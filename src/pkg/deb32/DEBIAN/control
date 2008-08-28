@@ -1,0 +1,11 @@
+Package: libzengl
+Version: 0.0.25
+Section: libs
+Architecture: i386
+Maintainer: Andrey <dr.andru@gmail.com>
+Depends: libx11-6, libxxf86vm1, libc6, libxext6, libstdc++6, libgcc1, libxau6, libxdmcp6
+Homepage: http://andru.2x4.ru/zengl.html
+Description: ZenGL
+  Crossplatform 2D/3D engine.
+  .
+  homepage: http://andru.2x4.ru/zengl.html
