@@ -456,12 +456,13 @@ begin
   Result         := tex_Add;
   Result.Width   := Texture.Width;
   Result.Height  := Texture.Height;
-  Result.U       := 1;
-  Result.V       := 1;
+  Result.U       := Texture.U;
+  Result.V       := Texture.V;
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 ) 
-                                  xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 );
+                                  xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 )
+                                  xor TEX_CONVERT_TO_POT * Byte( Texture.Flags and TEX_CONVERT_TO_POT > 0 );
   tex_Create( Result^, pData );
   tex_Del( Texture );
 
