@@ -77,7 +77,7 @@ procedure cam3d_Fly;
     Vector : zglTPoint3D;
 begin
   Vector.X :=  Cos( Camera.Rotation.Y ) * Cos( Camera.Rotation.X );
-  Vector.Y := -Sin( Camera.Rotation.X ) * Cos( Camera.Rotation.Z );
+  Vector.Y := -Sin( Camera.Rotation.X );
   Vector.Z :=  Sin( Camera.Rotation.Y ) * Cos( Camera.Rotation.X );
   Camera.Position := vector_Add( Camera.Position, vector_MulV( Vector, Speed ) );
 end;
