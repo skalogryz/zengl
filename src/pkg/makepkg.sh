@@ -7,6 +7,13 @@ rm -f *.deb
 rm -f *.rpm
 rm -f *.tar.gz
 
+#archlinux
+cp ../libZenGL.so ./arch/usr/lib
+cd ./arch
+tar -czvf ../zengl-"$VERSION"-i686.pkg.tar.gz usr .PKGINFO
+rm -f ./usr/lib/libZenGL.so
+cd ..
+
 #deb32
 cp ../libZenGL.so ./deb32/usr/lib
 dpkg --build ./deb32 libzengl-"$VERSION"_i386.deb
