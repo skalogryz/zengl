@@ -1,9 +1,0 @@
-pkgname = zengl
-pkgver = 0.0.25-1
-pkgdesc = Crossplatform 2D/3D Engine
-url = http://andru.2x4.ru/zengl.html
-packager = Andru
-size = 300
-arch = i686
-license = LGPL
-provides = zengl=0.0.25
