@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 24                     }
-{ date:  27.08.08               }
+{ build: 26                     }
+{ date:  12.09.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -579,6 +579,12 @@ type
 end;
 
 type
+  zglPQuaternion = ^zglTQuaternion;
+  zglTQuaternion = record
+    X, Y, Z, W : Single;
+end;
+
+type
   zglPMatrix3f = ^zglTMatrix3f;
   zglTMatrix3f = array[ 0..2 ] of zglTPoint3D;
   
@@ -756,6 +762,95 @@ var
   smesh_DrawGroup    : procedure( Mesh : zglPSMesh; Group : DWORD ); stdcall;
   smesh_Free         : procedure( var Mesh : zglPSMesh ); stdcall;
 
+// SKINNED MESH
+type
+  zglPBone = ^zglTBone;
+  zglTBone = record
+    Name   : String;
+    Parent : Integer;
+end;
+
+type
+  zglPBoneWeight = ^zglTBoneWeight;
+  zglTBoneWeight = record
+    boneID : Integer;
+    Weight : Single;
+end;
+
+type zglTBonesWeights = array of array of zglTBoneWeight;
+
+type
+  zglPBonePos = ^zglTBonePos;
+  zglTBonePos = record
+    Point       : zglTPoint3D;
+    Translation : zglTPoint3D;
+    Rotation    : zglTPoint3D;
+    Matrix      : zglTMatrix4f;
+    Quaternion  : zglTQuaternion;
+end;
+
+type
+  zglPSkeletonFrame = ^zglTSkeletonFrame;
+  zglTSkeletonFrame = record
+    BonePos : array of zglTBonePos;
+end;
+
+type
+  zglPSkeletonState = ^zglTSkeletonState;
+  zglTSkeletonState = record
+    prevFrame   : DWORD;
+    nextFrame   : DWORD;
+    prevAction  : DWORD;
+    nextAction  : DWORD;
+    _time       : Single;
+    _timeOld    : Single;
+    _timeNow    : Single;
+    Frame       : zglTSkeletonFrame;
+    Vertices    : array of zglTPoint3D;
+end;
+
+type
+  zglPSkeletonAction = ^zglTSkeletonAction;
+  zglTSkeletonAction = record    Name   : String;
+    FPS    : Single;
+    FCount : DWORD;
+    Frames : array of zglTSkeletonFrame;
+end;
+
+type
+  zglPSkMesh = ^zglTSkMesh;
+  zglTSkMesh = record
+    Flags          : DWORD;
+
+    VCount         : DWORD;
+    TCount         : DWORD;
+    FCount         : DWORD;
+    GCount         : DWORD;
+    BCount         : DWORD;
+    WCount         : array of Byte;
+    ACount         : DWORD;
+
+    Vertices       : array of zglTPoint3D;
+    Normals        : array of zglTPoint3D;
+    TexCoords      : array of zglTPoint2D;
+    MultiTexCoords : array of zglTPoint2D;
+    Faces          : array of zglTFace;
+    Indices        : Pointer;
+    Groups         : array of zglTGroup;
+
+    Bones          : array of zglTBone;
+    Weights        : zglTBonesWeights;
+    State          : zglTSkeletonState;
+    Actions        : array of zglTSkeletonAction;
+    Skeleton       : zglTSkeletonFrame;
+end;
+
+var
+  skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
+  skmesh_Draw         : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
+  skmesh_Animate      : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState; Action : Integer; FPS : Integer = 60 ); stdcall;
+  skmesh_Free         : procedure( var Mesh : zglPSkMesh ); stdcall;
+
 // HEIGHTMAP
 type
   zglPHeightMap = ^zglTHeightMap;
@@ -878,7 +973,7 @@ var
 // LIGHT
   light_Enable      : procedure( ID : Byte ); stdcall;
   light_Disable     : procedure( ID : Byte ); stdcall;
-  light_SetPosition : procedure( ID : Byte; X, Y, Z, W : Single ); stdcall;
+  light_SetPosition : procedure( ID : Byte; X, Y, Z : Single; W : Single = 1 ); stdcall;
   light_SetMaterial : procedure( ID, Material : Byte; Color : DWORD; Alpha : Byte ); stdcall;
 
   
@@ -945,6 +1040,7 @@ var
   m_Round     : function( value : Single ) : Integer; stdcall;
   m_Cos       : function( Angle : Integer ) : Single; stdcall;
   m_Sin       : function( Angle : Integer ) : Single; stdcall;
+  m_SinCos    : procedure( Angle : Single; var S, C : Single );
   m_Distance  : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
   m_FDistance : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
   m_Angle     : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
@@ -968,6 +1064,7 @@ var
   vector_Distance  : function( Vector1, Vector2 : zglTPoint3D ) : Single;
   vector_FDistance : function( Vector1, Vector2 : zglTPoint3D ) : Single;
   vector_Length    : function( Vector : zglTPoint3D ) : Single;
+  vector_Lerp      : function( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D;
   //matrix
   matrix3f_Get            : function( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
   matrix3f_Identity       : procedure( Matrix : zglPMatrix3f );
@@ -983,6 +1080,11 @@ var
   matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
   matrix4f_Add            : procedure( Matrix1, Matrix2 : zglPMatrix4f );
   matrix4f_Mul            : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
+  matrix4f_Concat         : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
+  // quaternions
+  quater_Lerp         : function( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
+  quater_FromRotation : function( Rotation : zglTPoint3D ) : zglTQuaternion;
+  quater_GetM4f       : function( Quaternion : zglTQuaternion ) : zglTMatrix4f;
   // line 3d
   line3d_ClosestPoint : function( A, B, Point : zglTPoint3D ) : zglTPoint3D;
   // plane
@@ -1302,6 +1404,11 @@ begin
       smesh_DrawGroup := dlsym( zglLib, 'smesh_DrawGroup' );
       smesh_Free := dlsym( zglLib, 'smesh_Free' );
 
+      skmesh_LoadFromFile := dlsym( zglLib, 'skmesh_LoadFromFile' );
+      skmesh_Draw := dlsym( zglLib, 'skmesh_Draw' );
+      skmesh_Animate := dlsym( zglLib, 'skmesh_Animate' );
+      skmesh_Free := dlsym( zglLib, 'skmesh_Free' );
+
       heightmap_Build := dlsym( zglLib, 'heightmap_Build' );
       heightmap_Draw := dlsym( zglLib, 'heightmap_Draw' );
       heightmap_Free := dlsym( zglLib, 'heightmap_Free' );
@@ -1371,6 +1478,7 @@ begin
       m_Round := dlsym( zglLib, 'm_Round' );
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );
+      m_SinCos := dlsym( zglLib, 'm_SinCos' );
       m_Distance := dlsym( zglLib, 'm_Distance' );
       m_FDistance := dlsym( zglLib, 'm_FDistance' );
       m_Angle := dlsym( zglLib, 'm_Angle' );
@@ -1394,6 +1502,7 @@ begin
       vector_Distance := dlsym( zglLib, 'vector_Distance' );
       vector_FDistance := dlsym( zglLib, 'vector_FDistance' );
       vector_Length := dlsym( zglLib, 'vector_Length' );
+      vector_Lerp := dlsym( zglLib, 'vector_Lerp' );
 
       matrix3f_Get := dlsym( zglLib, 'matrix3f_Get' );
       matrix3f_Identity := dlsym( zglLib, 'matrix3f_Identity' );
@@ -1410,6 +1519,11 @@ begin
       matrix4f_Scale := dlsym( zglLib, 'matrix4f_Scale' );
       matrix4f_Add := dlsym( zglLib, 'matrix4f_Add' );
       matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
+      matrix4f_Concat := dlsym( zglLib, 'matrix4f_Concat' );
+
+      quater_Lerp := dlsym( zglLib, 'quater_Lerp' );
+      quater_FromRotation := dlsym( zglLib, 'quater_FromRotation' );
+      quater_GetM4f := dlsym( zglLib, 'quater_GetM4f' );
 
       line3d_ClosestPoint := dlsym( zglLib, 'line3d_ClosestPoint' );
 
