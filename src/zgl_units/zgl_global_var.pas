@@ -52,7 +52,6 @@ var
   texNFCount    : Byte = 0;
   texNewFormats : array of zglTTextureFormat;
   
-  
   {------------------------------------ APP -----------------------------------}
   app_Work     : Boolean;
   app_WorkTime : DWORD;

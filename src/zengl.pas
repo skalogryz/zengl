@@ -72,6 +72,9 @@ uses
   zgl_sprite_2d,
   zgl_text,
 
+  //zgl_gui_main,
+  //zgl_gui_types,
+
   zgl_zbuffer,
   zgl_scissor,
 
@@ -85,6 +88,7 @@ uses
 
   zgl_mesh_file,
   zgl_static_mesh,
+  zgl_skinned_mesh,
   zgl_heightmap,
 
   zgl_vbo,
@@ -284,6 +288,12 @@ exports
   smesh_DrawGroup,
   smesh_Free,
 
+  // Skinned Mesh
+  skmesh_LoadFromFile,
+  skmesh_Draw,
+  skmesh_Animate,
+  skmesh_Free,
+
   // HeightMap
   heightmap_Build,
   heightmap_Draw,
@@ -366,6 +376,7 @@ exports
   m_Round,
   m_Cos,
   m_Sin,
+  m_SinCos,
   m_Distance,
   m_FDistance,
   m_Angle,
@@ -382,6 +393,7 @@ exports
   vector_DivV,
   vector_MulM3f,
   vector_MulM4f,
+  vector_MulInvM4f,
   vector_Negate,
   vector_Normalize,
   vector_Angle,
@@ -390,6 +402,7 @@ exports
   vector_Distance,
   vector_FDistance,
   vector_Length,
+  vector_Lerp,
   // matrix
   matrix3f_Get,
   matrix3f_Identity,
@@ -404,6 +417,11 @@ exports
   matrix4f_Rotate,
   matrix4f_Scale,
   matrix4f_Mul,
+  matrix4f_Concat,
+  // quaternions
+  quater_Lerp,
+  quater_FromRotation,
+  quater_GetM4f,
   // line 3d
   line3d_ClosestPoint,
   // plane

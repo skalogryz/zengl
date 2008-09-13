@@ -203,7 +203,7 @@ begin
   if Assigned( Target ) Then
     begin
       lRTarget := Target;
-      
+
       case Target.rtType of
         RT_TYPE_SIMPLE:
           begin
@@ -236,6 +236,7 @@ begin
           RT_TYPE_SIMPLE:
             begin
               glEnable( GL_TEXTURE_2D );
+              tex_Filter( lRTarget.Surface, lRTarget.Flags );
               glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
 
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
@@ -251,6 +252,7 @@ begin
           RT_TYPE_PBUFFER:
             begin
               glEnable( GL_TEXTURE_2D );
+              tex_Filter( lRTarget.Surface, lRTarget.Flags );
               glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
 
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );

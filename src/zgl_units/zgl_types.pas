@@ -47,7 +47,7 @@ type
 end;
   
 {------------------------------------------------------------------------------}
-{--------------------------------- zgl_ini.pp ---------------------------------}
+{-------------------------------- zgl_ini.pas ---------------------------------}
 {------------------------------------------------------------------------------}
   
 type
@@ -74,7 +74,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{------------------------------- zgl_timers.pp --------------------------------}
+{------------------------------ zgl_timers.pas --------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPTimer = ^zglTTimer;
@@ -95,7 +95,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{------------------------------ zgl_textures.pp -------------------------------}
+{----------------------------- zgl_textures.pas -------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPTexture = ^zglTTexture;
@@ -125,7 +125,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{--------------------------- zgl_render_target.pp -----------------------------}
+{-------------------------- zgl_render_target.pas -----------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPFBO = ^zglTFBO;
@@ -163,7 +163,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{-------------------------------- zgl_sound.pp --------------------------------}
+{-------------------------------- zgl_sound.pas -------------------------------}
 {------------------------------------------------------------------------------}
 
 {$IFDEF LINUX}
@@ -278,7 +278,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{-------------------------------- zgl_text.pp ---------------------------------}
+{------------------------------- zgl_text.pas ---------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPFont = ^zglTFont;
@@ -307,6 +307,12 @@ type
     case Byte of
     1: ( x, y, z : Single );
     2: ( point : array[ 0..2 ] of Single );
+end;
+
+type
+  zglPQuaternion = ^zglTQuaternion;
+  zglTQuaternion = record
+    X, Y, Z, W : Single;
 end;
 
 type
@@ -375,7 +381,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{----------------------------- zgl_camera_3d.pp -------------------------------}
+{----------------------------- zgl_camera_3d.pas ------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPCamera3D = ^zglTCamera3D;
@@ -386,7 +392,7 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{---------------------------- zgl_static_mesh.pp ------------------------------}
+{---------------------------- zgl_static_mesh.pas -----------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPSMesh = ^zglTSMesh;
@@ -408,7 +414,92 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{----------------------------- zgl_heightmap.pp -------------------------------}
+{--------------------------- zgl_skinned_mesh.pas -----------------------------}
+{------------------------------------------------------------------------------}
+type
+  zglPBone = ^zglTBone;
+  zglTBone = record
+    Name   : String;
+    Parent : Integer;
+end;
+
+type
+  zglPBoneWeight = ^zglTBoneWeight;
+  zglTBoneWeight = record
+    boneID : Integer;
+    Weight : Single;
+end;
+
+type zglTBonesWeights = array of array of zglTBoneWeight;
+
+type
+  zglPBonePos = ^zglTBonePos;
+  zglTBonePos = record
+    Point       : zglTPoint3D;
+    Translation : zglTPoint3D;
+    Rotation    : zglTPoint3D;
+    Matrix      : zglTMatrix4f;
+    Quaternion  : zglTQuaternion;
+end;
+
+type
+  zglPSkeletonFrame = ^zglTSkeletonFrame;
+  zglTSkeletonFrame = record
+    BonePos : array of zglTBonePos;
+end;
+
+type
+  zglPSkeletonState = ^zglTSkeletonState;
+  zglTSkeletonState = record
+    PrevFrame   : DWORD;
+    NextFrame   : DWORD;
+    PrevAction  : DWORD;
+    NextAction  : DWORD;
+    _time       : Single;
+    _timeOld    : Single;
+    _timeNow    : Single;
+    Frame       : zglTSkeletonFrame;
+    Vertices    : array of zglTPoint3D;
+end;
+
+type
+  zglPSkeletonAction = ^zglTSkeletonAction;
+  zglTSkeletonAction = record    Name   : String;
+    FPS    : Single;
+    FCount : DWORD;
+    Frames : array of zglTSkeletonFrame;
+end;
+
+type
+  zglPSkMesh = ^zglTSkMesh;
+  zglTSkMesh = record
+    Flags          : DWORD;
+
+    VCount         : DWORD;
+    TCount         : DWORD;
+    FCount         : DWORD;
+    GCount         : DWORD;
+    BCount         : DWORD;
+    WCount         : array of Byte;
+    ACount         : DWORD;
+
+    Vertices       : array of zglTPoint3D;
+    Normals        : array of zglTPoint3D;
+    TexCoords      : array of zglTPoint2D;
+    MultiTexCoords : array of zglTPoint2D;
+    Faces          : array of zglTFace;
+    Indices        : Pointer;
+    Groups         : array of zglTGroup;
+
+    Bones          : array of zglTBone;
+    Weights        : zglTBonesWeights;
+    State          : zglTSkeletonState;
+    Actions        : array of zglTSkeletonAction;
+    Skeleton       : zglTSkeletonFrame;
+end;
+
+{------------------------------------------------------------------------------}
+{---------------------------- zgl_heightmap.pas -------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPHeightMap = ^zglTHeightMap;
@@ -437,14 +528,14 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{------------------------------ zgl_frustum.pp --------------------------------}
+{------------------------------ zgl_frustum.pas -------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPFrustum = ^zglTFrustum;
   zglTFrustum = array [ 0..5 ] of array[ 0..3 ] of Single;
   
 {------------------------------------------------------------------------------}
-{------------------------------- zgl_octree.pp --------------------------------}
+{------------------------------ zgl_octree.pas --------------------------------}
 {------------------------------------------------------------------------------}
 type
   zglPRenderData = ^zglTRenderData;

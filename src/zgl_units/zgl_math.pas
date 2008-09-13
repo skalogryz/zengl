@@ -31,7 +31,7 @@ function m_Round( value : Single ) : Integer; extdecl;
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single; extdecl;
 function  m_Sin( Angle : Integer ) : Single; extdecl;
-procedure m_SinCos( Angle : Single; var S, C : Single );
+procedure m_SinCos( Angle : Single; var S, C : Single ); {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 function m_Distance( x1, y1, x2, y2 : Single ) : Single; extdecl;
 function m_FDistance( x1, y1, x2, y2 : Single ) : Single; extdecl;
@@ -54,6 +54,7 @@ function vector_DivV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IF
 
 function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglPMatrix3f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_MulM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulInvM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 function vector_Negate( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
@@ -63,6 +64,7 @@ function vector_Dot( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM}
 function vector_Distance( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_FDistance( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Length( Vector : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_Lerp( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 {------------------------------------------------------------------------------}
 {--------------------------------- Matrix3f -----------------------------------}
@@ -82,6 +84,14 @@ procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
 procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
 procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
 function  matrix4f_Mul( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
+function  matrix4f_Concat( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
+
+{------------------------------------------------------------------------------}
+{-------------------------------- Quaternion ----------------------------------}
+{------------------------------------------------------------------------------}
+function quater_Lerp( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
+function quater_FromRotation( Rotation : zglTPoint3D ) : zglTQuaternion;
+function quater_GetM4f( Quaternion : zglTQuaternion ) : zglTMatrix4f;
 
 function line3d_ClosestPoint( A, B, Point : zglTPoint3D ) : zglTPoint3D;
 
@@ -523,6 +533,67 @@ asm
 {$ENDIF}
 end;
 
+function vector_MulInvM4f;
+{$IFNDEF USE_ASM}
+begin
+  Result.x := Matrix[ 0, 0 ] * Vector.X + Matrix[ 0, 1 ] * Vector.Y + Matrix[ 0, 2 ] * Vector.Z + Matrix[ 0, 3 ];
+  Result.y := Matrix[ 1, 0 ] * Vector.X + Matrix[ 1, 1 ] * Vector.Y + Matrix[ 1, 2 ] * Vector.Z + Matrix[ 1, 3 ];
+  Result.z := Matrix[ 2, 0 ] * Vector.X + Matrix[ 2, 1 ] * Vector.Y + Matrix[ 2, 2 ] * Vector.Z + Matrix[ 2, 3 ];
+{$ELSE}
+asm
+  // Result.X
+  FLD  DWORD PTR [ EAX      ]
+  FMUL DWORD PTR [ EDX      ]
+
+  FLD  DWORD PTR [ EAX + 4  ]
+  FMUL DWORD PTR [ EDX + 4  ]
+
+  FADDP
+
+  FLD  DWORD PTR [ EAX + 8  ]
+  FMUL DWORD PTR [ EDX + 8  ]
+  FADD DWORD PTR [ EDX + 12 ]
+
+  FADDP
+
+  FSTP DWORD PTR [ ECX      ]
+
+  // Result.Y
+  FLD  DWORD PTR [ EAX      ]
+  FMUL DWORD PTR [ EDX + 16 ]
+
+  FLD  DWORD PTR [ EAX + 4  ]
+  FMUL DWORD PTR [ EDX + 20 ]
+
+  FADDP
+
+  FLD  DWORD PTR [ EAX + 8  ]
+  FMUL DWORD PTR [ EDX + 24 ]
+  FADD DWORD PTR [ EDX + 28 ]
+
+  FADDP
+
+  FSTP DWORD PTR [ ECX + 4  ]
+
+  // Result.Z
+  FLD  DWORD PTR [ EAX      ]
+  FMUL DWORD PTR [ EDX + 32 ]
+
+  FLD  DWORD PTR [ EAX + 4  ]
+  FMUL DWORD PTR [ EDX + 36 ]
+
+  FADDP
+
+  FLD  DWORD PTR [ EAX + 8  ]
+  FMUL DWORD PTR [ EDX + 40 ]
+  FADD DWORD PTR [ EDX + 44 ]
+
+  FADDP
+
+  FSTP DWORD PTR [ ECX + 8  ]
+{$ENDIF}
+end;
+
 function vector_Negate;
 {$IFNDEF USE_ASM}
 begin
@@ -732,6 +803,41 @@ asm
 {$ENDIF}
 end;
 
+function vector_Lerp;
+{$IFNDEF USE_ASM}
+begin
+  Result.X := Vector1.X + ( Vector2.X - Vector1.X ) * Value;
+  Result.Y := Vector1.Y + ( Vector2.Y - Vector1.Y ) * Value;
+  Result.Z := Vector1.Z + ( Vector2.Z - Vector1.Z ) * Value;
+{$ELSE}
+asm
+   FLD   Value
+
+   FLD   DWORD PTR [ EAX + 0 ]
+   FLD   DWORD PTR [ EDX + 0 ]
+   FSUB  ST( 0 ), ST( 1 )
+   FMUL  ST( 0 ), ST( 2 )
+   FADDP
+   FSTP  DWORD PTR [ ECX + 0 ]
+
+   FLD   DWORD PTR [ EAX + 4 ]
+   FLD   DWORD PTR [ EDX + 4 ]
+   FSUB  ST( 0 ), ST( 1 )
+   FMUL  ST( 0 ), ST( 2 )
+   FADDP
+   FSTP  DWORD PTR [ ECX + 4 ]
+
+   FLD   DWORD PTR [ EAX + 8 ]
+   FLD   DWORD PTR [ EDX + 8 ]
+   FSUB  ST( 0 ), ST( 1 )
+   FMUL  ST( 0 ), ST( 2 )
+   FADDP
+   FSTP  DWORD PTR [ ECX + 8 ]
+
+   FFREE ST( 0 )
+{$ENDIF}
+end;
+
 {------------------------------------------------------------------------------}
 {--------------------------------- Matrix3f -----------------------------------}
 {------------------------------------------------------------------------------}
@@ -914,6 +1020,127 @@ begin
   Result[2, 3] := Matrix1[2, 0] * Matrix2[0, 3] + Matrix1[2, 1] * Matrix2[1, 3] + Matrix1[2, 2] * Matrix2[2, 3] + Matrix1[2, 3] * Matrix2[3, 3];
   Result[3, 3] := Matrix1[3, 0] * Matrix2[0, 3] + Matrix1[3, 1] * Matrix2[1, 3] + Matrix1[3, 2] * Matrix2[2, 3] + Matrix1[3, 3] * Matrix2[3, 3];
 end;
+
+function matrix4f_Concat;
+  var
+    i, j : Integer;
+begin
+  for i := 0 to 3 do
+    for j := 0 to 3 do
+      Result[ i, j ] := Matrix1[ i, 0 ] * Matrix2[ 0, j ] +
+                        Matrix1[ i, 1 ] * Matrix2[ 1, j ] +
+                        Matrix1[ i, 2 ] * Matrix2[ 2, j ] +
+                        Matrix1[ i, 3 ] * Matrix2[ 3, j ];
+end;
+
+{------------------------------------------------------------------------------}
+{-------------------------------- Quaternion ----------------------------------}
+{------------------------------------------------------------------------------}
+function quater_Lerp;
+  var
+    p : zglTQuaternion;
+    omega, cosom, sinom, scale0, scale1 : Single;
+begin
+  // косинус угла
+  cosom := q1.X * q2.X + q1.Y * q2.Y + q1.Z * q2.Z + q1.W * q2.W;
+
+  if cosom < 0 then
+    begin 
+//      cosom := -cosom;
+      p.X := -q2.X;
+      p.Y := -q2.Y;
+      p.Z := -q2.Z;
+      p.W := -q2.W;
+    end else
+      begin
+        p.X := q2.X;
+        p.Y := q2.Y;
+        p.Z := q2.Z;
+        p.W := q2.W;
+      end;
+
+//  if 1 - cosom > 0.1 Then
+//    begin
+//      // стандартный случай (slerp)
+//      omega  := ArcCos( cosom );
+//      sinom  := sin( omega );
+//      scale0 := sin( 1 - Value ) * omega) / sinom;
+//      scale1 := sin( Value * omega ) / sinom;
+//    end else
+//      begin
+        // если маленький угол - линейная интерполяция
+        scale0 := 1 - Value;
+        scale1 := Value;
+//      end;
+
+  Result.X := scale0 * q1.X + scale1 * p.X;
+  Result.Y := scale0 * q1.Y + scale1 * p.Y;
+  Result.Z := scale0 * q1.Z + scale1 * p.Z;
+  Result.W := scale0 * q1.W + scale1 * p.W;
+end;
+
+function quater_FromRotation;
+  var
+    sr, sp, sy : Single;
+    cr, cp, cy : Single;
+    crcp, srsp : Single;
+begin
+  m_SinCos( Rotation.X * 0.5, sr, cr );
+  m_SinCos( Rotation.Y * 0.5, sp, cp );
+  m_SinCos( Rotation.Z * 0.5, sy, cy );
+  crcp := cr * cp;
+  srsp := sr * sp;
+
+  Result.X := sr * cp * cy - cr * sp * sy;
+  Result.Y := cr * sp * cy + sr * cp * sy;
+  Result.Z := crcp * sy - srsp * cy;
+  Result.W := crcp * cy + srsp * sy;
+end;
+
+function quater_GetM4f;
+  var
+    wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2 : Single;
+begin
+  with Quaternion do
+    begin
+      x2 := X * 2;
+      y2 := Y * 2;
+      z2 := Z * 2;
+
+      xx := X * x2;
+      xy := X * y2;
+      xz := X * z2;
+
+      yy := Y * y2;
+      yz := Y * z2;
+      zz := Z * z2;
+
+      wx := W * x2;
+      wy := W * y2;
+      wz := W * z2;
+    end;
+
+  Result[ 0, 0 ] := 1 - ( yy + zz );
+  Result[ 1, 0 ] := xy + wz;
+  Result[ 2, 0 ] := xz - wy;
+  Result[ 0, 1 ] := xy - wz;
+  Result[ 1, 1 ] := 1 - ( xx + zz );
+  Result[ 2, 1 ] := yz + wx;
+  Result[ 0, 2 ] := xz + wy;
+  Result[ 1, 2 ] := yz - wx;
+  Result[ 2, 2 ] := 1 - ( xx + yy );
+  Result[ 3, 0 ] := 0;
+  Result[ 3, 1 ] := 0;
+  Result[ 3, 2 ] := 0;
+  Result[ 0, 3 ] := 0;
+  Result[ 1, 3 ] := 0;
+  Result[ 2, 3 ] := 0;
+  Result[ 3, 3 ] := 1;
+end;
+
+{------------------------------------------------------------------------------}
+{------------------------------------ Line ------------------------------------}
+{------------------------------------------------------------------------------}
 
 function line3d_ClosestPoint;
   var

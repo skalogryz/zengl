@@ -7,6 +7,7 @@ INCLUDE = -Fuzgl_units \
 -Fuzgl_units/system \
 -Fuzgl_units/input \
 -Fuzgl_units/textures \
+-Fuzgl_units/gui \
 -Fuzgl_units/sound \
 -Fuzgl_units/collision \
 -Fusys_units \
@@ -17,6 +18,7 @@ INCLUDE = -Fuzgl_units \
 -Fusys_units/directsound
 #
 OUTPUT  = ./
+DESTDIR = /usr
 TMP     = -FUtmp
 TARGET  = libZenGL.so
 TARGETW = ZenGL.dll
@@ -56,8 +58,8 @@ cleanw:
 	del /Q zgl_units\sound\*.*~
 	del /Q zgl_units\collision\*.*~
 
-install: uninstall
-	install -m 644 $(OUTPUT)$(TARGET) /usr/lib
+install:
+	install -m 644 $(OUTPUT)$(TARGET) $(DESTDIR)/lib
 
 uninstall:
-	rm -f /usr/lib/$(TARGET)
+	rm -f $(DESTDIR)/lib/$(TARGET)

@@ -34,12 +34,12 @@ type
   zglTZMFHeader = record
     ID      : array[ 0..14 ] of Char;
     Flags   : DWORD;
-    VCount  : DWORD;
-    TCount  : DWORD;
-    FCount  : DWORD;
-    GCount  : DWORD;
-    Frames  : DWORD;
-    TLayers : Byte;
+    VCount  : DWORD; // Vertices
+    TCount  : DWORD; // TexCoords
+    FCount  : DWORD; // Faces
+    GCount  : DWORD; // Groups
+    BCount  : DWORD; // Bones
+    TLayers : Byte;  // Texture Layers
 end;
 
 const
@@ -56,6 +56,10 @@ const
   ZMF_FACES_RANGE_WORD  = $0A;
   ZMF_GROUPS_RANGE_WORD = $0B;
   ZMF_FRAME_RANGE_WORD  = $0C;
+  ZMF_BONES             = $0D;
+  ZMF_SKELETON          = $0E;
+  ZMF_WEIGHTS           = $0F;
+  ZMF_ACTION            = $10;
 
 function  zmf_ReadHeader( var Memory : zglTMemory ) : Boolean;
 procedure zmf_ReadVertices( var Memory : zglTMemory; var Vertices : array of zglTPoint3D );
@@ -70,6 +74,10 @@ procedure zmf_ReadPackedTexCoords( var Memory : zglTMemory; var TexCoords : arra
 procedure zmf_ReadFacesW( var Memory : zglTMemory; var Faces : array of zglTFace );
 procedure zmf_ReadGroupsW( var Memory : zglTMemory; var Groups : array of zglTGroup );
 procedure zmf_ReadFrameW( var Memory : zglTMemory; var Frame : zglTFrame );
+procedure zmf_ReadBones( var Memory : zglTMemory; var Bones : array of zglTBone );
+procedure zmf_ReadWeights( var Memory : zglTMemory; var Weights : zglTBonesWeights; WCount : array of Byte );
+procedure zmf_ReadAction( var Memory : zglTMemory; var Action : zglTSkeletonAction );
+procedure zmf_ReadSkeleton( var Memory : zglTMemory; var Skeleton : zglTSkeletonFrame );
 
 {$IFDEF ZMF_WRITE_DATA}
 procedure zmf_WriteHeader( var Memory : zglTMemory; zmfHeader : zglTZMFHeader );
@@ -85,6 +93,10 @@ procedure zmf_WritePackedTexCoords( var Memory : zglTMemory; TexCoords : array o
 procedure zmf_WriteFacesW( var Memory : zglTMemory; Faces : array of zglTFace );
 procedure zmf_WriteGroupsW( var Memory : zglTMemory; Groups : array of zglTGroup );
 procedure zmf_WriteFrameW( var Memory : zglTMemory; Frame : zglTFrame );
+procedure zmf_WriteBones( var Memory : zglTMemory; Bones : array of zglTBone );
+procedure zmf_WriteWeights( var Memory : zglTMemory; Weights : zglTBonesWeights; WCount : array of Byte );
+procedure zmf_WriteAction( var Memory : zglTMemory; Action : zglTSkeletonAction );
+procedure zmf_WriteSkeleton( var Memory : zglTMemory; Skeleton : zglTSkeletonFrame );
 {$ENDIF}
 
 var
@@ -166,6 +178,62 @@ procedure zmf_ReadFrameW;
 begin
 end;
 
+procedure zmf_ReadBones;
+  var
+    i : Integer;
+    j : Byte;
+begin
+  for i := 0 to zmfHeader.BCount - 1 do
+    begin
+      mem_Read( Memory, j, 1 );
+      SetLength( Bones[ i ].Name, j );
+      mem_Read( Memory, Bones[ i ].Name[ 1 ], j );
+      mem_Read( Memory, Bones[ i ].Parent, 4 );
+    end;
+end;
+
+procedure zmf_ReadWeights;
+  var
+    i, j : Integer;
+begin
+  for i := 0 to zmfHeader.VCount - 1 do
+    for j := 0 to WCount[ i ] - 1 do
+      begin
+        mem_Read( Memory, Weights[ i ][ j ].boneID, 4 );
+        mem_Read( Memory, Weights[ i ][ j ].Weight, 4 );
+      end;
+end;
+
+procedure zmf_ReadAction;
+  var
+    i, j : Integer;
+    c    : DWORD;
+begin
+  for i := 0 to Action.FCount - 1 do
+    begin
+      mem_Read( Memory, c, 4 );
+      SetLength( Action.Frames[ i ].BonePos, c );
+      mem_Read( Memory, Action.FPS, 4 );
+      for j := 0 to c - 1 do
+        begin
+          mem_Read( Memory, Action.Frames[ i ].BonePos[ j ].Translation, SizeOf( zglTPoint3D ) );
+          mem_Read( Memory, Action.Frames[ i ].BonePos[ j ].Rotation,    SizeOf( zglTPoint3D ) );
+        end;
+    end;
+end;
+
+procedure zmf_ReadSkeleton;
+  var
+    i, j : Integer;
+begin
+  mem_Read( Memory, j, 4 );
+  for i := 0 to j - 1 do
+    begin
+      mem_Read( Memory, Skeleton.BonePos[ i ].Translation, SizeOf( zglTPoint3D ) );
+      mem_Read( Memory, Skeleton.BonePos[ i ].Rotation,    SizeOf( zglTPoint3D ) );
+    end;
+end;
+
 {------------------------------------------------------------------------------}
 {--------------------------------- Write Data ---------------------------------}
 {------------------------------------------------------------------------------}
@@ -237,6 +305,70 @@ end;
 
 procedure zmf_WriteFrameW;
 begin
+end;
+
+procedure zmf_WriteBones;
+  var
+    i : Integer;
+    j : Byte;
+begin
+  mem_Write( Memory, ZMF_BONES, 1 );
+  for i := 0 to length( Bones ) - 1 do
+    begin
+      j := length( Bones[ i ].Name );
+      mem_Write( Memory, j, 1 );
+      mem_Write( Memory, Bones[ i ].Name[ 1 ], j );
+      mem_Write( Memory, Bones[ i ].Parent, 4 );
+    end;
+end;
+
+procedure zmf_WriteWeights;
+  var
+    i, j : Integer;
+begin
+  mem_Write( Memory, ZMF_WEIGHTS, 1 );
+  mem_Write( Memory, WCount[ 0 ], length( WCount ) );
+  for i := 0 to length( WCount ) - 1 do
+    for j := 0 to WCount[ i ] - 1 do
+    begin
+      mem_Write( Memory, Weights[ i ][ j ].boneID, 4 );
+      mem_Write( Memory, Weights[ i ][ j ].Weight, 4 );
+    end;
+end;
+
+procedure zmf_WriteAction;
+  var
+    i, j : Integer;
+begin
+  mem_Write( Memory, ZMF_ACTION, 1 );
+  mem_Write( Memory, Action.FCount, 4 );
+  for i := 0 to Action.FCount - 1 do
+    begin
+      j := length( Action.Frames[ i ].BonePos );
+      mem_Write( Memory, j, 4 );
+      mem_Write( Action.FPS );
+      for j := 0 to length( Action.Frames[ i ].BonePos ) - 1 do
+        begin
+          mem_Write( Memory, Action.Frames[ i ].BonePos[ j ].Translation, SizeOf( zglTPoint3D ) );
+          mem_Write( Memory, Action.Frames[ i ].BonePos[ j ].Rotation,    SizeOf( zglTPoint3D ) );
+          mem_Write( Memory, Action.Frames[ i ].BonePos[ j ].Point,       SizeOf( zglTPoint3D ) );
+        end;
+    end;
+end;
+
+procedure zmf_WriteSkeleton;
+  var
+    i, j : Integer;
+begin
+  mem_Write( Memory, ZMF_SKELETON, 1 );
+  j := length( Skeleton.BonePos );
+  mem_Write( Memory, j, 4 );
+  for i := 0 to j - 1 do
+    begin
+      mem_Write( Memory, Skeleton.BonePos[ i ].Point,       SizeOf( zglTPoint3D ) );
+      mem_Write( Memory, Skeleton.BonePos[ i ].Translation, SizeOf( zglTPoint3D ) );
+      mem_Write( Memory, Skeleton.BonePos[ i ].Rotation,    SizeOf( zglTPoint3D ) );
+    end;
 end;
 {$ENDIF}
 
