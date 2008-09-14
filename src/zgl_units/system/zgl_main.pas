@@ -259,11 +259,17 @@ begin
 end;
 
 procedure zgl_GetMem;
+  var
+    R : Boolean;
 begin
   if Size = 0 Then
     FreeMem( Mem )
   else
-    Mem := ReAllocMem( Mem, Size );
+    begin
+      if Assigned( Mem ) Then R := TRUE;
+      Mem := ReAllocMem( Mem, Size );
+      if not R Then FillChar( Mem^, Size, 0 );
+    end;
 end;
 
 procedure zgl_Enable;

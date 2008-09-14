@@ -38,6 +38,7 @@ uses
 
 function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
 procedure skmesh_Draw( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
+procedure skmesh_DrawSkelet( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
 procedure skmesh_Free( var Mesh : zglPSkMesh ); extdecl;
 
 procedure skmesh_CalcQuats( var Frame : zglTSkeletonFrame );
@@ -279,6 +280,27 @@ begin
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+end;
+
+procedure skmesh_DrawSkelet;
+  var
+    i : Integer;
+begin
+  glBegin( GL_LINES );
+  for i := 0 to length( State.Frame.BonePos ) - 1 do
+    if Mesh.Bones[ i ].Parent <> -1 Then
+      begin
+        glVertex3fv( @State.Frame.BonePos[ i ].Point );
+        glVertex3fv( @State.Frame.BonePos[ Mesh.Bones[ i ].Parent ].Point );
+      end;
+  glEnd;
+
+  glPointSize( 3 );
+  glBegin(GL_POINTS);
+  for i := 0 to length( State.Frame.BonePos ) - 1 do
+    glVertex3fv( @State.Frame.BonePos[ i ].Point );
+  glEnd;
+  glPointSize( 1 );
 end;
 
 procedure skmesh_Free;
