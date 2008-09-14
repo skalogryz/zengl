@@ -291,7 +291,7 @@ exports
   // Skinned Mesh
   skmesh_LoadFromFile,
   skmesh_Draw,
-  skmesh_Animate,
+  //skmesh_Animate,
   skmesh_Free,
 
   // HeightMap
@@ -394,6 +394,7 @@ exports
   vector_MulM3f,
   vector_MulM4f,
   vector_MulInvM4f,
+  vector_RotateQ,
   vector_Negate,
   vector_Normalize,
   vector_Angle,
@@ -419,6 +420,13 @@ exports
   matrix4f_Mul,
   matrix4f_Concat,
   // quaternions
+  quater_Get,
+  quater_Add,
+  quater_Sub,
+  quater_Mul,
+  quater_Negate,
+  quater_Normalize,
+  quater_Dot,
   quater_Lerp,
   quater_FromRotation,
   quater_GetM4f,
