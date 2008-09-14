@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 26                     }
-{ date:  12.09.08               }
+{ build: 27                     }
+{ date:  14.09.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -798,15 +798,12 @@ end;
 type
   zglPSkeletonState = ^zglTSkeletonState;
   zglTSkeletonState = record
-    prevFrame   : DWORD;
-    nextFrame   : DWORD;
-    prevAction  : DWORD;
-    nextAction  : DWORD;
-    _time       : Single;
-    _timeOld    : Single;
-    _timeNow    : Single;
-    Frame       : zglTSkeletonFrame;
-    Vertices    : array of zglTPoint3D;
+    nAction   : Integer;
+    nFrame    : Integer;
+    Delta     : Single;
+    prevDelta : Single;
+    Frame     : zglTSkeletonFrame;
+    Vertices  : array of zglTPoint3D;
 end;
 
 type
@@ -848,7 +845,6 @@ end;
 var
   skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
   skmesh_Draw         : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
-  skmesh_Animate      : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState; Action : Integer; FPS : Integer = 60 ); stdcall;
   skmesh_Free         : procedure( var Mesh : zglPSkMesh ); stdcall;
 
 // HEIGHTMAP
@@ -1084,6 +1080,7 @@ var
   matrix4f_Mul            : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
   matrix4f_Concat         : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
   // quaternions
+  quater_Get          : function( X, Y, Z, W : Single ) : zglTQuaternion;
   quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
   quater_Sub          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
   quater_Mul          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
@@ -1414,7 +1411,6 @@ begin
 
       skmesh_LoadFromFile := dlsym( zglLib, 'skmesh_LoadFromFile' );
       skmesh_Draw := dlsym( zglLib, 'skmesh_Draw' );
-      skmesh_Animate := dlsym( zglLib, 'skmesh_Animate' );
       skmesh_Free := dlsym( zglLib, 'skmesh_Free' );
 
       heightmap_Build := dlsym( zglLib, 'heightmap_Build' );
@@ -1531,6 +1527,7 @@ begin
       matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
       matrix4f_Concat := dlsym( zglLib, 'matrix4f_Concat' );
 
+      quater_Get := dlsym( zglLib, 'quater_Get' );
       quater_Add := dlsym( zglLib, 'quater_Add' );
       quater_Sub := dlsym( zglLib, 'quater_Sub' );
       quater_Mul := dlsym( zglLib, 'quater_Mul' );

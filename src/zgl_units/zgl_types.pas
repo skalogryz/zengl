@@ -451,15 +451,12 @@ end;
 type
   zglPSkeletonState = ^zglTSkeletonState;
   zglTSkeletonState = record
-    PrevFrame   : DWORD;
-    NextFrame   : DWORD;
-    PrevAction  : DWORD;
-    NextAction  : DWORD;
-    _time       : Single;
-    _timeOld    : Single;
-    _timeNow    : Single;
-    Frame       : zglTSkeletonFrame;
-    Vertices    : array of zglTPoint3D;
+    nAction   : Integer;
+    nFrame    : Integer;
+    Delta     : Single;
+    prevDelta : Single;
+    Frame     : zglTSkeletonFrame;
+    Vertices  : array of zglTPoint3D;
 end;
 
 type
