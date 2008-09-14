@@ -291,7 +291,7 @@ exports
   // Skinned Mesh
   skmesh_LoadFromFile,
   skmesh_Draw,
-  //skmesh_Animate,
+  skmesh_DrawSkelet,
   skmesh_Free,
 
   // HeightMap
