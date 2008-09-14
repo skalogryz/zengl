@@ -1056,6 +1056,8 @@ var
   vector_DivV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
   vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglPMatrix3f ) : zglTPoint3D;
   vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglPMatrix4f ) : zglTPoint3D;
+  vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglPMatrix4f ) : zglTPoint3D;
+  vector_RotateQ   : function( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
   vector_Negate    : function( Vector : zglTPoint3D ) : zglTPoint3D;
   vector_Normalize : function( Vector : zglTPoint3D ) : zglTPoint3D;
   vector_Angle     : function( Vector1, Vector2 : zglTPoint3D ) : Single;
@@ -1082,6 +1084,12 @@ var
   matrix4f_Mul            : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
   matrix4f_Concat         : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
   // quaternions
+  quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
+  quater_Sub          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
+  quater_Mul          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
+  quater_Negate       : function( Quaternion : zglTQuaternion ) : zglTQuaternion;
+  quater_Normalize    : function( Quaternion : zglTQuaternion ) : zglTQuaternion;
+  quater_Dot          : function( q1, q2 : zglTQuaternion ) : Single;
   quater_Lerp         : function( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
   quater_FromRotation : function( Rotation : zglTPoint3D ) : zglTQuaternion;
   quater_GetM4f       : function( Quaternion : zglTQuaternion ) : zglTMatrix4f;
@@ -1494,6 +1502,8 @@ begin
       vector_DivV := dlsym( zglLib, 'vector_DivV' );
       vector_MulM3f := dlsym( zglLib, 'vector_MulM3f' );
       vector_MulM4f := dlsym( zglLib, 'vector_MulM4f' );
+      vector_MulInvM4f := dlsym( zglLib, 'vector_MulInvM4f' );
+      vector_RotateQ := dlsym( zglLib, 'vector_RotateQ' );
       vector_Negate := dlsym( zglLib, 'vector_Negate' );
       vector_Normalize := dlsym( zglLib, 'vector_Normalize' );
       vector_Angle := dlsym( zglLib, 'vector_Angle' );
@@ -1521,6 +1531,12 @@ begin
       matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
       matrix4f_Concat := dlsym( zglLib, 'matrix4f_Concat' );
 
+      quater_Add := dlsym( zglLib, 'quater_Add' );
+      quater_Sub := dlsym( zglLib, 'quater_Sub' );
+      quater_Mul := dlsym( zglLib, 'quater_Mul' );
+      quater_Negate := dlsym( zglLib, 'quater_Negate' );
+      quater_Normalize := dlsym( zglLib, 'quater_Normalize' );
+      quater_Dot := dlsym( zglLib, 'quater_Dot' );
       quater_Lerp := dlsym( zglLib, 'quater_Lerp' );
       quater_FromRotation := dlsym( zglLib, 'quater_FromRotation' );
       quater_GetM4f := dlsym( zglLib, 'quater_GetM4f' );
