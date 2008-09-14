@@ -56,6 +56,8 @@ function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglPMatrix3f ) : zglTPoin
 function vector_MulM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_MulInvM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
+function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
+
 function vector_Negate( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Angle( Vector1, Vector2 : zglTPoint3D ) : Single;
@@ -89,6 +91,13 @@ function  matrix4f_Concat( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
 {------------------------------------------------------------------------------}
 {-------------------------------- Quaternion ----------------------------------}
 {------------------------------------------------------------------------------}
+function quater_Get( X, Y, Z, W : Single ) : zglTQuaternion;
+function quater_Add( q1, q2 : zglTQuaternion ) : zglTQuaternion; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function quater_Sub( q1, q2 : zglTQuaternion ) : zglTQuaternion; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function quater_Mul( q1, q2 : zglTQuaternion ) : zglTQuaternion;
+function quater_Negate( Quaternion : zglTQuaternion ) : zglTQuaternion;
+function quater_Normalize( Quaternion : zglTQuaternion ) : zglTQuaternion;
+function quater_Dot( q1, q2 : zglTQuaternion ) : Single;
 function quater_Lerp( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
 function quater_FromRotation( Rotation : zglTPoint3D ) : zglTQuaternion;
 function quater_GetM4f( Quaternion : zglTQuaternion ) : zglTMatrix4f;
@@ -594,6 +603,25 @@ asm
 {$ENDIF}
 end;
 
+function vector_RotateQ;
+  var
+    vn : zglTPoint3D;
+    vecQuat, resQuat : zglTQuaternion;
+begin
+	vecQuat.x := Vector.x;
+	vecQuat.y := Vector.y;
+	vecQuat.z := Vector.z;
+	vecQuat.w := 0;
+ 
+	resQuat := quater_Mul( vecQuat, quater_Negate( Quaternion ) );
+	resQuat := quater_Mul( Quaternion, resQuat );
+ 
+	Result.X := resQuat.x;
+  Result.Y := resQuat.y;
+  Result.Z := resQuat.z;
+end;
+
+
 function vector_Negate;
 {$IFNDEF USE_ASM}
 begin
@@ -1036,17 +1064,110 @@ end;
 {------------------------------------------------------------------------------}
 {-------------------------------- Quaternion ----------------------------------}
 {------------------------------------------------------------------------------}
+function quater_Get;
+begin
+  Result.X := X;
+  Result.Y := Y;
+  Result.Z := Z;
+  Result.W := W;
+end;
+
+function quater_Add;
+{$IFNDEF USE_ASM}
+begin
+  Result.X := q1.X + q2.X;
+  Result.Y := q1.Y + q2.Y;
+  Result.Z := q1.Z + q2.Z;
+  Result.W := q1.W + q2.W;
+{$ELSE}
+asm
+  FLD  DWORD PTR [ EAX      ]
+  FADD DWORD PTR [ EDX      ]
+  FSTP DWORD PTR [ ECX      ]
+
+  FLD  DWORD PTR [ EAX + 4  ]
+  FADD DWORD PTR [ EDX + 4  ]
+  FSTP DWORD PTR [ ECX + 4  ]
+
+  FLD  DWORD PTR [ EAX + 8  ]
+  FADD DWORD PTR [ EDX + 8  ]
+  FSTP DWORD PTR [ ECX + 8  ]
+
+  FLD  DWORD PTR [ EAX + 12 ]
+  FADD DWORD PTR [ EDX + 12 ]
+  FSTP DWORD PTR [ ECX + 12 ]
+{$ENDIF}
+end;
+
+function quater_Sub;
+{$IFNDEF USE_ASM}
+begin
+  Result.X := q1.X - q2.X;
+  Result.Y := q1.Y - q2.Y;
+  Result.Z := q1.Z - q2.Z;
+  Result.W := q1.W - q2.W;
+{$ELSE}
+asm
+  FLD  DWORD PTR [ EAX      ]
+  FSUB DWORD PTR [ EDX      ]
+  FSTP DWORD PTR [ ECX      ]
+
+  FLD  DWORD PTR [ EAX + 4  ]
+  FSUB DWORD PTR [ EDX + 4  ]
+  FSTP DWORD PTR [ ECX + 4  ]
+
+  FLD  DWORD PTR [ EAX + 8  ]
+  FSUB DWORD PTR [ EDX + 8  ]
+  FSTP DWORD PTR [ ECX + 8  ]
+
+  FLD  DWORD PTR [ EAX + 12 ]
+  FSUB DWORD PTR [ EDX + 12 ]
+  FSTP DWORD PTR [ ECX + 12 ]
+{$ENDIF}
+end;
+
+function quater_Mul;
+begin
+  Result.X := q1.W * q2.X + q1.X * q2.W + q1.Y * q2.Z - q1.Z * q2.Y;
+  Result.Y := q1.W * q2.Y + q1.Y * q2.W + q1.Z * q2.X - q1.X * q2.Z;
+  Result.Z := q1.W * q2.Z + q1.Z * q2.W + q1.X * q2.Y - q1.Y * q2.X;
+  Result.W := q1.W * q2.W - q1.X * q2.X - q1.Y * q2.Y - q1.Z * q2.Z;
+end;
+
+function quater_Negate;
+begin
+  Result.X := -Quaternion.X;
+  Result.Y := -Quaternion.Y;
+  Result.Z := -Quaternion.Z;
+  Result.W :=  Quaternion.W;
+end;
+
+function quater_Normalize;
+  var
+    t : Single;
+begin
+  t := 1 / ( sqr( Quaternion.X ) + sqr( Quaternion.Y ) + sqr( Quaternion.Z ) + sqr( Quaternion.W ) );
+  Result.X := Quaternion.X * t;
+  Result.Y := Quaternion.Y * t;
+  Result.Z := Quaternion.Z * t;
+  Result.W := Quaternion.W * t;
+end;
+
+function quater_Dot;
+begin
+  Result := q1.X * q2.X + q1.Y * q2.Y + q1.Z * q2.Z + q1.W * q2.W;
+end;
+
 function quater_Lerp;
   var
     p : zglTQuaternion;
-    omega, cosom, sinom, scale0, scale1 : Single;
+    omega, cosom, scale0, scale1 : Single;
 begin
-  // косинус угла
   cosom := q1.X * q2.X + q1.Y * q2.Y + q1.Z * q2.Z + q1.W * q2.W;
 
   if cosom < 0 then
     begin 
-//      cosom := -cosom;
+      cosom := -cosom;
       p.X := -q2.X;
       p.Y := -q2.Y;
       p.Z := -q2.Z;
@@ -1059,19 +1180,8 @@ begin
         p.W := q2.W;
       end;
 
-//  if 1 - cosom > 0.1 Then
-//    begin
-//      // стандартный случай (slerp)
-//      omega  := ArcCos( cosom );
-//      sinom  := sin( omega );
-//      scale0 := sin( 1 - Value ) * omega) / sinom;
-//      scale1 := sin( Value * omega ) / sinom;
-//    end else
-//      begin
-        // если маленький угол - линейная интерполяция
-        scale0 := 1 - Value;
-        scale1 := Value;
-//      end;
+  scale0 := 1 - Value;
+  scale1 := Value;
 
   Result.X := scale0 * q1.X + scale1 * p.X;
   Result.Y := scale0 * q1.Y + scale1 * p.Y;
