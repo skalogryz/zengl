@@ -38,12 +38,11 @@ uses
 
 function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
 procedure skmesh_Draw( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
-procedure skmesh_Animate( Mesh : zglPSkMesh; State : zglPSkeletonState; Action, FPS : Integer ); extdecl;
 procedure skmesh_Free( var Mesh : zglPSkMesh ); extdecl;
 
 procedure skmesh_CalcQuats( var Frame : zglTSkeletonFrame );
 procedure skmesh_CalcFrame( var Frame : zglTSkeletonFrame; Bones : array of zglTBone );
-procedure skmesh_CalcVerts( Mesh : zglPSkMesh; var State : zglPSkeletonState; Frame : zglTSkeletonFrame );
+procedure skmesh_CalcVerts( Mesh : zglPSkMesh; var State : zglTSkeletonState; Frame : zglTSkeletonFrame );
 
 implementation
 
@@ -211,8 +210,6 @@ begin
   skmesh_CalcFrame( Mesh.Skeleton, Mesh.Bones );
 
   SetLength( Mesh.State.Vertices, Mesh.VCount );
-  for i := 0 to Mesh.VCount - 1 do
-    Mesh.State.Vertices[ i ] := Mesh.Vertices[ i ];
 
   Result := TRUE;
 end;
@@ -221,6 +218,31 @@ procedure skmesh_Draw;
   var
     i : Byte;
 begin
+  if length( State.Vertices ) < Mesh.VCount Then
+    SetLength( State.Vertices, Mesh.VCount );
+  if State.Delta <> State.prevDelta Then
+  with State^ do
+    begin
+      prevDelta := Delta;
+      if length( Frame.BonePos ) = 0 Then
+        SetLength( Frame.BonePos, length( Mesh.Actions[ nAction ].Frames[ nFrame ].BonePos ) );
+
+      skmesh_CalcQuats( Mesh.Actions[ nAction ].Frames[ nFrame ] );
+      skmesh_CalcQuats( Mesh.Actions[ nAction ].Frames[ nFrame + 1 ] );
+
+      for i := 0 to length( Frame.BonePos ) - 1 do        with Mesh.Actions[ nAction ].Frames[ nFrame ].BonePos[ i ] do
+          begin
+            Frame.BonePos[ i ].Translation := vector_Lerp( Translation,
+                                                           Mesh.Actions[ nAction ].Frames[ nFrame + 1 ].BonePos[ i ].Translation,                                                           Delta );
+            Frame.BonePos[ i ].Quaternion  := quater_Lerp( Quaternion,
+                                                           Mesh.Actions[ nAction ].Frames[ nFrame + 1 ].BonePos[ i ].Quaternion,
+                                                           Delta );
+            Frame.BonePos[ i ].Matrix      := quater_GetM4f( Frame.BonePos[ i ].Quaternion );          end;
+
+      skmesh_CalcFrame( Frame, Mesh.Bones );
+      skmesh_CalcVerts( Mesh, State^, Frame );
+    end;
+
   if ogl_MaxTexLevels > 0 Then
     tTexLevel := Byte( Mesh.Flags and USE_MULTITEX1 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
@@ -257,78 +279,6 @@ begin
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-end;
-
-procedure skmesh_Animate;
-  var
-    i, j : Integer;
-    dt   : Single;
-begin
-  State._timeNow := timer_GetTicks;
-  with State^ do
-    begin
-      while State._timeNow - State._timeOld > 1000 / FPS do
-        begin
-          if length( Frame.BonePos ) = 0 Then
-            SetLength( Frame.BonePos, length( Mesh.Actions[ prevAction ].Frames[ prevFrame ].BonePos ) );
-
-          if prevAction <> Action then
-            begin
-              nextAction := Action;
-              nextFrame  := 0;
-
-              skmesh_CalcQuats( Mesh.Actions[ prevAction ].Frames[ prevFrame ] );
-              skmesh_CalcQuats( Mesh.Actions[ nextAction ].Frames[ nextFrame ] );
-            end;
-
-          if prevAction < 0 Then prevAction := Action;
-          if nextAction < 0 Then nextAction := Action;
-
-          dt := ( _timeNow - _timeOld ) * Mesh.Actions[ nextAction ].FPS / 1000;
-
-          if _time = 0 Then
-            begin
-              skmesh_CalcQuats( Mesh.Actions[ prevAction ].Frames[ prevFrame ] );
-              skmesh_CalcQuats( Mesh.Actions[ nextAction ].Frames[ nextFrame ] );
-            end;
-
-          _time := _time + dt;
-          if _time > 1 Then
-            begin
-              prevAction := nextAction;
-              prevFrame  := nextFrame;
-              nextFrame  := nextFrame + trunc( _time );
-              _time      := 0;
-
-              if nextFrame > Mesh.Actions[ nextAction ].FCount - 2 Then
-                begin
-                  prevAction := nextAction;
-                  nextFrame  := 0;
-                end;
-            end;
-
-          for i := 0 to length( Frame.BonePos ) - 1 do
-            with Mesh.Actions[ prevAction ].Frames[ prevFrame ].BonePos[ i ] do
-              begin
-                Frame.BonePos[ i ].Translation := vector_Lerp( Translation,
-                                                               Mesh.Actions[ nextAction ].Frames[ nextFrame ].BonePos[ i ].Translation,
-                                                               _time );
-                Frame.BonePos[ i ].Quaternion  := quater_Lerp( Quaternion,
-                                                               Mesh.Actions[ nextAction ].Frames[ nextFrame ].BonePos[ i ].Quaternion,
-                                                               _time );
-                Frame.BonePos[ i ].Matrix      := quater_GetM4f( Frame.BonePos[ i ].Quaternion );
-              end;
-
-          _timeOld := _timeOld + 16;
-          j := -1;
-        end;
-
-      if j = -1 Then
-        begin
-          skmesh_CalcFrame( Frame, Mesh.Bones );
-          skmesh_CalcVerts( Mesh, State, Frame );
-        end;
-    end;
 end;
 
 procedure skmesh_Free;
@@ -393,7 +343,7 @@ procedure skmesh_CalcVerts;
     i, j   : Integer;
     t1, t2 : zglTPoint3D;
     Matrix : zglPMatrix4f;
-    Weight : single;
+    Weight : Single;
 begin
   for i := 0 to Mesh.VCount - 1 do
     begin
@@ -403,9 +353,9 @@ begin
       for j := 0 to Mesh.WCount[ i ] - 1 do
         begin
           Matrix := @Mesh.Skeleton.BonePos[ Mesh.Weights[ i ][ j ].boneID ].Matrix;
-          t1.X   := Mesh.Vertices[ i ].x - Matrix[ 0, 3 ];
-          t1.Y   := Mesh.Vertices[ i ].y - Matrix[ 1, 3 ];
-          t1.Z   := Mesh.Vertices[ i ].z - Matrix[ 2, 3 ];
+          t1.X   := Mesh.Vertices[ i ].X - Matrix[ 0, 3 ];
+          t1.Y   := Mesh.Vertices[ i ].Y - Matrix[ 1, 3 ];
+          t1.Z   := Mesh.Vertices[ i ].Z - Matrix[ 2, 3 ];
           t1     := vector_MulM4f( t1, Matrix );
 
           Matrix := @Frame.BonePos[ Mesh.Weights[ i ][ j ].boneID ].Matrix;
