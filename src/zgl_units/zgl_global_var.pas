@@ -79,7 +79,7 @@ var
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
   
-  app_Flags : DWORD = COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR;
+  app_Flags : DWORD = COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
   {---------------------------------- WINDOW ----------------------------------}
   wnd_X      : WORD;
   wnd_Y      : WORD;
@@ -163,6 +163,10 @@ var
   ogl_Y      : WORD;
   ogl_Width  : WORD = defWidth;
   ogl_Height : WORD = defHeight;
+  ogl_CropX  : WORD;
+  ogl_CropY  : WORD;
+  ogl_CropW  : WORD;
+  ogl_CropH  : WORD;
   
   ScissorX : WORD;
   ScissorY : WORD;

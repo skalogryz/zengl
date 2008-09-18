@@ -27,6 +27,7 @@ uses
   GL,
   zgl_types,
   zgl_const,
+  zgl_global_var,
   zgl_opengl,
 
   zgl_fx_2d,
@@ -59,6 +60,10 @@ begin
       W := W * FX2D_SX;
       H := H * FX2D_SY;
     end;
+
+  if app_Flags and CROP_INVISIBLE > 0 Then
+  if not ( ( X + W + H >= ogl_CropX ) and ( X - W - H <= ogl_CropW ) and
+           ( Y + H + W >= ogl_CropY ) and ( Y - W - H <= ogl_CropH ) ) Then Exit;
     
   // Текстурные координаты
   if FX and FX2D_FLIPX > 0 Then FU := Texture^.U else FU := 0;
@@ -192,6 +197,10 @@ begin
       W := W * FX2D_SX;
       H := H * FX2D_SY;
     end;
+
+  if app_Flags and CROP_INVISIBLE > 0 Then
+  if not ( ( X + W + H >= ogl_CropX ) and ( X - W - H <= ogl_CropW ) and
+           ( Y + H + W >= ogl_CropY ) and ( Y - W - H <= ogl_CropH ) ) Then Exit;
     
   // Текстурные координаты
   SU := Texture.U / Texture.FramesX;
@@ -339,6 +348,10 @@ begin
       W := W * FX2D_SX;
       H := H * FX2D_SY;
     end;
+
+  if app_Flags and CROP_INVISIBLE > 0 Then
+  if not ( ( X + W + H >= ogl_CropX ) and ( X - W - H <= ogl_CropW ) and
+           ( Y + H + W >= ogl_CropY ) and ( Y - W - H <= ogl_CropH ) ) Then Exit;
     
   // Текстурные координаты
   tX := ( 1 / ( Texture.Width  / Texture.U ) ) * CutRect.X;

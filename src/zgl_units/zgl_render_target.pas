@@ -50,6 +50,7 @@ implementation
 
 var
   lRTarget : zglPRenderTarget;
+  lMode : Integer;
   lACX : Integer;
   lACY : Integer;
 
@@ -113,9 +114,10 @@ begin
           end;
 
         case ogl_zDepth of
-          16: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Surface.Width, Surface.Height );
           24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Surface.Width, Surface.Height );
           32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Surface.Width, Surface.Height );
+        else
+          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Surface.Width, Surface.Height );
         end;
         glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
         glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
@@ -203,6 +205,8 @@ begin
   if Assigned( Target ) Then
     begin
       lRTarget := Target;
+      lMode := ogl_Mode;
+      ogl_Mode := 1;
 
       case Target.rtType of
         RT_TYPE_SIMPLE:
@@ -227,9 +231,8 @@ begin
         glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ), 
                     ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
         
-      if Target.rtType = RT_TYPE_FBO Then
-        if Target.Flags and RT_CLEAR_SCREEN > 0 Then
-          glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
+      if ( Target.rtType = RT_TYPE_FBO ) and ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
+        glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
     end else
       begin
         case lRTarget.rtType of
@@ -263,13 +266,10 @@ begin
           {$ENDIF}
         end;
 
-        if app_Flags and CORRECT_RESOLUTION > 0 Then
-          glViewPort( scr_AddCX, scr_AddCY, wnd_Width - scr_AddCX * 2, wnd_Height - scr_AddCY * 2 )
-        else
-          glViewPort( 0, 0, wnd_Width, wnd_Height );
-        if ( lRTarget.rtType = RT_TYPE_SIMPLE ) or ( lRTarget.rtType = RT_TYPE_PBUFFER ) Then
-          if lRTarget.Flags and RT_CLEAR_SCREEN > 0 Then
-            glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
+        ogl_Mode := lMode;
+        scr_SetViewPort;
+        if ( ( lRTarget.rtType = RT_TYPE_SIMPLE ) or ( lRTarget.rtType = RT_TYPE_PBUFFER ) ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
+          glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
       end;
 end;
 

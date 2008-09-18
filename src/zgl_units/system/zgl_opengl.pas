@@ -68,7 +68,7 @@ var
 
 implementation
 uses
-  zgl_window;
+  zgl_window, zgl_screen;
 
 function gl_Create;
   {$IFDEF WIN32}
@@ -408,10 +408,7 @@ begin
     glOrtho( 0, wnd_Width, wnd_Height, 0, 0, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
-    glViewPort( scr_AddCX, scr_AddCY, wnd_Width - scr_AddCX * 2, wnd_Height - scr_AddCY * 2 )
-  else
-    glViewPort( 0, 0, wnd_Width, wnd_Height );
+  scr_SetViewPort;
 end;
 
 procedure Set3DMode;
@@ -427,7 +424,7 @@ begin
   gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
-  glViewPort( 0, 0, wnd_Width, wnd_Height );
+  scr_SetViewPort;
 end;
 
 procedure SetCurrentMode;

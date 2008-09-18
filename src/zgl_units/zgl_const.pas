@@ -34,8 +34,8 @@ const
   defBPP      = 32;
 
   // constant string
-  cs_ZenGL    = 'ZenGL build 27[14.09.08]';
-  cv_version  = 27;
+  cs_ZenGL    = 'ZenGL build 28[18.09.08]';
+  cv_version  = 28;
 
   // zgl_Reg
   SYS_LOAD             = $000001;
@@ -71,6 +71,7 @@ const
   APP_USE_AUTOMINIMIZE = $000040;
   SND_CAN_PLAY         = $000080;
   SND_CAN_PLAY_FILE    = $000100;
+  CROP_INVISIBLE       = $000200;
 
   // Screen
   REFRESH_MAXIMUM = 0;

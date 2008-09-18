@@ -46,6 +46,7 @@ procedure scr_Flush; extdecl;
 
 procedure scr_SetOptions( Width, Height, BPP, Refresh : WORD; FullScreen, VSync : Boolean ); extdecl;
 procedure scr_CorrectResolution( Width, Height : WORD ); extdecl;
+procedure scr_SetViewPort; extdecl;
 procedure scr_SetVSync( VSync : Boolean ); extdecl;
 procedure scr_SetFSAA( FSAA : Byte ); extdecl;
 
@@ -450,6 +451,26 @@ begin
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
   SetCurrentMode;
+end;
+
+procedure scr_SetViewPort;
+begin
+  if ( ogl_Mode <> 2 ) and ( ogl_Mode <> 3 ) Then exit;
+
+  if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
+    begin
+      ogl_CropX := scr_AddCX;
+      ogl_CropY := scr_AddCY;
+      ogl_CropW := wnd_Width - scr_AddCX * 2;
+      ogl_CropH := wnd_Height - scr_AddCY * 2;
+    end else
+      begin
+        ogl_CropX := 0;
+        ogl_CropY := 0;
+        ogl_CropW := wnd_Width;
+        ogl_CropH := wnd_Height;
+      end;
+  glViewPort( ogl_CropX, ogl_CropY, ogl_CropW, ogl_CropH );
 end;
 
 procedure scr_SetVSync;

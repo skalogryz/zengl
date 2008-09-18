@@ -89,6 +89,7 @@ const
   APP_USE_AUTOMINIMIZE = $000040;
   SND_CAN_PLAY         = $000080;
   SND_CAN_PLAY_FILE    = $000100;
+  CROP_INVISIBLE       = $000200;
 
 var
   zgl_Enable  : procedure( What : DWORD ); stdcall;
@@ -845,6 +846,7 @@ end;
 var
   skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
   skmesh_Draw         : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
+  skmesh_DrawSkelet   : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
   skmesh_Free         : procedure( var Mesh : zglPSkMesh ); stdcall;
 
 // HEIGHTMAP
@@ -1411,6 +1413,7 @@ begin
 
       skmesh_LoadFromFile := dlsym( zglLib, 'skmesh_LoadFromFile' );
       skmesh_Draw := dlsym( zglLib, 'skmesh_Draw' );
+      skmesh_DrawSkelet := dlsym( zglLib, 'skmesh_DrawSkelet' );
       skmesh_Free := dlsym( zglLib, 'skmesh_Free' );
 
       heightmap_Build := dlsym( zglLib, 'heightmap_Build' );
