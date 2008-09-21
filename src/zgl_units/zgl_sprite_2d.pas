@@ -30,6 +30,7 @@ uses
   zgl_global_var,
   zgl_opengl,
 
+  zgl_camera_2d,
   zgl_fx_2d,
   zgl_math;
 
@@ -62,8 +63,8 @@ begin
     end;
 
   if app_Flags and CROP_INVISIBLE > 0 Then
-  if not ( ( X + W + H >= ogl_CropX ) and ( X - W - H <= ogl_CropW ) and
-           ( Y + H + W >= ogl_CropY ) and ( Y - W - H <= ogl_CropH ) ) Then Exit;
+  if not ( ( X + W + H >= ogl_CropX + cam2DGlobal.X ) and ( X - W - H <= ogl_CropW + cam2DGlobal.X ) and
+           ( Y + H + W >= ogl_CropY + cam2DGlobal.Y ) and ( Y - W - H <= ogl_CropH + cam2DGlobal.Y ) ) Then Exit;
     
   // Текстурные координаты
   if FX and FX2D_FLIPX > 0 Then FU := Texture^.U else FU := 0;
@@ -199,8 +200,8 @@ begin
     end;
 
   if app_Flags and CROP_INVISIBLE > 0 Then
-  if not ( ( X + W + H >= ogl_CropX ) and ( X - W - H <= ogl_CropW ) and
-           ( Y + H + W >= ogl_CropY ) and ( Y - W - H <= ogl_CropH ) ) Then Exit;
+  if not ( ( X + W + H >= ogl_CropX + cam2DGlobal.X ) and ( X - W - H <= ogl_CropW + cam2DGlobal.X ) and
+           ( Y + H + W >= ogl_CropY + cam2DGlobal.Y ) and ( Y - W - H <= ogl_CropH + cam2DGlobal.Y ) ) Then Exit;
     
   // Текстурные координаты
   SU := Texture.U / Texture.FramesX;
@@ -350,8 +351,8 @@ begin
     end;
 
   if app_Flags and CROP_INVISIBLE > 0 Then
-  if not ( ( X + W + H >= ogl_CropX ) and ( X - W - H <= ogl_CropW ) and
-           ( Y + H + W >= ogl_CropY ) and ( Y - W - H <= ogl_CropH ) ) Then Exit;
+  if not ( ( X + W + H >= ogl_CropX + cam2DGlobal.X ) and ( X - W - H <= ogl_CropW + cam2DGlobal.X ) and
+           ( Y + H + W >= ogl_CropY + cam2DGlobal.Y ) and ( Y - W - H <= ogl_CropH + cam2DGlobal.Y ) ) Then Exit;
     
   // Текстурные координаты
   tX := ( 1 / ( Texture.Width  / Texture.U ) ) * CutRect.X;

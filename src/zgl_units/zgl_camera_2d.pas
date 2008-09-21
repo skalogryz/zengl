@@ -36,7 +36,8 @@ procedure cam2d_Vertex2f( X, Y : Single ); extdecl;
 procedure cam2d_Vertex2fv( v : Pointer ); extdecl;
 
 var
-  cam2dGlobal : zglPCamera2D = nil;
+  cam2dGlobal   : zglPCamera2D = nil;
+  constCamera2D : zglTCamera2D = ( X: 0; Y: 0 );
 
 implementation
 
@@ -45,6 +46,7 @@ begin
   cam2dGlobal := Camera;
   if Camera = nil Then
     begin
+      cam2dGlobal  := @constCamera2D;
       gl_Vertex2f  := @glVertex2f;
       gl_Vertex2fv := @glVertex2fv;
     end else
@@ -69,5 +71,8 @@ begin
   v2[ 1 ] := PSingle( v + 4 )^ - cam2dGlobal.Y;
   glVertex2fv( @v2[ 0 ] );
 end;
+
+initialization
+  cam2dGlobal := @constCamera2D;
 
 end.
