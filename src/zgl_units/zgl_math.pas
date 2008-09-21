@@ -59,7 +59,7 @@ function vector_MulInvM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTP
 function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
 
 function vector_Negate( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D;
 function vector_Angle( Vector1, Vector2 : zglTPoint3D ) : Single;
 function vector_Cross( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Dot( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
@@ -86,7 +86,6 @@ procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
 procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
 procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
 function  matrix4f_Mul( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
-function  matrix4f_Concat( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
 
 {------------------------------------------------------------------------------}
 {-------------------------------- Quaternion ----------------------------------}
@@ -645,44 +644,20 @@ asm
 end;
 
 function vector_Normalize;
-{$IFNDEF USE_ASM}
   var
     len : Single;
 begin
-  len := 1 / sqrt( sqr( Vector.X ) + sqr( Vector.Y ) + sqr( Vector.Z ) );
+  len := sqrt( sqr( Vector.X ) + sqr( Vector.Y ) + sqr( Vector.Z ) );
+  if len <> 0 Then
+    len := 1 / len
+  else
+    begin
+      Result := vector_Get( 0, 0, 0 );
+      exit;
+    end;
   Result.X := Vector.X * len;
   Result.Y := Vector.Y * len;
   Result.Z := Vector.Z * len;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ] // Vector.X
-  FMUL ST, ST                // sqr( Vector.X )
-
-  FLD  DWORD PTR [ EAX + 4 ] // Vector.Y
-  FMUL ST, ST                // sqr( Vector.Y )
-
-  FADD                       // sqr( Vector.X ) + sqr( Vector.Y )
-
-  FLD  DWORD PTR [ EAX + 8 ] // Vector.Z
-  FMUL ST, ST                // sqr( Vector.Z )
-
-  FADD                       // sqr( Vector.X ) + sqr( Vector.Y ) + sqr( Vector.Z )
-  
-  FSQRT                      // sqrt( sqr( Vector.X ) + sqr( Vector.Y ) + sqr( Vector.Z ) )
-  FLD1
-  FDIVR                      // len := 1 / sqrt( sqr( Vector.X ) + sqr( Vector.Y ) + sqr( Vector.Z ) );
-
-  FLD  ST
-  FMUL DWORD PTR [ EAX     ]
-  FSTP DWORD PTR [ EDX     ] // Result.X := Vector.X * len;
-  
-  FLD  ST
-  FMUL DWORD PTR [ EAX + 4 ]
-  FSTP DWORD PTR [ EDX + 4 ] // Result.Y := Vector.Y * len;
-
-  FMUL DWORD PTR [ EAX + 8 ]
-  FSTP DWORD PTR [ EDX + 8 ] // Result.Z := Vector.Z * len;
-{$ENDIF}
 end;
 
 function vector_Angle;
@@ -1047,18 +1022,6 @@ begin
   Result[1, 3] := Matrix1[1, 0] * Matrix2[0, 3] + Matrix1[1, 1] * Matrix2[1, 3] + Matrix1[1, 2] * Matrix2[2, 3] + Matrix1[1, 3] * Matrix2[3, 3];
   Result[2, 3] := Matrix1[2, 0] * Matrix2[0, 3] + Matrix1[2, 1] * Matrix2[1, 3] + Matrix1[2, 2] * Matrix2[2, 3] + Matrix1[2, 3] * Matrix2[3, 3];
   Result[3, 3] := Matrix1[3, 0] * Matrix2[0, 3] + Matrix1[3, 1] * Matrix2[1, 3] + Matrix1[3, 2] * Matrix2[2, 3] + Matrix1[3, 3] * Matrix2[3, 3];
-end;
-
-function matrix4f_Concat;
-  var
-    i, j : Integer;
-begin
-  for i := 0 to 3 do
-    for j := 0 to 3 do
-      Result[ i, j ] := Matrix1[ i, 0 ] * Matrix2[ 0, j ] +
-                        Matrix1[ i, 1 ] * Matrix2[ 1, j ] +
-                        Matrix1[ i, 2 ] * Matrix2[ 2, j ] +
-                        Matrix1[ i, 3 ] * Matrix2[ 3, j ];
 end;
 
 {------------------------------------------------------------------------------}

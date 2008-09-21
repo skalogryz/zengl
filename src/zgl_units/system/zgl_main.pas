@@ -353,7 +353,8 @@ begin
   
   scr_flush;
   
-  INC( app_FPSCount );
+  if not app_Pause Then
+    INC( app_FPSCount );
 end;
 
 procedure zgl_FPS;
@@ -469,6 +470,7 @@ begin
         FocusIn:
           begin
             app_Focus := TRUE;
+            if app_Pause Then timer_Reset;
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
             FillChar( keysUp[ 0 ], 256, 0 );

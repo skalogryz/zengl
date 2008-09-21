@@ -37,7 +37,9 @@ uses
   zgl_utils_3d;
 
 function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
+procedure skmesh_Animate( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
 procedure skmesh_Draw( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
+procedure skmesh_DrawGroup( Mesh : zglPSkMesh; State : zglPSkeletonState; Group : DWORD ); extdecl;
 procedure skmesh_DrawSkelet( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
 procedure skmesh_Free( var Mesh : zglPSkMesh ); extdecl;
 
@@ -215,9 +217,9 @@ begin
   Result := TRUE;
 end;
 
-procedure skmesh_Draw;
+procedure skmesh_Animate;
   var
-    i : Byte;
+    i, k, j : Integer;
 begin
   if length( State.Vertices ) < Mesh.VCount Then
     SetLength( State.Vertices, Mesh.VCount );
@@ -238,12 +240,18 @@ begin
             Frame.BonePos[ i ].Quaternion  := quater_Lerp( Quaternion,
                                                            Mesh.Actions[ nAction ].Frames[ nFrame + 1 ].BonePos[ i ].Quaternion,
                                                            Delta );
-            Frame.BonePos[ i ].Matrix      := quater_GetM4f( Frame.BonePos[ i ].Quaternion );          end;
+            Frame.BonePos[ i ].Matrix      := quater_GetM4f( Frame.BonePos[ i ].Quaternion );
+          end;
 
       skmesh_CalcFrame( Frame, Mesh.Bones );
       skmesh_CalcVerts( Mesh, State^, Frame );
     end;
+end;
 
+procedure skmesh_Draw;
+  var
+    i : Byte;
+begin
   if ogl_MaxTexLevels > 0 Then
     tTexLevel := Byte( Mesh.Flags and USE_MULTITEX1 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
@@ -282,13 +290,55 @@ begin
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 end;
 
+procedure skmesh_DrawGroup;
+  var
+    i : Byte;
+begin
+  if ogl_MaxTexLevels > 0 Then
+    tTexLevel := Byte( Mesh.Flags and USE_MULTITEX1 > 0 ) +
+                 Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
+                 Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
+                 
+  if Mesh.Flags and USE_NORMALS > 0 Then
+    begin
+      glEnableClientState( GL_NORMAL_ARRAY );
+      glNormalPointer( GL_FLOAT, 0, @Mesh.Normals[ 0 ] );
+    end;
+  if Mesh.Flags and USE_TEXTURE > 0 Then
+    begin
+      glClientActiveTextureARB( GL_TEXTURE0_ARB );
+      glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+      glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.TexCoords[ 0 ] );
+
+      if ogl_MaxTexLevels > 0 Then
+        for i := 1 to tTexLevel do
+          begin
+            glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
+            glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+            glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
+          end;
+    end;
+
+  glEnableClientState( GL_VERTEX_ARRAY );
+  glVertexPointer( 3, GL_FLOAT, 0, @State.Vertices[ 0 ] );
+    
+  if Mesh.VCount < 65536 Then
+    glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_SHORT, Mesh.Groups[ Group ].Indices )
+  else
+    glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_INT, Mesh.Groups[ Group ].Indices );
+    
+  glDisableClientState( GL_VERTEX_ARRAY );
+  glDisableClientState( GL_NORMAL_ARRAY );
+  glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+end;
+
 procedure skmesh_DrawSkelet;
   var
     i : Integer;
 begin
   glBegin( GL_LINES );
   for i := 0 to length( State.Frame.BonePos ) - 1 do
-    if Mesh.Bones[ i ].Parent <> -1 Then
+    if Mesh.Bones[ i ].Parent >= 0 Then
       begin
         glVertex3fv( @State.Frame.BonePos[ i ].Point );
         glVertex3fv( @State.Frame.BonePos[ Mesh.Bones[ i ].Parent ].Point );
@@ -354,8 +404,8 @@ begin
       Frame.BonePos[ i ].Matrix[ 0, 3 ] := Frame.BonePos[ i ].Translation.X;
       Frame.BonePos[ i ].Matrix[ 1, 3 ] := Frame.BonePos[ i ].Translation.Y;
       Frame.BonePos[ i ].Matrix[ 2, 3 ] := Frame.BonePos[ i ].Translation.Z;
-      if Bones[ i ].Parent <> -1 Then
-        Frame.BonePos[ i ].Matrix := matrix4f_Concat( @Frame.BonePos[ Bones[ i ].Parent ].Matrix, @Frame.BonePos[ i ].Matrix );
+      if Bones[ i ].Parent >= 0 Then
+        Frame.BonePos[ i ].Matrix := matrix4f_Mul( @Frame.BonePos[ Bones[ i ].Parent ].Matrix, @Frame.BonePos[ i ].Matrix );
       Frame.BonePos[ i ].Point := vector_MulInvM4f( Frame.BonePos[ i ].Point, @Frame.BonePos[ i ].Matrix );
     end;
 end;
@@ -364,6 +414,7 @@ procedure skmesh_CalcVerts;
   var
     i, j   : Integer;
     t1, t2 : zglTPoint3D;
+    p      : zglPPoint3D;
     Matrix : zglPMatrix4f;
     Weight : Single;
 begin

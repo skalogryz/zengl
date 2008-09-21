@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 27                     }
-{ date:  14.09.08               }
+{ build: 28                     }
+{ date:  21.09.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -845,7 +845,9 @@ end;
 
 var
   skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
+  skmesh_Animate      : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
   skmesh_Draw         : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
+  skmesh_DrawGroup    : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState; Group : DWORD ); stdcall;
   skmesh_DrawSkelet   : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
   skmesh_Free         : procedure( var Mesh : zglPSkMesh ); stdcall;
 
@@ -1080,7 +1082,6 @@ var
   matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
   matrix4f_Add            : procedure( Matrix1, Matrix2 : zglPMatrix4f );
   matrix4f_Mul            : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
-  matrix4f_Concat         : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
   // quaternions
   quater_Get          : function( X, Y, Z, W : Single ) : zglTQuaternion;
   quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
@@ -1412,7 +1413,9 @@ begin
       smesh_Free := dlsym( zglLib, 'smesh_Free' );
 
       skmesh_LoadFromFile := dlsym( zglLib, 'skmesh_LoadFromFile' );
+      skmesh_Animate := dlsym( zglLib, 'skmesh_Animate' );
       skmesh_Draw := dlsym( zglLib, 'skmesh_Draw' );
+      skmesh_DrawGroup := dlsym( zglLib, 'skmesh_DrawGroup' );
       skmesh_DrawSkelet := dlsym( zglLib, 'skmesh_DrawSkelet' );
       skmesh_Free := dlsym( zglLib, 'skmesh_Free' );
 
@@ -1528,7 +1531,6 @@ begin
       matrix4f_Scale := dlsym( zglLib, 'matrix4f_Scale' );
       matrix4f_Add := dlsym( zglLib, 'matrix4f_Add' );
       matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
-      matrix4f_Concat := dlsym( zglLib, 'matrix4f_Concat' );
 
       quater_Get := dlsym( zglLib, 'quater_Get' );
       quater_Add := dlsym( zglLib, 'quater_Add' );

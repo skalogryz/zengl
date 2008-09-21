@@ -364,6 +364,7 @@ type
     vIndex : array[ 0..2 ] of DWORD;
     tIndex : array[ 0..2 ] of DWORD;
 end;
+type zglTFaceArray = array of zglTFace;
 
 type
   zglPGroup = ^zglTGroup;

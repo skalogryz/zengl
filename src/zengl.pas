@@ -290,7 +290,9 @@ exports
 
   // Skinned Mesh
   skmesh_LoadFromFile,
+  skmesh_Animate,
   skmesh_Draw,
+  skmesh_DrawGroup,
   skmesh_DrawSkelet,
   skmesh_Free,
 
@@ -418,7 +420,6 @@ exports
   matrix4f_Rotate,
   matrix4f_Scale,
   matrix4f_Mul,
-  matrix4f_Concat,
   // quaternions
   quater_Get,
   quater_Add,
