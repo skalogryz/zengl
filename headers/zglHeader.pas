@@ -87,9 +87,10 @@ const
   CORRECT_RESOLUTION   = $000010;
   APP_USE_AUTOPAUSE    = $000020;
   APP_USE_AUTOMINIMIZE = $000040;
-  SND_CAN_PLAY         = $000080;
-  SND_CAN_PLAY_FILE    = $000100;
-  CROP_INVISIBLE       = $000200;
+  APP_USE_LOG          = $000080;
+  SND_CAN_PLAY         = $000100;
+  SND_CAN_PLAY_FILE    = $000200;
+  CROP_INVISIBLE       = $000400;
 
 var
   zgl_Enable  : procedure( What : DWORD ); stdcall;
@@ -805,6 +806,7 @@ type
     prevDelta : Single;
     Frame     : zglTSkeletonFrame;
     Vertices  : array of zglTPoint3D;
+    Normals   : array of zglTPoint3D;
 end;
 
 type

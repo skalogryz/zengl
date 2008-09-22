@@ -301,6 +301,12 @@ begin
   if What and APP_USE_AUTOMINIMIZE > 0 Then
     app_AutoMinimize := TRUE;
 
+  if What and APP_USE_LOG > 0 Then
+    begin
+      app_Log := TRUE;
+      log_Init;
+    end;
+
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := TRUE;
 
@@ -337,6 +343,9 @@ begin
 
   if What and APP_USE_AUTOMINIMIZE > 0 Then
     app_AutoMinimize := FALSE;
+
+  if What and APP_USE_LOG > 0 Then
+    app_Log := FALSE;
 
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := FALSE;

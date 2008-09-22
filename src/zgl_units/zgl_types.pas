@@ -458,6 +458,7 @@ type
     prevDelta : Single;
     Frame     : zglTSkeletonFrame;
     Vertices  : array of zglTPoint3D;
+    Normals   : array of zglTPoint3D;
 end;
 
 type

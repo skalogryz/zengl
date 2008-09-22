@@ -219,10 +219,12 @@ end;
 
 procedure skmesh_Animate;
   var
-    i, k, j : Integer;
+    i : Integer;
 begin
   if length( State.Vertices ) < Mesh.VCount Then
     SetLength( State.Vertices, Mesh.VCount );
+  if ( length( State.Normals ) < Mesh.VCount ) and ( Mesh.Flags and USE_NORMALS > 0 ) Then
+    SetLength( State.Normals, Mesh.VCount );
   if State.Delta <> State.prevDelta Then
   with State^ do
     begin
@@ -260,7 +262,7 @@ begin
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
-      glNormalPointer( GL_FLOAT, 0, @Mesh.Normals[ 0 ] );
+      glNormalPointer( GL_FLOAT, 0, @State.Normals[ 0 ] );
     end;
   if Mesh.Flags and USE_TEXTURE > 0 Then
     begin
@@ -302,7 +304,7 @@ begin
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
-      glNormalPointer( GL_FLOAT, 0, @Mesh.Normals[ 0 ] );
+      glNormalPointer( GL_FLOAT, 0, @State.Normals[ 0 ] );
     end;
   if Mesh.Flags and USE_TEXTURE > 0 Then
     begin
@@ -412,11 +414,12 @@ end;
 
 procedure skmesh_CalcVerts;
   var
-    i, j   : Integer;
-    t1, t2 : zglTPoint3D;
-    p      : zglPPoint3D;
-    Matrix : zglPMatrix4f;
-    Weight : Single;
+    i, j    : Integer;
+    t1, t2  : zglTPoint3D;
+    p       : zglPPoint3D;
+    Matrix  : zglPMatrix4f;
+    rMatrix : zglTMAtrix4f;
+    Weight  : Single;
 begin
   for i := 0 to Mesh.VCount - 1 do
     begin
@@ -441,6 +444,49 @@ begin
         end;
       State.Vertices[ i ] := t2;
     end;
+
+  if Mesh.Flags and USE_NORMALS > 0 Then
+    for i := 0 to Mesh.VCount - 1 do
+      begin
+        t2.X := 0;
+        t2.Y := 0;
+        t2.Z := 0;
+
+        for j := 0 to Mesh.WCount[ i ] - 1 do
+          begin
+            t1 := Mesh.Normals[ i ];
+
+            rMatrix := Mesh.Skeleton.BonePos[ Mesh.Weights[ i ][ j ].BoneID ].Matrix;
+            rMatrix[ 0, 3 ] := 0;
+            rMatrix[ 1, 3 ] := 0;
+            rMatrix[ 2, 3 ] := 0;
+            rMatrix[ 3, 0 ] := 0;
+            rMatrix[ 3, 1 ] := 0;
+            rMatrix[ 3, 2 ] := 0;
+            rMatrix[ 3, 3 ] := 0;
+
+            t1 := vector_MulM4f( t1, @rMatrix );
+
+            rMatrix := Frame.BonePos[ Mesh.Weights[ i ][ j ].BoneID ].Matrix;
+            rMatrix[ 0, 3 ] := 0;
+            rMatrix[ 1, 3 ] := 0;
+            rMatrix[ 2, 3 ] := 0;
+            rMatrix[ 3, 0 ] := 0;
+            rMatrix[ 3, 1 ] := 0;
+            rMatrix[ 3, 2 ] := 0;
+            rMatrix[ 3, 3 ] := 0;
+
+            t1 := vector_MulInvM4f( t1, @rMatrix );
+
+            Weight := Mesh.Weights[ i ][ j ].Weight;
+
+            t2.X := t2.X + t1.X * Weight;
+            t2.Y := t2.Y + t1.Y * Weight;
+            t2.Z := t2.Z + t1.Z * Weight;
+          end;
+
+        State.Normals[ i ] := t2;
+      end;
 end;
 
 end.

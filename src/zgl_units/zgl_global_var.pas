@@ -79,7 +79,7 @@ var
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
   
-  app_Flags : DWORD = COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
+  app_Flags : DWORD = APP_USE_LOG or COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
   {---------------------------------- WINDOW ----------------------------------}
   wnd_X      : WORD;
   wnd_Y      : WORD;

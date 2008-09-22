@@ -49,8 +49,10 @@ implementation
 
 procedure log_Init;
 begin
-  logstart := m_Round( timer_GetTicks );
+  if ( app_Flags and APP_USE_LOG = 0 ) Then exit;
+  if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then exit;
   app_Log := TRUE;
+  logstart := m_Round( timer_GetTicks );
   
   file_Open( log, logfile, FOM_CREATE );
   log_Add( '############################', FALSE );
@@ -61,7 +63,7 @@ end;
 
 procedure log_Close;
 begin
-  if app_Log Then
+  if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then
     file_Close( log );
 end;
 
@@ -90,8 +92,8 @@ end;
 
 procedure log_Flush;
 begin
-  if not app_Log Then exit;
-  file_Flush( log );
+  if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then
+    file_Flush( log );
 end;
 
 function log_Timing;
