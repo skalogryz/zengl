@@ -314,7 +314,8 @@ begin
   wnd_SetPos( wnd_X, wnd_Y );
 {$ENDIF}
 {$IFDEF WIN32}
-  SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOZORDER or SWP_SHOWWINDOW );
+  if not app_InitToHandle Then
+    SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOZORDER or SWP_SHOWWINDOW );
 {$ENDIF}
   ogl_Width  := Width;
   ogl_Height := Height;

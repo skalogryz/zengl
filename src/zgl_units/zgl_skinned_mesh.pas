@@ -229,6 +229,7 @@ begin
   with State^ do
     begin
       prevDelta := Delta;
+
       if length( Frame.BonePos ) = 0 Then
         SetLength( Frame.BonePos, length( Mesh.Actions[ nAction ].Frames[ nFrame ].BonePos ) );
 
@@ -281,7 +282,7 @@ begin
 
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, @State.Vertices[ 0 ] );
-    
+
   if Mesh.VCount < 65536 Then
     glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_SHORT, Mesh.Indices )
   else

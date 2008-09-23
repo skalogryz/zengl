@@ -1289,4 +1289,7 @@ begin
     Result := vector_DivV( p, uvector );
 end;
 
+initialization
+  InitCosSinTables;
+
 end.

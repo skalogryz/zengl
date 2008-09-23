@@ -56,6 +56,8 @@ var
   app_Work     : Boolean;
   app_WorkTime : DWORD;
   app_Log      : Boolean;
+
+  app_InitToHandle : Boolean;
   
   app_FullScreen : Boolean;
 
@@ -167,11 +169,6 @@ var
   ogl_CropY  : WORD;
   ogl_CropW  : WORD;
   ogl_CropH  : WORD;
-  
-  ScissorX : WORD;
-  ScissorY : WORD;
-  ScissorW : WORD;
-  ScissorH : WORD;
 
   ogl_3DAccelerator : Boolean;
   ogl_CanVSync      : Boolean;

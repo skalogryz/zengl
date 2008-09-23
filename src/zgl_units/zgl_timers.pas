@@ -111,4 +111,11 @@ begin
     end;
 end;
 
+initialization
+{$IFDEF WIN32}
+  QueryPerformanceFrequency( Frequency );
+  Freq := 1 / Frequency;
+{$ENDIF}
+  t_start := timer_GetTicks;
+
 end.

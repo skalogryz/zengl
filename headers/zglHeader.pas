@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 28                     }
-{ date:  21.09.08               }
+{ build: 29                     }
+{ date:  23.09.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -45,8 +45,9 @@ function zglLoad( LibraryName : String; Error : Boolean = TRUE ) : Boolean;
 procedure zglFree;
 
 var
-  zgl_Init : procedure( FSAA : Byte = 0; StencilBits : Byte = 0 ); stdcall;
-  zgl_Exit : procedure; stdcall;
+  zgl_Init         : procedure( FSAA : Byte = 0; StencilBits : Byte = 0 ); stdcall;
+  zgl_InitToHandle : procedure( Handle : DWORD; FSAA : Byte = 0; StencilBits : Byte = 0 ); stdcall;
+  zgl_Exit         : procedure; stdcall;
 
 const
   SYS_LOAD             = $000001;
@@ -1265,6 +1266,7 @@ begin
     begin
       Result := TRUE;
       zgl_Init := dlsym( zglLib, 'zgl_Init' );
+      zgl_InitToHandle := dlsym( zglLib, 'zgl_InitToHandle' );
       zgl_Exit := dlsym( zglLib, 'zgl_Exit' );
       zgl_Reg := dlsym( zglLib, 'zgl_Reg' );
       zgl_Get := dlsym( zglLib, 'zgl_Get' );

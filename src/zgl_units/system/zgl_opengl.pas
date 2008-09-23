@@ -154,7 +154,7 @@ begin
 
   if ogl_Format = 0 Then
     wglChoosePixelFormatARB := wglGetProcAddress( 'wglChoosePixelFormatARB' );
-  if ( ogl_Format = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) Then
+  if ( ogl_Format = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not app_InitToHandle ) Then
     begin
       ogl_zDepth := 24;
 
@@ -247,6 +247,7 @@ begin
   glDisable( GL_ALPHA_TEST );
   glDisable( GL_DEPTH_TEST );
   glDisable( GL_TEXTURE_2D );
+  glEnable ( GL_NORMALIZE );
   
   Result := TRUE;
 end;

@@ -33,34 +33,36 @@ procedure scissor_End; extdecl;
 implementation
 
 var
-  tScissorX : WORD;
-  tScissorY : WORD;
-  tScissorW : WORD;
-  tScissorH : WORD;
+  tSCount  : WORD;
+  tScissor : array of array[ 0..3 ] of WORD;
 
 procedure scissor_Begin;
 begin
   glEnable( GL_SCISSOR_TEST );
   glScissor( X, ogl_Height - Y - Height, Width, Height );
 
-  tScissorX := ScissorX;
-  tScissorY := ScissorY;
-  tScissorW := ScissorW;
-  tScissorH := ScissorH;
+  INC( tSCount );
+  SetLength( tScissor, tSCount );
+  tScissor[ tSCount - 1 ][ 0 ] := ogl_CropX;
+  tScissor[ tSCount - 1 ][ 1 ] := ogl_CropY;
+  tScissor[ tSCount - 1 ][ 2 ] := ogl_CropW;
+  tScissor[ tSCount - 1 ][ 3 ] := ogl_CropH;
 
-  ScissorX := X;
-  ScissorY := Y;
-  ScissorW := Width  + X;
-  ScissorH := Height + Y;
+  ogl_CropX := X;
+  ogl_CropY := Y;
+  ogl_CropW := Width;
+  ogl_CropH := Height;
 end;
 
 procedure scissor_End;
 begin
   glDisable( GL_SCISSOR_TEST );
-  ScissorX := tScissorX;
-  ScissorY := tScissorY;
-  ScissorW := tScissorW;
-  ScissorH := tScissorH;
+  DEC( tSCount );
+  ogl_CropX := tScissor[ tSCount ][ 0 ];
+  ogl_CropY := tScissor[ tSCount ][ 1 ];
+  ogl_CropW := tScissor[ tSCount ][ 2 ];
+  ogl_CropH := tScissor[ tSCount ][ 3 ];
+  SetLength( tScissor, tSCount );
 end;
 
 end.

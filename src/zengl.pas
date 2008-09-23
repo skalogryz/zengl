@@ -57,7 +57,6 @@ uses
   zgl_timers,
 
   zgl_textures,
-  zgl_textures_bmp,
   zgl_textures_tga,
   zgl_textures_jpg,
 
@@ -112,6 +111,9 @@ uses
 exports
   // Main
   zgl_Init,
+  {$IFDEF WIN32}
+  zgl_InitToHandle,
+  {$ENDIF}
   zgl_Exit,
   zgl_Reg,
   zgl_Get,
@@ -511,5 +513,17 @@ exports
   mem_Free
   ;
 
+{$IFDEF WIN32}
+var
+  SysInfo : _SYSTEM_INFO;
+{$ENDIF}
 begin
+  {$IFDEF WIN32}
+  // Багнутое MS-поделко требует патча :)
+  // Вешаем движок на одно ядро
+  GetSystemInfo( SysInfo );
+  SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
+  
+  wnd_INST := hInstance;
+  {$ENDIF}
 end.

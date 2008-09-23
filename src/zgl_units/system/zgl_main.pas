@@ -54,6 +54,9 @@ uses
   Utils;
 
 procedure zgl_Init( FSAA, StencilBits : Byte ); extdecl;
+{$IFDEF WIN32}
+procedure zgl_InitToHandle( Handle : DWORD; FSAA, StencilBits : Byte ); extdecl;
+{$ENDIF}
 procedure zgl_Destroy;
 procedure zgl_Exit; extdecl;
 procedure zgl_Reg( What : WORD; UserData : Pointer ); extdecl;
@@ -73,44 +76,13 @@ function sleep(__useconds:longword):longint;cdecl;external 'libc' name 'usleep';
 
 implementation
 uses
-  zgl_textures_bmp,
   zgl_textures_jpg,
   zgl_textures_png,
   zgl_textures_tga,
   zgl_sound_wav;
 
 procedure zgl_Init;
-  {$IFDEF WIN32}
-  var
-    SysInfo : _SYSTEM_INFO;
-  {$ENDIF}
 begin
-  {$IFDEF WIN32}
-  // Багнутое MS-поделко требует патча :)
-  // Вешаем движок на одно ядро
-  GetSystemInfo( SysInfo );
-  SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
-  
-  wnd_INST := hInstance;
-
-  QueryPerformanceFrequency( Frequency );
-  Freq := 1 / Frequency;
-  {$ENDIF}
-  InitCosSinTables;
-  t_start := timer_GetTicks;
-
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'bmp' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @bmp_LoadFromFile );
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'jpg' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @jpg_LoadFromFile );
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'png' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @png_LoadFromFile );
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'tga' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @tga_LoadFromFile );
-
-  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'wav' ) );
-  zgl_Reg( SND_FORMAT_LOADER, @wav_LoadFromFile );
-
   log_Init;
   if not InitGL Then
     begin
@@ -142,13 +114,35 @@ begin
   
   zgl_loop;
   zgl_Destroy;
-  
-{$IFDEF WIN32}
-  wnd_ShowCursor( TRUE );
-{$ENDIF}
-  log_add( 'End' );
-  log_Close;
 end;
+
+{$IFDEF WIN32}
+procedure zgl_InitToHandle;
+begin
+  log_Init;
+  if not InitGL Then
+    begin
+      log_Add( 'Cannot load GL library' );
+      exit;
+    end;
+
+  ogl_FSAA    := FSAA;
+  ogl_Stencil := StencilBits;
+
+  if not scr_Create Then exit;
+  app_InitToHandle := TRUE;
+  wnd_Handle := Handle;
+  wnd_DC := GetDC( wnd_Handle );
+  if not gl_Create Then exit;
+  app_Work := TRUE;
+
+  Set2DMode;
+  wnd_ShowCursor( FALSE );
+  
+  zgl_loop;
+  zgl_Destroy;
+end;
+{$ENDIF}
 
 procedure zgl_Destroy;
 begin
@@ -176,9 +170,15 @@ begin
   gl_Destroy;
   snd_StopFile;
   snd_Free;
-  wnd_Destroy;
+  if not app_InitToHandle Then wnd_Destroy;
 
   app_PExit;
+
+{$IFDEF WIN32}
+  wnd_ShowCursor( TRUE );
+{$ENDIF}
+  log_add( 'End' );
+  log_Close;
 end;
 
 procedure zgl_Exit;
@@ -267,8 +267,11 @@ begin
   else
     begin
       if Assigned( Mem ) Then R := TRUE;
-      Mem := ReAllocMem( Mem, Size );
-      if not R Then FillChar( Mem^, Size, 0 );
+      if not R Then
+        begin
+          Mem := ReAllocMem( Mem, Size );
+          FillChar( Mem^, Size, 0 );
+        end else Mem := AllocMem( Size );
     end;
 end;
 
@@ -281,19 +284,6 @@ begin
 
   if What and DEPTH_MASK > 0 Then
     glDepthMask( GL_TRUE );
-  
-  if What and CORRECT_RESOLUTION > 0 Then
-    begin
-       if cam2dGlobal = nil Then
-        begin
-          gl_Vertex2f  := @glVertex2f;
-          gl_Vertex2fv := @glVertex2fv;
-        end else
-          begin
-            gl_Vertex2f  := @cam2d_Vertex2f;
-            gl_Vertex2fv := @cam2d_Vertex2fv;
-          end;
-    end;
 
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := TRUE;
@@ -324,19 +314,6 @@ begin
 
   if What and DEPTH_MASK > 0 Then
     glDepthMask( GL_FALSE );
-    
-  if What and CORRECT_RESOLUTION > 0 Then
-    begin
-      if cam2dGlobal = nil Then
-        begin
-          gl_Vertex2f  := @glVertex2f;
-          gl_Vertex2fv := @glVertex2fv;
-        end else
-          begin
-            gl_Vertex2f  := @cam2d_Vertex2f;
-            gl_Vertex2fv := @cam2d_Vertex2fv;
-          end;
-    end;
 
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := FALSE;
@@ -710,5 +687,16 @@ begin
   end;
 {$ENDIF}
 end;
+
+initialization
+  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'jpg' ) );
+  zgl_Reg( TEX_FORMAT_LOADER, @jpg_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'png' ) );
+  zgl_Reg( TEX_FORMAT_LOADER, @png_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'tga' ) );
+  zgl_Reg( TEX_FORMAT_LOADER, @tga_LoadFromFile );
+
+  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'wav' ) );
+  zgl_Reg( SND_FORMAT_LOADER, @wav_LoadFromFile );
 
 end.
