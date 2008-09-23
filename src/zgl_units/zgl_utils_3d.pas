@@ -26,27 +26,11 @@ uses
   zgl_types,
   zgl_math;
 
-procedure BuildTexCoords( FCount : DWORD; var Faces : array of zglTFace; VCount : DWORD; var TexCoords : array of zglTPoint2D );
 procedure BuildIndices( FCount : DWORD; var Faces : array of zglTFace; Indices : Pointer; Size : Byte );
 procedure BuildFNormals( FCount : DWORD; Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
 procedure BuildSNormals( FCount : DWORD; Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
 
 implementation
-
-procedure BuildTexCoords;
-  var
-    i, j : DWORD;
-    TC   : array of zglTPoint2D;
-begin
-  SetLength( TC, VCount );
-
-  for i := 0 to FCount - 1 do
-    for j := 0 to 2 do
-      TC[ Faces[ i ].vIndex[ j ] ] := TexCoords[ Faces[ i ].tIndex[ j ] ];
-
-  Move( TC[ 0 ], TexCoords[ 0 ], VCount * SizeOf( zglTPoint2D ) );
-  SetLength( TC, 0 );
-end;
 
 procedure BuildIndices;
   var
@@ -56,13 +40,13 @@ begin
     begin
       for i := 0 to FCount - 1 do
         for j := 0 to 2 do
-          PWORD( Indices + ( i * 3 ) * Size + j * Size )^ := Faces[ i ].vIndex[ j ];
+          PWORD( Indices + ( i * 3 ) * Size + j * Size )^ := Faces[ i, j ];
     end else
       if Size = 4 Then
         begin
           for i := 0 to FCount - 1 do
             for j := 0 to 2 do
-              PDWORD( Indices + ( i * 3 ) * Size + j * Size )^ := Faces[ i ].vIndex[ j ];
+              PDWORD( Indices + ( i * 3 ) * Size + j * Size )^ := Faces[ i, j ];
         end;
 end;
 
@@ -73,10 +57,10 @@ procedure BuildFNormals;
 begin
   for i := 0 to FCount - 1 do
     begin
-      normal := tri_GetNormal( @Vertices[ Faces[ i ].vIndex[ 0 ] ], @Vertices[ Faces[ i ].vIndex[ 1 ] ], @Vertices[ Faces[ i ].vIndex[ 2 ] ] );
-      Normals[ Faces[ i ].vIndex[ 0 ] ] := normal;
-      Normals[ Faces[ i ].vIndex[ 1 ] ] := normal;
-      Normals[ Faces[ i ].vIndex[ 2 ] ] := normal;
+      normal := tri_GetNormal( @Vertices[ Faces[ i, 0 ] ], @Vertices[ Faces[ i, 1 ] ], @Vertices[ Faces[ i, 2 ] ] );
+      Normals[ Faces[ i, 0 ] ] := normal;
+      Normals[ Faces[ i, 1 ] ] := normal;
+      Normals[ Faces[ i, 2 ] ] := normal;
     end;
 end;
 
@@ -96,9 +80,9 @@ begin
 
   for i := 0 to FCount - 1 do
     begin
-      vPoly[ 0 ] := Vertices[ Faces[ i ].vIndex[ 0 ] ];
-      vPoly[ 1 ] := Vertices[ Faces[ i ].vIndex[ 1 ] ];
-      vPoly[ 2 ] := Vertices[ Faces[ i ].vIndex[ 2 ] ];
+      vPoly[ 0 ] := Vertices[ Faces[ i, 0 ] ];
+      vPoly[ 1 ] := Vertices[ Faces[ i, 1 ] ];
+      vPoly[ 2 ] := Vertices[ Faces[ i, 2 ] ];
 
       v1 := vector_Sub( vPoly[ 0 ], vPoly[ 2 ] );
       v2 := vector_Sub( vPoly[ 2 ], vPoly[ 1 ] );
@@ -110,7 +94,7 @@ begin
   for i := 0 to length( Vertices ) - 1 do
     begin
       for j := 0 to FCount - 1 do
-        if ( Faces[ j ].vIndex[ 0 ] = i ) or ( Faces[ j ].vIndex[ 1 ] = i ) or ( Faces[ j ].vIndex[ 2 ] = i ) Then
+        if ( Faces[ j, 0 ] = i ) or ( Faces[ j, 1 ] = i ) or ( Faces[ j, 2 ] = i ) Then
           begin
             vSum := vector_Add( vSum, TNormals[ j ] );
             INC( Shared );

@@ -119,9 +119,9 @@ begin
             begin
               face_id := Faces[ t ];
 
-              PWORD( RenderData[ 0 ].Indices + ( j     ) * 2 )^ := Octree.Faces[ face_id ].vIndex[ 0 ];
-              PWORD( RenderData[ 0 ].Indices + ( j + 1 ) * 2 )^ := Octree.Faces[ face_id ].vIndex[ 1 ];
-              PWORD( RenderData[ 0 ].Indices + ( j + 2 ) * 2 )^ := Octree.Faces[ face_id ].vIndex[ 2 ];
+              PWORD( RenderData[ 0 ].Indices + ( j     ) * 2 )^ := Octree.Faces[ face_id, 0 ];
+              PWORD( RenderData[ 0 ].Indices + ( j + 1 ) * 2 )^ := Octree.Faces[ face_id, 1 ];
+              PWORD( RenderData[ 0 ].Indices + ( j + 2 ) * 2 )^ := Octree.Faces[ face_id, 2 ];
 
               INC( j, 3 );
             end;
@@ -130,9 +130,9 @@ begin
             begin
               face_id := Faces[ t ];
 
-              PDWORD( RenderData[ 0 ].Indices + ( j     ) * 4 )^ := Octree.Faces[ face_id ].vIndex[ 0 ];
-              PDWORD( RenderData[ 0 ].Indices + ( j + 1 ) * 4 )^ := Octree.Faces[ face_id ].vIndex[ 1 ];
-              PDWORD( RenderData[ 0 ].Indices + ( j + 2 ) * 4 )^ := Octree.Faces[ face_id ].vIndex[ 2 ];
+              PDWORD( RenderData[ 0 ].Indices + ( j     ) * 4 )^ := Octree.Faces[ face_id, 0 ];
+              PDWORD( RenderData[ 0 ].Indices + ( j + 1 ) * 4 )^ := Octree.Faces[ face_id, 1 ];
+              PDWORD( RenderData[ 0 ].Indices + ( j + 2 ) * 4 )^ := Octree.Faces[ face_id, 2 ];
 
               INC( j, 3 );
             end;
@@ -160,9 +160,9 @@ begin
                 begin
                   face_id := Faces[ t ];
 
-                  PWORD( RenderData[ rdata_id ].Indices + ( j     ) * 2 )^ := Octree.Faces[ face_id ].vIndex[ 0 ];
-                  PWORD( RenderData[ rdata_id ].Indices + ( j + 1 ) * 2 )^ := Octree.Faces[ face_id ].vIndex[ 1 ];
-                  PWORD( RenderData[ rdata_id ].Indices + ( j + 2 ) * 2 )^ := Octree.Faces[ face_id ].vIndex[ 2 ];
+                  PWORD( RenderData[ rdata_id ].Indices + ( j     ) * 2 )^ := Octree.Faces[ face_id, 0 ];
+                  PWORD( RenderData[ rdata_id ].Indices + ( j + 1 ) * 2 )^ := Octree.Faces[ face_id, 1 ];
+                  PWORD( RenderData[ rdata_id ].Indices + ( j + 2 ) * 2 )^ := Octree.Faces[ face_id, 2 ];
 
                   INC( j, 3 );
                 end;
@@ -171,9 +171,9 @@ begin
                 begin
                   face_id := Faces[ t ];
 
-                  PDWORD( RenderData[ rdata_id ].Indices + ( j     ) * 4 )^ := Octree.Faces[ face_id ].vIndex[ 0 ];
-                  PDWORD( RenderData[ rdata_id ].Indices + ( j + 1 ) * 4 )^ := Octree.Faces[ face_id ].vIndex[ 1 ];
-                  PDWORD( RenderData[ rdata_id ].Indices + ( j + 2 ) * 4 )^ := Octree.Faces[ face_id ].vIndex[ 2 ];
+                  PDWORD( RenderData[ rdata_id ].Indices + ( j     ) * 4 )^ := Octree.Faces[ face_id, 0 ];
+                  PDWORD( RenderData[ rdata_id ].Indices + ( j + 1 ) * 4 )^ := Octree.Faces[ face_id, 1 ];
+                  PDWORD( RenderData[ rdata_id ].Indices + ( j + 2 ) * 4 )^ := Octree.Faces[ face_id, 2 ];
 
                   INC( j, 3 );
                 end;
@@ -309,15 +309,9 @@ begin
     begin
       SetLength( Octree.Planes, Octree.FCount );
       for i := 0 to Octree.FCount - 1 do
-        Octree.Planes[ i ] := plane_Get( Octree.Vertices[ Octree.Faces[ i ].vIndex[ 0 ] ],
-                                         Octree.Vertices[ Octree.Faces[ i ].vIndex[ 1 ] ],
-                                         Octree.Vertices[ Octree.Faces[ i ].vIndex[ 2 ] ] );
-    end;
-      
-  if Octree.Flags and USE_TEXTURE > 0 Then
-    begin
-      SetLength( Octree.TexCoords, Octree.VCount );
-      BuildTexCoords( Octree.FCount, Octree.Faces, Octree.VCount, Octree.TexCoords );
+        Octree.Planes[ i ] := plane_Get( Octree.Vertices[ Octree.Faces[ i, 0 ] ],
+                                         Octree.Vertices[ Octree.Faces[ i, 1 ] ],
+                                         Octree.Vertices[ Octree.Faces[ i, 2 ] ] );
     end;
 
   if Octree.Flags and BUILD_VBO > 0 Then tbuildVBO := TRUE;
@@ -410,7 +404,7 @@ begin
       for i := 0 to FCount - 1 do
         for j := 0 to 2 do
           begin
-            vertex := @Octree.Vertices[ Octree.Faces[ Faces[ i ] ].vIndex[ j ] ];
+            vertex := @Octree.Vertices[ Octree.Faces[ Faces[ i ], j ] ];
 
             // top
             if vertex.y >= Node.Cube.Position.Y Then
@@ -418,17 +412,17 @@ begin
                 if vertex.x <= Node.Cube.Position.X Then
                   begin
                     if vertex.z >= Node.Cube.Position.Z Then
-                      bFaces[ 0 ][ i ] := TRUE // left_front
+                      bFaces[ 0, i ] := TRUE // left_front
                     else
-                      bFaces[ 1 ][ i ] := TRUE // left_back
+                      bFaces[ 1, i ] := TRUE // left_back
                   end else
                     begin
                       if vertex.x >= Node.Cube.Position.X Then
                         begin
                           if vertex.z <= Node.Cube.Position.Z Then
-                            bFaces[ 2 ][ i ] := TRUE  // right_back
+                            bFaces[ 2, i ] := TRUE  // right_back
                           else
-                            bFaces[ 3 ][ i ] := TRUE; // right_front
+                            bFaces[ 3, i ] := TRUE; // right_front
                         end;
                     end;
               end else
@@ -439,17 +433,17 @@ begin
                       if vertex.x <= Node.Cube.Position.X Then
                         begin
                           if vertex.z >= Node.Cube.Position.Z Then
-                            bFaces[ 4 ][ i ] := TRUE // left_front
+                            bFaces[ 4, i ] := TRUE // left_front
                           else
-                            bFaces[ 5 ][ i ] := TRUE // left_back
+                            bFaces[ 5, i ] := TRUE // left_back
                         end else
                           begin
                             if vertex.x >= Node.Cube.Position.X Then
                               begin
                                 if vertex.z <= Node.Cube.Position.Z Then
-                                  bFaces[ 6 ][ i ] := TRUE  // right_back
+                                  bFaces[ 6, i ] := TRUE  // right_back
                                 else
-                                  bFaces[ 7 ][ i ] := TRUE; // right_front
+                                  bFaces[ 7, i ] := TRUE; // right_front
                               end;
                           end;
                     end;
@@ -458,7 +452,7 @@ begin
           
       for ID := 0 to 7 do
         for i := 0 to FCount - 1 do
-          if bFaces[ ID ][ i ] Then
+          if bFaces[ ID, i ] Then
             INC( bFCount[ ID ] );
 
       for ID := 0 to 7 do
@@ -537,9 +531,9 @@ begin
   DFCount := 0;
   for i := 0 to FCount - 1 do
     begin
-      v1 := Octree.Vertices[ Octree.Faces[ Faces[ i ] ].vIndex[ 0 ] ];
-      v2 := Octree.Vertices[ Octree.Faces[ Faces[ i ] ].vIndex[ 1 ] ];
-      v3 := Octree.Vertices[ Octree.Faces[ Faces[ i ] ].vIndex[ 2 ] ];
+      v1 := Octree.Vertices[ Octree.Faces[ Faces[ i ], 0 ] ];
+      v2 := Octree.Vertices[ Octree.Faces[ Faces[ i ], 1 ] ];
+      v3 := Octree.Vertices[ Octree.Faces[ Faces[ i ], 2 ] ];
 
       if octree_FaceInNode( min, max, v1, v2, v3 ) Then
         begin

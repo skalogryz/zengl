@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { build: 29                     }
-{ date:  23.09.08               }
+{ date:  24.09.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -596,10 +596,7 @@ type
   
 type
   zglPFace = ^zglTFace;
-  zglTFace = record
-    vIndex : array[ 0..2 ] of DWORD;
-    tIndex : array[ 0..2 ] of DWORD;
-end;
+  zglTFace = array[ 0..2 ] of DWORD;
 
 type
   zglPGroup = ^zglTGroup;

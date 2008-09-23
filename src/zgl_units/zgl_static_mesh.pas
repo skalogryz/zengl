@@ -151,11 +151,6 @@ begin
         end;
     end;
 
-  if zmfHeader.TLayers > 0 Then
-    begin
-      SetLength( Mesh.TexCoords, Mesh.VCount );
-      BuildTexCoords( Mesh.FCount, Mesh.Faces, Mesh.VCount, Mesh.TexCoords );
-    end;
   if Mesh.VCount < 65536 Then
     begin
       Mesh.Indices := AllocMem( Mesh.FCount * 2 * 3 );

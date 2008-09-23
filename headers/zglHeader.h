@@ -560,11 +560,8 @@ typedef zglTMatrix3f *zglPMatrix3f;
 typedef float zglTMatrix4f[3][3];
 typedef zglTMatrix4f *zglPMatrix4f;
   
-typedef struct
-{
-  DWORD vIndex[3];
-  DWORD tIndex[3];
-} zglTFace, *zglPFace;
+typedef DWORD zglTFace[3];
+typedef zglTFace* zglPFace;
 
 typedef struct
 {
@@ -919,6 +916,7 @@ float       ( APIENTRY *vector_Dot )( zglTPoint3D Vector1, zglTPoint3D Vector2 )
 float       ( APIENTRY *vector_Distance )( zglTPoint3D Vector1, zglTPoint3D Vector2 );
 float       ( APIENTRY *vector_FDistance )( zglTPoint3D Vector1, zglTPoint3D Vector2 );
 float       ( APIENTRY *vector_Length )( zglTPoint3D Vector );
+zglTPoin3D  ( APIENTRY *vector_Lerp )( zglTPoint3D Vector1, zglTPoint3D Vector2, float Value );
   /* matrix */
 zglTMatrix3f ( APIENTRY *matrix3f_Get )( zglTPoint3D v1, zglTPoint3D v2, zglTPoint3D v3 );
 void         ( APIENTRY *matrix3f_Identity )( zglPMatrix3f Matrix );
@@ -1314,6 +1312,7 @@ void zglLoad( char* LibraryName )
       zglGetAddress( vector_Distance, zglLib, "vector_Distance" );
       zglGetAddress( vector_FDistance, zglLib, "vector_FDistance" );
       zglGetAddress( vector_Length, zglLib, "vector_Length" );
+      zglGetAddress( vector_Lerp, zglLib, "vector_Lerp" );
 
       zglGetAddress( matrix3f_Get, zglLib, "matrix3f_Get" );
       zglGetAddress( matrix3f_Identity, zglLib, "matrix3f_Identity" );

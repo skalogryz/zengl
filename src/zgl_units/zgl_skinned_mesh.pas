@@ -189,12 +189,6 @@ begin
         end;
     end;
 
-  if zmfHeader.TLayers > 0 Then
-    begin
-      SetLength( Mesh.TexCoords, Mesh.VCount );
-      BuildTexCoords( Mesh.FCount, Mesh.Faces, Mesh.VCount, Mesh.TexCoords );
-    end;
-
   if Mesh.VCount < 65536 Then
     begin
       Mesh.Indices := AllocMem( Mesh.FCount * 2 * 3 );
@@ -429,15 +423,15 @@ begin
       t2.Z := 0;
       for j := 0 to Mesh.WCount[ i ] - 1 do
         begin
-          Matrix := @Mesh.Skeleton.BonePos[ Mesh.Weights[ i ][ j ].boneID ].Matrix;
+          Matrix := @Mesh.Skeleton.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
           t1.X   := Mesh.Vertices[ i ].X - Matrix[ 0, 3 ];
           t1.Y   := Mesh.Vertices[ i ].Y - Matrix[ 1, 3 ];
           t1.Z   := Mesh.Vertices[ i ].Z - Matrix[ 2, 3 ];
           t1     := vector_MulM4f( t1, Matrix );
 
-          Matrix := @Frame.BonePos[ Mesh.Weights[ i ][ j ].boneID ].Matrix;
+          Matrix := @Frame.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
           t1     := vector_MulInvM4f( t1, Matrix );
-          Weight := Mesh.Weights[ i ][ j ].Weight;
+          Weight := Mesh.Weights[ i, j ].Weight;
 
           t2.X := t2.X + t1.X * Weight;
           t2.Y := t2.Y + t1.Y * Weight;
@@ -457,7 +451,7 @@ begin
           begin
             t1 := Mesh.Normals[ i ];
 
-            rMatrix := Mesh.Skeleton.BonePos[ Mesh.Weights[ i ][ j ].BoneID ].Matrix;
+            rMatrix := Mesh.Skeleton.BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
             rMatrix[ 0, 3 ] := 0;
             rMatrix[ 1, 3 ] := 0;
             rMatrix[ 2, 3 ] := 0;
@@ -468,7 +462,7 @@ begin
 
             t1 := vector_MulM4f( t1, @rMatrix );
 
-            rMatrix := Frame.BonePos[ Mesh.Weights[ i ][ j ].BoneID ].Matrix;
+            rMatrix := Frame.BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
             rMatrix[ 0, 3 ] := 0;
             rMatrix[ 1, 3 ] := 0;
             rMatrix[ 2, 3 ] := 0;
@@ -479,7 +473,7 @@ begin
 
             t1 := vector_MulInvM4f( t1, @rMatrix );
 
-            Weight := Mesh.Weights[ i ][ j ].Weight;
+            Weight := Mesh.Weights[ i, j ].Weight;
 
             t2.X := t2.X + t1.X * Weight;
             t2.Y := t2.Y + t1.Y * Weight;

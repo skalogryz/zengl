@@ -360,11 +360,7 @@ end;
 
 type
   zglPFace = ^zglTFace;
-  zglTFace = record
-    vIndex : array[ 0..2 ] of DWORD;
-    tIndex : array[ 0..2 ] of DWORD;
-end;
-type zglTFaceArray = array of zglTFace;
+  zglTFace = array[ 0..2 ] of DWORD;
 
 type
   zglPGroup = ^zglTGroup;

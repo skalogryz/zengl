@@ -83,19 +83,13 @@ begin
 
       if ( x < Texture.Width - 2 ) and ( y < Texture.Height - 2 ) Then
         begin
-          HeightMap.Faces[ j ].vIndex[ 0 ] := i + Texture.Width;
-          HeightMap.Faces[ j ].vIndex[ 1 ] := i + 1;
-          HeightMap.Faces[ j ].vIndex[ 2 ] := i;
-          HeightMap.Faces[ j ].tIndex[ 0 ] := HeightMap.Faces[ j ].vIndex[ 0 ];
-          HeightMap.Faces[ j ].tIndex[ 1 ] := HeightMap.Faces[ j ].vIndex[ 1 ];
-          HeightMap.Faces[ j ].tIndex[ 2 ] := HeightMap.Faces[ j ].vIndex[ 2 ];
+          HeightMap.Faces[ j, 0 ] := i + Texture.Width;
+          HeightMap.Faces[ j, 1 ] := i + 1;
+          HeightMap.Faces[ j, 2 ] := i;
           INC( j );
-          HeightMap.Faces[ j ].vIndex[ 0 ] := i + Texture.Width + 1;
-          HeightMap.Faces[ j ].vIndex[ 1 ] := i + 1;
-          HeightMap.Faces[ j ].vIndex[ 2 ] := i + Texture.Width;
-          HeightMap.Faces[ j ].tIndex[ 0 ] := HeightMap.Faces[ j ].vIndex[ 0 ];
-          HeightMap.Faces[ j ].tIndex[ 1 ] := HeightMap.Faces[ j ].vIndex[ 1 ];
-          HeightMap.Faces[ j ].tIndex[ 2 ] := HeightMap.Faces[ j ].vIndex[ 2 ];
+          HeightMap.Faces[ j, 0 ] := i + Texture.Width + 1;
+          HeightMap.Faces[ j, 1 ] := i + 1;
+          HeightMap.Faces[ j, 2 ] := i + Texture.Width;
           INC( j );
         end;
       INC( i );
@@ -144,9 +138,9 @@ begin
       HeightMap.PCount := HeightMap.FCount;
       SetLength( HeightMap.Planes, HeightMap.PCount );
       for i := 0 to HeightMap.PCount - 1 do
-        HeightMap.Planes[ i ] := plane_Get( HeightMap.Vertices[ HeightMap.Faces[ i ].vIndex[ 0 ] ],
-                                            HeightMap.Vertices[ HeightMap.Faces[ i ].vIndex[ 1 ] ],
-                                            HeightMap.Vertices[ HeightMap.Faces[ i ].vIndex[ 2 ] ] );
+        HeightMap.Planes[ i ] := plane_Get( HeightMap.Vertices[ HeightMap.Faces[ i, 0 ] ],
+                                            HeightMap.Vertices[ HeightMap.Faces[ i, 1 ] ],
+                                            HeightMap.Vertices[ HeightMap.Faces[ i, 2 ] ] );
     end;
 
   FreeMem( pData );
@@ -251,9 +245,9 @@ begin
     Position.Z := 0;
 
   Result := ( trunc( Position.X / HeightMap.xScale ) + trunc( Position.Z / HeightMap.zScale ) * ( HeightMap.Width - 2 ) ) * 2;
-  with HeightMap.Vertices[ HeightMap.Faces[ Result ].vIndex[ 0 ] ] do
-    if ( HeightMap.Vertices[ HeightMap.Faces[ Result ].vIndex[ 1 ] ].X - X ) * ( Position.Z - Z ) -
-       ( HeightMap.Vertices[ HeightMap.Faces[ Result ].vIndex[ 1 ] ].Z - Z ) * ( Position.X - X ) >= 0 Then INC( Result );
+  with HeightMap.Vertices[ HeightMap.Faces[ Result, 0 ] ] do
+    if ( HeightMap.Vertices[ HeightMap.Faces[ Result, 1 ] ].X - X ) * ( Position.Z - Z ) -
+       ( HeightMap.Vertices[ HeightMap.Faces[ Result, 1 ] ].Z - Z ) * ( Position.X - X ) >= 0 Then INC( Result );
 end;
 
 function heightmap_GetYOffset;
@@ -270,9 +264,9 @@ begin
     Position.Z := 0;
 
   p := ( trunc( Position.X / HeightMap.xScale ) + trunc( Position.Z / HeightMap.zScale ) * ( HeightMap.Width - 2 ) ) * 2;
-  with HeightMap.Vertices[ HeightMap.Faces[ p ].vIndex[ 0 ] ] do
-    if ( HeightMap.Vertices[ HeightMap.Faces[ p ].vIndex[ 1 ] ].X - X ) * ( Position.Z - Z ) -
-       ( HeightMap.Vertices[ HeightMap.Faces[ p ].vIndex[ 1 ] ].Z - Z ) * ( Position.X - X ) >= 0 Then INC( p );
+  with HeightMap.Vertices[ HeightMap.Faces[ p, 0 ] ] do
+    if ( HeightMap.Vertices[ HeightMap.Faces[ p, 1 ] ].X - X ) * ( Position.Z - Z ) -
+       ( HeightMap.Vertices[ HeightMap.Faces[ p, 1 ] ].Z - Z ) * ( Position.X - X ) >= 0 Then INC( p );
 
   Result := ( - HeightMap.Planes[ p ].Normal.X * Position.X -
                 HeightMap.Planes[ p ].Normal.Z * Position.Z - HeightMap.Planes[ p ].D ) / HeightMap.Planes[ p ].Normal.Y;
