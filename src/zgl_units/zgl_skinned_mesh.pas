@@ -206,8 +206,6 @@ begin
   skmesh_CalcQuats( Mesh.Skeleton );
   skmesh_CalcFrame( Mesh.Skeleton, Mesh.Bones );
 
-  SetLength( Mesh.State.Vertices, Mesh.VCount );
-
   Result := TRUE;
 end;
 
@@ -402,8 +400,8 @@ begin
       Frame.BonePos[ i ].Matrix[ 1, 3 ] := Frame.BonePos[ i ].Translation.Y;
       Frame.BonePos[ i ].Matrix[ 2, 3 ] := Frame.BonePos[ i ].Translation.Z;
       if Bones[ i ].Parent >= 0 Then
-        Frame.BonePos[ i ].Matrix := matrix4f_Mul( @Frame.BonePos[ Bones[ i ].Parent ].Matrix, @Frame.BonePos[ i ].Matrix );
-      Frame.BonePos[ i ].Point := vector_MulInvM4f( Frame.BonePos[ i ].Point, @Frame.BonePos[ i ].Matrix );
+        Frame.BonePos[ i ].Matrix := matrix4f_Mul( Frame.BonePos[ Bones[ i ].Parent ].Matrix, Frame.BonePos[ i ].Matrix );
+      Frame.BonePos[ i ].Point := vector_MulInvM4f( Frame.BonePos[ i ].Point, Frame.BonePos[ i ].Matrix );
     end;
 end;
 
@@ -427,10 +425,10 @@ begin
           t1.X   := Mesh.Vertices[ i ].X - Matrix[ 0, 3 ];
           t1.Y   := Mesh.Vertices[ i ].Y - Matrix[ 1, 3 ];
           t1.Z   := Mesh.Vertices[ i ].Z - Matrix[ 2, 3 ];
-          t1     := vector_MulM4f( t1, Matrix );
+          t1     := vector_MulM4f( t1, Matrix^ );
 
           Matrix := @Frame.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
-          t1     := vector_MulInvM4f( t1, Matrix );
+          t1     := vector_MulInvM4f( t1, Matrix^ );
           Weight := Mesh.Weights[ i, j ].Weight;
 
           t2.X := t2.X + t1.X * Weight;
@@ -460,7 +458,7 @@ begin
             rMatrix[ 3, 2 ] := 0;
             rMatrix[ 3, 3 ] := 0;
 
-            t1 := vector_MulM4f( t1, @rMatrix );
+            t1 := vector_MulM4f( t1, rMatrix );
 
             rMatrix := Frame.BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
             rMatrix[ 0, 3 ] := 0;
@@ -471,7 +469,7 @@ begin
             rMatrix[ 3, 2 ] := 0;
             rMatrix[ 3, 3 ] := 0;
 
-            t1 := vector_MulInvM4f( t1, @rMatrix );
+            t1 := vector_MulInvM4f( t1, rMatrix );
 
             Weight := Mesh.Weights[ i, j ].Weight;
 

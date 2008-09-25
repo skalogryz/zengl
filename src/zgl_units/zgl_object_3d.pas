@@ -68,8 +68,8 @@ const
 procedure obj3d_Rotate( Angle : Single; Axis : Byte ); extdecl;
 procedure obj3d_Scale( ScaleX, ScaleY, ScaleZ : Single ); extdecl;
 procedure obj3d_Move( X, Y, Z : Single ); extdecl;
-procedure obj3d_SetMatrix( Matrix : zglPMatrix4f ); extdecl;
-procedure obj3d_MulMatrix( Matrix : zglPMatrix4f ); extdecl;
+procedure obj3d_SetMatrix( Matrix : zglTMatrix4f ); extdecl;
+procedure obj3d_MulMatrix( Matrix : zglTMatrix4f ); extdecl;
 
 var
   tLastFlags : DWORD;
@@ -256,12 +256,12 @@ end;
 
 procedure obj3d_SetMatrix;
 begin
-  glLoadMatrixf( @Matrix^ );
+  glLoadMatrixf( @Matrix );
 end;
 
 procedure obj3d_MulMatrix;
 begin
-  glMultMatrixf( @Matrix^ );
+  glMultMatrixf( @Matrix );
 end;
 
 end.

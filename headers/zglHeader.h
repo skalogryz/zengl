@@ -88,8 +88,10 @@ void ( APIENTRY *zgl_GetMem )( void** Ptr, DWORD Size );
 #define CORRECT_RESOLUTION   0x000010
 #define APP_USE_AUTOPAUSE    0x000020
 #define APP_USE_AUTOMINIMIZE 0x000040
-#define SND_CAN_PLAY         0x000080
-#define SND_CAN_PLAY_FILE    0x000100
+#define APP_USE_LOG          0x000080
+#define SND_CAN_PLAY         0x000100
+#define SND_CAN_PLAY_FILE    0x000200
+#define CROP_INVISIBLE       0x000400
 
 void ( APIENTRY *zgl_Enable )( DWORD What );
 void ( APIENTRY *zgl_Disable )( DWORD What );
@@ -554,14 +556,38 @@ typedef struct
   float Z;
 } zglTPoint3D, *zglPPoint3D;
 
-typedef zglTPoint3D *zglTMatrix3f;
-typedef zglTMatrix3f *zglPMatrix3f;
+typedef struct
+{
+  float X;
+  float Y;
+  float Z;
+  float W;
+} zglTQuaternion, *zglPQuaternion;
+
+//typedef zglTPoint3D *zglTMatrix3f[3];
+//typedef zglTMatrix3f *zglPMatrix3f;
+typedef struct
+{
+  float a11, a12, a13;
+  float a21, a22, a23;
+  float a31, a32, a33;
+} zglTMatrix3f, *zglPMatrix3f;
   
-typedef float zglTMatrix4f[3][3];
-typedef zglTMatrix4f *zglPMatrix4f;
+//typedef float zglTMatrix4f[3][3];
+//typedef zglTMatrix4f *zglPMatrix4f;
+typedef struct
+{
+  float a11, a12, a13, a14;
+  float a21, a22, a23, a24;
+  float a31, a32, a33, a34;
+  float a41, a42, a43, a44;
+} zglTMatrix4f, *zglPMatrix4f;
   
-typedef DWORD zglTFace[3];
-typedef zglTFace* zglPFace;
+typedef struct
+{
+  DWORD vIndex[3];
+  DWORD tIndex[3];
+} zglTFace, *zglPFace;
 
 typedef struct
 {
@@ -906,8 +932,9 @@ zglTPoint3D ( APIENTRY *vector_AddV )( zglTPoint3D Vector, float Value );
 zglTPoint3D ( APIENTRY *vector_SubV )( zglTPoint3D Vector, float Value );
 zglTPoint3D ( APIENTRY *vector_MulV )( zglTPoint3D Vector, float Value );
 zglTPoint3D ( APIENTRY *vector_DivV )( zglTPoint3D Vector, float Value );
-zglTPoint3D ( APIENTRY *vector_MulM3f )( zglTPoint3D Vector, zglPMatrix3f Matrix );
-zglTPoint3D ( APIENTRY *vector_MulM4f )( zglTPoint3D Vector, zglPMatrix4f Matrix );
+zglTPoint3D ( APIENTRY *vector_MulM3f )( zglTPoint3D Vector, zglTMatrix3f Matrix );
+zglTPoint3D ( APIENTRY *vector_MulM4f )( zglTPoint3D Vector, zglTMatrix4f Matrix );
+zglTPoint3D ( APIENTRY *vector_MulInvM4f )( zglTPoint3D Vector, zglTMatrix4f Matrix );
 zglTPoint3D ( APIENTRY *vector_Negate )( zglTPoint3D Vector );
 zglTPoint3D ( APIENTRY *vector_Normalize )( zglTPoint3D Vector );
 float       ( APIENTRY *vector_Angle )( zglTPoint3D Vector1, zglTPoint3D Vector2 );
@@ -916,22 +943,32 @@ float       ( APIENTRY *vector_Dot )( zglTPoint3D Vector1, zglTPoint3D Vector2 )
 float       ( APIENTRY *vector_Distance )( zglTPoint3D Vector1, zglTPoint3D Vector2 );
 float       ( APIENTRY *vector_FDistance )( zglTPoint3D Vector1, zglTPoint3D Vector2 );
 float       ( APIENTRY *vector_Length )( zglTPoint3D Vector );
-zglTPoin3D  ( APIENTRY *vector_Lerp )( zglTPoint3D Vector1, zglTPoint3D Vector2, float Value );
+zglTPoint3D ( APIENTRY *vector_Lerp )( zglTPoint3D Vector1, zglTPoint3D Vector2, float Value );
   /* matrix */
 zglTMatrix3f ( APIENTRY *matrix3f_Get )( zglTPoint3D v1, zglTPoint3D v2, zglTPoint3D v3 );
 void         ( APIENTRY *matrix3f_Identity )( zglPMatrix3f Matrix );
 void         ( APIENTRY *matrix3f_OrthoNormalize )( zglPMatrix3f Matrix );
 void         ( APIENTRY *matrix3f_Transpose )( zglPMatrix3f Matrix );
 void         ( APIENTRY *matrix3f_Rotate )( zglPMatrix3f Matrix, float aX, float aY, float aZ );
-void         ( APIENTRY *matrix3f_Add )( zglPMatrix3f Matrix1, zglPMatrix3f Matrix2 );
-zglTMatrix3f ( APIENTRY *matrix3f_Mul )( zglPMatrix3f Matrix1, zglPMatrix3f Matrix2 );
+zglTMatrix3f ( APIENTRY *matrix3f_Add )( zglTMatrix3f Matrix1, zglTMatrix3f Matrix2 );
+zglTMatrix3f ( APIENTRY *matrix3f_Mul )( zglTMatrix3f Matrix1, zglTMatrix3f Matrix2 );
 void         ( APIENTRY *matrix4f_Identity )( zglPMatrix4f Matrix );
 void         ( APIENTRY *matrix4f_Transpose )( zglPMatrix4f Matrix );
 void         ( APIENTRY *matrix4f_Translate )( zglPMatrix4f Matrix, float tX, float tY, float tZ );
 void         ( APIENTRY *matrix4f_Rotate )( zglPMatrix4f Matrix, float aX, float aY, float aZ );
-void         ( APIENTRY *matrix4f_Scale )( zglPMatrix4f Matrix, float sX, float sY, float sZ );
-void         ( APIENTRY *matrix4f_Add )( zglPMatrix4f Matrix1, zglPMatrix4f Matrix2 );
-zglTMatrix3f ( APIENTRY *matrix4f_Mul )( zglPMatrix4f Matrix1, zglPMatrix4f Matrix2 );
+zglTMatrix4f ( APIENTRY *matrix4f_Scale )( float sX, float sY, float sZ );
+zglTMatrix4f ( APIENTRY *matrix4f_Mul )( zglTMatrix4f Matrix1, zglTMatrix4f Matrix2 );
+/* quaternions */
+zglTQuaternion ( APIENTRY *quater_Get )( float X, float Y, float Z, float W );
+zglTQuaternion ( APIENTRY *quater_Add )( zglTQuaternion q1, zglTQuaternion q2 );
+zglTQuaternion ( APIENTRY *quater_Sub )( zglTQuaternion q1, zglTQuaternion q2 );
+zglTQuaternion ( APIENTRY *quater_Mul )( zglTQuaternion q1, zglTQuaternion q2 );
+zglTQuaternion ( APIENTRY *quater_Negate )( zglTQuaternion Quaternion );
+zglTQuaternion ( APIENTRY *quater_Normalize )( zglTQuaternion Quaternion );
+float          ( APIENTRY *quater_Dot )( zglTQuaternion q1, zglTQuaternion q2 );
+zglTQuaternion ( APIENTRY *quater_Lerp )( zglTQuaternion q1, zglTQuaternion q2, float Value );
+zglTQuaternion ( APIENTRY *quater_FromRotation )( zglTPoint3D Rotation );
+zglTMatrix4f   ( APIENTRY *quater_GetM4f )( zglTQuaternion Quaternion );
 /* line 3d */
 zglTPoint3D ( APIENTRY *line3d_ClosestPoint )( zglTPoint3D A, zglTPoint3D B, zglTPoint3D Point );
   /* plane */
@@ -1304,6 +1341,7 @@ void zglLoad( char* LibraryName )
       zglGetAddress( vector_DivV, zglLib, "vector_DivV" );
       zglGetAddress( vector_MulM3f, zglLib, "vector_MulM3f" );
       zglGetAddress( vector_MulM4f, zglLib, "vector_MulM4f" );
+      zglGetAddress( vector_MulInvM4f, zglLib, "vector_MulInvM4f" );
       zglGetAddress( vector_Negate, zglLib, "vector_Negate" );
       zglGetAddress( vector_Normalize, zglLib, "vector_Normalize" );
       zglGetAddress( vector_Angle, zglLib, "vector_Angle" );
@@ -1327,7 +1365,6 @@ void zglLoad( char* LibraryName )
       zglGetAddress( matrix4f_Translate, zglLib, "matrix4f_Translate" );
       zglGetAddress( matrix4f_Rotate, zglLib, "matrix4f_Rotate" );
       zglGetAddress( matrix4f_Scale, zglLib, "matrix4f_Scale" );
-      zglGetAddress( matrix4f_Add, zglLib, "matrix4f_Add" );
       zglGetAddress( matrix4f_Mul, zglLib, "matrix4f_Mul" );
 
       zglGetAddress( line3d_ClosestPoint, zglLib, "line3d_ClosestPoint" );

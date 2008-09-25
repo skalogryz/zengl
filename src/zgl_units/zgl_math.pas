@@ -52,9 +52,9 @@ function vector_SubV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IF
 function vector_MulV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_DivV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
-function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglPMatrix3f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulInvM4f( Vector : zglTPoint3D; MAtrix : zglPMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulM4f( Vector : zglTPoint3D; MAtrix : zglTMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulInvM4f( Vector : zglTPoint3D; MAtrix : zglTMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
 
@@ -73,19 +73,19 @@ function vector_Lerp( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoi
 {------------------------------------------------------------------------------}
 function  matrix3f_Get( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
 
-procedure matrix3f_Identity( Matrix : zglPMatrix3f );
+function  matrix3f_Identity : zglTMatrix3f;
 procedure matrix3f_OrthoNormalize( Matrix : zglPMatrix3f );
 procedure matrix3f_Transpose( Matrix : zglPMatrix3f );
 procedure matrix3f_Rotate( Matrix : zglPMatrix3f; aX, aY, aZ : Single );
-procedure matrix3f_Add( Matrix1, Matrix2 : zglPMatrix3f );
-function  matrix3f_Mul( Matrix1, Matrix2 : zglPMatrix3f ) : zglTMatrix3f;
+function  matrix3f_Add( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
+function  matrix3f_Mul( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
 
-procedure matrix4f_Identity( Matrix : zglPMatrix4f );
+function  matrix4f_Identity : zglTMatrix4f;
 procedure matrix4f_Transpose( Matrix : zglPMatrix4f );
 procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
 procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
-procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
-function  matrix4f_Mul( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
+function  matrix4f_Scale( sX, sY, sZ : Single ) : zglTMatrix4f;
+function  matrix4f_Mul( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
 
 {------------------------------------------------------------------------------}
 {-------------------------------- Quaternion ----------------------------------}
@@ -110,6 +110,10 @@ function tri_GetNormal( A, B, C : zglPPoint3D ) : zglTPoint3D;
 
 function ArcTan2( X, Y : Single ) : Single; assembler;
 function ArcCos( Value : Single ) : Single;
+
+const
+  MATRIX_IDENTITY3F: zglTMatrix3f = ( ( X: 1; Y: 0; Z: 0 ), ( X: 0; Y: 1; Z: 0 ), ( X: 0; Y: 0; Z: 1 ) );
+  MATRIX_IDENTITY4F: zglTMatrix4f = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) );
 
 var
   CosTable : array[ 0..360 ] of Single;
@@ -851,17 +855,9 @@ begin
   Result[ 2 ] := v3;
 end;
 
-procedure matrix3f_Identity;
+function matrix3f_Identity;
 begin
-  Matrix[ 0 ].X := 1;
-  Matrix[ 0 ].Y := 0;
-  MAtrix[ 0 ].Z := 0;
-  Matrix[ 1 ].X := 0;
-  Matrix[ 1 ].Y := 1;
-  MAtrix[ 1 ].Z := 0;
-  Matrix[ 2 ].X := 0;
-  Matrix[ 2 ].Y := 0;
-  MAtrix[ 2 ].Z := 1;
+  Result := MATRIX_IDENTITY3F;
 end;
 
 procedure matrix3f_OrthoNormalize;
@@ -885,16 +881,16 @@ begin
   tMatrix[ 0 ] := vector_Get(   0, -aZ,  aY );
   tMatrix[ 1 ] := vector_Get(  aZ,   0, -aX );
   tMatrix[ 2 ] := vector_Get( -aY,  aX,   0 );
-  matrix3f_Mul( @tMatrix, @Matrix );
-  matrix3f_Add( @Matrix, @tMatrix );
+  tMatrix := matrix3f_Mul( tMatrix, Matrix^ );
+  Matrix^ := matrix3f_Add( Matrix^, tMatrix );
   matrix3f_OrthoNormalize( @Matrix );
 end;
 
-procedure matrix3f_Add;
+function matrix3f_Add;
 begin
-  Matrix1[ 0 ] := vector_Add( Matrix1[ 0 ], Matrix2[ 0 ] );
-  Matrix1[ 1 ] := vector_Add( Matrix1[ 1 ], Matrix2[ 1 ] );
-  Matrix1[ 2 ] := vector_Add( Matrix1[ 2 ], Matrix2[ 2 ] );
+  Result[ 0 ] := vector_Add( Matrix1[ 0 ], Matrix2[ 0 ] );
+  Result[ 1 ] := vector_Add( Matrix1[ 1 ], Matrix2[ 1 ] );
+  Result[ 2 ] := vector_Add( Matrix1[ 2 ], Matrix2[ 2 ] );
 end;
 
 function matrix3f_Mul;
@@ -910,24 +906,9 @@ begin
   Result[ 2 ].Z := Matrix1[ 2 ].X * Matrix2[ 0 ].Z + Matrix1[ 2 ].Y * Matrix2[ 1 ].Z + Matrix1[ 2 ].Z * Matrix2[ 2 ].Z;
 end;
 
-procedure matrix4f_Identity;
+function matrix4f_Identity;
 begin
-  Matrix[ 0, 0 ] := 1;
-  Matrix[ 0, 1 ] := 0;
-  Matrix[ 0, 2 ] := 0;
-  Matrix[ 0, 3 ] := 0;
-  Matrix[ 1, 0 ] := 0;
-  Matrix[ 1, 1 ] := 1;
-  Matrix[ 1, 2 ] := 0;
-  Matrix[ 1, 3 ] := 0;
-  Matrix[ 2, 0 ] := 0;
-  Matrix[ 2, 1 ] := 0;
-  Matrix[ 2, 2 ] := 1;
-  Matrix[ 2, 3 ] := 0;
-  Matrix[ 3, 0 ] := 0;
-  Matrix[ 3, 1 ] := 0;
-  Matrix[ 3, 2 ] := 0;
-  Matrix[ 3, 3 ] := 1;
+  Result := MATRIX_IDENTITY4F;
 end;
 
 procedure matrix4f_Transpose;
@@ -991,17 +972,12 @@ begin
   Matrix[ 2 ][ 3 ] := 0;
 end;
 
-procedure matrix4f_Scale;
+function matrix4f_Scale;
 begin
-  Matrix[ 0, 0 ] := Matrix[ 0, 0 ] * sX;
-  Matrix[ 0, 1 ] := Matrix[ 0, 1 ] * sX;
-  Matrix[ 0, 2 ] := Matrix[ 0, 2 ] * sX;
-  Matrix[ 1, 0 ] := Matrix[ 1, 0 ] * sY;
-  Matrix[ 1, 1 ] := Matrix[ 1, 1 ] * sY;
-  Matrix[ 1, 2 ] := Matrix[ 1, 2 ] * sY;
-  Matrix[ 2, 0 ] := Matrix[ 2, 0 ] * sZ;
-  Matrix[ 2, 1 ] := Matrix[ 2, 1 ] * sZ;
-  Matrix[ 2, 2 ] := Matrix[ 2, 2 ] * sZ;
+  Result := MATRIX_IDENTITY4F;
+  Result[ 0, 0 ] := sx;
+  Result[ 1, 1 ] := sy;
+  Result[ 2, 2 ] := sz;
 end;
 
 function matrix4f_Mul;

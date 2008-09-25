@@ -90,7 +90,7 @@ begin
     begin
       log_Add( 'Cannot read ' + FontInfo );
       zgl_Destroy;
-      halt;
+      exit;
     end;
     
   mem_LoadFromFile( M, FontInfo );
@@ -99,7 +99,7 @@ begin
     begin
       log_Add( FontInfo + ' - it''s not a ZenGL font info file' );
       zgl_Destroy;
-      halt;
+      exit;
     end;
     
   mem_Read( M, Result.Height, 1 );

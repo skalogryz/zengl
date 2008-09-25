@@ -701,8 +701,8 @@ var
   obj3d_SetMaterial : procedure( Material, Side : Byte; Color : DWORD; Alpha : Byte ); stdcall;
   obj3d_Scale       : procedure( ScaleX, ScaleY, ScaleZ : Single ); stdcall;
   obj3d_Move        : procedure( X, Y, Z : Single ); stdcall;
-  obj3d_SetMatrix   : procedure( Matrix : zglPMatrix4f ); stdcall;
-  obj3d_MulMatrix   : procedure( Matrix : zglPMatrix4f ); stdcall;
+  obj3d_SetMatrix   : procedure( Matrix : zglTMatrix4f ); stdcall;
+  obj3d_MulMatrix   : procedure( Matrix : zglTMatrix4f ); stdcall;
   
 const
   AX = $01;
@@ -1054,9 +1054,9 @@ var
   vector_SubV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
   vector_MulV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
   vector_DivV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglPMatrix3f ) : zglTPoint3D;
-  vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglPMatrix4f ) : zglTPoint3D;
-  vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglPMatrix4f ) : zglTPoint3D;
+  vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D;
+  vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D;
+  vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D;
   vector_RotateQ   : function( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
   vector_Negate    : function( Vector : zglTPoint3D ) : zglTPoint3D;
   vector_Normalize : function( Vector : zglTPoint3D ) : zglTPoint3D;
@@ -1069,19 +1069,18 @@ var
   vector_Lerp      : function( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D;
   //matrix
   matrix3f_Get            : function( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
-  matrix3f_Identity       : procedure( Matrix : zglPMatrix3f );
+  matrix3f_Identity       : function : zglTMatrix3f;
   matrix3f_OrthoNormalize : procedure( Matrix : zglPMatrix3f );
   matrix3f_Transpose      : procedure( Matrix : zglPMatrix3f );
   matrix3f_Rotate         : procedure( Matrix : zglPMatrix3f; aX, aY, aZ : Single );
-  matrix3f_Add            : procedure( Matrix1, Matrix2 : zglPMatrix3f );
-  matrix3f_Mul            : function ( Matrix1, Matrix2 : zglPMatrix3f ) : zglTMatrix3f;
-  matrix4f_Identity       : procedure( Matrix : zglPMatrix4f );
+  matrix3f_Add            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f;
+  matrix3f_Mul            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
+  matrix4f_Identity       : function : zglTMatrix4f;
   matrix4f_Transpose      : procedure( Matrix : zglPMatrix4f );
   matrix4f_Translate      : procedure( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
   matrix4f_Rotate         : procedure( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
-  matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
-  matrix4f_Add            : procedure( Matrix1, Matrix2 : zglPMatrix4f );
-  matrix4f_Mul            : function ( Matrix1, Matrix2 : zglPMatrix4f ) : zglTMatrix4f;
+  matrix4f_Scale          : function( sX, sY, sZ : Single ) : zglTMatrix4f;
+  matrix4f_Mul            : function ( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
   // quaternions
   quater_Get          : function( X, Y, Z, W : Single ) : zglTQuaternion;
   quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
@@ -1530,7 +1529,6 @@ begin
       matrix4f_Translate := dlsym( zglLib, 'matrix4f_Translate' );
       matrix4f_Rotate := dlsym( zglLib, 'matrix4f_Rotate' );
       matrix4f_Scale := dlsym( zglLib, 'matrix4f_Scale' );
-      matrix4f_Add := dlsym( zglLib, 'matrix4f_Add' );
       matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
 
       quater_Get := dlsym( zglLib, 'quater_Get' );

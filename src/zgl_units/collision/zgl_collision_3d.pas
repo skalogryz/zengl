@@ -99,7 +99,7 @@ begin
   tAABB.Size     := OBB.Size;
 
   // трансформируем точку в систему координат OBB
-  tPoint := vector_MulM3f( tPoint, @OBB.Matrix );
+  tPoint := vector_MulM3f( tPoint, OBB.Matrix );
 
 	Result := col3d_PointInAABB( @tPoint, @tAABB );
 end;
@@ -166,8 +166,8 @@ begin
   tAABB.Size     := OBB.Size;
 
   // трансформируем линию в систему координат OBB
-  tLine.p1 := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Line.p1 ), @OBB.Matrix ) );
-  tLine.p2 := vector_MulM3f( Line.p2, @OBB.Matrix );
+  tLine.p1 := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Line.p1 ), OBB.Matrix ) );
+  tLine.p2 := vector_MulM3f( Line.p2, OBB.Matrix );
 
 	Result := col3d_LinevsAABB( @tAABB, @tLine );
 end;
@@ -343,12 +343,12 @@ begin
   v := vector_Sub( OBB1.Position, OBB2.Position );
 
   //смещение в системе координат А
-  T := vector_MulM3f( v, @OBB1.Matrix );
+  T := vector_MulM3f( v, OBB1.Matrix );
 
   //"создаем" матрицу поворота B относительно А
   mR := OBB2.Matrix;
   matrix3f_Transpose( @mR );
-  mR := matrix3f_Mul( @mR, @OBB1.Matrix );
+  mR := matrix3f_Mul( mR, OBB1.Matrix );
 
   //система координат А
   for i := 0 to 2 do
@@ -480,7 +480,7 @@ begin
   tAABB.Size     := OBB.Size;
 
   // трансформируем сферу в систему координат OBB
-  tSphere.Position := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Sphere.Position ), @OBB.Matrix ) );
+  tSphere.Position := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Sphere.Position ), OBB.Matrix ) );
   tSphere.Radius   := Sphere.Radius;
 
   Result := col3d_AABBvsSphere( @tAABB, @tSphere );

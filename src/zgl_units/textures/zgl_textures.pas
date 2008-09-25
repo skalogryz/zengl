@@ -184,7 +184,7 @@ begin
     begin
       log_Add( 'Unable to load texture: ' + FileName );
       zgl_Destroy;
-      halt;
+      exit;
     end;
 
   Result         := tex_Add;

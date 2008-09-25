@@ -94,7 +94,15 @@ begin
   for i := 0 to length( Vertices ) - 1 do
     begin
       for j := 0 to FCount - 1 do
-        if ( Faces[ j, 0 ] = i ) or ( Faces[ j, 1 ] = i ) or ( Faces[ j, 2 ] = i ) Then
+        if ( ( Vertices[ Faces[ j, 0 ] ].X = Vertices[ i ].X ) and
+             ( Vertices[ Faces[ j, 0 ] ].Y = Vertices[ i ].Y ) and
+             ( Vertices[ Faces[ j, 0 ] ].Z = Vertices[ i ].Z ) ) or
+           ( ( Vertices[ Faces[ j, 1 ] ].X = Vertices[ i ].X ) and
+             ( Vertices[ Faces[ j, 1 ] ].Y = Vertices[ i ].Y ) and
+             ( Vertices[ Faces[ j, 1 ] ].Z = Vertices[ i ].Z ) ) or
+           ( ( Vertices[ Faces[ j, 2 ] ].X = Vertices[ i ].X ) and
+             ( Vertices[ Faces[ j, 2 ] ].Y = Vertices[ i ].Y ) and
+             ( Vertices[ Faces[ j, 2 ] ].Z = Vertices[ i ].Z ) ) Then
           begin
             vSum := vector_Add( vSum, TNormals[ j ] );
             INC( Shared );
