@@ -53,8 +53,8 @@ function vector_MulV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IF
 function vector_DivV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulM4f( Vector : zglTPoint3D; MAtrix : zglTMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulInvM4f( Vector : zglTPoint3D; MAtrix : zglTMAtrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulInvM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
 
@@ -84,7 +84,7 @@ function  matrix4f_Identity : zglTMatrix4f;
 procedure matrix4f_Transpose( Matrix : zglPMatrix4f );
 procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
 procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
-function  matrix4f_Scale( sX, sY, sZ : Single ) : zglTMatrix4f;
+procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
 function  matrix4f_Mul( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
 
 {------------------------------------------------------------------------------}
@@ -972,12 +972,15 @@ begin
   Matrix[ 2 ][ 3 ] := 0;
 end;
 
-function matrix4f_Scale;
+procedure matrix4f_Scale;
+  var
+    sMatrix : zglTMatrix4f;
 begin
-  Result := MATRIX_IDENTITY4F;
-  Result[ 0, 0 ] := sx;
-  Result[ 1, 1 ] := sy;
-  Result[ 2, 2 ] := sz;
+  sMatrix := MATRIX_IDENTITY4F;
+  sMatrix[ 0, 0 ] := sX;
+  sMatrix[ 1, 1 ] := sY;
+  sMatrix[ 2, 2 ] := sZ;
+  Matrix^ := matrix4f_Mul( Matrix^, sMatrix );
 end;
 
 function matrix4f_Mul;
@@ -1262,7 +1265,9 @@ begin
   // получаем унитарный вектор единичной длины
   uvector := sqrt( sqr( p.X ) + sqr( p.Y ) + sqr( p.Z ) );
   if uvector <> 0 Then
-    Result := vector_DivV( p, uvector );
+    Result := vector_DivV( p, uvector )
+  else
+    Result := vector_Get( 0, 0, 0 );
 end;
 
 initialization

@@ -34,7 +34,7 @@ const
   defBPP      = 32;
 
   // constant string
-  cs_ZenGL    = 'ZenGL build 29[24.09.08]';
+  cs_ZenGL    = 'ZenGL build 29[27.09.08]';
   cv_version  = 29;
 
   // zgl_Reg
@@ -66,13 +66,14 @@ const
   DEPTH_BUFFER         = $000002;
   DEPTH_BUFFER_CLEAR   = $000004;
   DEPTH_MASK           = $000008;
-  CORRECT_RESOLUTION   = $000010;
-  APP_USE_AUTOPAUSE    = $000020;
-  APP_USE_AUTOMINIMIZE = $000040;
-  APP_USE_LOG          = $000080;
-  SND_CAN_PLAY         = $000100;
-  SND_CAN_PLAY_FILE    = $000200;
-  CROP_INVISIBLE       = $000400;
+  STENCIL_BUFFER_CLEAR = $000010;
+  CORRECT_RESOLUTION   = $000020;
+  APP_USE_AUTOPAUSE    = $000040;
+  APP_USE_AUTOMINIMIZE = $000080;
+  APP_USE_LOG          = $000100;
+  SND_CAN_PLAY         = $000200;
+  SND_CAN_PLAY_FILE    = $000400;
+  CROP_INVISIBLE       = $000800;
 
   // Screen
   REFRESH_MAXIMUM = 0;
