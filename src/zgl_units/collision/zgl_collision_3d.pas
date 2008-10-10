@@ -247,7 +247,7 @@ function col3d_PlaneVsSphere;
 begin
 	Result.Result := FALSE;
 
-  distance := plane_Distance( Plane, Sphere.Position );
+  distance := plane_Distance( Plane^, Sphere.Position );
 
 	if abs( distance ) < Sphere.Radius Then
   	begin

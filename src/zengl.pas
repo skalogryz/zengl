@@ -99,6 +99,8 @@ uses
   zgl_fog,
   zgl_sky,
 
+  zgl_shadow_volume,
+
   zgl_shader,
 
   zgl_math,
@@ -343,7 +345,12 @@ exports
   // SkyBox
   skybox_Init,
   skybox_Draw,
-  
+
+  shadow_InitVolume,
+  shadow_CalcVolume,
+  shadow_DrawVolume,
+  shadow_DrawShadowVolumes,
+
   // Shaders
   // asm
   shader_InitARB,
@@ -398,6 +405,9 @@ exports
   vector_MulM3f,
   vector_MulM4f,
   vector_MulInvM4f,
+  vector_RotateX,
+  vector_RotateY,
+  vector_RotateZ,
   vector_RotateQ,
   vector_Negate,
   vector_Normalize,
@@ -410,15 +420,15 @@ exports
   vector_Lerp,
   // matrix
   matrix3f_Get,
-  matrix3f_Identity,
   matrix3f_OrthoNormalize,
   matrix3f_Transpose,
   matrix3f_Rotate,
   matrix3f_Add,
   matrix3f_Mul,
-  matrix4f_Identity,
   matrix4f_Transpose,
   matrix4f_Translate,
+  matrix4f_Determinant,
+  matrix4f_Inverse,
   matrix4f_Rotate,
   matrix4f_Scale,
   matrix4f_Mul,

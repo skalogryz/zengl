@@ -40,6 +40,7 @@ uses
 function  gl_Create : Boolean;
 procedure gl_Destroy;
 procedure gl_LoadEx;
+function  gl_GetProc( Proc : PChar ) : Pointer;
 
 procedure Set2DMode; extdecl;
 procedure Set3DMode( FOVY : Single ); extdecl;
@@ -291,12 +292,12 @@ begin
   gl_TexCoord2fv := @glTexCoord2fv;
   glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @ogl_MaxTexLevels );
   log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( ogl_MaxTexLevels ) );
-  glMultiTexCoord2fARB := wglGetProcAddress( 'glMultiTexCoord2fARB' );
+  glMultiTexCoord2fARB := gl_GetProc( 'glMultiTexCoord2f' );
   if Assigned( glMultiTexCoord2fARB ) Then
     begin
-      glMultiTexCoord2fvARB    := wglGetProcAddress( 'glMultiTexCoord2fvARB'    );
-      glActiveTextureARB       := wglGetProcAddress( 'glActiveTextureARB'       );
-      glClientActiveTextureARB := wglGetProcAddress( 'glClientActiveTextureARB' );
+      glMultiTexCoord2fvARB    := gl_GetProc( 'glMultiTexCoord2fv'    );
+      glActiveTextureARB       := gl_GetProc( 'glActiveTexture'       );
+      glClientActiveTextureARB := gl_GetProc( 'glClientActiveTexture' );
     end else
       begin
         // Это конечно извращенство, но лень потом проверять везде "ogl_MaxTexLevels > 0" :)
@@ -324,15 +325,15 @@ begin
     end;}
     
   // VBO
-  glBindBufferARB := wglGetProcAddress( 'glBindBufferARB' );
+  glBindBufferARB := gl_GetProc( 'glBindBuffer' );
   if Assigned( glBindBufferARB ) Then
     begin
       ogl_CanVBO         := TRUE;
-      glDeleteBuffersARB := wglGetProcAddress( 'glDeleteBuffersARB' );
-      glGenBuffersARB    := wglGetProcAddress( 'glGenBuffersARB'    );
-      glIsBufferARB      := wglGetProcAddress( 'glIsBufferARB'      );
-      glBufferDataARB    := wglGetProcAddress( 'glBufferDataARB'    );
-      glBufferSubDataARB := wglGetProcAddress( 'glBufferSubDataARB' );
+      glDeleteBuffersARB := gl_GetProc( 'glDeleteBuffers' );
+      glGenBuffersARB    := gl_GetProc( 'glGenBuffers'    );
+      glIsBufferARB      := gl_GetProc( 'glIsBuffer'      );
+      glBufferDataARB    := gl_GetProc( 'glBufferData'    );
+      glBufferSubDataARB := gl_GetProc( 'glBufferSubData' );
     end else
       ogl_CanVBO := FALSE;
   log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( ogl_CanVBO ) );
@@ -359,18 +360,19 @@ begin
     
   // PBUFFER
   {$IFDEF WIN32}
-  wglCreatePbufferARB := wglGetProcAddress( 'wglCreatePbufferARB' );
+  wglCreatePbufferARB := gl_GetProc( 'wglCreatePbuffer' );
   if Assigned( wglCreatePbufferARB ) and Assigned( wglChoosePixelFormatARB ) Then
     begin
       ogl_CanPBuffer         := TRUE;
-      wglGetPbufferDCARB     := wglGetProcAddress( 'wglGetPbufferDCARB'     );
-      wglReleasePbufferDCARB := wglGetProcAddress( 'wglReleasePbufferDCARB' );
-      wglDestroyPbufferARB   := wglGetProcAddress( 'wglDestroyPbufferARB'   );
+      wglGetPbufferDCARB     := gl_GetProc( 'wglGetPbufferDC'     );
+      wglReleasePbufferDCARB := gl_GetProc( 'wglReleasePbufferDC' );
+      wglDestroyPbufferARB   := gl_GetProc( 'wglDestroyPbuffer'   );
     end else
       ogl_CanPBuffer := FALSE;
   log_Add( 'WGL_ARB_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
   {$ENDIF}
 
+  glActiveStencilFaceEXT := wglGetProcAddress( 'glActiveStencilFaceEXT' );
     
   // WaitVSync
 {$IFDEF LINUX}
@@ -391,9 +393,16 @@ begin
     end else
       ogl_CanVSync := FALSE;
       
-   wglChoosePixelFormatARB := wglGetProcAddress( 'wglChoosePixelFormatARB' );
+   wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormat' );
 {$ENDIF}
   log_Add( 'Support WaitVSync: ' + u_BoolToStr( ogl_CanVSync ) );
+end;
+
+function gl_GetProc;
+begin
+  Result := wglGetProcAddress( Proc );
+  if not Assigned( Result ) then
+    Result := wglGetProcAddress( PChar( Proc + 'ARB' ) );
 end;
 
 procedure Set2DMode;

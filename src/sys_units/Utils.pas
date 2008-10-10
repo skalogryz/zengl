@@ -140,6 +140,8 @@ begin
       case B[ 1 ] of
         #129       : Result := 168;
         #144..#191 : Result := Byte( Ord( B[ 1 ] ) + 48 );
+      else
+        Result := 208;
       end;
     end else
       if A[ 1 ] = #209 Then
@@ -147,6 +149,8 @@ begin
           case B[ 1 ] of
             #128..#143 : Result := Byte( Ord( B[ 1 ] ) + 112 );
             #145       : Result := 184;
+          else
+            Result := 209;
           end;
         end else
           Result := Byte( A[ 1 ] );

@@ -674,6 +674,8 @@ begin
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
         keysLast[ KA_DOWN ] := Key;
+
+        key_TextInput( Key );
       end;
     WM_KEYUP{, WM_SYSKEYUP}:
       begin

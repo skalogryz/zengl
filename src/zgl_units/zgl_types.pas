@@ -310,6 +310,10 @@ type
 end;
 
 type
+  zglTPoint3DArray = array[ 0..0 ] of zglTPoint3D;
+  zglPPoint3DArray = ^zglTPoint3DArray;
+
+type
   zglPQuaternion = ^zglTQuaternion;
   zglTQuaternion = record
     X, Y, Z, W : Single;
@@ -361,6 +365,9 @@ end;
 type
   zglPFace = ^zglTFace;
   zglTFace = array[ 0..2 ] of DWORD;
+
+  zglTFaceArray = array[ 0..0 ] of zglTFace;
+  zglPFaceArray = ^zglTFaceArray;
 
 type
   zglPGroup = ^zglTGroup;
@@ -491,6 +498,29 @@ type
     State          : zglTSkeletonState;
     Actions        : array of zglTSkeletonAction;
     Skeleton       : zglTSkeletonFrame;
+end;
+
+{------------------------------------------------------------------------------}
+{-------------------------- zgl_shadow_volume.pas -----------------------------}
+{------------------------------------------------------------------------------}
+
+type
+  zglPShadowVolume = ^zglTShadowVolume;
+  zglTShadowVolume = record
+    VCount : DWORD;
+    FCount : DWORD;
+    ICount : DWORD;
+
+    Caps       : array of zglTPoint3D;
+    Indices    : array of DWORD;
+    Planes     : array of zglTPlane;
+
+    eVertices : array of zglTPoint3D;
+    eVCount   : DWORD;
+
+    isFacingLight    : array of Boolean;
+    neighbourIndices : array of Integer;
+    isSilhouetteEdge : array of Boolean;
 end;
 
 {------------------------------------------------------------------------------}

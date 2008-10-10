@@ -25,6 +25,7 @@ interface
 
 uses
   GL, GLext,
+  zgl_opengl,
   zgl_file,
   zgl_memory,
   zgl_global_var,
@@ -65,7 +66,7 @@ procedure shader_SetAttrib2f( Attrib : Integer; v1, v2 : Single ); extdecl;
 procedure shader_SetAttrib3f( Attrib : Integer; v1, v2, v3 : Single ); extdecl;
 procedure shader_SetAttrib4f( Attrib : Integer; v1, v2, v3, v4 : Single ); extdecl;
 procedure shader_SetAttribPf( Attrib : Integer; v : Pointer; Normalized : Boolean ); extdecl;
-procedure shader_SetParameter4f( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single ); extdecl;
+procedure shader_SetParameter4f( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single; Local : Boolean ); extdecl;
 
 implementation
 
@@ -78,19 +79,21 @@ var
 function shader_InitARB;
 begin
   Result := FALSE;
-  glGenProgramsARB := wglGetProcAddress( 'glGenProgramsARB' );
+  glGenProgramsARB := gl_GetProc( 'glGenPrograms' );
   if Assigned( glGenProgramsARB ) Then
     begin
       ogl_CanARB                   := TRUE;
-      glBindProgramARB             := wglGetProcAddress( 'glBindProgramARB' );
-      glDeleteProgramsARB          := wglGetProcAddress( 'glDeleteProgramsARB' );
-      glProgramStringARB           := wglGetProcAddress( 'glProgramStringARB' );
-      glVertexAttrib1fARB          := wglGetProcAddress( 'glVertexAttrib1fARB' );
-      glVertexAttrib2fARB          := wglGetProcAddress( 'glVertexAttrib2fARB' );
-      glVertexAttrib3fARB          := wglGetProcAddress( 'glVertexAttrib3fARB' );
-      glVertexAttrib4fARB          := wglGetProcAddress( 'glVertexAttrib4fARB' );
-      glVertexAttribPointerARB     := wglGetProcAddress( 'glVertexAttribPointerARB' );
-      glProgramLocalParameter4fARB := wglGetProcAddress( 'glProgramLocalParameter4fARB' );
+      glBindProgramARB             := gl_GetProc( 'glBindProgram' );
+      glDeleteProgramsARB          := gl_GetProc( 'glDeletePrograms' );
+      glProgramStringARB           := gl_GetProc( 'glProgramString' );
+      glGetAttribLocationARB       := gl_GetProc( 'glGetAttribLocation' );
+      glVertexAttrib1fARB          := gl_GetProc( 'glVertexAttrib1f' );
+      glVertexAttrib2fARB          := gl_GetProc( 'glVertexAttrib2f' );
+      glVertexAttrib3fARB          := gl_GetProc( 'glVertexAttrib3f' );
+      glVertexAttrib4fARB          := gl_GetProc( 'glVertexAttrib4f' );
+      glVertexAttribPointerARB     := gl_GetProc( 'glVertexAttribPointer' );
+      glProgramLocalParameter4fARB := gl_GetProc( 'glProgramLocalParameter4f' );
+      glProgramEnvParameter4fARB   := gl_GetProc( 'glProgramEnvParameter4f' );
       Result := TRUE;
     end else
       ogl_CanARB := FALSE;
@@ -161,31 +164,31 @@ end;
 function shader_InitGLSL;
 begin
   Result := FALSE;
-  glCreateShaderObjectARB := wglGetProcAddress( 'glCreateShaderObjectARB' );
+  glCreateShaderObjectARB := gl_GetProc( 'glCreateShaderObject' );
   if Assigned( glCreateShaderObjectARB ) Then
     begin
       ogl_CanGLSL               := TRUE;
-      glCreateShaderObjectARB   := wglGetProcAddress( 'glCreateShaderObjectARB' );
-      glCreateProgramObjectARB  := wglGetProcAddress( 'glCreateProgramObjectARB' );
-      glDeleteObjectARB         := wglGetProcAddress( 'glDeleteObjectARB' );
-      glShaderSourceARB         := wglGetProcAddress( 'glShaderSourceARB' );
-      glCompileShaderARB        := wglGetProcAddress( 'glCompileShaderARB' );
-      glAttachObjectARB         := wglGetProcAddress( 'glAttachObjectARB' );
-      glGetObjectParameterivARB := wglGetProcAddress( 'glGetObjectParameterivARB' );
-      glLinkProgramARB          := wglGetProcAddress( 'glLinkProgramARB' );
-      glUseProgramObjectARB     := wglGetProcAddress( 'glUseProgramObjectARB' );
-      glGetUniformLocationARB   := wglGetProcAddress( 'glGetUniformLocationARB' );
-      glUniform1fARB            := wglGetProcAddress( 'glUniform1fARB' );
-      glUniform1iARB            := wglGetProcAddress( 'glUniform1iARB' );
-      glUniform2fARB            := wglGetProcAddress( 'glUniform2fARB' );
-      glUniform3fARB            := wglGetProcAddress( 'glUniform3fARB' );
-      glUniform4fARB            := wglGetProcAddress( 'glUniform4fARB' );
-      glGetAttribLocationARB    := wglGetProcAddress( 'glGetAttribLocationARB' );
-      glVertexAttrib1fARB       := wglGetProcAddress( 'glVertexAttrib1fARB' );
-      glVertexAttrib2fARB       := wglGetProcAddress( 'glVertexAttrib2fARB' );
-      glVertexAttrib3fARB       := wglGetProcAddress( 'glVertexAttrib3fARB' );
-      glVertexAttrib4fARB       := wglGetProcAddress( 'glVertexAttrib4fARB' );
-      glVertexAttribPointerARB  := wglGetProcAddress( 'glVertexAttribPointerARB' );
+      glCreateShaderObjectARB   := gl_GetProc( 'glCreateShaderObject' );
+      glCreateProgramObjectARB  := gl_GetProc( 'glCreateProgramObject' );
+      glDeleteObjectARB         := gl_GetProc( 'glDeleteObject' );
+      glShaderSourceARB         := gl_GetProc( 'glShaderSource' );
+      glCompileShaderARB        := gl_GetProc( 'glCompileShader' );
+      glAttachObjectARB         := gl_GetProc( 'glAttachObject' );
+      glGetObjectParameterivARB := gl_GetProc( 'glGetObjectParameteriv' );
+      glLinkProgramARB          := gl_GetProc( 'glLinkProgram' );
+      glUseProgramObjectARB     := gl_GetProc( 'glUseProgramObject' );
+      glGetUniformLocationARB   := gl_GetProc( 'glGetUniformLocation' );
+      glUniform1fARB            := gl_GetProc( 'glUniform1f' );
+      glUniform1iARB            := gl_GetProc( 'glUniform1i' );
+      glUniform2fARB            := gl_GetProc( 'glUniform2f' );
+      glUniform3fARB            := gl_GetProc( 'glUniform3f' );
+      glUniform4fARB            := gl_GetProc( 'glUniform4f' );
+      glGetAttribLocationARB    := gl_GetProc( 'glGetAttribLocation' );
+      glVertexAttrib1fARB       := gl_GetProc( 'glVertexAttrib1f' );
+      glVertexAttrib2fARB       := gl_GetProc( 'glVertexAttrib2f' );
+      glVertexAttrib3fARB       := gl_GetProc( 'glVertexAttrib3f' );
+      glVertexAttrib4fARB       := gl_GetProc( 'glVertexAttrib4f' );
+      glVertexAttribPointerARB  := gl_GetProc( 'glVertexAttribPointer' );
       Result := TRUE;
     end else
       ogl_CanGLSL := FALSE;
@@ -363,7 +366,7 @@ end;
 function shader_GetAttrib;
 begin
   Result := 0;
-  if not ogl_CanGLSL Then Exit;
+  if ( not ogl_CanGLSL ) and ( not ogl_CanARB ) Then Exit;
   Result := glGetAttribLocationARB( Shader, AttribName );
 end;
 
@@ -400,7 +403,10 @@ end;
 procedure shader_SetParameter4f;
 begin
   if not ogl_CanARB Then exit;
-  glProgramLocalParameter4fARB( ShaderType, Parameter, v1, v2, v3, v4 );
+  if Local Then
+    glProgramLocalParameter4fARB( ShaderType, Parameter, v1, v2, v3, v4 )
+  else
+    glProgramEnvParameter4fARB( ShaderType, Parameter, v1, v2, v3, v4 );
 end;
 
 end.

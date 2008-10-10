@@ -56,6 +56,9 @@ function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoin
 function vector_MulM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_MulInvM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
+function vector_RotateX( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
+function vector_RotateY( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
+function vector_RotateZ( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
 function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
 
 function vector_Negate( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
@@ -73,15 +76,15 @@ function vector_Lerp( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoi
 {------------------------------------------------------------------------------}
 function  matrix3f_Get( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
 
-function  matrix3f_Identity : zglTMatrix3f;
 procedure matrix3f_OrthoNormalize( Matrix : zglPMatrix3f );
 procedure matrix3f_Transpose( Matrix : zglPMatrix3f );
 procedure matrix3f_Rotate( Matrix : zglPMatrix3f; aX, aY, aZ : Single );
 function  matrix3f_Add( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
 function  matrix3f_Mul( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
 
-function  matrix4f_Identity : zglTMatrix4f;
 procedure matrix4f_Transpose( Matrix : zglPMatrix4f );
+function  matrix4f_Determinant( Matrix : zglTMatrix4f ): Single;
+function  matrix4f_Inverse( Matrix : zglTMatrix4f ) : zglTMatrix4f;
 procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
 procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
 procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
@@ -104,7 +107,7 @@ function quater_GetM4f( Quaternion : zglTQuaternion ) : zglTMatrix4f;
 function line3d_ClosestPoint( A, B, Point : zglTPoint3D ) : zglTPoint3D;
 
 function plane_Get( A, B, C : zglTPoint3D ) : zglTPlane;
-function plane_Distance( Plane : zglPPlane; Point : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function plane_Distance( Plane : zglTPlane; Point : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
 function tri_GetNormal( A, B, C : zglPPoint3D ) : zglTPoint3D;
 
@@ -112,8 +115,9 @@ function ArcTan2( X, Y : Single ) : Single; assembler;
 function ArcCos( Value : Single ) : Single;
 
 const
-  MATRIX_IDENTITY3F: zglTMatrix3f = ( ( X: 1; Y: 0; Z: 0 ), ( X: 0; Y: 1; Z: 0 ), ( X: 0; Y: 0; Z: 1 ) );
-  MATRIX_IDENTITY4F: zglTMatrix4f = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) );
+  matrix3f_Identity: zglTMatrix3f = ( ( X: 1; Y: 0; Z: 0 ), ( X: 0; Y: 1; Z: 0 ), ( X: 0; Y: 0; Z: 1 ) );
+  matrix4f_Identity: zglTMatrix4f = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) );
+  quater_Zero      : zglTQuaternion = ( X: 0; Y: 0; Z: 0; W: 0 );
 
 var
   CosTable : array[ 0..360 ] of Single;
@@ -606,6 +610,36 @@ asm
 {$ENDIF}
 end;
 
+function vector_RotateX;
+  var
+    sina, cosa : Single;
+begin
+  m_SinCos( Value, sina, cosa );
+  Result.X := Vector.X;
+  Result.Y := ( Vector.Y * cosa ) + ( Vector.Z * ( -sina ) );
+  Result.Z := ( Vector.Y * sina ) + ( Vector.Z * cosa );
+end;
+
+function vector_RotateY;
+  var
+    sina, cosa : Single;
+begin
+  m_SinCos( Value, sina, cosa );
+  Result.X := ( Vector.X * cosa ) + ( Vector.Z * sina );
+  Result.Y := Vector.Y;
+  Result.Z := ( Vector.X * ( -sina ) ) + ( Vector.Z * cosa );
+end;
+
+function vector_RotateZ;
+  var
+    sina, cosa : Single;
+begin
+  m_SinCos( Value, sina, cosa );
+  Result.X := ( Vector.X * cosa ) + ( Vector.Y * ( -sina ) );
+  Result.Y := ( Vector.X * sina ) + ( Vector.Y * cosa );
+  Result.Z := Vector.Z;
+end;
+
 function vector_RotateQ;
   var
     vn : zglTPoint3D;
@@ -855,11 +889,6 @@ begin
   Result[ 2 ] := v3;
 end;
 
-function matrix3f_Identity;
-begin
-  Result := MATRIX_IDENTITY3F;
-end;
-
 procedure matrix3f_OrthoNormalize;
 begin
   Matrix[ 0 ] := vector_Normalize( Matrix[ 0 ] );
@@ -883,7 +912,7 @@ begin
   tMatrix[ 2 ] := vector_Get( -aY,  aX,   0 );
   tMatrix := matrix3f_Mul( tMatrix, Matrix^ );
   Matrix^ := matrix3f_Add( Matrix^, tMatrix );
-  matrix3f_OrthoNormalize( @Matrix );
+  matrix3f_OrthoNormalize( Matrix );
 end;
 
 function matrix3f_Add;
@@ -904,11 +933,6 @@ begin
   Result[ 2 ].X := Matrix1[ 2 ].X * Matrix2[ 0 ].X + Matrix1[ 2 ].Y * Matrix2[ 1 ].X + Matrix1[ 2 ].Z * Matrix2[ 2 ].X;
   Result[ 2 ].Y := Matrix1[ 2 ].X * Matrix2[ 0 ].Y + Matrix1[ 2 ].Y * Matrix2[ 1 ].Y + Matrix1[ 2 ].Z * Matrix2[ 2 ].Y;
   Result[ 2 ].Z := Matrix1[ 2 ].X * Matrix2[ 0 ].Z + Matrix1[ 2 ].Y * Matrix2[ 1 ].Z + Matrix1[ 2 ].Z * Matrix2[ 2 ].Z;
-end;
-
-function matrix4f_Identity;
-begin
-  Result := MATRIX_IDENTITY4F;
 end;
 
 procedure matrix4f_Transpose;
@@ -938,6 +962,39 @@ begin
   t              := Matrix[ 2, 3 ];
   Matrix[ 2, 3 ] := Matrix[ 3, 2 ];
   Matrix[ 3, 2 ] := t;
+end;
+
+function matrix4f_Determinant; 
+begin
+  Result := Matrix[ 0, 0 ] * Matrix[ 1, 1 ] * Matrix[ 2, 2 ] +
+            Matrix[ 1, 0 ] * Matrix[ 2, 1 ] * Matrix[ 0, 2 ] +
+            Matrix[ 2, 0 ] * Matrix[ 0, 1 ] * Matrix[ 1, 2 ] -
+            Matrix[ 2, 0 ] * Matrix[ 1, 1 ] * Matrix[ 0, 2 ] -
+            Matrix[ 1, 0 ] * Matrix[ 0, 1 ] * Matrix[ 2, 2 ] -
+            Matrix[ 0, 0 ] * Matrix[ 2, 1 ] * Matrix[ 1, 2 ];
+end;
+
+function matrix4f_Inverse;
+  var
+    det : Single;
+begin
+  det := 1 / matrix4f_Determinant( Matrix );
+  Result[ 0, 0 ] :=  ( Matrix[ 1, 1 ] * Matrix[ 2, 2 ] - Matrix[ 2, 1 ] * Matrix[ 1, 2 ] ) * det;
+  Result[ 0, 1 ] := -( Matrix[ 0, 1 ] * Matrix[ 2, 2 ] - Matrix[ 2, 1 ] * Matrix[ 0, 2 ] ) * det;
+  Result[ 0, 2 ] :=  ( Matrix[ 0, 1 ] * Matrix[ 1, 2 ] - Matrix[ 1, 1 ] * Matrix[ 0, 2 ] ) * det;
+  Result[ 0, 3 ] := 0;
+  Result[ 1, 0 ] := -( Matrix[ 1, 0 ] * Matrix[ 2, 2 ] - Matrix[ 2, 0 ] * Matrix[ 1, 2 ] ) * det;
+  Result[ 1, 1 ] :=  ( Matrix[ 0, 0 ] * Matrix[ 2, 2 ] - Matrix[ 2, 0 ] * Matrix[ 0, 2 ] ) * det;
+  Result[ 1, 2 ] := -( Matrix[ 0, 0 ] * Matrix[ 1, 2 ] - Matrix[ 1, 0 ] * Matrix[ 0, 2 ] ) * det;
+  Result[ 1, 3 ] := 0;
+  Result[ 2, 0 ] :=  ( Matrix[ 1, 0 ] * Matrix[ 2, 1 ] - Matrix[ 2, 0 ] * Matrix[ 1, 1 ] ) * det;
+  Result[ 2, 1 ] := -( Matrix[ 0, 0 ] * Matrix[ 2, 1 ] - Matrix[ 2, 0 ] * Matrix[ 0, 1 ] ) * det;
+  Result[ 2, 2 ] :=  ( Matrix[ 0, 0 ] * Matrix[ 1, 1 ] - Matrix[ 1, 0 ] * Matrix[ 0, 1 ] ) * det;
+  Result[ 2, 3 ] := 0;
+  Result[ 3, 0 ] := -( Matrix[ 3, 0 ] * Result[ 0, 0 ] + Matrix[ 3, 1 ] * Result[ 1, 0 ] + Matrix[ 3, 2 ] * Result[ 2, 0 ] );
+  Result[ 3, 1 ] := -( Matrix[ 3, 0 ] * Result[ 0, 1 ] + Matrix[ 3, 1 ] * Result[ 1, 1 ] + Matrix[ 3, 2 ] * Result[ 2, 1 ] );
+  Result[ 3, 2 ] := -( Matrix[ 3, 0 ] * Result[ 0, 2 ] + Matrix[ 3, 1 ] * Result[ 1, 2 ] + Matrix[ 3, 2 ] * Result[ 2, 2 ] );
+  Result[ 3, 3 ] := 1;
 end;
 
 procedure matrix4f_Translate;
@@ -976,7 +1033,7 @@ procedure matrix4f_Scale;
   var
     sMatrix : zglTMatrix4f;
 begin
-  sMatrix := MATRIX_IDENTITY4F;
+  sMatrix := matrix4f_Identity;
   sMatrix[ 0, 0 ] := sX;
   sMatrix[ 1, 1 ] := sY;
   sMatrix[ 2, 2 ] := sZ;
@@ -1088,11 +1145,16 @@ function quater_Normalize;
   var
     t : Single;
 begin
-  t := 1 / ( sqr( Quaternion.X ) + sqr( Quaternion.Y ) + sqr( Quaternion.Z ) + sqr( Quaternion.W ) );
-  Result.X := Quaternion.X * t;
-  Result.Y := Quaternion.Y * t;
-  Result.Z := Quaternion.Z * t;
-  Result.W := Quaternion.W * t;
+  t := ( sqr( Quaternion.X ) + sqr( Quaternion.Y ) + sqr( Quaternion.Z ) + sqr( Quaternion.W ) );
+  if t <> 0 Then
+    begin
+      t        := 1 / t;
+      Result.X := Quaternion.X * t;
+      Result.Y := Quaternion.Y * t;
+      Result.Z := Quaternion.Z * t;
+      Result.W := Quaternion.W * t;
+    end else
+      Result := quater_Zero;
 end;
 
 function quater_Dot;
