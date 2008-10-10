@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 29                     }
-{ date:  27.09.08               }
+{ build: 30                     }
+{ date:  10.10.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -995,6 +995,32 @@ var
 // SKYBOX
   skybox_Init : procedure( Top, Bottom, Left, Right, Front, Back : zglPTexture ); stdcall;
   skybox_Draw : procedure; stdcall;
+
+// SHADOW VOLUMES
+type
+  zglPShadowVolume = ^zglTShadowVolume;
+  zglTShadowVolume = record
+    VCount : DWORD;
+    FCount : DWORD;
+    ICount : DWORD;
+
+    Caps       : array of zglTPoint3D;
+    Indices    : array of DWORD;
+    Planes     : array of zglTPlane;
+
+    eVertices : array of zglTPoint3D;
+    eVCount   : DWORD;
+
+    isFacingLight    : array of Boolean;
+    neighbourIndices : array of Integer;
+    isSilhouetteEdge : array of Boolean;
+end;
+
+var
+  shadow_InitVolume        : procedure( var Volume : zglPShadowVolume; Vertices : zglPPoint3D; FCount : DWORD; Faces : zglPFace ); stdcall;
+  shadow_CalcVolume        : procedure( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3D; Light : zglTPoint3D; Extrude : Single ); stdcall;
+  shadow_DrawVolume        : procedure( Volume : zglPShadowVolume; zFail : Boolean ); stdcall;
+  shadow_DrawShadowVolumes : procedure( DrawVolumes : Pointer ); stdcall;
   
 // SHADERS
 const
@@ -1004,6 +1030,10 @@ const
   SHADER_FRAGMENT_ARB = $8804;
   SHADER_VERTEX       = $8B31;
   SHADER_FRAGMENT     = $8B30;
+
+const
+  matrix3f_Identity: zglTMatrix3f = ( ( X: 1; Y: 0; Z: 0 ), ( X: 0; Y: 1; Z: 0 ), ( X: 0; Y: 0; Z: 1 ) );
+  matrix4f_Identity: zglTMatrix4f = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) );
 
 var
   // ARBfp/ARBvp
@@ -1035,8 +1065,8 @@ var
   shader_SetAttrib3f    : procedure( Attrib : Integer; v1, v2, v3 : Single ); stdcall;
   shader_SetAttrib4f    : procedure( Attrib : Integer; v1, v2, v3, v4 : Single ); stdcall;
   shader_SetAttribPf    : procedure( Attrib : Integer; v : Pointer; Normalized : Boolean ); stdcall;
-  shader_SetParameter4f : procedure( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single ); stdcall;
-  
+  shader_SetParameter4f : procedure( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single; Local : Boolean = TRUE ); stdcall;
+
 // MATH
   m_Round     : function( value : Single ) : Integer; stdcall;
   m_Cos       : function( Angle : Integer ) : Single; stdcall;
@@ -1058,6 +1088,9 @@ var
   vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D;
   vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D;
   vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D;
+  vector_RotateX   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
+  vector_RotateY   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
+  vector_RotateZ   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
   vector_RotateQ   : function( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
   vector_Negate    : function( Vector : zglTPoint3D ) : zglTPoint3D;
   vector_Normalize : function( Vector : zglTPoint3D ) : zglTPoint3D;
@@ -1070,14 +1103,14 @@ var
   vector_Lerp      : function( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D;
   //matrix
   matrix3f_Get            : function( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
-  matrix3f_Identity       : function : zglTMatrix3f;
   matrix3f_OrthoNormalize : procedure( Matrix : zglPMatrix3f );
   matrix3f_Transpose      : procedure( Matrix : zglPMatrix3f );
   matrix3f_Rotate         : procedure( Matrix : zglPMatrix3f; aX, aY, aZ : Single );
   matrix3f_Add            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f;
   matrix3f_Mul            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
-  matrix4f_Identity       : function : zglTMatrix4f;
   matrix4f_Transpose      : procedure( Matrix : zglPMatrix4f );
+  matrix4f_Determinant    : function( Matrix : zglTMatrix4f ): Single;
+  matrix4f_Inverse        : function( Matrix : zglTMatrix4f ) : zglTMatrix4f;
   matrix4f_Translate      : procedure( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
   matrix4f_Rotate         : procedure( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
   matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
@@ -1097,7 +1130,7 @@ var
   line3d_ClosestPoint : function( A, B, Point : zglTPoint3D ) : zglTPoint3D;
   // plane
   plane_Get      : function( A, B, C : zglTPoint3D ) : zglTPlane;
-  plane_Distance : function( Plane : zglPPlane; Point : zglTPoint3D ) : Single;
+  plane_Distance : function( Plane : zglTPlane; Point : zglTPoint3D ) : Single;
   // triangle
   tri_GetNormal  : function( A, B, C : zglPPoint3D ) : zglTPoint3D;
 
@@ -1458,6 +1491,11 @@ begin
 
       skybox_Init := dlsym( zglLib, 'skybox_Init' );
       skybox_Draw := dlsym( zglLib, 'skybox_Draw' );
+
+      shadow_InitVolume := dlsym( zglLib, 'shadow_InitVolume' );
+      shadow_CalcVolume := dlsym( zglLib, 'shadow_CalcVolume' );
+      shadow_DrawVolume := dlsym( zglLib, 'shadow_DrawVolume' );
+      shadow_DrawShadowVolumes := dlsym( zglLib, 'shadow_DrawShadowVolumes' );
   
       shader_InitARB := dlsym( zglLib, 'shader_InitARB' );
       shader_LoadFromFileARB := dlsym( zglLib, 'shader_LoadFromFileARB' );
@@ -1506,6 +1544,9 @@ begin
       vector_MulM3f := dlsym( zglLib, 'vector_MulM3f' );
       vector_MulM4f := dlsym( zglLib, 'vector_MulM4f' );
       vector_MulInvM4f := dlsym( zglLib, 'vector_MulInvM4f' );
+      vector_RotateX := dlsym( zglLib, 'vector_RotateX' );
+      vector_RotateY := dlsym( zglLib, 'vector_RotateY' );
+      vector_RotateZ := dlsym( zglLib, 'vector_RotateZ' );
       vector_RotateQ := dlsym( zglLib, 'vector_RotateQ' );
       vector_Negate := dlsym( zglLib, 'vector_Negate' );
       vector_Normalize := dlsym( zglLib, 'vector_Normalize' );
@@ -1518,15 +1559,15 @@ begin
       vector_Lerp := dlsym( zglLib, 'vector_Lerp' );
 
       matrix3f_Get := dlsym( zglLib, 'matrix3f_Get' );
-      matrix3f_Identity := dlsym( zglLib, 'matrix3f_Identity' );
       matrix3f_OrthoNormalize := dlsym( zglLib, 'matrix3f_OrthoNormalize' );
       matrix3f_Transpose := dlsym( zglLib, 'matrix3f_Transpose' );
       matrix3f_Rotate := dlsym( zglLib, 'matrix3f_Rotate' );
       matrix3f_Add := dlsym( zglLib, 'matrix3f_Add' );
       matrix3f_Mul := dlsym( zglLib, 'matrix3f_Mul' );
 
-      matrix4f_Identity := dlsym( zglLib, 'matrix4f_Identity' );
       matrix4f_Transpose := dlsym( zglLib, 'matrix4f_Transpose' );
+      matrix4f_Determinant := dlsym( zglLib, 'matrix4f_Determinant' );
+      matrix4f_Inverse := dlsym( zglLib, 'matrix4f_Inverse' );
       matrix4f_Translate := dlsym( zglLib, 'matrix4f_Translate' );
       matrix4f_Rotate := dlsym( zglLib, 'matrix4f_Rotate' );
       matrix4f_Scale := dlsym( zglLib, 'matrix4f_Scale' );
