@@ -96,8 +96,7 @@ begin
     end;
 
   HeightMap.Flags := Flags;
-  if ( HeightMap.Flags and BUILD_VBO > 0 ) and ( not ogl_CanVBO ) Then
-    HeightMap.Flags := HeightMap.Flags xor BUILD_VBO;
+  vbo_Check( HeightMap.Flags );
 
   if not Assigned( HeightMap.Normals ) Then
     begin

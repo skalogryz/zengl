@@ -154,7 +154,7 @@ begin
     u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
 
   if ogl_Format = 0 Then
-    wglChoosePixelFormatARB := wglGetProcAddress( 'wglChoosePixelFormatARB' );
+    wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormat' );
   if ( ogl_Format = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not app_InitToHandle ) Then
     begin
       ogl_zDepth := 24;

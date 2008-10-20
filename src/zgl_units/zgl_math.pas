@@ -1290,7 +1290,7 @@ begin
   Result.Points[ 1 ] := B;
   Result.Points[ 2 ] := C;
   Result.Normal      := tri_GetNormal( @A, @B, @C );
-  Result.D           := -( Result.Normal.X * Result.Points[ 0 ].X + Result.Normal.Y * Result.Points[ 0 ].Y + Result.Normal.Z * Result.Points[ 0 ].Z );
+  Result.D           := -vector_Dot( Result.Normal, A );
 end;
 
 function plane_Distance;
@@ -1327,7 +1327,7 @@ begin
   // получаем унитарный вектор единичной длины
   uvector := sqrt( sqr( p.X ) + sqr( p.Y ) + sqr( p.Z ) );
   if uvector <> 0 Then
-    Result := vector_DivV( p, uvector )
+    Result := vector_MulV( p, 1 / uvector )
   else
     Result := vector_Get( 0, 0, 0 );
 end;

@@ -821,6 +821,9 @@ type
   zglTSkMesh = record
     Flags          : DWORD;
 
+    IBuffer        : DWORD;
+    VBuffer        : DWORD;
+
     VCount         : DWORD;
     TCount         : DWORD;
     FCount         : DWORD;
@@ -1059,12 +1062,12 @@ var
   shader_SetUniform3f   : procedure( Uniform : Integer; v1, v2, v3 : Single ); stdcall;
   shader_SetUniform4f   : procedure( Uniform : Integer; v1, v2, v3, v4 : Single ); stdcall;
   shader_GetAttrib      : function( Shader : DWORD; AttribName : String ) : Integer; stdcall;
+  shader_SetAttribPf    : procedure( Attrib : Integer; v : Pointer; Normalized : Boolean ); stdcall;
   // glVertexAttrib* GLSL/ARB
   shader_SetAttrib1f    : procedure( Attrib : Integer; v1 : Single ); stdcall;
   shader_SetAttrib2f    : procedure( Attrib : Integer; v1, v2 : Single ); stdcall;
   shader_SetAttrib3f    : procedure( Attrib : Integer; v1, v2, v3 : Single ); stdcall;
   shader_SetAttrib4f    : procedure( Attrib : Integer; v1, v2, v3, v4 : Single ); stdcall;
-  shader_SetAttribPf    : procedure( Attrib : Integer; v : Pointer; Normalized : Boolean ); stdcall;
   shader_SetParameter4f : procedure( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single; Local : Boolean = TRUE ); stdcall;
 
 // MATH
@@ -1109,7 +1112,7 @@ var
   matrix3f_Add            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f;
   matrix3f_Mul            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
   matrix4f_Transpose      : procedure( Matrix : zglPMatrix4f );
-  matrix4f_Determinant    : function( Matrix : zglTMatrix4f ): Single;
+  matrix4f_Determinant    : function( Matrix : zglTMatrix4f ) : Single;
   matrix4f_Inverse        : function( Matrix : zglTMatrix4f ) : zglTMatrix4f;
   matrix4f_Translate      : procedure( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
   matrix4f_Rotate         : procedure( Matrix : zglPMatrix4f; aX, aY, aZ : Single );

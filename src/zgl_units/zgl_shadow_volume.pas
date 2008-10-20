@@ -116,28 +116,15 @@ begin
                                   Vertices[ Indices[ i * 3 + 1 ] ],
                                   Vertices[ Indices[ i * 3 + 2 ] ] );
 
+      FillChar( isFacingLight[ 0 ], FCount, 0 );
       for i := 0 to FCount - 1 do
         if plane_Distance( Planes[ i ], mLight ) >= 0 Then
-          isFacingLight[ i ] := TRUE
-        else
-          isFacingLight[ i ] := FALSE;
+          isFacingLight[ i ] := TRUE;
 
+      FillChar( isSilhouetteEdge[ 0 ], FCount * 3, 0 );
       for i := 0 to FCount * 3 - 1 do
-        begin
-          if not isFacingLight[ i div 3 ] Then
-            begin
-              isSilhouetteEdge[ i ] := FALSE;
-              continue;
-            end;
-
-          if ( neighbourIndices[ i ] = -1 ) or ( not isFacingLight[ neighbourIndices[ i ] ] ) Then
-            begin
-              isSilhouetteEdge[ i ] := TRUE;
-              continue;
-            end;
-
-          isSilhouetteEdge[ i ] := FALSE;
-        end;
+        if ( neighbourIndices[ i ] = -1 ) or ( not isFacingLight[ neighbourIndices[ i ] ] ) Then
+          isSilhouetteEdge[ i ] := TRUE;
 
         eVCount := 0;
         for i := 0 to FCount - 1 do

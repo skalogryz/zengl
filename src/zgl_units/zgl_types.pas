@@ -33,9 +33,7 @@ uses
   ;
 
 type
-  Ptr32  = DWORD;
-  Ptr64  = QWORD;
-  Ptr    = {$IFDEF CPU64}Ptr64{$ELSE}Ptr32{$ENDIF};
+  Ptr    = {$IFDEF CPU64}QWORD{$ELSE}DWORD{$ENDIF};
   PPtr   = ^Ptr;
 
 type
@@ -402,6 +400,9 @@ type
   zglPSMesh = ^zglTSMesh;
   zglTSMesh = record
     Flags          : DWORD;
+
+    IBuffer        : DWORD;
+    VBuffer        : DWORD;
     
     VCount         : DWORD;
     TCount         : DWORD;
@@ -476,6 +477,9 @@ type
   zglPSkMesh = ^zglTSkMesh;
   zglTSkMesh = record
     Flags          : DWORD;
+
+    IBuffer        : DWORD;
+    VBuffer        : DWORD;
 
     VCount         : DWORD;
     TCount         : DWORD;

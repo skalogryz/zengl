@@ -302,8 +302,7 @@ begin
         end;
     end;
 
-  if ( Octree.Flags and BUILD_VBO > 0 ) and ( not ogl_CanVBO ) Then
-    Octree.Flags := Octree.Flags xor BUILD_VBO;
+  vbo_Check( Octree.Flags );
     
   if Octree.Flags and BUILD_PLANES > 0 Then
     begin

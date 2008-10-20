@@ -1,8 +1,9 @@
 /*-------------------------------*/
 /*-----------= ZenGL =-----------*/
 /*-------------------------------*/
-/* build: 24                     */
-/* date:  27.08.08               */
+/* build: 30                     */
+/* date:  10.10.08               */
+/* beta version of header !      */
 /*-------------------------------*/
 /* by:   Andru ( Kemka Andrey )  */
 /* mail: dr.andru@gmail.com      */
@@ -85,13 +86,14 @@ void ( APIENTRY *zgl_GetMem )( void** Ptr, DWORD Size );
 #define DEPTH_BUFFER         0x000002
 #define DEPTH_BUFFER_CLEAR   0x000004
 #define DEPTH_MASK           0x000008
-#define CORRECT_RESOLUTION   0x000010
-#define APP_USE_AUTOPAUSE    0x000020
-#define APP_USE_AUTOMINIMIZE 0x000040
-#define APP_USE_LOG          0x000080
-#define SND_CAN_PLAY         0x000100
-#define SND_CAN_PLAY_FILE    0x000200
-#define CROP_INVISIBLE       0x000400
+#define STENCIL_BUFFER_CLEAR 0x000010
+#define CORRECT_RESOLUTION   0x000020
+#define APP_USE_AUTOPAUSE    0x000040
+#define APP_USE_AUTOMINIMIZE 0x000080
+#define APP_USE_LOG          0x000100
+#define SND_CAN_PLAY         0x000200
+#define SND_CAN_PLAY_FILE    0x000400
+#define CROP_INVISIBLE       0x000800
 
 void ( APIENTRY *zgl_Enable )( DWORD What );
 void ( APIENTRY *zgl_Disable )( DWORD What );
@@ -564,8 +566,8 @@ typedef struct
   float W;
 } zglTQuaternion, *zglPQuaternion;
 
-//typedef zglTPoint3D *zglTMatrix3f[3];
-//typedef zglTMatrix3f *zglPMatrix3f;
+/*typedef zglTPoint3D *zglTMatrix3f[3];*/
+/*typedef zglTMatrix3f *zglPMatrix3f;*/
 typedef struct
 {
   float a11, a12, a13;
@@ -573,8 +575,8 @@ typedef struct
   float a31, a32, a33;
 } zglTMatrix3f, *zglPMatrix3f;
   
-//typedef float zglTMatrix4f[3][3];
-//typedef zglTMatrix4f *zglPMatrix4f;
+/*typedef float zglTMatrix4f[3][3];*/
+/*typedef zglTMatrix4f *zglPMatrix4f;*/
 typedef struct
 {
   float a11, a12, a13, a14;
@@ -582,7 +584,7 @@ typedef struct
   float a31, a32, a33, a34;
   float a41, a42, a43, a44;
 } zglTMatrix4f, *zglPMatrix4f;
-  
+
 typedef struct
 {
   DWORD vIndex[3];
@@ -683,8 +685,8 @@ void ( APIENTRY *obj3d_BindTexture )( zglPTexture Texture, byte Level );
 void ( APIENTRY *obj3d_SetMaterial )( byte Material, byte Side, DWORD Color, byte Alpha );
 void ( APIENTRY *obj3d_Scale )( float ScaleX, float ScaleY, float ScaleZ );
 void ( APIENTRY *obj3d_Move )( float X, float Y, float Z );
-void ( APIENTRY *obj3d_SetMatrix )( zglPMatrix4f Matrix );
-void ( APIENTRY *obj3d_MulMatrix )( zglPMatrix4f Matrix );
+void ( APIENTRY *obj3d_SetMatrix )( zglTMatrix4f Matrix );
+void ( APIENTRY *obj3d_MulMatrix )( zglTMatrix4f Matrix );
   
 #define AX 0x01
 #define AY 0x02
@@ -720,6 +722,9 @@ typedef struct
 {
   DWORD Flags;
 
+  DWORD IBuffer;
+  DWORD VBuffer;
+
   DWORD VCount;
   DWORD TCount;
   DWORD FCount;
@@ -739,7 +744,92 @@ void ( APIENTRY *smesh_Draw )( zglPSMesh Mesh );
 void ( APIENTRY *smesh_DrawGroup )( zglPSMesh Mesh, DWORD Group );
 void ( APIENTRY *smesh_Free )( zglPSMesh *Mesh );
 
-// HEIGHTMAP
+/* SKINNED MESH */
+typedef struct
+{
+  char* Name;
+  int   Parent;
+} zglTBone, *zglPBone;
+
+typedef struct
+{
+  int   boneID;
+  float Weight;
+} zglTBoneWeight, *zglPBoneWeight;
+
+typedef zglTBoneWeight **zglTBonesWeights;
+
+typedef struct
+{
+  zglTPoint3D    Point;
+  zglTPoint3D    Translation;
+  zglTPoint3D    Rotation;
+  zglTMatrix4f   Matrix;
+  zglTQuaternion Quaternion;
+} zglTBonePos, *zglPBonePos;
+
+typedef struct
+{
+  zglTBonePos *BonePos;
+} zglTSkeletonFrame, *zglPSkeletonFrame;
+
+typedef struct
+{
+  int               nAction;
+  int               nFrame;
+  float             Delta;
+  float             prevDelta;
+  zglTSkeletonFrame Frame;
+  zglTPoint3D       *Vertices;
+  zglTPoint3D       *Normals;
+} zglTSkeletonState, *zglPSkeletonState;
+
+typedef struct
+{
+  char*             Name;
+  float             FPS;
+  DWORD             FCount;
+  zglTSkeletonFrame Frames;
+} zglTSkeletonAction, *zglPSkeletonAction;
+
+typedef struct
+{
+  DWORD              Flags;
+
+  DWORD              IBuffer;
+  DWORD              VBuffer;
+
+  DWORD              VCount;
+  DWORD              TCount;
+  DWORD              FCount;
+  DWORD              GCount;
+  DWORD              BCount;
+  byte               *WCount;
+  DWORD              ACount;
+
+  zglTPoint3D        *Vertices;
+  zglTPoint3D        *Normals;
+  zglTPoint2D        *TexCoords;
+  zglTPoint2D        *MultiTexCoords;
+  zglTFace           *Faces;
+  void*              Indices;
+  zglTGroup          *Groups;
+
+  zglTBone           *Bones;
+  zglTBonesWeights   Weights;
+  zglTSkeletonState  State;
+  zglTSkeletonAction *Actions;
+  zglTSkeletonFrame  Skeleton;
+} zglTSkMesh, *zglPSkMesh;
+
+bool  ( APIENTRY *skmesh_LoadFromFile )( zglPSkMesh *Mesh, char *FileName, DWORD Flags );
+void  ( APIENTRY *skmesh_Animate )( zglPSkMesh Mesh, zglPSkeletonState State );
+void  ( APIENTRY *skmesh_Draw )( zglPSkMesh Mesh, zglPSkeletonState State );
+void  ( APIENTRY *skmesh_DrawGroup )( zglPSkMesh Mesh, zglPSkeletonState State, DWORD Group );
+void  ( APIENTRY *skmesh_DrawSkelet )( zglPSkMesh Mesh, zglPSkeletonState State );
+void  ( APIENTRY *skmesh_Free )( zglPSkMesh *Mesh );
+
+/* HEIGHTMAP */
 typedef struct
 {
   DWORD       Flags;
@@ -944,19 +1034,19 @@ float       ( APIENTRY *vector_Distance )( zglTPoint3D Vector1, zglTPoint3D Vect
 float       ( APIENTRY *vector_FDistance )( zglTPoint3D Vector1, zglTPoint3D Vector2 );
 float       ( APIENTRY *vector_Length )( zglTPoint3D Vector );
 zglTPoint3D ( APIENTRY *vector_Lerp )( zglTPoint3D Vector1, zglTPoint3D Vector2, float Value );
-  /* matrix */
+/* matrix */
 zglTMatrix3f ( APIENTRY *matrix3f_Get )( zglTPoint3D v1, zglTPoint3D v2, zglTPoint3D v3 );
-void         ( APIENTRY *matrix3f_Identity )( zglPMatrix3f Matrix );
 void         ( APIENTRY *matrix3f_OrthoNormalize )( zglPMatrix3f Matrix );
 void         ( APIENTRY *matrix3f_Transpose )( zglPMatrix3f Matrix );
 void         ( APIENTRY *matrix3f_Rotate )( zglPMatrix3f Matrix, float aX, float aY, float aZ );
 zglTMatrix3f ( APIENTRY *matrix3f_Add )( zglTMatrix3f Matrix1, zglTMatrix3f Matrix2 );
 zglTMatrix3f ( APIENTRY *matrix3f_Mul )( zglTMatrix3f Matrix1, zglTMatrix3f Matrix2 );
-void         ( APIENTRY *matrix4f_Identity )( zglPMatrix4f Matrix );
 void         ( APIENTRY *matrix4f_Transpose )( zglPMatrix4f Matrix );
+float        ( APIENTRY *matrix4f_Determinant )( zglTMatrix4f Matrix );
+zglTMatrix4f ( APIENTRY *matrix4f_Inverse )( zglTMatrix4f Matrix );
 void         ( APIENTRY *matrix4f_Translate )( zglPMatrix4f Matrix, float tX, float tY, float tZ );
 void         ( APIENTRY *matrix4f_Rotate )( zglPMatrix4f Matrix, float aX, float aY, float aZ );
-zglTMatrix4f ( APIENTRY *matrix4f_Scale )( float sX, float sY, float sZ );
+void         ( APIENTRY *matrix4f_Scale )( zglPMatrix4f Matrix, float sX, float sY, float sZ );
 zglTMatrix4f ( APIENTRY *matrix4f_Mul )( zglTMatrix4f Matrix1, zglTMatrix4f Matrix2 );
 /* quaternions */
 zglTQuaternion ( APIENTRY *quater_Get )( float X, float Y, float Z, float W );
@@ -1257,6 +1347,13 @@ void zglLoad( char* LibraryName )
       zglGetAddress( smesh_DrawGroup, zglLib, "smesh_DrawGroup" );
       zglGetAddress( smesh_Free, zglLib, "smesh_Free" );
 
+      zglGetAddress( skmesh_LoadFromFile, zglLib, "skmesh_LoadFromFile" );
+      zglGetAddress( skmesh_Animate, zglLib, "skmesh_Animate" );
+      zglGetAddress( skmesh_Draw, zglLib, "skmesh_Draw" );
+      zglGetAddress( skmesh_DrawGroup, zglLib, "skmesh_DrawGroup" );
+      zglGetAddress( skmesh_DrawSkelet, zglLib, "skmesh_DrawSkelet" );
+      zglGetAddress( skmesh_Free, zglLib, "skmesh_Free" );
+
       zglGetAddress( heightmap_Build, zglLib, "heightmap_Build" );
       zglGetAddress( heightmap_Draw, zglLib, "heightmap_Draw" );
       zglGetAddress( heightmap_Free, zglLib, "heightmap_Free" );
@@ -1353,15 +1450,15 @@ void zglLoad( char* LibraryName )
       zglGetAddress( vector_Lerp, zglLib, "vector_Lerp" );
 
       zglGetAddress( matrix3f_Get, zglLib, "matrix3f_Get" );
-      zglGetAddress( matrix3f_Identity, zglLib, "matrix3f_Identity" );
       zglGetAddress( matrix3f_OrthoNormalize, zglLib, "matrix3f_OrthoNormalize" );
       zglGetAddress( matrix3f_Transpose, zglLib, "matrix3f_Transpose" );
       zglGetAddress( matrix3f_Rotate, zglLib, "matrix3f_Rotate" );
       zglGetAddress( matrix3f_Add, zglLib, "matrix3f_Add" );
       zglGetAddress( matrix3f_Mul, zglLib, "matrix3f_Mul" );
 
-      zglGetAddress( matrix4f_Identity, zglLib, "matrix4f_Identity" );
       zglGetAddress( matrix4f_Transpose, zglLib, "matrix4f_Transpose" );
+      zglGetAddress( matrix4f_Determinant, zglLib, "matrix4f_Determinant" );
+      zglGetAddress( matrix4f_Inverse, zglLib, "matrix4f_Inverse" );
       zglGetAddress( matrix4f_Translate, zglLib, "matrix4f_Translate" );
       zglGetAddress( matrix4f_Rotate, zglLib, "matrix4f_Rotate" );
       zglGetAddress( matrix4f_Scale, zglLib, "matrix4f_Scale" );

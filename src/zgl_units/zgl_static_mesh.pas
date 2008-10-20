@@ -170,86 +170,154 @@ end;
 
 procedure smesh_Draw;
   var
-    i : Byte;
+    i  : Byte;
+    PV : Ptr = 0;
+    PN : Ptr = 0;
+    PT : Ptr = 0;
 begin
   if ogl_MaxTexLevels > 0 Then
     tTexLevel := Byte( Mesh.Flags and USE_MULTITEX1 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
+
+  if Mesh.Flags and BUILD_VBO > 0 Then
+    begin
+      PV := 0;
+      if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12;
+      if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12;
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+      glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh.IBuffer );
+    end else
+      begin
+        PV := Ptr( @Mesh.Vertices[ 0 ] );
+        if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @Mesh.Normals[ 0 ] );
+        if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+      end;
                  
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
-      glNormalPointer( GL_FLOAT, 0, @Mesh.Normals[ 0 ] );
+      glNormalPointer( GL_FLOAT, 0, Pointer( PN ) );
     end;
   if Mesh.Flags and USE_TEXTURE > 0 Then
     begin
       glClientActiveTextureARB( GL_TEXTURE0_ARB );
       glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-      glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.TexCoords[ 0 ] );
+      glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT ) );
 
       if ogl_MaxTexLevels > 0 Then
         for i := 1 to tTexLevel do
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
+            if Mesh.Flags and BUILD_VBO > 0 Then
+              glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Mesh.VCount * i * 8  ) )
+            else
+              glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
           end;
     end;
 
   glEnableClientState( GL_VERTEX_ARRAY );
-  glVertexPointer( 3, GL_FLOAT, 0, @Mesh.Vertices[ 0 ] );
-    
-  if Mesh.VCount < 65536 Then
-    glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_SHORT, Mesh.Indices )
-  else
-    glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_INT, Mesh.Indices );
+  glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
+
+  if Mesh.Flags and BUILD_VBO > 0 Then
+    begin
+      if Mesh.VCount < 65536 Then
+        glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_SHORT, nil )
+      else
+        glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_INT, nil );
+    end else
+      begin
+        if Mesh.VCount < 65536 Then
+          glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_SHORT, Mesh.Indices )
+        else
+          glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_INT, Mesh.Indices );
+      end;
     
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+  if ogl_CanVBO Then
+    begin
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
+      glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
+    end;
 end;
 
 procedure smesh_DrawGroup;
   var
-    i : Byte;
+    i  : Byte;
+    PV : Ptr = 0;
+    PN : Ptr = 0;
+    PT : Ptr = 0;
 begin
   if ogl_MaxTexLevels > 0 Then
     tTexLevel := Byte( Mesh.Flags and USE_MULTITEX1 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
+
+  if Mesh.Flags and BUILD_VBO > 0 Then
+    begin
+      PV := 0;
+      if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12;
+      if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12;
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+      glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh.IBuffer );
+    end else
+      begin
+        PV := Ptr( @Mesh.Vertices[ 0 ] );
+        if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @Mesh.Normals[ 0 ] );
+        if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+      end;
                  
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
-      glNormalPointer( GL_FLOAT, 0, @Mesh.Normals[ 0 ] );
+      glNormalPointer( GL_FLOAT, 0, Pointer( PN ) );
     end;
   if Mesh.Flags and USE_TEXTURE > 0 Then
     begin
       glClientActiveTextureARB( GL_TEXTURE0_ARB );
       glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-      glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.Texcoords[ 0 ] );
+      glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT ) );
 
       if ogl_MaxTexLevels > 0 Then
         for i := 1 to tTexLevel do
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
+            if Mesh.Flags and BUILD_VBO > 0 Then
+              glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Mesh.VCount * i * 8  ) )
+            else
+              glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
           end;
     end;
 
   glEnableClientState( GL_VERTEX_ARRAY );
-  glVertexPointer( 3, GL_FLOAT, 0, @Mesh.Vertices[ 0 ] );
+  glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  if Mesh.VCount < 65536 Then
-    glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_SHORT, Mesh.Groups[ Group ].Indices )
-  else
-    glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_INT, Mesh.Groups[ Group ].Indices );
-
+  if Mesh.Flags and BUILD_VBO > 0 Then
+    begin
+      if Mesh.VCount < 65536 Then
+        glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_SHORT, Pointer( Mesh.Groups[ Group ].IFace * 3 * 2 ) )
+      else
+        glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_INT, Pointer( Mesh.Groups[ Group ].IFace * 3 * 4 ) );
+    end else
+      begin
+        if Mesh.VCount < 65536 Then
+          glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_SHORT, Mesh.Groups[ Group ].Indices )
+        else
+          glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_INT, Mesh.Groups[ Group ].Indices );
+      end;
+    
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+  if ogl_CanVBO Then
+    begin
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
+      glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
+    end;
 end;
 
 procedure smesh_Free;

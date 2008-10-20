@@ -31,6 +31,7 @@ uses
   
 procedure vbo_Build( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD; Indices, Vertices, Normals, TexCoords, MultiTexCoords : Pointer; var Flags : DWORD ); extdecl;
 procedure vbo_Free( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD ); extdecl;
+procedure vbo_Check( var Flags : DWORD ); extdecl;
 
 implementation
 
@@ -112,6 +113,12 @@ begin
         else
           glDeleteBuffersARB( ICount * 4, @IBuffer );
     end;
+end;
+
+procedure vbo_Check;
+begin
+  if ( Flags and BUILD_VBO > 0 ) and ( not ogl_CanVBO ) Then
+    Flags := Flags xor BUILD_VBO;
 end;
 
 {procedure vbo_Draw;
