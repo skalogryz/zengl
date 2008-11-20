@@ -49,25 +49,25 @@ begin
   cy := vector_Get( B * D * E - C * F, A * E, D * F + B * C * E );
   cz := vector_Get(             A * D,    -B,             A * C );
 
-  Camera.Matrix[ 0 ][ 0 ] := cx.X;
-  Camera.Matrix[ 0 ][ 1 ] := cy.X;
-  Camera.Matrix[ 0 ][ 2 ] := cz.X;
-  Camera.Matrix[ 0 ][ 3 ] := 0;
+  Camera.Matrix.a11 := cx.X;
+  Camera.Matrix.a12 := cy.X;
+  Camera.Matrix.a13 := cz.X;
+  Camera.Matrix.a14 := 0;
 
-  Camera.Matrix[ 1 ][ 0 ] := cx.Y;
-  Camera.Matrix[ 1 ][ 1 ] := cy.Y;
-  Camera.Matrix[ 1 ][ 2 ] := cz.Y;
-  Camera.Matrix[ 1 ][ 3 ] := 0;
+  Camera.Matrix.a21 := cx.Y;
+  Camera.Matrix.a22 := cy.Y;
+  Camera.Matrix.a23 := cz.Y;
+  Camera.Matrix.a24 := 0;
 
-  Camera.Matrix[ 2 ][ 0 ] := cx.Z;
-  Camera.Matrix[ 2 ][ 1 ] := cy.Z;
-  Camera.Matrix[ 2 ][ 2 ] := cz.Z;
-  Camera.Matrix[ 2 ][ 3 ] := 0;
+  Camera.Matrix.a31 := cx.Z;
+  Camera.Matrix.a32 := cy.Z;
+  Camera.Matrix.a33 := cz.Z;
+  Camera.Matrix.a34 := 0;
 
-  Camera.Matrix[ 3 ][ 0 ] := -vector_Dot( cx, Camera.Position );
-  Camera.Matrix[ 3 ][ 1 ] := -vector_Dot( cy, Camera.Position );
-  Camera.Matrix[ 3 ][ 2 ] := -vector_Dot( cz, Camera.Position );
-  Camera.Matrix[ 3 ][ 3 ] := 1;
+  Camera.Matrix.a41 := -vector_Dot( cx, Camera.Position );
+  Camera.Matrix.a42 := -vector_Dot( cy, Camera.Position );
+  Camera.Matrix.a43 := -vector_Dot( cz, Camera.Position );
+  Camera.Matrix.a44 := 1;
   
   glLoadMatrixf( @Camera.Matrix );
 end;
