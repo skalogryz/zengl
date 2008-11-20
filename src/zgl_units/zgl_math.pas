@@ -40,7 +40,7 @@ function m_Angle( x1, y1, x2, y2 : Single ) : Single; extdecl;
 {------------------------------------------------------------------------------}
 {--------------------------------- Vectors ------------------------------------}
 {------------------------------------------------------------------------------}
-function vector_Get( x, y, z : Single ) : zglTPoint3D;
+function vector_Get( x, y, z : Single ) : zglTPoint3D; extdecl;
 
 function vector_Add( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Sub( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
@@ -56,14 +56,14 @@ function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoin
 function vector_MulM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_MulInvM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
-function vector_RotateX( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-function vector_RotateY( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-function vector_RotateZ( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
+function vector_RotateX( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; extdecl;
+function vector_RotateY( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; extdecl;
+function vector_RotateZ( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; extdecl;
+function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D; extdecl;
 
 function vector_Negate( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D;
-function vector_Angle( Vector1, Vector2 : zglTPoint3D ) : Single;
+function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D; extdecl;
+function vector_Angle( Vector1, Vector2 : zglTPoint3D ) : Single; extdecl;
 function vector_Cross( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Dot( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function vector_Distance( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
@@ -74,49 +74,49 @@ function vector_Lerp( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoi
 {------------------------------------------------------------------------------}
 {--------------------------------- Matrix3f -----------------------------------}
 {------------------------------------------------------------------------------}
-function  matrix3f_Get( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
+function  matrix3f_Get( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f; extdecl;
 
-procedure matrix3f_OrthoNormalize( Matrix : zglPMatrix3f );
-procedure matrix3f_Transpose( Matrix : zglPMatrix3f );
-procedure matrix3f_Rotate( Matrix : zglPMatrix3f; aX, aY, aZ : Single );
-function  matrix3f_Add( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
-function  matrix3f_Mul( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
+procedure matrix3f_OrthoNormalize( Matrix : zglPMatrix3f ); extdecl;
+procedure matrix3f_Transpose( Matrix : zglPMatrix3f ); extdecl;
+procedure matrix3f_Rotate( Matrix : zglPMatrix3f; aX, aY, aZ : Single ); extdecl;
+function  matrix3f_Add( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f; extdecl;
+function  matrix3f_Mul( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f; extdecl;
 
-procedure matrix4f_Transpose( Matrix : zglPMatrix4f );
-function  matrix4f_Determinant( Matrix : zglTMatrix4f ): Single;
-function  matrix4f_Inverse( Matrix : zglTMatrix4f ) : zglTMatrix4f;
-procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
-procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
-procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
-function  matrix4f_Mul( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
+procedure matrix4f_Transpose( Matrix : zglPMatrix4f ); extdecl;
+function  matrix4f_Determinant( Matrix : zglTMatrix4f ): Single; extdecl;
+function  matrix4f_Inverse( Matrix : zglTMatrix4f ) : zglTMatrix4f; extdecl;
+procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single ); extdecl;
+procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single ); extdecl;
+procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single ); extdecl;
+function  matrix4f_Mul( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f; extdecl;
 
 {------------------------------------------------------------------------------}
 {-------------------------------- Quaternion ----------------------------------}
 {------------------------------------------------------------------------------}
-function quater_Get( X, Y, Z, W : Single ) : zglTQuaternion;
+function quater_Get( X, Y, Z, W : Single ) : zglTQuaternion; extdecl;
 function quater_Add( q1, q2 : zglTQuaternion ) : zglTQuaternion; {$IFDEF USE_ASM} assembler; {$ENDIF}
 function quater_Sub( q1, q2 : zglTQuaternion ) : zglTQuaternion; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function quater_Mul( q1, q2 : zglTQuaternion ) : zglTQuaternion;
-function quater_Negate( Quaternion : zglTQuaternion ) : zglTQuaternion;
-function quater_Normalize( Quaternion : zglTQuaternion ) : zglTQuaternion;
-function quater_Dot( q1, q2 : zglTQuaternion ) : Single;
-function quater_Lerp( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
-function quater_FromRotation( Rotation : zglTPoint3D ) : zglTQuaternion;
-function quater_GetM4f( Quaternion : zglTQuaternion ) : zglTMatrix4f;
+function quater_Mul( q1, q2 : zglTQuaternion ) : zglTQuaternion; extdecl;
+function quater_Negate( Quaternion : zglTQuaternion ) : zglTQuaternion; extdecl;
+function quater_Normalize( Quaternion : zglTQuaternion ) : zglTQuaternion; extdecl;
+function quater_Dot( q1, q2 : zglTQuaternion ) : Single; extdecl;
+function quater_Lerp( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion; extdecl;
+function quater_FromRotation( Rotation : zglTPoint3D ) : zglTQuaternion; extdecl;
+function quater_GetM4f( Quaternion : zglTQuaternion ) : zglTMatrix4f; extdecl;
 
-function line3d_ClosestPoint( A, B, Point : zglTPoint3D ) : zglTPoint3D;
+function line3d_ClosestPoint( A, B, Point : zglTPoint3D ) : zglTPoint3D; extdecl;
 
-function plane_Get( A, B, C : zglTPoint3D ) : zglTPlane;
+function plane_Get( A, B, C : zglTPoint3D ) : zglTPlane; extdecl;
 function plane_Distance( Plane : zglTPlane; Point : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
 
-function tri_GetNormal( A, B, C : zglPPoint3D ) : zglTPoint3D;
+function tri_GetNormal( A, B, C : zglPPoint3D ) : zglTPoint3D; extdecl;
 
 function ArcTan2( X, Y : Single ) : Single; assembler;
 function ArcCos( Value : Single ) : Single;
 
 const
-  matrix3f_Identity: zglTMatrix3f = ( ( X: 1; Y: 0; Z: 0 ), ( X: 0; Y: 1; Z: 0 ), ( X: 0; Y: 0; Z: 1 ) );
-  matrix4f_Identity: zglTMatrix4f = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) );
+  matrix3f_Identity: zglTMatrix3f = ( a11: 1; a12: 0; a13: 0; a21: 0; a22: 1; a23: 0; a31: 0; a32: 0; a33: 1 );
+  matrix4f_Identity: zglTMatrix4f = ( a11: 1; a12: 0; a13: 0; a14: 0; a21: 0; a22: 1; a23: 0; a24: 0; a31: 0; a32: 0; a33: 1; a34: 0; a41: 0; a42: 0; a43: 0; a44: 1 );
   quater_Zero      : zglTQuaternion = ( X: 0; Y: 0; Z: 0; W: 0 );
 
 var
@@ -433,9 +433,9 @@ end;
 function vector_MulM3f;
 {$IFNDEF USE_ASM}
 begin
-  Result.X := Matrix[ 0 ].X * Vector.X + Matrix[ 1 ].X * Vector.Y + Matrix[ 2 ].X * Vector.Z;
-  Result.Y := Matrix[ 0 ].Y * Vector.X + Matrix[ 1 ].Y * Vector.Y + Matrix[ 2 ].Y * Vector.Z;
-  Result.Z := Matrix[ 0 ].Z * Vector.X + Matrix[ 1 ].Z * Vector.Y + Matrix[ 2 ].Z * Vector.Z;
+  Result.X := Matrix.a11 * Vector.X + Matrix.a21 * Vector.Y + Matrix.a31 * Vector.Z;
+  Result.Y := Matrix.a12 * Vector.X + Matrix.a22 * Vector.Y + Matrix.a32 * Vector.Z;
+  Result.Z := Matrix.a13 * Vector.X + Matrix.a23 * Vector.Y + Matrix.a33 * Vector.Z;
 {$ELSE}
 asm
   // Result.X
@@ -491,9 +491,9 @@ end;
 function vector_MulM4f;
 {$IFNDEF USE_ASM}
 begin
-  Result.X := Matrix[ 0, 0 ] * Vector.X + Matrix[ 1, 0 ] * Vector.Y + Matrix[ 2, 0 ] * Vector.Z + Matrix[ 3, 0 ];
-  Result.Y := Matrix[ 0, 1 ] * Vector.X + Matrix[ 1, 1 ] * Vector.Y + Matrix[ 2, 1 ] * Vector.Z + Matrix[ 3, 1 ];
-  Result.Z := Matrix[ 0, 2 ] * Vector.X + Matrix[ 1, 2 ] * Vector.Y + Matrix[ 2, 2 ] * Vector.Z + Matrix[ 3, 2 ];
+  Result.X := Matrix.a11 * Vector.X + Matrix.a21 * Vector.Y + Matrix.a31 * Vector.Z + Matrix.a41;
+  Result.Y := Matrix.a12 * Vector.X + Matrix.a22 * Vector.Y + Matrix.a32 * Vector.Z + Matrix.a42;
+  Result.Z := Matrix.a13 * Vector.X + Matrix.a23 * Vector.Y + Matrix.a33 * Vector.Z + Matrix.a43;
 {$ELSE}
 asm
   // Result.X
@@ -552,9 +552,9 @@ end;
 function vector_MulInvM4f;
 {$IFNDEF USE_ASM}
 begin
-  Result.x := Matrix[ 0, 0 ] * Vector.X + Matrix[ 0, 1 ] * Vector.Y + Matrix[ 0, 2 ] * Vector.Z + Matrix[ 0, 3 ];
-  Result.y := Matrix[ 1, 0 ] * Vector.X + Matrix[ 1, 1 ] * Vector.Y + Matrix[ 1, 2 ] * Vector.Z + Matrix[ 1, 3 ];
-  Result.z := Matrix[ 2, 0 ] * Vector.X + Matrix[ 2, 1 ] * Vector.Y + Matrix[ 2, 2 ] * Vector.Z + Matrix[ 2, 3 ];
+  Result.x := Matrix.a11 * Vector.X + Matrix.a12 * Vector.Y + Matrix.a13 * Vector.Z + Matrix.a14;
+  Result.y := Matrix.a21 * Vector.X + Matrix.a22 * Vector.Y + Matrix.a23 * Vector.Z + Matrix.a24;
+  Result.z := Matrix.a31 * Vector.X + Matrix.a32 * Vector.Y + Matrix.a33 * Vector.Z + Matrix.a34;
 {$ELSE}
 asm
   // Result.X
@@ -884,32 +884,50 @@ end;
 {------------------------------------------------------------------------------}
 function matrix3f_Get;
 begin
-  Result[ 0 ] := v1;
-  Result[ 1 ] := v2;
-  Result[ 2 ] := v3;
+  Result.a11 := v1.X;
+  Result.a12 := v1.Y;
+  Result.a13 := v1.Z;
+
+  Result.a21 := v2.X;
+  Result.a22 := v2.Y;
+  Result.a23 := v2.Z;
+
+  Result.a31 := v3.X;
+  Result.a32 := v3.Y;
+  Result.a33 := v3.Z;
 end;
 
 procedure matrix3f_OrthoNormalize;
 begin
-  Matrix[ 0 ] := vector_Normalize( Matrix[ 0 ] );
-  Matrix[ 2 ] := vector_Normalize( vector_Cross( Matrix[ 0 ], Matrix[ 1 ] ) );
-  Matrix[ 1 ] := vector_Normalize( vector_Cross( Matrix[ 2 ], Matrix[ 0 ] ) );
+  Matrix.row[ 0 ] := vector_Normalize( Matrix.row[ 0 ] );
+  Matrix.row[ 2 ] := vector_Normalize( vector_Cross( Matrix.row[ 0 ], Matrix.row[ 1 ] ) );
+  Matrix.row[ 1 ] := vector_Normalize( vector_Cross( Matrix.row[ 2 ], Matrix.row[ 0 ] ) );
 end;
 
 procedure matrix3f_Transpose;
+  var
+    t : Single;
 begin
-  Matrix[ 0 ] := vector_Get( Matrix[ 0 ].X, Matrix[ 1 ].X, Matrix[ 2 ].X );
-  Matrix[ 1 ] := vector_Get( Matrix[ 0 ].Y, Matrix[ 1 ].Y, Matrix[ 2 ].Y );
-  Matrix[ 2 ] := vector_Get( Matrix[ 0 ].Z, Matrix[ 1 ].Z, Matrix[ 2 ].Z );
+  t          := Matrix.a12;
+  Matrix.a12 := Matrix.a21;
+  Matrix.a21 := t;
+
+  t          := Matrix.a13;
+  Matrix.a13 := Matrix.a31;
+  Matrix.a31 := t;
+
+  t          := Matrix.a23;
+  Matrix.a23 := Matrix.a32;
+  Matrix.a32 := t;
 end;
 
 procedure matrix3f_Rotate;
   var
     tMatrix : zglTMatrix3f;
 begin
-  tMatrix[ 0 ] := vector_Get(   0, -aZ,  aY );
-  tMatrix[ 1 ] := vector_Get(  aZ,   0, -aX );
-  tMatrix[ 2 ] := vector_Get( -aY,  aX,   0 );
+  tMatrix.row[ 0 ] := vector_Get(   0, -aZ,  aY );
+  tMatrix.row[ 1 ] := vector_Get(  aZ,   0, -aX );
+  tMatrix.row[ 2 ] := vector_Get( -aY,  aX,   0 );
   tMatrix := matrix3f_Mul( tMatrix, Matrix^ );
   Matrix^ := matrix3f_Add( Matrix^, tMatrix );
   matrix3f_OrthoNormalize( Matrix );
@@ -917,61 +935,63 @@ end;
 
 function matrix3f_Add;
 begin
-  Result[ 0 ] := vector_Add( Matrix1[ 0 ], Matrix2[ 0 ] );
-  Result[ 1 ] := vector_Add( Matrix1[ 1 ], Matrix2[ 1 ] );
-  Result[ 2 ] := vector_Add( Matrix1[ 2 ], Matrix2[ 2 ] );
+  Result.row[ 0 ] := vector_Add( Matrix1.row[ 0 ], Matrix2.row[ 0 ] );
+  Result.row[ 1 ] := vector_Add( Matrix1.row[ 1 ], Matrix2.row[ 1 ] );
+  Result.row[ 2 ] := vector_Add( Matrix1.row[ 2 ], Matrix2.row[ 2 ] );
 end;
 
 function matrix3f_Mul;
 begin
-  Result[ 0 ].X := Matrix1[ 0 ].X * Matrix2[ 0 ].X + Matrix1[ 0 ].Y * Matrix2[ 1 ].X + Matrix1[ 0 ].Z * Matrix2[ 2 ].X;
-  Result[ 0 ].Y := Matrix1[ 0 ].X * Matrix2[ 0 ].Y + Matrix1[ 0 ].Y * Matrix2[ 1 ].Y + Matrix1[ 0 ].Z * Matrix2[ 2 ].Y;
-  Result[ 0 ].Z := Matrix1[ 0 ].X * Matrix2[ 0 ].Z + Matrix1[ 0 ].Y * Matrix2[ 1 ].Z + Matrix1[ 0 ].Z * Matrix2[ 2 ].Z;
-  Result[ 1 ].X := Matrix1[ 1 ].X * Matrix2[ 0 ].X + Matrix1[ 1 ].Y * Matrix2[ 1 ].X + Matrix1[ 1 ].Z * Matrix2[ 2 ].X;
-  Result[ 1 ].Y := Matrix1[ 1 ].X * Matrix2[ 0 ].Y + Matrix1[ 1 ].Y * Matrix2[ 1 ].Y + Matrix1[ 1 ].Z * Matrix2[ 2 ].Y;
-  Result[ 1 ].Z := Matrix1[ 1 ].X * Matrix2[ 0 ].Z + Matrix1[ 1 ].Y * Matrix2[ 1 ].Z + Matrix1[ 1 ].Z * Matrix2[ 2 ].Z;
-  Result[ 2 ].X := Matrix1[ 2 ].X * Matrix2[ 0 ].X + Matrix1[ 2 ].Y * Matrix2[ 1 ].X + Matrix1[ 2 ].Z * Matrix2[ 2 ].X;
-  Result[ 2 ].Y := Matrix1[ 2 ].X * Matrix2[ 0 ].Y + Matrix1[ 2 ].Y * Matrix2[ 1 ].Y + Matrix1[ 2 ].Z * Matrix2[ 2 ].Y;
-  Result[ 2 ].Z := Matrix1[ 2 ].X * Matrix2[ 0 ].Z + Matrix1[ 2 ].Y * Matrix2[ 1 ].Z + Matrix1[ 2 ].Z * Matrix2[ 2 ].Z;
+  Result.a11 := Matrix1.a11 * Matrix2.a11 + Matrix1.a12 * Matrix2.a21 + Matrix1.a13 * Matrix2.a31;
+  Result.a12 := Matrix1.a11 * Matrix2.a12 + Matrix1.a12 * Matrix2.a22 + Matrix1.a13 * Matrix2.a32;
+  Result.a13 := Matrix1.a11 * Matrix2.a13 + Matrix1.a12 * Matrix2.a23 + Matrix1.a13 * Matrix2.a33;
+
+  Result.a21 := Matrix1.a21 * Matrix2.a11 + Matrix1.a22 * Matrix2.a21 + Matrix1.a23 * Matrix2.a31;
+  Result.a22 := Matrix1.a21 * Matrix2.a12 + Matrix1.a22 * Matrix2.a22 + Matrix1.a23 * Matrix2.a32;
+  Result.a23 := Matrix1.a21 * Matrix2.a13 + Matrix1.a22 * Matrix2.a23 + Matrix1.a23 * Matrix2.a33;
+
+  Result.a31 := Matrix1.a31 * Matrix2.a11 + Matrix1.a32 * Matrix2.a21 + Matrix1.a33 * Matrix2.a31;
+  Result.a32 := Matrix1.a31 * Matrix2.a12 + Matrix1.a32 * Matrix2.a22 + Matrix1.a33 * Matrix2.a32;
+  Result.a33 := Matrix1.a31 * Matrix2.a13 + Matrix1.a32 * Matrix2.a23 + Matrix1.a33 * Matrix2.a33;
 end;
 
 procedure matrix4f_Transpose;
   var
     t : Single;
 begin
-  t              := Matrix[ 0, 1 ];
-  Matrix[ 0, 1 ] := Matrix[ 1, 0 ];
-  Matrix[ 1, 0 ] := t;
+  t          := Matrix.a12;
+  Matrix.a12 := Matrix.a21;
+  Matrix.a21 := t;
 
-  t              := Matrix[ 0, 2 ];
-  Matrix[ 0, 2 ] := Matrix[ 2, 0 ];
-  Matrix[ 2, 0 ] := t;
+  t          := Matrix.a13;
+  Matrix.a13 := Matrix.a31;
+  Matrix.a31 := t;
 
-  t              := Matrix[ 0, 3 ];
-  Matrix[ 0, 3 ] := Matrix[ 3, 0 ];
-  Matrix[ 3, 0 ] := t;
+  t          := Matrix.a14;
+  Matrix.a14 := Matrix.a41;
+  Matrix.a41 := t;
 
-  t              := Matrix[ 1, 2 ];
-  Matrix[ 1, 2 ] := Matrix[ 2, 1 ];
-  Matrix[ 2, 1 ] := t;
+  t          := Matrix.a23;
+  Matrix.a23 := Matrix.a32;
+  Matrix.a32 := t;
 
-  t              := Matrix[ 1, 3 ];
-  Matrix[ 1, 3 ] := Matrix[ 3, 1 ];
-  Matrix[ 3, 1 ] := t;
+  t          := Matrix.a24;
+  Matrix.a24 := Matrix.a42;
+  Matrix.a42 := t;
 
-  t              := Matrix[ 2, 3 ];
-  Matrix[ 2, 3 ] := Matrix[ 3, 2 ];
-  Matrix[ 3, 2 ] := t;
+  t          := Matrix.a34;
+  Matrix.a34 := Matrix.a43;
+  Matrix.a43 := t;
 end;
 
 function matrix4f_Determinant; 
 begin
-  Result := Matrix[ 0, 0 ] * Matrix[ 1, 1 ] * Matrix[ 2, 2 ] +
-            Matrix[ 1, 0 ] * Matrix[ 2, 1 ] * Matrix[ 0, 2 ] +
-            Matrix[ 2, 0 ] * Matrix[ 0, 1 ] * Matrix[ 1, 2 ] -
-            Matrix[ 2, 0 ] * Matrix[ 1, 1 ] * Matrix[ 0, 2 ] -
-            Matrix[ 1, 0 ] * Matrix[ 0, 1 ] * Matrix[ 2, 2 ] -
-            Matrix[ 0, 0 ] * Matrix[ 2, 1 ] * Matrix[ 1, 2 ];
+  Result := Matrix.a11 * Matrix.a22 * Matrix.a33 +
+            Matrix.a21 * Matrix.a32 * Matrix.a13 +
+            Matrix.a31 * Matrix.a12 * Matrix.a23 -
+            Matrix.a31 * Matrix.a22 * Matrix.a13 -
+            Matrix.a21 * Matrix.a12 * Matrix.a33 -
+            Matrix.a11 * Matrix.a32 * Matrix.a23;
 end;
 
 function matrix4f_Inverse;
@@ -979,30 +999,34 @@ function matrix4f_Inverse;
     det : Single;
 begin
   det := 1 / matrix4f_Determinant( Matrix );
-  Result[ 0, 0 ] :=  ( Matrix[ 1, 1 ] * Matrix[ 2, 2 ] - Matrix[ 2, 1 ] * Matrix[ 1, 2 ] ) * det;
-  Result[ 0, 1 ] := -( Matrix[ 0, 1 ] * Matrix[ 2, 2 ] - Matrix[ 2, 1 ] * Matrix[ 0, 2 ] ) * det;
-  Result[ 0, 2 ] :=  ( Matrix[ 0, 1 ] * Matrix[ 1, 2 ] - Matrix[ 1, 1 ] * Matrix[ 0, 2 ] ) * det;
-  Result[ 0, 3 ] := 0;
-  Result[ 1, 0 ] := -( Matrix[ 1, 0 ] * Matrix[ 2, 2 ] - Matrix[ 2, 0 ] * Matrix[ 1, 2 ] ) * det;
-  Result[ 1, 1 ] :=  ( Matrix[ 0, 0 ] * Matrix[ 2, 2 ] - Matrix[ 2, 0 ] * Matrix[ 0, 2 ] ) * det;
-  Result[ 1, 2 ] := -( Matrix[ 0, 0 ] * Matrix[ 1, 2 ] - Matrix[ 1, 0 ] * Matrix[ 0, 2 ] ) * det;
-  Result[ 1, 3 ] := 0;
-  Result[ 2, 0 ] :=  ( Matrix[ 1, 0 ] * Matrix[ 2, 1 ] - Matrix[ 2, 0 ] * Matrix[ 1, 1 ] ) * det;
-  Result[ 2, 1 ] := -( Matrix[ 0, 0 ] * Matrix[ 2, 1 ] - Matrix[ 2, 0 ] * Matrix[ 0, 1 ] ) * det;
-  Result[ 2, 2 ] :=  ( Matrix[ 0, 0 ] * Matrix[ 1, 1 ] - Matrix[ 1, 0 ] * Matrix[ 0, 1 ] ) * det;
-  Result[ 2, 3 ] := 0;
-  Result[ 3, 0 ] := -( Matrix[ 3, 0 ] * Result[ 0, 0 ] + Matrix[ 3, 1 ] * Result[ 1, 0 ] + Matrix[ 3, 2 ] * Result[ 2, 0 ] );
-  Result[ 3, 1 ] := -( Matrix[ 3, 0 ] * Result[ 0, 1 ] + Matrix[ 3, 1 ] * Result[ 1, 1 ] + Matrix[ 3, 2 ] * Result[ 2, 1 ] );
-  Result[ 3, 2 ] := -( Matrix[ 3, 0 ] * Result[ 0, 2 ] + Matrix[ 3, 1 ] * Result[ 1, 2 ] + Matrix[ 3, 2 ] * Result[ 2, 2 ] );
-  Result[ 3, 3 ] := 1;
+
+  Result.a11 :=  ( Matrix.a22 * Matrix.a33 - Matrix.a32 * Matrix.a23 ) * det;
+  Result.a12 := -( Matrix.a12 * Matrix.a33 - Matrix.a32 * Matrix.a13 ) * det;
+  Result.a13 :=  ( Matrix.a12 * Matrix.a23 - Matrix.a22 * Matrix.a13 ) * det;
+  Result.a14 := 0;
+
+  Result.a21 := -( Matrix.a21 * Matrix.a33 - Matrix.a31 * Matrix.a23 ) * det;
+  Result.a22 :=  ( Matrix.a11 * Matrix.a33 - Matrix.a31 * Matrix.a13 ) * det;
+  Result.a23 := -( Matrix.a11 * Matrix.a23 - Matrix.a21 * Matrix.a13 ) * det;
+  Result.a24 := 0;
+
+  Result.a31 :=  ( Matrix.a21 * Matrix.a32 - Matrix.a31 * Matrix.a22 ) * det;
+  Result.a32 := -( Matrix.a11 * Matrix.a32 - Matrix.a31 * Matrix.a12 ) * det;
+  Result.a33 :=  ( Matrix.a11 * Matrix.a22 - Matrix.a21 * Matrix.a12 ) * det;
+  Result.a34 := 0;
+
+  Result.a41 := -( Matrix.a41 * Result.a11 + Matrix.a42 * Result.a21 + Matrix.a43 * Result.a31 );
+  Result.a42 := -( Matrix.a41 * Result.a12 + Matrix.a42 * Result.a22 + Matrix.a43 * Result.a32 );
+  Result.a43 := -( Matrix.a41 * Result.a13 + Matrix.a42 * Result.a23 + Matrix.a43 * Result.a33 );
+  Result.a44 := 1;
 end;
 
 procedure matrix4f_Translate;
 begin
-  Matrix[ 3 ][ 0 ] := tX;
-  Matrix[ 3 ][ 1 ] := tY;
-  Matrix[ 3 ][ 2 ] := tZ;
-  Matrix[ 3 ][ 3 ] := 1;
+  Matrix.a41 := tX;
+  Matrix.a42 := tY;
+  Matrix.a43 := tZ;
+  Matrix.a44 := 1;
 end;
 
 procedure matrix4f_Rotate;
@@ -1013,20 +1037,20 @@ begin
   m_SinCos( aY, B, E );
   m_SinCos( aZ, C, F );
 
-  Matrix[ 0 ][ 0 ] := E * F;
-  Matrix[ 0 ][ 1 ] := E * C;
-  Matrix[ 0 ][ 2 ] := - B;
-  Matrix[ 0 ][ 3 ] := 0;
+  Matrix.a11 := E * F;
+  Matrix.a12 := E * C;
+  Matrix.a13 := - B;
+  Matrix.a14 := 0;
 
-  Matrix[ 1 ][ 0 ] := A * B * F - D * C;
-  Matrix[ 1 ][ 1 ] := A * B * C + D * F;
-  Matrix[ 1 ][ 2 ] := A * E;
-  Matrix[ 1 ][ 3 ] := 0;
+  Matrix.a21 := A * B * F - D * C;
+  Matrix.a22 := A * B * C + D * F;
+  Matrix.a23 := A * E;
+  Matrix.a24 := 0;
 
-  Matrix[ 2 ][ 0 ] := D * B * F + A * C;
-  Matrix[ 2 ][ 1 ] := D * B * C - A * F;
-  Matrix[ 2 ][ 2 ] := D * E;
-  Matrix[ 2 ][ 3 ] := 0;
+  Matrix.a31 := D * B * F + A * C;
+  Matrix.a32 := D * B * C - A * F;
+  Matrix.a33 := D * E;
+  Matrix.a34 := 0;
 end;
 
 procedure matrix4f_Scale;
@@ -1034,30 +1058,30 @@ procedure matrix4f_Scale;
     sMatrix : zglTMatrix4f;
 begin
   sMatrix := matrix4f_Identity;
-  sMatrix[ 0, 0 ] := sX;
-  sMatrix[ 1, 1 ] := sY;
-  sMatrix[ 2, 2 ] := sZ;
+  sMatrix.a11 := sX;
+  sMatrix.a22 := sY;
+  sMatrix.a33 := sZ;
   Matrix^ := matrix4f_Mul( Matrix^, sMatrix );
 end;
 
 function matrix4f_Mul;
 begin
-  Result[0, 0] := Matrix1[0, 0] * Matrix2[0, 0] + Matrix1[0, 1] * Matrix2[1, 0] + Matrix1[0, 2] * Matrix2[2, 0] + Matrix1[0, 3] * Matrix2[3, 0];
-  Result[1, 0] := Matrix1[1, 0] * Matrix2[0, 0] + Matrix1[1, 1] * Matrix2[1, 0] + Matrix1[1, 2] * Matrix2[2, 0] + Matrix1[1, 3] * Matrix2[3, 0];
-  Result[2, 0] := Matrix1[2, 0] * Matrix2[0, 0] + Matrix1[2, 1] * Matrix2[1, 0] + Matrix1[2, 2] * Matrix2[2, 0] + Matrix1[2, 3] * Matrix2[3, 0];
-  Result[3, 0] := Matrix1[3, 0] * Matrix2[0, 0] + Matrix1[3, 1] * Matrix2[1, 0] + Matrix1[3, 2] * Matrix2[2, 0] + Matrix1[3, 3] * Matrix2[3, 0];
-  Result[0, 1] := Matrix1[0, 0] * Matrix2[0, 1] + Matrix1[0, 1] * Matrix2[1, 1] + Matrix1[0, 2] * Matrix2[2, 1] + Matrix1[0, 3] * Matrix2[3, 1];
-  Result[1, 1] := Matrix1[1, 0] * Matrix2[0, 1] + Matrix1[1, 1] * Matrix2[1, 1] + Matrix1[1, 2] * Matrix2[2, 1] + Matrix1[1, 3] * Matrix2[3, 1];
-  Result[2, 1] := Matrix1[2, 0] * Matrix2[0, 1] + Matrix1[2, 1] * Matrix2[1, 1] + Matrix1[2, 2] * Matrix2[2, 1] + Matrix1[2, 3] * Matrix2[3, 1];
-  Result[3, 1] := Matrix1[3, 0] * Matrix2[0, 1] + Matrix1[3, 1] * Matrix2[1, 1] + Matrix1[3, 2] * Matrix2[2, 1] + Matrix1[3, 3] * Matrix2[3, 1];
-  Result[0, 2] := Matrix1[0, 0] * Matrix2[0, 2] + Matrix1[0, 1] * Matrix2[1, 2] + Matrix1[0, 2] * Matrix2[2, 2] + Matrix1[0, 3] * Matrix2[3, 2];
-  Result[1, 2] := Matrix1[1, 0] * Matrix2[0, 2] + Matrix1[1, 1] * Matrix2[1, 2] + Matrix1[1, 2] * Matrix2[2, 2] + Matrix1[1, 3] * Matrix2[3, 2];
-  Result[2, 2] := Matrix1[2, 0] * Matrix2[0, 2] + Matrix1[2, 1] * Matrix2[1, 2] + Matrix1[2, 2] * Matrix2[2, 2] + Matrix1[2, 3] * Matrix2[3, 2];
-  Result[3, 2] := Matrix1[3, 0] * Matrix2[0, 2] + Matrix1[3, 1] * Matrix2[1, 2] + Matrix1[3, 2] * Matrix2[2, 2] + Matrix1[3, 3] * Matrix2[3, 2];
-  Result[0, 3] := Matrix1[0, 0] * Matrix2[0, 3] + Matrix1[0, 1] * Matrix2[1, 3] + Matrix1[0, 2] * Matrix2[2, 3] + Matrix1[0, 3] * Matrix2[3, 3];
-  Result[1, 3] := Matrix1[1, 0] * Matrix2[0, 3] + Matrix1[1, 1] * Matrix2[1, 3] + Matrix1[1, 2] * Matrix2[2, 3] + Matrix1[1, 3] * Matrix2[3, 3];
-  Result[2, 3] := Matrix1[2, 0] * Matrix2[0, 3] + Matrix1[2, 1] * Matrix2[1, 3] + Matrix1[2, 2] * Matrix2[2, 3] + Matrix1[2, 3] * Matrix2[3, 3];
-  Result[3, 3] := Matrix1[3, 0] * Matrix2[0, 3] + Matrix1[3, 1] * Matrix2[1, 3] + Matrix1[3, 2] * Matrix2[2, 3] + Matrix1[3, 3] * Matrix2[3, 3];
+  Result.a11 := Matrix1.a11 * Matrix2.a11 + Matrix1.a12 * Matrix2.a21 + Matrix1.a13 * Matrix2.a31 + Matrix1.a14 * Matrix2.a41;
+  Result.a21 := Matrix1.a21 * Matrix2.a11 + Matrix1.a22 * Matrix2.a21 + Matrix1.a23 * Matrix2.a31 + Matrix1.a24 * Matrix2.a41;
+  Result.a31 := Matrix1.a31 * Matrix2.a11 + Matrix1.a32 * Matrix2.a21 + Matrix1.a33 * Matrix2.a31 + Matrix1.a34 * Matrix2.a41;
+  Result.a41 := Matrix1.a41 * Matrix2.a11 + Matrix1.a42 * Matrix2.a21 + Matrix1.a43 * Matrix2.a31 + Matrix1.a44 * Matrix2.a41;
+  Result.a12 := Matrix1.a11 * Matrix2.a12 + Matrix1.a12 * Matrix2.a22 + Matrix1.a13 * Matrix2.a32 + Matrix1.a14 * Matrix2.a42;
+  Result.a22 := Matrix1.a21 * Matrix2.a12 + Matrix1.a22 * Matrix2.a22 + Matrix1.a23 * Matrix2.a32 + Matrix1.a24 * Matrix2.a42;
+  Result.a32 := Matrix1.a31 * Matrix2.a12 + Matrix1.a32 * Matrix2.a22 + Matrix1.a33 * Matrix2.a32 + Matrix1.a34 * Matrix2.a42;
+  Result.a42 := Matrix1.a41 * Matrix2.a12 + Matrix1.a42 * Matrix2.a22 + Matrix1.a43 * Matrix2.a32 + Matrix1.a44 * Matrix2.a42;
+  Result.a13 := Matrix1.a11 * Matrix2.a13 + Matrix1.a12 * Matrix2.a23 + Matrix1.a13 * Matrix2.a33 + Matrix1.a14 * Matrix2.a43;
+  Result.a23 := Matrix1.a21 * Matrix2.a13 + Matrix1.a22 * Matrix2.a23 + Matrix1.a23 * Matrix2.a33 + Matrix1.a24 * Matrix2.a43;
+  Result.a33 := Matrix1.a31 * Matrix2.a13 + Matrix1.a32 * Matrix2.a23 + Matrix1.a33 * Matrix2.a33 + Matrix1.a34 * Matrix2.a43;
+  Result.a43 := Matrix1.a41 * Matrix2.a13 + Matrix1.a42 * Matrix2.a23 + Matrix1.a43 * Matrix2.a33 + Matrix1.a44 * Matrix2.a43;
+  Result.a14 := Matrix1.a11 * Matrix2.a14 + Matrix1.a12 * Matrix2.a24 + Matrix1.a13 * Matrix2.a34 + Matrix1.a14 * Matrix2.a44;
+  Result.a24 := Matrix1.a21 * Matrix2.a14 + Matrix1.a22 * Matrix2.a24 + Matrix1.a23 * Matrix2.a34 + Matrix1.a24 * Matrix2.a44;
+  Result.a34 := Matrix1.a31 * Matrix2.a14 + Matrix1.a32 * Matrix2.a24 + Matrix1.a33 * Matrix2.a34 + Matrix1.a34 * Matrix2.a44;
+  Result.a44 := Matrix1.a41 * Matrix2.a14 + Matrix1.a42 * Matrix2.a24 + Matrix1.a43 * Matrix2.a34 + Matrix1.a44 * Matrix2.a44;
 end;
 
 {------------------------------------------------------------------------------}
@@ -1234,22 +1258,22 @@ begin
       wz := W * z2;
     end;
 
-  Result[ 0, 0 ] := 1 - ( yy + zz );
-  Result[ 1, 0 ] := xy + wz;
-  Result[ 2, 0 ] := xz - wy;
-  Result[ 0, 1 ] := xy - wz;
-  Result[ 1, 1 ] := 1 - ( xx + zz );
-  Result[ 2, 1 ] := yz + wx;
-  Result[ 0, 2 ] := xz + wy;
-  Result[ 1, 2 ] := yz - wx;
-  Result[ 2, 2 ] := 1 - ( xx + yy );
-  Result[ 3, 0 ] := 0;
-  Result[ 3, 1 ] := 0;
-  Result[ 3, 2 ] := 0;
-  Result[ 0, 3 ] := 0;
-  Result[ 1, 3 ] := 0;
-  Result[ 2, 3 ] := 0;
-  Result[ 3, 3 ] := 1;
+  Result.a11 := 1 - ( yy + zz );
+  Result.a21 := xy + wz;
+  Result.a31 := xz - wy;
+  Result.a12 := xy - wz;
+  Result.a22 := 1 - ( xx + zz );
+  Result.a32 := yz + wx;
+  Result.a13 := xz + wy;
+  Result.a23 := yz - wx;
+  Result.a33 := 1 - ( xx + yy );
+  Result.a41 := 0;
+  Result.a42 := 0;
+  Result.a43 := 0;
+  Result.a14 := 0;
+  Result.a24 := 0;
+  Result.a34 := 0;
+  Result.a44 := 1;
 end;
 
 {------------------------------------------------------------------------------}
