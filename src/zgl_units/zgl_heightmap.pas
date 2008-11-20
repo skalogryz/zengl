@@ -98,20 +98,11 @@ begin
   HeightMap.Flags := Flags;
   vbo_Check( HeightMap.Flags );
 
-  if not Assigned( HeightMap.Normals ) Then
+  if ( not Assigned( HeightMap.Normals ) ) and ( HeightMap.Flags and BUILD_SNORMALS > 0 ) Then
     begin
-      if HeightMap.Flags and BUILD_FNORMALS > 0 Then
-        begin
-          HeightMap.Flags := HeightMap.Flags or USE_NORMALS;
-          SetLength( HeightMap.Normals, HeightMap.VCount );
-          BuildFNormals( HeightMap.FCount, HeightMap.Faces, HeightMap.Vertices, HeightMap.Normals );
-        end else
-      if HeightMap.Flags and BUILD_SNORMALS > 0 Then
-        begin
-          HeightMap.Flags := HeightMap.Flags or USE_NORMALS;
-          SetLength( HeightMap.Normals, HeightMap.VCount );
-          BuildSNormals( HeightMap.FCount, HeightMap.Faces, HeightMap.Vertices, HeightMap.Normals );
-        end;
+      HeightMap.Flags := HeightMap.Flags or USE_NORMALS;
+      SetLength( HeightMap.Normals, HeightMap.VCount );
+      BuildSNormals( HeightMap.FCount, HeightMap.VCount, HeightMap.Faces, HeightMap.Vertices, HeightMap.Normals );
     end;
 
   HeightMap.ICount := HeightMap.FCount * 3;
@@ -125,7 +116,7 @@ begin
         BuildIndices( HeightMap.FCount, HeightMap.Faces, HeightMap.Indices, 4 );
       end;
 
-  if HeightMap.Flags and BUILD_VBO > 0 Then
+  if HeightMap.Flags and USE_VBO > 0 Then
     vbo_Build( HeightMap.IBuffer, HeightMap.VBuffer, HeightMap.ICount, HeightMap.VCount,
                HeightMap.Indices, 
                HeightMap.Vertices, HeightMap.Normals,
@@ -157,7 +148,7 @@ begin
                  Byte( HeightMap.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( HeightMap.Flags and USE_MULTITEX3 > 0 );
 
-  if HeightMap.Flags and BUILD_VBO > 0 Then
+  if HeightMap.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
       if HeightMap.Flags and USE_NORMALS > 0 Then PN := PV + HeightMap.VCount * 12;
@@ -187,7 +178,7 @@ begin
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            if HeightMap.Flags and BUILD_VBO > 0 Then
+            if HeightMap.Flags and USE_VBO > 0 Then
               glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + HeightMap.VCount * i * 8  ) )
             else
               glTexCoordPointer( 2, GL_FLOAT, 0, @HeightMap.MultiTexCoords[ 0 + HeightMap.VCount * ( i - 1 ) ] );
@@ -197,7 +188,7 @@ begin
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  if HeightMap.Flags and BUILD_VBO > 0 Then
+  if HeightMap.Flags and USE_VBO > 0 Then
     begin
       if HeightMap.VCount < 65536 Then
         glDrawElements( GL_TRIANGLES, HeightMap.ICount, GL_UNSIGNED_SHORT, nil )
@@ -221,7 +212,7 @@ end;
 
 procedure heightmap_Free;
 begin
-  if HeightMap.Flags and BUILD_VBO > 0 Then
+  if HeightMap.Flags and USE_VBO > 0 Then
     vbo_Free( HeightMap.IBuffer, HeightMap.VBuffer, HeightMap.ICount, HeightMap.VCount );
   SetLength( HeightMap.Vertices, 0 );
   SetLength( HeightMap.Normals, 0 );
