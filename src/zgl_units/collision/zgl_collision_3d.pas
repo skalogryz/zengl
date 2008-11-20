@@ -354,7 +354,7 @@ begin
   for i := 0 to 2 do
     begin
       ra := OBB1.Size.point[ i ];
-      rb := OBB2.Size.X * abs( mR[ i ].X ) + OBB2.Size.Y * abs( mR[ i ].Y ) + OBB2.Size.Z * abs( mR[ i ].Z );
+      rb := OBB2.Size.X * abs( mR.row[ i ].X ) + OBB2.Size.Y * abs( mR.row[ i ].Y ) + OBB2.Size.Z * abs( mR.row[ i ].Z );
       ts := abs( T.point[ i ] );
       if ts > ra + rb Then
         begin
@@ -366,9 +366,9 @@ begin
   //система координат B
   for k := 0 to 2 do
     begin
-      ra := OBB1.Size.X * abs( mR[ 0 ].point[ k ] ) + OBB1.Size.Y * abs( mR[ 1 ].point[ k ] ) + OBB1.Size.Z * abs( mR[ 2 ].point[ k ] );
+      ra := OBB1.Size.X * abs( mR.row[ 0 ].point[ k ] ) + OBB1.Size.Y * abs( mR.row[ 1 ].point[ k ] ) + OBB1.Size.Z * abs( mR.row[ 2 ].point[ k ] );
       rb := OBB2.Size.point[ k ];
-      ts := abs( T.X * mR[ 0 ].point[ k ] + T.Y * mR[ 1 ].point[ k ] + T.Z * mR[ 2 ].point[ k ] );
+      ts := abs( T.X * mR.row[ 0 ].point[ k ] + T.Y * mR.row[ 1 ].point[ k ] + T.Z * mR.row[ 2 ].point[ k ] );
       if ts > ra + rb Then
         begin
           Result := FALSE;
@@ -378,9 +378,9 @@ begin
 
   //9 векторных произведений
   //L = A0 x B0
-  ra := OBB1.Size.Y * abs( mR[ 2 ].X ) + OBB1.Size.Z * abs( mR[ 1 ].X );
-  rb := OBB2.Size.Y * abs( mR[ 0 ].Z ) + OBB2.Size.Z * abs( mR[ 0 ].Y );
-  ts := abs( T.Z * mR[ 1 ].X - T.Y * mR[ 2 ].X );
+  ra := OBB1.Size.Y * abs( mR.row[ 2 ].X ) + OBB1.Size.Z * abs( mR.row[ 1 ].X );
+  rb := OBB2.Size.Y * abs( mR.row[ 0 ].Z ) + OBB2.Size.Z * abs( mR.row[ 0 ].Y );
+  ts := abs( T.Z * mR.row[ 1 ].X - T.Y * mR.row[ 2 ].X );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -388,9 +388,9 @@ begin
     end;
 
   //L = A0 x B1
-  ra := OBB1.Size.Y * abs( mR[ 2 ].Y ) + OBB1.Size.Z * abs( mR[ 1 ].Y );
-  rb := OBB2.Size.X * abs( mR[ 0 ].Z ) + OBB2.Size.Z * abs( mR[ 0 ].X );
-  ts := abs( T.Z * mR[ 1 ].Y - T.Y * mR[ 2 ].Y );
+  ra := OBB1.Size.Y * abs( mR.row[ 2 ].Y ) + OBB1.Size.Z * abs( mR.row[ 1 ].Y );
+  rb := OBB2.Size.X * abs( mR.row[ 0 ].Z ) + OBB2.Size.Z * abs( mR.row[ 0 ].X );
+  ts := abs( T.Z * mR.row[ 1 ].Y - T.Y * mR.row[ 2 ].Y );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -398,9 +398,9 @@ begin
     end;
 
   //L = A0 x B2
-  ra := OBB1.Size.Y * abs( mR[ 2 ].Z ) + OBB1.Size.Z * abs( mR[ 1 ].Z );
-  rb := OBB2.Size.X * abs( mR[ 0 ].Y ) + OBB2.Size.Y * abs( mR[ 0 ].X );
-  ts := abs( T.Z * mR[ 1 ].Z - T.Y * mR[ 2 ].Z );
+  ra := OBB1.Size.Y * abs( mR.row[ 2 ].Z ) + OBB1.Size.Z * abs( mR.row[ 1 ].Z );
+  rb := OBB2.Size.X * abs( mR.row[ 0 ].Y ) + OBB2.Size.Y * abs( mR.row[ 0 ].X );
+  ts := abs( T.Z * mR.row[ 1 ].Z - T.Y * mR.row[ 2 ].Z );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -408,9 +408,9 @@ begin
     end;
 
   //L = A1 x B0
-  ra := OBB1.Size.X * abs( mR[ 2 ].X ) + OBB1.Size.Z * abs( mR[ 0 ].X );
-  rb := OBB2.Size.Y * abs( mR[ 1 ].Z ) + OBB2.Size.Z * abs( mR[ 1 ].Y );
-  ts := abs( T.X * mR[ 2 ].X - T.Z * mR[ 0 ].X );
+  ra := OBB1.Size.X * abs( mR.row[ 2 ].X ) + OBB1.Size.Z * abs( mR.row[ 0 ].X );
+  rb := OBB2.Size.Y * abs( mR.row[ 1 ].Z ) + OBB2.Size.Z * abs( mR.row[ 1 ].Y );
+  ts := abs( T.X * mR.row[ 2 ].X - T.Z * mR.row[ 0 ].X );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -418,9 +418,9 @@ begin
     end;
 
   //L = A1 x B1
-  ra := OBB1.Size.X * abs( mR[ 2 ].Y ) + OBB1.Size.Z * abs( mR[ 0 ].Y );
-  rb := OBB2.Size.X * abs( mR[ 1 ].Z ) + OBB2.Size.Z * abs( mR[ 1 ].X );
-  ts := abs( T.X * mR[ 2 ].Y - T.Z * mR[ 0 ].Y );
+  ra := OBB1.Size.X * abs( mR.row[ 2 ].Y ) + OBB1.Size.Z * abs( mR.row[ 0 ].Y );
+  rb := OBB2.Size.X * abs( mR.row[ 1 ].Z ) + OBB2.Size.Z * abs( mR.row[ 1 ].X );
+  ts := abs( T.X * mR.row[ 2 ].Y - T.Z * mR.row[ 0 ].Y );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -428,9 +428,9 @@ begin
     end;
 
   //L = A1 x B2
-  ra := OBB1.Size.X * abs( mR[ 2 ].Z ) + OBB1.Size.Z * abs( mR[ 0 ].Z );
-  rb := OBB2.Size.X * abs( mR[ 1 ].Y ) + OBB2.Size.Y * abs( mR[ 1 ].X );
-  ts := abs( T.X * mR[ 2 ].Z - T.Z * mR[ 0 ].Z );
+  ra := OBB1.Size.X * abs( mR.row[ 2 ].Z ) + OBB1.Size.Z * abs( mR.row[ 0 ].Z );
+  rb := OBB2.Size.X * abs( mR.row[ 1 ].Y ) + OBB2.Size.Y * abs( mR.row[ 1 ].X );
+  ts := abs( T.X * mR.row[ 2 ].Z - T.Z * mR.row[ 0 ].Z );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -438,9 +438,9 @@ begin
     end;
 
   //L = A2 x B0
-  ra := OBB1.Size.X * abs( mR[ 1 ].X ) + OBB1.Size.Y * abs( mR[ 0 ].X );
-  rb := OBB2.Size.Y * abs( mR[ 2 ].Z ) + OBB2.Size.Z * abs( mR[ 2 ].Y );
-  ts := abs( T.Y * mR[ 0 ].X - T.X * mR[ 1 ].X );
+  ra := OBB1.Size.X * abs( mR.row[ 1 ].X ) + OBB1.Size.Y * abs( mR.row[ 0 ].X );
+  rb := OBB2.Size.Y * abs( mR.row[ 2 ].Z ) + OBB2.Size.Z * abs( mR.row[ 2 ].Y );
+  ts := abs( T.Y * mR.row[ 0 ].X - T.X * mR.row[ 1 ].X );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -448,9 +448,9 @@ begin
     end;
 
   //L = A2 x B1
-  ra := OBB1.Size.X * abs( mR[ 1 ].Y ) + OBB1.Size.Y * abs( mR[ 0 ].Y );
-  rb := OBB2.Size.X * abs( mR[ 2 ].Z ) + OBB2.Size.Z * abs( mR[ 2 ].X );
-  ts := abs( T.Y * mR[ 0 ].Y - T.X * mR[ 1 ].Y );
+  ra := OBB1.Size.X * abs( mR.row[ 1 ].Y ) + OBB1.Size.Y * abs( mR.row[ 0 ].Y );
+  rb := OBB2.Size.X * abs( mR.row[ 2 ].Z ) + OBB2.Size.Z * abs( mR.row[ 2 ].X );
+  ts := abs( T.Y * mR.row[ 0 ].Y - T.X * mR.row[ 1 ].Y );
   if ts > ra + rb Then
     begin
       Result := FALSE;
@@ -458,9 +458,9 @@ begin
     end;
 
   //L = A2 x B2
-  ra := OBB1.Size.X * abs( mR[ 1 ].Z ) + OBB1.Size.Y * abs( mR[ 0 ].Z );
-  rb := OBB2.Size.X * abs( mR[ 2 ].Y ) + OBB2.Size.Y * abs( mR[ 2 ].X );
-  ts := abs( T.Y * mR[ 0 ].Z - T.X * mR[ 1 ].Z );
+  ra := OBB1.Size.X * abs( mR.row[ 1 ].Z ) + OBB1.Size.Y * abs( mR.row[ 0 ].Z );
+  rb := OBB2.Size.X * abs( mR.row[ 2 ].Y ) + OBB2.Size.Y * abs( mR.row[ 2 ].X );
+  ts := abs( T.Y * mR.row[ 0 ].Z - T.X * mR.row[ 1 ].Z );
   if ts > ra + rb Then
     begin
       Result := FALSE;
