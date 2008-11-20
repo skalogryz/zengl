@@ -1,7 +1,7 @@
-VERSION = 0.0.24
+VERSION = 0.0.33
 FPC     = fpc
 FPCINW  =
-FLAGS   = -OG3 -XdsX -CX
+FLAGS   = -OG3p3 -XdsX -CX
 #
 INCLUDE = -Fuzgl_units \
 -Fuzgl_units/system \

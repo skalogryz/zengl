@@ -86,7 +86,7 @@ uses
   zgl_camera_3d,
 
   zgl_mesh_file,
-  zgl_static_mesh,
+  zgl_simple_mesh,
   zgl_skinned_mesh,
   zgl_heightmap,
 
@@ -288,6 +288,7 @@ exports
   
   // Static Mesh
   smesh_LoadFromFile,
+  smesh_Animate,
   smesh_Draw,
   smesh_DrawGroup,
   smesh_Free,

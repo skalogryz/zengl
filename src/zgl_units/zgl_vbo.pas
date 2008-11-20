@@ -45,6 +45,7 @@ procedure vbo_Build;
   var
     i, size : DWORD;
     pn, pt  : DWORD;
+    Mode    : DWORD;
 begin
   if Flags and USE_MULTITEX3 > 0 Then
     begin
@@ -54,14 +55,19 @@ begin
       if Flags and USE_MULTITEX2 > 0 Then
         Flags := Flags or USE_MULTITEX1;
 
+  if Flags and BUILD_VBO_STATIC > 0 Then
+    Mode := GL_STATIC_DRAW_ARB
+  else
+    Mode := GL_STREAM_DRAW_ARB;
+
   if ogl_CanVBO Then
     begin
       glGenBuffersARB( 1, @IBuffer );
       glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, IBuffer );
       if VCount < 65536 Then
-        glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, ICount * 2, Indices, GL_STATIC_DRAW_ARB )
+        glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, ICount * 2, Indices, Mode )
       else
-        glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, ICount * 4, Indices, GL_STATIC_DRAW_ARB );
+        glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, ICount * 4, Indices, Mode );
       glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 
       size := VCount * 12;
@@ -86,7 +92,7 @@ begin
 
       glGenBuffersARB( 1, @VBuffer );
       glBindBufferARB( GL_ARRAY_BUFFER_ARB, VBuffer );
-      glBufferDataARB( GL_ARRAY_BUFFER_ARB, size, nil, GL_STATIC_DRAW_ARB );
+      glBufferDataARB( GL_ARRAY_BUFFER_ARB, size, nil, Mode );
       glBufferSubDataARB( GL_ARRAY_BUFFER_ARB, 0, VCount * 12, Vertices );
       if Flags and USE_NORMALS > 0 Then
         glBufferSubDataARB( GL_ARRAY_BUFFER_ARB, pn, VCount * 12, Normals );
@@ -117,8 +123,14 @@ end;
 
 procedure vbo_Check;
 begin
-  if ( Flags and BUILD_VBO > 0 ) and ( not ogl_CanVBO ) Then
-    Flags := Flags xor BUILD_VBO;
+  if ( ( Flags and BUILD_VBO_STATIC > 0 ) or ( Flags and BUILD_VBO_STREAM > 0 ) ) and ogl_CanVBO Then
+    Flags := Flags or USE_VBO
+  else
+    if Flags and BUILD_VBO_STATIC > 0 Then
+      Flags := Flags xor BUILD_VBO_STATIC
+    else
+      if Flags and BUILD_VBO_STREAM > 0 Then
+        Flags := Flags xor BUILD_VBO_STREAM;
 end;
 
 {procedure vbo_Draw;

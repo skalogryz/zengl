@@ -28,7 +28,7 @@ uses
   zgl_math;
 
 procedure shadow_InitVolume( var Volume : zglPShadowVolume; Vertices : zglPPoint3DArray; FCount : DWORD; Faces : zglPFaceArray ); extdecl;
-procedure shadow_CalcVolume( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3DArray; Light : zglTPoint3D; Extrude : Single ); extdecl;
+procedure shadow_CalcVolume( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3DArray; Light : zglTPoint3D; RebuildPlanes : Boolean; Extrude : Single ); extdecl;
 procedure shadow_DrawVolume( Volume : zglPShadowVolume; zFail : Boolean ); extdecl;
 procedure shadow_DrawShadowVolumes( DrawVolumes : Pointer ); extdecl;
 
@@ -111,10 +111,11 @@ begin
 
   with Volume^ do
     begin
-      for i := 0 to FCount - 1 do
-        Planes[ i ] := plane_Get( Vertices[ Indices[ i * 3 + 0 ] ],
-                                  Vertices[ Indices[ i * 3 + 1 ] ],
-                                  Vertices[ Indices[ i * 3 + 2 ] ] );
+      if RebuildPlanes Then
+        for i := 0 to FCount - 1 do
+          Planes[ i ] := plane_Get( Vertices[ Indices[ i * 3 + 0 ] ],
+                                    Vertices[ Indices[ i * 3 + 1 ] ],
+                                    Vertices[ Indices[ i * 3 + 2 ] ] );
 
       FillChar( isFacingLight[ 0 ], FCount, 0 );
       for i := 0 to FCount - 1 do

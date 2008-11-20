@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
-unit zgl_static_mesh;
+unit zgl_simple_mesh;
 
 {$I define.inc}
 
@@ -31,12 +31,16 @@ uses
   zgl_const,
   zgl_types,
   zgl_global_var,
+  zgl_timers,
   zgl_mesh_file,
+  zgl_vbo,
+  zgl_math,
   zgl_utils_3d;
-  
+
 function  smesh_LoadFromFile( var Mesh : zglPSMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
-procedure smesh_Draw( Mesh : zglPSMesh ); extdecl;
-procedure smesh_DrawGroup( Mesh : zglPSMesh; Group : DWORD ); extdecl;
+procedure smesh_Animate( Mesh : zglPSMesh; State : zglPSimpleState ); extdecl;
+procedure smesh_Draw( Mesh : zglPSMesh; State : zglPSimpleState ); extdecl;
+procedure smesh_DrawGroup( Mesh : zglPSMesh; State : zglPSimpleState; Group : DWORD ); extdecl;
 procedure smesh_Free( var Mesh : zglPSMesh ); extdecl;
 
 implementation
@@ -46,10 +50,32 @@ var
 
 function smesh_LoadFromFile;
   var
-    i        : DWORD;
+    i, f     : DWORD;
     M        : zglTMemory;
-    DataID   : Byte;
+    DataID, t: Byte;
     TexLayer : Byte = 0;
+    function getVI( ID : DWORD ) : DWORD;
+      var
+        k : DWORD;
+    begin
+      for k := 0 to Mesh.VCount - 1 do
+        if ( Mesh.Vertices[ ID ].X = Mesh.Vertices[ k ].X ) and
+           ( Mesh.Vertices[ ID ].Y = Mesh.Vertices[ k ].Y ) and
+           ( Mesh.Vertices[ ID ].Z = Mesh.Vertices[ k ].Z ) Then
+          begin
+            Result := k;
+            if ( k <> ID ) and ( Mesh.RVCount = 0 ) Then Mesh.RVCount := ID;
+            break;
+          end;
+    end;
+    procedure calcVI;
+      var
+        k : DWORD;
+    begin
+      SetLength( Mesh.RIndices, Mesh.VCount );
+      for k := 0 to Mesh.VCount - 1 do
+        Mesh.RIndices[ k ] := getVI( k );
+    end;
 begin
   Mesh := AllocMem( SizeOf( zglTSMesh ) );
   Result := FALSE;
@@ -74,6 +100,8 @@ begin
   Mesh.TCount := zmfHeader.TCount;
   Mesh.FCount := zmfHeader.FCount;
   Mesh.GCount := zmfHeader.GCount;
+  Mesh.ACount := 0;
+  Mesh.Frames := 1;
 
   SetLength( Mesh.Vertices, Mesh.VCount );
   if zmfHeader.Flags and USE_NORMALS > 0 Then SetLength( Mesh.Normals, Mesh.VCount );
@@ -110,6 +138,14 @@ begin
           begin
             zmf_ReadGroups( M, Mesh.Groups );
           end;
+        ZMF_FRAME:
+          begin
+            INC( Mesh.Frames );
+            SetLength( Mesh.Vertices, Mesh.VCount * Mesh.Frames );
+            if zmfHeader.Flags and USE_NORMALS > 0 Then
+              SetLength( Mesh.Normals, Mesh.VCount * Mesh.Frames );
+            zmf_ReadFrame( M, Mesh.Vertices, Mesh.Normals );
+          end;
         ZMF_PACKED_VERTICES:
           begin
             zmf_ReadPackedVertices( M, Mesh.Vertices );
@@ -131,24 +167,48 @@ begin
           begin
             zmf_ReadGroupsW( M, Mesh.Groups );
           end;
+        ZMF_PACKED_FRAME:
+          begin
+            INC( Mesh.Frames );
+            SetLength( Mesh.Vertices, Mesh.VCount * Mesh.Frames );
+            if zmfHeader.Flags and USE_NORMALS > 0 Then
+              SetLength( Mesh.Normals, Mesh.VCount * Mesh.Frames );
+            zmf_ReadPackedFrame( M, Mesh.Vertices, Mesh.Normals );
+          end;
+        ZMF_ACTION:
+          begin
+            SetLength( Mesh.Actions, Mesh.ACount + 1 );
+            mem_Read( M, t, 1 );
+            SetLength( Mesh.Actions[ Mesh.ACount ].Name, t );
+            mem_Read( M, Mesh.Actions[ Mesh.ACount ].Name,   t );
+            mem_Read( M, Mesh.Actions[ Mesh.ACount ].FPS,    4 );
+            mem_Read( M, Mesh.Actions[ Mesh.ACount ].FCount, 4 );
+            mem_Read( M, Mesh.Actions[ Mesh.ACount ].FFrame, 4 );
+            INC( Mesh.ACount );
+          end;
       end;
     end;
   mem_Free( M );
 
-  if not Assigned( Mesh.Normals ) Then
+  calcVI;
+  if Mesh.Frames > 1 Then
+    for f := 0 to Mesh.Frames - 1 do
+      begin
+        for i := Mesh.RVCount to Mesh.VCount - 1 do
+          Mesh.Vertices[ Mesh.VCount * f + i ] := Mesh.Vertices[ Mesh.VCount * f + Mesh.RIndices[ i ] ];
+        if zmfHeader.Flags and USE_NORMALS > 0 Then
+          for i := Mesh.RVCount to Mesh.VCount - 1 do
+            Mesh.Normals[ Mesh.VCount * f + i ] := Mesh.Normals[ Mesh.VCount * f + Mesh.RIndices[ i ] ];
+      end;
+
+  vbo_Check( Mesh.Flags );
+
+  if ( not Assigned( Mesh.Normals ) ) and ( Mesh.Flags and BUILD_SNORMALS > 0 ) Then
     begin
-      if Mesh.Flags and BUILD_FNORMALS > 0 Then
-        begin
-          Mesh.Flags := Mesh.Flags or USE_NORMALS;
-          SetLength( Mesh.Normals, Mesh.VCount );
-          BuildFNormals( Mesh.FCount, Mesh.Faces, Mesh.Vertices, Mesh.Normals );
-        end else
-      if Mesh.Flags and BUILD_SNORMALS > 0 Then
-        begin
-          Mesh.Flags := Mesh.Flags or USE_NORMALS;
-          SetLength( Mesh.Normals, Mesh.VCount );
-          BuildSNormals( Mesh.FCount, Mesh.Faces, Mesh.Vertices, Mesh.Normals );
-        end;
+      Mesh.Flags := Mesh.Flags or USE_NORMALS;
+      SetLength( Mesh.Normals, Mesh.VCount * Mesh.Frames );
+      for i := 0 to Mesh.Frames - 1 do
+        BuildSNormals( Mesh.FCount, Mesh.VCount, Mesh.Faces, Mesh.Vertices[ i * Mesh.VCount ], Mesh.Normals[ i * Mesh.VCount ] );
     end;
 
   if Mesh.VCount < 65536 Then
@@ -165,7 +225,75 @@ begin
           Mesh.Groups[ i ].Indices := Mesh.Indices + Mesh.Groups[ i ].IFace * 3 * 4;
       end;
 
+  if Mesh.Flags and USE_VBO > 0 Then
+    vbo_Build( Mesh.IBuffer, Mesh.VBuffer, Mesh.FCount * 3, Mesh.VCount{ * Mesh.Frames},
+               Mesh.Indices,
+               Mesh.Vertices, Mesh.Normals,
+               Mesh.TexCoords, Mesh.MultiTexCoords,
+               Mesh.Flags );
+
   Result := TRUE;
+end;
+
+procedure smesh_Animate;
+  var
+    i, j : Integer;
+    prevFrame, nextFrame : Integer;
+    d   : Single;
+    b   : Boolean;
+    vb  : Pointer;
+    vb2 : Pointer;
+begin
+  if length( State.Vertices ) < Mesh.VCount Then
+    SetLength( State.Vertices, Mesh.VCount );
+  if ( length( State.Normals ) < Mesh.VCount ) and ( Mesh.Flags and USE_NORMALS > 0 ) Then
+    SetLength( State.Normals, Mesh.VCount );
+
+  with State^ do
+    begin
+      CalcFrame( Delta, prevDelta, d, Time, Frame, prevFrame, nextFrame, Mesh.Actions[ Action ].FFrame, Mesh.Actions[ Action ].FCount );
+
+      if Mesh.Flags and BUILD_VBO_STATIC > 0 Then exit;
+
+      for i := 0 to Mesh.RVCount - 1 do
+        Vertices[ i ] := vector_Lerp( Mesh.Vertices[ i + prevFrame * Mesh.VCount ], Mesh.Vertices[ i + nextFrame * Mesh.VCount ], d );
+      for i := Mesh.RVCount to Mesh.VCount - 1 do
+        Vertices[ i ] := Vertices[ Mesh.RIndices[ i ] ];
+
+      if Mesh.Flags and USE_NORMALS > 0 Then
+        begin
+          for i := 0 to Mesh.RVCount - 1 do
+            Normals[ i ] := vector_Lerp( Mesh.Normals[ i + prevFrame * Mesh.VCount ], Mesh.Normals[ i + nextFrame * Mesh.VCount ], d );
+          for i := Mesh.RVCount to Mesh.VCount - 1 do
+            Normals[ i ] := Normals[ Mesh.RIndices[ i ] ];
+        end;
+    end;
+
+  if Mesh.Flags and BUILD_VBO_STREAM > 0 Then
+    begin
+      if glIsBufferARB( State.VBuffer ) = GL_FALSE Then
+        begin
+          glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+          glGetBufferParameterivARB( GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, @i );
+          vb := glMapBufferARB( GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB );
+          vb2 := AllocMem( i );
+          Move( vb^, vb2^, i );
+          glUnmapBufferARB( GL_ARRAY_BUFFER_ARB );
+
+          glGenBuffersARB( 1, @State.VBuffer );
+          glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
+          glBufferDataARB( GL_ARRAY_BUFFER_ARB, i, vb2, GL_STREAM_DRAW_ARB );
+        end;
+
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
+      vb := glMapBufferARB( GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB );
+
+      Move( State.Vertices[ 0 ], vb^, SizeOf( zglTPoint3D ) * Mesh.VCount );
+      if Mesh.Flags and USE_NORMALS > 0 Then
+        Move( State.Normals[ 0 ], Pointer( vb + SizeOf( zglTPoint3D ) * Mesh.VCount )^, SizeOf( zglTPoint3D ) * Mesh.VCount );
+      glUnmapBufferARB( GL_ARRAY_BUFFER_ARB );
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
+    end;
 end;
 
 procedure smesh_Draw;
@@ -180,19 +308,33 @@ begin
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
-      if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12;
-      if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12;
-      glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+      if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12{ * Mesh.Frames};
+      if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12{ * Mesh.Frames};
+      if glIsBufferARB( State.VBuffer ) = GL_FALSE Then
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer )
+      else
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
       glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh.IBuffer );
     end else
       begin
-        PV := Ptr( @Mesh.Vertices[ 0 ] );
-        if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @Mesh.Normals[ 0 ] );
-        if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+        if Assigned( State ) Then
+          begin
+            PV := Ptr( @State.Vertices[ 0 ] );
+            if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @State.Normals[ 0 ] );
+            if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+          end else
+            begin
+              PV := Ptr( @Mesh.Vertices[ 0 ] );
+              if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @Mesh.Normals[ 0 ] );
+              if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+            end;
       end;
+
+  {if Assigned( State ) and ( Mesh.Flags and BUILD_VBO_STATIC > 0 ) Then
+    PV := PV + Mesh.VCount * 12 * ( Mesh.Actions[ State.nAction ].FFrame + State.nFrame );}
                  
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
@@ -210,7 +352,7 @@ begin
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            if Mesh.Flags and BUILD_VBO > 0 Then
+            if Mesh.Flags and USE_VBO > 0 Then
               glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Mesh.VCount * i * 8  ) )
             else
               glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
@@ -220,7 +362,7 @@ begin
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       if Mesh.VCount < 65536 Then
         glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_SHORT, nil )
@@ -256,18 +398,29 @@ begin
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
-      if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12;
-      if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12;
-      glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+      if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12 * Mesh.Frames;
+      if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12 * Mesh.Frames;
+      if glIsBufferARB( State.VBuffer ) = GL_FALSE Then
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer )
+      else
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
       glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh.IBuffer );
     end else
       begin
-        PV := Ptr( @Mesh.Vertices[ 0 ] );
-        if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @Mesh.Normals[ 0 ] );
-        if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+        if Assigned( State ) Then
+          begin
+            PV := Ptr( @State.Vertices[ 0 ] );
+            if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @State.Normals[ 0 ] );
+            if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+          end else
+            begin
+              PV := Ptr( @Mesh.Vertices[ 0 ] );
+              if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @Mesh.Normals[ 0 ] );
+              if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
+            end;
       end;
                  
   if Mesh.Flags and USE_NORMALS > 0 Then
@@ -286,7 +439,7 @@ begin
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            if Mesh.Flags and BUILD_VBO > 0 Then
+            if Mesh.Flags and USE_VBO > 0 Then
               glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Mesh.VCount * i * 8  ) )
             else
               glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
@@ -296,7 +449,7 @@ begin
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       if Mesh.VCount < 65536 Then
         glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_SHORT, Pointer( Mesh.Groups[ Group ].IFace * 3 * 2 ) )
@@ -329,6 +482,8 @@ begin
   SetLength( Mesh.Faces, 0 );
   SetLength( Mesh.Groups, 0 );
   FreeMem( Mesh.Indices );
+  SetLength( Mesh.RIndices, 0 );
+  SetLength( Mesh.Actions, 0 );
   FreeMem( Mesh );
 end;
 

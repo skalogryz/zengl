@@ -182,7 +182,7 @@ begin
           z := i;
         end;
   if tbuildVBO Then
-    if Octree.Flags and BUILD_VBO > 0 Then
+    if Octree.Flags and USE_VBO > 0 Then
       begin
         for i := 0 to RDSize - 1 do
           begin
@@ -286,20 +286,11 @@ begin
       Octree.MainNode.Cube.Size.Z := max.z - min.z;
     end;
 
-  if not Assigned( Octree.Normals ) Then
+  if ( not Assigned( Octree.Normals ) ) and ( Octree.Flags and BUILD_SNORMALS > 0 ) Then
     begin
-      if Octree.Flags and BUILD_FNORMALS > 0 Then
-        begin
-          Octree.Flags := Octree.Flags or USE_NORMALS;
-          SetLength( Octree.Normals, Octree.VCount );
-          BuildFNormals( Octree.FCount, Octree.Faces, Octree.Vertices, Octree.Normals );
-        end else
-      if Octree.Flags and BUILD_SNORMALS > 0 Then
-        begin
-          Octree.Flags := Octree.Flags or USE_NORMALS;
-          SetLength( Octree.Normals, Octree.VCount );
-          BuildSNormals( Octree.FCount, Octree.Faces, Octree.Vertices, Octree.Normals );
-        end;
+      Octree.Flags := Octree.Flags or USE_NORMALS;
+      SetLength( Octree.Normals, Octree.VCount );
+      BuildSNormals( Octree.FCount, Octree.VCount, Octree.Faces, Octree.Vertices, Octree.Normals );
     end;
 
   vbo_Check( Octree.Flags );
@@ -313,12 +304,12 @@ begin
                                          Octree.Vertices[ Octree.Faces[ i, 2 ] ] );
     end;
 
-  if Octree.Flags and BUILD_VBO > 0 Then tbuildVBO := TRUE;
+  if Octree.Flags and USE_VBO > 0 Then tbuildVBO := TRUE;
     
   octree_AddNode( Octree, Octree.MainNode, Octree.FCount, Faces );
   SetLength( Faces, 0 );
 
-  if Octree.Flags and BUILD_VBO > 0 Then
+  if Octree.Flags and USE_VBO > 0 Then
     begin
       vbo_Build( Octree.IBuffer, Octree.VBuffer, Octree.ICount, Octree.VCount,
                  Octree.Indices, 
@@ -344,7 +335,7 @@ begin
   if Assigned( Octree.MainNode ) Then
     octree_DelNode( Octree.MainNode );
     
-  if Octree.Flags and BUILD_VBO > 0 Then
+  if Octree.Flags and USE_VBO > 0 Then
     vbo_Free( Octree.IBuffer, Octree.VBuffer, Octree.VCount, Octree.ICount );
 end;
 
@@ -645,7 +636,7 @@ begin
   Octree.r_DFacesCount := 0;
   Octree.r_NodeACount  := 0;
   
-  if Octree.Flags and BUILD_VBO > 0 Then
+  if Octree.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
       if Octree.Flags and USE_NORMALS > 0 Then PN := PV + Octree.VCount * 12;
@@ -681,7 +672,7 @@ begin
             begin
               glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
               glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-              if Octree.Flags and BUILD_VBO > 0 Then
+              if Octree.Flags and USE_VBO > 0 Then
                 glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Octree.VCount * i * 8  ) )
               else
                 glTexCoordPointer( 2, GL_FLOAT, 0, @Octree.MultiTexCoords[ 0 + Octree.VCount * ( i - 1 ) ] )
@@ -694,12 +685,12 @@ begin
 
   octree_DrawNode( Octree, Octree.MainNode, Frustum );
 
-  if Octree.Flags and BUILD_VBO > 0 Then
+  if Octree.Flags and USE_VBO > 0 Then
     glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 
   octree_DrawDFaces( Octree, Octree.MainNode, Frustum );
   
-  if Octree.Flags and BUILD_VBO > 0 Then
+  if Octree.Flags and USE_VBO > 0 Then
     glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
   glDisableClientState( GL_VERTEX_ARRAY );

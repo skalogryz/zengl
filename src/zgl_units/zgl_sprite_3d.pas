@@ -48,14 +48,14 @@ begin
   Size.Y     := sY;
   Size.Z     := sZ;
 
-  Cross1.X := Matrix[ 0, 0 ];
-  Cross1.Y := Matrix[ 1, 0 ];
-  Cross1.Z := Matrix[ 2, 0 ];
+  Cross1.X := Matrix.a11;
+  Cross1.Y := Matrix.a21;
+  Cross1.Z := Matrix.a31;
   Cross1   := vector_Mul( Cross1, Size );
 
-  Cross2.X := Matrix[ 0, 1 ];
-  Cross2.Y := Matrix[ 1, 1 ];
-  Cross2.Z := Matrix[ 2, 1 ];
+  Cross2.X := Matrix.a12;
+  Cross2.Y := Matrix.a22;
+  Cross2.Z := Matrix.a32;
   Cross2   := Vector_Mul( Cross2, Size );
 
   A := vector_Add( Position, vector_Get( -Cross1.X - Cross2.X, -Cross1.Y - Cross2.Y, -Cross1.Z - Cross2.Z ) );
@@ -86,14 +86,14 @@ begin
   Size.Y     := sY;
   Size.Z     := sZ;
 
-  Cross1.X := Matrix[ 0, 0 ];
-  Cross1.Y := Matrix[ 1, 0 ];
-  Cross1.Z := Matrix[ 2, 0 ];
+  Cross1.X := Matrix.a11;
+  Cross1.Y := Matrix.a21;
+  Cross1.Z := Matrix.a31;
   Cross1   := vector_Mul( Cross1, Size );
 
-  Cross2.X := Matrix[ 0, 1 ];
-  Cross2.Y := Matrix[ 1, 1 ];
-  Cross2.Z := Matrix[ 2, 1 ];
+  Cross2.X := Matrix.a12;
+  Cross2.Y := Matrix.a22;
+  Cross2.Z := Matrix.a32;
   Cross2   := Vector_Mul( Cross2, Size );
 
   A := vector_Add( Position, vector_Get( -Cross1.X - Cross2.X, -Cross1.Y - Cross2.Y, -Cross1.Z - Cross2.Z ) );

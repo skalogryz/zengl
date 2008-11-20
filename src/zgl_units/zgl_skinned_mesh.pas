@@ -31,11 +31,12 @@ uses
   zgl_const,
   zgl_types,
   zgl_global_var,
-  zgl_vbo,
   zgl_timers,
+  zgl_vbo,
   zgl_mesh_file,
   zgl_math,
-  zgl_utils_3d;
+  zgl_utils_3d,
+  Utils;
 
 function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
 procedure skmesh_Animate( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
@@ -44,9 +45,9 @@ procedure skmesh_DrawGroup( Mesh : zglPSkMesh; State : zglPSkeletonState; Group 
 procedure skmesh_DrawSkelet( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
 procedure skmesh_Free( var Mesh : zglPSkMesh ); extdecl;
 
-procedure skmesh_CalcQuats( var Frame : zglTSkeletonFrame );
-procedure skmesh_CalcFrame( var Frame : zglTSkeletonFrame; Bones : array of zglTBone );
-procedure skmesh_CalcVerts( Mesh : zglPSkMesh; var State : zglTSkeletonState; Frame : zglTSkeletonFrame );
+procedure skmesh_CalcQuats( var BonePos : array of zglTBonePos );
+procedure skmesh_CalcFrame( var BonePos : array of zglTBonePos; Bones : array of zglTBone );
+procedure skmesh_CalcVerts( Mesh : zglPSkMesh; var State : zglTSkeletonState; BonePos : array of zglTBonePos ); extdecl;
 
 implementation
 
@@ -59,6 +60,28 @@ function skmesh_LoadFromFile;
     M        : zglTMemory;
     DataID   : Byte;
     TexLayer : Byte = 0;
+    function getVI( ID : DWORD ) : DWORD;
+      var
+        k : DWORD;
+    begin
+      for k := 0 to Mesh.VCount - 1 do
+        if ( Mesh.Vertices[ ID ].X = Mesh.Vertices[ k ].X ) and
+           ( Mesh.Vertices[ ID ].Y = Mesh.Vertices[ k ].Y ) and
+           ( Mesh.Vertices[ ID ].Z = Mesh.Vertices[ k ].Z ) Then
+          begin
+            Result := k;
+            if ( k <> ID ) and ( Mesh.RVCount = 0 ) Then Mesh.RVCount := ID;
+            break;
+          end;
+    end;
+    procedure calcVI;
+      var
+        k : DWORD;
+    begin
+      SetLength( Mesh.RIndices, Mesh.VCount );
+      for k := 0 to Mesh.VCount - 1 do
+        Mesh.RIndices[ k ] := getVI( k );
+    end;
 begin
   Mesh := AllocMem( SizeOf( zglTSkMesh ) );
   Result := FALSE;
@@ -97,7 +120,7 @@ begin
   SetLength( Mesh.Groups, Mesh.GCount );
   SetLength( Mesh.Bones, Mesh.BCount );
   SetLength( Mesh.Weights, Mesh.VCount );
-  SetLength( Mesh.Skeleton.BonePos, Mesh.BCount );
+  SetLength( Mesh.BonePos, Mesh.BCount );
 
   while M.Position < M.Size do
     begin
@@ -166,30 +189,22 @@ begin
             zmf_ReadAction( M, Mesh.Actions[ Mesh.ACount ] );
             INC( Mesh.ACount );
           end;
-        ZMF_SKELETON:
+        ZMF_BONEPOS:
           begin
-            zmf_ReadSkeleton( M, Mesh.Skeleton );
+            zmf_ReadBonePos( M, Mesh.BonePos );
           end;
       end;
     end;
   mem_Free( M );
+  calcVI;
 
   vbo_Check( Mesh.Flags );
 
-  if not Assigned( Mesh.Normals ) Then
+  if ( not Assigned( Mesh.Normals ) ) and ( Mesh.Flags and BUILD_SNORMALS > 0 ) Then
     begin
-      if Mesh.Flags and BUILD_FNORMALS > 0 Then
-        begin
-          Mesh.Flags := Mesh.Flags or USE_NORMALS;
-          SetLength( Mesh.Normals, Mesh.VCount );
-          BuildFNormals( Mesh.FCount, Mesh.Faces, Mesh.Vertices, Mesh.Normals );
-        end else
-      if Mesh.Flags and BUILD_SNORMALS > 0 Then
-        begin
-          Mesh.Flags := Mesh.Flags or USE_NORMALS;
-          SetLength( Mesh.Normals, Mesh.VCount );
-          BuildSNormals( Mesh.FCount, Mesh.Faces, Mesh.Vertices, Mesh.Normals );
-        end;
+      Mesh.Flags := Mesh.Flags or USE_NORMALS;
+      SetLength( Mesh.Normals, Mesh.VCount );
+      BuildSNormals( Mesh.FCount, Mesh.VCount, Mesh.Faces, Mesh.Vertices, Mesh.Normals );
     end;
 
   if Mesh.VCount < 65536 Then
@@ -206,15 +221,15 @@ begin
           Mesh.Groups[ i ].Indices := Mesh.Indices + Mesh.Groups[ i ].IFace * 3 * 4;
       end;
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     vbo_Build( Mesh.IBuffer, Mesh.VBuffer, Mesh.FCount * 3, Mesh.VCount,
                Mesh.Indices,
                Mesh.Vertices, Mesh.Normals,
                Mesh.TexCoords, Mesh.MultiTexCoords,
                Mesh.Flags );
 
-  skmesh_CalcQuats( Mesh.Skeleton );
-  skmesh_CalcFrame( Mesh.Skeleton, Mesh.Bones );
+  skmesh_CalcQuats( Mesh.BonePos );
+  skmesh_CalcFrame( Mesh.BonePos, Mesh.Bones );
 
   Result := TRUE;
 end;
@@ -222,34 +237,33 @@ end;
 procedure skmesh_Animate;
   var
     i : Integer;
+    b : Boolean;
+    d : Single;
+    prevFrame : Integer;
+    nextFrame : Integer;
 begin
-  if length( State.Vertices ) < Mesh.VCount Then
-    SetLength( State.Vertices, Mesh.VCount );
-  if ( length( State.Normals ) < Mesh.VCount ) and ( Mesh.Flags and USE_NORMALS > 0 ) Then
-    SetLength( State.Normals, Mesh.VCount );
-  if State.Delta <> State.prevDelta Then
   with State^ do
     begin
-      prevDelta := Delta;
+      CalcFrame( Delta, prevDelta, d, Time, Frame, prevFrame, nextFrame, 0, Mesh.Actions[ Action ].FCount );
 
-      if length( Frame.BonePos ) = 0 Then
-        SetLength( Frame.BonePos, length( Mesh.Actions[ nAction ].Frames[ nFrame ].BonePos ) );
+      if length( BonePos ) = 0 Then
+        SetLength( BonePos, length( Mesh.Actions[ Action ].Frames[ prevFrame ] ) );
 
-      skmesh_CalcQuats( Mesh.Actions[ nAction ].Frames[ nFrame ] );
-      skmesh_CalcQuats( Mesh.Actions[ nAction ].Frames[ nFrame + 1 ] );
+      skmesh_CalcQuats( Mesh.Actions[ Action ].Frames[ prevFrame ] );
+      skmesh_CalcQuats( Mesh.Actions[ Action ].Frames[ nextFrame ] );
 
-      for i := 0 to length( Frame.BonePos ) - 1 do        with Mesh.Actions[ nAction ].Frames[ nFrame ].BonePos[ i ] do
+      for i := 0 to length( BonePos ) - 1 do        with Mesh.Actions[ Action ].Frames[ prevFrame, i ] do
           begin
-            Frame.BonePos[ i ].Translation := vector_Lerp( Translation,
-                                                           Mesh.Actions[ nAction ].Frames[ nFrame + 1 ].BonePos[ i ].Translation,                                                           Delta );
-            Frame.BonePos[ i ].Quaternion  := quater_Lerp( Quaternion,
-                                                           Mesh.Actions[ nAction ].Frames[ nFrame + 1 ].BonePos[ i ].Quaternion,
-                                                           Delta );
-            Frame.BonePos[ i ].Matrix      := quater_GetM4f( Frame.BonePos[ i ].Quaternion );
+            BonePos[ i ].Translation := vector_Lerp( Translation,
+                                                     Mesh.Actions[ Action ].Frames[ nextFrame, i ].Translation,                                                     d );
+            BonePos[ i ].Quaternion  := quater_Lerp( Quaternion,
+                                                     Mesh.Actions[ Action ].Frames[ nextFrame, i ].Quaternion,
+                                                     d );
+            BonePos[ i ].Matrix      := quater_GetM4f( BonePos[ i ].Quaternion );
           end;
 
-      skmesh_CalcFrame( Frame, Mesh.Bones );
-      skmesh_CalcVerts( Mesh, State^, Frame );
+      skmesh_CalcFrame( BonePos, Mesh.Bones );
+      skmesh_CalcVerts( Mesh, State^, BonePos );
     end;
 end;
 
@@ -265,12 +279,15 @@ begin
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
       if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12;
       if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12;
-      glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+      if glIsBufferARB( State.VBuffer ) = GL_FALSE Then
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer )
+      else
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
       glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh.IBuffer );
     end else
       begin
@@ -295,7 +312,7 @@ begin
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            if Mesh.Flags and BUILD_VBO > 0 Then
+            if Mesh.Flags and USE_VBO > 0 Then
               glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Mesh.VCount * i * 8  ) )
             else
               glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
@@ -305,7 +322,7 @@ begin
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       if Mesh.VCount < 65536 Then
         glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_SHORT, nil )
@@ -341,12 +358,15 @@ begin
                  Byte( Mesh.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( Mesh.Flags and USE_MULTITEX3 > 0 );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
       if Mesh.Flags and USE_NORMALS > 0 Then PN := PV + Mesh.VCount * 12;
       if Mesh.Flags and USE_TEXTURE > 0 Then PT := PV + PN + Mesh.VCount * 12;
-      glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+      if glIsBufferARB( State.VBuffer ) = GL_FALSE Then
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer )
+      else
+        glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
       glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, Mesh.IBuffer );
     end else
       begin
@@ -371,7 +391,7 @@ begin
           begin
             glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
             glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-            if Mesh.Flags and BUILD_VBO > 0 Then
+            if Mesh.Flags and USE_VBO > 0 Then
               glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT + Mesh.VCount * i * 8  ) )
             else
               glTexCoordPointer( 2, GL_FLOAT, 0, @Mesh.MultiTexCoords[ 0 + Mesh.VCount * ( i - 1 ) ] );
@@ -381,7 +401,7 @@ begin
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  if Mesh.Flags and BUILD_VBO > 0 Then
+  if Mesh.Flags and USE_VBO > 0 Then
     begin
       if Mesh.VCount < 65536 Then
         glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_SHORT, Pointer( Mesh.Groups[ Group ].IFace * 3 * 2 ) )
@@ -410,18 +430,18 @@ procedure skmesh_DrawSkelet;
     i : Integer;
 begin
   glBegin( GL_LINES );
-  for i := 0 to length( State.Frame.BonePos ) - 1 do
+  for i := 0 to length( State.BonePos ) - 1 do
     if Mesh.Bones[ i ].Parent >= 0 Then
       begin
-        glVertex3fv( @State.Frame.BonePos[ i ].Point );
-        glVertex3fv( @State.Frame.BonePos[ Mesh.Bones[ i ].Parent ].Point );
+        glVertex3fv( @State.BonePos[ i ].Point );
+        glVertex3fv( @State.BonePos[ Mesh.Bones[ i ].Parent ].Point );
       end;
   glEnd;
 
   glPointSize( 3 );
   glBegin(GL_POINTS);
-  for i := 0 to length( State.Frame.BonePos ) - 1 do
-    glVertex3fv( @State.Frame.BonePos[ i ].Point );
+  for i := 0 to length( State.BonePos ) - 1 do
+    glVertex3fv( @State.BonePos[ i ].Point );
   glEnd;
   glPointSize( 1 );
 end;
@@ -444,12 +464,13 @@ begin
   for i := 0 to Mesh.ACount - 1 do
     begin
       for j := 0 to Mesh.Actions[ i ].FCount - 1 do
-        SetLength( Mesh.Actions[ i ].Frames[ j ].BonePos, 0 );
+        SetLength( Mesh.Actions[ i ].Frames[ j ], 0 );
       SetLength( Mesh.Actions[ i ].Frames, 0 );
     end;
-  SetLength( Mesh.Actions,   0 );
-  SetLength( Mesh.Skeleton.BonePos, 0 );
+  SetLength( Mesh.Actions, 0 );
+  SetLength( Mesh.BonePos, 0 );
   FreeMem( Mesh.Indices );
+  SetLength( Mesh.RIndices, 0 );
   FreeMem( Mesh );
 end;
 
@@ -457,10 +478,10 @@ procedure skmesh_CalcQuats;
   var
     i : Integer;
 begin
-  for i := 0 to length( Frame.BonePos ) - 1 do
+  for i := 0 to length( BonePos ) - 1 do
     begin
-      Frame.BonePos[ i ].Quaternion := quater_FromRotation( Frame.BonePos[ i ].Rotation );
-      Frame.BonePos[ i ].Matrix     := quater_GetM4f( Frame.BonePos[ i ].Quaternion );
+      BonePos[ i ].Quaternion := quater_FromRotation( BonePos[ i ].Rotation );
+      BonePos[ i ].Matrix     := quater_GetM4f( BonePos[ i ].Quaternion );
     end;
 end;
 
@@ -468,18 +489,18 @@ procedure skmesh_CalcFrame;
   var
     i : Integer;
 begin
-  for i := 0 to length( Frame.BonePos ) - 1 do
+  for i := 0 to length( BonePos ) - 1 do
     begin
-      Frame.BonePos[ i ].Point.X := 0;
-      Frame.BonePos[ i ].Point.Y := 0;
-      Frame.BonePos[ i ].Point.Z := 0;
+      BonePos[ i ].Point.X := 0;
+      BonePos[ i ].Point.Y := 0;
+      BonePos[ i ].Point.Z := 0;
 
-      Frame.BonePos[ i ].Matrix[ 0, 3 ] := Frame.BonePos[ i ].Translation.X;
-      Frame.BonePos[ i ].Matrix[ 1, 3 ] := Frame.BonePos[ i ].Translation.Y;
-      Frame.BonePos[ i ].Matrix[ 2, 3 ] := Frame.BonePos[ i ].Translation.Z;
+      BonePos[ i ].Matrix.a14 := BonePos[ i ].Translation.X;
+      BonePos[ i ].Matrix.a24 := BonePos[ i ].Translation.Y;
+      BonePos[ i ].Matrix.a34 := BonePos[ i ].Translation.Z;
       if Bones[ i ].Parent >= 0 Then
-        Frame.BonePos[ i ].Matrix := matrix4f_Mul( Frame.BonePos[ Bones[ i ].Parent ].Matrix, Frame.BonePos[ i ].Matrix );
-      Frame.BonePos[ i ].Point := vector_MulInvM4f( Frame.BonePos[ i ].Point, Frame.BonePos[ i ].Matrix );
+        BonePos[ i ].Matrix := matrix4f_Mul( BonePos[ Bones[ i ].Parent ].Matrix, BonePos[ i ].Matrix );
+      BonePos[ i ].Point := vector_MulInvM4f( BonePos[ i ].Point, BonePos[ i ].Matrix );
     end;
 end;
 
@@ -491,21 +512,27 @@ procedure skmesh_CalcVerts;
     Matrix  : zglPMatrix4f;
     rMatrix : zglTMAtrix4f;
     Weight  : Single;
+    vb, vb2 : Pointer;
 begin
-  for i := 0 to Mesh.VCount - 1 do
+  if length( State.Vertices ) < Mesh.VCount Then
+    SetLength( State.Vertices, Mesh.VCount );
+  if ( length( State.Normals ) < Mesh.VCount ) and ( Mesh.Flags and USE_NORMALS > 0 ) Then
+    SetLength( State.Normals, Mesh.VCount );
+
+  for i := 0 to Mesh.RVCount - 1 do
     begin
       t2.X := 0;
       t2.Y := 0;
       t2.Z := 0;
       for j := 0 to Mesh.WCount[ i ] - 1 do
         begin
-          Matrix := @Mesh.Skeleton.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
-          t1.X   := Mesh.Vertices[ i ].X - Matrix[ 0, 3 ];
-          t1.Y   := Mesh.Vertices[ i ].Y - Matrix[ 1, 3 ];
-          t1.Z   := Mesh.Vertices[ i ].Z - Matrix[ 2, 3 ];
+          Matrix := @Mesh.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
+          t1.X   := Mesh.Vertices[ i ].X - Matrix.a14;
+          t1.Y   := Mesh.Vertices[ i ].Y - Matrix.a24;
+          t1.Z   := Mesh.Vertices[ i ].Z - Matrix.a34;
           t1     := vector_MulM4f( t1, Matrix^ );
 
-          Matrix := @Frame.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
+          Matrix := @BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
           t1     := vector_MulInvM4f( t1, Matrix^ );
           Weight := Mesh.Weights[ i, j ].Weight;
 
@@ -516,48 +543,83 @@ begin
       State.Vertices[ i ] := t2;
     end;
 
+  for i := Mesh.RVCount to Mesh.VCount - 1 do
+    State.Vertices[ i ] := State.Vertices[ Mesh.RIndices[ i ] ];
+
   if Mesh.Flags and USE_NORMALS > 0 Then
-    for i := 0 to Mesh.VCount - 1 do
-      begin
-        t2.X := 0;
-        t2.Y := 0;
-        t2.Z := 0;
+    begin
+      if Mesh.Flags and BUILD_VBO_STREAM = 0 Then vb := @State.Normals[ 0 ];
+      for i := 0 to Mesh.VCount - 1 do
+        begin
+          t2.X := 0;
+          t2.Y := 0;
+          t2.Z := 0;
 
-        for j := 0 to Mesh.WCount[ i ] - 1 do
-          begin
-            t1 := Mesh.Normals[ i ];
+          for j := 0 to Mesh.WCount[ i ] - 1 do
+            begin
+              t1 := Mesh.Normals[ i ];
 
-            rMatrix := Mesh.Skeleton.BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
-            rMatrix[ 0, 3 ] := 0;
-            rMatrix[ 1, 3 ] := 0;
-            rMatrix[ 2, 3 ] := 0;
-            rMatrix[ 3, 0 ] := 0;
-            rMatrix[ 3, 1 ] := 0;
-            rMatrix[ 3, 2 ] := 0;
-            rMatrix[ 3, 3 ] := 0;
+              rMatrix := Mesh.BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
+              rMatrix.a14 := 0;
+              rMatrix.a24 := 0;
+              rMatrix.a34 := 0;
+              rMatrix.a41 := 0;
+              rMatrix.a42 := 0;
+              rMatrix.a43 := 0;
+              rMatrix.a44 := 0;
 
-            t1 := vector_MulM4f( t1, rMatrix );
+              t1 := vector_MulM4f( t1, rMatrix );
 
-            rMatrix := Frame.BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
-            rMatrix[ 0, 3 ] := 0;
-            rMatrix[ 1, 3 ] := 0;
-            rMatrix[ 2, 3 ] := 0;
-            rMatrix[ 3, 0 ] := 0;
-            rMatrix[ 3, 1 ] := 0;
-            rMatrix[ 3, 2 ] := 0;
-            rMatrix[ 3, 3 ] := 0;
+              rMatrix := BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
+              rMatrix.a14 := 0;
+              rMatrix.a24 := 0;
+              rMatrix.a44 := 0;
+              rMatrix.a41 := 0;
+              rMatrix.a42 := 0;
+              rMatrix.a43 := 0;
+              rMatrix.a44 := 0;
 
-            t1 := vector_MulInvM4f( t1, rMatrix );
+              t1 := vector_MulInvM4f( t1, rMatrix );
 
-            Weight := Mesh.Weights[ i, j ].Weight;
+              Weight := Mesh.Weights[ i, j ].Weight;
 
-            t2.X := t2.X + t1.X * Weight;
-            t2.Y := t2.Y + t1.Y * Weight;
-            t2.Z := t2.Z + t1.Z * Weight;
-          end;
+              t2.X := t2.X + t1.X * Weight;
+              t2.Y := t2.Y + t1.Y * Weight;
+              t2.Z := t2.Z + t1.Z * Weight;
+            end;
 
-        State.Normals[ i ] := t2;
-      end;
+          State.Normals[ i ] := t2;
+        end;
+
+      for i := Mesh.RVCount to Mesh.VCount - 1 do
+        State.Normals[ i ] := State.Normals[ Mesh.RIndices[ i ] ];
+    end;
+
+  if Mesh.Flags and BUILD_VBO_STREAM > 0 Then
+    begin
+      if glIsBufferARB( State.VBuffer ) = GL_FALSE Then
+        begin
+          glBindBufferARB( GL_ARRAY_BUFFER_ARB, Mesh.VBuffer );
+          glGetBufferParameterivARB( GL_ARRAY_BUFFER_ARB, GL_BUFFER_SIZE_ARB, @i );
+          vb := glMapBufferARB( GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB );
+          vb2 := AllocMem( i );
+          Move( vb^, vb2^, i );
+          glUnmapBufferARB( GL_ARRAY_BUFFER_ARB );
+
+          glGenBuffersARB( 1, @State.VBuffer );
+          glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
+          glBufferDataARB( GL_ARRAY_BUFFER_ARB, i, vb2, GL_STREAM_DRAW_ARB );
+        end;
+
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, State.VBuffer );
+      vb := glMapBufferARB( GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB );
+
+      Move( State.Vertices[ 0 ], vb^, SizeOf( zglTPoint3D ) * Mesh.VCount );
+      if Mesh.Flags and USE_NORMALS > 0 Then
+        Move( State.Normals[ 0 ], Pointer( vb + SizeOf( zglTPoint3D ) * Mesh.VCount )^, SizeOf( zglTPoint3D ) * Mesh.VCount );
+      glUnmapBufferARB( GL_ARRAY_BUFFER_ARB );
+      glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
+    end;
 end;
 
 end.

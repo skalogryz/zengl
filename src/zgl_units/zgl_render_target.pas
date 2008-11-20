@@ -145,7 +145,9 @@ begin
         pPBuffer.DC := wglGetPbufferDCARB( pPBuffer.Handle );
         pPBuffer.RC := wglCreateContext( pPBuffer.DC );
 
+        wglMakeCurrent( pPBuffer.Handle, pPBuffer.RC );
         wglShareLists( wnd_DC, pPBuffer.RC );
+        wglMakeCurrent( wnd_DC, ogl_Context );
 
         if pPBuffer.RC = 0 Then
           begin

@@ -83,13 +83,15 @@ type
     OnTimer    : procedure;
     
     Prev, Next : zglPTimer;
+    _align8    : DWORD; //FIXME
 end;
 
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count : DWORD;
-    First : zglTTimer;
+    Count   : DWORD;
+    First   : zglTTimer;
+    _align8 : DWORD; //FIXME
 end;
 
 {------------------------------------------------------------------------------}
@@ -319,10 +321,22 @@ end;
 
 type
   zglPMatrix3f = ^zglTMatrix3f;
-  zglTMatrix3f = array[ 0..2 ] of zglTPoint3D;
-  
+  zglTMatrix3f = record
+    case Byte of
+    1: ( a11, a12, a13 : Single;
+         a21, a22, a23 : Single;
+         a31, a32, a33 : Single );
+    2: ( row : array[ 0..2 ] of zglTPoint3D );
+end;
+
+type
   zglPMatrix4f = ^zglTMatrix4f;
-  zglTMatrix4f = array[ 0..3, 0..3 ] of Single;
+  zglTMatrix4f = record
+    a11, a12, a13, a14 : Single;
+    a21, a22, a23, a24 : Single;
+    a31, a32, a33, a34 : Single;
+    a41, a42, a43, a44 : Single;
+end;
   
 type
   zglPLine3D = ^zglTLine3D;
@@ -375,13 +389,6 @@ type
     Indices : Pointer;
 end;
 
-type
-  zglPFrame = ^zglTFrame;
-  zglTFrame = record
-    Vertices : array of zglTPoint3D;
-    Normals  : array of zglTPoint3D;
-end;
-
 {------------------------------------------------------------------------------}
 {----------------------------- zgl_camera_3d.pas ------------------------------}
 {------------------------------------------------------------------------------}
@@ -394,8 +401,30 @@ type
 end;
 
 {------------------------------------------------------------------------------}
-{---------------------------- zgl_static_mesh.pas -----------------------------}
+{---------------------------- zgl_simple_mesh.pas -----------------------------}
 {------------------------------------------------------------------------------}
+type
+  zglPSimpleAction = ^zglTSimpleAction;
+  zglTSimpleAction = record
+    Name   : String;
+    FPS    : Single;
+    FCount : DWORD;
+    FFrame : DWORD;
+end;
+
+type
+  zglPSimpleState = ^zglTSimpleState;
+  zglTSimpleState = record
+    VBuffer   : DWORD;
+    Action    : Integer;
+    Frame     : Integer;
+    Delta     : Single;
+    prevDelta : Single;
+    Time      : Double;
+    Vertices  : array of zglTPoint3D;
+    Normals   : array of zglTPoint3D;
+end;
+
 type
   zglPSMesh = ^zglTSMesh;
   zglTSMesh = record
@@ -405,9 +434,12 @@ type
     VBuffer        : DWORD;
     
     VCount         : DWORD;
+    RVCount        : DWORD;
     TCount         : DWORD;
     FCount         : DWORD;
     GCount         : DWORD;
+    ACount         : DWORD;
+    Frames         : DWORD;
     
     Vertices       : array of zglTPoint3D;
     Normals        : array of zglTPoint3D;
@@ -415,7 +447,12 @@ type
     MultiTexCoords : array of zglTPoint2D;
     Faces          : array of zglTFace;
     Indices        : Pointer;
+    RIndices       : array of DWORD;
     Groups         : array of zglTGroup;
+
+    State          : zglTSimpleState;
+    Actions        : array of zglTSimpleAction;
+    _align8        : DWORD; //FIXME
 end;
 
 {------------------------------------------------------------------------------}
@@ -448,21 +485,18 @@ type
 end;
 
 type
-  zglPSkeletonFrame = ^zglTSkeletonFrame;
-  zglTSkeletonFrame = record
-    BonePos : array of zglTBonePos;
-end;
-
-type
   zglPSkeletonState = ^zglTSkeletonState;
   zglTSkeletonState = record
-    nAction   : Integer;
-    nFrame    : Integer;
+    VBuffer   : DWORD;
+    Action    : Integer;
+    Frame     : Integer;
     Delta     : Single;
     prevDelta : Single;
-    Frame     : zglTSkeletonFrame;
+    Time      : Double;
     Vertices  : array of zglTPoint3D;
     Normals   : array of zglTPoint3D;
+    BonePos   : array of zglTBonePos;
+    _align8   : DWORD; //FIXME
 end;
 
 type
@@ -470,7 +504,7 @@ type
   zglTSkeletonAction = record    Name   : String;
     FPS    : Single;
     FCount : DWORD;
-    Frames : array of zglTSkeletonFrame;
+    Frames : array of array of zglTBonePos;
 end;
 
 type
@@ -482,6 +516,7 @@ type
     VBuffer        : DWORD;
 
     VCount         : DWORD;
+    RVCount        : DWORD;
     TCount         : DWORD;
     FCount         : DWORD;
     GCount         : DWORD;
@@ -495,13 +530,14 @@ type
     MultiTexCoords : array of zglTPoint2D;
     Faces          : array of zglTFace;
     Indices        : Pointer;
+    RIndices       : array of DWORD;
     Groups         : array of zglTGroup;
 
     Bones          : array of zglTBone;
+    BonePos        : array of zglTBonePos;
     Weights        : zglTBonesWeights;
     State          : zglTSkeletonState;
     Actions        : array of zglTSkeletonAction;
-    Skeleton       : zglTSkeletonFrame;
 end;
 
 {------------------------------------------------------------------------------}
@@ -511,16 +547,16 @@ end;
 type
   zglPShadowVolume = ^zglTShadowVolume;
   zglTShadowVolume = record
-    VCount : DWORD;
-    FCount : DWORD;
-    ICount : DWORD;
+    VCount           : DWORD;
+    FCount           : DWORD;
+    ICount           : DWORD;
 
-    Caps       : array of zglTPoint3D;
-    Indices    : array of DWORD;
-    Planes     : array of zglTPlane;
+    Caps             : array of zglTPoint3D;
+    Indices          : array of DWORD;
+    Planes           : array of zglTPlane;
 
-    eVertices : array of zglTPoint3D;
-    eVCount   : DWORD;
+    eVertices        : array of zglTPoint3D;
+    eVCount          : DWORD;
 
     isFacingLight    : array of Boolean;
     neighbourIndices : array of Integer;

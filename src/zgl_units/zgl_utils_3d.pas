@@ -24,11 +24,13 @@ unit zgl_utils_3d;
 interface
 uses
   zgl_types,
+  zgl_timers,
   zgl_math;
 
 procedure BuildIndices( FCount : DWORD; var Faces : array of zglTFace; Indices : Pointer; Size : Byte );
-procedure BuildFNormals( FCount : DWORD; Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
-procedure BuildSNormals( FCount : DWORD; Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
+procedure BuildSNormals( FCount, VCount : DWORD; Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
+
+procedure CalcFrame( var Delta, prevDelta, outDelta : Single; var Time : Double; var Frame, prevFrame, nextFrame : Integer; FFrame, FCount : Integer );
 
 implementation
 
@@ -48,20 +50,6 @@ begin
             for j := 0 to 2 do
               PDWORD( Indices + ( i * 3 ) * Size + j * Size )^ := Faces[ i, j ];
         end;
-end;
-
-procedure BuildFNormals;
-  var
-    i      : DWORD;
-    normal : zglTPoint3D;
-begin
-  for i := 0 to FCount - 1 do
-    begin
-      normal := tri_GetNormal( @Vertices[ Faces[ i, 0 ] ], @Vertices[ Faces[ i, 1 ] ], @Vertices[ Faces[ i, 2 ] ] );
-      Normals[ Faces[ i, 0 ] ] := normal;
-      Normals[ Faces[ i, 1 ] ] := normal;
-      Normals[ Faces[ i, 2 ] ] := normal;
-    end;
 end;
 
 procedure BuildSNormals;
@@ -91,7 +79,7 @@ begin
     end;
 
   Shared  := 0;
-  for i := 0 to length( Vertices ) - 1 do
+  for i := 0 to VCount - 1 do
     begin
       for j := 0 to FCount - 1 do
         if ( ( Vertices[ Faces[ j, 0 ] ].X = Vertices[ i ].X ) and
@@ -115,6 +103,53 @@ begin
     end;
 
   SetLength( TNormals, 0 );
+end;
+
+procedure CalcFrame;
+  var
+    b : Boolean;
+begin
+  if Time = 0 Then
+    begin
+      Delta     := 0;
+      prevDelta := 0;
+    end;
+  Time := timer_GetTicks;
+
+  b := Delta < prevDelta;
+  while Delta < 0 do
+    begin
+      Delta := Delta + 1;
+      DEC( Frame );
+    end;
+  while Delta >= 1 do
+    begin
+      Delta := Delta - 1;
+      INC( Frame );
+    end;
+  while Frame < 0 do
+    Frame := Frame + FCount;
+  while Frame > FCount - 1 do
+    Frame := Frame - ( FCount - 1 );
+
+  if b Then
+    begin
+      prevFrame := FFrame + Frame;
+      nextFrame := prevFrame - 1;
+      outDelta  := 1 - Delta;
+
+      if nextFrame < FFrame Then
+        nextFrame := nextFrame + FCount;
+    end else
+      begin
+        prevFrame := FFrame + Frame;
+        nextFrame := prevFrame + 1;
+        outDelta  := Delta;
+
+        if nextFrame > FFrame + FCount - 1 Then
+          nextFrame := nextFrame - ( FCount - 1 );
+      end;
+  prevDelta := Delta;
 end;
 
 end.
