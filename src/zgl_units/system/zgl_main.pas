@@ -82,6 +82,8 @@ uses
   zgl_sound_wav;
 
 procedure zgl_Init;
+  var
+    mesh : zglTSMesh;
 begin
   log_Init;
   if not InitGL Then
@@ -89,6 +91,7 @@ begin
       log_Add( 'Cannot load GL library' );
       exit;
     end;
+  log_Add( 'sub: ' + u_IntToStr( sizeof( mesh ) ) );
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
@@ -111,7 +114,7 @@ begin
 
   Set2DMode;
   wnd_ShowCursor( FALSE );
-  
+
   zgl_loop;
   zgl_Destroy;
 end;
@@ -359,6 +362,19 @@ procedure zgl_loop;
     {$IFDEF WIN32}
     Mess : tagMsg;
     {$ENDIF}
+    procedure OSProcess;
+    begin
+      {$IFDEF LINUX}
+      zgl_mess();
+      {$ENDIF}
+      {$IFDEF WIN32}
+      while PeekMessage( Mess, wnd_Handle, 0, 0, PM_REMOVE ) do
+        begin
+          TranslateMessage( Mess );
+          DispatchMessage( Mess );
+        end;
+      {$ENDIF}
+    end;
 begin
   app_PLoad;
   {$IFDEF LINUX}
@@ -375,18 +391,9 @@ begin
   timer_Reset;
   timer_Add( @zgl_FPS, 1000 );
   while app_Work do
-    begin
-      {$IFDEF LINUX}
-      zgl_mess();
-      {$ENDIF}
-      {$IFDEF WIN32}
-      while PeekMessage( Mess, wnd_Handle, 0, 0, PM_REMOVE ) do
-        begin
-          TranslateMessage( Mess );
-          DispatchMessage( Mess );
-        end;
-      {$ENDIF}
-      
+    begin      
+      OSProcess;
+
       CanKillTimers := FALSE;
       if not app_Pause Then
         begin
@@ -430,6 +437,7 @@ begin
           if dt < 2 Then
             begin
               t := t + 1;
+              OSProcess;
               zgl_draw;
             end else
               t := t + dt;

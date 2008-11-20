@@ -40,7 +40,7 @@ uses
 function  gl_Create : Boolean;
 procedure gl_Destroy;
 procedure gl_LoadEx;
-function  gl_GetProc( Proc : PChar ) : Pointer;
+function  gl_GetProc( Proc : String ) : Pointer;
 
 procedure Set2DMode; extdecl;
 procedure Set3DMode( FOVY : Single ); extdecl;
@@ -328,12 +328,15 @@ begin
   glBindBufferARB := gl_GetProc( 'glBindBuffer' );
   if Assigned( glBindBufferARB ) Then
     begin
-      ogl_CanVBO         := TRUE;
-      glDeleteBuffersARB := gl_GetProc( 'glDeleteBuffers' );
-      glGenBuffersARB    := gl_GetProc( 'glGenBuffers'    );
-      glIsBufferARB      := gl_GetProc( 'glIsBuffer'      );
-      glBufferDataARB    := gl_GetProc( 'glBufferData'    );
-      glBufferSubDataARB := gl_GetProc( 'glBufferSubData' );
+      ogl_CanVBO                := TRUE;
+      glDeleteBuffersARB        := gl_GetProc( 'glDeleteBuffers'        );
+      glGenBuffersARB           := gl_GetProc( 'glGenBuffers'           );
+      glIsBufferARB             := gl_GetProc( 'glIsBuffer'             );
+      glBufferDataARB           := gl_GetProc( 'glBufferData'           );
+      glBufferSubDataARB        := gl_GetProc( 'glBufferSubData'        );
+      glMapBufferARB            := gl_GetProc( 'glMapBuffer'            );
+      glUnmapBufferARB          := gl_GetProc( 'glUnmapBuffer'          );
+      glGetBufferParameterivARB := gl_GetProc( 'glGetBufferParameteriv' );
     end else
       ogl_CanVBO := FALSE;
   log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( ogl_CanVBO ) );
@@ -400,9 +403,13 @@ end;
 
 function gl_GetProc;
 begin
-  Result := wglGetProcAddress( Proc );
-  if not Assigned( Result ) then
+  {$IFDEF USE_WINEHACK}
+  Result := wglGetProcAddress( PChar( Proc + 'ARB' ) );
+  {$ELSE}
+  Result := wglGetProcAddress( PChar( Proc ) );
+  if not Assigned( Result ) Then
     Result := wglGetProcAddress( PChar( Proc + 'ARB' ) );
+  {$ENDIF}
 end;
 
 procedure Set2DMode;
