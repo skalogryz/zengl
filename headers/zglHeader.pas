@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 30                     }
-{ date:  10.10.08               }
+{ build: 33                     }
+{ date:  17.11.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -151,13 +151,15 @@ type
     OnTimer    : procedure;
 
     Prev, Next : zglPTimer;
+    _align8    : DWORD; //FIXME
 end;
 
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count : DWORD;
-    First : zglTTimer;
+    Count   : DWORD;
+    First   : zglTTimer;
+    _align8 : DWORD; //FIXME
 end;
 
 var
@@ -590,10 +592,22 @@ end;
 
 type
   zglPMatrix3f = ^zglTMatrix3f;
-  zglTMatrix3f = array[ 0..2 ] of zglTPoint3D;
-  
+  zglTMatrix3f = record
+    case Byte of
+    1: ( a11, a12, a13 : Single;
+         a21, a22, a23 : Single;
+         a31, a32, a33 : Single );
+    2: ( row : array[ 0..2 ] of zglTPoint3D );
+end;
+
+type
   zglPMatrix4f = ^zglTMatrix4f;
-  zglTMatrix4f = array[ 0..3, 0..3 ] of Single;
+  zglTMatrix4f = record
+    a11, a12, a13, a14 : Single;
+    a21, a22, a23, a24 : Single;
+    a31, a32, a33, a34 : Single;
+    a41, a42, a43, a44 : Single;
+end;
   
 type
   zglPFace = ^zglTFace;
@@ -681,16 +695,17 @@ const
   SIDE_BACK           = $02;
   SIDE_FRONT_AND_BACK = $03;
 
-  // HeigthMap, Static Mesh, VBO, Octree
+  // HeigthMap, Simple Mesh, Skinned Mesh, Octree
   USE_NORMALS         = $001;
   USE_TEXTURE         = $002;
   USE_MULTITEX1       = $004;
   USE_MULTITEX2       = $008;
   USE_MULTITEX3       = $010;
-  BUILD_FNORMALS      = $020;
+  USE_VBO             = $020;
   BUILD_SNORMALS      = $040;
   BUILD_PLANES        = $080;
-  BUILD_VBO           = $100;
+  BUILD_VBO_STATIC    = $100;
+  BUILD_VBO_STREAM    = $200;
 
 var
   obj3d_Begin       : procedure( Flags : DWORD ); stdcall;
@@ -736,31 +751,65 @@ var
   cam3d_Set    : procedure( Camera : zglPCamera3D ); stdcall;
   cam3d_Fly    : procedure( Camera : zglPCamera3D; Speed : Single ); stdcall;
   cam3d_Strafe : procedure( Camera : zglPCamera3D; Speed : Single ); stdcall;
-  
-// STATIC MESH
+
+// SIMPLE MESH
+type
+  zglPSimpleAction = ^zglTSimpleAction;
+  zglTSimpleAction = record
+    Name   : String;
+    FPS    : Single;
+    FCount : DWORD;
+    FFrame : DWORD;
+end;
+
+type
+  zglPSimpleState = ^zglTSimpleState;
+  zglTSimpleState = record
+    VBuffer   : DWORD;
+    Action    : Integer;
+    Frame     : Integer;
+    Delta     : Single;
+    prevDelta : Single;
+    Time      : Double;
+    Vertices  : array of zglTPoint3D;
+    Normals   : array of zglTPoint3D;
+end;
+
 type
   zglPSMesh = ^zglTSMesh;
   zglTSMesh = record
     Flags          : DWORD;
 
+    IBuffer        : DWORD;
+    VBuffer        : DWORD;
+    
     VCount         : DWORD;
+    RVCount        : DWORD;
     TCount         : DWORD;
     FCount         : DWORD;
     GCount         : DWORD;
-
+    ACount         : DWORD;
+    Frames         : DWORD;
+    
     Vertices       : array of zglTPoint3D;
     Normals        : array of zglTPoint3D;
     TexCoords      : array of zglTPoint2D;
     MultiTexCoords : array of zglTPoint2D;
     Faces          : array of zglTFace;
     Indices        : Pointer;
+    RIndices       : array of DWORD;
     Groups         : array of zglTGroup;
+
+    State          : zglTSimpleState;
+    Actions        : array of zglTSimpleAction;
+    _align8        : DWORD; //FIXME
 end;
 
 var
   smesh_LoadFromFile : function( var Mesh : zglPSMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
-  smesh_Draw         : procedure( Mesh : zglPSMesh ); stdcall;
-  smesh_DrawGroup    : procedure( Mesh : zglPSMesh; Group : DWORD ); stdcall;
+  smesh_Animate      : procedure( Mesh : zglPSMesh; State : zglPSimpleState ); stdcall;
+  smesh_Draw         : procedure( Mesh : zglPSMesh; State : zglPSimpleState ); stdcall;
+  smesh_DrawGroup    : procedure( Mesh : zglPSMesh; State : zglPSimpleState; Group : DWORD ); stdcall;
   smesh_Free         : procedure( var Mesh : zglPSMesh ); stdcall;
 
 // SKINNED MESH
@@ -791,21 +840,18 @@ type
 end;
 
 type
-  zglPSkeletonFrame = ^zglTSkeletonFrame;
-  zglTSkeletonFrame = record
-    BonePos : array of zglTBonePos;
-end;
-
-type
   zglPSkeletonState = ^zglTSkeletonState;
   zglTSkeletonState = record
-    nAction   : Integer;
-    nFrame    : Integer;
+    VBuffer   : DWORD;
+    Action    : Integer;
+    Frame     : Integer;
     Delta     : Single;
     prevDelta : Single;
-    Frame     : zglTSkeletonFrame;
+    Time      : Double;
     Vertices  : array of zglTPoint3D;
     Normals   : array of zglTPoint3D;
+    BonePos   : array of zglTBonePos;
+    _align8   : DWORD; //FIXME
 end;
 
 type
@@ -813,7 +859,7 @@ type
   zglTSkeletonAction = record    Name   : String;
     FPS    : Single;
     FCount : DWORD;
-    Frames : array of zglTSkeletonFrame;
+    Frames : array of array of zglTBonePos;
 end;
 
 type
@@ -825,6 +871,7 @@ type
     VBuffer        : DWORD;
 
     VCount         : DWORD;
+    RVCount        : DWORD;
     TCount         : DWORD;
     FCount         : DWORD;
     GCount         : DWORD;
@@ -838,13 +885,14 @@ type
     MultiTexCoords : array of zglTPoint2D;
     Faces          : array of zglTFace;
     Indices        : Pointer;
+    RIndices       : array of DWORD;
     Groups         : array of zglTGroup;
 
     Bones          : array of zglTBone;
+    BonePos        : array of zglTBonePos;
     Weights        : zglTBonesWeights;
     State          : zglTSkeletonState;
     Actions        : array of zglTSkeletonAction;
-    Skeleton       : zglTSkeletonFrame;
 end;
 
 var
@@ -1021,7 +1069,7 @@ end;
 
 var
   shadow_InitVolume        : procedure( var Volume : zglPShadowVolume; Vertices : zglPPoint3D; FCount : DWORD; Faces : zglPFace ); stdcall;
-  shadow_CalcVolume        : procedure( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3D; Light : zglTPoint3D; Extrude : Single ); stdcall;
+  shadow_CalcVolume        : procedure( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3D; Light : zglTPoint3D; RebuildPlanes : Boolean; Extrude : Single ); stdcall;
   shadow_DrawVolume        : procedure( Volume : zglPShadowVolume; zFail : Boolean ); stdcall;
   shadow_DrawShadowVolumes : procedure( DrawVolumes : Pointer ); stdcall;
   
@@ -1035,8 +1083,8 @@ const
   SHADER_FRAGMENT     = $8B30;
 
 const
-  matrix3f_Identity: zglTMatrix3f = ( ( X: 1; Y: 0; Z: 0 ), ( X: 0; Y: 1; Z: 0 ), ( X: 0; Y: 0; Z: 1 ) );
-  matrix4f_Identity: zglTMatrix4f = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) );
+  matrix3f_Identity: zglTMatrix3f = ( a11: 1; a12: 0; a13: 0; a21: 0; a22: 1; a23: 0; a31: 0; a32: 0; a33: 1 );
+  matrix4f_Identity: zglTMatrix4f = ( a11: 1; a12: 0; a13: 0; a14: 0; a21: 0; a22: 1; a23: 0; a24: 0; a31: 0; a32: 0; a33: 1; a34: 0; a41: 0; a42: 0; a43: 0; a44: 1 );
 
 var
   // ARBfp/ARBvp
@@ -1079,63 +1127,63 @@ var
   m_FDistance : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
   m_Angle     : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
   //vectros
-  vector_Get       : function( x, y, z : Single ) : zglTPoint3D;
-  vector_Add       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
-  vector_Sub       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
-  vector_Mul       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
-  vector_Div       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
-  vector_AddV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_SubV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_MulV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_DivV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D;
-  vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D;
-  vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D;
-  vector_RotateX   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_RotateY   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_RotateZ   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
-  vector_RotateQ   : function( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D;
-  vector_Negate    : function( Vector : zglTPoint3D ) : zglTPoint3D;
-  vector_Normalize : function( Vector : zglTPoint3D ) : zglTPoint3D;
-  vector_Angle     : function( Vector1, Vector2 : zglTPoint3D ) : Single;
-  vector_Cross     : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
-  vector_Dot       : function( Vector1, Vector2 : zglTPoint3D ) : Single;
-  vector_Distance  : function( Vector1, Vector2 : zglTPoint3D ) : Single;
-  vector_FDistance : function( Vector1, Vector2 : zglTPoint3D ) : Single;
-  vector_Length    : function( Vector : zglTPoint3D ) : Single;
-  vector_Lerp      : function( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D;
+  vector_Get       : function( x, y, z : Single ) : zglTPoint3D; stdcall;
+  vector_Add       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
+  vector_Sub       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
+  vector_Mul       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
+  vector_Div       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
+  vector_AddV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
+  vector_SubV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
+  vector_MulV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
+  vector_DivV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
+  vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D; //assembler;
+  vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; //assembler;
+  vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; //assembler;
+  vector_RotateX   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; stdcall;
+  vector_RotateY   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; stdcall;
+  vector_RotateZ   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; stdcall;
+  vector_RotateQ   : function( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D; stdcall;
+  vector_Negate    : function( Vector : zglTPoint3D ) : zglTPoint3D; //assembler;
+  vector_Normalize : function( Vector : zglTPoint3D ) : zglTPoint3D; stdcall;
+  vector_Angle     : function( Vector1, Vector2 : zglTPoint3D ) : Single; stdcall;
+  vector_Cross     : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
+  vector_Dot       : function( Vector1, Vector2 : zglTPoint3D ) : Single; //assembler;
+  vector_Distance  : function( Vector1, Vector2 : zglTPoint3D ) : Single; //assembler;
+  vector_FDistance : function( Vector1, Vector2 : zglTPoint3D ) : Single; //assembler;
+  vector_Length    : function( Vector : zglTPoint3D ) : Single; //assembler;
+  vector_Lerp      : function( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
   //matrix
-  matrix3f_Get            : function( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
-  matrix3f_OrthoNormalize : procedure( Matrix : zglPMatrix3f );
-  matrix3f_Transpose      : procedure( Matrix : zglPMatrix3f );
-  matrix3f_Rotate         : procedure( Matrix : zglPMatrix3f; aX, aY, aZ : Single );
-  matrix3f_Add            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f;
-  matrix3f_Mul            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
-  matrix4f_Transpose      : procedure( Matrix : zglPMatrix4f );
-  matrix4f_Determinant    : function( Matrix : zglTMatrix4f ) : Single;
-  matrix4f_Inverse        : function( Matrix : zglTMatrix4f ) : zglTMatrix4f;
-  matrix4f_Translate      : procedure( Matrix : zglPMatrix4f; tX, tY, tZ : Single );
-  matrix4f_Rotate         : procedure( Matrix : zglPMatrix4f; aX, aY, aZ : Single );
-  matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single );
-  matrix4f_Mul            : function ( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
+  matrix3f_Get            : function( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f; stdcall;
+  matrix3f_OrthoNormalize : procedure( Matrix : zglPMatrix3f ); stdcall;
+  matrix3f_Transpose      : procedure( Matrix : zglPMatrix3f ); stdcall;
+  matrix3f_Rotate         : procedure( Matrix : zglPMatrix3f; aX, aY, aZ : Single ); stdcall;
+  matrix3f_Add            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f; stdcall;
+  matrix3f_Mul            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f; stdcall;
+  matrix4f_Transpose      : procedure( Matrix : zglPMatrix4f ); stdcall;
+  matrix4f_Determinant    : function( Matrix : zglTMatrix4f ) : Single; stdcall;
+  matrix4f_Inverse        : function( Matrix : zglTMatrix4f ) : zglTMatrix4f; stdcall;
+  matrix4f_Translate      : procedure( Matrix : zglPMatrix4f; tX, tY, tZ : Single ); stdcall;
+  matrix4f_Rotate         : procedure( Matrix : zglPMatrix4f; aX, aY, aZ : Single ); stdcall;
+  matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single ); stdcall;
+  matrix4f_Mul            : function ( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f; stdcall;
   // quaternions
-  quater_Get          : function( X, Y, Z, W : Single ) : zglTQuaternion;
-  quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
-  quater_Sub          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
-  quater_Mul          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion;
-  quater_Negate       : function( Quaternion : zglTQuaternion ) : zglTQuaternion;
-  quater_Normalize    : function( Quaternion : zglTQuaternion ) : zglTQuaternion;
-  quater_Dot          : function( q1, q2 : zglTQuaternion ) : Single;
-  quater_Lerp         : function( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
-  quater_FromRotation : function( Rotation : zglTPoint3D ) : zglTQuaternion;
-  quater_GetM4f       : function( Quaternion : zglTQuaternion ) : zglTMatrix4f;
+  quater_Get          : function( X, Y, Z, W : Single ) : zglTQuaternion; stdcall;
+  quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion; //assembler;
+  quater_Sub          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion; //assembler;
+  quater_Mul          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion; stdcall;
+  quater_Negate       : function( Quaternion : zglTQuaternion ) : zglTQuaternion; stdcall;
+  quater_Normalize    : function( Quaternion : zglTQuaternion ) : zglTQuaternion; stdcall;
+  quater_Dot          : function( q1, q2 : zglTQuaternion ) : Single; stdcall;
+  quater_Lerp         : function( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion; stdcall;
+  quater_FromRotation : function( Rotation : zglTPoint3D ) : zglTQuaternion; stdcall;
+  quater_GetM4f       : function( Quaternion : zglTQuaternion ) : zglTMatrix4f; stdcall;
   // line 3d
-  line3d_ClosestPoint : function( A, B, Point : zglTPoint3D ) : zglTPoint3D;
+  line3d_ClosestPoint : function( A, B, Point : zglTPoint3D ) : zglTPoint3D; stdcall;
   // plane
-  plane_Get      : function( A, B, C : zglTPoint3D ) : zglTPlane;
-  plane_Distance : function( Plane : zglTPlane; Point : zglTPoint3D ) : Single;
+  plane_Get      : function( A, B, C : zglTPoint3D ) : zglTPlane; stdcall;
+  plane_Distance : function( Plane : zglTPlane; Point : zglTPoint3D ) : Single; //assembler;
   // triangle
-  tri_GetNormal  : function( A, B, C : zglPPoint3D ) : zglTPoint3D;
+  tri_GetNormal  : function( A, B, C : zglPPoint3D ) : zglTPoint3D; stdcall;
 
 // COLLISION 2D
   col2d_PointInRect     : function( X, Y : Single; Rect : zglPRect   ) : Boolean; stdcall;
@@ -1445,6 +1493,7 @@ begin
       cam3d_Strafe := dlsym( zglLib, 'cam3d_Strafe' );
 
       smesh_LoadFromFile := dlsym( zglLib, 'smesh_LoadFromFile' );
+      smesh_Animate := dlsym( zglLib, 'smesh_Animate' );
       smesh_Draw := dlsym( zglLib, 'smesh_Draw' );
       smesh_DrawGroup := dlsym( zglLib, 'smesh_DrawGroup' );
       smesh_Free := dlsym( zglLib, 'smesh_Free' );
