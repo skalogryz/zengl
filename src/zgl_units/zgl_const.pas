@@ -34,8 +34,8 @@ const
   defBPP      = 32;
 
   // constant string
-  cs_ZenGL    = 'ZenGL build 30[07.10.08]';
-  cv_version  = 30;
+  cs_ZenGL    = 'ZenGL build 33[17.11.08]';
+  cv_version  = 33;
 
   // zgl_Reg
   SYS_LOAD             = $000001;
@@ -102,15 +102,16 @@ const
   TEX_QUALITY_MEDIUM    = $800000;
 
   // 3D
-  USE_NORMALS    = $001;
-  USE_TEXTURE    = $002;
-  USE_MULTITEX1  = $004;
-  USE_MULTITEX2  = $008;
-  USE_MULTITEX3  = $010;
-  BUILD_FNORMALS = $020;
-  BUILD_SNORMALS = $040;
-  BUILD_PLANES   = $080;
-  BUILD_VBO      = $100;
+  USE_NORMALS      = $001;
+  USE_TEXTURE      = $002;
+  USE_MULTITEX1    = $004;
+  USE_MULTITEX2    = $008;
+  USE_MULTITEX3    = $010;
+  USE_VBO          = $020;
+  BUILD_SNORMALS   = $040;
+  BUILD_PLANES     = $080;
+  BUILD_VBO_STATIC = $100;
+  BUILD_VBO_STREAM = $200;
 
 implementation
 
