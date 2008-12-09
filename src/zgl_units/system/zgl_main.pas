@@ -82,8 +82,6 @@ uses
   zgl_sound_wav;
 
 procedure zgl_Init;
-  var
-    mesh : zglTSMesh;
 begin
   log_Init;
   if not InitGL Then
@@ -91,7 +89,6 @@ begin
       log_Add( 'Cannot load GL library' );
       exit;
     end;
-  log_Add( 'sub: ' + u_IntToStr( sizeof( mesh ) ) );
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
