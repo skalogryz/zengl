@@ -83,7 +83,6 @@ type
     OnTimer    : procedure;
     
     Prev, Next : zglPTimer;
-    _align8    : DWORD; //FIXME
 end;
 
 type
@@ -91,7 +90,6 @@ type
   zglTTimerManager = record
     Count   : DWORD;
     First   : zglTTimer;
-    _align8 : DWORD; //FIXME
 end;
 
 {------------------------------------------------------------------------------}
@@ -452,7 +450,6 @@ type
 
     State          : zglTSimpleState;
     Actions        : array of zglTSimpleAction;
-    _align8        : DWORD; //FIXME
 end;
 
 {------------------------------------------------------------------------------}
@@ -496,7 +493,6 @@ type
     Vertices  : array of zglTPoint3D;
     Normals   : array of zglTPoint3D;
     BonePos   : array of zglTBonePos;
-    _align8   : DWORD; //FIXME
 end;
 
 type

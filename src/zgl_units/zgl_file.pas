@@ -82,8 +82,10 @@ begin
 end;
 
 function file_Exists;
+  {$IFDEF WIN32}
   var
-    FileHandle : zglTFile;
+    FileHandle : DWORD;
+  {$ENDIF}
 begin
   {$IFDEF LINUX}
   Result := not Boolean( access( FileName, F_OK ) );
