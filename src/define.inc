@@ -5,6 +5,8 @@
 {$DEFINE USE_SOUND}
 {$DEFINE USE_WINEHACK}
 
+{$PACKRECORDS 8}
+
 {$IFDEF LINUX}
   {$DEFINE extdecl := cdecl}
 {$ENDIF}
