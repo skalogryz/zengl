@@ -16,6 +16,7 @@ unit zglHeader;
 {$IFDEF FPC}
   {$MODE DELPHI}
   {$MACRO ON}
+  {$PACKRECORDS 8}
   {$IFDEF LINUX}
     {$DEFINE stdcall := cdecl}
   {$ENDIF}
@@ -151,7 +152,6 @@ type
     OnTimer    : procedure;
 
     Prev, Next : zglPTimer;
-    _align8    : DWORD; //FIXME
 end;
 
 type
@@ -159,7 +159,6 @@ type
   zglTTimerManager = record
     Count   : DWORD;
     First   : zglTTimer;
-    _align8 : DWORD; //FIXME
 end;
 
 var
@@ -802,7 +801,6 @@ type
 
     State          : zglTSimpleState;
     Actions        : array of zglTSimpleAction;
-    _align8        : DWORD; //FIXME
 end;
 
 var
@@ -851,7 +849,6 @@ type
     Vertices  : array of zglTPoint3D;
     Normals   : array of zglTPoint3D;
     BonePos   : array of zglTBonePos;
-    _align8   : DWORD; //FIXME
 end;
 
 type
