@@ -50,6 +50,11 @@ procedure scr_SetViewPort; extdecl;
 procedure scr_SetVSync( VSync : Boolean ); extdecl;
 procedure scr_SetFSAA( FSAA : Byte ); extdecl;
 
+{$IFDEF LINUX}
+function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
+function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
+{$ENDIF}
+
 implementation
 
 {$IFDEF WIN32}
@@ -146,6 +151,18 @@ begin
       u_Error( 'GLX Extension not found' );
       exit;
     end else log_Add( 'GLX Extension - ok' );
+
+  app_XIM := XOpenIM( scr_Display, nil, nil, nil );
+  if not Assigned( app_XIM ) Then
+    log_Add( 'XOpenIM - Fail' )
+  else
+    log_Add( 'XOpenIM - ok' );
+
+  app_XIC := XCreateIC( app_XIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
+  if not Assigned( app_XIC ) Then
+    log_Add( 'XCreateIC - Fail' )
+  else
+    log_Add( 'XCreateIC - ok' );
     
   scr_Default := DefaultScreen( scr_Display );
 

@@ -72,6 +72,8 @@ function  zgl_mess{$IFDEF LINUX} : DWORD{$ENDIF}
 
 {$IFDEF LINUX}
 function sleep(__useconds:longword):longint;cdecl;external 'libc' name 'usleep';
+
+function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
 {$ENDIF}
 
 implementation
@@ -138,7 +140,7 @@ begin
 
   Set2DMode;
   wnd_ShowCursor( FALSE );
-  
+
   zgl_loop;
   zgl_Destroy;
 end;
@@ -151,7 +153,7 @@ begin
   log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 0 do
     rtarget_Del( managerRTarget.First.Next );
-  
+
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 0 do
     timer_Del( managerTimer.First.Next );
@@ -336,9 +338,9 @@ begin
   scr_Clear;
 
   app_PDraw;
-  
+
   scr_flush;
-  
+
   if not app_Pause Then
     INC( app_FPSCount );
 end;
@@ -446,8 +448,13 @@ function zgl_mess;
   var
   {$IFDEF LINUX}
     Event  : TXEvent;
+    Keysym : TKeySym;
+    Status : TStatus;
   {$ENDIF}
     Key : WORD;
+    c   : array[ 0..1 ] of Char;
+    i   : Integer;
+    len : Integer;
 begin
 {$IFDEF LINUX}
   while XPending( scr_Display ) <> 0 do
@@ -476,7 +483,7 @@ begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
           end;
-          
+
         MotionNotify:
           begin
             if not mouseLock Then
@@ -559,14 +566,24 @@ begin
             keysDown[ Key ] := TRUE;
             keysUp  [ Key ] := FALSE;
             keysLast[ KA_DOWN ] := Key;
-            
+
             if ( Key = K_SHIFT_L ) or ( Key = K_SHIFT_R ) Then Key := K_SHIFT;
             if ( Key = K_CTRL_L ) or ( Key = K_CTRL_R ) Then Key := K_CTRL;
             if ( Key = K_ALT_L ) or ( Key = K_ALT_R ) Then Key := K_ALT;
             keysDown[ Key ] := TRUE;
             keysUp  [ Key ] := FALSE;
-            
-            key_TextInput( Key );
+
+            case Key of
+              K_BACKSPACE: Delete( keysText, Length( keysText ), 1 );
+              K_TAB: key_InputText( '  ' );
+            else
+              len := Xutf8LookupString( app_XIC, @Event, @c, 2, @Keysym, @Status );
+              if len > 1 Then
+                key_InputText( Char( Getchar( c[ 0 ], c[ 1 ] ) ) )
+              else
+                if len > 0 Then
+                  key_InputText( c );
+            end;
           end;
         KeyRelease:
           begin
@@ -574,7 +591,7 @@ begin
             keysDown[ Key ] := FALSE;
             keysUp  [ Key ] := TRUE;
             keysLast[ KA_UP ] := Key;
-            
+
             if ( Key = K_SHIFT_L ) or ( Key = K_SHIFT_R ) Then Key := K_SHIFT;
             if ( Key = K_CTRL_L ) or ( Key = K_CTRL_R ) Then Key := K_CTRL;
             if ( Key = K_ALT_L ) or ( Key = K_ALT_R ) Then Key := K_ALT;
@@ -679,8 +696,6 @@ begin
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
         keysLast[ KA_DOWN ] := Key;
-
-        key_TextInput( Key );
       end;
     WM_KEYUP{, WM_SYSKEYUP}:
       begin
@@ -688,6 +703,16 @@ begin
         keysDown[ Key ] := FALSE;
         keysUp  [ Key ] := TRUE;
         keysLast[ KA_UP ] := Key;
+      end;
+    WM_CHAR:
+      begin
+        case wParam of
+          K_BACKSPACE: Delete( keysText, Length( keysText ), 1 );
+          K_TAB: key_InputText( '  ' );
+        else
+          if wParam >= 32 Then
+            key_InputText( Chr( wParam ) );
+        end;
       end;
   else
     Result := DefWindowProc( hWnd, Msg, wParam, lParam );
