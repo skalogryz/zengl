@@ -138,7 +138,7 @@ procedure key_BeginReadText( Text : String; MaxSymbols : WORD ); extdecl;
 function  key_EndReadText : PChar; extdecl;
 procedure key_ClearState; extdecl;
 
-procedure key_TextInput( KeyCode : WORD );
+procedure key_InputText( Text : String );
 {$IFDEF LINUX}
 function xkey_to_winkey( KeyCode : WORD ) : Byte;
 {$ENDIF}
@@ -188,32 +188,10 @@ begin
     keysUp[ i ] := FALSE;
 end;
 
-// TODO: доработать
-procedure key_TextInput;
+procedure key_InputText;
 begin
-  if KeyCode <> keysLast[ KA_DOWN ] Then
-    begin
-      keysLast[ KA_DOWN ] := KeyCode;
-    end else
-      if keysTick < timer_GetTicks - 100 Then
-        begin
-          keysTick := keysTick + 100;
-        end else
-          exit;
-
-  if KeyCode = K_BACKSPACE Then
-    Delete( keysText, Length( keysText ), 1 );
-    
-  if length( keysText ) > keysMax Then exit;
-
-  if KeyCode = K_SPACE Then
-    keysText := keysText + ' ';
-
-  if ( KeyCode >= K_A ) and ( KeyCode <= K_Z ) Then
-    if key_Down( K_SHIFT ) Then
-      keysText := keysText + StrUp( Chr( KeyCode ) )
-    else
-      keysText := keysText + StrDown( Chr( KeyCode ) );
+  if length( keysText ) < keysMax Then
+    keysText := keysText + Text;
 end;
 
 {$IFDEF LINUX}
