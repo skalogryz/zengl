@@ -49,7 +49,7 @@ const
   FSM_SET    = $01;
   FSM_CUR    = $02;
   FSM_END    = $03;
-  
+
 procedure file_Open( var FileHandle : zglTFile; FileName : PChar; Mode : Byte ); extdecl;
 function  file_Exists( FileName : PChar ) : Boolean; extdecl;
 function  file_Seek( FileHandle : zglTFile; Offset : DWORD; Mode : Byte ) : DWORD; extdecl;

@@ -81,7 +81,7 @@ type
     Interval   : DWORD;
     LastTick   : Double;
     OnTimer    : procedure;
-    
+
     Prev, Next : zglPTimer;
 end;
 
@@ -104,7 +104,7 @@ type
     FramesX       : WORD;
     FramesY       : WORD;
     Flags         : DWORD;
-    
+
     Prev, Next    : zglPTexture;
 end;
 
@@ -149,7 +149,7 @@ type
     Handle     : Pointer;
     Surface    : zglPTexture;
     Flags      : Byte;
-    
+
     Prev, Next : zglPRenderTarget;
 end;
 
@@ -430,7 +430,7 @@ type
 
     IBuffer        : DWORD;
     VBuffer        : DWORD;
-    
+
     VCount         : DWORD;
     RVCount        : DWORD;
     TCount         : DWORD;
@@ -438,7 +438,7 @@ type
     GCount         : DWORD;
     ACount         : DWORD;
     Frames         : DWORD;
-    
+
     Vertices       : array of zglTPoint3D;
     Normals        : array of zglTPoint3D;
     TexCoords      : array of zglTPoint2D;
@@ -578,7 +578,7 @@ type
     FCount         : DWORD;
     ICount         : DWORD;
     PCount         : DWORD;
-    
+
     Vertices       : array of zglTPoint3D;
     Normals        : array of zglTPoint3D;
     TexCoords      : array of zglTPoint2D;
@@ -630,7 +630,7 @@ type
 
     IBuffer         : DWORD;
     VBuffer         : DWORD;
-    
+
     MainNode        : zglPNode;
 
     VCount          : DWORD;
@@ -646,7 +646,7 @@ type
     Indices         : Pointer;
     Planes          : array of zglTPlane;
     Textures        : array of DWORD;
-    
+
     MaxDFaces       : DWORD;
     DFaces          : array of DWORD;
 

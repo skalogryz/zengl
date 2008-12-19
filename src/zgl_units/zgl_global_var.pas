@@ -74,6 +74,8 @@ var
   
   {$IFDEF LINUX}
   app_Cursor : TCursor = None;
+  app_XIM    : PXIM;
+  app_XIC    : PXIC;
   {$ENDIF}
   app_ShowCursor : Boolean = TRUE;
   
