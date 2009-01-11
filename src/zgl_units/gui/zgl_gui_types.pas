@@ -22,48 +22,114 @@ unit zgl_gui_types;
 {$I define.inc}
 
 interface
+uses
+  zgl_types;
 
 const
-  EVENT_MOUSE_MOVE  = 1;
-  EVENT_MOUSE_DOWN  = 2;
-  EVENT_MOUSE_CLICK = 3;
+  WIDGET_BUTTON     = 1;
+  WIDGET_CHECKBOX   = 2;
+
+  EVENT_FOCUS_IN    = 1;
+  EVENT_FOCUS_OUT   = 2;
+
+  EVENT_MOUSE_MOVE  = 3;
   EVENT_MOUSE_ENTER = 4;
   EVENT_MOUSE_LEAVE = 5;
+  EVENT_MOUSE_DOWN  = 6;
+  EVENT_MOUSE_UP    = 7;
+  EVENT_MOUSE_CLICK = 8;
+  EVENT_MOUSE_WHEEL = 9;
+
+  EVENT_KEY_DOWN    = 10;
+  EVENT_KEY_UP      = 11;
+  EVENT_KEY_CHAR    = 12;
 
 type
   zglPEvent  = ^zglTEvent;
   zglPWidget = ^zglTWidget;
+
+  //Events
+  zglTEvents = record
+  case byte of
+    0: ( OnClick      : procedure( const Widget : zglPWidget ) );
+    1: ( OnMouseUp    : procedure( const Widget : zglPWidget ) );
+    2: ( OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single ) );
+    3: ( OnMouseEnter : procedure( const Widget : zglPWidget ) );
+    4: ( OnMouseLeave : procedure( const Widget : zglPWidget ) );
+    5: ( OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte ) );
+    6: ( OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte ) );
+end;
 
   //Widget
   zglTWidget = record
     _type      : Integer;
     desc       : Pointer;
     data       : Pointer;
+    rect       : zglTRect;
+    focus      : Boolean;
+    mousein    : Boolean;
 
-    events     : zglPEvent;
+    OnDraw     : procedure( const Widget : zglPWidget );
+    OnProc     : procedure( const Event  : zglPEvent );
+    Events     : zglTEvents;
+
     parent     : zglPWidget;
     Next, Prev : zglPWidget;
+end;
+
+  //GUI Manager
+  zglPGUIManager = ^zglTGUIManager;
+  zglTGUIManager = record
+    Count : DWORD;
+    First : zglTWidget;
+end;
+
+  zglTWidgetType = record
+    _type  : Integer;
+
+    OnDraw : procedure( const Widget : zglPWidget );
+    OnProc : procedure( const Event  : zglPEvent );
 end;
 
   //Event
   zglTEvent = record
     _type      : Integer;
-    data       : Pointer;
-    OnEvent    : procedure( Sender : zglPWidget; Desc, Data : Pointer ); extdecl;
+    widget     : zglPWidget;
     Next, Prev : zglPEvent;
+    case byte of
+      1: ( mouse_pos    : zglTPoint2D );
+      2: ( mouse_button : Byte );
+      3: ( key_code     : Byte );
+      4: ( key_char     : PChar );
+end;
+
+  //Event list
+  zglTEventList = record
+    Count : DWORD;
+    First : zglTEvent;
 end;
 
   zglPButtonDesc = ^zglTButtonDesc;
   zglTButtonDesc = record
-    X, Y, W, H : Single;
-    Caption    : PChar;
+    Caption : PChar;
+    Font    : zglPFont;
+
+    Pressed : Boolean;
 end;
 
   zglPCheckBoxDesc = ^zglTCheckBoxDesc;
   zglTCheckBoxDesc = record
-    X, Y, W, H : Single;
-    Caption    : PChar;
-    Checked    : Boolean;
+    Caption : PChar;
+    Font    : zglPFont;
+
+    Checked : Boolean;
+end;
+
+  zglPEditDesc = ^zglTEditDesc;
+  zglTEditDesc = record
+    Text : PChar;
+    Font : zglPFont;
+    Max  : Integer;
 end;
 
 implementation
