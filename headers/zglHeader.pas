@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 33                     }
-{ date:  17.11.08               }
+{ build: 35                     }
+{ date:  29.12.08               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -19,6 +19,11 @@ unit zglHeader;
   {$PACKRECORDS 8}
   {$IFDEF LINUX}
     {$DEFINE stdcall := cdecl}
+    {$DEFINE LINUX_OR_DARWIN}
+  {$ENDIF}
+  {$IFDEF DARWIN}
+    {$DEFINE stdcall := cdecl}
+    {$DEFINE LINUX_OR_DARWIN}
   {$ENDIF}
 {$ENDIF}
 
@@ -41,14 +46,17 @@ const
 {$IFDEF WIN32}
   libZenGL = 'ZenGL.dll';
 {$ENDIF}
+{$IFDEF DARWIN}
+  libZenGL = 'libZenGL.dylib';
+{$ENDIF}
 
 function zglLoad( LibraryName : String; Error : Boolean = TRUE ) : Boolean;
 procedure zglFree;
 
 var
-  zgl_Init         : procedure( FSAA : Byte = 0; StencilBits : Byte = 0 ); stdcall;
-  zgl_InitToHandle : procedure( Handle : DWORD; FSAA : Byte = 0; StencilBits : Byte = 0 ); stdcall;
-  zgl_Exit         : procedure; stdcall;
+  zgl_Init         : procedure( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+  zgl_InitToHandle : procedure( const Handle : DWORD; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+  zgl_Exit         : procedure;
 
 const
   SYS_LOAD             = $000001;
@@ -58,9 +66,12 @@ const
   TEX_FORMAT_LOADER    = $000011;
   SND_FORMAT_EXTENSION = $000020;
   SND_FORMAT_LOADER    = $000021;
+  WIDGET_TYPE_ID       = $000022;
+  WIDGET_ONDRAW        = $000023;
+  WIDGET_ONPROC        = $000024;
 
 var
-  zgl_Reg : procedure( What : WORD; UserData : Pointer ); stdcall;
+  zgl_Reg : procedure( const What : WORD; const UserData : Pointer );
   
 const
   SYS_FPS         = 1;  // DWORD,  := zgl_Get( SYS_FPS )
@@ -76,10 +87,11 @@ const
   MANAGER_FONT    = 11; // zglPFontManager
   MANAGER_RTARGET = 12; // zglTRenderTargetManager
   MANAGER_SOUND   = 13; // zglPSoundManager
+  MANAGER_GUI     = 14; // zglPGUIManager
 
 var
-  zgl_Get    : function( What : DWORD ) : Ptr; stdcall;
-  zgl_GetMem : procedure( var Mem : Pointer; Size : DWORD ); stdcall;
+  zgl_Get    : function( const What : DWORD ) : Ptr;
+  zgl_GetMem : procedure( var Mem : Pointer; const Size : DWORD );
 
 const
   COLOR_BUFFER_CLEAR   = $000001;
@@ -96,18 +108,18 @@ const
   CROP_INVISIBLE       = $000800;
 
 var
-  zgl_Enable  : procedure( What : DWORD ); stdcall;
-  zgl_Disable : procedure( What : DWORD ); stdcall;
+  zgl_Enable  : procedure( const What : DWORD );
+  zgl_Disable : procedure( const What : DWORD );
 
 // LOG
-  log_Add : procedure( Message : String; Timings : Boolean = TRUE ); stdcall;
+  log_Add : procedure( const Message : String; const Timings : Boolean = TRUE );
   
 // WINDOW
-  wnd_SetCaption : procedure( NewCaption : String ); stdcall;
-  wnd_SetSize    : procedure( Width, Height : WORD ); stdcall;
-  wnd_SetPos     : procedure( X, Y : WORD ); stdcall;
-  wnd_SetOnTop   : procedure( OnTop : Boolean ); stdcall;
-  wnd_ShowCursor : procedure( Show : Boolean ); stdcall;
+  wnd_SetCaption : procedure( const NewCaption : String );
+  wnd_SetSize    : procedure( const Width, Height : WORD );
+  wnd_SetPos     : procedure( const X, Y : WORD );
+  wnd_SetOnTop   : procedure( const OnTop : Boolean );
+  wnd_ShowCursor : procedure( const Show : Boolean );
   
 // SCREEN
 type
@@ -123,24 +135,24 @@ const
   REFRESH_DEFAULT = 1;
 
 var
-  scr_Clear             : procedure; stdcall;
-  scr_Flush             : procedure; stdcall;
-  scr_SetVSync          : procedure( VSync : Boolean ); stdcall;
+  scr_Clear             : procedure;
+  scr_Flush             : procedure;
+  scr_SetVSync          : procedure( const VSync : Boolean );
   // ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
-  scr_SetFSAA           : procedure( FSAA : Byte ); stdcall;
-  scr_SetOptions        : procedure( Width, Height, BPP, Refresh : WORD; FullScreen, VSync : Boolean ); stdcall;
-  scr_CorrectResolution : procedure( Width, Height : WORD ); stdcall;
+  scr_SetFSAA           : procedure( const FSAA : Byte );
+  scr_SetOptions        : procedure( const Width, Height, BPP, Refresh : WORD; const FullScreen, VSync : Boolean );
+  scr_CorrectResolution : procedure( const Width, Height : WORD );
 
 // INI
-  ini_LoadFromFile : procedure( FileName : String ); stdcall;
-  ini_SaveToFile   : procedure( FileName : String ); stdcall;
-  ini_Add          : procedure( Section, Key : String ); stdcall;
-  ini_ReadKeyStr   : function( Section, Key : String ) : String; stdcall;
-  ini_ReadKeyInt   : function( Section, Key : String ) : Integer; stdcall;
-  ini_ReadKeyBool  : function( Section, Key : String ) : Boolean; stdcall;
-  ini_WriteKeyStr  : function( Section, Key, Value : String ) : Boolean; stdcall;
-  ini_WriteKeyInt  : function( Section, Key : String; Value : Integer ) : Boolean; stdcall;
-  ini_WriteKeyBool : function( Section, Key : String; Value : Boolean ) : Boolean; stdcall;
+  ini_LoadFromFile : procedure( const FileName : String );
+  ini_SaveToFile   : procedure( const FileName : String );
+  ini_Add          : procedure( const Section, Key : String );
+  ini_ReadKeyStr   : function( const Section, Key : String ) : String;
+  ini_ReadKeyInt   : function( const Section, Key : String ) : Integer;
+  ini_ReadKeyBool  : function( const Section, Key : String ) : Boolean;
+  ini_WriteKeyStr  : function( const Section, Key, Value : String ) : Boolean;
+  ini_WriteKeyInt  : function( const Section, Key : String; const Value : Integer ) : Boolean;
+  ini_WriteKeyBool : function( const Section, Key : String; const Value : Boolean ) : Boolean;
   
 // TIMERS
 type
@@ -162,9 +174,9 @@ type
 end;
 
 var
-  timer_Add      : function( OnTimer : Pointer; Interval : DWORD ) : zglPTimer; stdcall;
-  timer_Del      : procedure( Timer : zglPTimer ); stdcall;
-  timer_GetTicks : function : Double; stdcall;
+  timer_Add      : function( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
+  timer_Del      : procedure( var Timer : zglPTimer );
+  timer_GetTicks : function : Double;
   
 // KEYBOARD
 const
@@ -269,12 +281,12 @@ const
   KA_DOWN     = 0;
   KA_UP       = 1;
 var
-  key_Down          : function( KeyCode : Byte ) : Boolean; stdcall;
-  key_Up            : function( KeyCode : Byte ) : Boolean; stdcall;
-  key_Last          : function( KeyAction : Byte ) : Byte; stdcall;
-  key_BeginReadText : procedure( Text : String; MaxSymbols : WORD ); stdcall;
-  key_EndReadText   : function : PChar; stdcall;
-  key_ClearState    : procedure; stdcall;
+  key_Down          : function( const KeyCode : Byte ) : Boolean;
+  key_Up            : function( const KeyCode : Byte ) : Boolean;
+  key_Last          : function( const KeyAction : Byte ) : Byte;
+  key_BeginReadText : procedure( const Text : String; const MaxSymbols : WORD );
+  key_EndReadText   : function : PChar;
+  key_ClearState    : procedure;
   
 // MOUSE
 const
@@ -285,20 +297,20 @@ const
   M_WDOWN  = 1;
 
 var
-  mouse_X          : function : Integer; stdcall;
-  mouse_Y          : function : Integer; stdcall;
-  mouse_DX         : function : Integer; stdcall;
-  mouse_DY         : function : Integer; stdcall;
-  mouse_Down       : function( Button : Byte ) : Boolean; stdcall;
-  mouse_Up         : function( Button : Byte ) : Boolean; stdcall;
-  mouse_Click      : function( Button : Byte ) : Boolean; stdcall;
-  mouse_Wheel      : function( Axis : Byte ) : Boolean; stdcall;
-  mouse_ClearState : procedure; stdcall;
-  mouse_Lock       : procedure; stdcall;
+  mouse_X          : function : Integer;
+  mouse_Y          : function : Integer;
+  mouse_DX         : function : Integer;
+  mouse_DY         : function : Integer;
+  mouse_Down       : function( const Button : Byte ) : Boolean;
+  mouse_Up         : function( const Button : Byte ) : Boolean;
+  mouse_Click      : function( const Button : Byte ) : Boolean;
+  mouse_Wheel      : function( const Axis : Byte ) : Boolean;
+  mouse_ClearState : procedure;
+  mouse_Lock       : procedure;
   
 // GL
-  Set2DMode : procedure; stdcall;
-  Set3DMode : procedure( FOVY : Single ); stdcall;
+  Set2DMode : procedure;
+  Set3DMode : procedure( FOVY : Single );
   
 // TEXTURES
 type
@@ -346,16 +358,16 @@ const
   TEX_DEFAULT_2D        = TEX_CLAMP or TEX_CONVERT_TO_POT or TEX_FILTER_LINEAR;
 
 var
-  tex_Add           : function : zglPTexture; stdcall;
-  tex_Del           : procedure( Texture : zglPTexture ); stdcall;
-  tex_Create        : procedure( var Texture : zglTTexture; pData : Pointer ); stdcall;
-  tex_CreateZero    : function( Width, Height : WORD; Color, Flags : DWORD ) : zglPTexture; stdcall;
-  tex_LoadFromFile  : function( FileName : String; TransparentColor, Flags : DWORD ) : zglPTexture; stdcall;
-  tex_SetFrameSize  : procedure( Texture : zglPTexture; FrameWidth, FrameHeight : WORD ); stdcall;
-  tex_SetMask       : function( Texture, Mask : zglPTexture ) : zglPTexture; stdcall;
-  tex_GetData       : procedure( Texture : zglPTexture; var pData : Pointer; var pSize : Integer ); stdcall;
-  tex_Filter        : procedure( Texture : zglPTexture; Flags : DWORD ); stdcall;
-  tex_SetAnisotropy : procedure( Level : Byte ); stdcall;
+  tex_Add           : function : zglPTexture;
+  tex_Del           : procedure( const Texture : zglPTexture );
+  tex_Create        : procedure( var Texture : zglTTexture; const pData : Pointer );
+  tex_CreateZero    : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
+  tex_LoadFromFile  : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
+  tex_SetFrameSize  : procedure( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
+  tex_SetMask       : function( const Texture, Mask : zglPTexture ) : zglPTexture;
+  tex_GetData       : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
+  tex_Filter        : procedure( const Texture : zglPTexture; const Flags : DWORD );
+  tex_SetAnisotropy : procedure( const Level : Byte );
 
 // RENDER TARGETS
 type
@@ -401,9 +413,9 @@ const
   RT_CLEAR_SCREEN = $02;
 
 var
-  rtarget_Add : function( rtType : Byte; Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget; stdcall;
-  rtarget_Del : procedure( Target : zglPRenderTarget ); stdcall;
-  rtarget_Set : procedure( Target : zglPRenderTarget ); stdcall;
+  rtarget_Add : function( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+  rtarget_Del : procedure( const Target : zglPRenderTarget );
+  rtarget_Set : procedure( const Target : zglPRenderTarget );
   
 // 2D
 type
@@ -450,7 +462,7 @@ const
   FX_BLEND_MASK   = $05;
 
 var
-  fx_SetBlendMode : procedure( Mode : Byte ); stdcall;
+  fx_SetBlendMode : procedure( const Mode : Byte );
   
 // FX 2D
 const
@@ -464,10 +476,10 @@ const
   FX_BLEND      = $000040;
 
 var
-  fx2d_SetColorMix : procedure( Color : DWORD ); stdcall;
-  fx2d_SetVCA      : procedure( c1, c2, c3, c4 : DWORD; a1, a2, a3, a4 : Byte ); stdcall;
-  fx2d_SetVertexes : procedure( x1, y1, x2, y2, x3, y3, x4, y4 : Single ); stdcall;
-  fx2d_SetScale    : procedure( scaleX, scaleY : Single ); stdcall;
+  fx2d_SetColorMix : procedure( const Color : DWORD );
+  fx2d_SetVCA      : procedure( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
+  fx2d_SetVertexes : procedure( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
+  fx2d_SetScale    : procedure( const scaleX, scaleY : Single );
   
 // Camera 2D
 type
@@ -478,7 +490,7 @@ type
 end;
 
 var
-  cam2d_Set : procedure( Camera : zglPCamera2D ); stdcall;
+  cam2d_Set : procedure( const Camera : zglPCamera2D );
   
 // Primitives 2D
 const
@@ -486,16 +498,16 @@ const
   PR2D_SMOOTH = $000002;
 
 var
-  pr2d_Pixel   : procedure( X, Y : Single; Color : DWORD = $FFFFFF; Alpha : Byte = 255 ); stdcall;
-  pr2d_Line    : procedure( X1, Y1, X2, Y2 : Single; Color : DWORD = $FFFFFF; Alpha : Byte = 255; FX : DWORD = 0 ); stdcall;
-  pr2d_Rect    : procedure( X, Y, W, H : Single; Color : DWORD = $FFFFFF; Alpha : Byte = 255; FX : DWORD = 0 ); stdcall;
-  pr2d_Circle  : procedure( X, Y, Radius : Single; Color : DWORD = $FFFFFF; Alpha : Byte = 255; Quality : WORD = 32; FX : DWORD = 0 ); stdcall;
-  pr2d_Ellipse : procedure( X, Y, xRadius, yRadius : Single; Color : DWORD = $FFFFFF; Alpha : Byte = 255; Quality : WORD = 32; FX : DWORD = 0 ); stdcall;
+  pr2d_Pixel   : procedure( const X, Y : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255 );
+  pr2d_Line    : procedure( const X1, Y1, X2, Y2 : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = 0 );
+  pr2d_Rect    : procedure( const X, Y, W, H : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = 0 );
+  pr2d_Circle  : procedure( const X, Y, Radius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
+  pr2d_Ellipse : procedure( const X, Y, xRadius, yRadius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
   
 // Sprites 2D
-  ssprite2d_Draw : procedure( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : DWORD = FX_BLEND ); stdcall;
-  asprite2d_Draw : procedure( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; Alpha : Byte = 255; FX : DWORD = FX_BLEND ); stdcall;
-  csprite2d_Draw : procedure( Texture : zglPTexture; X, Y, W, H, Angle : Single; CutRect : zglTRect; Alpha : Byte = 255; FX : DWORD = FX_BLEND ); stdcall;
+  ssprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  asprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  csprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   
 // Text
 type
@@ -517,11 +529,126 @@ type
 end;
 
 var
-  font_Add          : function : zglPFont; stdcall;
-  font_Del          : procedure( Font : zglPFont ); stdcall;
-  font_LoadFromFile : function( Texture, FontInfo : String ) : zglPFont; stdcall;
-  text_Draw         : procedure( Font : zglPFont; X, Y : Single; Text : String; Alpha : Byte = 255; Color : DWORD = $FFFFFF; Step : Single = 0; Scale : Single = 1 ); stdcall;
-  text_GetWidth     : function( Font : zglPFont; Text : String; Step : Single = 0.0; Scale : Single = 1.0 ) : Single; stdcall;
+  font_Add          : function : zglPFont;
+  font_Del          : procedure( const Font : zglPFont );
+  font_LoadFromFile : function( const Texture, FontInfo : String ) : zglPFont;
+  text_Draw         : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Step : Single = 0; const Scale : Single = 1 );
+  text_GetWidth     : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0; const Scale : Single = 1.0 ) : Single;
+
+// GUI
+const
+  WIDGET_BUTTON     = 1;
+  WIDGET_CHECKBOX   = 2;
+
+  EVENT_FOCUS_IN    = 1;
+  EVENT_FOCUS_OUT   = 2;
+
+  EVENT_MOUSE_MOVE  = 3;
+  EVENT_MOUSE_ENTER = 4;
+  EVENT_MOUSE_LEAVE = 5;
+  EVENT_MOUSE_DOWN  = 6;
+  EVENT_MOUSE_UP    = 7;
+  EVENT_MOUSE_CLICK = 8;
+  EVENT_MOUSE_WHEEL = 9;
+
+  EVENT_KEY_DOWN    = 10;
+  EVENT_KEY_UP      = 11;
+  EVENT_KEY_CHAR    = 12;
+
+type
+  zglPEvent  = ^zglTEvent;
+  zglPWidget = ^zglTWidget;
+
+  //Events
+  zglTEvents = record
+  case byte of
+    0: ( OnClick      : procedure( const Widget : zglPWidget ) );
+    1: ( OnMouseUp    : procedure( const Widget : zglPWidget ) );
+    2: ( OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single ) );
+    3: ( OnMouseEnter : procedure( const Widget : zglPWidget ) );
+    4: ( OnMouseLeave : procedure( const Widget : zglPWidget ) );
+    5: ( OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte ) );
+    6: ( OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte ) );
+end;
+
+  //Widget
+  zglTWidget = record
+    _type      : Integer;
+    desc       : Pointer;
+    data       : Pointer;
+    rect       : zglTRect;
+    focus      : Boolean;
+    mousein    : Boolean;
+
+    OnDraw     : procedure( const Widget : zglPWidget );
+    OnProc     : procedure( const Event  : zglPEvent );
+    Events     : zglTEvents;
+
+    parent     : zglPWidget;
+    Next, Prev : zglPWidget;
+end;
+
+  //GUI Manager
+  zglPGUIManager = ^zglTGUIManager;
+  zglTGUIManager = record
+    Count : DWORD;
+    First : zglTWidget;
+end;
+
+  zglTWidgetType = record
+    _type  : Integer;
+
+    OnDraw : procedure( const Widget : zglPWidget );
+    OnProc : procedure( const Event  : zglPEvent );
+end;
+
+  //Event
+  zglTEvent = record
+    _type      : Integer;
+    widget     : zglPWidget;
+    Next, Prev : zglPEvent;
+    case byte of
+      1: ( mouse_pos    : zglTPoint2D );
+      2: ( mouse_button : Byte );
+      3: ( key_code     : Byte );
+      4: ( key_char     : PChar );
+end;
+
+  //Event list
+  zglTEventList = record
+    Count : DWORD;
+    First : zglTEvent;
+end;
+
+  zglPButtonDesc = ^zglTButtonDesc;
+  zglTButtonDesc = record
+    Caption : PChar;
+    Font    : zglPFont;
+
+    Pressed : Boolean;
+end;
+
+  zglPCheckBoxDesc = ^zglTCheckBoxDesc;
+  zglTCheckBoxDesc = record
+    Caption : PChar;
+    Font    : zglPFont;
+
+    Checked : Boolean;
+end;
+
+  zglPEditDesc = ^zglTEditDesc;
+  zglTEditDesc = record
+    Text : PChar;
+    Font : zglPFont;
+    Max  : Integer;
+end;
+
+var
+  gui_Init      : procedure;
+  gui_Draw      : procedure;
+  gui_Proc      : procedure;
+  gui_AddWidget : function( const _type : Integer; const X, Y, W, H : Single; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
+  gui_DelWidget : procedure( var Widget : zglPWidget );
 
 // Sound
 type
@@ -542,8 +669,8 @@ type
   zglPSoundFile = ^zglTSoundFile;
   zglTSoundFile = record
     _File      : DWORD;
-    CodecRead  : Pointer;//function( Buffer : Pointer; Count : DWORD ) : DWORD; stdcall;
-    CodecLoop  : Pointer;//procedure; stdcall;
+    CodecRead  : Pointer;//function( const Buffer : Pointer; const Count : DWORD ) : DWORD;
+    CodecLoop  : Pointer;//procedure;
     Rate       : DWORD;
     Channels   : DWORD;
     Buffer     : Pointer;
@@ -560,19 +687,19 @@ type
 end;
 
 var
-  snd_Init              : function : Boolean; stdcall;
-  snd_Free              : procedure; stdcall;
-  snd_Add               : function( BufferCount, SourceCount : Integer ) : zglPSound; stdcall;
-  snd_Del               : procedure( Sound : zglPSound ); stdcall;
-  snd_LoadFromFile      : function( FileName : String; SourceCount : Integer ) : zglPSound; stdcall;
-  snd_Play              : function( Sound : zglPSound; X, Y, Z : Single; Loop : Boolean = FALSE ) : Integer; stdcall;
-  snd_Stop              : procedure( Sound : zglPSound; Source : Integer = -1 ); stdcall;
-  snd_SetVolume         : procedure( Volume : Byte; ID : Integer ); stdcall;
-  snd_SetFrequency      : procedure( Frequency : Integer; ID : Integer ); stdcall;
-  snd_SetFrequencyCoeff : procedure( Coefficient : Single; ID : Integer ); stdcall;
-  snd_PlayFile          : procedure( SoundFile : zglPSoundFile ); stdcall;
-  snd_StopFile          : procedure; stdcall;
-  snd_RestoreFile       : procedure; stdcall;
+  snd_Init              : function : Boolean;
+  snd_Free              : procedure;
+  snd_Add               : function( const BufferCount, SourceCount : Integer ) : zglPSound;
+  snd_Del               : procedure( var Sound : zglPSound );
+  snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer ) : zglPSound;
+  snd_Play              : function( const Sound : zglPSound; X, Y, Z : Single; Loop : Boolean = FALSE ) : Integer;
+  snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer = -1 );
+  snd_SetVolume         : procedure( const Volume : Byte; const ID : Integer );
+  snd_SetFrequency      : procedure( const Frequency : Integer; const ID : Integer );
+  snd_SetFrequencyCoeff : procedure( const Coefficient : Single; const ID : Integer );
+  snd_PlayFile          : procedure( const SoundFile : zglPSoundFile );
+  snd_StopFile          : procedure;
+  snd_RestoreFile       : procedure;
 
 // 3D
 type
@@ -665,12 +792,12 @@ end;
   
 var
 // Z BUFFER
-  zbuffer_SetDepth  : procedure( zNear, zFar : Single ); stdcall;
-  zbuffer_Clear     : procedure; stdcall;
+  zbuffer_SetDepth  : procedure( const zNear, zFar : Single );
+  zbuffer_Clear     : procedure;
   
 // SCISSOR
-  scissor_Begin : procedure( X, Y, Width, Height : WORD ); stdcall;
-  scissor_End   : procedure; stdcall;
+  scissor_Begin : procedure( const X, Y, Width, Height : WORD );
+  scissor_End   : procedure;
   
 // OBJECT 3D
 const
@@ -707,35 +834,35 @@ const
   BUILD_VBO_STREAM    = $200;
 
 var
-  obj3d_Begin       : procedure( Flags : DWORD ); stdcall;
-  obj3d_End         : procedure; stdcall;
-  obj3d_Enable      : procedure( Flags : DWORD ); stdcall;
-  obj3d_Disable     : procedure( Flags : DWORD ); stdcall;
-  obj3d_SetColor    : procedure( Color : DWORD; Alpha : Byte ); stdcall;
-  obj3d_BindTexture : procedure( Texture : zglPTexture; Level : Byte ); stdcall;
-  obj3d_SetMaterial : procedure( Material, Side : Byte; Color : DWORD; Alpha : Byte ); stdcall;
-  obj3d_Scale       : procedure( ScaleX, ScaleY, ScaleZ : Single ); stdcall;
-  obj3d_Move        : procedure( X, Y, Z : Single ); stdcall;
-  obj3d_SetMatrix   : procedure( Matrix : zglTMatrix4f ); stdcall;
-  obj3d_MulMatrix   : procedure( Matrix : zglTMatrix4f ); stdcall;
+  obj3d_Begin       : procedure( const Flags : DWORD );
+  obj3d_End         : procedure;
+  obj3d_Enable      : procedure( const Flags : DWORD );
+  obj3d_Disable     : procedure( const Flags : DWORD );
+  obj3d_SetColor    : procedure( const Color : DWORD; const Alpha : Byte );
+  obj3d_BindTexture : procedure( const Texture : zglPTexture; const Level : Byte );
+  obj3d_SetMaterial : procedure( const Material, Side : Byte; const Color : DWORD; const Alpha : Byte );
+  obj3d_Scale       : procedure( const ScaleX, ScaleY, ScaleZ : Single );
+  obj3d_Move        : procedure( const X, Y, Z : Single );
+  obj3d_SetMatrix   : procedure( const Matrix : zglTMatrix4f );
+  obj3d_MulMatrix   : procedure( const Matrix : zglTMatrix4f );
   
 const
   AX = $01;
   AY = $02;
   AZ = $04;
 var
-  obj3d_Rotate : procedure( Angle : Single; Axis : Byte ); stdcall;
+  obj3d_Rotate : procedure( const Angle : Single; const Axis : Byte );
 
 // PRIMITIVES 3D
-  pr3d_Point  : procedure( X, Y, Z : Single ); stdcall;
-  pr3d_Line   : procedure( X1, Y1, Z1, X2, Y2, Z2 : Single ); stdcall;
-  pr3d_Plane  : procedure( Width, Height : Single ); stdcall;
-  pr3d_AABB   : procedure( Width, Height, ZDepth : Single ); stdcall;
-  pr3d_Sphere : procedure( Radius : Single; Quality : Integer ); stdcall;
+  pr3d_Point  : procedure( const X, Y, Z : Single );
+  pr3d_Line   : procedure( const X1, Y1, Z1, X2, Y2, Z2 : Single );
+  pr3d_Plane  : procedure( const Width, Height : Single );
+  pr3d_AABB   : procedure( const Width, Height, ZDepth : Single );
+  pr3d_Sphere : procedure( Radius : Single; Quality : Integer );
 
 // SPRITE 3D
-  ssprite3d_Draw : procedure( X, Y, Z, sX, sY, sZ : Single; Matrix : zglPMatrix4f ); stdcall;
-  asprite3d_Draw : procedure( X, Y, Z, sX, sY, sZ : Single; Frame : Integer; Matrix : zglPMatrix4f ); stdcall;
+  ssprite3d_Draw : procedure( const X, Y, Z, sX, sY, sZ : Single; const Matrix : zglTMatrix4f );
+  asprite3d_Draw : procedure( const X, Y, Z, sX, sY, sZ : Single; const Frame : Integer; const Matrix : zglTMatrix4f );
 
 // CAMERA 3D
 type
@@ -747,9 +874,9 @@ type
 end;
 
 var
-  cam3d_Set    : procedure( Camera : zglPCamera3D ); stdcall;
-  cam3d_Fly    : procedure( Camera : zglPCamera3D; Speed : Single ); stdcall;
-  cam3d_Strafe : procedure( Camera : zglPCamera3D; Speed : Single ); stdcall;
+  cam3d_Set    : procedure( var Camera : zglTCamera3D );
+  cam3d_Fly    : procedure( var Camera : zglTCamera3D; const Speed : Single );
+  cam3d_Strafe : procedure( var Camera : zglTCamera3D; const Speed : Single );
 
 // SIMPLE MESH
 type
@@ -804,11 +931,11 @@ type
 end;
 
 var
-  smesh_LoadFromFile : function( var Mesh : zglPSMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
-  smesh_Animate      : procedure( Mesh : zglPSMesh; State : zglPSimpleState ); stdcall;
-  smesh_Draw         : procedure( Mesh : zglPSMesh; State : zglPSimpleState ); stdcall;
-  smesh_DrawGroup    : procedure( Mesh : zglPSMesh; State : zglPSimpleState; Group : DWORD ); stdcall;
-  smesh_Free         : procedure( var Mesh : zglPSMesh ); stdcall;
+  smesh_LoadFromFile : function( var Mesh : zglPSMesh; const FileName : String; const Flags : DWORD = 0 ) : Boolean;
+  smesh_Animate      : procedure( const Mesh : zglPSMesh; var State : zglTSimpleState );
+  smesh_Draw         : procedure( const Mesh : zglPSMesh; const State : zglPSimpleState );
+  smesh_DrawGroup    : procedure( const Mesh : zglPSMesh; const State : zglPSimpleState; const Group : DWORD );
+  smesh_Free         : procedure( var Mesh : zglPSMesh );
 
 // SKINNED MESH
 type
@@ -893,12 +1020,12 @@ type
 end;
 
 var
-  skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; FileName : String; Flags : DWORD = 0 ) : Boolean; stdcall;
-  skmesh_Animate      : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
-  skmesh_Draw         : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
-  skmesh_DrawGroup    : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState; Group : DWORD ); stdcall;
-  skmesh_DrawSkelet   : procedure( Mesh : zglPSkMesh; State : zglPSkeletonState ); stdcall;
-  skmesh_Free         : procedure( var Mesh : zglPSkMesh ); stdcall;
+  skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; const FileName : String; const Flags : DWORD = 0 ) : Boolean;
+  skmesh_Animate      : procedure( const Mesh : zglPSkMesh; var State : zglTSkeletonState );
+  skmesh_Draw         : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
+  skmesh_DrawGroup    : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
+  skmesh_DrawSkelet   : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
+  skmesh_Free         : procedure( var Mesh : zglPSkMesh );
 
 // HEIGHTMAP
 type
@@ -928,15 +1055,15 @@ type
 end;
 
 var
-  heightmap_Build      : procedure( var Heightmap : zglPHeightMap; Texture : zglPTexture; xScale, yScale, zScale : Single; xDetail, yDetail : Integer; Flags : DWORD ); stdcall;
-  heightmap_Draw       : procedure( Heightmap : zglPHeightMap ); stdcall;
-  heightmap_Free       : procedure( var Heightmap : zglPHeightMap ); stdcall;
-  heightmap_GetPlane   : function( Heightmap : zglPHeightMap; Position : zglTPoint3D ) : DWORD; stdcall;
-  heightmap_GetYOffset : function( Heightmap : zglPHeightMap; Position : zglTPoint3D ) : Single; stdcall;
+  heightmap_Build      : procedure( var Heightmap : zglPHeightMap; const Texture : zglPTexture; const xScale, yScale, zScale : Single; const xDetail, yDetail : Integer; const Flags : DWORD );
+  heightmap_Draw       : procedure( const Heightmap : zglPHeightMap );
+  heightmap_Free       : procedure( var Heightmap : zglPHeightMap );
+  heightmap_GetPlane   : function( const Heightmap : zglPHeightMap; Position : zglTPoint3D ) : DWORD;
+  heightmap_GetYOffset : function( const Heightmap : zglPHeightMap; Position : zglTPoint3D ) : Single;
   
 // VBO
-  vbo_Build : procedure( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD; Indices, Vertices, Normals, TexCoords, MultiTexCoords : Pointer; var Flags : DWORD ); stdcall;
-  vbo_Free  : procedure( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD ); stdcall;
+  vbo_Build : procedure( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD; Indices, Vertices, Normals, TexCoords, MultiTexCoords : Pointer; var Flags : DWORD );
+  vbo_Free  : procedure( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD );
 
 // FRUSTUM
 type
@@ -944,13 +1071,13 @@ type
   zglTFrustum = array [ 0..5 ] of array[ 0..3 ] of Single;
 
 var
-  frustum_Calc       : procedure( f : zglPFrustum ); stdcall;
-  frustum_PointIn    : function( f : zglPFrustum; x, y, z : Single ) : Boolean; stdcall;
-  frustum_PPointIn   : function( f : zglPFrustum; Vertex : zglPPoint3D ) : Boolean; stdcall;
-  frustum_TriangleIn : function( f : zglPFrustum; v1, v2, v3 : zglTPoint3D ) : Boolean; stdcall;
-  frustum_SphereIn   : function( f : zglPFrustum; x, y, z, r : Single ) : Boolean; stdcall;
-  frustum_BoxIn      : function( f : zglPFrustum; x, y, z, bx, by, bz : Single ) : Boolean; stdcall;
-  frustum_CubeIn     : function( f : zglPFrustum; x, y, z, size : Single ) : Boolean; stdcall;
+  frustum_Calc       : procedure( var f : zglTFrustum );
+  frustum_PointIn    : function( const f : zglTFrustum; const x, y, z : Single ) : Boolean;
+  frustum_PPointIn   : function( const f : zglTFrustum; const Vertex : zglTPoint3D ) : Boolean;
+  frustum_TriangleIn : function( const f : zglTFrustum; const v1, v2, v3 : zglTPoint3D ) : Boolean;
+  frustum_SphereIn   : function( const f : zglTFrustum; const x, y, z, r : Single ) : Boolean;
+  frustum_BoxIn      : function( const f : zglTFrustum; const x, y, z, bx, by, bz : Single ) : Boolean;
+  frustum_CubeIn     : function( const f : zglTFrustum; const x, y, z, size : Single ) : Boolean;
   
 // OCTREE
 type
@@ -1013,17 +1140,17 @@ type
 end;
 
 var
-  octree_Build     : procedure( Octree : zglPOctree; MaxFacesPerNode, Flags : DWORD ); stdcall;
-  octree_Free      : procedure( Octree : zglPOctree ); stdcall;
-  octree_Draw      : procedure( Octree : zglPOctree; Frustum : zglPFrustum ); stdcall;
-  octree_DrawDebug : procedure( Octree : zglPOctree; Frustum : zglPFrustum ); stdcall;
-  octree_DrawNode  : procedure( OCtree : zglPOctree; Node : zglPNode; Frustum : zglPFrustum ); stdcall;
+  octree_Build     : procedure( var Octree : zglTOctree; const MaxFacesPerNode, Flags : DWORD );
+  octree_Free      : procedure( var Octree : zglTOctree );
+  octree_Draw      : procedure( var Octree : zglTOctree; const Frustum : zglTFrustum );
+  octree_DrawDebug : procedure( var Octree : zglTOctree; const Frustum : zglTFrustum );
+  octree_DrawNode  : procedure( var OCtree : zglTOctree; const Node : zglTNode; const Frustum : zglTFrustum );
   
 // LIGHT
-  light_Enable      : procedure( ID : Byte ); stdcall;
-  light_Disable     : procedure( ID : Byte ); stdcall;
-  light_SetPosition : procedure( ID : Byte; X, Y, Z : Single; W : Single = 1 ); stdcall;
-  light_SetMaterial : procedure( ID, Material : Byte; Color : DWORD; Alpha : Byte ); stdcall;
+  light_Enable      : procedure( const ID : Byte );
+  light_Disable     : procedure( const ID : Byte );
+  light_SetPosition : procedure( const ID : Byte; const X, Y, Z : Single; const W : Single = 1 );
+  light_SetMaterial : procedure( const ID, Material : Byte; const Color : DWORD; const Alpha : Byte );
 
   
 // FOG
@@ -1033,16 +1160,16 @@ const
   FOG_MODE_LINEAR = 2;
 
 var
-  fog_Enable      : procedure; stdcall;
-  fog_Disable     : procedure; stdcall;
-  fog_SetMode     : procedure( Mode : Byte ); stdcall;
-  fog_SetColor    : procedure( Color : DWORD ); stdcall;
-  fog_SetDensity  : procedure( Density : Single ); stdcall;
-  fog_SetBeginEnd : procedure( fBegin, fEnd : Single ); stdcall;
+  fog_Enable      : procedure;
+  fog_Disable     : procedure;
+  fog_SetMode     : procedure( const Mode : Byte );
+  fog_SetColor    : procedure( const Color : DWORD );
+  fog_SetDensity  : procedure( const Density : Single );
+  fog_SetBeginEnd : procedure( const fBegin, fEnd : Single );
   
 // SKYBOX
-  skybox_Init : procedure( Top, Bottom, Left, Right, Front, Back : zglPTexture ); stdcall;
-  skybox_Draw : procedure; stdcall;
+  skybox_Init : procedure( const Top, Bottom, Left, Right, Front, Back : zglPTexture );
+  skybox_Draw : procedure;
 
 // SHADOW VOLUMES
 type
@@ -1065,10 +1192,10 @@ type
 end;
 
 var
-  shadow_InitVolume        : procedure( var Volume : zglPShadowVolume; Vertices : zglPPoint3D; FCount : DWORD; Faces : zglPFace ); stdcall;
-  shadow_CalcVolume        : procedure( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3D; Light : zglTPoint3D; RebuildPlanes : Boolean; Extrude : Single ); stdcall;
-  shadow_DrawVolume        : procedure( Volume : zglPShadowVolume; zFail : Boolean ); stdcall;
-  shadow_DrawShadowVolumes : procedure( DrawVolumes : Pointer ); stdcall;
+  shadow_InitVolume        : procedure( var Volume : zglPShadowVolume; const Vertices : zglPPoint3D; const FCount : DWORD; const Faces : zglPFace );
+  shadow_CalcVolume        : procedure( const Volume : zglPShadowVolume; const Matrix : zglPMatrix4f; const Vertices : zglPPoint3D; const Light : zglTPoint3D; const RebuildPlanes : Boolean; const Extrude : Single );
+  shadow_DrawVolume        : procedure( const Volume : zglPShadowVolume; const zFail : Boolean );
+  shadow_DrawShadowVolumes : procedure( const DrawVolumes : Pointer );
   
 // SHADERS
 const
@@ -1085,102 +1212,102 @@ const
 
 var
   // ARBfp/ARBvp
-  shader_InitARB         : function : Boolean; stdcall;
-  shader_LoadFromFileARB : function( FileName : String; ShaderType : DWORD ) : DWORD; stdcall;
-  shader_BeginARB        : procedure( Shader, ShaderType : DWORD ); stdcall;
-  shader_EndARB          : procedure( ShaderType : DWORD ); stdcall;
-  shader_FreeARB         : procedure( Shader : DWORD ); stdcall;
+  shader_InitARB         : function : Boolean;
+  shader_LoadFromFileARB : function( const FileName : String; const ShaderType : DWORD ) : DWORD;
+  shader_BeginARB        : procedure( const Shader, ShaderType : DWORD );
+  shader_EndARB          : procedure( const ShaderType : DWORD );
+  shader_FreeARB         : procedure( const Shader : DWORD );
 
   // GLSL
-  shader_InitGLSL       : function : Boolean; stdcall;
-  shader_LoadFromFile   : function( FileName : String; ShaderType : Integer; Link : Boolean ) : DWORD; stdcall;
-  shader_Attach         : procedure( Attach : DWORD ); stdcall;
-  shader_BeginLink      : procedure; stdcall;
-  shader_EndLink        : function : DWORD; stdcall;
-  shader_Begin          : procedure( Shader : DWORD ); stdcall;
-  shader_End            : procedure; stdcall;
-  shader_Free           : procedure( Shader : DWORD ); stdcall;
-  shader_GetUniform     : function( Shader : DWORD; UniformName : String ) : Integer; stdcall;
-  shader_SetUniform1f   : procedure( Uniform : Integer; v1 : Single ); stdcall;
-  shader_SetUniform1i   : procedure( Uniform : Integer; v1 : Integer ); stdcall;
-  shader_SetUniform2f   : procedure( Uniform : Integer; v1, v2 : Single ); stdcall;
-  shader_SetUniform3f   : procedure( Uniform : Integer; v1, v2, v3 : Single ); stdcall;
-  shader_SetUniform4f   : procedure( Uniform : Integer; v1, v2, v3, v4 : Single ); stdcall;
-  shader_GetAttrib      : function( Shader : DWORD; AttribName : String ) : Integer; stdcall;
-  shader_SetAttribPf    : procedure( Attrib : Integer; v : Pointer; Normalized : Boolean ); stdcall;
+  shader_InitGLSL       : function : Boolean;
+  shader_LoadFromFile   : function( const FileName : String; const ShaderType : Integer; const Link : Boolean ) : DWORD;
+  shader_Attach         : procedure( const Attach : DWORD );
+  shader_BeginLink      : procedure;
+  shader_EndLink        : function : DWORD;
+  shader_Begin          : procedure( const Shader : DWORD );
+  shader_End            : procedure;
+  shader_Free           : procedure( const Shader : DWORD );
+  shader_GetUniform     : function( const Shader : DWORD; const UniformName : String ) : Integer;
+  shader_SetUniform1f   : procedure( const Uniform : Integer; const v1 : Single );
+  shader_SetUniform1i   : procedure( const Uniform : Integer; const v1 : Integer );
+  shader_SetUniform2f   : procedure( const Uniform : Integer; const v1, v2 : Single );
+  shader_SetUniform3f   : procedure( const Uniform : Integer; const v1, v2, v3 : Single );
+  shader_SetUniform4f   : procedure( const Uniform : Integer; const v1, v2, v3, v4 : Single );
+  shader_GetAttrib      : function( const Shader : DWORD; const AttribName : String ) : Integer;
+  shader_SetAttribPf    : procedure( const Attrib : Integer; const v : Pointer; const Normalized : Boolean );
   // glVertexAttrib* GLSL/ARB
-  shader_SetAttrib1f    : procedure( Attrib : Integer; v1 : Single ); stdcall;
-  shader_SetAttrib2f    : procedure( Attrib : Integer; v1, v2 : Single ); stdcall;
-  shader_SetAttrib3f    : procedure( Attrib : Integer; v1, v2, v3 : Single ); stdcall;
-  shader_SetAttrib4f    : procedure( Attrib : Integer; v1, v2, v3, v4 : Single ); stdcall;
-  shader_SetParameter4f : procedure( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single; Local : Boolean = TRUE ); stdcall;
+  shader_SetAttrib1f    : procedure( const Attrib : Integer; const v1 : Single );
+  shader_SetAttrib2f    : procedure( const Attrib : Integer; const v1, v2 : Single );
+  shader_SetAttrib3f    : procedure( const Attrib : Integer; const v1, v2, v3 : Single );
+  shader_SetAttrib4f    : procedure( const Attrib : Integer; const v1, v2, v3, v4 : Single );
+  shader_SetParameter4f : procedure( const ShaderType : DWORD; const Parameter : Integer; const v1, v2, v3, v4 : Single; const Local : Boolean = TRUE );
 
 // MATH
-  m_Round     : function( value : Single ) : Integer; stdcall;
-  m_Cos       : function( Angle : Integer ) : Single; stdcall;
-  m_Sin       : function( Angle : Integer ) : Single; stdcall;
-  m_SinCos    : procedure( Angle : Single; var S, C : Single );
-  m_Distance  : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
-  m_FDistance : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
-  m_Angle     : function( x1, y1, x2, y2 : Single ) : Single; stdcall;
+  m_Round     : function( const value : Single ) : Integer;
+  m_Cos       : function( Angle : Integer ) : Single;
+  m_Sin       : function( Angle : Integer ) : Single;
+  m_SinCos    : procedure( const Angle : Single; var S, C : Single );
+  m_Distance  : function( const x1, y1, x2, y2 : Single ) : Single;
+  m_FDistance : function( const x1, y1, x2, y2 : Single ) : Single;
+  m_Angle     : function( const x1, y1, x2, y2 : Single ) : Single;
   //vectros
-  vector_Get       : function( x, y, z : Single ) : zglTPoint3D; stdcall;
-  vector_Add       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
-  vector_Sub       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
-  vector_Mul       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
-  vector_Div       : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
-  vector_AddV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
-  vector_SubV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
-  vector_MulV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
-  vector_DivV      : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
-  vector_MulM3f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D; //assembler;
-  vector_MulM4f    : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; //assembler;
-  vector_MulInvM4f : function( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; //assembler;
-  vector_RotateX   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; stdcall;
-  vector_RotateY   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; stdcall;
-  vector_RotateZ   : function( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; stdcall;
-  vector_RotateQ   : function( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D; stdcall;
-  vector_Negate    : function( Vector : zglTPoint3D ) : zglTPoint3D; //assembler;
-  vector_Normalize : function( Vector : zglTPoint3D ) : zglTPoint3D; stdcall;
-  vector_Angle     : function( Vector1, Vector2 : zglTPoint3D ) : Single; stdcall;
-  vector_Cross     : function( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; //assembler;
-  vector_Dot       : function( Vector1, Vector2 : zglTPoint3D ) : Single; //assembler;
-  vector_Distance  : function( Vector1, Vector2 : zglTPoint3D ) : Single; //assembler;
-  vector_FDistance : function( Vector1, Vector2 : zglTPoint3D ) : Single; //assembler;
-  vector_Length    : function( Vector : zglTPoint3D ) : Single; //assembler;
-  vector_Lerp      : function( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D; //assembler;
+  vector_Get       : function( const x, y, z : Single ) : zglTPoint3D;
+  vector_Add       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Sub       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Mul       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Div       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_AddV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_SubV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_MulV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_DivV      : function( const Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
+  vector_MulM3f    : function( const Vector : zglTPoint3D; const Matrix : zglTMatrix3f ) : zglTPoint3D;
+  vector_MulM4f    : function( const Vector : zglTPoint3D; const Matrix : zglTMatrix4f ) : zglTPoint3D;
+  vector_MulInvM4f : function( const Vector : zglTPoint3D; const Matrix : zglTMatrix4f ) : zglTPoint3D;
+  vector_RotateX   : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_RotateY   : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_RotateZ   : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_RotateQ   : function( const Vector : zglTPoint3D; const Quaternion : zglTQuaternion ) : zglTPoint3D;
+  vector_Negate    : function( const Vector : zglTPoint3D ) : zglTPoint3D;
+  vector_Normalize : function( const Vector : zglTPoint3D ) : zglTPoint3D;
+  vector_Angle     : function( const Vector1, Vector2 : zglTPoint3D ) : Single;
+  vector_Cross     : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Dot       : function( const Vector1, Vector2 : zglTPoint3D ) : Single;
+  vector_Distance  : function( const Vector1, Vector2 : zglTPoint3D ) : Single;
+  vector_FDistance : function( const Vector1, Vector2 : zglTPoint3D ) : Single;
+  vector_Length    : function( const Vector : zglTPoint3D ) : Single;
+  vector_Lerp      : function( const Vector1, Vector2 : zglTPoint3D; const Value : Single ) : zglTPoint3D;
   //matrix
-  matrix3f_Get            : function( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f; stdcall;
-  matrix3f_OrthoNormalize : procedure( Matrix : zglPMatrix3f ); stdcall;
-  matrix3f_Transpose      : procedure( Matrix : zglPMatrix3f ); stdcall;
-  matrix3f_Rotate         : procedure( Matrix : zglPMatrix3f; aX, aY, aZ : Single ); stdcall;
-  matrix3f_Add            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f; stdcall;
-  matrix3f_Mul            : function( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f; stdcall;
-  matrix4f_Transpose      : procedure( Matrix : zglPMatrix4f ); stdcall;
-  matrix4f_Determinant    : function( Matrix : zglTMatrix4f ) : Single; stdcall;
-  matrix4f_Inverse        : function( Matrix : zglTMatrix4f ) : zglTMatrix4f; stdcall;
-  matrix4f_Translate      : procedure( Matrix : zglPMatrix4f; tX, tY, tZ : Single ); stdcall;
-  matrix4f_Rotate         : procedure( Matrix : zglPMatrix4f; aX, aY, aZ : Single ); stdcall;
-  matrix4f_Scale          : procedure( Matrix : zglPMatrix4f; sX, sY, sZ : Single ); stdcall;
-  matrix4f_Mul            : function ( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f; stdcall;
+  matrix3f_Get            : function( const v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
+  matrix3f_OrthoNormalize : procedure( var Matrix : zglTMatrix3f );
+  matrix3f_Transpose      : procedure( var Matrix : zglTMatrix3f );
+  matrix3f_Rotate         : procedure( var Matrix : zglTMatrix3f; const aX, aY, aZ : Single );
+  matrix3f_Add            : function( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f;
+  matrix3f_Mul            : function( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
+  matrix4f_Transpose      : procedure( var Matrix : zglTMatrix4f );
+  matrix4f_Determinant    : function( const Matrix : zglTMatrix4f ) : Single;
+  matrix4f_Inverse        : function( const Matrix : zglTMatrix4f ) : zglTMatrix4f;
+  matrix4f_Translate      : procedure( var Matrix : zglTMatrix4f; const tX, tY, tZ : Single );
+  matrix4f_Rotate         : procedure( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single );
+  matrix4f_Scale          : procedure( var Matrix : zglTMatrix4f; const sX, sY, sZ : Single );
+  matrix4f_Mul            : function ( const Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
   // quaternions
-  quater_Get          : function( X, Y, Z, W : Single ) : zglTQuaternion; stdcall;
-  quater_Add          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion; //assembler;
-  quater_Sub          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion; //assembler;
-  quater_Mul          : function( q1, q2 : zglTQuaternion ) : zglTQuaternion; stdcall;
-  quater_Negate       : function( Quaternion : zglTQuaternion ) : zglTQuaternion; stdcall;
-  quater_Normalize    : function( Quaternion : zglTQuaternion ) : zglTQuaternion; stdcall;
-  quater_Dot          : function( q1, q2 : zglTQuaternion ) : Single; stdcall;
-  quater_Lerp         : function( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion; stdcall;
-  quater_FromRotation : function( Rotation : zglTPoint3D ) : zglTQuaternion; stdcall;
-  quater_GetM4f       : function( Quaternion : zglTQuaternion ) : zglTMatrix4f; stdcall;
+  quater_Get          : function( const X, Y, Z, W : Single ) : zglTQuaternion;
+  quater_Add          : function( const q1, q2 : zglTQuaternion ) : zglTQuaternion;
+  quater_Sub          : function( const q1, q2 : zglTQuaternion ) : zglTQuaternion;
+  quater_Mul          : function( const q1, q2 : zglTQuaternion ) : zglTQuaternion;
+  quater_Negate       : function( const Quaternion : zglTQuaternion ) : zglTQuaternion;
+  quater_Normalize    : function( const Quaternion : zglTQuaternion ) : zglTQuaternion;
+  quater_Dot          : function( const q1, q2 : zglTQuaternion ) : Single;
+  quater_Lerp         : function( const q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
+  quater_FromRotation : function( const Rotation : zglTPoint3D ) : zglTQuaternion;
+  quater_GetM4f       : function( const Quaternion : zglTQuaternion ) : zglTMatrix4f;
   // line 3d
-  line3d_ClosestPoint : function( A, B, Point : zglTPoint3D ) : zglTPoint3D; stdcall;
+  line3d_ClosestPoint : function( const A, B, Point : zglTPoint3D ) : zglTPoint3D;
   // plane
-  plane_Get      : function( A, B, C : zglTPoint3D ) : zglTPlane; stdcall;
-  plane_Distance : function( Plane : zglTPlane; Point : zglTPoint3D ) : Single; //assembler;
+  plane_Get      : function( const A, B, C : zglTPoint3D ) : zglTPlane;
+  plane_Distance : function( const Plane : zglTPlane; const Point : zglTPoint3D ) : Single;
   // triangle
-  tri_GetNormal  : function( A, B, C : zglPPoint3D ) : zglTPoint3D; stdcall;
+  tri_GetNormal  : function( const A, B, C : zglPPoint3D ) : zglTPoint3D;
 
 // COLLISION 2D
   col2d_PointInRect     : function( X, Y : Single; Rect : zglPRect   ) : Boolean; stdcall;
@@ -1223,7 +1350,7 @@ var
 // COLLISION 3D
 type
   zglPCol3DCallback = ^zglTCol3DCallback;
-  zglTCol3DCallback = procedure( Offset : zglPPoint3D; Data : Pointer );
+  zglTCol3DCallback = procedure( const Offset : zglTPoint3D; const Data : Pointer );
 type
   zglPCollision3D = ^zglTCollision3D;
   zglTCollision3D = record
@@ -1233,26 +1360,26 @@ end;
 
 var
   // point 3D
-  col3d_PointInTri    : function( Point, A, B, C : zglPPoint3D  ) : Boolean; stdcall;
-  col3d_PointInAABB   : function( Point : zglPPoint3D; AABB : zglPAABB ) : Boolean; stdcall;
-  col3d_PointInOBB    : function( Point : zglPPoint3D; OBB : zglPOBB ) : Boolean; stdcall;
-  col3d_PointInSphere : function( Point : zglPPoint3D; Sphere : zglPSphere ) : Boolean; stdcall;
+  col3d_PointInTri    : function( const Point, A, B, C : zglTPoint3D  ) : Boolean;
+  col3d_PointInAABB   : function( const Point : zglPPoint3D; const AABB : zglTAABB ) : Boolean;
+  col3d_PointInOBB    : function( const Point : zglPPoint3D; const OBB : zglTOBB ) : Boolean;
+  col3d_PointInSphere : function( const Point : zglPPoint3D; const Sphere : zglTSphere ) : Boolean;
   // line3D
-  col3d_LineVsAABB   : function( Line : zglPLine3D; AABB : zglPAABB ) : Boolean; stdcall;
-  col3d_LineVsOBB    : function( Line : zglPLine3D; OBB : zglPOBB ) : Boolean; stdcall;
-  col3d_LineVsSphere : function( Line : zglPLine3D; Sphere : zglPSphere ) : Boolean; stdcall;
+  col3d_LineVsAABB   : function( const Line : zglTLine3D; const AABB : zglTAABB ) : Boolean;
+  col3d_LineVsOBB    : function( const Line : zglTLine3D; const OBB : zglTOBB ) : Boolean;
+  col3d_LineVsSphere : function( const Line : zglTLine3D; const Sphere : zglTSphere ) : Boolean;
   // plane 3d
-  col3d_PlaneVsSphere : function( Plane : zglPPlane; Sphere : zglPSphere ) : zglTCollision3D; stdcall;
+  col3d_PlaneVsSphere : function( const Plane : zglTPlane; const Sphere : zglTSphere ) : zglTCollision3D;
   // aabb
-  col3d_AABBVsAABB   : function( AABB1, AABB2 : zglPAABB ) : Boolean; stdcall;
-  col3d_AABBVsOBB    : function( AABB : zglPAABB; OBB : zglPOBB ) : Boolean; stdcall;
-  col3d_AABBVsSphere : function( AABB : zglPAABB; Sphere : zglPSphere ) : Boolean; stdcall;
+  col3d_AABBVsAABB   : function( const AABB1, AABB2 : zglTAABB ) : Boolean;
+  col3d_AABBVsOBB    : function( const AABB : zglTAABB; const OBB : zglTOBB ) : Boolean;
+  col3d_AABBVsSphere : function( const AABB : zglTAABB; const Sphere : zglTSphere ) : Boolean;
   // obb
-  col3d_OBBVsOBB    : function( OBB1, OBB2 : zglPOBB ) : Boolean; stdcall;
-  col3d_OBBVsSphere : function( OBB : zglPOBB; Sphere : zglPSphere ) : Boolean; stdcall;
+  col3d_OBBVsOBB    : function( const OBB1, OBB2 : zglTOBB ) : Boolean;
+  col3d_OBBVsSphere : function( const OBB : zglTOBB; const Sphere : zglTSphere ) : Boolean;
   // sphere
-  col3d_SphereVsSphere : function( Sphere1, Sphere : zglPSphere ) : Boolean; stdcall;
-  col3d_SphereVsNode   : function( Sphere : zglPSphere; Octree : zglPOctree; Node : zglPNode; Callback : zglTCol3DCallback; CData : Pointer ) : Boolean; stdcall;
+  col3d_SphereVsSphere : function( const Sphere1, Sphere : zglTSphere ) : Boolean;
+  col3d_SphereVsNode   : function( const Sphere : zglTSphere; const Octree : zglTOctree; const Node : zglTNode; const Callback : zglTCol3DCallback; const CData : Pointer ) : Boolean;
 
 type zglTFile = DWORD;
 const
@@ -1267,16 +1394,16 @@ const
   FSM_END    = $03;
 
 var
-  file_Open    : procedure( var FileHandle : zglTFile; FileName : String; Mode : Byte ); stdcall;
-  file_Exists  : function( FileName : String ) : Boolean; stdcall;
-  file_Seek    : function( FileHandle : zglTFile; Offset : DWORD; Mode : Byte ) : DWORD; stdcall;
-  file_GetPos  : function( FileHandle : zglTFile ) : DWORD; stdcall;
-  file_Read    : function( FileHandle : zglTFile; var buffer; count : DWORD ) : DWORD; stdcall;
-  file_Write   : function( FileHandle : zglTFile; const buffer; count : DWORD ) : DWORD; stdcall;
-  file_Trunc   : procedure( FileHandle : zglTFile; count : DWORD ); stdcall;
-  file_GetSize : function( FileHandle : zglTFile ) : DWORD; stdcall;
-  file_Flush   : procedure( FileHandle : zglTFile ); stdcall;
-  file_Close   : procedure( FileHandle : zglTFile ); stdcall;
+  file_Open    : procedure( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+  file_Exists  : function( const FileName : String ) : Boolean;
+  file_Seek    : function( var FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
+  file_GetPos  : function( var FileHandle : zglTFile ) : DWORD;
+  file_Read    : function( var FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
+  file_Write   : function( var FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
+  file_Trunc   : procedure( var FileHandle : zglTFile; const count : DWORD );
+  file_GetSize : function( var FileHandle : zglTFile ) : DWORD;
+  file_Flush   : procedure( var FileHandle : zglTFile );
+  file_Close   : procedure( var FileHandle : zglTFile );
 
 type
   zglPMemory = ^zglTMemory;
@@ -1287,19 +1414,19 @@ type
 end;
 
 var
-  mem_LoadFromFile : procedure( var Memory : zglTMemory; FileName : String ); stdcall;
-  mem_SaveToFile   : procedure( var Memory : zglTMemory; FileName : String ); stdcall;
-  mem_Seek         : function( var Memory : zglTMemory; Offset : DWORD; Mode : Byte ) : DWORD; stdcall;
-  mem_Read         : function( var Memory : zglTMemory; var buffer; count : DWORD ) : DWORD; stdcall;
-  mem_Write        : function( var Memory : zglTMemory; const buffer; count : DWORD ) : DWORD; stdcall;
-  mem_SetSize      : procedure( var Memory : zglTMemory; Size : DWORD ); stdcall;
-  mem_Free         : procedure( var Memory : zglTMemory ); stdcall;
+  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
+  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : String );
+  mem_Seek         : function( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
+  mem_Read         : function( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
+  mem_Write        : function( var Memory : zglTMemory; const buffer; const count : DWORD ) : DWORD;
+  mem_SetSize      : procedure( var Memory : zglTMemory; const Size : DWORD );
+  mem_Free         : procedure( var Memory : zglTMemory );
 
 // Utils
 function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( Value : String ) : Integer;
 
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
@@ -1316,7 +1443,7 @@ function MessageBoxA( hWnd : DWORD; lpText, lpCaption : PChar; uType : DWORD) : 
 implementation
 
 var
-  zglLib : {$IFDEF LINUX} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  zglLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
   
 function u_IntToStr;
 begin
@@ -1338,9 +1465,9 @@ End;
 
 function zglLoad;
 begin
-  zglLib := dlopen( PChar( LibraryName ) {$IFDEF LINUX}, $001 {$ENDIF} );
+  zglLib := dlopen( PChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
 
-  if zglLib <> {$IFDEF LINUX} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
+  if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
     begin
       Result := TRUE;
       zgl_Init := dlsym( zglLib, 'zgl_Init' );
@@ -1448,6 +1575,12 @@ begin
       font_LoadFromFile := dlsym( zglLib, 'font_LoadFromFile' );
       text_Draw := dlsym( zglLib, 'text_Draw' );
       text_GetWidth := dlsym( zglLib, 'text_GetWidth' );
+
+      gui_Init := dlsym( zglLib, 'gui_Init' );
+      gui_Draw := dlsym( zglLib, 'gui_Draw' );
+      gui_Proc := dlsym( zglLib, 'gui_Proc' );
+      gui_AddWidget := dlsym( zglLib, 'gui_AddWidget' );
+      gui_DelWidget := dlsym( zglLib, 'gui_DelWidget' );
 
       snd_Init := dlsym( zglLib, 'snd_Init' );
       snd_Free := dlsym( zglLib, 'snd_Free' );
@@ -1708,7 +1841,7 @@ begin
       if Error Then
         begin
           Result := FALSE;
-          {$IFDEF LINUX}
+          {$IFDEF LINUX_OR_DARWIN}
           WriteLn( 'Error while loading ZenGL Engine' );
           {$ENDIF}
           {$IFDEF WIN32}
