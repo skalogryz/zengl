@@ -29,6 +29,9 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll,
+  {$ENDIF}
   zgl_const,
   zgl_global_var,
   zgl_math;
@@ -40,16 +43,16 @@ const
   M_WUP    = 0;
   M_WDOWN  = 1;
 
-function mouse_X : Integer; extdecl;
-function mouse_Y : Integer; extdecl;
-function mouse_DX : Integer; extdecl;
-function mouse_DY : Integer; extdecl;
-function mouse_Down( Button : Byte ) : Boolean; extdecl;
-function mouse_Up( Button : Byte ) : Boolean; extdecl;
-function mouse_Click( Button : Byte ) : Boolean; extdecl;
-function mouse_Wheel( Axis : Byte ) : Boolean; extdecl;
-procedure mouse_ClearState; extdecl;
-procedure mouse_Lock; extdecl;
+function mouse_X : Integer;
+function mouse_Y : Integer;
+function mouse_DX : Integer;
+function mouse_DY : Integer;
+function mouse_Down( const Button : Byte ) : Boolean;
+function mouse_Up( const Button : Byte ) : Boolean;
+function mouse_Click( const Button : Byte ) : Boolean;
+function mouse_Wheel( const Axis : Byte ) : Boolean;
+procedure mouse_ClearState;
+procedure mouse_Lock;
 
 var
   mouseX        : WORD;
@@ -61,7 +64,7 @@ var
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
   {$IFDEF WIN32}
-  cursorpos     : TPoint;
+  cursorpos : TPoint;
   {$ENDIF}
 
 implementation
@@ -75,6 +78,9 @@ begin
   GetCursorPos( cursorpos );
   Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  Result := mouseX - wnd_BrdSizeX;
+  {$ENDIF}
   Result := m_Round( Result / scr_ResCX );
 end;
 
@@ -87,27 +93,20 @@ begin
   GetCursorPos( cursorpos );
   Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  Result := mouseY - wnd_BrdSizeY - wnd_CpnSize;
+  {$ENDIF}
   Result := m_Round( Result / scr_ResCY );
 end;
 
 function mouse_DX;
 begin
-  {$IFDEF LINUX}
   Result := mouse_X() - wnd_Width div 2;
-  {$ENDIF}
-  {$IFDEF WIN32}
-  Result := mouse_X() - wnd_Width div 2;
-  {$ENDIF}
 end;
 
 function mouse_DY;
 begin
-  {$IFDEF LINUX}
   Result := mouse_Y() - wnd_Height div 2;
-  {$ENDIF}
-  {$IFDEF WIN32}
-  Result := mouse_Y() - wnd_Height div 2;
-  {$ENDIF}
 end;
 
 function mouse_Down;
@@ -152,12 +151,21 @@ begin
 end;
 
 procedure mouse_Lock;
+  {$IFDEF DARWIN}
+  var
+    Point : CGPoint;
+  {$ENDIF}
 begin
   {$IFDEF LINUX}
   XWarpPointer( scr_display, None, wnd_Handle, 0, 0, 0, 0, wnd_X + wnd_Width div 2, wnd_Y + wnd_Height div 2 );
   {$ENDIF}
   {$IFDEF WIN32}
   SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  Point.X := wnd_X + wnd_Width / 2;
+  Point.Y := wnd_Y + wnd_Height / 2;
+  CGWarpMouseCursorPosition( Point );
   {$ENDIF}
 end;
 

@@ -26,7 +26,9 @@ uses
 {$IFDEF LINUX}
   keysym,
 {$ENDIF}
-  zgl_timers,
+{$IFDEF DARWIN}
+  MacOSAll,
+{$ENDIF}
   Utils;
 
 const
@@ -131,16 +133,19 @@ const
   KA_DOWN      = 0;
   KA_UP        = 1;
 
-function  key_Down( KeyCode : Byte ) : Boolean; extdecl;
-function  key_Up( KeyCode : Byte ) : Boolean; extdecl;
-function  key_Last( KeyAction : Byte ) : Byte; extdecl;
-procedure key_BeginReadText( Text : String; MaxSymbols : WORD ); extdecl;
-function  key_EndReadText : PChar; extdecl;
-procedure key_ClearState; extdecl;
+function  key_Down( const KeyCode : Byte ) : Boolean;
+function  key_Up( const KeyCode : Byte ) : Boolean;
+function  key_Last( const KeyAction : Byte ) : Byte;
+procedure key_BeginReadText( const Text : String; const MaxSymbols : WORD );
+function  key_EndReadText : PChar;
+procedure key_ClearState;
 
-procedure key_InputText( Text : String );
+procedure key_InputText( const Text : String );
 {$IFDEF LINUX}
 function xkey_to_winkey( KeyCode : WORD ) : Byte;
+{$ENDIF}
+{$IFDEF DARWIN}
+function mackeys_to_winkeys( KeyCode : WORD ) : Byte;
 {$ENDIF}
 
 var
@@ -186,6 +191,8 @@ procedure key_ClearState;
 begin
   for i := 0 to 255 do
     keysUp[ i ] := FALSE;
+  keysLast[ KA_DOWN ] := 0;
+  keysLast[ KA_UP   ] := 0;
 end;
 
 procedure key_InputText;
@@ -235,6 +242,111 @@ begin
     if ( KeyCode >= XK_KP_0 ) and ( KeyCode <= XK_KP_9 ) Then Result := KeyCode - ( XK_KP_0 - K_NUMPAD0 );
     if ( KeyCode >= XK_A ) and ( KeyCode <= XK_Z ) Then Result := KeyCode - ( XK_A - K_A );
     if ( KeyCode >= XK_F1 ) and ( KeyCode <= XK_F12 ) Then Result := KeyCode - ( XK_F1 - K_F1 );
+  end;
+end;
+{$ENDIF}
+{$IFDEF DARWIN}
+// Ябблы точно мыслят иначе O_o Стоит лишь взглянуть на разброс кодов для клавишь F1-F12, к примеру
+function mackeys_to_winkeys;
+begin
+  case KeyCode of
+    $33 : Result := K_BACKSPACE;
+    $30 : Result := K_TAB;
+    $24 : Result := K_ENTER;
+    $4C : Result := K_ENTER; // Numpad
+    $38 : Result := K_SHIFT_L;
+//    $38 : Result := K_SHIFT_R;
+    $3B : Result := K_CTRL_L;
+//    3B : Result := K_CTRL_R;
+    $3A : Result := K_ALT_L;
+//    3A        : Result := K_ALT_R;
+    $71 : Result := K_PAUSE;
+    $35 : Result := K_ESCAPE;
+    $31 : Result := K_SPACE;
+
+    $74 : Result := K_PAGEUP;
+    $79 : Result := K_PAGEDOWN;
+    $77 : Result := K_END;
+    $73 : Result := K_HOME;
+    $69 : Result := K_SNAPSHOT;
+    $72 : Result := K_INSERT;
+    $75 : Result := K_DELETE;
+
+    $7B : Result := K_LEFT;
+    $7E : Result := K_UP;
+    $7C : Result := K_RIGHT;
+    $7D : Result := K_DOWN;
+
+    $43 : Result := K_MULTIPLY;
+    $45 : Result := K_ADD;
+//    XK_KP_Separator : Result := K_SEPARATOR;
+    $4E : Result := K_SUBTRACT;
+//    XK_KP_Decimal   : Result := K_DECIMAL;
+    $4B : Result := K_DIVIDE;
+
+    $1D : Result := K_0;
+    $12 : Result := K_1;
+    $13 : Result := K_2;
+    $14 : Result := K_3;
+    $15 : Result := K_4;
+    $17 : Result := K_5;
+    $16 : Result := K_6;
+    $1A : Result := K_7;
+    $1C : Result := K_8;
+    $19 : Result := K_9;
+
+    $52 : Result := K_NUMPAD0;
+    $53 : Result := K_NUMPAD1;
+    $54 : Result := K_NUMPAD2;
+    $55 : Result := K_NUMPAD3;
+    $56 : Result := K_NUMPAD4;
+    $57 : Result := K_NUMPAD5;
+    $58 : Result := K_NUMPAD6;
+    $59 : Result := K_NUMPAD7;
+    $5B : Result := K_NUMPAD8;
+    $5C : Result := K_NUMPAD9;
+
+    $0C : Result := K_Q;
+    $0D : Result := K_W;
+    $0E : Result := K_E;
+    $0F : Result := K_R;
+    $11 : Result := K_T;
+    $10 : Result := K_Y;
+    $20 : Result := K_U;
+    $22 : Result := K_I;
+    $1F : Result := K_O;
+    $23 : Result := K_P;
+
+    $00 : Result := K_A;
+    $01 : Result := K_S;
+    $02 : Result := K_D;
+    $03 : Result := K_F;
+    $05 : Result := K_G;
+    $04 : Result := K_H;
+    $26 : Result := K_J;
+    $28 : Result := K_K;
+    $25 : Result := K_L;
+
+    $06 : Result := K_Z;
+    $07 : Result := K_X;
+    $08 : Result := K_C;
+    $09 : Result := K_V;
+    $0B : Result := K_B;
+    $2D : Result := K_N;
+    $2E : Result := K_M;
+
+    $7A : Result := K_F1;
+    $78 : Result := K_F2;
+    $63 : Result := K_F3;
+    $76 : Result := K_F4;
+    $60 : Result := K_F5;
+    $61 : Result := K_F6;
+    $62 : Result := K_F7;
+    $64 : Result := K_F8;
+    $65 : Result := K_F9;
+    $6D : Result := K_F10;
+    $67 : Result := K_F11;
+    $6F : Result := K_F12;
   end;
 end;
 {$ENDIF}
