@@ -33,10 +33,10 @@ const
   
   FX_BLEND      = $000040;
   
-procedure fx2d_SetColorMix( Color : DWORD ); extdecl;
-procedure fx2d_SetVCA( c1, c2, c3, c4 : DWORD; a1, a2, a3, a4 : Byte ); extdecl;
-procedure fx2d_SetVertexes( x1, y1, x2, y2, x3, y3, x4, y4 : Single ); extdecl;
-procedure fx2d_SetScale( scaleX, scaleY : Single ); extdecl;
+procedure fx2d_SetColorMix( const Color : DWORD );
+procedure fx2d_SetVCA( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
+procedure fx2d_SetVertexes( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
+procedure fx2d_SetScale( const scaleX, scaleY : Single );
   
 var
   // FX2D_COLORMIX

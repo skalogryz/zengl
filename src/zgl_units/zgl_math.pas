@@ -26,92 +26,92 @@ uses
   zgl_const,
   zgl_types;
   
-function m_Round( value : Single ) : Integer; extdecl;
+function m_Round( value : Single ) : Integer;
 
 procedure InitCosSinTables;
-function  m_Cos( Angle : Integer ) : Single; extdecl;
-function  m_Sin( Angle : Integer ) : Single; extdecl;
-procedure m_SinCos( Angle : Single; var S, C : Single ); {$IFDEF USE_ASM} assembler; {$ENDIF}
+function  m_Cos( Angle : Integer ) : Single;
+function  m_Sin( Angle : Integer ) : Single;
+procedure m_SinCos( const Angle : Single; var S, C : Single );
 
-function m_Distance( x1, y1, x2, y2 : Single ) : Single; extdecl;
-function m_FDistance( x1, y1, x2, y2 : Single ) : Single; extdecl;
-function m_Angle( x1, y1, x2, y2 : Single ) : Single; extdecl;
+function m_Distance( x1, y1, x2, y2 : Single ) : Single;
+function m_FDistance( x1, y1, x2, y2 : Single ) : Single;
+function m_Angle( x1, y1, x2, y2 : Single ) : Single;
 
 {------------------------------------------------------------------------------}
 {--------------------------------- Vectors ------------------------------------}
 {------------------------------------------------------------------------------}
-function vector_Get( x, y, z : Single ) : zglTPoint3D; extdecl;
+function vector_Get( const x, y, z : Single ) : zglTPoint3D;
 
-function vector_Add( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Sub( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Mul( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Div( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_Add( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+function vector_Sub( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+function vector_Mul( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+function vector_Div( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
 
-function vector_AddV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_SubV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_DivV( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_AddV( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+function vector_SubV( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+function vector_MulV( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+function vector_DivV( const Vector : zglTPoint3D; Value : Single ) : zglTPoint3D;
 
-function vector_MulM3f( Vector : zglTPoint3D; Matrix : zglTMatrix3f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_MulInvM4f( Vector : zglTPoint3D; Matrix : zglTMatrix4f ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_MulM3f( const Vector : zglTPoint3D; const Matrix : zglTMatrix3f ) : zglTPoint3D;
+function vector_MulM4f( const Vector : zglTPoint3D; const Matrix : zglTMatrix4f ) : zglTPoint3D;
+function vector_MulInvM4f( const Vector : zglTPoint3D; const Matrix : zglTMatrix4f ) : zglTPoint3D;
 
-function vector_RotateX( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; extdecl;
-function vector_RotateY( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; extdecl;
-function vector_RotateZ( Vector : zglTPoint3D; Value : Single ) : zglTPoint3D; extdecl;
-function vector_RotateQ( Vector : zglTPoint3D; Quaternion : zglTQuaternion ) : zglTPoint3D; extdecl;
+function vector_RotateX( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+function vector_RotateY( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+function vector_RotateZ( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+function vector_RotateQ( const Vector : zglTPoint3D; const Quaternion : zglTQuaternion ) : zglTPoint3D;
 
-function vector_Negate( Vector : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Normalize( Vector : zglTPoint3D ) : zglTPoint3D; extdecl;
-function vector_Angle( Vector1, Vector2 : zglTPoint3D ) : Single; extdecl;
-function vector_Cross( Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Dot( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Distance( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_FDistance( Vector1, Vector2 : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Length( Vector : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function vector_Lerp( Vector1, Vector2 : zglTPoint3D; Value : Single ) : zglTPoint3D; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function vector_Negate( const Vector : zglTPoint3D ) : zglTPoint3D;
+function vector_Normalize( const Vector : zglTPoint3D ) : zglTPoint3D;
+function vector_Angle( const Vector1, Vector2 : zglTPoint3D ) : Single;
+function vector_Cross( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+function vector_Dot( const Vector1, Vector2 : zglTPoint3D ) : Single;
+function vector_Distance( const Vector1, Vector2 : zglTPoint3D ) : Single;
+function vector_FDistance( const  Vector1, Vector2 : zglTPoint3D ) : Single;
+function vector_Length( const Vector : zglTPoint3D ) : Single;
+function vector_Lerp( const Vector1, Vector2 : zglTPoint3D; const Value : Single ) : zglTPoint3D;
 
 {------------------------------------------------------------------------------}
 {--------------------------------- Matrix3f -----------------------------------}
 {------------------------------------------------------------------------------}
-function  matrix3f_Get( v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f; extdecl;
+function  matrix3f_Get( const v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
 
-procedure matrix3f_OrthoNormalize( Matrix : zglPMatrix3f ); extdecl;
-procedure matrix3f_Transpose( Matrix : zglPMatrix3f ); extdecl;
-procedure matrix3f_Rotate( Matrix : zglPMatrix3f; aX, aY, aZ : Single ); extdecl;
-function  matrix3f_Add( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f; extdecl;
-function  matrix3f_Mul( Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f; extdecl;
+procedure matrix3f_OrthoNormalize( var Matrix : zglTMatrix3f );
+procedure matrix3f_Transpose( var Matrix : zglTMatrix3f );
+procedure matrix3f_Rotate( var Matrix : zglTMatrix3f; const aX, aY, aZ : Single );
+function  matrix3f_Add( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
+function  matrix3f_Mul( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
 
-procedure matrix4f_Transpose( Matrix : zglPMatrix4f ); extdecl;
-function  matrix4f_Determinant( Matrix : zglTMatrix4f ): Single; extdecl;
-function  matrix4f_Inverse( Matrix : zglTMatrix4f ) : zglTMatrix4f; extdecl;
-procedure matrix4f_Translate( Matrix : zglPMatrix4f; tX, tY, tZ : Single ); extdecl;
-procedure matrix4f_Rotate( Matrix : zglPMatrix4f; aX, aY, aZ : Single ); extdecl;
-procedure matrix4f_Scale( Matrix : zglPMatrix4f; sX, sY, sZ : Single ); extdecl;
-function  matrix4f_Mul( Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f; extdecl;
+procedure matrix4f_Transpose( var Matrix : zglTMatrix4f );
+function  matrix4f_Determinant( const Matrix : zglTMatrix4f ): Single;
+function  matrix4f_Inverse( const Matrix : zglTMatrix4f ) : zglTMatrix4f;
+procedure matrix4f_Translate( var Matrix : zglTMatrix4f; const tX, tY, tZ : Single );
+procedure matrix4f_Rotate( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single );
+procedure matrix4f_Scale( var Matrix : zglTMatrix4f; const sX, sY, sZ : Single );
+function  matrix4f_Mul( const Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
 
 {------------------------------------------------------------------------------}
 {-------------------------------- Quaternion ----------------------------------}
 {------------------------------------------------------------------------------}
-function quater_Get( X, Y, Z, W : Single ) : zglTQuaternion; extdecl;
-function quater_Add( q1, q2 : zglTQuaternion ) : zglTQuaternion; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function quater_Sub( q1, q2 : zglTQuaternion ) : zglTQuaternion; {$IFDEF USE_ASM} assembler; {$ENDIF}
-function quater_Mul( q1, q2 : zglTQuaternion ) : zglTQuaternion; extdecl;
-function quater_Negate( Quaternion : zglTQuaternion ) : zglTQuaternion; extdecl;
-function quater_Normalize( Quaternion : zglTQuaternion ) : zglTQuaternion; extdecl;
-function quater_Dot( q1, q2 : zglTQuaternion ) : Single; extdecl;
-function quater_Lerp( q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion; extdecl;
-function quater_FromRotation( Rotation : zglTPoint3D ) : zglTQuaternion; extdecl;
-function quater_GetM4f( Quaternion : zglTQuaternion ) : zglTMatrix4f; extdecl;
+function quater_Get( const X, Y, Z, W : Single ) : zglTQuaternion;
+function quater_Add( const q1, q2 : zglTQuaternion ) : zglTQuaternion;
+function quater_Sub( const q1, q2 : zglTQuaternion ) : zglTQuaternion;
+function quater_Mul( const q1, q2 : zglTQuaternion ) : zglTQuaternion;
+function quater_Negate( const Quaternion : zglTQuaternion ) : zglTQuaternion;
+function quater_Normalize( const Quaternion : zglTQuaternion ) : zglTQuaternion;
+function quater_Dot( const q1, q2 : zglTQuaternion ) : Single;
+function quater_Lerp( const q1, q2 : zglTQuaternion; Value : Single ) : zglTQuaternion;
+function quater_FromRotation( const Rotation : zglTPoint3D ) : zglTQuaternion;
+function quater_GetM4f( const Quaternion : zglTQuaternion ) : zglTMatrix4f;
 
-function line3d_ClosestPoint( A, B, Point : zglTPoint3D ) : zglTPoint3D; extdecl;
+function line3d_ClosestPoint( const A, B, Point : zglTPoint3D ) : zglTPoint3D;
 
-function plane_Get( A, B, C : zglTPoint3D ) : zglTPlane; extdecl;
-function plane_Distance( Plane : zglTPlane; Point : zglTPoint3D ) : Single; {$IFDEF USE_ASM} assembler; {$ENDIF}
+function plane_Get( const A, B, C : zglTPoint3D ) : zglTPlane;
+function plane_Distance( const Plane : zglTPlane; const Point : zglTPoint3D ) : Single;
 
-function tri_GetNormal( A, B, C : zglPPoint3D ) : zglTPoint3D; extdecl;
+function tri_GetNormal( const A, B, C : zglPPoint3D ) : zglTPoint3D;
 
-function ArcTan2( X, Y : Single ) : Single; assembler;
+function ArcTan2( X, Y : Single ) : Single;
 function ArcCos( Value : Single ) : Single;
 
 const
@@ -126,15 +126,8 @@ var
 implementation
 
 function m_Round;
-{$IFNDEF USE_ASM}
 begin
   Result := Round( value );
-{$ELSE}
-asm
-  FLD   value
-  FISTP DWORD PTR [ value ]
-  MOV   EAX,      [ value ]
-{$ENDIF}
 end;
 
 procedure InitCosSinTables;
@@ -171,17 +164,11 @@ begin
 end;
 
 procedure m_SinCos;
-{$IFNDEF USE_ASM}
-begin
-  s := Sin( Angle );
-  c := Cos( Angle );
-{$ELSE}
 asm
   FLD Angle
   FSINCOS
-  FSTP DWORD PTR [ EDX ]
-  FSTP DWORD PTR [ EAX ]
-{$ENDIF}
+  FSTP [ EDX ]
+  FSTP [ EAX ]
 end;
 
 function m_Distance;
@@ -226,388 +213,82 @@ begin
 end;
 
 function vector_Add;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector1.X + Vector2.X;
   Result.Y := Vector1.Y + Vector2.Y;
   Result.Z := Vector1.Z + Vector2.Z;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FADD DWORD PTR [ EDX     ]
-  FSTP DWORD PTR [ ECX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FADD DWORD PTR [ EDX + 4 ]
-  FSTP DWORD PTR [ ECX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FADD DWORD PTR [ EDX + 8 ]
-  FSTP DWORD PTR [ ECX + 8 ]
-{$ENDIF}
 end;
 
 
 function vector_Sub;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector1.X - Vector2.X;
   Result.Y := Vector1.Y - Vector2.Y;
   Result.Z := Vector1.Z - Vector2.Z;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FSUB DWORD PTR [ EDX     ]
-  FSTP DWORD PTR [ ECX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FSUB DWORD PTR [ EDX + 4 ]
-  FSTP DWORD PTR [ ECX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FSUB DWORD PTR [ EDX + 8 ]
-  FSTP DWORD PTR [ ECX + 8 ]
-{$ENDIF}
 end;
 
 function vector_Mul;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector1.X * Vector2.X;
   Result.Y := Vector1.Y * Vector2.Y;
   Result.Z := Vector1.Z * Vector2.Z;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FMUL DWORD PTR [ EDX     ]
-  FSTP DWORD PTR [ ECX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FMUL DWORD PTR [ EDX + 4 ]
-  FSTP DWORD PTR [ ECX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX + 8 ]
-  FSTP DWORD PTR [ ECX + 8 ]
-{$ENDIF}
 end;
 
 function vector_Div;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector1.X / Vector2.X;
   Result.Y := Vector1.Y / Vector2.Y;
   Result.Z := Vector1.Z / Vector2.Z;
-{$ELSE}
-asm
-  mov [ EAX     ], 0
-  mov [ EAX + 4 ], 0
-  mov [ EAX + 8 ], 0
-  
-@@1:
-  cmp [ EDX     ], 0
-  jz  @@2
-  
-  FLD  DWORD PTR [ EAX     ]
-  FDIV DWORD PTR [ EDX     ]
-  FSTP DWORD PTR [ ECX     ]
-  
-@@2:
-  cmp [ EDX + 4 ], 0
-  jz  @@3
-  
-  FLD  DWORD PTR [ EAX + 4 ]
-  FDIV DWORD PTR [ EDX + 4 ]
-  FSTP DWORD PTR [ ECX + 4 ]
-  
-@@3:
-  cmp [ EDX + 8 ], 0
-  jz  @@4
-  
-  FLD  DWORD PTR [ EAX + 8 ]
-  FDIV DWORD PTR [ EDX + 8 ]
-  FSTP DWORD PTR [ ECX + 8 ]
-  
-@@4:
-{$ENDIF}
 end;
 
 function vector_AddV;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector.X + Value;
   Result.Y := Vector.Y + Value;
   Result.Z := Vector.Z + Value;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FADD DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FADD DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FADD DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 8 ]
-{$ENDIF}
 end;
 
 function vector_SubV;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector.X - Value;
   Result.Y := Vector.Y - Value;
   Result.Z := Vector.Z - Value;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FSUB DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FSUB DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FSUB DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 8 ]
-{$ENDIF}
 end;
 
 function vector_MulV;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector.X * Value;
   Result.Y := Vector.Y * Value;
   Result.Z := Vector.Z * Value;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FMUL DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FMUL DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 8 ]
-{$ENDIF}
 end;
 
 function vector_DivV;
-{$IFNDEF USE_ASM}
 begin
   Value := 1 / Value;
   Result.X := Vector.X * Value;
   Result.Y := Vector.Y * Value;
   Result.Z := Vector.Z * Value;
-{$ELSE}
-asm
-  mov [ EDX     ], 0
-  mov [ EDX + 4 ], 0
-  mov [ EDX + 8 ], 0
-
-  cmp [ EBP + 8 ], 0
-  jz  @@1
-
-  FLD  DWORD PTR [ EAX     ]
-  FDIV DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FDIV DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FDIV DWORD PTR [ EBP + 8 ]
-  FSTP DWORD PTR [ EDX + 8 ]
-
-@@1:
-{$ENDIF}
 end;
 
 function vector_MulM3f;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Matrix.a11 * Vector.X + Matrix.a21 * Vector.Y + Matrix.a31 * Vector.Z;
   Result.Y := Matrix.a12 * Vector.X + Matrix.a22 * Vector.Y + Matrix.a32 * Vector.Z;
   Result.Z := Matrix.a13 * Vector.X + Matrix.a23 * Vector.Y + Matrix.a33 * Vector.Z;
-{$ELSE}
-asm
-  // Result.X
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX      ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 12 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FMUL DWORD PTR [ EDX + 24 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX      ]
-
-  // Result.Y
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX + 4  ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 16 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX + 28 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX + 4  ]
-
-  // Result.Z
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX + 8  ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 20 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX + 32 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX + 8  ]
-{$ENDIF}
 end;
 
 function vector_MulM4f;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Matrix.a11 * Vector.X + Matrix.a21 * Vector.Y + Matrix.a31 * Vector.Z + Matrix.a41;
   Result.Y := Matrix.a12 * Vector.X + Matrix.a22 * Vector.Y + Matrix.a32 * Vector.Z + Matrix.a42;
   Result.Z := Matrix.a13 * Vector.X + Matrix.a23 * Vector.Y + Matrix.a33 * Vector.Z + Matrix.a43;
-{$ELSE}
-asm
-  // Result.X
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX      ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 16 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FMUL DWORD PTR [ EDX + 32 ]
-  FADD DWORD PTR [ EDX + 48 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX      ]
-
-  // Result.Y
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX + 4  ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 20 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX + 36 ]
-  FADD DWORD PTR [ EDX + 52 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX + 4  ]
-
-  // Result.Z
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX + 8  ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 24 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX + 40 ]
-  FADD DWORD PTR [ EDX + 56 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX + 8  ]
-{$ENDIF}
 end;
 
 function vector_MulInvM4f;
-{$IFNDEF USE_ASM}
 begin
   Result.x := Matrix.a11 * Vector.X + Matrix.a12 * Vector.Y + Matrix.a13 * Vector.Z + Matrix.a14;
   Result.y := Matrix.a21 * Vector.X + Matrix.a22 * Vector.Y + Matrix.a23 * Vector.Z + Matrix.a24;
   Result.z := Matrix.a31 * Vector.X + Matrix.a32 * Vector.Y + Matrix.a33 * Vector.Z + Matrix.a34;
-{$ELSE}
-asm
-  // Result.X
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX      ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 4  ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FMUL DWORD PTR [ EDX + 8  ]
-  FADD DWORD PTR [ EDX + 12 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX      ]
-
-  // Result.Y
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX + 16 ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 20 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FMUL DWORD PTR [ EDX + 24 ]
-  FADD DWORD PTR [ EDX + 28 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX + 4  ]
-
-  // Result.Z
-  FLD  DWORD PTR [ EAX      ]
-  FMUL DWORD PTR [ EDX + 32 ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FMUL DWORD PTR [ EDX + 36 ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FMUL DWORD PTR [ EDX + 40 ]
-  FADD DWORD PTR [ EDX + 44 ]
-
-  FADDP
-
-  FSTP DWORD PTR [ ECX + 8  ]
-{$ENDIF}
 end;
 
 function vector_RotateX;
@@ -660,25 +341,10 @@ end;
 
 
 function vector_Negate;
-{$IFNDEF USE_ASM}
 begin
   Result.X := -Result.X;
   Result.Y := -Result.Y;
   Result.Z := -Result.Z
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ]
-  FCHS
-  FSTP DWORD PTR [ EDX     ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FCHS
-  FSTP DWORD PTR [ EDX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FCHS
-  FSTP DWORD PTR [ EDX + 8 ]
-{$ENDIF}
 end;
 
 function vector_Normalize;
@@ -704,179 +370,41 @@ begin
 end;
 
 function vector_Cross;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector1.Y * Vector2.Z - Vector1.Z * Vector2.Y;
   Result.Y := Vector1.Z * Vector2.X - Vector1.X * Vector2.Z;
   Result.Z := Vector1.X * Vector2.Y - Vector1.Y * Vector2.X;
-{$ELSE}
-asm
-  // Result.X
-  FLD  DWORD PTR [ EAX + 4 ]
-  FMUL DWORD PTR [ EDX + 8 ]
-
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX + 4 ]
-
-  FSUBP
-
-  FSTP DWORD PTR [ ECX     ]
-
-  // Result.Y
-  FLD  DWORD PTR [ EAX + 8 ]
-  FMUL DWORD PTR [ EDX     ]
-
-  FLD  DWORD PTR [ EAX     ]
-  FMUL DWORD PTR [ EDX + 8 ]
-
-  FSUBP
-
-  FSTP DWORD PTR [ ECX + 4 ]
-
-  // Result.Z
-  FLD  DWORD PTR [ EAX     ]
-  FMUL DWORD PTR [ EDX + 4 ]
-
-  FLD  DWORD PTR [ EAX + 4 ]
-  FMUL DWORD PTR [ EDX     ]
-
-  FSUBP
-
-  FSTP DWORD PTR [ ECX + 8 ]
-{$ENDIF}
 end;
 
 function vector_Dot;
-{$IFNDEF USE_ASM}
 begin
   Result := Vector1.X * Vector2.X + Vector1.Y * Vector2.Y + Vector1.Z * Vector2.Z;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ] // Vector1.X
-  FMUL DWORD PTR [ EDX     ] // Vector1.X * Vector2.X
-  
-  FLD  DWORD PTR [ EAX + 4 ] // Vector1.Y
-  FMUL DWORD PTR [ EDX + 4 ] // Vector1.X * Vector2.X
-  
-  FADDP                      // Result := Vector1.X * Vector2.X + Vector1.X * Vector2.X
-  
-  FLD  DWORD PTR [ EAX + 8 ] // Vector1.Z
-  FMUL DWORD PTR [ EDX + 8 ] // Vector1.Z * Vector2.Z
-  
-  FADDP                      // Result := Result + Vector1.Z * Vector2.Z
-{$ENDIF}
 end;
 
 function vector_Distance;
-{$IFNDEF USE_ASM}
 begin
   Result := sqrt( sqr( Vector2.X - Vector1.X ) +
                   sqr( Vector2.Y - Vector1.Y ) +
                   sqr( Vector2.Z - Vector1.Z ) );
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EDX     ] // Vector1.X
-  FSUB DWORD PTR [ EAX     ] // Vector2.X - Vector1.X
-  FMUL ST, ST                // sqr( Vector2.X - Vector1.X )
-  
-  FLD  DWORD PTR [ EDX + 4 ] // Vector2.Y
-  FSUB DWORD PTR [ EAX + 4 ] // Vector2.Y - Vector1.Y
-  FMUL ST, ST                // sqr( Vector2.Y - Vector1.Y )
-  
-  FADDP                      // Result := sqr( Vector2.X - Vector1.X ) + sqr( Vector2.Y - Vector1.Y )
-  
-  FLD  DWORD PTR [ EDX + 8 ] // Vector2.Z
-  FSUB DWORD PTR [ EAX + 8 ] // Vector2.Z - Vector1.Z
-  FMUL ST, ST                // sqr( Vector2.Z - Vector1.Z )
-  
-  FADDP                      // Result := Result + sqr( Vector2.Z - Vector1.Z )
-  
-  FSQRT                      // Result := sqrt( Result )
-{$ENDIF}
 end;
 
 function vector_FDistance;
-{$IFNDEF USE_ASM}
 begin
   Result := sqr( Vector2.X - Vector1.X ) +
             sqr( Vector2.Y - Vector1.Y ) +
             sqr( Vector2.Z - Vector1.Z );
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EDX     ] // Vector1.X
-  FSUB DWORD PTR [ EAX     ] // Vector2.X - Vector1.X
-  FMUL ST, ST                // sqr( Vector2.X - Vector1.X )
-
-  FLD  DWORD PTR [ EDX + 4 ] // Vector2.Y
-  FSUB DWORD PTR [ EAX + 4 ] // Vector2.Y - Vector1.Y
-  FMUL ST, ST                // sqr( Vector2.Y - Vector1.Y )
-
-  FADDP                      // Result := sqr( Vector2.X - Vector1.X ) + sqr( Vector2.Y - Vector1.Y )
-
-  FLD  DWORD PTR [ EDX + 8 ] // Vector2.Z
-  FSUB DWORD PTR [ EAX + 8 ] // Vector2.Z - Vector1.Z
-  FMUL ST, ST                // sqr( Vector2.Z - Vector1.Z )
-
-  FADDP                      // Result := Result + sqr( Vector2.Z - Vector1.Z )
-{$ENDIF}
 end;
 
 function vector_Length;
-{$IFNDEF USE_ASM}
 begin
   Result := sqrt( sqr( Vector.X ) + sqr( Vector.Y ) + sqr( Vector.Z ) );
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX     ] // Vector.X
-  FMUL ST, ST                // sqr( Vector.X )
-
-  FLD  DWORD PTR [ EAX + 4 ] // Vector.Y
-  FMUL ST, ST                // sqr( Vector.Y )
-
-  FADDP                      // Result := sqr( Vector.X ) + sqr( Vector.Y )
-
-  FLD  DWORD PTR [ EAX + 8 ] // Vector.Z
-  FMUL ST, ST                // sqr( Vector.Z )
-
-  FADDP                      // Result := Result + sqr( Vector.Z )
-
-  FSQRT                      // Result := sqrt( Result )
-{$ENDIF}
 end;
 
 function vector_Lerp;
-{$IFNDEF USE_ASM}
 begin
   Result.X := Vector1.X + ( Vector2.X - Vector1.X ) * Value;
   Result.Y := Vector1.Y + ( Vector2.Y - Vector1.Y ) * Value;
   Result.Z := Vector1.Z + ( Vector2.Z - Vector1.Z ) * Value;
-{$ELSE}
-asm
-   FLD   Value
-
-   FLD   DWORD PTR [ EAX + 0 ]
-   FLD   DWORD PTR [ EDX + 0 ]
-   FSUB  ST( 0 ), ST( 1 )
-   FMUL  ST( 0 ), ST( 2 )
-   FADDP
-   FSTP  DWORD PTR [ ECX + 0 ]
-
-   FLD   DWORD PTR [ EAX + 4 ]
-   FLD   DWORD PTR [ EDX + 4 ]
-   FSUB  ST( 0 ), ST( 1 )
-   FMUL  ST( 0 ), ST( 2 )
-   FADDP
-   FSTP  DWORD PTR [ ECX + 4 ]
-
-   FLD   DWORD PTR [ EAX + 8 ]
-   FLD   DWORD PTR [ EDX + 8 ]
-   FSUB  ST( 0 ), ST( 1 )
-   FMUL  ST( 0 ), ST( 2 )
-   FADDP
-   FSTP  DWORD PTR [ ECX + 8 ]
-
-   FFREE ST( 0 )
-{$ENDIF}
 end;
 
 {------------------------------------------------------------------------------}
@@ -928,8 +456,8 @@ begin
   tMatrix.row[ 0 ] := vector_Get(   0, -aZ,  aY );
   tMatrix.row[ 1 ] := vector_Get(  aZ,   0, -aX );
   tMatrix.row[ 2 ] := vector_Get( -aY,  aX,   0 );
-  tMatrix := matrix3f_Mul( tMatrix, Matrix^ );
-  Matrix^ := matrix3f_Add( Matrix^, tMatrix );
+  tMatrix := matrix3f_Mul( tMatrix, Matrix );
+  Matrix  := matrix3f_Add( Matrix, tMatrix );
   matrix3f_OrthoNormalize( Matrix );
 end;
 
@@ -1061,7 +589,7 @@ begin
   sMatrix.a11 := sX;
   sMatrix.a22 := sY;
   sMatrix.a33 := sZ;
-  Matrix^ := matrix4f_Mul( Matrix^, sMatrix );
+  Matrix := matrix4f_Mul( Matrix, sMatrix );
 end;
 
 function matrix4f_Mul;
@@ -1096,57 +624,19 @@ begin
 end;
 
 function quater_Add;
-{$IFNDEF USE_ASM}
 begin
   Result.X := q1.X + q2.X;
   Result.Y := q1.Y + q2.Y;
   Result.Z := q1.Z + q2.Z;
   Result.W := q1.W + q2.W;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX      ]
-  FADD DWORD PTR [ EDX      ]
-  FSTP DWORD PTR [ ECX      ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FADD DWORD PTR [ EDX + 4  ]
-  FSTP DWORD PTR [ ECX + 4  ]
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FADD DWORD PTR [ EDX + 8  ]
-  FSTP DWORD PTR [ ECX + 8  ]
-
-  FLD  DWORD PTR [ EAX + 12 ]
-  FADD DWORD PTR [ EDX + 12 ]
-  FSTP DWORD PTR [ ECX + 12 ]
-{$ENDIF}
 end;
 
 function quater_Sub;
-{$IFNDEF USE_ASM}
 begin
   Result.X := q1.X - q2.X;
   Result.Y := q1.Y - q2.Y;
   Result.Z := q1.Z - q2.Z;
   Result.W := q1.W - q2.W;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX      ]
-  FSUB DWORD PTR [ EDX      ]
-  FSTP DWORD PTR [ ECX      ]
-
-  FLD  DWORD PTR [ EAX + 4  ]
-  FSUB DWORD PTR [ EDX + 4  ]
-  FSTP DWORD PTR [ ECX + 4  ]
-
-  FLD  DWORD PTR [ EAX + 8  ]
-  FSUB DWORD PTR [ EDX + 8  ]
-  FSTP DWORD PTR [ ECX + 8  ]
-
-  FLD  DWORD PTR [ EAX + 12 ]
-  FSUB DWORD PTR [ EDX + 12 ]
-  FSTP DWORD PTR [ ECX + 12 ]
-{$ENDIF}
 end;
 
 function quater_Mul;
@@ -1318,25 +808,8 @@ begin
 end;
 
 function plane_Distance;
-{$IFNDEF USE_ASM}
 begin
 	Result := Plane.Normal.X * Point.X + Plane.Normal.Y * Point.Y + Plane.Normal.Z * Point.Z + Plane.D;
-{$ELSE}
-asm
-  FLD  DWORD PTR [ EAX + 40 ]
-  FMUL DWORD PTR [ EDX      ]
-
-  FLD  DWORD PTR [ EAX + 44 ]
-  FMUL DWORD PTR [ EDX + 4  ]
-
-  FADDP
-
-  FLD  DWORD PTR [ EAX + 48 ]
-  FMUL DWORD PTR [ EDX + 8  ]
-  FADD DWORD PTR [ EAX + 36 ]
-
-  FADDP
-{$ENDIF}
 end;
 
 function tri_GetNormal;

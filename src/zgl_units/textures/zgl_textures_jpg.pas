@@ -24,7 +24,7 @@ unit zgl_textures_jpg;
 interface
 
 uses
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   jmorecfg,
   jpeglib,
   jerror,
@@ -41,7 +41,7 @@ uses
   zgl_memory,
   zgl_log;
   
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
 const
   INPUT_BUF_SIZE = 4096;
   
@@ -168,7 +168,7 @@ implementation
 
 var
   jpgMem     : zglTMemory;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   jpgDecoder : zglPJPGDecoder;
   jpgCInfo   : jpeg_decompress_struct;
   jpgData    : zglTJPGData;
@@ -177,7 +177,7 @@ var
   jpgData    : zglTJPGData;
   {$ENDIF}
   
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
 procedure jpeg_output_message( cinfo : j_common_ptr );
   var
     str : String;
@@ -242,7 +242,7 @@ end;
 
 procedure jpg_LoadFromFile;
   label _exit;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   var
     jerr : jpeg_error_mgr;
   {$ENDIF}
@@ -253,7 +253,7 @@ procedure jpg_LoadFromFile;
   {$ENDIF}
 begin
   mem_LoadFromFile( jpgMem, FileName );
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
   jpgCInfo.err := jpeg_error( jerr );
   jpeg_create_decompress( @jpgCInfo );
   
@@ -331,7 +331,7 @@ begin
 
 _exit:
   begin
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
     SetLength( jpgData.Data, 0 );
     jpeg_finish_decompress ( @jpgCInfo );
     jpeg_destroy_decompress( @jpgCInfo );
@@ -346,7 +346,7 @@ _exit:
 end;
 
 procedure jpg_FillData;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   var
     i, j  : JDIMENSION;
     color : JSAMPLE_PTR;

@@ -28,11 +28,11 @@ uses
   zgl_global_var,
   zgl_object_3d;
   
-procedure light_Enable( ID : Byte ); extdecl;
-procedure light_Disable( ID : Byte ); extdecl;
-procedure light_SetPosition( ID : Byte; X, Y, Z, W : Single ); extdecl;
+procedure light_Enable( const ID : Byte );
+procedure light_Disable( const ID : Byte );
+procedure light_SetPosition( const ID : Byte; const X, Y, Z, W : Single );
 
-procedure light_SetMaterial( ID, Material : Byte; Color : DWORD; Alpha : Byte ); extdecl;
+procedure light_SetMaterial( const ID, Material : Byte; const Color : DWORD; const Alpha : Byte );
 
 implementation
 

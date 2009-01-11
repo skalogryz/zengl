@@ -38,16 +38,16 @@ uses
   zgl_utils_3d,
   Utils;
 
-function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
-procedure skmesh_Animate( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
-procedure skmesh_Draw( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
-procedure skmesh_DrawGroup( Mesh : zglPSkMesh; State : zglPSkeletonState; Group : DWORD ); extdecl;
-procedure skmesh_DrawSkelet( Mesh : zglPSkMesh; State : zglPSkeletonState ); extdecl;
-procedure skmesh_Free( var Mesh : zglPSkMesh ); extdecl;
+function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; const FileName : PChar; const Flags : DWORD ) : Boolean;
+procedure skmesh_Animate( const Mesh : zglPSkMesh; var State : zglTSkeletonState );
+procedure skmesh_Draw( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
+procedure skmesh_DrawGroup( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
+procedure skmesh_DrawSkelet( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
+procedure skmesh_Free( var Mesh : zglPSkMesh );
 
 procedure skmesh_CalcQuats( var BonePos : array of zglTBonePos );
-procedure skmesh_CalcFrame( var BonePos : array of zglTBonePos; Bones : array of zglTBone );
-procedure skmesh_CalcVerts( Mesh : zglPSkMesh; var State : zglTSkeletonState; BonePos : array of zglTBonePos ); extdecl;
+procedure skmesh_CalcFrame( var BonePos : array of zglTBonePos; const Bones : array of zglTBone );
+procedure skmesh_CalcVerts( const Mesh : zglPSkMesh; var State : zglTSkeletonState; const BonePos : array of zglTBonePos );
 
 implementation
 
@@ -242,7 +242,7 @@ procedure skmesh_Animate;
     prevFrame : Integer;
     nextFrame : Integer;
 begin
-  with State^ do
+  with State do
     begin
       CalcFrame( Delta, prevDelta, d, Time, Frame, prevFrame, nextFrame, 0, Mesh.Actions[ Action ].FCount );
 
@@ -263,7 +263,7 @@ begin
           end;
 
       skmesh_CalcFrame( BonePos, Mesh.Bones );
-      skmesh_CalcVerts( Mesh, State^, BonePos );
+      skmesh_CalcVerts( Mesh, State, BonePos );
     end;
 end;
 
@@ -508,9 +508,8 @@ procedure skmesh_CalcVerts;
   var
     i, j    : Integer;
     t1, t2  : zglTPoint3D;
-    p       : zglPPoint3D;
     Matrix  : zglPMatrix4f;
-    rMatrix : zglTMAtrix4f;
+    rMatrix : zglTMatrix4f;
     Weight  : Single;
     vb, vb2 : Pointer;
 begin
@@ -548,8 +547,7 @@ begin
 
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
-      if Mesh.Flags and BUILD_VBO_STREAM = 0 Then vb := @State.Normals[ 0 ];
-      for i := 0 to Mesh.VCount - 1 do
+      for i := 0 to Mesh.RVCount - 1 do
         begin
           t2.X := 0;
           t2.Y := 0;
@@ -573,7 +571,7 @@ begin
               rMatrix := BonePos[ Mesh.Weights[ i, j ].BoneID ].Matrix;
               rMatrix.a14 := 0;
               rMatrix.a24 := 0;
-              rMatrix.a44 := 0;
+              rMatrix.a34 := 0;
               rMatrix.a41 := 0;
               rMatrix.a42 := 0;
               rMatrix.a43 := 0;

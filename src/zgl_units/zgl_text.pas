@@ -37,22 +37,25 @@ uses
   zgl_math,
   Utils;
   
-function  font_Add : zglPFont; extdecl;
-procedure font_Del( Font : zglPFont ); extdecl;
+function  font_Add : zglPFont;
+procedure font_Del( const Font : zglPFont );
 
-function font_LoadFromFile( Texture, FontInfo : PChar ) : zglPFont; extdecl;
+function font_LoadFromFile( const Texture, FontInfo : PChar ) : zglPFont;
 
-procedure text_Draw( Font : zglPFont; X, Y : Single; _Text : PChar; Alpha : Byte; Color : DWORD; Step, Scale : Single ); extdecl;
-function  text_GetWidth( Font : zglPFont; _Text : PChar; Step, Scale : Single ) : Single; extdecl;
+procedure text_Draw( const Font : zglPFont; X, Y : Single; const _Text : PChar; const Alpha : Byte; const Color : DWORD; const Step, Scale : Single );
+function  text_GetWidth( const Font : zglPFont; const _Text : PChar; const Step, Scale : Single ) : Single;
 
 const
   ZGL_FONT_INFO = 'ZGL_FONT_INFO';
 
 implementation
 uses
-  zgl_main;
+  zgl_main, zgl_gui_main, zgl_gui_types;
 
 function font_Add;
+  var
+    button   : zglTButtonDesc;
+    checkbox : zglTCheckBoxDesc;
 begin
   Result := @managerFont.First;
   while Assigned( Result.Next ) do
@@ -63,6 +66,16 @@ begin
   Result.Next.Prev := Result;
   Result := Result.Next;
   INC( managerFont.Count );
+
+  button.Caption := 'KICK ME!';
+  button.Font    := Result;
+  button.Pressed := FALSE;
+  gui_AddWidget( WIDGET_BUTTON, 320, 240, 128, 64, @button, nil, nil );
+
+  checkbox.Caption := 'checkbox';
+  checkbox.Font    := Result;
+  checkbox.Checked := TRUE;
+  gui_AddWidget( WIDGET_CHECKBOX, 340, 260, 16, 16, @checkbox, nil, nil );
 end;
 
 procedure font_Del;

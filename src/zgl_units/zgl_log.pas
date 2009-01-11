@@ -35,9 +35,9 @@ uses
 
 procedure log_Init;
 procedure log_Close;
-procedure log_Add( Message : String; Timings : Boolean = TRUE ); extdecl;
-procedure log_AddC( Message : PChar; Timings : Boolean = TRUE ); extdecl;
-procedure log_Flush; extdecl;
+procedure log_Add( const Message : String; const Timings : Boolean = TRUE );
+procedure log_AddC( const Message : PChar; const Timings : Boolean = TRUE );
+procedure log_Flush;
 function  log_Timing : String;
 
 var
@@ -50,7 +50,9 @@ implementation
 procedure log_Init;
 begin
   if ( app_Flags and APP_USE_LOG = 0 ) Then exit;
+  {$IFNDEF DARWIN}
   if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then exit;
+  {$ENDIF}
   app_Log := TRUE;
   logstart := m_Round( timer_GetTicks );
   
@@ -63,7 +65,9 @@ end;
 
 procedure log_Close;
 begin
+  {$IFNDEF DARWIN}
   if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then
+  {$ENDIF}
     file_Close( log );
 end;
 
@@ -72,7 +76,7 @@ procedure log_Add;
     str : String;
 begin
   if not app_Log Then exit;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   writeln( Message );
   {$ENDIF}
   if Timings Then
@@ -85,14 +89,16 @@ begin
   log_Flush;
 end;
 
-procedure log_AddC( Message : PChar; Timings : Boolean = TRUE );
+procedure log_AddC;
 begin
   log_Add( Message, Timings );
 end;
 
 procedure log_Flush;
 begin
+  {$IFNDEF DARWIN}
   if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then
+  {$ENDIF}
     file_Flush( log );
 end;
 

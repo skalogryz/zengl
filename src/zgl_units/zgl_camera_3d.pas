@@ -30,9 +30,9 @@ uses
   zgl_types,
   zgl_math;
 
-procedure cam3d_Set( Camera : zglPCamera3D ); extdecl;
-procedure cam3d_Fly( Camera : zglPCamera3D; Speed : Single ); extdecl;
-procedure cam3d_Strafe( Camera : zglPCamera3D; Speed : Single ); extdecl;
+procedure cam3d_Set( var Camera : zglTCamera3D );
+procedure cam3d_Fly( var Camera : zglTCamera3D; const Speed : Single );
+procedure cam3d_Strafe( var Camera : zglTCamera3D; const Speed : Single );
 
 implementation
 

@@ -28,14 +28,14 @@ uses
   
   zgl_types;
   
-procedure frustum_Calc( f : zglPFrustum ); extdecl;
+procedure frustum_Calc( var f : zglTFrustum );
 
-function frustum_PointIn   ( f : zglPFrustum; x, y, z : Single )             : Boolean; extdecl;
-function frustum_PPointIn  ( f : zglPFrustum; Vertex : zglPPoint3D )         : Boolean; extdecl;
-function frustum_TriangleIn( f : zglPFrustum; v1, v2, v3 : zglTPoint3D )     : Boolean; extdecl;
-function frustum_SphereIn  ( f : zglPFrustum; x, y, z, r : Single )          : Boolean; extdecl;
-function frustum_BoxIn     ( f : zglPFrustum; x, y, z, bx, by, bz : Single ) : Boolean; extdecl;
-function frustum_CubeIn    ( f : zglPFrustum; x, y, z, size : Single )       : Boolean; extdecl;
+function frustum_PointIn   ( const f : zglTFrustum; const x, y, z : Single )             : Boolean;
+function frustum_PPointIn  ( const f : zglTFrustum; const Vertex : zglTPoint3D )         : Boolean;
+function frustum_TriangleIn( const f : zglTFrustum; const v1, v2, v3 : zglTPoint3D )     : Boolean;
+function frustum_SphereIn  ( const f : zglTFrustum; const x, y, z, r : Single )          : Boolean;
+function frustum_BoxIn     ( const f : zglTFrustum; const x, y, z, bx, by, bz : Single ) : Boolean;
+function frustum_CubeIn    ( const f : zglTFrustum; const x, y, z, size : Single )       : Boolean;
 
 implementation
 

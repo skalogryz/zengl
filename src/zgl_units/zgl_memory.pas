@@ -34,14 +34,14 @@ type
     Position : DWORD;
 end;
 
-procedure mem_LoadFromFile( var Memory : zglTMemory; FileName : PChar ); extdecl;
-procedure mem_SaveToFile( var Memory : zglTMemory; FileName : PChar ); extdecl;
-function  mem_Seek( var Memory : zglTMemory; Offset : DWORD; Mode : Byte ) : DWORD; extdecl;
-function  mem_Read( var Memory : zglTMemory; var buffer; count : DWORD ) : DWORD; extdecl;
-function  mem_ReadSwap( var Memory : zglTMemory; var buffer; count : DWORD ) : DWORD;
-function  mem_Write( var Memory : zglTMemory; const buffer; count : DWORD ) : DWORD; extdecl;
-procedure mem_SetSize( var Memory : zglTMemory; Size : DWORD ); extdecl;
-procedure mem_Free( var Memory : zglTMemory ); extdecl;
+procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : PChar );
+procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : PChar );
+function  mem_Seek( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
+function  mem_Read( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
+function  mem_ReadSwap( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
+function  mem_Write( var Memory : zglTMemory; const buffer; const count : DWORD ) : DWORD;
+procedure mem_SetSize( var Memory : zglTMemory; const Size : DWORD );
+procedure mem_Free( var Memory : zglTMemory );
 
 implementation
 

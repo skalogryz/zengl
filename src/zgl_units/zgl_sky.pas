@@ -27,8 +27,8 @@ uses
   GL, GLext,
   zgl_types;
   
-procedure skybox_Init( Top, Bottom, Left, Right, Front, Back : zglPTexture ); extdecl;
-procedure skybox_Draw; extdecl;
+procedure skybox_Init( const Top, Bottom, Left, Right, Front, Back : zglPTexture );
+procedure skybox_Draw;
 
 implementation
 

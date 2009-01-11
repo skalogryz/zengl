@@ -34,11 +34,11 @@ uses
   zgl_utils_3d,
   Utils;
 
-procedure heightmap_Build( var HeightMap : zglPHeightMap; Texture : zglPTexture; xScale, yScale, zScale : Single; xDetail, yDetail : Integer; Flags : DWORD ); extdecl;
-procedure heightmap_Draw( HeightMap : zglPHeightMap ); extdecl;
-procedure heightmap_Free( var HeightMap : zglPHeightMap ); extdecl;
-function  heightmap_GetPlane( HeightMap : zglPHeightMap; Position : zglTPoint3D ) : DWORD; extdecl;
-function  heightmap_GetYOffset( HeightMap : zglPHeightMap; Position : zglTPoint3D ) : Single; extdecl;
+procedure heightmap_Build( var HeightMap : zglPHeightMap; const Texture : zglPTexture; const xScale, yScale, zScale : Single; const xDetail, yDetail : Integer; const Flags : DWORD );
+procedure heightmap_Draw( const HeightMap : zglPHeightMap );
+procedure heightmap_Free( var HeightMap : zglPHeightMap );
+function  heightmap_GetPlane( const HeightMap : zglPHeightMap; Position : zglTPoint3D ) : DWORD;
+function  heightmap_GetYOffset( const HeightMap : zglPHeightMap; Position : zglTPoint3D ) : Single;
 
 implementation
 var

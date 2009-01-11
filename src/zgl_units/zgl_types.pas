@@ -30,6 +30,10 @@ uses
   Windows,
   DirectSound
   {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll,
+  openal
+  {$ENDIF}
   ;
 
 type
@@ -164,7 +168,7 @@ end;
 {-------------------------------- zgl_sound.pas -------------------------------}
 {------------------------------------------------------------------------------}
 
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
 type
   zglPSound = ^zglTSound;
   zglTSound = record
@@ -310,6 +314,12 @@ end;
 type
   zglTPoint3DArray = array[ 0..0 ] of zglTPoint3D;
   zglPPoint3DArray = ^zglTPoint3DArray;
+
+type
+  zglPVector = ^zglTVector;
+  zglTVector = record
+    X, Y, Z, W : Single;
+end;
 
 type
   zglPQuaternion = ^zglTQuaternion;

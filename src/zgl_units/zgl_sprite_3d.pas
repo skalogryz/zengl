@@ -29,8 +29,8 @@ uses
   zgl_global_var,
   zgl_math;
 
-procedure ssprite3d_Draw( X, Y, Z, sX, sY, sZ : Single; Matrix : zglPMatrix4f ); extdecl;
-procedure asprite3d_Draw( X, Y, Z, sX, sY, sZ : Single; Frame : Integer; Matrix : zglPMatrix4f ); extdecl;
+procedure ssprite3d_Draw( const X, Y, Z, sX, sY, sZ : Single; const Matrix : zglTMatrix4f );
+procedure asprite3d_Draw( const X, Y, Z, sX, sY, sZ : Single; const Frame : Integer; const Matrix : zglTMatrix4f );
 
 implementation
 

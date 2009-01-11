@@ -36,25 +36,25 @@ uses
   zgl_file,
   Utils;
 
-function  tex_Add : zglPTexture; extdecl;
-procedure tex_Del( Texture : zglPTexture ); extdecl;
+function  tex_Add : zglPTexture;
+procedure tex_Del( Texture : zglPTexture );
   
-procedure tex_Create( var Texture : zglTTexture; var pData : Pointer ); extdecl;
-function  tex_CreateZero( Width, Height : WORD; Color, Flags : DWORD ) : zglPTexture; extdecl;
-function  tex_LoadFromFile( FileName : PChar; TransparentColor, Flags : DWORD ) : zglPTexture; extdecl;
-procedure tex_SetFrameSize( Texture : zglPTexture; FrameWidth, FrameHeight : WORD ); extdecl;
-function  tex_SetMask( Texture, Mask : zglPTexture ) : zglPTexture; extdecl;
+procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
+function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : PChar; const TransparentColor, Flags : DWORD ) : zglPTexture;
+procedure tex_SetFrameSize( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
+function  tex_SetMask( const Texture, Mask : zglPTexture ) : zglPTexture;
 
-procedure tex_Filter( Texture : zglPTexture; Flags : DWORD ); extdecl;
-procedure tex_SetAnisotropy( Level : Byte ); extdecl;
+procedure tex_Filter( const Texture : zglPTexture; const Flags : DWORD );
+procedure tex_SetAnisotropy( const Level : Byte );
 
 procedure tex_CalcPOT( var pData : Pointer; var Width, Height : WORD; var U, V : Single );
-procedure tex_CalcGrayScale( pData : Pointer; Width, Height : WORD );
-procedure tex_CalcInvert( pData : Pointer; Width, Height : WORD );
-procedure tex_CalcRGB( var pData : Pointer; Width, Height : WORD );
-procedure tex_CalcTransparent( pData : Pointer; TransparentColor : Integer; Width, Height : WORD );
+procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : WORD );
+procedure tex_CalcInvert( var pData : Pointer; const Width, Height : WORD );
+procedure tex_CalcRGB( var pData : Pointer; const Width, Height : WORD );
+procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : Integer; const Width, Height : WORD );
 
-procedure tex_GetData( Texture : zglPTexture; var pData : Pointer; var pSize : Integer ); extdecl;
+procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
 
 implementation
 uses

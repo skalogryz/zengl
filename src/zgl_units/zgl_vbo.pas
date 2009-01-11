@@ -29,9 +29,9 @@ uses
   zgl_types,
   zgl_global_var;
   
-procedure vbo_Build( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD; Indices, Vertices, Normals, TexCoords, MultiTexCoords : Pointer; var Flags : DWORD ); extdecl;
-procedure vbo_Free( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD ); extdecl;
-procedure vbo_Check( var Flags : DWORD ); extdecl;
+procedure vbo_Build( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD; Indices, Vertices, Normals, TexCoords, MultiTexCoords : Pointer; var Flags : DWORD );
+procedure vbo_Free( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD );
+procedure vbo_Check( var Flags : DWORD );
 
 implementation
 

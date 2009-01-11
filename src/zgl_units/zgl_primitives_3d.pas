@@ -28,11 +28,11 @@ uses
   zgl_opengl,
   zgl_math;
 
-procedure pr3d_Point( X, Y, Z : Single ); extdecl;
-procedure pr3d_Line( X1, Y1, Z1, X2, Y2, Z2 : Single ); extdecl;
-procedure pr3d_Plane( Width, Height : Single ); extdecl;
-procedure pr3d_AABB( Width, Height, ZDepth : Single ); extdecl;
-procedure pr3d_Sphere( Radius : Single; Quality : Integer ); extdecl;
+procedure pr3d_Point( const X, Y, Z : Single );
+procedure pr3d_Line( const X1, Y1, Z1, X2, Y2, Z2 : Single );
+procedure pr3d_Plane( const Width, Height : Single );
+procedure pr3d_AABB( const Width, Height, ZDepth : Single );
+procedure pr3d_Sphere( Radius : Single; Quality : Integer );
 
 implementation
 

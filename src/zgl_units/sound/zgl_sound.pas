@@ -32,6 +32,9 @@ uses
   Windows,
   DirectSound,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  openal,
+  {$ENDIF}
   zgl_types,
   zgl_global_var,
   zgl_log,
@@ -41,21 +44,21 @@ uses
   Utils
   ;
 
-function  snd_Init : Boolean; extdecl;
-procedure snd_Free; extdecl;
-function  snd_Add( BufferCount, SourceCount : Integer ) : zglPSound; extdecl;
-procedure snd_Del( Sound : zglPSound ); extdecl;
-function  snd_LoadFromFile( FileName : PChar; SourceCount : Integer ) : zglPSound; extdecl;
+function  snd_Init : Boolean;
+procedure snd_Free;
+function  snd_Add( const BufferCount, SourceCount : Integer ) : zglPSound;
+procedure snd_Del( var Sound : zglPSound );
+function  snd_LoadFromFile( const FileName : PChar; const SourceCount : Integer ) : zglPSound;
 
-function  snd_Play( Sound : zglPSound; X, Y, Z : Single; Loop : Boolean ) : Integer; extdecl;
-procedure snd_Stop( Sound : zglPSound; Source : Integer ); extdecl;
-procedure snd_SetVolume( Volume : Byte; ID : Integer ); extdecl;
-procedure snd_SetFrequency( Frequency, ID : Integer ); extdecl;
-procedure snd_SetFrequencyCoeff( Coefficient : Single; ID : Integer ); extdecl;
-procedure snd_PlayFile( SoundFile : zglPSoundFile ); extdecl;
-procedure snd_StopFile; extdecl;
-function  snd_ProcFile( data : Pointer ) : DWORD; extdecl;
-procedure snd_RestoreFile; extdecl;
+function  snd_Play( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;
+procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
+procedure snd_SetVolume( const Volume : Byte; const ID : Integer );
+procedure snd_SetFrequency( const Frequency, ID : Integer );
+procedure snd_SetFrequencyCoeff( const Coefficient : Single; const ID : Integer );
+procedure snd_PlayFile( const SoundFile : zglPSoundFile );
+procedure snd_StopFile;
+function  snd_ProcFile( const data : Pointer ) : DWORD;
+procedure snd_RestoreFile;
 
 var
   sndActive : Boolean;
@@ -131,7 +134,7 @@ end;
 function snd_Init;
 begin
   Result := FALSE;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   log_Add( 'OpenAL: load ' + libopenal  );
   if not InitOpenAL( libopenal ) Then
     begin
@@ -191,7 +194,7 @@ procedure snd_Free;
 begin
   if not sndInitialized Then exit;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   alDeleteBuffers( sfBufCount, @sfBuffers[ 0 ] );
   alDeleteSources( 1, @sfSource );
 
@@ -211,7 +214,7 @@ begin
 end;
 
 function snd_Add;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   var
     i : Integer;
   {$ENDIF}
@@ -229,7 +232,7 @@ begin
   Result.Next.Prev := Result;
   Result           := Result.Next;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   if BufferCount > 0 Then
     alGenBuffers( BufferCount, @Result.Buffer );
   Result.sCount := SourceCount;
@@ -249,7 +252,7 @@ procedure snd_Del;
   var
     i : Integer;
 begin
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   alDeleteBuffers( 1, @Sound.Buffer );
   for i := 0 to Sound.sCount - 1 do
     alDeleteSources( 1, @Sound.Source[ i ] );
@@ -291,7 +294,7 @@ begin
     if copy( StrUp( FileName ), length( FileName ) - 3, 4 ) = '.' + sndNewFormats[ i ].Extension Then
       sndNewFormats[ i ].Loader( FileName, Result.Data, Result.Size, f, Result.Frequency );
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
   {$ENDIF}
   {$IFDEF WIN32}
@@ -307,7 +310,7 @@ end;
 function snd_Play;
   var
     i, j      : Integer;
-    {$IFDEF LINUX}
+    {$IFDEF LINUX_OR_DARWIN}
     sourcePos : array[ 0..2 ] of TALfloat;
     {$ENDIF}
     {$IFDEF WIN32}
@@ -322,7 +325,7 @@ begin
      ( not sndInitialized ) or 
      ( not sndCanPlay ) Then exit;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   for i := 0 to Sound.sCount - 1 do
     begin
       alGetSourcei( Sound.Source[ i ], AL_SOURCE_STATE, @j );
@@ -383,7 +386,7 @@ begin
   if ( not Assigned( Sound ) ) or 
      ( not sndInitialized ) Then exit;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   if source = -1 Then
     begin
       for i := 0 to Sound.sCount - 1 do alSourceStop( Sound.Source[ i ] );
@@ -406,9 +409,11 @@ procedure snd_SetVolume;
     i, j  : Integer;
     Sound : zglPSound;
 begin
-  if Volume > 100 then Volume := 100;
-  sndVolume := Volume;
-  {$IFDEF LINUX}
+  if Volume > 100 then
+    sndVolume := 100
+  else
+    sndVolume := Volume;
+  {$IFDEF LINUX_OR_DARWIN}
     if ID > -1 Then
       begin
         Sound := managerSound.First.Next;
@@ -441,7 +446,7 @@ procedure snd_SetFrequency;
     i, j  : Integer;
     Sound : zglPSound;
 begin
-  {$IFDEF LINUX}
+  {$IFDEF LINUXOR_DARWIN}
     if ID > -1 Then
       begin
         Sound := managerSound.First.Next;
@@ -474,7 +479,7 @@ procedure snd_SetFrequencyCoeff;
     i, j  : Integer;
     Sound : zglPSound;
 begin
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
     if ID > -1 Then
       begin
         Sound := managerSound.First.Next;
@@ -595,6 +600,9 @@ function snd_ProcFile;
   {$IFDEF WIN32}
     Pos : DWORD;
   {$ENDIF}
+  {$IFDEF DARWIN}
+    tmp : Integer;
+  {$ENDIF}
 begin
   try
     while not sndStopFile do
@@ -659,7 +667,9 @@ begin
             if sfBufferNext > 3 Then sfBufferNext := 0;
           end;
         {$ENDIF}
+        {$IFNDEF DARWIN}
         sleep( 100 );
+        {$ENDIF}
       end;
   except
   end;

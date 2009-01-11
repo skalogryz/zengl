@@ -34,8 +34,8 @@ const
   defBPP      = 32;
 
   // constant string
-  cs_ZenGL    = 'ZenGL build 34[19.12.08]';
-  cv_version  = 34;
+  cs_ZenGL    = 'ZenGL build 36[02.01.09]';
+  cv_version  = 36;
 
   // zgl_Reg
   SYS_LOAD             = $000001;
@@ -45,6 +45,9 @@ const
   TEX_FORMAT_LOADER    = $000011;
   SND_FORMAT_EXTENSION = $000020;
   SND_FORMAT_LOADER    = $000021;
+  WIDGET_TYPE_ID       = $000022;
+  WIDGET_ONDRAW        = $000023;
+  WIDGET_ONPROC        = $000024;
 
   // zgl_Get
   SYS_FPS         = 1;
@@ -60,6 +63,7 @@ const
   MANAGER_FONT    = 11;
   MANAGER_RTARGET = 12;
   MANAGER_SOUND   = 13;
+  MANAGER_GUI     = 14;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR   = $000001;

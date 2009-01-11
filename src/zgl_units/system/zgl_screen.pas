@@ -30,6 +30,9 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  AGL, MacOSAll,
+  {$ENDIF}
   zgl_const,
   zgl_global_var,
   zgl_log,
@@ -41,14 +44,14 @@ function  scr_Create : Boolean;
 procedure scr_GetResList;
 procedure scr_Destroy;
 procedure scr_Reset;
-procedure scr_Clear; extdecl;
-procedure scr_Flush; extdecl;
+procedure scr_Clear;
+procedure scr_Flush;
 
-procedure scr_SetOptions( Width, Height, BPP, Refresh : WORD; FullScreen, VSync : Boolean ); extdecl;
-procedure scr_CorrectResolution( Width, Height : WORD ); extdecl;
-procedure scr_SetViewPort; extdecl;
-procedure scr_SetVSync( VSync : Boolean ); extdecl;
-procedure scr_SetFSAA( FSAA : Byte ); extdecl;
+procedure scr_SetOptions( const Width, Height, BPP, Refresh : WORD; const FullScreen, VSync : Boolean );
+procedure scr_CorrectResolution( const Width, Height : WORD );
+procedure scr_SetViewPort;
+procedure scr_SetVSync( const VSync : Boolean );
+procedure scr_SetFSAA( const FSAA : Byte );
 
 {$IFDEF LINUX}
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
@@ -445,6 +448,10 @@ begin
 //  glFinish;
   SwapBuffers( wnd_DC );
   {$ENDIF}
+
+  {$IFDEF DARWIN}
+  aglSwapBuffers( ogl_Context );
+  {$ENDIF}
 end;
 
 procedure scr_CorrectResolution;
@@ -494,6 +501,9 @@ end;
 procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
+  {$IFDEF DARWIN}
+  aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
+  {$ENDIF}
 end;
 
 procedure scr_SetFSAA;

@@ -30,6 +30,9 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  AGL, MacOSAll,
+  {$ENDIF}
 
   zgl_const,
   zgl_global_var,
@@ -40,14 +43,14 @@ uses
 function  gl_Create : Boolean;
 procedure gl_Destroy;
 procedure gl_LoadEx;
-function  gl_GetProc( Proc : String ) : Pointer;
+function  gl_GetProc( const Proc : String ) : Pointer;
 
-procedure Set2DMode; extdecl;
-procedure Set3DMode( FOVY : Single ); extdecl;
+procedure Set2DMode;
+procedure Set3DMode( const FOVY : Single );
 procedure SetCurrentMode;
 
-procedure gl_MTexCoord2f( U, V : Single ); extdecl;
-procedure gl_MTexCoord2fv( Coord : Pointer ); extdecl;
+procedure gl_MTexCoord2f( const U, V : Single );
+procedure gl_MTexCoord2fv( const Coord : Pointer );
 
 const
 {$IFDEF LINUX}
@@ -55,6 +58,9 @@ const
 {$ENDIF}
 {$IFDEF WIN32}
   libGLU = 'glu32.dll';
+{$ENDIF}
+{$IFDEF DARWIN}
+  libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
 {$ENDIF}
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); extdecl; external libGLU;
 function gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; extdecl; external libGLU;
@@ -79,6 +85,10 @@ function gl_Create;
     
     ga, gf : DWORD;
     i, j : DWORD;
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  var
+    i : Integer;
   {$ENDIF}
 begin
   Result := FALSE;
@@ -224,6 +234,78 @@ begin
       exit;
     end;
 {$ENDIF}
+{$IFDEF DARWIN}
+  ogl_zDepth := 24;
+  repeat
+    ogl_Attr[ 0 ]  := AGL_RGBA;
+    ogl_Attr[ 1 ]  := AGL_BUFFER_SIZE;
+    ogl_Attr[ 2 ]  := scr_BPP;
+    ogl_Attr[ 3 ]  := AGL_RED_SIZE;
+    ogl_Attr[ 4 ]  := 8;
+    ogl_Attr[ 5 ]  := AGL_GREEN_SIZE;
+    ogl_Attr[ 6 ]  := 8;
+    ogl_Attr[ 7 ]  := AGL_BLUE_SIZE;
+    ogl_Attr[ 8 ]  := 8;
+    ogl_Attr[ 9 ]  := AGL_ALPHA_SIZE;
+    ogl_Attr[ 10 ] := 8;
+    ogl_Attr[ 11 ] := AGL_DOUBLEBUFFER;
+    ogl_Attr[ 12 ] := AGL_DEPTH_SIZE;
+    ogl_Attr[ 13 ] := ogl_zDepth;
+    i := 15;
+    if ogl_Stencil > 0 Then
+      begin
+        ogl_Attr[ i     ] := AGL_STENCIL_SIZE;
+        ogl_Attr[ i + 1 ] := ogl_Stencil;
+        INC( i, 2 );
+      end;
+    if ogl_FSAA > 0 Then
+        begin
+          ogl_Attr[ i     ] := AGL_SAMPLES_ARB;
+          ogl_Attr[ i + 1 ] := ogl_FSAA;
+          INC( i, 2 );
+        end;
+    ogl_Attr[ i ] := AGL_NONE;
+
+    log_Add( 'aglChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
+    ogl_Format := aglChoosePixelFormat( nil, 0, @ogl_Attr[ 0 ] );
+    if ( not Assigned( ogl_Format ) and ( ogl_zDepth = 1 ) ) Then
+      begin
+        if ogl_FSAA = 0 Then
+          break
+        else
+          begin
+            ogl_zDepth := 24;
+            DEC( ogl_FSAA, 2 );
+          end;
+      end else
+        if not Assigned( ogl_Format ) Then DEC( ogl_zDepth, 8 );
+  if ogl_zDepth = 0 Then ogl_zDepth := 1;
+  until Assigned( ogl_Format );
+  
+  if not Assigned( ogl_Format ) Then
+    begin
+      u_Error( 'Cannot choose pixel format.' );
+      exit;
+    end;
+
+  ogl_Context := aglCreateContext( ogl_Format, nil );
+  if not Assigned( ogl_Context ) Then
+    begin
+      u_Error( 'Cannot create OpenGL context' );
+      exit;
+    end;
+  if aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) ) = GL_FALSE Then
+    begin
+      u_Error( 'Cannot set Drawable' );
+      exit;
+    end;
+  if aglSetCurrentContext( ogl_Context ) = GL_FALSE Then
+    begin
+      u_Error( 'Cannot set current OpenGL context' );
+      exit;
+    end;
+  aglDestroyPixelFormat( ogl_Format );
+{$ENDIF}
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
   log_Add( 'GL_RENDERER: ' + glGetString( GL_RENDERER ) );
   
@@ -268,9 +350,19 @@ begin
 
   wglDeleteContext( ogl_Context );
 {$ENDIF}
+{$IFDEF DARWIN}
+  if aglSetCurrentContext( nil ) = GL_FALSE Then
+    u_Error( 'Cannot release current OpenGL context' );
+
+  aglDestroyContext( ogl_Context );
+{$ENDIF}
 end;
 
 procedure gl_LoadEx;
+  {$IFDEF DARWIN}
+  var
+    i : Integer;
+  {$ENDIF}
 begin
   if LoadEx Then
     exit
@@ -397,6 +489,13 @@ begin
       ogl_CanVSync := FALSE;
       
    wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormat' );
+{$ENDIF}
+{$IFDEF DARWIN}
+  if aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then
+    ogl_CanVSync := TRUE
+  else
+    ogl_CanVSync := FALSE;
+  aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, 0 );
 {$ENDIF}
   log_Add( 'Support WaitVSync: ' + u_BoolToStr( ogl_CanVSync ) );
 end;

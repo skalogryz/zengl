@@ -29,14 +29,17 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll,
+  {$ENDIF}
   zgl_global_var,
   zgl_types;
 
-function  timer_Add( OnTimer : Pointer; Interval : DWORD ) : zglPTimer; extdecl;
-procedure timer_Del( Timer : zglPTimer ); extdecl;
+function  timer_Add( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
+procedure timer_Del( var Timer : zglPTimer );
 
-function timer_GetTicks : Double; extdecl;
-procedure timer_Reset; extdecl;
+function timer_GetTicks : Double;
+procedure timer_Reset;
 
 var
 {$IFDEF LINUX}
@@ -49,6 +52,8 @@ var
   t_start   : Double;
 
 implementation
+uses
+  zgl_main;
 
 function timer_Add;
 begin
@@ -56,8 +61,7 @@ begin
   while Assigned( Result.Next ) do
     Result := Result.Next;
 
-  Result.Next := AllocMem( SizeOf( zglTTimer ) );
-  FillChar( Result.Next^, SizeOf( zglTTimer ), 0 );
+  zgl_GetMem( Result.Next, SizeOf( zglTTimer ) );
   Result.Next.Active   := TRUE;
   Result.Next.Interval := Interval;
   Result.Next.OnTimer  := OnTimer;
@@ -74,7 +78,7 @@ begin
       aTimersToKill[ TimersToKill ] := Timer;
       exit;
     end;
-  
+
   if Assigned( Timer.Prev ) Then
     Timer.Prev.Next := Timer.Next;
   if Assigned( Timer.Next ) Then
@@ -88,6 +92,10 @@ function timer_GetTicks;
   var
     T : int64;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  var
+    T : UnsignedWide;
+  {$ENDIF}
 begin
 {$IFDEF LINUX}
   fpGetTimeOfDay( @t_tmr, nil );
@@ -96,6 +104,10 @@ begin
 {$IFDEF WIN32}
   QueryPerformanceCounter( T );
   Result := 1000 * T * Freq - t_start;
+{$ENDIF}
+{$IFDEF DARWIN}
+  Microseconds( T );
+  Result := T.int / 1000 - t_start;
 {$ENDIF}
 end;
 

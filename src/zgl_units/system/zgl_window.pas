@@ -30,6 +30,9 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  AGL, MacOSAll,
+  {$ENDIF}
   zgl_global_var,
   zgl_opengl,
   zgl_log,
@@ -51,15 +54,15 @@ type
     Status      : LongWord;  
   end;}
 
-function  wnd_Create( Width, Height : WORD ) : Boolean;
+function  wnd_Create( const Width, Height : WORD ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
-procedure wnd_SetCaption( NewCaption : String ); extdecl;
-procedure wnd_SetSize( Width, Height : WORD ); extdecl;
-procedure wnd_SetPos( X, Y : WORD ); extdecl;
-procedure wnd_SetOnTop( OnTop : Boolean ); extdecl;
-procedure wnd_ShowCursor( Show : Boolean ); extdecl;
+procedure wnd_SetCaption( const NewCaption : PChar );
+procedure wnd_SetSize( const Width, Height : WORD );
+procedure wnd_SetPos( const X, Y : WORD );
+procedure wnd_SetOnTop( const OnTop : Boolean );
+procedure wnd_ShowCursor( const Show : Boolean );
 
 implementation
 uses
@@ -70,6 +73,12 @@ function wnd_Create;
   var
     sizehints  : TXSizeHints;
     //motifhints : TPropMotifWmHints;
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  var
+    size   : MAcOSAll.Rect;
+    status : OSStatus;
+    Events : array[ 0..9 ] of EventTypeSpec;
   {$ENDIF}
 begin
   Result     := FALSE;
@@ -207,7 +216,49 @@ begin
       exit;
     end;
 {$ENDIF}
-  wnd_SetCaption( wnd_Caption );
+{$IFDEF DARWIN}
+  size.Left   := wnd_X;
+  size.Top    := wnd_Y;
+  size.Right  := wnd_X + wnd_Width;
+  size.Bottom := wnd_Y + wnd_Height;
+  wnd_Attr    := kWindowCloseBoxAttribute or kWindowCollapseBoxAttribute or kWindowStandardHandlerAttribute;// or kWindowCompositingAttribute;
+  status      := CreateNewWindow( kDocumentWindowClass, wnd_Attr, size, wnd_Handle );
+
+  if ( status <> noErr ) or ( wnd_Handle = nil ) Then
+    begin
+      u_Error( 'Cannot create window' );
+      exit;
+    end;
+
+  // Window
+  Events[ 0 ].eventClass := kEventClassWindow;
+  Events[ 0 ].eventKind  := kEventWindowClosed;
+  Events[ 1 ].eventClass := kEventClassWindow;
+  Events[ 1 ].eventKind  := kEventWindowActivated;
+  Events[ 2 ].eventClass := kEventClassWindow;
+  Events[ 2 ].eventKind  := kEventWindowDeactivated;
+  // Keyboard
+  Events[ 3 ].eventClass := kEventClassKeyboard;
+  Events[ 3 ].eventKind  := kEventRawKeyDown;
+  Events[ 4 ].eventClass := kEventClassKeyboard;
+  Events[ 4 ].eventKind  := kEventRawKeyUp;
+  Events[ 5 ].eventClass := kEventClassKeyboard;
+  Events[ 5 ].eventKind  := kEventRawKeyRepeat;
+  // Mouse
+  Events[ 6 ].eventClass := kEventClassMouse;
+  Events[ 6 ].eventKind  := kEventMouseMoved;
+  Events[ 7 ].eventClass := kEventClassMouse;
+  Events[ 7 ].eventKind  := kEventMouseDown;
+  Events[ 8 ].eventClass := kEventClassMouse;
+  Events[ 8 ].eventKind  := kEventMouseUp;
+  Events[ 9 ].eventClass := kEventClassMouse;
+  Events[ 9 ].eventKind  := kEventMouseWheelMoved;
+  InstallEventHandler( GetWindowEventTarget( wnd_Handle ), NewEventHandlerUPP( @zgl_mess ), 10, @Events[ 0 ], nil, nil );
+
+  SelectWindow( wnd_Handle );
+  ShowWindow( wnd_Handle );
+{$ENDIF}
+  wnd_SetCaption( PChar( wnd_Caption ) );
 
   Result := TRUE;
 end;
@@ -236,6 +287,9 @@ begin
       u_Error( 'Cannot unregister window class' );
       wnd_INST := 0;
     end;
+{$ENDIF}
+{$IFDEF DARWIN}
+  ReleaseWindow( wnd_Handle );
 {$ENDIF}
 end;
 
@@ -283,13 +337,16 @@ begin
   
   wglMakeCurrent( wnd_DC, ogl_Context );
 {$ENDIF}
+{$IFDEF DARWIN}
+  aglSetCurrentContext( ogl_Context );
+{$ENDIF}
   app_Work := TRUE;
   wnd_SetSize( wnd_Width, wnd_Height );
 end;
 
 procedure wnd_SetCaption;
 begin
-  wnd_Caption := PChar( NewCaption );
+  wnd_Caption := NewCaption;
   {$IFDEF LINUX}
   XStringListToTextProperty( @wnd_Caption, 1, @wnd_Title );
   if wnd_Handle <> 0 Then
@@ -298,6 +355,11 @@ begin
   {$IFDEF WIN32}
   if wnd_Handle <> 0 Then
     SetWindowText( wnd_Handle, PChar( wnd_Caption ) );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  SetWTitle( wnd_Handle, wnd_Caption );
+  SelectWindow( wnd_Handle );
+  ShowWindow( wnd_Handle );
   {$ENDIF}
 end;
 
@@ -316,6 +378,9 @@ begin
 {$IFDEF WIN32}
   if not app_InitToHandle Then
     SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOZORDER or SWP_SHOWWINDOW );
+{$ENDIF}
+{$IFDEF DARWIN}
+  SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
 {$ENDIF}
   ogl_Width  := Width;
   ogl_Height := Height;
@@ -349,6 +414,13 @@ begin
           GetWindowRect( wnd_Handle, Rect );
           SetWindowPos( wnd_Handle, 0, 0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOZORDER or SWP_SHOWWINDOW );
         end;
+{$ENDIF}
+{$IFDEF DARWIN}
+  if Assigned( wnd_Handle ) Then
+    if not app_FullScreen Then
+      MoveWindow( wnd_Handle, wnd_X, wnd_Y, TRUE )
+    else
+      MoveWindow( wnd_Handle, 0, 0, TRUE );
 {$ENDIF}
 end;
 
@@ -397,6 +469,14 @@ begin
   else
     ShowCursor( TRUE );
   app_ShowCursor := Show;
+{$ENDIF}
+{$IFDEF DARWIN}
+begin
+  app_ShowCursor := Show;
+  if app_ShowCursor Then
+    ShowCursor
+  else
+    HideCursor;
 {$ENDIF}
 end;
 

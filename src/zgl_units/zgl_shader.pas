@@ -40,33 +40,33 @@ const
   SHADER_VERTEX       = $8B31;
   SHADER_FRAGMENT     = $8B30;
   
-function  shader_InitARB : Boolean; extdecl;
-function  shader_LoadFromFileARB( FileName : PChar; ShaderType : DWORD ) : DWORD; extdecl;
-procedure shader_BeginARB( Shader, ShaderType : DWORD ); extdecl;
-procedure shader_EndARB( ShaderType : DWORD ); extdecl;
-procedure shader_FreeARB( Shader : DWORD ); extdecl;
+function  shader_InitARB : Boolean;
+function  shader_LoadFromFileARB( const FileName : PChar; const ShaderType : DWORD ) : DWORD;
+procedure shader_BeginARB( const Shader, ShaderType : DWORD );
+procedure shader_EndARB( const ShaderType : DWORD );
+procedure shader_FreeARB( const Shader : DWORD );
   
-function  shader_InitGLSL : Boolean; extdecl;
-function  shader_LoadFromFile( FileName : PChar; ShaderType : DWORD; Link : Boolean ) : DWORD; extdecl;
-procedure shader_Attach( Attach : DWORD ); extdecl;
-procedure shader_BeginLink; extdecl;
-function  shader_EndLink : DWORD; extdecl;
-procedure shader_Begin( Shader : DWORD ); extdecl;
-procedure shader_End; extdecl;
-procedure shader_Free( Shader : DWORD ); extdecl;
-function  shader_GetUniform( Shader : DWORD; UniformName : PChar ) : Integer; extdecl;
-procedure shader_SetUniform1f( Uniform : Integer; v1 : Single ); extdecl;
-procedure shader_SetUniform1i( Uniform : Integer; v1 : Integer ); extdecl;
-procedure shader_SetUniform2f( Uniform : Integer; v1, v2 : Single ); extdecl;
-procedure shader_SetUniform3f( Uniform : Integer; v1, v2, v3 : Single ); extdecl;
-procedure shader_SetUniform4f( Uniform : Integer; v1, v2, v3, v4 : Single ); extdecl;
-function  shader_GetAttrib( Shader : DWORD; AttribName : PChar ) : Integer; extdecl;
-procedure shader_SetAttrib1f( Attrib : Integer; v1 : Single ); extdecl;
-procedure shader_SetAttrib2f( Attrib : Integer; v1, v2 : Single ); extdecl;
-procedure shader_SetAttrib3f( Attrib : Integer; v1, v2, v3 : Single ); extdecl;
-procedure shader_SetAttrib4f( Attrib : Integer; v1, v2, v3, v4 : Single ); extdecl;
-procedure shader_SetAttribPf( Attrib : Integer; v : Pointer; Normalized : Boolean ); extdecl;
-procedure shader_SetParameter4f( ShaderType : DWORD; Parameter : Integer; v1, v2, v3, v4 : Single; Local : Boolean ); extdecl;
+function  shader_InitGLSL : Boolean;
+function  shader_LoadFromFile( const FileName : PChar; const ShaderType : DWORD; const Link : Boolean ) : DWORD;
+procedure shader_Attach( const Attach : DWORD );
+procedure shader_BeginLink;
+function  shader_EndLink : DWORD;
+procedure shader_Begin( const Shader : DWORD );
+procedure shader_End;
+procedure shader_Free( const Shader : DWORD );
+function  shader_GetUniform( const Shader : DWORD; const UniformName : PChar ) : Integer;
+procedure shader_SetUniform1f( const Uniform : Integer; const v1 : Single );
+procedure shader_SetUniform1i( const Uniform : Integer; const v1 : Integer );
+procedure shader_SetUniform2f( const Uniform : Integer; const v1, v2 : Single );
+procedure shader_SetUniform3f( const Uniform : Integer; const v1, v2, v3 : Single );
+procedure shader_SetUniform4f( const Uniform : Integer; const v1, v2, v3, v4 : Single );
+function  shader_GetAttrib( const Shader : DWORD; const AttribName : PChar ) : Integer;
+procedure shader_SetAttrib1f( const Attrib : Integer; const v1 : Single );
+procedure shader_SetAttrib2f( const Attrib : Integer; const v1, v2 : Single );
+procedure shader_SetAttrib3f( const Attrib : Integer; const v1, v2, v3 : Single );
+procedure shader_SetAttrib4f( const Attrib : Integer; const v1, v2, v3, v4 : Single );
+procedure shader_SetAttribPf( const Attrib : Integer; const v : Pointer; const Normalized : Boolean );
+procedure shader_SetParameter4f( const ShaderType : DWORD; const Parameter : Integer; const v1, v2, v3, v4 : Single; const Local : Boolean );
 
 implementation
 

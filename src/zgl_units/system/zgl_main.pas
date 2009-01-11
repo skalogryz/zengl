@@ -30,12 +30,17 @@ uses
   {$IFDEF WIN32}
   Windows, Messages,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  AGL, MacOSAll,
+  {$ENDIF}
   zgl_const,
   zgl_types,
   zgl_global_var,
   
   zgl_keyboard,
   zgl_mouse,
+
+  zgl_gui_main,
   
   zgl_camera_2d,
   zgl_render_target,
@@ -53,22 +58,23 @@ uses
   
   Utils;
 
-procedure zgl_Init( FSAA, StencilBits : Byte ); extdecl;
+procedure zgl_Init( const FSAA, StencilBits : Byte );
 {$IFDEF WIN32}
-procedure zgl_InitToHandle( Handle : DWORD; FSAA, StencilBits : Byte ); extdecl;
+procedure zgl_InitToHandle( const Handle : DWORD; const FSAA, StencilBits : Byte );
 {$ENDIF}
 procedure zgl_Destroy;
-procedure zgl_Exit; extdecl;
-procedure zgl_Reg( What : WORD; UserData : Pointer ); extdecl;
-function  zgl_Get( What : DWORD ) : Ptr; extdecl;
-procedure zgl_GetMem( var Mem : Pointer; Size : DWORD ); extdecl;
-procedure zgl_Enable( What : DWORD ); extdecl;
-procedure zgl_Disable( What : DWORD ); extdecl;
+procedure zgl_Exit;
+procedure zgl_Reg( const What : WORD; const UserData : Pointer );
+function  zgl_Get( const What : DWORD ) : Ptr;
+procedure zgl_GetMem( var Mem : Pointer; const Size : DWORD );
+procedure zgl_Enable( const What : DWORD );
+procedure zgl_Disable( const What : DWORD );
 
 procedure zgl_draw;
 procedure zgl_loop;
 function  zgl_mess{$IFDEF LINUX} : DWORD{$ENDIF}
-                  {$IFDEF WIN32}( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall{$ENDIF};
+                  {$IFDEF WIN32}( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall{$ENDIF}
+                  {$IFDEF DARWIN}( inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr ): OSStatus; cdecl{$ENDIF};
 
 {$IFDEF LINUX}
 function sleep(__useconds:longword):longint;cdecl;external 'libc' name 'usleep';
@@ -91,6 +97,13 @@ begin
       log_Add( 'Cannot load GL library' );
       exit;
     end;
+  {$IFDEF DARWIN}
+  if not InitAGL Then
+    begin
+      log_Add( 'Cannot load AGL library' );
+      exit;
+    end;
+  {$ENDIF}
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
@@ -226,6 +239,25 @@ begin
         sndNewFormats[ sndNFCount ].Loader := UserData;
         INC( sndNFCount );
       end;
+    WIDGET_TYPE_ID:
+      begin
+        if Integer( UserData ) > widgetTCount Then
+          begin
+            SetLength( widgetTypes, widgetTCount + 1 );
+            widgetTypes[ widgetTCount ]._type := Integer( UserData );
+            widgetTLast := widgetTCount;
+            INC( widgetTCount );
+          end else
+            widgetTLast := Integer( UserData );
+      end;
+    WIDGET_ONDRAW:
+      begin
+        widgetTypes[ widgetTLast ].OnDraw := UserData;
+      end;
+    WIDGET_ONPROC:
+      begin
+        widgetTypes[ widgetTLast ].OnProc := UserData;
+      end;
   end;
 end;
 
@@ -244,6 +276,9 @@ begin
     {$IFDEF WIN32}
       Result := scr_Desktop.dmPelsWidth;
     {$ENDIF}
+    {$IFDEF DARWIN}
+      Result := 0;
+    {$ENDIF}
     DESKTOP_HEIGHT:
     {$IFDEF LINUX}
       Result := scr_Desktop.vdisplay;
@@ -251,12 +286,16 @@ begin
     {$IFDEF WIN32}
       Result := scr_Desktop.dmPelsHeight;
     {$ENDIF}
+    {$IFDEF DARWIN}
+      Result := 0;
+    {$ENDIF}
     RESOLUTION_LIST: Result := Ptr( @scr_ResList );
     MANAGER_TIMER: Result := Ptr( @managerTimer );
     MANAGER_TEXTURE: Result := Ptr( @managerTexture );
     MANAGER_FONT: Result := Ptr( @managerFont );
     MANAGER_RTARGET: Result := Ptr( @managerRTarget );
     MANAGER_SOUND: Result := Ptr( @managerSound );
+    MANAGER_GUI: Result := Ptr( @managerGUI );
   end;
 end;
 
@@ -338,6 +377,7 @@ begin
   scr_Clear;
 
   app_PDraw;
+  //gui_Draw;
 
   scr_flush;
 
@@ -361,10 +401,15 @@ procedure zgl_loop;
     {$IFDEF WIN32}
     Mess : tagMsg;
     {$ENDIF}
+    {$IFDEF DARWIN}
+    Event    : EventRecord;
+    Window   : WindowRef;
+    PartCode : WindowPartCode;
+    {$ENDIF}
     procedure OSProcess;
     begin
       {$IFDEF LINUX}
-      zgl_mess();
+      zgl_mess;
       {$ENDIF}
       {$IFDEF WIN32}
       while PeekMessage( Mess, wnd_Handle, 0, 0, PM_REMOVE ) do
@@ -373,8 +418,24 @@ procedure zgl_loop;
           DispatchMessage( Mess );
         end;
       {$ENDIF}
+      {$IFDEF DARWIN}
+      while GetNextEvent( everyEvent, Event ) do
+        if Event.what = MacOSAll.mouseDown Then
+          begin
+            PartCode := FindWindow( Event.where, Window );            if Assigned( Window ) Then
+              begin                SelectWindow( Window );
+                if Partcode = inDrag Then
+                  begin
+                    wnd_X := Event.where.h;
+                    wnd_Y := Event.where.v;
+                    DragWindow( wnd_Handle, Event.where, nil );
+                  end;
+              end;
+          end;
+      {$ENDIF}
     end;
 begin
+  //gui_Init;
   app_PLoad;
   {$IFDEF LINUX}
   glFlush;
@@ -385,6 +446,9 @@ begin
   glFlush;
   glFinish;
   SwapBuffers( wnd_DC );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  aglSwapBuffers( ogl_Context );
   {$ENDIF}
   t := timer_GetTicks;
   timer_Reset;
@@ -406,6 +470,8 @@ begin
                     if j > currTimer^.LastTick + currTimer^.Interval Then
                       begin
                         currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
+                        //if z > 0 Then
+                        //  gui_Proc;
                         currTimer^.OnTimer;
                         j := timer_GetTicks;
                       end;
@@ -422,7 +488,9 @@ begin
                   currTimer^.LastTick := timer_GetTicks;
                   currTimer := currTimer^.Next;
                 end;
+            {$IFNDEF DARWIN}
             Sleep( 10 );
+            {$ENDIF}
           end;
 
       CanKillTimers := TRUE;
@@ -451,10 +519,26 @@ function zgl_mess;
     Keysym : TKeySym;
     Status : TStatus;
   {$ENDIF}
-    Key : WORD;
+  {$IFDEF DARWIN}
+    eClass  : UInt32;
+    eKind   : UInt32;
+    mPos    : Point;
+    mButton : EventMouseButton;
+    mWheel  : Integer;
+  {$ENDIF}
+    Key : DWORD;
     c   : array[ 0..1 ] of Char;
     i   : Integer;
     len : Integer;
+  {$IFDEF LINUX_OR_DARWIN}
+    function SCA( KeyCode : DWORD ) : DWORD;
+    begin
+      Result := KeyCode;
+      if ( KeyCode = K_SHIFT_L ) or ( KeyCode = K_SHIFT_R ) Then Result := K_SHIFT;
+      if ( KeyCode = K_CTRL_L ) or ( KeyCode = K_CTRL_R ) Then Result := K_CTRL;
+      if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;
+    end;
+  {$ENDIF}
 begin
 {$IFDEF LINUX}
   while XPending( scr_Display ) <> 0 do
@@ -543,7 +627,7 @@ begin
                   mouseUp  [ M_BMIDLE ] := TRUE;
                   mouseCanClick[ M_BMIDLE ] := TRUE;
                 end;
-              3: // Rigth
+              3: // Right
                 begin
                   mouseDown[ M_BRIGHT ] := FALSE;
                   mouseUp  [ M_BRIGHT ] := TRUE;
@@ -567,9 +651,7 @@ begin
             keysUp  [ Key ] := FALSE;
             keysLast[ KA_DOWN ] := Key;
 
-            if ( Key = K_SHIFT_L ) or ( Key = K_SHIFT_R ) Then Key := K_SHIFT;
-            if ( Key = K_CTRL_L ) or ( Key = K_CTRL_R ) Then Key := K_CTRL;
-            if ( Key = K_ALT_L ) or ( Key = K_ALT_R ) Then Key := K_ALT;
+            Key := SCA( Key );
             keysDown[ Key ] := TRUE;
             keysUp  [ Key ] := FALSE;
 
@@ -592,9 +674,7 @@ begin
             keysUp  [ Key ] := TRUE;
             keysLast[ KA_UP ] := Key;
 
-            if ( Key = K_SHIFT_L ) or ( Key = K_SHIFT_R ) Then Key := K_SHIFT;
-            if ( Key = K_CTRL_L ) or ( Key = K_CTRL_R ) Then Key := K_CTRL;
-            if ( Key = K_ALT_L ) or ( Key = K_ALT_R ) Then Key := K_ALT;
+            Key := SCA( Key );
             keysDown[ Key ] := FALSE;
             keysUp  [ Key ] := TRUE;
           end;
@@ -716,6 +796,165 @@ begin
       end;
   else
     Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+  end;
+{$ENDIF}
+{$IFDEF DARWIN}
+  eClass := GetEventClass( inEvent );
+  eKind  := GetEventKind( inEvent );
+
+  Result := CallNextEventHandler( inHandlerCallRef, inEvent );
+
+  case eClass of
+    kEventClassWindow:
+      case eKind of
+        kEventWindowActivated:
+          begin
+            app_Focus := TRUE;
+            if app_Pause Then timer_Reset;
+            app_Pause := FALSE;
+            FillChar( keysDown[ 0 ], 256, 0 );
+            FillChar( keysUp[ 0 ], 256, 0 );
+            FillChar( mouseDown[ 0 ], 3, 0 );
+            FillChar( mouseCanClick[ 0 ], 3, 1 );
+            FillChar( mouseClick[ 0 ], 3, 0 );
+            FillChar( mouseWheel[ 0 ], 2, 0 );
+          end;
+        kEventWindowDeactivated:
+          begin
+            if app_FullScreen Then exit;
+            app_Focus := FALSE;
+            if app_AutoPause Then app_Pause := TRUE;
+          end;
+        kEventWindowClosed:
+          begin
+            wnd_Handle := nil;
+            app_Work   := FALSE;
+          end;
+      end;
+
+    kEventClassKeyboard:
+      begin
+        GetEventParameter( inEvent, kEventParamKeyMacCharCodes, typeChar, nil, 1, nil, @c[ 0 ] );
+        GetEventParameter( inEvent, kEventParamKeyCode, typeUInt32, nil, 4, nil, @Key );
+
+        case eKind of
+          kEventRawKeyDown, kEventRawKeyRepeat:
+            begin
+              Key := mackeys_to_winkeys( Key );
+              keysDown[ Key ] := TRUE;
+              keysUp  [ Key ] := FALSE;
+              keysLast[ KA_DOWN ] := Key;
+
+              Key := SCA( Key );
+              keysDown[ Key ] := TRUE;
+              keysUp  [ Key ] := FALSE;
+
+              case Byte( c[ 0 ] ) of
+                K_BACKSPACE: Delete( keysText, Length( keysText ), 1 );
+                K_TAB: key_InputText( '  ' );
+              else
+                key_InputText( c[ 0 ] );
+              end;
+            end;
+          kEventRawKeyUp:
+            begin
+              Key := mackeys_to_winkeys( Key );
+              keysDown[ Key ] := FALSE;
+              keysUp  [ Key ] := TRUE;
+              keysLast[ KA_UP ] := Key;
+
+              Key := SCA( Key );
+              keysDown[ Key ] := TRUE;
+              keysUp  [ Key ] := FALSE;
+            end;
+        end;
+      end;
+
+    kEventClassMouse:
+      case eKind of
+        kEventMouseMoved:
+          begin
+            GetEventParameter( inEvent, kEventParamWindowMouseLocation, typeQDPoint, 0, SizeOf( Point ), nil, @mPos);
+
+            if not mouseLock Then
+              begin
+                mouseX := mPos.h;
+                mouseY := mPos.v;
+              end else
+                begin
+                  mouseX := mPos.h - wnd_Width  div 2;
+                  mouseY := mPos.v - wnd_Height div 2;
+                end;
+          end;
+        kEventMouseDown:
+          begin
+            GetEventParameter( inEvent, kEventParamMouseButton, typeMouseButton, nil, SizeOf( EventMouseButton ), nil, @mButton );
+
+            case mButton of
+              kEventMouseButtonPrimary: // Left
+                begin
+                  mouseDown[ M_BLEFT ]  := TRUE;
+                  if mouseCanClick[ M_BLEFT ] Then
+                    begin
+                      mouseClick[ M_BLEFT ] := TRUE;
+                      mouseCanClick[ M_BLEFT ] := FALSE;
+                    end;
+                end;
+              kEventMouseButtonTertiary: // Midle
+                begin
+                  mouseDown[ M_BMIDLE ] := TRUE;
+                  if mouseCanClick[ M_BMIDLE ] Then
+                    begin
+                      mouseClick[ M_BMIDLE ] := TRUE;
+                      mouseCanClick[ M_BMIDLE ] := FALSE;
+                    end;
+                end;
+              kEventMouseButtonSecondary: // Right
+                begin
+                  mouseDown[ M_BRIGHT ] := TRUE;
+                  if mouseCanClick[ M_BRIGHT ] Then
+                    begin
+                      mouseClick[ M_BRIGHT ] := TRUE;
+                      mouseCanClick[ M_BRIGHT ] := FALSE;
+                    end;
+                end;
+            end;
+          end;
+        kEventMouseUp:
+          begin
+            GetEventParameter( inEvent, kEventParamMouseButton, typeMouseButton, nil, SizeOf( EventMouseButton ), nil, @mButton );
+
+            case mButton of
+              kEventMouseButtonPrimary: // Left
+                begin
+                  mouseDown[ M_BLEFT ]  := FALSE;
+                  mouseUp  [ M_BLEFT ]  := TRUE;
+                  mouseCanClick[ M_BLEFT ] := TRUE;
+                end;
+              kEventMouseButtonTertiary: // Midle
+                begin
+                  mouseDown[ M_BMIDLE ] := FALSE;
+                  mouseUp  [ M_BMIDLE ] := TRUE;
+                  mouseCanClick[ M_BMIDLE ] := TRUE;
+                end;
+              kEventMouseButtonSecondary: // Right
+                begin
+                  mouseDown[ M_BRIGHT ] := FALSE;
+                  mouseUp  [ M_BRIGHT ] := TRUE;
+                  mouseCanClick[ M_BRIGHT ] := TRUE;
+                end;
+            end;
+          end;
+        kEventMouseWheelMoved:
+          begin
+            GetEventParameter( inEvent, kEventParamMouseWheelDelta, typeSInt32, nil, 4, nil, @mWheel );
+
+            if mWheel > 0 then
+              mouseWheel[ M_WUP ] := TRUE
+            else
+              mouseWheel[ M_WDOWN ] := TRUE;
+          end;
+      end;
   end;
 {$ENDIF}
 end;

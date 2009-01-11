@@ -34,25 +34,25 @@ uses
   zgl_math,
   zgl_utils_3d;
   
-procedure octree_Build( Octree : zglPOctree; MaxFacesPerNode, Flags : DWORD ); extdecl;
-procedure octree_Free( Octree : zglPOctree ); extdecl;
-procedure octree_SortFacesByTexture( Octree : zglPOctree; var Faces : array of DWORD; left, right : DWORD ); extdecl;
+procedure octree_Build( var Octree : zglTOctree; const MaxFacesPerNode, Flags : DWORD );
+procedure octree_Free( var Octree : zglTOctree );
+procedure octree_SortFacesByTexture( var Octree : zglTOctree; var Faces : array of DWORD; const left, right : DWORD );
 
-procedure octree_AddNode( Octree : zglPOctree; Node : zglPNode; FCount : DWORD; var Faces : array of DWORD ); extdecl;
-procedure octree_AddNodeInside( Octree : zglPOctree; Node : zglPNode;
-                                pFCount : DWORD; var pFaces : array of DWORD;
-                                bFCount : DWORD; var bFaces : array of Boolean;
-                                ID : Byte); extdecl;
-procedure octree_DelNode( node : zglPNode ); extdecl;
-procedure octree_MoveVerticesToNode( Octree : zglPOctree; Node : zglPNode; FCount : DWORD; var Faces : array of DWORD ); extdecl;
-function octree_NodeCenter( Node : zglPNode; ID : Byte ): zglTPoint3D; extdecl;
-function octree_FaceInNode( min, max, v1, v2, v3 : zglTPoint3D ) : Boolean; extdecl;
+procedure octree_AddNode( var Octree : zglTOctree; var Node : zglTNode; const FCount : DWORD; var Faces : array of DWORD );
+procedure octree_AddNodeInside( var Octree : zglTOctree; var Node : zglTNode;
+                                const pFCount : DWORD; var pFaces : array of DWORD;
+                                const bFCount : DWORD; var bFaces : array of Boolean;
+                                const ID : Byte);
+procedure octree_DelNode( var Node : zglPNode );
+procedure octree_MoveVerticesToNode( var Octree : zglTOctree; var Node : zglTNode; const FCount : DWORD; var Faces : array of DWORD );
+function octree_NodeCenter( const Node : zglTNode; const ID : Byte ): zglTPoint3D;
+function octree_FaceInNode( const min, max, v1, v2, v3 : zglTPoint3D ) : Boolean;
 
-procedure octree_Draw( Octree : zglPOctree; Frustum : zglPFrustum ); extdecl;
-procedure octree_DrawDebug( Octree : zglPOctree; Frustum : zglPFrustum ); extdecl;
-procedure octree_DrawNode( Octree : zglPOctree; Node : zglPNode; Frustum : zglPFrustum ); extdecl;
-procedure octree_DrawDFaces( Octree : zglPOctree; Node : zglPNode; Frustum : zglPFrustum ); extdecl;
-function octree_FaceAlreadyDraw( Octree : zglPOctree; face_index : DWORD ) : Boolean; extdecl;
+procedure octree_Draw( var Octree : zglTOctree; const Frustum : zglTFrustum );
+procedure octree_DrawDebug( var Octree : zglTOctree; Frustum : zglTFrustum );
+procedure octree_DrawNode( var Octree : zglTOctree; const Node : zglTNode; Frustum : zglTFrustum );
+procedure octree_DrawDFaces( var Octree : zglTOctree; const Node : zglTNode; Frustum : zglTFrustum );
+function octree_FaceAlreadyDraw( var Octree : zglTOctree; const face_index : DWORD ) : Boolean;
 
 implementation
 
@@ -64,7 +64,7 @@ var
   tTexLevel        : DWORD;
   tLastVCount      : DWORD;
 
-function GetRenderDataSize( Octree : zglPOctree; FCount : DWORD; var Faces : array of DWORD ) : DWORD;
+function GetRenderDataSize( var Octree : zglTOctree; const FCount : DWORD; var Faces : array of DWORD ) : DWORD;
   var
     i : DWORD;
 begin
@@ -76,7 +76,7 @@ begin
     if Octree.Textures[ Faces[ i ] ] <> Octree.Textures[ Faces[ i + 1 ] ] Then INC( Result );
 end;
 
-procedure octree_AddIndices( Octree : zglPOctree; Indices : Pointer; Count : DWORD; Size : Byte );
+procedure octree_AddIndices( var Octree : zglTOctree; const Indices : Pointer; const Count : DWORD; const Size : Byte );
 begin
   if not Assigned( Octree.Indices ) Then
     Octree.Indices := AllocMem( Count * Size )
@@ -87,9 +87,9 @@ begin
   INC( Octree.ICount, Count );
 end;
 
-procedure BuildRenderData( Octree : zglPOctree;
-                           RDSize : DWORD; var RenderData : array of zglTRenderData;
-                           FCount : DWORD; var Faces      : array of DWORD );
+procedure BuildRenderData( var Octree : zglTOctree;
+                           const RDSize : DWORD; var RenderData : array of zglTRenderData;
+                           const FCount : DWORD; var Faces      : array of DWORD );
   var
     i, j, t, z : DWORD;
     rdata_id   : DWORD;
@@ -232,15 +232,13 @@ procedure octree_Build;
 begin
   tLastVCount := Octree.VCount;
   tMaxFacesPerNode := MaxFacesPerNode;
-  
-  if Flags and USE_MULTITEX3 > 0 Then
-    begin
-      Flags := Flags or USE_MULTITEX2;
-      Flags := Flags or USE_MULTITEX1;
-    end else
-      if Flags and USE_MULTITEX2 > 0 Then
-        Flags := Flags or USE_MULTITEX1;
+
   Octree.Flags := Flags;
+  if Flags and USE_MULTITEX3 > 0 Then
+    Octree.Flags := Flags or USE_MULTITEX2 or USE_MULTITEX1
+  else
+    if Flags and USE_MULTITEX2 > 0 Then
+      Octree.Flags := Flags or USE_MULTITEX1;
   
   tTexLevel := Byte( Octree.Flags and USE_MULTITEX1 > 0 ) +
                Byte( Octree.Flags and USE_MULTITEX2 > 0 ) +
@@ -306,7 +304,7 @@ begin
 
   if Octree.Flags and USE_VBO > 0 Then tbuildVBO := TRUE;
     
-  octree_AddNode( Octree, Octree.MainNode, Octree.FCount, Faces );
+  octree_AddNode( Octree, Octree.MainNode^, Octree.FCount, Faces );
   SetLength( Faces, 0 );
 
   if Octree.Flags and USE_VBO > 0 Then
@@ -478,7 +476,7 @@ begin
   Node.SubNodes[ ID ].Cube.Size.Y   := Node.Cube.Size.Y / 2;
   Node.SubNodes[ ID ].Cube.Size.Z   := Node.Cube.Size.Z / 2;
 
-  octree_AddNode( Octree, Node.SubNodes[ ID ], bFCount, Faces );
+  octree_AddNode( Octree, Node.SubNodes[ ID ]^, bFCount, Faces );
   SetLength( Faces, 0 );
 end;
 
@@ -683,12 +681,12 @@ begin
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 
-  octree_DrawNode( Octree, Octree.MainNode, Frustum );
+  octree_DrawNode( Octree, Octree.MainNode^, Frustum );
 
   if Octree.Flags and USE_VBO > 0 Then
     glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 
-  octree_DrawDFaces( Octree, Octree.MainNode, Frustum );
+  octree_DrawDFaces( Octree, Octree.MainNode^, Frustum );
   
   if Octree.Flags and USE_VBO > 0 Then
     glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
@@ -768,7 +766,7 @@ begin
   if Node.NInside Then
     for i := 0 to 7 do
       if Assigned( Node.SubNodes[ i ] ) Then
-        octree_DrawNode( Octree, Node.SubNodes[ i ], Frustum );
+        octree_DrawNode( Octree, Node.SubNodes[ i ]^, Frustum );
 
   INC( Octree.r_NodeACount );
 
@@ -802,7 +800,7 @@ begin
   if Node.NInside Then
     for i := 0 to 7 do
       if Assigned( Node.SubNodes[ i ] ) Then
-        octree_DrawDFaces( Octree, Node.SubNodes[ i ], Frustum );
+        octree_DrawDFaces( Octree, Node.SubNodes[ i ]^, Frustum );
 
   if Node.DFCount > 0 Then
     begin

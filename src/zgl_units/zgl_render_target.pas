@@ -42,9 +42,9 @@ const
   RT_TYPE_PBUFFER = 2;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
-function  rtarget_Add( rtType : Byte; Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget; extdecl;
-procedure rtarget_Del( Target : zglPRenderTarget ); extdecl;
-procedure rtarget_Set( Target : zglPRenderTarget ); extdecl;
+function  rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+procedure rtarget_Del( const Target : zglPRenderTarget );
+procedure rtarget_Set( const Target : zglPRenderTarget );
 
 implementation
 

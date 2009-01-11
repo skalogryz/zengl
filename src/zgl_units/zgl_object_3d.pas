@@ -50,26 +50,26 @@ const
   SIDE_BACK           = $02;
   SIDE_FRONT_AND_BACK = $03;
   
-procedure obj3d_Begin( Flags : DWORD ); extdecl;
-procedure obj3d_End; extdecl;
+procedure obj3d_Begin( const Flags : DWORD );
+procedure obj3d_End;
 
-procedure obj3d_Enable( Flags : DWORD ); extdecl;
-procedure obj3d_Disable( Flags : DWORD ); extdecl;
+procedure obj3d_Enable( const Flags : DWORD );
+procedure obj3d_Disable( const Flags : DWORD );
 
-procedure obj3d_SetColor( Color : DWORD; Alpha : Byte ); extdecl;
-procedure obj3d_BindTexture( Texture : zglPTexture; Level : Byte ); extdecl;
+procedure obj3d_SetColor( const Color : DWORD; const Alpha : Byte );
+procedure obj3d_BindTexture( const Texture : zglPTexture; const Level : Byte );
 
-procedure obj3d_SetMaterial( Material, Side : Byte; Color : DWORD; Alpha : Byte ); extdecl;
+procedure obj3d_SetMaterial( const Material, Side : Byte; const Color : DWORD; const Alpha : Byte );
 
 const
   AX = $01;
   AY = $02;
   AZ = $04;
-procedure obj3d_Rotate( Angle : Single; Axis : Byte ); extdecl;
-procedure obj3d_Scale( ScaleX, ScaleY, ScaleZ : Single ); extdecl;
-procedure obj3d_Move( X, Y, Z : Single ); extdecl;
-procedure obj3d_SetMatrix( Matrix : zglTMatrix4f ); extdecl;
-procedure obj3d_MulMatrix( Matrix : zglTMatrix4f ); extdecl;
+procedure obj3d_Rotate( const Angle : Single; const Axis : Byte );
+procedure obj3d_Scale( const ScaleX, ScaleY, ScaleZ : Single );
+procedure obj3d_Move( const X, Y, Z : Single );
+procedure obj3d_SetMatrix( const Matrix : zglTMatrix4f );
+procedure obj3d_MulMatrix( const Matrix : zglTMatrix4f );
 
 var
   tLastFlags : DWORD;

@@ -27,8 +27,8 @@ uses
   GL,
   zgl_global_var;
   
-procedure zbuffer_SetDepth( zNear, zFar : Single ); extdecl;
-procedure zbuffer_Clear; extdecl;
+procedure zbuffer_SetDepth( const zNear, zFar : Single );
+procedure zbuffer_Clear;
 
 implementation
 

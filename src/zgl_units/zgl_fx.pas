@@ -34,7 +34,7 @@ const
   FX_BLEND_WHITE  = $04;
   FX_BLEND_MASK   = $05;
   
-procedure fx_SetBlendMode( Mode : Byte ); extdecl;
+procedure fx_SetBlendMode( const Mode : Byte );
 
 implementation
 

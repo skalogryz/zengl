@@ -30,10 +30,10 @@ uses
   zgl_types,
   zgl_global_var;
   
-procedure cam2d_Set( Camera : zglPCamera2D ); extdecl;
+procedure cam2d_Set( const Camera : zglPCamera2D );
 
-procedure cam2d_Vertex2f( X, Y : Single ); extdecl;
-procedure cam2d_Vertex2fv( v : Pointer ); extdecl;
+procedure cam2d_Vertex2f( X, Y : Single );
+procedure cam2d_Vertex2fv( v : Pointer );
 
 var
   cam2dGlobal   : zglPCamera2D = nil;

@@ -27,10 +27,10 @@ uses
   zgl_types,
   zgl_math;
 
-procedure shadow_InitVolume( var Volume : zglPShadowVolume; Vertices : zglPPoint3DArray; FCount : DWORD; Faces : zglPFaceArray ); extdecl;
-procedure shadow_CalcVolume( Volume : zglPShadowVolume; Matrix : zglPMatrix4f; Vertices : zglPPoint3DArray; Light : zglTPoint3D; RebuildPlanes : Boolean; Extrude : Single ); extdecl;
-procedure shadow_DrawVolume( Volume : zglPShadowVolume; zFail : Boolean ); extdecl;
-procedure shadow_DrawShadowVolumes( DrawVolumes : Pointer ); extdecl;
+procedure shadow_InitVolume( var Volume : zglPShadowVolume; const Vertices : zglPPoint3DArray; const FCount : DWORD; const Faces : zglPFaceArray );
+procedure shadow_CalcVolume( const Volume : zglPShadowVolume; const Matrix : zglPMatrix4f; const Vertices : zglPPoint3DArray; const Light : zglTPoint3D; const RebuildPlanes : Boolean; const Extrude : Single );
+procedure shadow_DrawVolume( const Volume : zglPShadowVolume; const zFail : Boolean );
+procedure shadow_DrawShadowVolumes( const DrawVolumes : Pointer );
 
 implementation
 

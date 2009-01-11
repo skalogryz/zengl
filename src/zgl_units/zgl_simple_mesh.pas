@@ -37,11 +37,11 @@ uses
   zgl_math,
   zgl_utils_3d;
 
-function  smesh_LoadFromFile( var Mesh : zglPSMesh; FileName : PChar; Flags : DWORD ) : Boolean; extdecl;
-procedure smesh_Animate( Mesh : zglPSMesh; State : zglPSimpleState ); extdecl;
-procedure smesh_Draw( Mesh : zglPSMesh; State : zglPSimpleState ); extdecl;
-procedure smesh_DrawGroup( Mesh : zglPSMesh; State : zglPSimpleState; Group : DWORD ); extdecl;
-procedure smesh_Free( var Mesh : zglPSMesh ); extdecl;
+function  smesh_LoadFromFile( var Mesh : zglPSMesh; const FileName : PChar; const Flags : DWORD ) : Boolean;
+procedure smesh_Animate( const Mesh : zglPSMesh; var State : zglTSimpleState );
+procedure smesh_Draw( Mesh : zglPSMesh; const State : zglPSimpleState );
+procedure smesh_DrawGroup( const Mesh : zglPSMesh; const State : zglPSimpleState; const Group : DWORD );
+procedure smesh_Free( var Mesh : zglPSMesh );
 
 implementation
 
@@ -249,7 +249,7 @@ begin
   if ( length( State.Normals ) < Mesh.VCount ) and ( Mesh.Flags and USE_NORMALS > 0 ) Then
     SetLength( State.Normals, Mesh.VCount );
 
-  with State^ do
+  with State do
     begin
       CalcFrame( Delta, prevDelta, d, Time, Frame, prevFrame, nextFrame, Mesh.Actions[ Action ].FFrame, Mesh.Actions[ Action ].FCount );
 

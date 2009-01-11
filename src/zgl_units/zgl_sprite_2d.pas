@@ -34,9 +34,9 @@ uses
   zgl_fx_2d,
   zgl_math;
 
-procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte; FX : DWORD ); extdecl;
-procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; Alpha : Byte; FX : DWORD ); extdecl;
-procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; CutRect : zglTRect; Alpha : Byte; FX : DWORD ); extdecl;
+procedure ssprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte; const FX : DWORD );
+procedure asprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte; const FX : DWORD );
+procedure csprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte; const FX : DWORD );
 
 implementation
 

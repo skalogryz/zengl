@@ -30,13 +30,19 @@ uses
   {$IFDEF WIN32}
   Windows
   {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll
+  {$ENDIF}
   ;
-  
+
 {$IFDEF LINUX}
 type zglTFile = PFILE;
 {$ENDIF}
 {$IFDEF WIN32}
 type zglTFile = HANDLE;
+{$ENDIF}
+{$IFDEF DARWIN}
+type zglTFile = File;
 {$ENDIF}
 
 const
@@ -50,16 +56,16 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; FileName : PChar; Mode : Byte ); extdecl;
-function  file_Exists( FileName : PChar ) : Boolean; extdecl;
-function  file_Seek( FileHandle : zglTFile; Offset : DWORD; Mode : Byte ) : DWORD; extdecl;
-function  file_GetPos( FileHandle : zglTFile ) : DWORD; extdecl;
-function  file_Read( FileHandle : zglTFile; var buffer; count : DWORD ) : DWORD; extdecl;
-function  file_Write( FileHandle : zglTFile; const buffer; count : DWORD ) : DWORD; extdecl;
-procedure file_Trunc( FileHandle : zglTFile; count : DWORD ); extdecl;
-function  file_GetSize( FileHandle : zglTFile ) : DWORD; extdecl;
-procedure file_Flush( FileHandle : zglTFile ); extdecl;
-procedure file_Close( FileHandle : zglTFile ); extdecl;
+procedure file_Open( var FileHandle : zglTFile; const FileName : PChar; const Mode : Byte );
+function  file_Exists( const FileName : PChar ) : Boolean;
+function  file_Seek( var FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
+function  file_GetPos( var FileHandle : zglTFile ) : DWORD;
+function  file_Read( var FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
+function  file_Write( var FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
+procedure file_Trunc( var FileHandle : zglTFile; const count : DWORD );
+function  file_GetSize( var FileHandle : zglTFile ) : DWORD;
+procedure file_Flush( var FileHandle : zglTFile );
+procedure file_Close( var FileHandle : zglTFile );
 
 implementation
 
@@ -79,12 +85,37 @@ begin
     FOM_OPENRW: FileHandle := CreateFile( FileName, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  Assign( FileHandle, FileName );
+  case Mode of
+    FOM_CREATE:
+      begin
+        FileMode := 2;
+        Rewrite( FileHandle, 1 );
+      end;
+    FOM_OPENR:
+      begin
+        FileMode := 0;
+        Reset( FileHandle, 1 );
+      end;
+    FOM_OPENRW:
+      begin
+        FileMode := 2;
+        Reset( FileHandle, 1 );
+      end;
+  end;
+  {$ENDIF}
 end;
 
 function file_Exists;
   {$IFDEF WIN32}
   var
     FileHandle : DWORD;
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  var
+    f : File;
+    i : Byte;
   {$ENDIF}
 begin
   {$IFDEF LINUX}
@@ -95,6 +126,17 @@ begin
   Result := FileHandle <> INVALID_HANDLE_VALUE;
   if Result Then
     file_Close( FileHandle );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  i := FileMode;
+  FileMode := 0;
+  Assign( f, FileName );
+  {$I-}
+  Reset( f, 1 );
+  FileMode := i;
+  Result := IOResult = 0;
+  Close( f );
+  {$I+}
   {$ENDIF}
 end;
 
@@ -114,6 +156,14 @@ begin
     FSM_END: Result := SetFilePointer( FileHandle, Offset, nil, FILE_END );
   end;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  case Mode of
+    FSM_SET: Seek( FileHandle, Offset );
+    FSM_CUR: Seek( FileHandle, FilePos( FileHandle ) + Offset );
+    FSM_END: Seek( FileHandle, FileSize( FileHandle ) );
+  end;
+  Result := FilePos( FileHandle );
+  {$ENDIF}
 end;
 
 function file_GetPos;
@@ -123,6 +173,9 @@ begin
   {$ENDIF}
   {$IFDEF WIN32}
   Result := SetFilePointer( FileHandle, 0, nil, FILE_CURRENT );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  Result := FilePos( FileHandle );
   {$ENDIF}
 end;
 
@@ -139,6 +192,9 @@ begin
   {$IFDEF WIN32}
   ReadFile( FileHandle, buffer, count, Result, nil );
   {$ENDIF}
+  {$IFDEF DARWIN}
+  BlockRead( FileHandle, buffer, count, Result );
+  {$ENDIF}
 end;
 
 function file_Write;
@@ -154,6 +210,9 @@ begin
   {$IFDEF WIN32}
   WriteFile( FileHandle, buffer, count, Result, nil );
   {$ENDIF}
+  {$IFDEF DARWIN}
+  BlockWrite( FileHandle, buffer, count, Result );
+  {$ENDIF}
 end;
 
 procedure file_Trunc;
@@ -164,8 +223,10 @@ begin
 end;
 
 function file_GetSize;
+  {$IFDEF LINUX}
   var
     tmp : DWORD;
+  {$ENDIF}
 begin
   {$IFDEF LINUX}
   // Весьма безумная реализация 8)
@@ -177,6 +238,9 @@ begin
   {$IFDEF WIN32}
   Result := GetFileSize( FileHandle, nil );
   {$ENDIF}
+  {$IFDEF DARWIN}
+  Result := FileSize( FileHandle );
+  {$ENDIF}
 end;
 
 procedure file_Flush;
@@ -187,6 +251,8 @@ begin
   {$IFDEF WIN32}
   FlushFileBuffers( FileHandle );
   {$ENDIF}
+  {$IFDEF DARWIN}
+  {$ENDIF}
 end;
 
 procedure file_Close;
@@ -196,6 +262,9 @@ begin
   {$ENDIF}
   {$IFDEF WIN32}
   CloseHandle( FileHandle );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  Close( FileHandle );
   {$ENDIF}
 end;
 

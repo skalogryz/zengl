@@ -33,12 +33,12 @@ const
   PR2D_FILL   = $000001;
   PR2D_SMOOTH = $000002;
   
-procedure pr2d_Pixel( X, Y : Single; Color : DWORD; Alpha : Byte ); extdecl;
-procedure pr2d_Line( X1, Y1, X2, Y2 : Single; Color : DWORD; Alpha : Byte; FX : DWORD ); extdecl;
-procedure pr2d_Triangle; extdecl;
-procedure pr2d_Rect( X, Y, W, H : Single; Color : DWORD; Alpha : Byte; FX : DWORD ); extdecl;
-procedure pr2d_Circle( X, Y, Radius : Single; Color : DWORD; Alpha : Byte; Quality : WORD; FX : DWORD ); extdecl;
-procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; Color : DWORD; Alpha : Byte; Quality : WORD; FX : DWORD ); extdecl;
+procedure pr2d_Pixel( const X, Y : Single; const Color : DWORD; const Alpha : Byte );
+procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const Alpha : Byte; const FX : DWORD );
+procedure pr2d_Triangle;
+procedure pr2d_Rect( const X, Y, W, H : Single; const Color : DWORD; const Alpha : Byte; const FX : DWORD );
+procedure pr2d_Circle( const X, Y, Radius : Single; const Color : DWORD; const Alpha : Byte; const Quality : WORD; const FX : DWORD );
+procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : DWORD; const Alpha : Byte; const Quality : WORD; const FX : DWORD );
 
 implementation
 
@@ -142,8 +142,10 @@ begin
     end;
   glEnable( GL_BLEND );
 
-  if Quality > 360 Then Quality := 360;
-  k := 360 / Quality;
+  if Quality > 360 Then
+    k := 1
+  else
+    k := 1 / Quality;
   
   if FX and PR2D_FILL = 0 Then
     begin
@@ -187,8 +189,10 @@ begin
     end;
   glEnable( GL_BLEND );
 
-  if Quality > 360 Then Quality := 360;
-  k := 360 / Quality;
+  if Quality > 360 Then
+    k := 1
+  else
+    k := 1 / Quality;
   
   if FX and PR2D_FILL = 0 Then
     begin

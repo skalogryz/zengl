@@ -31,8 +31,13 @@ uses
   Windows,
   DirectSound,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  AGL, MacOSAll,
+  openal,
+  {$ENDIF}
   zgl_const,
-  zgl_types;
+  zgl_types,
+  zgl_gui_types;
   
 procedure zero;
 
@@ -43,15 +48,23 @@ var
   managerFont    : zglTFontManager;
   managerRTarget : zglTRenderTargetManager;
   managerSound   : zglTSoundManager;
+  managerGUI     : zglTGUIManager;
 
   // timers
   CanKillTimers : Boolean;
   TimersToKill  : WORD = 0;
   aTimersToKill : array[ 0..cv_MaxCount ] of zglPTimer;
 
+  // Formats, etc.
   texNFCount    : Byte = 0;
   texNewFormats : array of zglTTextureFormat;
-  
+
+  sndNFCount    : Byte = 0;
+  sndNewFormats : array of zglTSoundFormat;
+
+  widgetTCount  : Byte = 0;
+  widgetTypes   : array of zglTWidgetType;
+  widgetTLast   : Byte;
   {------------------------------------ APP -----------------------------------}
   app_Work     : Boolean;
   app_WorkTime : DWORD;
@@ -117,6 +130,10 @@ var
   wnd_CpnSize  : WORD;
   wnd_BrdSizeX : WORD;
   wnd_BrdSizeY : WORD;
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  wnd_Handle : WindowRef;
+  wnd_Attr   : WindowAttributes;
   {$ENDIF}
   {---------------------------------- SCREEN ----------------------------------}
   scr_Width   : WORD;
@@ -197,11 +214,13 @@ var
   ogl_Format  : Integer;
   ogl_Formats : DWORD;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  ogl_Context : TAGLContext;
+  ogl_Format  : TAGLPixelFormat;
+  ogl_Attr    : array[ 0..31 ] of DWORD;
+  {$ENDIF}
 
   {---------------------------------- Sound -----------------------------------}
-  sndNFCount    : Byte = 0;
-  sndNewFormats : array of zglTSoundFormat;
-
   sndInitialized : Boolean = FALSE;
   sndVolume      : Byte    = 100;
   sndCanPlay     : Boolean = TRUE;
@@ -209,7 +228,7 @@ var
   sndStopFile    : Boolean = FALSE;
   sndLoopFile    : Boolean = FALSE;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   oal_Device  : TALCdevice  = nil;
   oal_Context : TALCcontext = nil;
 
@@ -227,7 +246,7 @@ var
   {$ENDIF}
 
   sfStream   : zglPSoundFile = nil;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   sfFormat   : array[ 1..2 ] of TALenum = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
   sfBufCount : Integer = 4;
   sfSource   : TALuint;

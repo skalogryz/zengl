@@ -28,15 +28,15 @@ uses
   zgl_types,
   Utils;
 
-procedure ini_LoadFromFile( FileName : PChar ); extdecl;
-procedure ini_SaveToFile( FileName : PChar ); extdecl;
-procedure ini_Add( Section, Key : PChar ); extdecl;
-function  ini_ReadKeyStr( Section, Key : PChar ) : PChar; extdecl;
-function  ini_ReadKeyInt( Section, Key : PChar ) : Integer; extdecl;
-function  ini_ReadKeyBool( Section, Key : PChar ) : Boolean; extdecl;
-function  ini_WriteKeyStr( Section, Key, Value : PChar ) : Boolean; extdecl;
-function  ini_WriteKeyInt( Section, Key : PChar; Value : Integer ) : Boolean; extdecl;
-function  ini_WriteKeyBool( Section, Key : PChar; Value : Boolean ) : Boolean; extdecl;
+procedure ini_LoadFromFile( const FileName : PChar );
+procedure ini_SaveToFile( const FileName : PChar );
+procedure ini_Add( const Section, Key : PChar );
+function  ini_ReadKeyStr( const Section, Key : PChar ) : PChar;
+function  ini_ReadKeyInt( const Section, Key : PChar ) : Integer;
+function  ini_ReadKeyBool( const Section, Key : PChar ) : Boolean;
+function  ini_WriteKeyStr( const Section, Key, Value : PChar ) : Boolean;
+function  ini_WriteKeyInt( const Section, Key : PChar; const Value : Integer ) : Boolean;
+function  ini_WriteKeyBool( const Section, Key : PChar; const Value : Boolean ) : Boolean;
 
 function  ini_GetID( S, K : String; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;
@@ -75,6 +75,7 @@ procedure AddData( str : String );
     i, j, s, k, len : Integer;
 begin
   if str = '' Then exit;
+  if str[ 1 ] = ';' Then exit;
   len := length( str );
 
   if ( str[ 1 ] = '[' ) and ( str[ len ] = ']' ) Then

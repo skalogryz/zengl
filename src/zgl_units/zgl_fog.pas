@@ -25,17 +25,17 @@ interface
 uses
   GL, GLExt;
   
-procedure fog_Enable; extdecl;
-procedure fog_Disable; extdecl;
+procedure fog_Enable;
+procedure fog_Disable;
 
 const
   FOG_MODE_EXP    = 0;
   FOG_MODE_EXP2   = 1;
   FOG_MODE_LINEAR = 2;
-procedure fog_SetMode( Mode : Byte ); extdecl;
-procedure fog_SetColor( Color : DWORD ); extdecl;
-procedure fog_SetDensity( Density : Single ); extdecl;
-procedure fog_SetBeginEnd( fBegin, fEnd : Single ); extdecl;
+procedure fog_SetMode( const Mode : Byte );
+procedure fog_SetColor( const Color : DWORD );
+procedure fog_SetDensity( const Density : Single );
+procedure fog_SetBeginEnd( const fBegin, fEnd : Single );
 
 var
   fog_Color : array[ 0..3 ] of Single = ( 0.9, 0.9, 1.0, 0.0 );
