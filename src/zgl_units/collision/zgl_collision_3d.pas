@@ -30,7 +30,7 @@ uses
 
 type
   zglPCol3DCallback = ^zglTCol3DCallback;
-  zglTCol3DCallback = procedure( Offset : zglPPoint3D; Data : Pointer );
+  zglTCol3DCallback = procedure( const Offset : zglTPoint3D; const Data : Pointer );
 
 type
   zglPCollision3D = ^zglTCollision3D;
@@ -40,27 +40,27 @@ type
 end;
   
 // point 3d
-function col3d_PointInTri( Point, A, B, C : zglPPoint3D  ) : Boolean; extdecl;
-function col3d_PointInAABB( Point : zglPPoint3D; AABB : zglPAABB ) : Boolean; extdecl;
-function col3d_PointInOBB( Point : zglPPoint3D; OBB : zglPOBB ) : Boolean; extdecl;
-function col3d_PointInSphere( Point : zglPPoint3D; Sphere : zglPSphere ) : Boolean; extdecl;
+function col3d_PointInTri( const Point, A, B, C : zglTPoint3D  ) : Boolean;
+function col3d_PointInAABB( const Point : zglTPoint3D; const AABB : zglTAABB ) : Boolean;
+function col3d_PointInOBB( const Point : zglTPoint3D; const OBB : zglTOBB ) : Boolean;
+function col3d_PointInSphere( const Point : zglTPoint3D; const Sphere : zglTSphere ) : Boolean;
 // line 3d
-function col3d_LineVsAABB( Line : zglPLine3D; AABB : zglPAABB ) : Boolean; extdecl;
-function col3d_LineVsOBB( Line : zglPLine3D; OBB : zglPOBB ) : Boolean; extdecl;
-function col3d_LineVsSphere( Line : zglPLine3D; Sphere : zglPSphere ) : Boolean; extdecl;
+function col3d_LineVsAABB( const Line : zglTLine3D; const AABB : zglTAABB ) : Boolean;
+function col3d_LineVsOBB( const Line : zglTLine3D; const OBB : zglTOBB ) : Boolean;
+function col3d_LineVsSphere( const Line : zglTLine3D; const Sphere : zglTSphere ) : Boolean;
 // plane
-function col3d_PlaneVsSphere( Plane : zglPPlane; Sphere : zglPSphere ) : zglTCollision3D; extdecl;
+function col3d_PlaneVsSphere( const Plane : zglTPlane; const Sphere : zglTSphere ) : zglTCollision3D;
 // aabb
-function col3d_AABBVsAABB( AABB1, AABB2 : zglPAABB ) : Boolean; extdecl;
-function col3d_AABBVsOBB( AABB : zglPAABB; OBB : zglPOBB ) : Boolean; extdecl;
-function col3d_AABBVsSphere( AABB : zglPAABB; Sphere : zglPSphere ) : Boolean; extdecl;
-function col3d_AABBInAABB( AABB1, AABB2 : zglPAABB ) : Boolean; extdecl;
+function col3d_AABBVsAABB( const AABB1, AABB2 : zglTAABB ) : Boolean;
+function col3d_AABBVsOBB( const AABB : zglTAABB; OBB : zglTOBB ) : Boolean;
+function col3d_AABBVsSphere( const AABB : zglTAABB; Sphere : zglTSphere ) : Boolean;
+function col3d_AABBInAABB( const AABB1, AABB2 : zglTAABB ) : Boolean;
 // obb
-function col3d_OBBVsOBB( OBB1, OBB2 : zglPOBB ) : Boolean; extdecl;
-function col3d_OBBVsSphere( OBB : zglPOBB; Sphere : zglPSphere ) : Boolean; extdecl;
+function col3d_OBBVsOBB( const OBB1, OBB2 : zglTOBB ) : Boolean;
+function col3d_OBBVsSphere( const OBB : zglTOBB; const Sphere : zglTSphere ) : Boolean;
 // sphere
-function col3d_SphereVsSphere( Sphere1, Sphere2 : zglPSphere ) : Boolean; extdecl;
-function col3d_SphereVsNode( Sphere : zglPSphere; Octree : zglPOctree; Node : zglPNode; Callback : zglTCol3DCallback; CData : Pointer ) : Boolean; extdecl;
+function col3d_SphereVsSphere( const Sphere1, Sphere2 : zglTSphere ) : Boolean;
+function col3d_SphereVsNode( const Sphere : zglTSphere; const Octree : zglTOctree; const Node : zglTNode; const Callback : zglTCol3DCallback; const CData : Pointer ) : Boolean;
 
 implementation
   var
@@ -75,9 +75,9 @@ function col3d_PointInTri;
 begin
   Result := FALSE;
  
-  Angle := vector_Angle( vector_Sub( A^, Point^ ), vector_Sub( B^, Point^ ) ) +
-           vector_Angle( vector_Sub( B^, Point^ ), vector_Sub( C^, Point^ ) ) +
-           vector_Angle( vector_Sub( C^, Point^ ), vector_Sub( A^, Point^ ) );
+  Angle := vector_Angle( vector_Sub( A, Point ), vector_Sub( B, Point ) ) +
+           vector_Angle( vector_Sub( B, Point ), vector_Sub( C, Point ) ) +
+           vector_Angle( vector_Sub( C, Point ), vector_Sub( A, Point ) );
 
 	if Angle >= cv_pi * 2 * 0.999 Then Result := TRUE;
 end;
@@ -101,12 +101,12 @@ begin
   // трансформируем точку в систему координат OBB
   tPoint := vector_MulM3f( tPoint, OBB.Matrix );
 
-	Result := col3d_PointInAABB( @tPoint, @tAABB );
+	Result := col3d_PointInAABB( tPoint, tAABB );
 end;
 
 function col3d_PointInSphere;
 begin
-  Result := abs( vector_FDistance( Sphere.Position, Point^ ) ) < Sphere.Radius * Sphere.Radius;
+  Result := abs( vector_FDistance( Sphere.Position, Point ) ) < Sphere.Radius * Sphere.Radius;
 end;
 
 {------------------------------------------------------------------------------}
@@ -169,7 +169,7 @@ begin
   tLine.p1 := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Line.p1 ), OBB.Matrix ) );
   tLine.p2 := vector_MulM3f( Line.p2, OBB.Matrix );
 
-	Result := col3d_LinevsAABB( @tAABB, @tLine );
+	Result := col3d_LinevsAABB( tLine, tAABB );
 end;
 
 function col3d_LineVsSphere;
@@ -205,7 +205,7 @@ function col3d_PlaneVsSphere;
   var
     point    : zglTPoint3D;
     distance : Single;
-  function EdgeSphereCollision( Point : zglPPoint3D; Plane : zglPPlane; Sphere : zglPSphere; var dis :Single ) : Boolean;
+  function EdgeSphereCollision( const Plane : zglTPlane; const Sphere : zglTSphere; var dis :Single ) : Boolean;
     var
       i : Byte;
       t : Single;
@@ -224,44 +224,44 @@ function col3d_PlaneVsSphere;
           begin
   			    Result := TRUE;
             t      := dis;
-            Point^ := c;
+            Point  := c;
           end;
     	end;
 
     if Result Then dis := sqrt( t );
   end;
-  function GetCollisionOffset( Normal : zglPPoint3D; Radius, Distance : Single ) : zglTPoint3D;
+  function GetCollisionOffset( const Normal : zglTPoint3D; const Radius, Distance : Single ) : zglTPoint3D;
     var
       distanceOver : Single;
   begin
     if distance > 0 Then
       begin
         distanceOver := Radius - Distance;
-        Result       := vector_MulV( Normal^, distanceOver );
+        Result       := vector_MulV( Normal, distanceOver );
       end else
         begin
           distanceOver := radius + distance;
-          Result       := vector_MulV( Normal^, -distanceOver );
+          Result       := vector_MulV( Normal, -distanceOver );
         end;
   end;
 begin
 	Result.Result := FALSE;
 
-  distance := plane_Distance( Plane^, Sphere.Position );
+  distance := plane_Distance( Plane, Sphere.Position );
 
 	if abs( distance ) < Sphere.Radius Then
   	begin
 		  Result.Offset := vector_MulV( Plane.Normal, distance );
       point         := vector_Sub( Sphere.Position, Result.Offset );
 
-  		if col3d_PointInTri( @point, @Plane.Points[ 0 ], @Plane.Points[ 1 ], @Plane.Points[ 2 ] ) Then
+  		if col3d_PointInTri( point, Plane.Points[ 0 ], Plane.Points[ 1 ], Plane.Points[ 2 ] ) Then
         begin
-          Result.Offset := GetCollisionOffset( @Plane.Normal, Sphere.Radius, distance );
+          Result.Offset := GetCollisionOffset( Plane.Normal, Sphere.Radius, distance );
           Result.Result := TRUE;
         end else
-          if EdgeSphereCollision( @point, Plane, Sphere, distance ) Then
+          if EdgeSphereCollision( Plane, Sphere, distance ) Then
             begin
-              Result.Offset := GetCollisionOffset( @Plane.Normal, Sphere.Radius, distance );
+              Result.Offset := GetCollisionOffset( Plane.Normal, Sphere.Radius, distance );
               Result.Result := TRUE;
             end;
     end;
@@ -288,7 +288,7 @@ begin
   tOBB.Position := AABB.Position;
   tOBB.Size     := AABB.Size;
 
-  Result := col3d_OBBvsOBB( @OBB, @tOBB );
+  Result := col3d_OBBvsOBB( OBB, tOBB );
 end;
 
 function col3d_AABBVsSphere;
@@ -347,7 +347,7 @@ begin
 
   //"создаем" матрицу поворота B относительно А
   mR := OBB2.Matrix;
-  matrix3f_Transpose( @mR );
+  matrix3f_Transpose( mR );
   mR := matrix3f_Mul( mR, OBB1.Matrix );
 
   //система координат А
@@ -483,7 +483,7 @@ begin
   tSphere.Position := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Sphere.Position ), OBB.Matrix ) );
   tSphere.Radius   := Sphere.Radius;
 
-  Result := col3d_AABBvsSphere( @tAABB, @tSphere );
+  Result := col3d_AABBvsSphere( tAABB, tSphere );
 end;
 
 {------------------------------------------------------------------------------}
@@ -502,20 +502,20 @@ function col3d_SphereVsNode;
     t : zglTCollision3D;
 begin
   Result := FALSE;
-  if not col3d_AABBVsSphere( @Node.Cube, Sphere ) Then exit;
+  if not col3d_AABBVsSphere( Node.Cube, Sphere ) Then exit;
   
   if Node.NInside Then
     for i := 0 to 7 do
       if Assigned( Node.SubNodes[ i ] ) Then
-        if col3d_SphereVsNode( Sphere, Octree, Node.SubNodes[ i ], Callback, CData ) Then tResult := TRUE;
+        if col3d_SphereVsNode( Sphere, Octree, Node.SubNodes[ i ]^, Callback, CData ) Then tResult := TRUE;
 
   if Node.PCount > 0 Then
     for i := 0 to Node.PCount - 1 do
       begin
-        t := col3d_PlaneVsSphere( @Octree.Planes[ Node.Planes[ i ] ], Sphere );
+        t := col3d_PlaneVsSphere( Octree.Planes[ Node.Planes[ i ] ], Sphere );
         if t.Result Then
           begin
-            if Assigned( Callback ) Then Callback( @t.Offset, CData );
+            if Assigned( Callback ) Then Callback( t.Offset, CData );
             tResult := TRUE;
           end;
       end;
