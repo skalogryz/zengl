@@ -1,7 +1,8 @@
-VERSION = 0.0.33
+VERSION = 0.0.35
 FPC     = fpc
-FPCINW  =
-FLAGS   = -OG3p3 -XdsX -CX
+FPC_WIN =
+FPC_MAC = /usr/local/lib/fpc/2.2.2/ppc386
+FLAGS   = -O3 -XdsX -CX #-a
 #
 INCLUDE = -Fuzgl_units \
 -Fuzgl_units/system \
@@ -22,10 +23,19 @@ DESTDIR = /usr
 TMP     = -FUtmp
 TARGET  = libZenGL.so
 TARGETW = ZenGL.dll
+TARGETM = libZenGL.dylib
 
 all: clean
-	$(FPC) zengl.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX
+	$(FPC) zengl.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX #-Aas
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
+
+macos: clean
+	$(FPC_MAC) zengl.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM) -Cn
+	echo /System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib >> link.res
+	echo /System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib >> link.res
+	sh ppas.sh
+	rm link.res
+	rm ppas.sh
 
 pkg: clean
 	sh ./pkg/makepkg.sh
@@ -34,11 +44,11 @@ win32: clean
 	$(FPC) zengl.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
 
 inwin32: cleanw
-	$(FPCINW) zengl.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
+	$(FPC_WIN) zengl.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
 
 clean:
 	rm -f *.*~
-	rm -f ./tmp/*
+	rm -f -R ./tmp/*
 	rm -f ./sys_units/*.*~
 	rm -f ./zgl_units/*.*~
 	rm -f ./zgl_units/system/*.*~

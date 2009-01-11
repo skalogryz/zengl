@@ -71,8 +71,10 @@ uses
   zgl_sprite_2d,
   zgl_text,
 
-  //zgl_gui_main,
-  //zgl_gui_types,
+  zgl_gui_main,
+  zgl_gui_types,
+  zgl_gui_render,
+  zgl_gui_process,
 
   zgl_zbuffer,
   zgl_scissor,
@@ -235,6 +237,14 @@ exports
   font_LoadFromFile,
   text_Draw,
   text_GetWidth,
+
+{$IFDEF USE_GUI}
+  gui_Init,
+  gui_Draw,
+  gui_Proc,
+  gui_AddWidget,
+  gui_DelWidget,
+{$ENDIF}
 
 {$IFDEF USE_SOUND}
   // Sound
