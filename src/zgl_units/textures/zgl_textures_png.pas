@@ -73,7 +73,7 @@ type
     R, G, B, A : Byte;
   end;
 
-procedure png_LoadFromFile( FileName : PChar; var pData : Pointer; var W, H : WORD ); extdecl;
+procedure png_LoadFromFile( const FileName : PChar; var pData : Pointer; var W, H : WORD );
 
 procedure png_ReadIHDR;
 procedure png_ReadPLTE;

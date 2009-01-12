@@ -27,8 +27,8 @@ uses
   GL,
   zgl_global_var;
   
-procedure scissor_Begin( X, Y, Width, Height : WORD ); extdecl;
-procedure scissor_End; extdecl;
+procedure scissor_Begin( const X, Y, Width, Height : WORD );
+procedure scissor_End;
 
 implementation
 

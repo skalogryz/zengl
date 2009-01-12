@@ -46,7 +46,7 @@ procedure gui_ProcWidget;
     i     : Integer;
     Event : zglTEvent;
 begin
-  if col2d_PointInRect( mouse_X, mouse_Y, @Widget.rect ) Then
+  if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) Then
     begin
       Event.mouse_pos.X := Widget.rect.X - mouse_X;
       Event.mouse_pos.Y := Widget.rect.Y - mouse_Y;

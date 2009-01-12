@@ -58,7 +58,12 @@ const
   libopenal = 'openal32.dll';
 {$ENDIF}
 {$IFDEF LINUX}
+  {$DEFINE LINUX_OR_DARWIN}
   libopenal = 'libopenal.so';
+{$ENDIF}
+{$IFDEF DARWIN}
+  {$DEFINE LINUX_OR_DARWIN}
+  libopenal = '/System/Library/Frameworks/OpenAL.framework/OpenAL';
 {$ENDIF}
 
 type
@@ -965,11 +970,11 @@ procedure ReadOpenALExtensions;
 type
   HMODULE = THandle;
 var
-  lopenal : {$IFDEF LINUX} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  lopenal : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
 
 implementation
 
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
@@ -991,12 +996,12 @@ end;
 function InitOpenAL(LibName: String): Boolean;
 begin
   Result := FALSE;
-  lopenal := dlopen( PChar( LibName ){$IFDEF LINUX}, $001 {$ENDIF} );
+  lopenal := dlopen( PChar( LibName ){$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   if lopenal = nil Then lopenal := dlopen( PChar( LibName + '.0' ), $001 );
   {$ENDIF}
 
-  if lopenal <> {$IFDEF LINUX} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
+  if lopenal <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
   begin
     alEnable:= alGetProcedure('alEnable');
     alDisable:= alGetProcedure('alDisable');
@@ -1072,7 +1077,7 @@ end;
 
 procedure ReadOpenALExtensions;
 begin
-  if lopenal <> {$IFDEF LINUX} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
+  if lopenal <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
     begin
       EAXSet := alGetProcedure('EAXSet');
       EAXGet := alGetProcedure('EAXGet');

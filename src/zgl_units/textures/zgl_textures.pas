@@ -37,13 +37,13 @@ uses
   Utils;
 
 function  tex_Add : zglPTexture;
-procedure tex_Del( Texture : zglPTexture );
+procedure tex_Del( var Texture : zglPTexture );
   
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
 function  tex_LoadFromFile( const FileName : PChar; const TransparentColor, Flags : DWORD ) : zglPTexture;
 procedure tex_SetFrameSize( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
-function  tex_SetMask( const Texture, Mask : zglPTexture ) : zglPTexture;
+function  tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
 
 procedure tex_Filter( const Texture : zglPTexture; const Flags : DWORD );
 procedure tex_SetAnisotropy( const Level : Byte );
@@ -217,8 +217,8 @@ if Texture.Flags and TEX_QUALITY_MEDIUM > 0 Then
         FrameHeight := FrameHeight div 4;
       end;
 
-  Texture.FramesX := m_Round( ( Texture.Width * Texture.U ) ) div FrameWidth;
-  Texture.FramesY := m_Round( ( Texture.Height * Texture.V ) ) div FrameHeight;
+  Texture.FramesX := Round( ( Texture.Width * Texture.U ) ) div FrameWidth;
+  Texture.FramesY := Round( ( Texture.Height * Texture.V ) ) div FrameHeight;
 end;
 
 procedure tex_Filter;
@@ -332,7 +332,7 @@ begin
   for i := 0 to Width * Height - 1 do
     begin
       P := pData + i * 4;
-      Gray := m_Round(
+      Gray := Round(
                        PByte( P + 0 )^ * 0.3  +
                        PByte( P + 1 )^ * 0.59 +
                        PByte( P + 2 )^ * 0.11

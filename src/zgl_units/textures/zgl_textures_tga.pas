@@ -49,7 +49,7 @@ type
     end;
 end;
 
-procedure tga_LoadFromFile( FileName : PChar; var pData : Pointer; var W, H : WORD ); extdecl;
+procedure tga_LoadFromFile( const FileName : PChar; var pData : Pointer; var W, H : WORD );
 procedure tga_FlipVertically( var Data : array of Byte; w, h, pixelSize : Integer );
 procedure tga_FlipHorizontally( var Data : array of Byte; w, h, pixelSize : Integer );
 procedure tga_RLEDecode;

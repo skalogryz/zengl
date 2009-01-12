@@ -54,7 +54,7 @@ begin
   if log <> {$IFDEF LINUX}nil{$ELSE}0{$ENDIF} Then exit;
   {$ENDIF}
   app_Log := TRUE;
-  logstart := m_Round( timer_GetTicks );
+  logstart := Round( timer_GetTicks );
   
   file_Open( log, logfile, FOM_CREATE );
   log_Add( '############################', FALSE );
@@ -106,7 +106,7 @@ function log_Timing;
   var
     V : DWORD;
 begin
-  V := m_Round( timer_GetTicks ) - logstart;
+  V := Round( timer_GetTicks ) - logstart;
   case V of
     0..9:               Result := '[0000000' + u_IntToStr( V ) + 'ms] ';
     10..99:             Result := '[000000'  + u_IntToStr( V ) + 'ms] ';

@@ -51,8 +51,8 @@ begin
       pr2d_Rect( X, Y, W, H, color, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W, H, $000000, 255, 0 );
 
-      text_Draw( Font, m_Round( X + ( W - text_GetWidth( Font, Caption, 0, 1 ) ) / 2 ),
-                       m_Round( Y + ( H - Font.Height ) / 2 ), Caption, 255, $FFFFFF, 0, 1 );
+      text_Draw( Font, Round( X + ( W - text_GetWidth( Font, Caption, 0, 1 ) ) / 2 ),
+                       Round( Y + ( H - Font.Height ) / 2 ), Caption, 255, $FFFFFF, 0, 1 );
     end;
 end;
 
@@ -70,7 +70,7 @@ begin
         pr2d_Rect( X + 2, Y + 2, W - 4, H - 4, color - $222222, 255, PR2D_FILL );
 
       text_Draw( Font, X + W + Font.Width[ Byte( ' ' ) ],
-                       m_Round( Y + ( H - Font.Height ) / 2 ), Caption, 255, $FFFFFF, 0, 1 );
+                       Round( Y + ( H - Font.Height ) / 2 ), Caption, 255, $FFFFFF, 0, 1 );
     end;
 end;
 

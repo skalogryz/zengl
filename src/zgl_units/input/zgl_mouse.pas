@@ -81,7 +81,7 @@ begin
   {$IFDEF DARWIN}
   Result := mouseX - wnd_BrdSizeX;
   {$ENDIF}
-  Result := m_Round( Result / scr_ResCX );
+  Result := Round( Result / scr_ResCX );
 end;
 
 function mouse_Y;
@@ -96,7 +96,7 @@ begin
   {$IFDEF DARWIN}
   Result := mouseY - wnd_BrdSizeY - wnd_CpnSize;
   {$ENDIF}
-  Result := m_Round( Result / scr_ResCY );
+  Result := Round( Result / scr_ResCY );
 end;
 
 function mouse_DX;

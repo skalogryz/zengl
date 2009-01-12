@@ -486,11 +486,11 @@ begin
         for i := 0 to managerSound.Count - 1 do
           begin
             for j := 0 to Sound.sCount - 1 do
-              alSourcei( Sound.Source[ j ], AL_FREQUENCY, m_Round( Sound.Frequency * Coefficient ) );
+              alSourcei( Sound.Source[ j ], AL_FREQUENCY, Round( Sound.Frequency * Coefficient ) );
             Sound := Sound.Next;
           end;
       end else
-        alSourcei( Sound.Source[ ID ], AL_FREQUENCY, m_Round( Sound.Frequency * Coefficient ) );
+        alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Round( Sound.Frequency * Coefficient ) );
   {$ENDIF}
   {$IFDEF WIN32}
     if ID > -1 Then
@@ -499,11 +499,11 @@ begin
         for i := 0 to managerSound.Count - 1 do
           begin
             for j := 0 to Sound.sCount - 1 do
-              Sound.Source[ j ].SetFrequency( m_Round( Sound.Frequency * Coefficient ) );
+              Sound.Source[ j ].SetFrequency( Round( Sound.Frequency * Coefficient ) );
             Sound := Sound.Next;
           end;
       end else
-        Sound.Source[ ID ].SetFrequency( m_Round( Sound.Frequency * Coefficient ) );
+        Sound.Source[ ID ].SetFrequency( Round( Sound.Frequency * Coefficient ) );
   {$ENDIF}
 end;
 

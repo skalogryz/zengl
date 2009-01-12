@@ -395,7 +395,6 @@ exports
   
   // Math
   //
-  m_Round,
   m_Cos,
   m_Sin,
   m_SinCos,

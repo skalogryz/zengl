@@ -76,7 +76,7 @@ const
   {$IFDEF LINUX}
   ogl = 'libGL.so.1';
   {$ENDIF}
-  {$IFDEF darwin}
+  {$IFDEF DARWIN}
   ogl = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
   {$ENDIF}
 

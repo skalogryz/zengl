@@ -53,9 +53,9 @@ uses
   zgl_main, zgl_gui_main, zgl_gui_types;
 
 function font_Add;
-  var
+  {var
     button   : zglTButtonDesc;
-    checkbox : zglTCheckBoxDesc;
+    checkbox : zglTCheckBoxDesc;}
 begin
   Result := @managerFont.First;
   while Assigned( Result.Next ) do
@@ -67,7 +67,7 @@ begin
   Result := Result.Next;
   INC( managerFont.Count );
 
-  button.Caption := 'KICK ME!';
+  {button.Caption := 'KICK ME!';
   button.Font    := Result;
   button.Pressed := FALSE;
   gui_AddWidget( WIDGET_BUTTON, 320, 240, 128, 64, @button, nil, nil );
@@ -75,7 +75,7 @@ begin
   checkbox.Caption := 'checkbox';
   checkbox.Font    := Result;
   checkbox.Checked := TRUE;
-  gui_AddWidget( WIDGET_CHECKBOX, 340, 260, 16, 16, @checkbox, nil, nil );
+  gui_AddWidget( WIDGET_CHECKBOX, 340, 260, 16, 16, @checkbox, nil, nil );}
 end;
 
 procedure font_Del;
@@ -130,10 +130,10 @@ begin
           tY := tY + 1;
         end;
       if tY < 1 Then tY := tY + 13;
-      tW := m_Round( Result.Texture.Width  / 13 );
-      tH := m_Round( Result.Texture.Height / 13 );
-      tX := m_Round( tX * tW );
-      tY := m_Round( tY * tH );
+      tW := Round( Result.Texture.Width  / 13 );
+      tH := Round( Result.Texture.Height / 13 );
+      tX := Round( tX * tW );
+      tY := Round( tY * tH );
       
       tX := ( 1 / ( Result.Texture.Width  / Result.Texture.U ) ) * ( tX - tW );
       tY := ( 1 / ( Result.Texture.Height / Result.Texture.V ) ) * ( Result.Texture.Height - ( tY - tH ) );
@@ -162,9 +162,9 @@ procedure text_Draw;
     xt    : Single;
     Text  : String;
 begin
-  w := m_Round( Font.Texture.Width  / 13 ) * Scale;
-  h := m_Round( Font.Texture.Height / 13 ) * Scale;
-  Y := Y - m_Round( ( h - Font.Height ) / 2 * Scale );
+  w := Round( Font.Texture.Width  / 13 ) * Scale;
+  h := Round( Font.Texture.Height / 13 ) * Scale;
+  Y := Y - Round( ( h - Font.Height ) / 2 * Scale );
   xt := X;
   
   if not Assigned( _Text ) Then exit;
@@ -179,7 +179,7 @@ begin
   glBegin( GL_QUADS );
   c := Getchar( Text[ 1 ], Text[ 2 ] );
   c2 := c;
-  X := m_Round( X - ( w - Font.Width[ c2 ] * Scale ) / 2 );
+  X := Round( X - ( w - Font.Width[ c2 ] * Scale ) / 2 );
   for i := 1 to length( Text ) - 1 do
     begin
       if Text[ i ] = Char( 13 ) Then
@@ -191,7 +191,7 @@ begin
 
       c := Getchar( Text[ i ], Text[ i + 1 ] );
       if ( i <> 1 ) and ( Text[ i - 1 ] <> Char( 13 ) ) Then
-        X := X + m_Round( Font.Width[ c2 ] * Scale + ( w - Font.Width[ c2 ] * Scale ) / 2 - ( w - Font.Width[ c ] * Scale ) / ( 2 / ( Byte( i = 1 ) + 1 ) ) + Step * Scale );
+        X := X + Round( Font.Width[ c2 ] * Scale + ( w - Font.Width[ c2 ] * Scale ) / 2 - ( w - Font.Width[ c ] * Scale ) / ( 2 / ( Byte( i = 1 ) + 1 ) ) + Step * Scale );
 
       glTexCoord2fv( @Font.TexCoords[ c ][ 0 ] );
       gl_Vertex2f( X, Y );

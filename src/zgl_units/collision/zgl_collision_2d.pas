@@ -28,42 +28,42 @@ uses
   zgl_math;
   
 // point 2d
-function col2d_PointInRect    ( X, Y : Single; Rect : zglPRect   ) : Boolean; extdecl;
-function col2d_PointInCircle  ( X, Y : Single; Circ : zglPCircle ) : Boolean; extdecl;
-function col2d_PointInPolyLine( X, Y : Single; PL : zglPPolyLine ) : Boolean; extdecl;
+function col2d_PointInRect    ( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
+function col2d_PointInCircle  ( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
+function col2d_PointInPolyLine( const X, Y : Single; const PL : zglTPolyLine ) : Boolean;
 // line 2d
-function col2d_Line          ( A, B : zglPLine ) : Boolean; extdecl;
-function col2d_LineVsRect    ( A : zglPLine; Rect : zglPRect ) : Boolean; extdecl;
-function col2d_LineVsCircle  ( L : zglPLine; Circ : zglPCircle ) : Boolean; extdecl;
-function col2d_LineVsCircleXY( L : zglPLine; Circ : zglPCircle; Precision : Byte ) : Boolean; extdecl;
-function col2d_LineVsPolyLine( A : zglPLine; B : zglPPolyLine ) : Boolean; extdecl;
+function col2d_Line          ( const A, B : zglTLine ) : Boolean;
+function col2d_LineVsRect    ( const A : zglTLine; const Rect : zglTRect ) : Boolean;
+function col2d_LineVsCircle  ( const L : zglTLine; const Circ : zglTCircle ) : Boolean;
+function col2d_LineVsCircleXY( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte ) : Boolean;
+function col2d_LineVsPolyLine( const A : zglTLine; const B : zglTPolyLine ) : Boolean;
 // polyline
-function col2d_PolyLine          ( A, B : zglPPolyLine ) : Boolean; extdecl;
-function col2d_PolyLineVsRect    ( A : zglPPolyLine; Rect : zglPRect ) : Boolean; extdecl;
-function col2d_PolyLineVsCircle  ( A : zglPPolyLine; Circ : zglPCircle ) : Boolean; extdecl;
-function col2d_PolyLineVsCircleXY( A : zglPPolyLine; Circ : zglPCircle; Precision : Integer ) : Boolean; extdecl;
+function col2d_PolyLine          ( const A, B : zglTPolyLine ) : Boolean;
+function col2d_PolyLineVsRect    ( const A : zglTPolyLine; const Rect : zglTRect ) : Boolean;
+function col2d_PolyLineVsCircle  ( const A : zglTPolyLine; const Circ : zglTCircle ) : Boolean;
+function col2d_PolyLineVsCircleXY( const A : zglTPolyLine; const Circ : zglTCircle; const Precision : Integer ) : Boolean;
 // rect
-function col2d_Rect        ( Rect1, Rect2 : zglPRect ) : Boolean; extdecl;
-function col2d_RectInRect  ( Rect1, Rect2 : zglPRect ) : Boolean; extdecl;
-function col2d_RectInCircle( Rect : zglPRect; Circ : zglPCircle ) : Boolean; extdecl;
-function col2d_RectVsCircle( Rect : zglPRect; Circ : zglPCircle ) : Boolean; extdecl;
+function col2d_Rect        ( const Rect1, Rect2 : zglTRect ) : Boolean;
+function col2d_RectInRect  ( const Rect1, Rect2 : zglTRect ) : Boolean;
+function col2d_RectInCircle( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
+function col2d_RectVsCircle( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
 // circle
-function col2d_Circle        ( Circ1, Circ2 : zglPCircle ) : Boolean; extdecl;
-function col2d_CircleInCircle( Circ1, Circ2 : zglPCircle ) : Boolean; extdecl;
-function col2d_CircleInRect  ( Circ : zglPCircle; Rect : zglPRect ) : Boolean; extdecl;
+function col2d_Circle        ( const Circ1, Circ2 : zglTCircle ) : Boolean;
+function col2d_CircleInCircle( const Circ1, Circ2 : zglTCircle ) : Boolean;
+function col2d_CircleInRect  ( const Circ : zglTCircle; const Rect : zglTRect ) : Boolean;
 // ectended
-function col2dEx_LastX : Single; extdecl;
-function col2dEx_LastY : Single; extdecl;
-function col2dEx_LastLineA : Integer; extdecl;
-function col2dEx_LastLineB : Integer; extdecl;
+function col2dEx_LastX : Single;
+function col2dEx_LastY : Single;
+function col2dEx_LastLineA : Integer;
+function col2dEx_LastLineB : Integer;
 // polyline transformations
-procedure col2dEx_PolyRotate( A, B : zglPPolyLine; Angle : Single ); extdecl;
-procedure col2dEx_PolyScale( A : zglPPolyLine; ScaleX, ScaleY : Single ); extdecl;
-procedure col2dEx_PolyMove( A, B : zglPPolyLine; X, Y : Single ); extdecl;
-procedure col2dEx_PolyCenter( A : zglPPolyLine ); extdecl;
-procedure col2dEx_PolyRect( A : zglPPolyLine; Rect : zglPRect ); extdecl;
+procedure col2dEx_PolyRotate( const A, B : zglTPolyLine; const Angle : Single );
+procedure col2dEx_PolyScale( const A : zglTPolyLine; const ScaleX, ScaleY : Single );
+procedure col2dEx_PolyMove( var A, B : zglTPolyLine; const X, Y : Single );
+procedure col2dEx_PolyCenter( var A : zglTPolyLine );
+procedure col2dEx_PolyRect( const A : zglTPolyLine; var Rect : zglTRect );
 // line
-procedure col2dEx_CalcLineCross( A, B : zglPLine ); extdecl;
+procedure col2dEx_CalcLineCross( const A, B : zglTLine );
 
 implementation
 
@@ -168,14 +168,14 @@ begin
       L.y0 := Rect.Y;
       L.x1 := Rect.X + Rect.W;
       L.y1 := Rect.Y + Rect.H;
-      Result := col2d_Line( A, @L );
+      Result := col2d_Line( A, L );
       if not Result Then
         begin
           L.x0 := Rect.X;
           L.y0 := Rect.Y + Rect.H;
           L.x1 := Rect.X + Rect.W;
           L.y1 := Rect.Y;
-          Result := col2d_Line( A, @L );
+          Result := col2d_Line( A, L );
         end;
     end;
 end;
@@ -228,7 +228,7 @@ begin
   p1.cX := Circ.cX;
   p1.cY := Circ.cY;
   p1.Count := Precision;
-  k := m_Round( 360 / p1.Count );
+  k := Round( 360 / p1.Count );
   SetLength( p1.Points, p1.Count + 1 );
   for i := 0 to p1.Count - 1 do
     begin
@@ -245,20 +245,20 @@ begin
       l1.y0 := p1.Points[ i     ].Y;
       l1.x1 := p1.Points[ i + 1 ].X;
       l1.y1 := p1.Points[ i + 1 ].Y;
-      if col2d_Line( @l1, L ) Then
+      if col2d_Line( l1, L ) Then
         begin
           INC( t );
           if t = 1 Then
             begin
               lLA := i;
-              col2dEx_CalcLineCross( @l1, L );
+              col2dEx_CalcLineCross( l1, L );
             end;
           if t = 2 Then
             begin
               lLB := i;
               x   := lX;
               y   := lY;
-              col2dEx_CalcLineCross( @l1, L );
+              col2dEx_CalcLineCross( l1, L );
               lX := ( x + lX ) / 2;
               lY := ( y + lY ) / 2;
               exit;
@@ -281,7 +281,7 @@ begin
       L.y0 := B.Points[ i     ].Y;
       L.x1 := B.Points[ i + 1 ].X;
       L.y1 := B.Points[ i + 1 ].Y;
-      if col2d_Line( @L, A ) Then
+      if col2d_Line( L, A ) Then
         begin
           Result := TRUE;
           lLA    := i;
@@ -312,7 +312,7 @@ begin
           L2.y0 := B.Points[ j     ].Y;
           L2.x1 := B.Points[ j + 1 ].X;
           L2.y1 := B.Points[ j + 1 ].Y;
-          if col2d_Line( @L1, @L2 ) Then
+          if col2d_Line( L1, L2 ) Then
             begin
               Result := TRUE;
               lLA    := i;
@@ -338,7 +338,7 @@ begin
       L.y0 := A.Points[ i     ].Y;
       L.x1 := A.Points[ i + 1 ].X;
       L.y1 := A.Points[ i + 1 ].Y;
-      if col2d_LineVsRect( @L, Rect ) Then
+      if col2d_LineVsRect( L, Rect ) Then
         begin
           Result := TRUE;
           lLA    := i;
@@ -362,7 +362,7 @@ begin
       L.y0 := A.Points[ i     ].Y;
       L.x1 := A.Points[ i + 1 ].X;
       L.y1 := A.Points[ i + 1 ].Y;
-      if col2d_LineVsCircle( @L, Circ ) Then
+      if col2d_LineVsCircle( L, Circ ) Then
         begin
           Result := TRUE;
           lLA    := i;
@@ -386,7 +386,7 @@ begin
       L.y0 := A.Points[ i     ].Y;
       L.x1 := A.Points[ i + 1 ].X;
       L.y1 := A.Points[ i + 1 ].Y;
-      if col2d_LineVsCircleXY( @L, Circ, Precision ) Then
+      if col2d_LineVsCircleXY( L, Circ, Precision ) Then
         begin
           Result := TRUE;
           lLA    := i;
@@ -477,8 +477,8 @@ begin
   // Кроме как искуственно возвращать размер пока не нашол другого решения...
   for i := 0 to A.Count do
     begin
-      B.Points[ i ].X := A.cX + ( A.Points[ i ].X - A.cX ) * m_Cos( m_Round( Angle ) ) * 1.000153 - ( A.Points[ i ].Y - A.cY ) * m_Sin( m_Round( Angle ) ) * 1.000153;
-      B.Points[ i ].Y := A.cY + ( A.Points[ i ].X - A.cX ) * m_Sin( m_Round( Angle ) ) * 1.000153 + ( A.Points[ i ].Y - A.cY ) * m_Cos( m_Round( Angle ) ) * 1.000153;
+      B.Points[ i ].X := A.cX + ( A.Points[ i ].X - A.cX ) * m_Cos( Round( Angle ) ) * 1.000153 - ( A.Points[ i ].Y - A.cY ) * m_Sin( Round( Angle ) ) * 1.000153;
+      B.Points[ i ].Y := A.cY + ( A.Points[ i ].X - A.cX ) * m_Sin( Round( Angle ) ) * 1.000153 + ( A.Points[ i ].Y - A.cY ) * m_Cos( Round( Angle ) ) * 1.000153;
     end;
 end;
 
@@ -486,7 +486,7 @@ procedure col2dEx_PolyScale;
   var
     i : Integer;
 begin
-  for i := 0 to A^.Count do
+  for i := 0 to A.Count do
     begin
       A.Points[ i ].X := A.cX + ( A.Points[ i ].X - A.cX ) * ScaleX;
       A.Points[ i ].Y := A.cY + ( A.Points[ i ].Y - A.cY ) * ScaleY;

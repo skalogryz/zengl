@@ -56,7 +56,7 @@ type
     BitsPerSample    : Word;
  end;
 
-procedure wav_LoadFromFile( FileName : PChar; var Data : Pointer; var Size, Format, Frequency : DWORD ); extdecl;
+procedure wav_LoadFromFile( const FileName : PChar; var Data : Pointer; var Size, Format, Frequency : DWORD );
 
 implementation
 

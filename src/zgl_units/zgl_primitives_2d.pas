@@ -152,8 +152,8 @@ begin
       glBegin( GL_LINES );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + Radius * CosTable[ m_Round( i * k ) ], Y + Radius * SinTable[ m_Round( i * k ) ] );
-          gl_Vertex2f( X + Radius * CosTable[ m_Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ m_Round( ( i + 1 ) * k ) ] );
+          gl_Vertex2f( X + Radius * CosTable[ Round( i * k ) ], Y + Radius * SinTable[ Round( i * k ) ] );
+          gl_Vertex2f( X + Radius * CosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ Round( ( i + 1 ) * k ) ] );
         end;
     end else
       begin
@@ -161,8 +161,8 @@ begin
         for i := 0 to Quality do
           begin
             gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + Radius * CosTable[ m_Round( i * k ) ], Y + Radius * SinTable[ m_Round( i * k ) ] );
-            gl_Vertex2f( X + Radius * CosTable[ m_Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ m_Round( ( i + 1 ) * k ) ] );
+            gl_Vertex2f( X + Radius * CosTable[ Round( i * k ) ], Y + Radius * SinTable[ Round( i * k ) ] );
+            gl_Vertex2f( X + Radius * CosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ Round( ( i + 1 ) * k ) ] );
           end;
       end;
   glEnd;
@@ -199,8 +199,8 @@ begin
       glBegin( GL_LINES );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + xRadius * CosTable[ m_Round( i * k ) ], Y + xRadius * SinTable[ m_Round( i * k ) ] );
-          gl_Vertex2f( X + yRadius * CosTable[ m_Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ m_Round( ( i + 1 ) * k ) ] );
+          gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + xRadius * SinTable[ Round( i * k ) ] );
+          gl_Vertex2f( X + yRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
         end;
     end else
       begin
@@ -208,8 +208,8 @@ begin
         for i := 0 to Quality do
           begin
             gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + xRadius * CosTable[ m_Round( i * k ) ], Y + xRadius * SinTable[ m_Round( i * k ) ] );
-            gl_Vertex2f( X + yRadius * CosTable[ m_Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ m_Round( ( i + 1 ) * k ) ] );
+            gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + xRadius * SinTable[ Round( i * k ) ] );
+            gl_Vertex2f( X + yRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
           end;
       end;
   glEnd;

@@ -161,7 +161,7 @@ type
 end;
 {$ENDIF}
 
-procedure jpg_LoadFromFile( FileName : PChar; var pData : Pointer; var W, H : WORD ); extdecl;
+procedure jpg_LoadFromFile( const FileName : PChar; var pData : Pointer; var W, H : WORD );
 procedure jpg_FillData;
 
 implementation

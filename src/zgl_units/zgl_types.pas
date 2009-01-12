@@ -123,7 +123,7 @@ type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
     Extension : String;
-    Loader    : procedure( FileName : PChar; var pData : Pointer; var W, H : WORD ); extdecl;
+    Loader    : procedure( const FileName : PChar; var pData : Pointer; var W, H : WORD );
 end;
 
 {------------------------------------------------------------------------------}
@@ -203,8 +203,8 @@ type
   zglPSoundFile = ^zglTSoundFile;
   zglTSoundFile = record
     _File      : DWORD;
-    CodecRead  : function( Buffer : Pointer; Count : DWORD ) : DWORD; extdecl;
-    CodecLoop  : procedure; extdecl;
+    CodecRead  : function( const Buffer : Pointer; const Count : DWORD ) : DWORD;
+    CodecLoop  : procedure;
     Rate       : DWORD;
     Channels   : DWORD;
     Buffer     : Pointer;
@@ -224,7 +224,7 @@ type
   zglPSoundFormat = ^zglTSoundFormat;
   zglTSoundFormat = record
     Extension : String;
-    Loader    : procedure( FileName : PChar; var Data : Pointer; var Size, Format, Frequency : Integer ); extdecl;
+    Loader    : procedure( const FileName : PChar; var Data : Pointer; var Size, Format, Frequency : Integer );
 end;
 
 {------------------------------------------------------------------------------}

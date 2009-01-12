@@ -25,17 +25,15 @@ interface
 uses
   zgl_const,
   zgl_types;
-  
-function m_Round( value : Single ) : Integer;
 
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
 function  m_Sin( Angle : Integer ) : Single;
 procedure m_SinCos( const Angle : Single; var S, C : Single );
 
-function m_Distance( x1, y1, x2, y2 : Single ) : Single;
-function m_FDistance( x1, y1, x2, y2 : Single ) : Single;
-function m_Angle( x1, y1, x2, y2 : Single ) : Single;
+function m_Distance( const x1, y1, x2, y2 : Single ) : Single;
+function m_FDistance( const x1, y1, x2, y2 : Single ) : Single;
+function m_Angle( const x1, y1, x2, y2 : Single ) : Single;
 
 {------------------------------------------------------------------------------}
 {--------------------------------- Vectors ------------------------------------}
@@ -124,11 +122,6 @@ var
   SinTable : array[ 0..360 ] of Single;
 
 implementation
-
-function m_Round;
-begin
-  Result := Round( value );
-end;
 
 procedure InitCosSinTables;
   var
@@ -323,7 +316,6 @@ end;
 
 function vector_RotateQ;
   var
-    vn : zglTPoint3D;
     vecQuat, resQuat : zglTQuaternion;
 begin
 	vecQuat.x := Vector.x;

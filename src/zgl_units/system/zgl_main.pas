@@ -180,7 +180,7 @@ begin
     snd_Del( managerSound.First.Next );
 
   if app_WorkTime <> 0 Then
-    log_Add( 'Average FPS: ' + u_IntToStr( m_Round( app_FPSAll / app_WorkTime ) ) );
+    log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
   gl_Destroy;
   snd_StopFile;

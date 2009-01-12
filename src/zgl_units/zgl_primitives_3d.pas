@@ -125,12 +125,12 @@ begin
 
   for j := 0 to Quality shr 1 - 1 do
     begin
-      t1 := m_Round( j * 360 * q - 90 );
-      t2 := m_Round( ( j + 1 ) * 360 * q - 90 );
+      t1 := Round( j * 360 * q - 90 );
+      t2 := Round( ( j + 1 ) * 360 * q - 90 );
       glBegin( GL_TRIANGLE_STRIP );
       for i := 0 to Quality do
         begin
-          t3 := M_Round( i * 360 * q );
+          t3 := Round( i * 360 * q );
 
           x := m_Cos( t2 ) * m_Cos( t3 );
           y := m_Sin( t2 );

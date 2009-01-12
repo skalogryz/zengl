@@ -32,8 +32,8 @@ uses
   
 procedure cam2d_Set( const Camera : zglPCamera2D );
 
-procedure cam2d_Vertex2f( X, Y : Single );
-procedure cam2d_Vertex2fv( v : Pointer );
+procedure cam2d_Vertex2f( X, Y : Single ); extdecl;
+procedure cam2d_Vertex2fv( v : Pointer ); extdecl;
 
 var
   cam2dGlobal   : zglPCamera2D = nil;
