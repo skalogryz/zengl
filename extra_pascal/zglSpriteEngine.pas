@@ -102,7 +102,7 @@ procedure zglCSprite.Draw;
 begin
   if not Assigned( Texture ) Then exit;
   if Animated Then
-    asprite2d_Draw( Texture, X, Y, Width, Height, Angle, m_Round( Frame ), Alpha, FX )
+    asprite2d_Draw( Texture, X, Y, Width, Height, Angle, Round( Frame ), Alpha, FX )
   else
     ssprite2d_Draw( Texture, X, Y, Width, Height, Angle, Alpha, FX );
 end;

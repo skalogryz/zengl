@@ -163,13 +163,13 @@ procedure zgl_Destroy;
 begin
   scr_Destroy;
 
-  log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
-  while managerRTarget.Count > 0 do
-    rtarget_Del( managerRTarget.First.Next );
-
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 0 do
     timer_Del( managerTimer.First.Next );
+
+  log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
+  while managerRTarget.Count > 0 do
+    rtarget_Del( managerRTarget.First.Next );
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count ) );
   while managerTexture.Count > 0 do

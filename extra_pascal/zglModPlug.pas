@@ -98,11 +98,11 @@ type
   end;
 
 procedure modplug_Init;
-procedure modplug_PlayFile( FileName : PChar; Looped : Boolean = FALSE ); {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
-procedure modplug_LoopFile; {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
-procedure modplug_CloseFile; {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
+procedure modplug_PlayFile( const FileName : PChar; const Looped : Boolean = FALSE );
+procedure modplug_LoopFile;
+procedure modplug_CloseFile;
 
-function mp_ReadBuffer( Buffer : Pointer; Count : DWORD ) : DWORD; {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
+function mp_ReadBuffer( const Buffer : Pointer; const Count : DWORD ) : DWORD;
 function mp_Read(datasource: pointer; ptr: pointer; size: cuint): cuint; cdecl;
 function mp_Seek(datasource: pointer; offset: clong; whence: cint): clong; cdecl;
 function mp_Close( datasource : pointer ) : cint; cdecl;

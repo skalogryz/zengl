@@ -223,11 +223,11 @@ type
   end;
 
 procedure ogg_Init;
-procedure ogg_PlayFile( FileName : PChar; Looped : Boolean = FALSE ); {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
-procedure ogg_LoopFile; {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
-procedure ogg_CloseFile; {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
+procedure ogg_PlayFile( const FileName : PChar; const Looped : Boolean = FALSE );
+procedure ogg_LoopFile;
+procedure ogg_CloseFile;
 
-function ogg_ReadBuffer( Buffer : Pointer; Count : DWORD ) : DWORD; {$IFDEF LINUX} cdecl; {$ELSE} stdcall; {$ENDIF}
+function ogg_ReadBuffer( const Buffer : Pointer; const Count : DWORD ) : DWORD;
 function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
 function ogg_Seek( datasource : pointer; offset : cint64; whence : cint) : cint; cdecl;
 function ogg_Close( datasource : pointer ) : cint; cdecl;

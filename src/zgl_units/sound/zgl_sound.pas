@@ -47,7 +47,7 @@ uses
 function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( const BufferCount, SourceCount : Integer ) : zglPSound;
-procedure snd_Del( var Sound : zglPSound );
+procedure snd_Del( Sound : zglPSound );
 function  snd_LoadFromFile( const FileName : PChar; const SourceCount : Integer ) : zglPSound;
 
 function  snd_Play( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;

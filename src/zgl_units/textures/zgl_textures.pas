@@ -37,7 +37,7 @@ uses
   Utils;
 
 function  tex_Add : zglPTexture;
-procedure tex_Del( var Texture : zglPTexture );
+procedure tex_Del( Texture : zglPTexture );
   
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;

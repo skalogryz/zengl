@@ -43,7 +43,7 @@ const
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 function  rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
-procedure rtarget_Del( const Target : zglPRenderTarget );
+procedure rtarget_Del( Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
 
 implementation

@@ -36,7 +36,7 @@ uses
   zgl_types;
 
 function  timer_Add( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
-procedure timer_Del( var Timer : zglPTimer );
+procedure timer_Del( Timer : zglPTimer );
 
 function timer_GetTicks : Double;
 procedure timer_Reset;

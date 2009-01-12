@@ -175,7 +175,7 @@ end;
 
 var
   timer_Add      : function( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
-  timer_Del      : procedure( var Timer : zglPTimer );
+  timer_Del      : procedure( Timer : zglPTimer );
   timer_GetTicks : function : Double;
   
 // KEYBOARD
@@ -359,8 +359,8 @@ const
 
 var
   tex_Add           : function : zglPTexture;
-  tex_Del           : procedure( const Texture : zglPTexture );
-  tex_Create        : procedure( var Texture : zglTTexture; const pData : Pointer );
+  tex_Del           : procedure( Texture : zglPTexture );
+  tex_Create        : procedure( var Texture : zglTTexture; var pData : Pointer );
   tex_CreateZero    : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
   tex_LoadFromFile  : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
   tex_SetFrameSize  : procedure( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
@@ -414,7 +414,7 @@ const
 
 var
   rtarget_Add : function( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
-  rtarget_Del : procedure( const Target : zglPRenderTarget );
+  rtarget_Del : procedure( Target : zglPRenderTarget );
   rtarget_Set : procedure( const Target : zglPRenderTarget );
   
 // 2D
@@ -690,7 +690,7 @@ var
   snd_Init              : function : Boolean;
   snd_Free              : procedure;
   snd_Add               : function( const BufferCount, SourceCount : Integer ) : zglPSound;
-  snd_Del               : procedure( var Sound : zglPSound );
+  snd_Del               : procedure( Sound : zglPSound );
   snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; X, Y, Z : Single; Loop : Boolean = FALSE ) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer = -1 );
@@ -1243,7 +1243,6 @@ var
   shader_SetParameter4f : procedure( const ShaderType : DWORD; const Parameter : Integer; const v1, v2, v3, v4 : Single; const Local : Boolean = TRUE );
 
 // MATH
-  m_Round     : function( const value : Single ) : Integer;
   m_Cos       : function( Angle : Integer ) : Single;
   m_Sin       : function( Angle : Integer ) : Single;
   m_SinCos    : procedure( const Angle : Single; var S, C : Single );
@@ -1310,42 +1309,42 @@ var
   tri_GetNormal  : function( const A, B, C : zglPPoint3D ) : zglTPoint3D;
 
 // COLLISION 2D
-  col2d_PointInRect     : function( X, Y : Single; Rect : zglPRect   ) : Boolean; stdcall;
-  col2d_PointInCircle   : function( X, Y : Single; Circ : zglPCircle ) : Boolean; stdcall;
-  col2d_PointInPolyLine : function( X, Y : Single; PL : zglPPolyLine ) : Boolean; stdcall;
+  col2d_PointInRect     : function( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
+  col2d_PointInCircle   : function( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
+  col2d_PointInPolyLine : function( const X, Y : Single; const PL : zglTPolyLine ) : Boolean;
   // line 2d
-  col2d_Line           : function( A, B : zglPLine ) : Boolean; stdcall;
-  col2d_LineVsRect     : function( A : zglPLine; Rect : zglPRect ) : Boolean; stdcall;
-  col2d_LineVsCircle   : function( L : zglPLine; Circ : zglPCircle ) : Boolean; stdcall;
-  col2d_LineVsCircleXY : function( L : zglPLine; Circ : zglPCircle; Precision : Byte ) : Boolean; stdcall;
-  col2d_LineVsPolyLine : function( A : zglPLine; B : zglPPolyLine ) : Boolean; stdcall;
+  col2d_Line           : function( const A, B : zglTLine ) : Boolean;
+  col2d_LineVsRect     : function( const A : zglTLine; const Rect : zglTRect ) : Boolean;
+  col2d_LineVsCircle   : function( const L : zglTLine; const Circ : zglTCircle ) : Boolean;
+  col2d_LineVsCircleXY : function( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte ) : Boolean;
+  col2d_LineVsPolyLine : function( const A : zglTLine; const B : zglTPolyLine ) : Boolean;
   // polyline
-  col2d_PolyLine           : function( A, B : zglPPolyLine ) : Boolean; stdcall;
-  col2d_PolyLineVsRect     : function( A : zglPPolyLine; Rect : zglPRect ) : Boolean; stdcall;
-  col2d_PolyLineVsCircle   : function( A : zglPPolyLine; Circ : zglPCircle ) : Boolean; stdcall;
-  col2d_PolyLineVsCircleXY : function( A : zglPPolyLine; Circ : zglPCircle; Precision : Integer ) : Boolean; stdcall;
+  col2d_PolyLine           : function( const A, B : zglTPolyLine ) : Boolean;
+  col2d_PolyLineVsRect     : function( const A : zglTPolyLine; const Rect : zglTRect ) : Boolean;
+  col2d_PolyLineVsCircle   : function( const A : zglTPolyLine; const Circ : zglTCircle ) : Boolean;
+  col2d_PolyLineVsCircleXY : function( const A : zglTPolyLine; const Circ : zglTCircle; const Precision : Integer ) : Boolean;
   // rect
-  col2d_Rect         : function( Rect1, Rect2 : zglPRect ) : Boolean; stdcall;
-  col2d_RectInRect   : function( Rect1, Rect2 : zglPRect ) : Boolean; stdcall;
-  col2d_RectInCircle : function( Rect : zglPRect; Circ : zglPCircle ) : Boolean; stdcall;
-  col2d_RectVsCircle : function( Rect : zglPRect; Circ : zglPCircle ) : Boolean; stdcall;
+  col2d_Rect         : function( const Rect1, Rect2 : zglTRect ) : Boolean;
+  col2d_RectInRect   : function( const Rect1, Rect2 : zglTRect ) : Boolean;
+  col2d_RectInCircle : function( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
+  col2d_RectVsCircle : function( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
   // circle
-  col2d_Circle         : function( Circ1, Circ2 : zglPCircle ) : Boolean; stdcall;
-  col2d_CircleInCircle : function( Circ1, Circ2 : zglPCircle ) : Boolean; stdcall;
-  col2d_CircleInRect   : function( Circ : zglPCircle; Rect : zglPRect ) : Boolean; stdcall;
+  col2d_Circle         : function( const Circ1, Circ2 : zglTCircle ) : Boolean;
+  col2d_CircleInCircle : function( const Circ1, Circ2 : zglTCircle ) : Boolean;
+  col2d_CircleInRect   : function( const Circ : zglTCircle; const Rect : zglTRect ) : Boolean;
   // extended
-  col2dEx_LastX     : function : Single; stdcall;
-  col2dEx_LastY     : function : Single; stdcall;
-  col2dEx_LastLineA : function : Integer; stdcall;
-  col2dEx_LastLineB : function : Integer; stdcall;
+  col2dEx_LastX     : function : Single;
+  col2dEx_LastY     : function : Single;
+  col2dEx_LastLineA : function : Integer;
+  col2dEx_LastLineB : function : Integer;
   // polyline transformations
-  col2dEx_PolyRotate : procedure( A, B : zglPPolyLine; Angle : Single ); stdcall;
-  col2dEx_PolyScale  : procedure( A : zglPPolyLine; ScaleX, ScaleY : Single ); stdcall;
-  col2dEx_PolyMove   : procedure( A, B : zglPPolyLine; X, Y : Single ); stdcall;
-  col2dEx_PolyCenter : procedure( A : zglPPolyLine ); stdcall;
-  col2dEx_PolyRect   : procedure( A : zglPPolyLine; Rect : zglPRect ); stdcall;
+  col2dEx_PolyRotate : procedure( const A, B : zglTPolyLine; const Angle : Single );
+  col2dEx_PolyScale  : procedure( const A : zglTPolyLine; const ScaleX, ScaleY : Single );
+  col2dEx_PolyMove   : procedure( const A, B : zglTPolyLine; const X, Y : Single );
+  col2dEx_PolyCenter : procedure( const A : zglTPolyLine );
+  col2dEx_PolyRect   : procedure( const A : zglTPolyLine; const Rect : zglTRect );
   // line
-  col2dEx_CalcLineCross : procedure( A, B : zglPLine ); stdcall;
+  col2dEx_CalcLineCross : procedure( const A, B : zglTLine );
   
 // COLLISION 3D
 type
@@ -1706,7 +1705,6 @@ begin
       shader_SetAttribPf := dlsym( zglLib, 'shader_SetAttribPf' );
       shader_SetParameter4f := dlsym( zglLib, 'shader_SetParameter4f' );
   
-      m_Round := dlsym( zglLib, 'm_Round' );
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );
       m_SinCos := dlsym( zglLib, 'm_SinCos' );
