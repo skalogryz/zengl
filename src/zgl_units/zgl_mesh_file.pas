@@ -94,9 +94,9 @@ procedure zmf_WriteFacesW( var Memory : zglTMemory; Faces : array of zglTFace );
 procedure zmf_WriteGroupsW( var Memory : zglTMemory; Groups : array of zglTGroup );
 procedure zmf_WritePackedFrame( var Memory : zglTMemory; VCount, VPerFrame, Frame : DWORD; Vertices, Normals : array of zglTPoint3D );
 procedure zmf_WriteBones( var Memory : zglTMemory; Bones : array of zglTBone );
+procedure zmf_WriteBonePos( var Memory : zglTMemory; Count : Integer; BonePos : array of zglTBonePos );
 procedure zmf_WriteWeights( var Memory : zglTMemory; Weights : zglTBonesWeights; WCount : array of Byte );
 procedure zmf_WriteAction( var Memory : zglTMemory; Action : zglTSkeletonAction );
-procedure zmf_WriteSkeleton( var Memory : zglTMemory; Skeleton : zglTSkeletonFrame );
 {$ENDIF}
 
 var
@@ -426,13 +426,13 @@ begin
   mem_Write( Memory, minZ, 4 );
   for i := 0 to VCount - 1 do
     begin
-      x := m_Round( ( Vertices[ i ].X - minX ) * maxX );
+      x := Round( ( Vertices[ i ].X - minX ) * maxX );
       mem_Write( Memory, x, 2 );
 
-      y := m_Round( ( Vertices[ i ].Y - minY ) * maxY );
+      y := Round( ( Vertices[ i ].Y - minY ) * maxY );
       mem_Write( Memory, y, 2 );
 
-      z := m_Round( ( Vertices[ i ].Z - minZ ) * maxZ );
+      z := Round( ( Vertices[ i ].Z - minZ ) * maxZ );
       mem_Write( Memory, z, 2 );
     end;
 end;
@@ -472,13 +472,13 @@ begin
   mem_Write( Memory, minZ, 4 );
   for i := 0 to VCount - 1 do
     begin
-      x := m_Round( ( Normals[ i ].X - minX ) * maxX );
+      x := Round( ( Normals[ i ].X - minX ) * maxX );
       mem_Write( Memory, x, 2 );
 
-      y := m_Round( ( Normals[ i ].Y - minY ) * maxY );
+      y := Round( ( Normals[ i ].Y - minY ) * maxY );
       mem_Write( Memory, y, 2 );
 
-      z := m_Round( ( Normals[ i ].Z - minZ ) * maxZ );
+      z := Round( ( Normals[ i ].Z - minZ ) * maxZ );
       mem_Write( Memory, z, 2 );
     end;
 end;
@@ -501,12 +501,12 @@ begin
   maxY := 65535 / maxY;
   mem_Write( Memory, maxX, 4 );
   mem_Write( Memory, maxY, 4 );
-  for i := 0 to VCount - 1 do
+  for i := 0 to TCount - 1 do
     begin
-      x := m_Round( TexCoords[ i ].X * maxX );
+      x := Round( TexCoords[ i ].X * maxX );
       mem_Write( Memory, x, 2 );
 
-      y := m_Round( TexCoords[ i ].Y * maxY );
+      y := Round( TexCoords[ i ].Y * maxY );
       mem_Write( Memory, y, 2 );
     end;
 end;
@@ -571,13 +571,13 @@ begin
   mem_Write( Memory, minZ, 4 );
   for i := 0 to VPerFrame - 1 do
     begin
-      x := m_Round( ( Vertices[ Frame * VCount + i ].X - minX ) * maxX );
+      x := Round( ( Vertices[ Frame * VCount + i ].X - minX ) * maxX );
       mem_Write( Memory, x, 2 );
 
-      y := m_Round( ( Vertices[ Frame * VCount + i ].Y - minY ) * maxY );
+      y := Round( ( Vertices[ Frame * VCount + i ].Y - minY ) * maxY );
       mem_Write( Memory, y, 2 );
 
-      z := m_Round( ( Vertices[ Frame * VCount + i ].Z - minZ ) * maxZ );
+      z := Round( ( Vertices[ Frame * VCount + i ].Z - minZ ) * maxZ );
       mem_Write( Memory, z, 2 );
     end;
 
@@ -600,6 +600,19 @@ begin
     end;
 end;
 
+procedure zmf_WriteBonePos;
+  var
+    i : Integer;
+begin
+  mem_Write( Memory, ZMF_BONEPOS, 1 );
+  mem_Write( Memory, Count, 4 );
+  for i := 0 to Count - 1 do
+    begin
+      mem_Write( Memory, BonePos[ i ].Translation, SizeOf( zglTPoint3D ) );
+      mem_Write( Memory, BonePos[ i ].Rotation,    SizeOf( zglTPoint3D ) );
+    end;
+end;
+
 procedure zmf_WriteWeights;
   var
     i, j : Integer;
@@ -609,8 +622,8 @@ begin
   for i := 0 to length( WCount ) - 1 do
     for j := 0 to WCount[ i ] - 1 do
     begin
-      mem_Write( Memory, Weights[ i ][ j ].boneID, 4 );
-      mem_Write( Memory, Weights[ i ][ j ].Weight, 4 );
+      mem_Write( Memory, Weights[ i, j ].boneID, 4 );
+      mem_Write( Memory, Weights[ i, j ].Weight, 4 );
     end;
 end;
 
@@ -622,29 +635,14 @@ begin
   mem_Write( Memory, Action.FCount, 4 );
   for i := 0 to Action.FCount - 1 do
     begin
-      j := length( Action.Frames[ i ].BonePos );
+      j := length( Action.Frames[ i ] );
       mem_Write( Memory, j, 4 );
       mem_Write( Memory, Action.FPS, 4 );
-      for j := 0 to length( Action.Frames[ i ].BonePos ) - 1 do
+      for j := 0 to j - 1 do
         begin
-          mem_Write( Memory, Action.Frames[ i ].BonePos[ j ].Translation, SizeOf( zglTPoint3D ) );
-          mem_Write( Memory, Action.Frames[ i ].BonePos[ j ].Rotation,    SizeOf( zglTPoint3D ) );
+          mem_Write( Memory, Action.Frames[ i, j ].Translation, SizeOf( zglTPoint3D ) );
+          mem_Write( Memory, Action.Frames[ i, j ].Rotation,    SizeOf( zglTPoint3D ) );
         end;
-    end;
-end;
-
-procedure zmf_WriteSkeleton;
-  var
-    i, j : Integer;
-begin
-  mem_Write( Memory, ZMF_SKELETON, 1 );
-  j := length( Skeleton.BonePos );
-  mem_Write( Memory, j, 4 );
-  for i := 0 to j - 1 do
-    begin
-      mem_Write( Memory, Skeleton.BonePos[ i ].Point,       SizeOf( zglTPoint3D ) );
-      mem_Write( Memory, Skeleton.BonePos[ i ].Translation, SizeOf( zglTPoint3D ) );
-      mem_Write( Memory, Skeleton.BonePos[ i ].Rotation,    SizeOf( zglTPoint3D ) );
     end;
 end;
 {$ENDIF}
