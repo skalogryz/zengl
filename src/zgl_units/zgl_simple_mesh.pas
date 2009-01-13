@@ -41,7 +41,7 @@ function  smesh_LoadFromFile( var Mesh : zglPSMesh; const FileName : PChar; cons
 procedure smesh_Animate( const Mesh : zglPSMesh; var State : zglTSimpleState );
 procedure smesh_Draw( Mesh : zglPSMesh; const State : zglPSimpleState );
 procedure smesh_DrawGroup( const Mesh : zglPSMesh; const State : zglPSimpleState; const Group : DWORD );
-procedure smesh_Free( var Mesh : zglPSMesh );
+procedure smesh_Free( const Mesh : zglPSMesh );
 
 implementation
 

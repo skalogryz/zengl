@@ -45,6 +45,7 @@ uses
   zgl_main,
 
   zgl_opengl,
+  zgl_opengl_simple,
   zgl_window,
   zgl_screen,
 
@@ -75,9 +76,6 @@ uses
   zgl_gui_types,
   zgl_gui_render,
   zgl_gui_process,
-
-  zgl_zbuffer,
-  zgl_scissor,
 
   zgl_render_target,
 

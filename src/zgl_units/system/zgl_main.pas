@@ -48,8 +48,9 @@ uses
   zgl_textures,
   zgl_sound,
   zgl_shader,
-  
+
   zgl_opengl,
+  zgl_opengl_simple,
   zgl_window,
   zgl_screen,
   

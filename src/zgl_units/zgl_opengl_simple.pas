@@ -17,24 +17,84 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
-unit zgl_scissor;
+unit zgl_opengl_simple;
 
 {$I define.inc}
 
 interface
-
 uses
-  GL,
+  GL, GLExt,
+  zgl_const,
   zgl_global_var;
-  
+
+procedure Set2DMode;
+procedure Set3DMode( const FOVY : Single );
+procedure SetCurrentMode;
+
+procedure zbuffer_SetDepth( const zNear, zFar : Single );
+procedure zbuffer_Clear;
+
 procedure scissor_Begin( const X, Y, Width, Height : WORD );
 procedure scissor_End;
 
 implementation
+uses
+  zgl_screen;
 
 var
   tSCount  : WORD;
   tScissor : array of array[ 0..3 ] of WORD;
+
+procedure Set2DMode;
+begin
+  ogl_Mode := 2;
+  
+  glDisable( GL_DEPTH_TEST );
+  glMatrixMode( GL_PROJECTION );
+  glLoadIdentity;
+  if app_Flags and CORRECT_RESOLUTION > 0 Then
+    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, 0, 1 )
+  else
+    glOrtho( 0, wnd_Width, wnd_Height, 0, 0, 1 );
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity;
+  scr_SetViewPort;
+end;
+
+procedure Set3DMode;
+begin
+  ogl_Mode := 3;
+  ogl_FOVY := FOVY;
+
+  glColor4ub( 255, 255, 255, 255 );
+
+  glEnable( GL_DEPTH_TEST );
+  glMatrixMode( GL_PROJECTION );
+  glLoadIdentity;
+  gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity;
+  scr_SetViewPort;
+end;
+
+procedure SetCurrentMode;
+begin
+  if ogl_Mode = 2 Then
+    Set2DMode
+  else
+    Set3DMode( ogl_FOVY );
+end;
+
+procedure zbuffer_SetDepth;
+begin
+  ogl_zNear := zNear;
+  ogl_zFar  := zFar;
+end;
+
+procedure zbuffer_Clear;
+begin
+  glClear( GL_DEPTH_BUFFER_BIT );
+end;
 
 procedure scissor_Begin;
 begin

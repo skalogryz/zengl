@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 35                     }
-{ date:  29.12.08               }
+{ build: 36                     }
+{ date:  12.01.09               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -935,7 +935,7 @@ var
   smesh_Animate      : procedure( const Mesh : zglPSMesh; var State : zglTSimpleState );
   smesh_Draw         : procedure( const Mesh : zglPSMesh; const State : zglPSimpleState );
   smesh_DrawGroup    : procedure( const Mesh : zglPSMesh; const State : zglPSimpleState; const Group : DWORD );
-  smesh_Free         : procedure( var Mesh : zglPSMesh );
+  smesh_Free         : procedure( const Mesh : zglPSMesh );
 
 // SKINNED MESH
 type
@@ -1025,7 +1025,7 @@ var
   skmesh_Draw         : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
   skmesh_DrawGroup    : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
   skmesh_DrawSkelet   : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
-  skmesh_Free         : procedure( var Mesh : zglPSkMesh );
+  skmesh_Free         : procedure( const Mesh : zglPSkMesh );
 
 // HEIGHTMAP
 type
@@ -1057,7 +1057,7 @@ end;
 var
   heightmap_Build      : procedure( var Heightmap : zglPHeightMap; const Texture : zglPTexture; const xScale, yScale, zScale : Single; const xDetail, yDetail : Integer; const Flags : DWORD );
   heightmap_Draw       : procedure( const Heightmap : zglPHeightMap );
-  heightmap_Free       : procedure( var Heightmap : zglPHeightMap );
+  heightmap_Free       : procedure( const Heightmap : zglPHeightMap );
   heightmap_GetPlane   : function( const Heightmap : zglPHeightMap; Position : zglTPoint3D ) : DWORD;
   heightmap_GetYOffset : function( const Heightmap : zglPHeightMap; Position : zglTPoint3D ) : Single;
   

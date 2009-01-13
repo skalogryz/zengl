@@ -34,7 +34,7 @@ uses
   AGL, MacOSAll,
   {$ENDIF}
   zgl_global_var,
-  zgl_opengl,
+  zgl_opengl_simple,
   zgl_log,
 
   Utils;

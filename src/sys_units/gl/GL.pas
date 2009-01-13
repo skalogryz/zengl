@@ -1578,6 +1578,19 @@ type
   PFNGLGETCOLORTABLEPARAMETERIVEXTPROC = procedure(target, pname: GLenum; params: PGLint); extdecl;
   PFNGLGETCOLORTABLEPARAMETERFVEXTPROC = procedure(target, pname: GLenum; params: PGLfloat); extdecl;
 
+const
+{$IFDEF LINUX}
+  libGLU = 'libGLU.so.1';
+{$ENDIF}
+{$IFDEF WIN32}
+  libGLU = 'glu32.dll';
+{$ENDIF}
+{$IFDEF DARWIN}
+  libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
+{$ENDIF}
+procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); extdecl; external libGLU;
+function gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; extdecl; external libGLU;
+
 implementation
 
 {$ifdef windows}

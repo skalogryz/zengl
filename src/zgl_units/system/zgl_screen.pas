@@ -37,6 +37,7 @@ uses
   zgl_global_var,
   zgl_log,
   zgl_opengl,
+  zgl_opengl_simple,
   zgl_window,
   Utils;
 

@@ -45,25 +45,8 @@ procedure gl_Destroy;
 procedure gl_LoadEx;
 function  gl_GetProc( const Proc : String ) : Pointer;
 
-procedure Set2DMode;
-procedure Set3DMode( const FOVY : Single );
-procedure SetCurrentMode;
-
 procedure gl_MTexCoord2f( const U, V : Single );
 procedure gl_MTexCoord2fv( const Coord : Pointer );
-
-const
-{$IFDEF LINUX}
-  libGLU = 'libGLU.so.1';
-{$ENDIF}
-{$IFDEF WIN32}
-  libGLU = 'glu32.dll';
-{$ENDIF}
-{$IFDEF DARWIN}
-  libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
-{$ENDIF}
-procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); extdecl; external libGLU;
-function gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; extdecl; external libGLU;
 
 var
   LoadEx : Boolean;
@@ -509,46 +492,6 @@ begin
   if not Assigned( Result ) Then
     Result := wglGetProcAddress( PChar( Proc + 'ARB' ) );
   {$ENDIF}
-end;
-
-procedure Set2DMode;
-begin
-  ogl_Mode := 2;
-  
-  glDisable( GL_DEPTH_TEST );
-  glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
-    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, 0, 1 )
-  else
-    glOrtho( 0, wnd_Width, wnd_Height, 0, 0, 1 );
-  glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity;
-  scr_SetViewPort;
-end;
-
-procedure Set3DMode;
-begin
-  ogl_Mode := 3;
-  ogl_FOVY := FOVY;
-
-  glColor4ub( 255, 255, 255, 255 );
-
-  glEnable( GL_DEPTH_TEST );
-  glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
-  gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
-  glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity;
-  scr_SetViewPort;
-end;
-
-procedure SetCurrentMode;
-begin
-  if ogl_Mode = 2 Then
-    Set2DMode
-  else
-    Set3DMode( ogl_FOVY );
 end;
 
 procedure gl_MTexCoord2f;

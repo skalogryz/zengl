@@ -43,7 +43,7 @@ procedure skmesh_Animate( const Mesh : zglPSkMesh; var State : zglTSkeletonState
 procedure skmesh_Draw( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
 procedure skmesh_DrawGroup( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
 procedure skmesh_DrawSkelet( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
-procedure skmesh_Free( var Mesh : zglPSkMesh );
+procedure skmesh_Free( const Mesh : zglPSkMesh );
 
 procedure skmesh_CalcQuats( var BonePos : array of zglTBonePos );
 procedure skmesh_CalcFrame( var BonePos : array of zglTBonePos; const Bones : array of zglTBone );
