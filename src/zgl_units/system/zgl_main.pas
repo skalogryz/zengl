@@ -108,9 +108,11 @@ begin
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
-
+  {$IFDEF DARWIN}writeln( 'scr_Create' );{$ENDIF}
   if not scr_Create Then exit;
+  {$IFDEF DARWIN}writeln( 'wnd_Create' );{$ENDIF}
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
+  {$IFDEF DARWIN}writeln( 'gl_Create' );{$ENDIF}
   if not gl_Create Then exit;
   app_Work := TRUE;
 
@@ -665,7 +667,7 @@ begin
                 key_InputText( Char( Getchar( c[ 0 ], c[ 1 ] ) ) )
               else
                 if len > 0 Then
-                  key_InputText( c );
+                  key_InputText( c[ 0 ] );
             end;
           end;
         KeyRelease:

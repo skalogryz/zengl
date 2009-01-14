@@ -27,14 +27,14 @@ uses
   zgl_types,
   zgl_math;
 
-procedure shadow_InitVolume( var Volume : zglPShadowVolume; const Vertices : zglPPoint3DArray; const FCount : DWORD; const Faces : zglPFaceArray );
-procedure shadow_CalcVolume( const Volume : zglPShadowVolume; const Matrix : zglPMatrix4f; const Vertices : zglPPoint3DArray; const Light : zglTPoint3D; const RebuildPlanes : Boolean; const Extrude : Single );
+function  shadow_InitVolume( const Vertices : zglPPoint3DArray; const FCount : DWORD; const Faces : zglPFaceArray ) : zglPShadowVolume;
+procedure shadow_CalcVolume( var Volume : zglTShadowVolume; const Matrix : zglPMatrix4f; const Vertices : zglPPoint3DArray; const Light : zglTPoint3D; const RebuildPlanes : Boolean; const Extrude : Single );
 procedure shadow_DrawVolume( const Volume : zglPShadowVolume; const zFail : Boolean );
 procedure shadow_DrawShadowVolumes( const DrawVolumes : Pointer );
 
 implementation
 
-procedure shadow_InitVolume;
+function shadow_InitVolume;
   var
     i, j : Integer;
     edgeI, edgeJ : Integer;
@@ -55,9 +55,9 @@ procedure shadow_InitVolume;
     Result := length( VA ) - 1;
   end;
 begin
-  Volume := AllocMem( SizeOf( zglTShadowVolume ) );
-  Volume.FCount := FCount;
-  with Volume^ do
+  Result := AllocMem( SizeOf( zglTShadowVolume ) );
+  Result.FCount := FCount;
+  with Result^ do
     begin
       ICount := FCount * 3;
 
@@ -109,7 +109,7 @@ begin
   if Assigned( Matrix ) Then
     mLight := vector_MulM4f( Light, matrix4f_Inverse( Matrix^ ) );
 
-  with Volume^ do
+  with Volume do
     begin
       if RebuildPlanes Then
         for i := 0 to FCount - 1 do

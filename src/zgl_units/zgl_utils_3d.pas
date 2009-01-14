@@ -27,9 +27,10 @@ uses
   zgl_timers,
   zgl_math;
 
-procedure BuildIndices( FCount : DWORD; var Faces : array of zglTFace; Indices : Pointer; Size : Byte );
-procedure BuildSNormals( FCount, VCount : DWORD; Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
+procedure BuildIndices( const FCount : DWORD; var Faces : array of zglTFace; var Indices : Pointer; const Size : Byte );
+procedure BuildSNormals( const FCount, VCount : DWORD; const Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
 
+function  CalcRVC( const VCount : DWORD; const Vertices : array of zglTPoint3D; var RIndices : array of DWORD ) : DWORD;
 procedure CalcFrame( var Delta, prevDelta, outDelta : Single; var Time : Double; var Frame, prevFrame, nextFrame : Integer; FFrame, FCount : Integer );
 
 implementation
@@ -38,6 +39,7 @@ procedure BuildIndices;
   var
     i, j : DWORD;
 begin
+  Indices := AllocMem( FCount * Size * 3 );
   if Size = 2 Then
     begin
       for i := 0 to FCount - 1 do
@@ -103,6 +105,23 @@ begin
     end;
 
   SetLength( TNormals, 0 );
+end;
+
+function CalcRVC;
+  var
+    i, j : DWORD;
+begin
+  Result := 0;
+  for i := 0 to VCount - 1 do
+    for j := 0 to VCount - 1 do
+      if ( Vertices[ i ].X = Vertices[ j ].X ) and
+         ( Vertices[ i ].Y = Vertices[ j ].Y ) and
+         ( Vertices[ i ].Z = Vertices[ j ].Z ) Then
+        begin
+          RIndices[ i ] := j;
+          if ( j <> i ) and ( Result = 0 ) Then Result := i;
+          break;
+        end;
 end;
 
 procedure CalcFrame;

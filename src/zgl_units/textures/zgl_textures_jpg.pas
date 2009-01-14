@@ -178,7 +178,7 @@ var
   {$ENDIF}
   
 {$IFDEF LINUX_OR_DARWIN}
-procedure jpeg_output_message( cinfo : j_common_ptr );
+procedure jpeg_output_message( cinfo : j_common_ptr ); register;
   var
     str : String;
 begin
@@ -186,22 +186,22 @@ begin
   log_Add( 'JPEG - ' + str );
 end;
 
-function jpeg_error( var err : jpeg_error_mgr ) : jpeg_error_mgr_ptr;
+function jpeg_error( var err : jpeg_error_mgr ) : jpeg_error_mgr_ptr; register;
 begin
   jpeg_std_error( err );
   err.output_message := jpeg_output_message;
   Result := @err;
 end;
 
-procedure Decoder_Init( cinfo : j_decompress_ptr );
+procedure Decoder_Init( cinfo : j_decompress_ptr ); register;
 begin
 end;
 
-procedure Decoder_Term( cinfo : j_decompress_ptr );
+procedure Decoder_Term( cinfo : j_decompress_ptr ); register;
 begin
 end;
 
-function Decoder_FillInputData( cinfo : j_decompress_ptr ) : Boolean;
+function Decoder_FillInputData( cinfo : j_decompress_ptr ) : Boolean; register;
   var
     Decoder   : zglPJPGDecoder;
     BytesRead : Integer;
@@ -222,7 +222,7 @@ begin
   Result := TRUE;
 end;
 
-procedure Decoder_SkipInputData( cinfo : j_decompress_ptr; BytesToSkip : Long );
+procedure Decoder_SkipInputData( cinfo : j_decompress_ptr; BytesToSkip : Long ); register;
   var
     Decoder : zglPJPGDecoder;
 begin
@@ -362,7 +362,7 @@ procedure jpg_FillData;
     t    : Byte;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
+{$IFDEF LINUX_OR_DARWIN}
   color := JSAMPLE_PTR( jpgData.Buffer[ 0 ] );
   if not jpgData.Grayscale Then
     begin

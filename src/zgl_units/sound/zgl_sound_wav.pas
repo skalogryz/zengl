@@ -24,7 +24,7 @@ unit zgl_sound_wav;
 interface
 
 uses
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   openal,
   {$ENDIF}
   {$IFDEF WIN32}
@@ -75,7 +75,7 @@ begin
 
   Frequency := wavHeader.SampleRate;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   if wavHeader.ChannelNumber = 1 Then
     case WavHeader.BitsPerSample of
       8:  format := AL_FORMAT_MONO8;

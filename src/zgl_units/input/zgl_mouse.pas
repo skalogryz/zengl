@@ -71,15 +71,12 @@ implementation
 
 function mouse_X;
 begin
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   Result := mouseX;
   {$ENDIF}
   {$IFDEF WIN32}
   GetCursorPos( cursorpos );
   Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  Result := mouseX - wnd_BrdSizeX;
   {$ENDIF}
   Result := Round( Result / scr_ResCX );
 end;
@@ -94,7 +91,7 @@ begin
   Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
   {$ENDIF}
   {$IFDEF DARWIN}
-  Result := mouseY - wnd_BrdSizeY - wnd_CpnSize;
+  Result := mouseY - wnd_CpnSize;
   {$ENDIF}
   Result := Round( Result / scr_ResCY );
 end;

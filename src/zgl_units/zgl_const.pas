@@ -34,8 +34,8 @@ const
   defBPP      = 32;
 
   // constant string
-  cs_ZenGL    = 'ZenGL build 36[02.01.09]';
-  cv_version  = 36;
+  cs_ZenGL    = 'ZenGL build 37[14.01.09]';
+  cv_version  = 37;
 
   // zgl_Reg
   SYS_LOAD             = $000001;

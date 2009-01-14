@@ -134,6 +134,8 @@ var
   {$IFDEF DARWIN}
   wnd_Handle : WindowRef;
   wnd_Attr   : WindowAttributes;
+
+  wnd_CpnSize  : WORD;
   {$ENDIF}
   {---------------------------------- SCREEN ----------------------------------}
   scr_Width   : WORD;

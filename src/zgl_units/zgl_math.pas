@@ -107,7 +107,7 @@ function line3d_ClosestPoint( const A, B, Point : zglTPoint3D ) : zglTPoint3D;
 function plane_Get( const A, B, C : zglTPoint3D ) : zglTPlane;
 function plane_Distance( const Plane : zglTPlane; const Point : zglTPoint3D ) : Single;
 
-function tri_GetNormal( const A, B, C : zglPPoint3D ) : zglTPoint3D;
+function tri_GetNormal( const A, B, C : zglTPoint3D ) : zglTPoint3D;
 
 function ArcTan2( X, Y : Single ) : Single;
 function ArcCos( Value : Single ) : Single;
@@ -795,7 +795,7 @@ begin
   Result.Points[ 0 ] := A;
   Result.Points[ 1 ] := B;
   Result.Points[ 2 ] := C;
-  Result.Normal      := tri_GetNormal( @A, @B, @C );
+  Result.Normal      := tri_GetNormal( A, B, C );
   Result.D           := -vector_Dot( Result.Normal, A );
 end;
 
@@ -809,8 +809,8 @@ function tri_GetNormal;
     s1, s2, p : zglTPoint3D;
     uvector   : Single;
 begin
-  s1 := vector_Sub( A^, B^ );
-  s2 := vector_Sub( B^, C^ );
+  s1 := vector_Sub( A, B );
+  s2 := vector_Sub( B, C );
   // вектор перпендикулярен центру треугольника
   p := vector_Cross( s1, s2 );
   // получаем унитарный вектор единичной длины

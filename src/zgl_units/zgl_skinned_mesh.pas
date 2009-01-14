@@ -38,7 +38,7 @@ uses
   zgl_utils_3d,
   Utils;
 
-function  skmesh_LoadFromFile( var Mesh : zglPSkMesh; const FileName : PChar; const Flags : DWORD ) : Boolean;
+function  skmesh_LoadFromFile( const FileName : PChar; const Flags : DWORD ) : zglPSkMesh;
 procedure skmesh_Animate( const Mesh : zglPSkMesh; var State : zglTSkeletonState );
 procedure skmesh_Draw( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
 procedure skmesh_DrawGroup( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
@@ -60,37 +60,15 @@ function skmesh_LoadFromFile;
     M        : zglTMemory;
     DataID   : Byte;
     TexLayer : Byte = 0;
-    function getVI( ID : DWORD ) : DWORD;
-      var
-        k : DWORD;
-    begin
-      for k := 0 to Mesh.VCount - 1 do
-        if ( Mesh.Vertices[ ID ].X = Mesh.Vertices[ k ].X ) and
-           ( Mesh.Vertices[ ID ].Y = Mesh.Vertices[ k ].Y ) and
-           ( Mesh.Vertices[ ID ].Z = Mesh.Vertices[ k ].Z ) Then
-          begin
-            Result := k;
-            if ( k <> ID ) and ( Mesh.RVCount = 0 ) Then Mesh.RVCount := ID;
-            break;
-          end;
-    end;
-    procedure calcVI;
-      var
-        k : DWORD;
-    begin
-      SetLength( Mesh.RIndices, Mesh.VCount );
-      for k := 0 to Mesh.VCount - 1 do
-        Mesh.RIndices[ k ] := getVI( k );
-    end;
 begin
-  Mesh := AllocMem( SizeOf( zglTSkMesh ) );
-  Result := FALSE;
-
   if not file_Exists( FileName ) Then
     begin
       log_Add( 'Cannot read ' + FileName );
+      Result := nil;
       exit;
     end;
+
+  Result := AllocMem( SizeOf( zglTSkMesh ) );
 
   mem_LoadFromFile( M, FileName );
 
@@ -101,26 +79,26 @@ begin
       exit;
     end;
 
-  Mesh.Flags  := zmfHeader.Flags or Flags;
-  Mesh.VCount := zmfHeader.VCount;
-  Mesh.TCount := zmfHeader.TCount;
-  Mesh.FCount := zmfHeader.FCount;
-  Mesh.GCount := zmfHeader.GCount;
-  Mesh.BCount := zmfHeader.BCount;
-  Mesh.ACount := 0;
+  Result.Flags  := zmfHeader.Flags or Flags;
+  Result.VCount := zmfHeader.VCount;
+  Result.TCount := zmfHeader.TCount;
+  Result.FCount := zmfHeader.FCount;
+  Result.GCount := zmfHeader.GCount;
+  Result.BCount := zmfHeader.BCount;
+  Result.ACount := 0;
 
-  SetLength( Mesh.Vertices, Mesh.VCount );
-  if zmfHeader.Flags and USE_NORMALS > 0 Then SetLength( Mesh.Normals, Mesh.VCount );
+  SetLength( Result.Vertices, Result.VCount );
+  if zmfHeader.Flags and USE_NORMALS > 0 Then SetLength( Result.Normals, Result.VCount );
   if zmfHeader.Flags and USE_TEXTURE > 0 Then
     begin
-      SetLength( Mesh.TexCoords, Mesh.TCount );
-      SetLength( Mesh.MultiTexCoords, ( zmfHeader.TLayers - 1 ) * Mesh.VCount );
+      SetLength( Result.TexCoords, Result.TCount );
+      SetLength( Result.MultiTexCoords, ( zmfHeader.TLayers - 1 ) * Result.VCount );
     end;
-  SetLength( Mesh.Faces, Mesh.FCount );
-  SetLength( Mesh.Groups, Mesh.GCount );
-  SetLength( Mesh.Bones, Mesh.BCount );
-  SetLength( Mesh.Weights, Mesh.VCount );
-  SetLength( Mesh.BonePos, Mesh.BCount );
+  SetLength( Result.Faces,   Result.FCount );
+  SetLength( Result.Groups,  Result.GCount );
+  SetLength( Result.Bones,   Result.BCount );
+  SetLength( Result.Weights, Result.VCount );
+  SetLength( Result.BonePos, Result.BCount );
 
   while M.Position < M.Size do
     begin
@@ -128,110 +106,108 @@ begin
       case DataID of
         ZMF_VERTICES:
           begin
-            zmf_ReadVertices( M, Mesh.Vertices );
+            zmf_ReadVertices( M, Result.Vertices );
           end;
         ZMF_NORMALS:
           begin
-            zmf_ReadNormals( M, Mesh.Normals );
+            zmf_ReadNormals( M, Result.Normals );
           end;
         ZMF_TEXCOORDS:
           begin
             INC( TexLayer );
-            zmf_ReadTexCoords( M, Mesh.TexCoords, TexLayer );
+            zmf_ReadTexCoords( M, Result.TexCoords, TexLayer );
           end;
         ZMF_FACES:
           begin
-            zmf_ReadFaces( M, Mesh.Faces );
+            zmf_ReadFaces( M, Result.Faces );
           end;
         ZMF_GROUPS:
           begin
-            zmf_ReadGroups( M, Mesh.Groups );
+            zmf_ReadGroups( M, Result.Groups );
           end;
         ZMF_PACKED_VERTICES:
           begin
-            zmf_ReadPackedVertices( M, Mesh.Vertices );
+            zmf_ReadPackedVertices( M, Result.Vertices );
           end;
         ZMF_PACKED_NORMALS:
           begin
-            zmf_ReadPackedNormals( M, Mesh.Normals );
+            zmf_ReadPackedNormals( M, Result.Normals );
           end;
         ZMF_PACKED_TEXCOORDS:
           begin
             INC( TexLayer );
-            zmf_ReadPackedTexCoords( M, Mesh.TexCoords, TexLayer );
+            zmf_ReadPackedTexCoords( M, Result.TexCoords, TexLayer );
           end;
         ZMF_FACES_RANGE_WORD:
           begin
-            zmf_ReadFacesW( M, Mesh.Faces );
+            zmf_ReadFacesW( M, Result.Faces );
           end;
         ZMF_GROUPS_RANGE_WORD:
           begin
-            zmf_ReadGroupsW( M, Mesh.Groups );
+            zmf_ReadGroupsW( M, Result.Groups );
           end;
         ZMF_BONES:
           begin
-            zmf_ReadBones( M, Mesh.Bones );
+            zmf_ReadBones( M, Result.Bones );
           end;
         ZMF_WEIGHTS:
           begin
-            SetLength( Mesh.WCount, Mesh.VCount );
-            mem_Read( M, Mesh.WCount[ 0 ], Mesh.VCount );
-            SetLength( Mesh.Weights, Mesh.VCount );
-            for i := 0 to Mesh.VCount - 1 do
-              SetLength( Mesh.Weights[ i ], Mesh.WCount[ i ] );
-            zmf_ReadWeights( M, Mesh.Weights, Mesh.WCount );
+            SetLength( Result.WCount, Result.VCount );
+            mem_Read( M, Result.WCount[ 0 ], Result.VCount );
+            SetLength( Result.Weights, Result.VCount );
+            for i := 0 to Result.VCount - 1 do
+              SetLength( Result.Weights[ i ], Result.WCount[ i ] );
+            zmf_ReadWeights( M, Result.Weights, Result.WCount );
           end;
         ZMF_ACTION:
           begin
-            SetLength( Mesh.Actions, Mesh.ACount + 1 );
-            mem_Read( M, Mesh.Actions[ Mesh.ACount ].FCount, 4 );
-            SetLength( Mesh.Actions[ Mesh.ACount ].Frames, Mesh.Actions[ Mesh.ACount ].FCount );
-            zmf_ReadAction( M, Mesh.Actions[ Mesh.ACount ] );
-            INC( Mesh.ACount );
+            SetLength( Result.Actions, Result.ACount + 1 );
+            mem_Read( M, Result.Actions[ Result.ACount ].FCount, 4 );
+            SetLength( Result.Actions[ Result.ACount ].Frames, Result.Actions[ Result.ACount ].FCount );
+            zmf_ReadAction( M, Result.Actions[ Result.ACount ] );
+            INC( Result.ACount );
           end;
         ZMF_BONEPOS:
           begin
-            zmf_ReadBonePos( M, Mesh.BonePos );
+            zmf_ReadBonePos( M, Result.BonePos );
           end;
       end;
     end;
   mem_Free( M );
-  calcVI;
 
-  vbo_Check( Mesh.Flags );
+  SetLength( Result.RIndices, Result.VCount );
+  Result.RVCount := CalcRVC( Result.VCount, Result.Vertices, Result.RIndices );
 
-  if ( not Assigned( Mesh.Normals ) ) and ( Mesh.Flags and BUILD_SNORMALS > 0 ) Then
+  vbo_Check( Result.Flags );
+
+  if ( not Assigned( Result.Normals ) ) and ( Result.Flags and BUILD_SNORMALS > 0 ) Then
     begin
-      Mesh.Flags := Mesh.Flags or USE_NORMALS;
-      SetLength( Mesh.Normals, Mesh.VCount );
-      BuildSNormals( Mesh.FCount, Mesh.VCount, Mesh.Faces, Mesh.Vertices, Mesh.Normals );
+      Result.Flags := Result.Flags or USE_NORMALS;
+      SetLength( Result.Normals, Result.VCount );
+      BuildSNormals( Result.FCount, Result.VCount, Result.Faces, Result.Vertices, Result.Normals );
     end;
 
-  if Mesh.VCount < 65536 Then
+  if Result.VCount < 65536 Then
     begin
-      Mesh.Indices := AllocMem( Mesh.FCount * 2 * 3 );
-      BuildIndices( Mesh.FCount, Mesh.Faces, Mesh.Indices, 2 );
-      for i := 0 to Mesh.GCount - 1 do
-        Mesh.Groups[ i ].Indices := Mesh.Indices + Mesh.Groups[ i ].IFace * 3 * 2;
+      BuildIndices( Result.FCount, Result.Faces, Result.Indices, 2 );
+      for i := 0 to Result.GCount - 1 do
+        Result.Groups[ i ].Indices := Result.Indices + Result.Groups[ i ].IFace * 3 * 2;
     end else
       begin
-        Mesh.Indices := AllocMem( Mesh.FCount * 4 * 3 );
-        BuildIndices( Mesh.FCount, Mesh.Faces, Mesh.Indices, 4 );
-        for i := 0 to Mesh.GCount - 1 do
-          Mesh.Groups[ i ].Indices := Mesh.Indices + Mesh.Groups[ i ].IFace * 3 * 4;
+        BuildIndices( Result.FCount, Result.Faces, Result.Indices, 4 );
+        for i := 0 to Result.GCount - 1 do
+          Result.Groups[ i ].Indices := Result.Indices + Result.Groups[ i ].IFace * 3 * 4;
       end;
 
-  if Mesh.Flags and USE_VBO > 0 Then
-    vbo_Build( Mesh.IBuffer, Mesh.VBuffer, Mesh.FCount * 3, Mesh.VCount,
-               Mesh.Indices,
-               Mesh.Vertices, Mesh.Normals,
-               Mesh.TexCoords, Mesh.MultiTexCoords,
-               Mesh.Flags );
+  if Result.Flags and USE_VBO > 0 Then
+    vbo_Build( Result.IBuffer, Result.VBuffer, Result.FCount * 3, Result.VCount,
+               Result.Indices,
+               Result.Vertices, Result.Normals,
+               Result.TexCoords, Result.MultiTexCoords,
+               Result.Flags );
 
-  skmesh_CalcQuats( Mesh.BonePos );
-  skmesh_CalcFrame( Mesh.BonePos, Mesh.Bones );
-
-  Result := TRUE;
+  skmesh_CalcQuats( Result.BonePos );
+  skmesh_CalcFrame( Result.BonePos, Result.Bones );
 end;
 
 procedure skmesh_Animate;

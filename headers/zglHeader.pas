@@ -28,6 +28,10 @@ unit zglHeader;
 {$ENDIF}
 
 interface
+{$IFDEF DARWIN}
+uses
+  MacOSAll;
+{$ENDIF}
 
 type
   DWORD   = LongWord;
@@ -48,6 +52,8 @@ const
 {$ENDIF}
 {$IFDEF DARWIN}
   libZenGL = 'libZenGL.dylib';
+var
+  mainPath : String;
 {$ENDIF}
 
 function zglLoad( LibraryName : String; Error : Boolean = TRUE ) : Boolean;
@@ -931,7 +937,7 @@ type
 end;
 
 var
-  smesh_LoadFromFile : function( var Mesh : zglPSMesh; const FileName : String; const Flags : DWORD = 0 ) : Boolean;
+  smesh_LoadFromFile : function( const FileName : String; const Flags : DWORD = 0 ) : zglPSMesh;
   smesh_Animate      : procedure( const Mesh : zglPSMesh; var State : zglTSimpleState );
   smesh_Draw         : procedure( const Mesh : zglPSMesh; const State : zglPSimpleState );
   smesh_DrawGroup    : procedure( const Mesh : zglPSMesh; const State : zglPSimpleState; const Group : DWORD );
@@ -1020,7 +1026,7 @@ type
 end;
 
 var
-  skmesh_LoadFromFile : function( var Mesh : zglPSkMesh; const FileName : String; const Flags : DWORD = 0 ) : Boolean;
+  skmesh_LoadFromFile : function( const FileName : String; const Flags : DWORD = 0 ) : zglPSkMesh;
   skmesh_Animate      : procedure( const Mesh : zglPSkMesh; var State : zglTSkeletonState );
   skmesh_Draw         : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
   skmesh_DrawGroup    : procedure( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
@@ -1055,7 +1061,7 @@ type
 end;
 
 var
-  heightmap_Build      : procedure( var Heightmap : zglPHeightMap; const Texture : zglPTexture; const xScale, yScale, zScale : Single; const xDetail, yDetail : Integer; const Flags : DWORD );
+  heightmap_Build      : function( const Texture : zglPTexture; const xScale, yScale, zScale : Single; const xDetail, yDetail : Integer; const Flags : DWORD ) : zglPHeightMap;
   heightmap_Draw       : procedure( const Heightmap : zglPHeightMap );
   heightmap_Free       : procedure( const Heightmap : zglPHeightMap );
   heightmap_GetPlane   : function( const Heightmap : zglPHeightMap; Position : zglTPoint3D ) : DWORD;
@@ -1192,8 +1198,8 @@ type
 end;
 
 var
-  shadow_InitVolume        : procedure( var Volume : zglPShadowVolume; const Vertices : zglPPoint3D; const FCount : DWORD; const Faces : zglPFace );
-  shadow_CalcVolume        : procedure( const Volume : zglPShadowVolume; const Matrix : zglPMatrix4f; const Vertices : zglPPoint3D; const Light : zglTPoint3D; const RebuildPlanes : Boolean; const Extrude : Single );
+  shadow_InitVolume        : function( const Vertices : zglPPoint3D; const FCount : DWORD; const Faces : zglPFace ) : zglPShadowVolume;
+  shadow_CalcVolume        : procedure( var Volume : zglTShadowVolume; const Matrix : zglPMatrix4f; const Vertices : zglPPoint3D; const Light : zglTPoint3D; const RebuildPlanes : Boolean; const Extrude : Single );
   shadow_DrawVolume        : procedure( const Volume : zglPShadowVolume; const zFail : Boolean );
   shadow_DrawShadowVolumes : procedure( const DrawVolumes : Pointer );
   
@@ -1306,7 +1312,7 @@ var
   plane_Get      : function( const A, B, C : zglTPoint3D ) : zglTPlane;
   plane_Distance : function( const Plane : zglTPlane; const Point : zglTPoint3D ) : Single;
   // triangle
-  tri_GetNormal  : function( const A, B, C : zglPPoint3D ) : zglTPoint3D;
+  tri_GetNormal  : function( const A, B, C : zglTPoint3D ) : zglTPoint3D;
 
 // COLLISION 2D
   col2d_PointInRect     : function( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
@@ -1380,7 +1386,11 @@ var
   col3d_SphereVsSphere : function( const Sphere1, Sphere : zglTSphere ) : Boolean;
   col3d_SphereVsNode   : function( const Sphere : zglTSphere; const Octree : zglTOctree; const Node : zglTNode; const Callback : zglTCol3DCallback; const CData : Pointer ) : Boolean;
 
+{$IFDEF DARWIN}
+type zglTFile = File;
+{$ELSE}
 type zglTFile = DWORD;
+{$ENDIF}
 const
   // Open Mode
   FOM_CREATE = $01; // Create
@@ -1443,6 +1453,12 @@ implementation
 
 var
   zglLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  {$IFDEF DARWIN}
+  mainBundle   : CFBundleRef;
+  tmpCFURLRef  : CFURLRef;
+  tmpCFString  : CFStringRef;
+  tmpPath      : array[ 0..8191 ] of Char;
+  {$ENDIF}
   
 function u_IntToStr;
 begin
@@ -1464,6 +1480,14 @@ End;
 
 function zglLoad;
 begin
+  {$IFDEF DARWIN}
+  mainBundle  := CFBundleGetMainBundle;
+  tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
+  tmpCFString := CFURLCopyPath( tmpCFURLRef );
+  CFStringGetFileSystemRepresentation( tmpCFString, @tmpPath[ 0 ], 8192 );
+  mainPath    := tmpPath + 'Contents/';
+  LibraryName := mainPath + 'Frameworks/' + LibraryName;
+  {$ENDIF}
   zglLib := dlopen( PChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
 
   if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
