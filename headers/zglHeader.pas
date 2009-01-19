@@ -18,11 +18,9 @@ unit zglHeader;
   {$MACRO ON}
   {$PACKRECORDS 8}
   {$IFDEF LINUX}
-    {$DEFINE stdcall := cdecl}
     {$DEFINE LINUX_OR_DARWIN}
   {$ENDIF}
   {$IFDEF DARWIN}
-    {$DEFINE stdcall := cdecl}
     {$DEFINE LINUX_OR_DARWIN}
   {$ENDIF}
 {$ENDIF}
@@ -1285,14 +1283,15 @@ var
   matrix3f_Get            : function( const v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
   matrix3f_OrthoNormalize : procedure( var Matrix : zglTMatrix3f );
   matrix3f_Transpose      : procedure( var Matrix : zglTMatrix3f );
-  matrix3f_Rotate         : procedure( var Matrix : zglTMatrix3f; const aX, aY, aZ : Single );
+  matrix3f_SetRot         : procedure( var Matrix : zglTMatrix3f; const aX, aY, aZ : Single );
   matrix3f_Add            : function( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix4f;
   matrix3f_Mul            : function( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
   matrix4f_Transpose      : procedure( var Matrix : zglTMatrix4f );
   matrix4f_Determinant    : function( const Matrix : zglTMatrix4f ) : Single;
   matrix4f_Inverse        : function( const Matrix : zglTMatrix4f ) : zglTMatrix4f;
   matrix4f_Translate      : procedure( var Matrix : zglTMatrix4f; const tX, tY, tZ : Single );
-  matrix4f_Rotate         : procedure( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single );
+  matrix4f_SetPos         : procedure( var Matrix : zglTMatrix4f; const X, Y, Z : Single );
+  matrix4f_SetRot         : procedure( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single );
   matrix4f_Scale          : procedure( var Matrix : zglTMatrix4f; const sX, sY, sZ : Single );
   matrix4f_Mul            : function ( const Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
   // quaternions
@@ -1765,7 +1764,7 @@ begin
       matrix3f_Get := dlsym( zglLib, 'matrix3f_Get' );
       matrix3f_OrthoNormalize := dlsym( zglLib, 'matrix3f_OrthoNormalize' );
       matrix3f_Transpose := dlsym( zglLib, 'matrix3f_Transpose' );
-      matrix3f_Rotate := dlsym( zglLib, 'matrix3f_Rotate' );
+      matrix3f_SetRot := dlsym( zglLib, 'matrix3f_SetRot' );
       matrix3f_Add := dlsym( zglLib, 'matrix3f_Add' );
       matrix3f_Mul := dlsym( zglLib, 'matrix3f_Mul' );
 
@@ -1773,7 +1772,8 @@ begin
       matrix4f_Determinant := dlsym( zglLib, 'matrix4f_Determinant' );
       matrix4f_Inverse := dlsym( zglLib, 'matrix4f_Inverse' );
       matrix4f_Translate := dlsym( zglLib, 'matrix4f_Translate' );
-      matrix4f_Rotate := dlsym( zglLib, 'matrix4f_Rotate' );
+      matrix4f_SetPos := dlsym( zglLib, 'matrix4f_SetPos' );
+      matrix4f_SetRot := dlsym( zglLib, 'matrix4f_SetRot' );
       matrix4f_Scale := dlsym( zglLib, 'matrix4f_Scale' );
       matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
 
