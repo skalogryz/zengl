@@ -208,6 +208,14 @@ begin
 
   skmesh_CalcQuats( Result.BonePos );
   skmesh_CalcFrame( Result.BonePos, Result.Bones );
+
+  for i := 0 to Result.BCount - 1 do
+    with Result.BonePos[ i ] do
+      begin
+        Matrix.a41 := -( Matrix.a14 * Matrix.a11 + Matrix.a24 * Matrix.a21 + Matrix.a34 * Matrix.a31 );
+        Matrix.a42 := -( Matrix.a14 * Matrix.a12 + Matrix.a24 * Matrix.a22 + Matrix.a34 * Matrix.a32 );
+        Matrix.a43 := -( Matrix.a14 * Matrix.a13 + Matrix.a24 * Matrix.a23 + Matrix.a34 * Matrix.a33 );
+      end;
 end;
 
 procedure skmesh_Animate;
@@ -467,16 +475,16 @@ procedure skmesh_CalcFrame;
 begin
   for i := 0 to length( BonePos ) - 1 do
     begin
-      BonePos[ i ].Point.X := 0;
-      BonePos[ i ].Point.Y := 0;
-      BonePos[ i ].Point.Z := 0;
-
       BonePos[ i ].Matrix.a14 := BonePos[ i ].Translation.X;
       BonePos[ i ].Matrix.a24 := BonePos[ i ].Translation.Y;
       BonePos[ i ].Matrix.a34 := BonePos[ i ].Translation.Z;
+
       if Bones[ i ].Parent >= 0 Then
         BonePos[ i ].Matrix := matrix4f_Mul( BonePos[ Bones[ i ].Parent ].Matrix, BonePos[ i ].Matrix );
-      BonePos[ i ].Point := vector_MulInvM4f( BonePos[ i ].Point, BonePos[ i ].Matrix );
+
+      BonePos[ i ].Point.X := BonePos[ i ].Matrix.a14;
+      BonePos[ i ].Point.Y := BonePos[ i ].Matrix.a24;
+      BonePos[ i ].Point.Z := BonePos[ i ].Matrix.a34;
     end;
 end;
 
@@ -484,7 +492,6 @@ procedure skmesh_CalcVerts;
   var
     i, j    : Integer;
     t1, t2  : zglTPoint3D;
-    Matrix  : zglPMatrix4f;
     rMatrix : zglTMatrix4f;
     Weight  : Single;
     vb, vb2 : Pointer;
@@ -501,14 +508,8 @@ begin
       t2.Z := 0;
       for j := 0 to Mesh.WCount[ i ] - 1 do
         begin
-          Matrix := @Mesh.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
-          t1.X   := Mesh.Vertices[ i ].X - Matrix.a14;
-          t1.Y   := Mesh.Vertices[ i ].Y - Matrix.a24;
-          t1.Z   := Mesh.Vertices[ i ].Z - Matrix.a34;
-          t1     := vector_MulM4f( t1, Matrix^ );
-
-          Matrix := @BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix;
-          t1     := vector_MulInvM4f( t1, Matrix^ );
+          t1     := vector_MulM4f( Mesh.Vertices[ i ], Mesh.BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix );
+          t1     := vector_MulInvM4f( t1, BonePos[ Mesh.Weights[ i, j ].boneID ].Matrix );
           Weight := Mesh.Weights[ i, j ].Weight;
 
           t2.X := t2.X + t1.X * Weight;

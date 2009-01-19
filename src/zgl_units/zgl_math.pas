@@ -76,7 +76,7 @@ function  matrix3f_Get( const v1, v2, v3 : zglTPoint3D ) : zglTMatrix3f;
 
 procedure matrix3f_OrthoNormalize( var Matrix : zglTMatrix3f );
 procedure matrix3f_Transpose( var Matrix : zglTMatrix3f );
-procedure matrix3f_Rotate( var Matrix : zglTMatrix3f; const aX, aY, aZ : Single );
+procedure matrix3f_SetRot( var Matrix : zglTMatrix3f; const aX, aY, aZ : Single );
 function  matrix3f_Add( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
 function  matrix3f_Mul( const Matrix1, Matrix2 : zglTMatrix3f ) : zglTMatrix3f;
 
@@ -84,7 +84,8 @@ procedure matrix4f_Transpose( var Matrix : zglTMatrix4f );
 function  matrix4f_Determinant( const Matrix : zglTMatrix4f ): Single;
 function  matrix4f_Inverse( const Matrix : zglTMatrix4f ) : zglTMatrix4f;
 procedure matrix4f_Translate( var Matrix : zglTMatrix4f; const tX, tY, tZ : Single );
-procedure matrix4f_Rotate( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single );
+procedure matrix4f_SetPos( var Matrix : zglTMatrix4f; const X, Y, Z : Single );
+procedure matrix4f_SetRot( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single );
 procedure matrix4f_Scale( var Matrix : zglTMatrix4f; const sX, sY, sZ : Single );
 function  matrix4f_Mul( const Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
 
@@ -441,7 +442,7 @@ begin
   Matrix.a32 := t;
 end;
 
-procedure matrix3f_Rotate;
+procedure matrix3f_SetRot;
   var
     tMatrix : zglTMatrix3f;
 begin
@@ -543,13 +544,20 @@ end;
 
 procedure matrix4f_Translate;
 begin
-  Matrix.a41 := tX;
-  Matrix.a42 := tY;
-  Matrix.a43 := tZ;
+  Matrix.a41 := Matrix.a11 * tX + Matrix.a21 * tY + Matrix.a31 * tZ + Matrix.a41;
+  Matrix.a42 := Matrix.a12 * tX + Matrix.a22 * tY + Matrix.a32 * tZ + Matrix.a42;
+  Matrix.a43 := Matrix.a13 * tX + Matrix.a23 * tY + Matrix.a33 * tZ + Matrix.a43;
+  Matrix.a44 := Matrix.a14 * tX + Matrix.a24 * tY + Matrix.a34 * tZ + Matrix.a44;end;
+
+procedure matrix4f_SetPos;
+begin
+  Matrix.a41 := X;
+  Matrix.a42 := Y;
+  Matrix.a43 := Z;
   Matrix.a44 := 1;
 end;
 
-procedure matrix4f_Rotate;
+procedure matrix4f_SetRot;
   var
     A, B, C, D, E, F : Single;
 begin
@@ -718,37 +726,20 @@ begin
 end;
 
 function quater_GetM4f;
-  var
-    wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2 : Single;
 begin
   with Quaternion do
     begin
-      x2 := X * 2;
-      y2 := Y * 2;
-      z2 := Z * 2;
-
-      xx := X * x2;
-      xy := X * y2;
-      xz := X * z2;
-
-      yy := Y * y2;
-      yz := Y * z2;
-      zz := Z * z2;
-
-      wx := W * x2;
-      wy := W * y2;
-      wz := W * z2;
+      Result.a11 := 1 - 2 * Y * Y - 2 * Z * Z;
+      Result.a21 := 2 * X * Y + 2 * W * Z;
+      Result.a31 := 2 * X * Z - 2 * W * Y;
+      Result.a12 := 2 * X * Y - 2 * W * Z;
+      Result.a22 := 1 - 2 * X * X - 2 * Z * Z;
+      Result.a32 := 2 * Y * Z + 2 * W * X;
+      Result.a13 := 2 * X * Z + 2 * W * Y;
+      Result.a23 := 2 * Y * Z - 2 * W * X;
+      Result.a33 := 1 - 2 * X * X - 2 * Y * Y;
     end;
 
-  Result.a11 := 1 - ( yy + zz );
-  Result.a21 := xy + wz;
-  Result.a31 := xz - wy;
-  Result.a12 := xy - wz;
-  Result.a22 := 1 - ( xx + zz );
-  Result.a32 := yz + wx;
-  Result.a13 := xz + wy;
-  Result.a23 := yz - wx;
-  Result.a33 := 1 - ( xx + yy );
   Result.a41 := 0;
   Result.a42 := 0;
   Result.a43 := 0;

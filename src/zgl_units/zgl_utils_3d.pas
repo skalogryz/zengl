@@ -31,7 +31,7 @@ procedure BuildIndices( const FCount : DWORD; var Faces : array of zglTFace; var
 procedure BuildSNormals( const FCount, VCount : DWORD; const Faces : array of zglTFace; var Vertices, Normals : array of zglTPoint3D );
 
 function  CalcRVC( const VCount : DWORD; const Vertices : array of zglTPoint3D; var RIndices : array of DWORD ) : DWORD;
-procedure CalcFrame( var Delta, prevDelta, outDelta : Single; var Time : Double; var Frame, prevFrame, nextFrame : Integer; FFrame, FCount : Integer );
+procedure CalcFrame( var Delta, prevDelta, outDelta : Single; var Time : Double; var Frame, prevFrame, nextFrame : Integer; const FFrame, FCount : Integer );
 
 implementation
 

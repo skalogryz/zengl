@@ -54,7 +54,7 @@ procedure tex_CalcInvert( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcRGB( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : Integer; const Width, Height : WORD );
 
-procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
+procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer ); stdcall;
 
 implementation
 uses

@@ -49,7 +49,7 @@ const
   SIDE_FRONT          = $01;
   SIDE_BACK           = $02;
   SIDE_FRONT_AND_BACK = $03;
-  
+
 procedure obj3d_Begin( const Flags : DWORD );
 procedure obj3d_End;
 

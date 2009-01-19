@@ -33,6 +33,7 @@ uses
   DirectSound,
   {$ENDIF}
   {$IFDEF DARWIN}
+  cthreads,
   openal,
   {$ENDIF}
   zgl_types,
@@ -57,7 +58,7 @@ procedure snd_SetFrequency( const Frequency, ID : Integer );
 procedure snd_SetFrequencyCoeff( const Coefficient : Single; const ID : Integer );
 procedure snd_PlayFile( const SoundFile : zglPSoundFile );
 procedure snd_StopFile;
-function  snd_ProcFile( const data : Pointer ) : DWORD;
+function  snd_ProcFile( data : Pointer ) : PtrInt;
 procedure snd_RestoreFile;
 
 var
@@ -69,6 +70,9 @@ var
   {$IFDEF WIN32}
   Thread   : DWORD;
   ThreadID : DWORD;
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  Thread : TThreadID;
   {$ENDIF}
 
 implementation
@@ -446,7 +450,7 @@ procedure snd_SetFrequency;
     i, j  : Integer;
     Sound : zglPSound;
 begin
-  {$IFDEF LINUXOR_DARWIN}
+  {$IFDEF LINUX_OR_DARWIN}
     if ID > -1 Then
       begin
         Sound := managerSound.First.Next;
@@ -522,7 +526,7 @@ begin
 
   sfStream := SoundFile;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   alSourceStop( sfSource );
   alSourceRewind( sfSource );
   alSourcei( sfSource, AL_BUFFER, 0 );
@@ -538,8 +542,6 @@ begin
   alSourcei( sfSource, AL_LOOPING, AL_FALSE );
   alSourcePlay( sfSource );
   sfStream^.Played := TRUE;
-
-  pthread_create( Thread, ThreadAttr^, @snd_ProcFile, @oal_Device );
   {$ENDIF}
 
   {$IFDEF WIN32}
@@ -560,12 +562,21 @@ begin
   sfBuffer.Play( 0, 0, DSBPLAY_LOOPING );
   sfBufferPos  := 0;
   sfBufferNext := 1;
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+  pthread_create( Thread, ThreadAttr^, @snd_ProcFile, @oal_Device );
+  {$ENDIF}
+  {$IFDEF WIN32}
   Thread := CreateThread( nil, 0, @snd_ProcFile, nil, 0, ThreadID );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  ThreadID := BeginThread( @snd_ProcFile );
   {$ENDIF}
 end;
 
 procedure snd_StopFile;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   var
     buffer : TALuint;
   {$ENDIF}
@@ -580,28 +591,30 @@ begin
     end;
   sfStream^.Played := FALSE;
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   alSourceStop( sfSource );
   alSourceRewind( sfSource );
   alSourcei( sfSource, AL_BUFFER, 0 );
   {$ENDIF}
+
   {$IFDEF WIN32}
   TerminateThread( Thread, 0 );
   CloseHandle( Thread );
+  {$ENDIF}
+
+  {$IFDEF DARWIN}
+  //KillThread( ThreadID );
   {$ENDIF}
 end;
 
 function snd_ProcFile;
   var
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
     processed : TALint;
     buffer    : TALuint;
   {$ENDIF}
   {$IFDEF WIN32}
     Pos : DWORD;
-  {$ENDIF}
-  {$IFDEF DARWIN}
-    tmp : Integer;
   {$ENDIF}
 begin
   try
@@ -610,7 +623,7 @@ begin
         if ( not Assigned( sfStream ) ) or
            ( not sndInitialized ) Then break;
 
-        {$IFDEF LINUX}
+        {$IFDEF LINUX_OR_DARWIN}
         alSourcef( sfSource, AL_GAIN, sndVolume / 100 );
         alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, @processed );
         while ( processed > 0 ) and ( not sndStopFile ) do
@@ -673,7 +686,7 @@ begin
       end;
   except
   end;
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   alSourceQueueBuffers( sfSource, 1, @buffer );
   {$ENDIF}
   {$IFDEF WIN32}
@@ -685,14 +698,14 @@ end;
 procedure snd_RestoreFile;
   var
     i : Integer;
-    {$IFDEF LINUX}
+    {$IFDEF LINUX_OR_DARWIN}
     p : TALint;
     {$ENDIF}
 begin
   if ( not Assigned( sfStream ) ) or
      ( not sndInitialized ) Then
 
-  {$IFDEF LINUX}
+  {$IFDEF LINUX_OR_DARWIN}
   for i := 0 to sfBufCount - 1 do
     begin
       if sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize ) = 0 Then break;
@@ -706,8 +719,6 @@ begin
   alSourceRewind( sfSource );
   alSourcePlay( sfSource );
   sfStream^.Played := TRUE;
-
-  pthread_create( Thread, ThreadAttr^, @snd_ProcFile, nil );
   {$ENDIF}
   {$IFDEF WIN32}
   dsu_FillData( sfBuffer, sfStream.Buffer, sfStream.Buffersize, sfStream.Buffersize * sfBufferPos );
@@ -715,8 +726,16 @@ begin
   sfBuffer.SetCurrentPosition( sfCurrPos );
 
   sfStream^.Played := TRUE;
+  {$ENDIF}
 
+  {$IFDEF LINUX}
+  pthread_create( Thread, ThreadAttr^, @snd_ProcFile, nil );
+  {$ENDIF}
+  {$IFDEF WIN32}
   Thread := CreateThread( nil, 0, @snd_ProcFile, nil, 0, ThreadID );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  ThreadID := BeginThread( @snd_ProcFile );
   {$ENDIF}
 end;
 

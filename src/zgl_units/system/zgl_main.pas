@@ -108,11 +108,8 @@ begin
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
-  {$IFDEF DARWIN}writeln( 'scr_Create' );{$ENDIF}
   if not scr_Create Then exit;
-  {$IFDEF DARWIN}writeln( 'wnd_Create' );{$ENDIF}
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
-  {$IFDEF DARWIN}writeln( 'gl_Create' );{$ENDIF}
   if not gl_Create Then exit;
   app_Work := TRUE;
 
@@ -408,6 +405,9 @@ procedure zgl_loop;
     Event    : EventRecord;
     Window   : WindowRef;
     PartCode : WindowPartCode;
+
+    KeyChar  : Byte;
+    KeyCode  : Byte;
     {$ENDIF}
     procedure OSProcess;
     begin
@@ -423,18 +423,20 @@ procedure zgl_loop;
       {$ENDIF}
       {$IFDEF DARWIN}
       while GetNextEvent( everyEvent, Event ) do
-        if Event.what = MacOSAll.mouseDown Then
-          begin
-            PartCode := FindWindow( Event.where, Window );            if Assigned( Window ) Then
-              begin                SelectWindow( Window );
-                if Partcode = inDrag Then
-                  begin
-                    wnd_X := Event.where.h;
-                    wnd_Y := Event.where.v;
-                    DragWindow( wnd_Handle, Event.where, nil );
-                  end;
-              end;
-          end;
+        case Event.what of
+          MacOSAll.mouseDown:
+            begin
+              PartCode := FindWindow( Event.where, Window );              if Assigned( Window ) Then
+                begin                  SelectWindow( Window );
+                  if Partcode = inDrag Then
+                    begin
+                      wnd_X := Event.where.h;
+                      wnd_Y := Event.where.v;
+                      DragWindow( wnd_Handle, Event.where, nil );
+                    end;
+                end;
+            end;
+        end;
       {$ENDIF}
     end;
 begin
@@ -533,15 +535,6 @@ function zgl_mess;
     c   : array[ 0..1 ] of Char;
     i   : Integer;
     len : Integer;
-  {$IFDEF LINUX_OR_DARWIN}
-    function SCA( KeyCode : DWORD ) : DWORD;
-    begin
-      Result := KeyCode;
-      if ( KeyCode = K_SHIFT_L ) or ( KeyCode = K_SHIFT_R ) Then Result := K_SHIFT;
-      if ( KeyCode = K_CTRL_L ) or ( KeyCode = K_CTRL_R ) Then Result := K_CTRL;
-      if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;
-    end;
-  {$ENDIF}
 begin
 {$IFDEF LINUX}
   while XPending( scr_Display ) <> 0 do
@@ -867,8 +860,8 @@ begin
               keysLast[ KA_UP ] := Key;
 
               Key := SCA( Key );
-              keysDown[ Key ] := TRUE;
-              keysUp  [ Key ] := FALSE;
+              keysDown[ Key ] := FALSE;
+              keysUp  [ Key ] := TRUE;
             end;
         end;
       end;

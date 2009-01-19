@@ -147,6 +147,9 @@ function xkey_to_winkey( KeyCode : WORD ) : Byte;
 {$IFDEF DARWIN}
 function mackeys_to_winkeys( KeyCode : WORD ) : Byte;
 {$ENDIF}
+{$IFDEF LINUX_OR_DARWIN}
+function SCA( KeyCode : DWORD ) : DWORD;
+{$ENDIF}
 
 var
   keysDown : array[ 0..255 ] of Boolean;
@@ -259,7 +262,7 @@ begin
     $3B : Result := K_CTRL_L;
 //    3B : Result := K_CTRL_R;
     $3A : Result := K_ALT_L;
-//    3A        : Result := K_ALT_R;
+//    3A : Result := K_ALT_R;
     $71 : Result := K_PAUSE;
     $35 : Result := K_ESCAPE;
     $31 : Result := K_SPACE;
@@ -348,6 +351,15 @@ begin
     $67 : Result := K_F11;
     $6F : Result := K_F12;
   end;
+end;
+{$ENDIF}
+{$IFDEF LINUX_OR_DARWIN}
+function SCA;
+begin
+  Result := KeyCode;
+  if ( KeyCode = K_SHIFT_L ) or ( KeyCode = K_SHIFT_R ) Then Result := K_SHIFT;
+  if ( KeyCode = K_CTRL_L ) or ( KeyCode = K_CTRL_R ) Then Result := K_CTRL;
+  if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;
 end;
 {$ENDIF}
 

@@ -400,6 +400,8 @@ begin
     end else
       ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
 {$ENDIF}
+{$IFDEF DARWIN}
+{$ENDIF}
   if app_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
   else
