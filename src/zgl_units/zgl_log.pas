@@ -36,7 +36,6 @@ uses
 procedure log_Init;
 procedure log_Close;
 procedure log_Add( const Message : String; const Timings : Boolean = TRUE );
-procedure log_AddC( const Message : PChar; const Timings : Boolean = TRUE );
 procedure log_Flush;
 function  log_Timing : String;
 
@@ -87,11 +86,6 @@ begin
   file_Write( log, str[ 1 ], length( str ) );
 
   log_Flush;
-end;
-
-procedure log_AddC;
-begin
-  log_Add( Message, Timings );
 end;
 
 procedure log_Flush;

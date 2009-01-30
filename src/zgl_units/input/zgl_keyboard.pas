@@ -136,7 +136,7 @@ const
 function  key_Down( const KeyCode : Byte ) : Boolean;
 function  key_Up( const KeyCode : Byte ) : Boolean;
 function  key_Last( const KeyAction : Byte ) : Byte;
-procedure key_BeginReadText( const Text : PChar; const MaxSymbols : WORD );
+procedure key_BeginReadText( const Text : String; const MaxSymbols : WORD );
 function  key_EndReadText : PChar;
 procedure key_ClearState;
 

@@ -35,6 +35,11 @@ uses
   {$ENDIF}
   ;
 
+type
+  zglTFileList = record
+    Count : Integer;
+    List  : array of String;
+end;
 {$IFDEF LINUX}
 type zglTFile = PFILE;
 {$ENDIF}
@@ -56,8 +61,8 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : PChar; const Mode : Byte );
-function  file_Exists( const FileName : PChar ) : Boolean;
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+function  file_Exists( const FileName : String ) : Boolean;
 function  file_Seek( var FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
 function  file_GetPos( var FileHandle : zglTFile ) : DWORD;
 function  file_Read( var FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
@@ -66,23 +71,26 @@ procedure file_Trunc( var FileHandle : zglTFile; const count : DWORD );
 function  file_GetSize( var FileHandle : zglTFile ) : DWORD;
 procedure file_Flush( var FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
+procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
 
 implementation
+uses
+  zgl_log, Utils;
 
 procedure file_Open;
 begin
   {$IFDEF LINUX}
   case Mode of
-    FOM_CREATE: FileHandle := fopen( FileName, 'w' );
-    FOM_OPENR:  FileHandle := fopen( FileName, 'r' );
-    FOM_OPENRW: FileHandle := fopen( FileName, 'r+' );
+    FOM_CREATE: FileHandle := fopen( PChar( FileName ), 'w' );
+    FOM_OPENR:  FileHandle := fopen( PChar( FileName ), 'r' );
+    FOM_OPENRW: FileHandle := fopen( PChar( FileName ), 'r+' );
   end;
   {$ENDIF}
   {$IFDEF WIN32}
   case Mode of
-    FOM_CREATE: FileHandle := CreateFile( FileName, GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
-    FOM_OPENR:  FileHandle := CreateFile( FileName, GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
-    FOM_OPENRW: FileHandle := CreateFile( FileName, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+    FOM_CREATE: FileHandle := CreateFile( PChar( FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_OPENR:  FileHandle := CreateFile( PChar( FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
+    FOM_OPENRW: FileHandle := CreateFile( PChar( FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -119,7 +127,7 @@ function file_Exists;
   {$ENDIF}
 begin
   {$IFDEF LINUX}
-  Result := not Boolean( access( FileName, F_OK ) );
+  Result := not Boolean( access( PChar( FileName ), F_OK ) );
   {$ENDIF}
   {$IFDEF WIN32}
   file_Open( FileHandle, FileName, FOM_OPENR );
@@ -265,6 +273,57 @@ begin
   {$ENDIF}
   {$IFDEF DARWIN}
   Close( FileHandle );
+  {$ENDIF}
+end;
+
+{$IFDEF LINUX}
+function filter_file(const p1: PDirEnt): Integer; cdecl;
+begin
+  Result := Byte( p1.d_type = 8 );
+end;
+function filter_dir(const p1: PDirEnt): Integer; cdecl;
+begin
+  Result := Byte( p1.d_type = 4 );
+end;
+{$ENDIF}
+
+procedure file_Find;
+  {$IFDEF LINUX}
+  var
+    FList : array of Pdirent;
+    i     : Integer;
+  {$ENDIF}
+  {$IFDEF WIN32}
+  var
+    First : HANDLE;
+    FList : WIN32_FIND_DATA;
+  {$ENDIF}
+begin
+  {$IFDEF LINUX}
+  if FindDir Then
+    List.Count := scandir( PChar( Directory ), PPPdirent( @FList ), filter_file, nil )
+  else
+    List.Count := scandir( PChar( Directory ), PPPdirent( @FList ), filter_dir, nil );
+  SetLength( List.List, List.Count );
+  for i := 0 to List.Count - 1 do
+    begin
+      List.List[ i ] := FList[ i ].d_name;
+      Free( FList[ i ] );
+    end;
+  Free( FList );
+  {$ENDIF}
+  {$IFDEF WIN32}
+  First := FindFirstFile( PChar( Directory + '*' ), FList );
+  repeat
+    if FindDir Then
+      begin
+        if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY = 0 Then continue;
+      end else
+        if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY > 0 Then continue;
+    SetLength( List.List, List.Count + 1 );
+    List.List[ List.Count ] := FList.cFileName;
+    INC( List.Count );
+  until not FindNextFile( First, FList );
   {$ENDIF}
 end;
 

@@ -12,7 +12,7 @@
 {$ENDIF}
 {$IFDEF WIN32}
   {$DEFINE extdecl := stdcall}
-  {.$DEFINE USE_WINEHACK}
+  {$DEFINE USE_WINEHACK}
 {$ENDIF}
 {$IFDEF DARWIN}
   {$DEFINE extdecl := cdecl}

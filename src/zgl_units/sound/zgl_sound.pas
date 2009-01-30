@@ -49,7 +49,8 @@ function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( const BufferCount, SourceCount : Integer ) : zglPSound;
 procedure snd_Del( Sound : zglPSound );
-function  snd_LoadFromFile( const FileName : PChar; const SourceCount : Integer ) : zglPSound;
+function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer ) : zglPSound;
+function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer ) : zglPSound;
 
 function  snd_Play( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;
 procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
@@ -295,8 +296,8 @@ begin
   Result := snd_Add( 1, SourceCount );
 
   for i := sndNFCount - 1 downto 0 do
-    if copy( StrUp( FileName ), length( FileName ) - 3, 4 ) = '.' + sndNewFormats[ i ].Extension Then
-      sndNewFormats[ i ].Loader( FileName, Result.Data, Result.Size, f, Result.Frequency );
+    if copy( StrUp( FileName ), length( FileName ) - 3, 4 ) = '.' + sndFormats[ i ].Extension Then
+      sndFormats[ i ].FileLoader( FileName, Result.Data, Result.Size, f, Result.Frequency );
 
   {$IFDEF LINUX_OR_DARWIN}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
@@ -309,6 +310,34 @@ begin
   {$ENDIF}
 
   log_Add( 'Successful loading of sound: ' + FileName );
+end;
+
+function snd_LoadFromMemory;
+  var
+    i : Integer;
+    f : DWORD;
+begin
+  Result := nil;
+
+  if not sndInitialized Then exit;
+
+  Result := snd_Add( 1, SourceCount );
+
+  for i := sndNFCount - 1 downto 0 do
+    if StrUp( Extension ) = sndFormats[ i ].Extension Then
+      sndFormats[ i ].MemLoader( Memory, Result.Data, Result.Size, f, Result.Frequency );
+
+  {$IFDEF LINUX_OR_DARWIN}
+  alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
+  {$ENDIF}
+  {$IFDEF WIN32}
+  Result.Source[ 0 ] := dsu_CreateBuffer( Result.Size, Pointer( f ) );
+  dsu_FillData( Result.Source[ 0 ], Result.Data, Result.Size );
+  for i := 1 to Result.sCount - 1 do
+    ds_Device.DuplicateSoundBuffer( Result.Source[ 0 ], Result.Source[ i ] );
+  {$ENDIF}
+
+  log_Add( 'Successful loading of sound: From Memory' );
 end;
 
 function snd_Play;

@@ -35,7 +35,7 @@ procedure gui_Draw;
 procedure gui_Proc;
 
 procedure gui_AddEvent( const _type : Integer; const Widget : zglPWidget; const EventData : Pointer );
-procedure gui_DelEvent( var Event : zglPEvent );
+procedure gui_DelEvent( Event : zglPEvent );
 
 function  gui_AddWidget( const _type : Integer; const X, Y, W, H : Single; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
 procedure gui_DelWidget( var Widget : zglPWidget );
@@ -58,6 +58,36 @@ begin
   zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_CHECKBOX ) );
   zgl_Reg( WIDGET_ONDRAW,  @gui_DrawCheckBox );
   zgl_Reg( WIDGET_ONPROC,  @gui_ProcCheckBox );
+
+  // RadioButton
+  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_RADIOBUTTON ) );
+  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawRadioButton );
+  zgl_Reg( WIDGET_ONPROC,  @gui_ProcRadioButton );
+
+  // Label
+  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_LABEL ) );
+  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawLabel );
+  zgl_Reg( WIDGET_ONPROC,  @gui_ProcLabel );
+
+  // EditBox
+  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_EDITBOX ) );
+  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawEditBox );
+  zgl_Reg( WIDGET_ONPROC,  @gui_ProcEditBox );
+
+  // ListBox
+  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_LISTBOX ) );
+  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawListBox );
+  zgl_Reg( WIDGET_ONPROC,  @gui_ProcListBox );
+
+  // GroupBox
+  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_GROUPBOX ) );
+  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawGroupBox );
+  zgl_Reg( WIDGET_ONPROC,  @gui_ProcGroupBox );
+
+  // Spin
+  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_SPIN ) );
+  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawSpin );
+  zgl_Reg( WIDGET_ONPROC,  @gui_ProcSpin );
 end;
 
 procedure gui_Draw;
@@ -67,7 +97,7 @@ begin
   Widget := managerGUI.First.Next;
   while Widget <> nil do
     begin
-      if Assigned( Widget.OnDraw ) Then Widget.OnDraw( Widget );
+      gui_DrawWidget( Widget );
       Widget := Widget.Next;
     end;
 end;
@@ -77,6 +107,9 @@ procedure gui_Proc;
     Widget : zglPWidget;
     Event  : zglPEvent;
 begin
+  managerGUI.First.rect.W := wnd_Width;
+  managerGUI.First.rect.H := wnd_Height;
+
   Widget := managerGUI.First.Next;
   while Widget <> nil do
     begin
@@ -126,7 +159,7 @@ begin
     Event.Prev.Next := Event.Next;
   if Assigned( Event.Next ) Then
     Event.Next.Prev := Event.Prev;
-  Freememory( Event );
+  Freemem( Event );
   DEC( eventList.Count );
 end;
 
@@ -134,21 +167,46 @@ function gui_AddWidget;
   var
     i, size : Integer;
 begin
-  Result := @managerGUI.First;
+  if Assigned ( Parent ) Then
+    begin
+      if not Assigned( Parent.child ) Then
+        zgl_GetMem( Parent.child, SizeOf( zglTWidget ) );
+      Result        := Parent.child;
+      Result._type  := WIDGET_UNKNOWN;
+      Result.parent := Parent;
+    end else
+      Result := @managerGUI.First;
+
   while Assigned( Result.Next ) do
     Result := Result.Next;
 
   zgl_GetMem( Result.Next, SizeOf( zglTWidget ) );
   Result.Next._type := _type;
   case _type of
-    WIDGET_BUTTON:   size := SizeOf( zglTButtonDesc );
-    WIDGET_CHECKBOX: size := SizeOf( zglTCheckBoxDesc );
+    WIDGET_BUTTON:      size := SizeOf( zglTButtonDesc );
+    WIDGET_CHECKBOX:    size := SizeOf( zglTCheckBoxDesc );
+    WIDGET_RADIOBUTTON: size := SizeOf( zglTRadioButtonDesc );
+    WIDGET_LABEL:       size := SizeOf( zglTLabelDesc );
+    WIDGET_EDITBOX:     size := SizeOf( zglTEditBoxDesc );
+    WIDGET_LISTBOX:     size := SizeOf( zglTListBoxDesc );
+    WIDGET_GROUPBOX:    size := SizeOf( zglTGroupBoxDesc );
+    WIDGET_SPIN:        size := SizeOf( zglTSpinDesc );
   end;
   zgl_GetMem( Result.Next.desc, size );
-  Move( Desc^, Result.Next.desc^, size );
+  if Assigned( Desc ) Then
+    Move( Desc^, Result.Next.desc^, size );
   Result.Next.data    := Data;
-  Result.Next.rect.X  := X;
-  Result.Next.rect.Y  := Y;
+  if Assigned( Parent ) Then
+    begin
+      Result.Next.parent := parent;
+      Result.Next.rect.X := Parent.Rect.X + X;
+      Result.Next.rect.Y := Parent.Rect.Y + Y;
+    end else
+      begin
+        Result.Next.parent := @managerGUI.First;
+        Result.Next.rect.X := X;
+        Result.Next.rect.Y := Y;
+      end;
   Result.Next.rect.W  := W;
   Result.Next.rect.H  := H;
   Result.Next.focus   := FALSE;
@@ -159,8 +217,8 @@ begin
         Result.Next.OnDraw := widgetTypes[ i ].OnDraw;
         Result.Next.OnProc := widgetTypes[ i ].OnProc;
       end;
-  Result.Next.Prev  := Result;
-  Result            := Result.Next;
+  Result.Next.Prev   := Result;
+  Result             := Result.Next;
   INC( managerGUI.Count );
 end;
 
@@ -170,7 +228,7 @@ begin
     Widget.Prev.Next := Widget.Next;
   if Assigned( Widget.Next ) Then
     Widget.Next.Prev := Widget.Prev;
-  Freememory( Widget );
+  Freemem( Widget );
   DEC( managerGUI.Count );
 end;
 

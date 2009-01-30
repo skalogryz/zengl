@@ -26,8 +26,15 @@ uses
   zgl_types;
 
 const
-  WIDGET_BUTTON     = 1;
-  WIDGET_CHECKBOX   = 2;
+  WIDGET_UNKNOWN     = 0;
+  WIDGET_BUTTON      = 1;
+  WIDGET_CHECKBOX    = 2;
+  WIDGET_RADIOBUTTON = 3;
+  WIDGET_LABEL       = 4;
+  WIDGET_EDITBOX     = 5;
+  WIDGET_LISTBOX     = 6;
+  WIDGET_GROUPBOX    = 7;
+  WIDGET_SPIN        = 8;
 
   EVENT_FOCUS_IN    = 1;
   EVENT_FOCUS_OUT   = 2;
@@ -50,14 +57,13 @@ type
 
   //Events
   zglTEvents = record
-  case byte of
-    0: ( OnClick      : procedure( const Widget : zglPWidget ) );
-    1: ( OnMouseUp    : procedure( const Widget : zglPWidget ) );
-    2: ( OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single ) );
-    3: ( OnMouseEnter : procedure( const Widget : zglPWidget ) );
-    4: ( OnMouseLeave : procedure( const Widget : zglPWidget ) );
-    5: ( OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte ) );
-    6: ( OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte ) );
+    OnClick      : procedure( const Widget : zglPWidget );
+    OnMouseUp    : procedure( const Widget : zglPWidget );
+    OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single );
+    OnMouseEnter : procedure( const Widget : zglPWidget );
+    OnMouseLeave : procedure( const Widget : zglPWidget );
+    OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte );
+    OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte );
 end;
 
   //Widget
@@ -74,6 +80,7 @@ end;
     Events     : zglTEvents;
 
     parent     : zglPWidget;
+    child      : zglPWidget;
     Next, Prev : zglPWidget;
 end;
 
@@ -111,25 +118,64 @@ end;
 
   zglPButtonDesc = ^zglTButtonDesc;
   zglTButtonDesc = record
-    Caption : PChar;
     Font    : zglPFont;
+    Caption : String;
 
     Pressed : Boolean;
 end;
 
   zglPCheckBoxDesc = ^zglTCheckBoxDesc;
   zglTCheckBoxDesc = record
-    Caption : PChar;
     Font    : zglPFont;
+    Caption : String;
 
     Checked : Boolean;
 end;
 
-  zglPEditDesc = ^zglTEditDesc;
-  zglTEditDesc = record
-    Text : PChar;
+  zglPRadioButtonDesc = ^zglTRadioButtonDesc;
+  zglTRadioButtonDesc = record
+    Font    : zglPFont;
+    Caption : String;
+
+    Checked : Boolean;
+    Group   : Integer;
+end;
+
+  zglPLabelDesc = ^zglTLabelDesc;
+  zglTLabelDesc = record
+    Font    : zglPFont;
+    Caption : String;
+end;
+
+  zglPEditBoxDesc = ^zglTEditBoxDesc;
+  zglTEditBoxDesc = record
     Font : zglPFont;
+    Text : String;
+
     Max  : Integer;
+end;
+
+  zglPListBoxDesc = ^zglTListBoxDesc;
+  zglTListBoxDesc = record
+    Font   : zglPFont;
+    ICount : Integer;
+    Items  : array of String;
+end;
+
+  zglPGroupBoxDesc = ^zglTGroupBoxDesc;
+  zglTGroupBoxDesc = record
+    Font    : zglPFont;
+    Caption : String;
+end;
+
+  zglPSpinDesc = ^zglTSpinDesc;
+  zglTSpinDesc = record
+    Value    : Integer;
+    Max      : Integer;
+    Min      : Integer;
+
+    UPressed : Boolean;
+    DPressed : Boolean;
 end;
 
 implementation

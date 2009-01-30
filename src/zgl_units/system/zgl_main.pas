@@ -39,8 +39,6 @@ uses
   
   zgl_keyboard,
   zgl_mouse,
-
-  zgl_gui_main,
   
   zgl_camera_2d,
   zgl_render_target,
@@ -221,22 +219,30 @@ begin
       end;
     TEX_FORMAT_EXTENSION:
       begin
-        SetLength( texNewFormats, texNFCount + 1 );
-        texNewFormats[ texNFCount ].Extension := StrUp( String( PChar( UserData ) ) );
+        SetLength( texFormats, texNFCount + 1 );
+        texFormats[ texNFCount ].Extension := StrUp( String( PChar( UserData ) ) );
       end;
-    TEX_FORMAT_LOADER:
+    TEX_FORMAT_FILE_LOADER:
       begin
-        texNewFormats[ texNFCount ].Loader := UserData;
+        texFormats[ texNFCount ].FileLoader := UserData;
+      end;
+    TEX_FORMAT_MEM_LOADER:
+      begin
+        texFormats[ texNFCount ].MemLoader := UserData;
         INC( texNFCount );
       end;
     SND_FORMAT_EXTENSION:
       begin
-        SetLength( sndNewFormats, sndNFCount + 1 );
-        sndNewFormats[ sndNFCount ].Extension := StrUp( String( PChar( UserData ) ) );
+        SetLength( sndFormats, sndNFCount + 1 );
+        sndFormats[ sndNFCount ].Extension := StrUp( String( PChar( UserData ) ) );
       end;
-    SND_FORMAT_LOADER:
+    SND_FORMAT_FILE_LOADER:
       begin
-        sndNewFormats[ sndNFCount ].Loader := UserData;
+        sndFormats[ sndNFCount ].FileLoader := UserData;
+      end;
+    SND_FORMAT_MEM_LOADER:
+      begin
+        sndFormats[ sndNFCount ].MemLoader := UserData;
         INC( sndNFCount );
       end;
     WIDGET_TYPE_ID:
@@ -377,7 +383,6 @@ begin
   scr_Clear;
 
   app_PDraw;
-  //gui_Draw;
 
   scr_flush;
 
@@ -440,7 +445,6 @@ procedure zgl_loop;
       {$ENDIF}
     end;
 begin
-  //gui_Init;
   app_PLoad;
   {$IFDEF LINUX}
   glFlush;
@@ -475,8 +479,6 @@ begin
                     if j > currTimer^.LastTick + currTimer^.Interval Then
                       begin
                         currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
-                        //if z > 0 Then
-                        //  gui_Proc;
                         currTimer^.OnTimer;
                         j := timer_GetTicks;
                       end;
@@ -657,10 +659,9 @@ begin
             else
               len := Xutf8LookupString( app_XIC, @Event, @c, 2, @Keysym, @Status );
               if len > 1 Then
-                key_InputText( Char( Getchar( c[ 0 ], c[ 1 ] ) ) )
-              else
-                if len > 0 Then
-                  key_InputText( c[ 0 ] );
+                c[ 0 ] := Char( Getchar( c[ 0 ], c[ 1 ] ) );
+              if Byte( c[ 0 ] ) >= 32 Then
+                key_InputText( c[ 0 ] );
             end;
           end;
         KeyRelease:
@@ -957,13 +958,16 @@ end;
 
 initialization
   zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'jpg' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @jpg_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
   zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'png' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @png_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_FILE_LOADER, @png_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_MEM_LOADER,  @png_LoadFromMemory );
   zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'tga' ) );
-  zgl_Reg( TEX_FORMAT_LOADER, @tga_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_FILE_LOADER, @tga_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_MEM_LOADER,  @tga_LoadFromMemory );
 
   zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'wav' ) );
-  zgl_Reg( SND_FORMAT_LOADER, @wav_LoadFromFile );
+  zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
 
 end.

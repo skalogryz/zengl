@@ -49,7 +49,10 @@ type
     end;
 end;
 
-procedure tga_LoadFromFile( const FileName : PChar; var pData : Pointer; var W, H : WORD );
+procedure tga_Load( var pData : Pointer; var W, H : WORD );
+procedure tga_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
+
 procedure tga_FlipVertically( var Data : array of Byte; w, h, pixelSize : Integer );
 procedure tga_FlipHorizontally( var Data : array of Byte; w, h, pixelSize : Integer );
 procedure tga_RLEDecode;
@@ -63,7 +66,7 @@ var
   tgaDataA   : array of Byte;
   tgaPalette : array of Byte;
 
-procedure tga_LoadFromFile;
+procedure tga_Load;
   label _exit;
   var
     i         : DWORD;
@@ -71,7 +74,6 @@ procedure tga_LoadFromFile;
     pixelSize : Integer;
     entry     : Byte;
 begin
-  mem_LoadFromFile( tgaMem, FileName );
   mem_Read( tgaMem, tgaHeader, SizeOf( zglTTGAHeader ) );
 
   pixelSize := tgaHeader.ImgSpec.Depth shr 3;
@@ -166,6 +168,21 @@ _exit:
     SetLength( tgaPalette, 0 );
     mem_Free( tgaMem );
   end;
+end;
+
+procedure tga_LoadFromFile;
+begin
+  mem_LoadFromFile( tgaMem, FileName );
+  tga_Load( pData, W, H );
+end;
+
+procedure tga_LoadFromMemory;
+begin
+  tgaMem.Size     := Memory.Size;
+  tgaMem.Memory   := Allocmem( Memory.Size );
+  tgaMem.Position := Memory.Position;
+  Move( Memory.Memory^, tgaMem.Memory^, Memory.Size );
+  tga_Load( pData, W, H );
 end;
 
 procedure tga_FlipVertically;

@@ -56,7 +56,9 @@ type
     BitsPerSample    : Word;
  end;
 
-procedure wav_LoadFromFile( const FileName : PChar; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
 
 implementation
 
@@ -64,13 +66,11 @@ var
   wavMemory : zglTMemory;
   wavHeader : zglTWAVHeader;
 
-procedure wav_LoadFromFile;
+procedure wav_Load;
   var
     chunkName : array[ 0..3 ] of Char;
     skip      : Integer;
 begin
-  mem_LoadFromFile( wavMemory, FileName );
-
   mem_Read( wavMemory, wavHeader, SizeOf( zglTWAVHeader ) );
 
   Frequency := wavHeader.SampleRate;
@@ -118,6 +118,21 @@ begin
   until wavMemory.Position >= wavMemory.Size;
 
   mem_Free( wavMemory );
+end;
+
+procedure wav_LoadFromFile;
+begin
+  mem_LoadFromFile( wavMemory, FileName );
+  wav_Load( Data, Size, Format, Frequency );
+end;
+
+procedure wav_LoadFromMemory;
+begin
+  wavMemory.Size     := Memory.Size;
+  wavMemory.Memory   := Allocmem( Memory.Size );
+  wavMemory.Position := Memory.Position;
+  Move( Memory.Memory^, wavMemory.Memory^, Memory.Size );
+  wav_Load( Data, Size, Format, Frequency );
 end;
 
 end.

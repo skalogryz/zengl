@@ -1,4 +1,4 @@
-VERSION = 0.0.35
+VERSION = 0.0.37
 FPC     = fpc
 FPC_WIN =
 FPC_MAC = /usr/local/lib/fpc/2.2.2/ppc386
@@ -14,7 +14,6 @@ INCLUDE = -Fuzgl_units \
 -Fusys_units \
 -Fusys_units/gl \
 -Fusys_units/pasjpeg \
--Fusys_units/paszlib \
 -Fusys_units/openal \
 -Fusys_units/directsound
 #

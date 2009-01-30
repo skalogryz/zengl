@@ -28,15 +28,15 @@ uses
   zgl_types,
   Utils;
 
-procedure ini_LoadFromFile( const FileName : PChar );
-procedure ini_SaveToFile( const FileName : PChar );
-procedure ini_Add( const Section, Key : PChar );
-function  ini_ReadKeyStr( const Section, Key : PChar ) : PChar;
-function  ini_ReadKeyInt( const Section, Key : PChar ) : Integer;
-function  ini_ReadKeyBool( const Section, Key : PChar ) : Boolean;
-function  ini_WriteKeyStr( const Section, Key, Value : PChar ) : Boolean;
-function  ini_WriteKeyInt( const Section, Key : PChar; const Value : Integer ) : Boolean;
-function  ini_WriteKeyBool( const Section, Key : PChar; const Value : Boolean ) : Boolean;
+procedure ini_LoadFromFile( const FileName : String );
+procedure ini_SaveToFile( const FileName : String );
+procedure ini_Add( const Section, Key : String );
+function  ini_ReadKeyStr( const Section, Key : String ) : PChar;
+function  ini_ReadKeyInt( const Section, Key : String ) : Integer;
+function  ini_ReadKeyBool( const Section, Key : String ) : Boolean;
+function  ini_WriteKeyStr( const Section, Key, Value : String ) : Boolean;
+function  ini_WriteKeyInt( const Section, Key : String; const Value : Integer ) : Boolean;
+function  ini_WriteKeyBool( const Section, Key : String; const Value : Boolean ) : Boolean;
 
 function  ini_GetID( S, K : String; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;

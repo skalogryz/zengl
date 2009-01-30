@@ -34,20 +34,22 @@ const
   defBPP      = 32;
 
   // constant string
-  cs_ZenGL    = 'ZenGL build 37[16.01.09]';
-  cv_version  = 37;
+  cs_ZenGL    = 'ZenGL build 38[31.01.09]';
+  cv_version  = 38;
 
   // zgl_Reg
-  SYS_LOAD             = $000001;
-  SYS_DRAW             = $000002;
-  SYS_EXIT             = $000003;
-  TEX_FORMAT_EXTENSION = $000010;
-  TEX_FORMAT_LOADER    = $000011;
-  SND_FORMAT_EXTENSION = $000020;
-  SND_FORMAT_LOADER    = $000021;
-  WIDGET_TYPE_ID       = $000022;
-  WIDGET_ONDRAW        = $000023;
-  WIDGET_ONPROC        = $000024;
+  SYS_LOAD               = $000001;
+  SYS_DRAW               = $000002;
+  SYS_EXIT               = $000003;
+  TEX_FORMAT_EXTENSION   = $000010;
+  TEX_FORMAT_FILE_LOADER = $000011;
+  TEX_FORMAT_MEM_LOADER  = $000012;
+  SND_FORMAT_EXTENSION   = $000020;
+  SND_FORMAT_FILE_LOADER = $000021;
+  SND_FORMAT_MEM_LOADER  = $000022;
+  WIDGET_TYPE_ID         = $000030;
+  WIDGET_ONDRAW          = $000031;
+  WIDGET_ONPROC          = $000032;
 
   // zgl_Get
   SYS_FPS         = 1;

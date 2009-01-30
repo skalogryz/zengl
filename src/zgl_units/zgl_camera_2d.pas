@@ -28,7 +28,8 @@ uses
   zgl_opengl,
   zgl_const,
   zgl_types,
-  zgl_global_var;
+  zgl_global_var,
+  zgl_math;
   
 procedure cam2d_Set( const Camera : zglPCamera2D );
 
@@ -57,19 +58,38 @@ begin
 end;
 
 procedure cam2d_Vertex2f;
+  var
+    sa, ca : Single;
+    Xa, Ya : Single;
 begin
   X := X - cam2dGlobal.X;
   Y := Y - cam2dGlobal.Y;
-  glVertex2f( X, Y );
+  if cam2dGlobal.Angle <> 0 Then
+    begin
+      m_SinCos( cam2dGlobal.Angle * cv_pi180, sa, ca );
+      Xa := wnd_Width  / 2 + ( X - wnd_Width / 2 ) * ca - ( Y - wnd_Height / 2 ) * sa;
+      Ya := wnd_Height / 2 + ( X - wnd_Width / 2 ) * sa + ( Y - wnd_Height / 2 ) * ca;
+      glVertex2f( Xa, Ya );
+    end else
+      glVertex2f( X, Y );
 end;
 
 procedure cam2d_Vertex2fv;
   var
-    v2 : array[ 0..1 ] of Single;
+    v2  : array[ 0..1 ] of Single;
+    sa, ca : Single;
+    v2a : array[ 0..1 ] of Single;
 begin
   v2[ 0 ] := PSingle( v + 0 )^ - cam2dGlobal.X;
   v2[ 1 ] := PSingle( v + 4 )^ - cam2dGlobal.Y;
-  glVertex2fv( @v2[ 0 ] );
+  if cam2dGlobal.Angle <> 0 Then
+    begin
+      m_SinCos( cam2dGlobal.Angle * cv_pi180, sa, ca );
+      v2a[ 0 ] := wnd_Width  / 2 + ( v2[ 0 ] - wnd_Width / 2 ) * ca - ( v2[ 1 ] - wnd_Height / 2 ) * sa;
+      v2a[ 1 ] := wnd_Height / 2 + ( v2[ 0 ] - wnd_Width / 2 ) * sa + ( v2[ 1 ] - wnd_Height / 2 ) * ca;
+      glVertex2fv( @v2a[ 0 ] );
+    end else
+      glVertex2fv( @v2[ 0 ] );
 end;
 
 initialization

@@ -161,7 +161,9 @@ type
 end;
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : PChar; var pData : Pointer; var W, H : WORD );
+procedure jpg_Load( var pData : Pointer; var W, H : WORD );
+procedure jpg_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 procedure jpg_FillData;
 
 implementation
@@ -240,7 +242,7 @@ begin
 end;
 {$ENDIF}
 
-procedure jpg_LoadFromFile;
+procedure jpg_Load;
   label _exit;
   {$IFDEF LINUX_OR_DARWIN}
   var
@@ -252,7 +254,6 @@ procedure jpg_LoadFromFile;
     g : HGLOBAL;
   {$ENDIF}
 begin
-  mem_LoadFromFile( jpgMem, FileName );
 {$IFDEF LINUX_OR_DARWIN}
   jpgCInfo.err := jpeg_error( jerr );
   jpeg_create_decompress( @jpgCInfo );
@@ -343,6 +344,21 @@ _exit:
   {$ENDIF}
     mem_Free( jpgMem );
   end;
+end;
+
+procedure jpg_LoadFromFile;
+begin
+  mem_LoadFromFile( jpgMem, FileName );
+  jpg_Load( pData, W, H );
+end;
+
+procedure jpg_LoadFromMemory;
+begin
+  jpgMem.Size     := Memory.Size;
+  jpgMem.Memory   := Allocmem( Memory.Size );
+  jpgMem.Position := Memory.Position;
+  Move( Memory.Memory^, jpgMem.Memory^, Memory.Size );
+  jpg_Load( pData, W, H );
 end;
 
 procedure jpg_FillData;

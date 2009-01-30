@@ -58,7 +58,7 @@ function  wnd_Create( const Width, Height : WORD ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
-procedure wnd_SetCaption( const NewCaption : PChar );
+procedure wnd_SetCaption( const NewCaption : String );
 procedure wnd_SetSize( const Width, Height : WORD );
 procedure wnd_SetPos( const X, Y : WORD );
 procedure wnd_SetOnTop( const OnTop : Boolean );
@@ -258,7 +258,7 @@ begin
   SelectWindow( wnd_Handle );
   ShowWindow( wnd_Handle );
 {$ENDIF}
-  wnd_SetCaption( PChar( wnd_Caption ) );
+  wnd_SetCaption( wnd_Caption );
 
   Result := TRUE;
 end;

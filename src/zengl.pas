@@ -130,7 +130,7 @@ exports
   zgl_GetMem               name prefix + 'zgl_GetMem',
   zgl_Enable               name prefix + 'zgl_Enable',
   zgl_Disable              name prefix + 'zgl_Disable',
-  log_AddC                 name prefix + 'log_Add',
+  log_Add                  name prefix + 'log_Add',
   
   // Window
   wnd_SetCaption           name prefix + 'wnd_SetCaption',
@@ -190,6 +190,7 @@ exports
   tex_Create               name prefix + 'tex_Create',
   tex_CreateZero           name prefix + 'tex_CreateZero',
   tex_LoadFromFile         name prefix + 'tex_LoadFromFile',
+  tex_LoadFromMemory       name prefix + 'tex_LoadFromMemory',
   tex_SetFrameSize         name prefix + 'tex_SetFrameSize',
   tex_SetMask              name prefix + 'tex_SetMask',
   tex_GetData              name prefix + 'tex_GetData',
@@ -259,6 +260,7 @@ exports
   snd_Add                  name prefix + 'snd_Add',
   snd_Del                  name prefix + 'snd_Del',
   snd_LoadFromFile         name prefix + 'snd_LoadFromFile',
+  snd_LoadFromMemory       name prefix + 'snd_LoadFromMemory',
   snd_Play                 name prefix + 'snd_Play',
   snd_Stop                 name prefix + 'snd_Stop',
   snd_SetVolume            name prefix + 'snd_SetVolume',
@@ -304,6 +306,7 @@ exports
 
   // Static Mesh
   smesh_LoadFromFile       name prefix + 'smesh_LoadFromFile',
+  smesh_LoadFromMemory     name prefix + 'smesh_LoadFromMemory',
   smesh_Animate            name prefix + 'smesh_Animate',
   smesh_Draw               name prefix + 'smesh_Draw',
   smesh_DrawGroup          name prefix + 'smesh_DrawGroup',
@@ -311,6 +314,7 @@ exports
 
   // Skinned Mesh
   skmesh_LoadFromFile      name prefix + 'skmesh_LoadFromFile',
+  skmesh_LoadFromMemory    name prefix + 'skmesh_LoadFromMemory',
   skmesh_Animate           name prefix + 'skmesh_Animate',
   skmesh_Draw              name prefix + 'skmesh_Draw',
   skmesh_DrawGroup         name prefix + 'skmesh_DrawGroup',
@@ -530,6 +534,7 @@ exports
   file_GetSize             name prefix + 'file_GetSize',
   file_Flush               name prefix + 'file_Flush',
   file_Close               name prefix + 'file_Close',
+  file_Find                name prefix + 'file_Find',
 
   mem_LoadFromFile         name prefix + 'mem_LoadFromFile',
   mem_SaveToFile           name prefix + 'mem_SaveToFile',

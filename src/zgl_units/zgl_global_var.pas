@@ -56,15 +56,15 @@ var
   aTimersToKill : array[ 0..cv_MaxCount ] of zglPTimer;
 
   // Formats, etc.
-  texNFCount    : Byte = 0;
-  texNewFormats : array of zglTTextureFormat;
+  texNFCount : Byte = 0;
+  texFormats : array of zglTTextureFormat;
 
-  sndNFCount    : Byte = 0;
-  sndNewFormats : array of zglTSoundFormat;
+  sndNFCount : Byte = 0;
+  sndFormats : array of zglTSoundFormat;
 
-  widgetTCount  : Byte = 0;
-  widgetTypes   : array of zglTWidgetType;
-  widgetTLast   : Byte;
+  widgetTCount : Byte = 0;
+  widgetTypes  : array of zglTWidgetType;
+  widgetTLast  : Byte;
   {------------------------------------ APP -----------------------------------}
   app_Work     : Boolean;
   app_WorkTime : DWORD;

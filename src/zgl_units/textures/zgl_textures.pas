@@ -34,6 +34,7 @@ uses
   zgl_math,
 
   zgl_file,
+  zgl_memory,
   Utils;
 
 function  tex_Add : zglPTexture;
@@ -41,7 +42,8 @@ procedure tex_Del( Texture : zglPTexture );
   
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
-function  tex_LoadFromFile( const FileName : PChar; const TransparentColor, Flags : DWORD ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
+function  tex_LoadFromMemory( Memory : zglTMemory; Extension : PChar; TransparentColor, Flags : DWORD ) : zglPTexture;
 procedure tex_SetFrameSize( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
 function  tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
 
@@ -54,7 +56,7 @@ procedure tex_CalcInvert( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcRGB( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : Integer; const Width, Height : WORD );
 
-procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer ); stdcall;
+procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
 
 implementation
 uses
@@ -177,8 +179,8 @@ begin
     end;
 
   for i := texNFCount - 1 downto 0 do
-    if copy( StrUp( FileName ), length( FileName ) - 3, 4 ) = '.' + texNewFormats[ i ].Extension Then
-      texNewFormats[ i ].Loader( FileName, pData, w, h );
+    if copy( StrUp( FileName ), length( FileName ) - 3, 4 ) = '.' + texFormats[ i ].Extension Then
+      texFormats[ i ].FileLoader( FileName, pData, w, h );
 
   if not Assigned( pData ) Then
     begin
@@ -200,6 +202,43 @@ begin
   tex_Create( Result^, pData );
   
   log_Add( 'Successful loading of texture: ' + FileName );
+  
+  FreeMemory( pData );
+end;
+
+function tex_LoadFromMemory;
+  var
+    i      : Integer;
+    pData  : Pointer;
+    w, h   : WORD;
+begin
+  Result := nil;
+  pData  := nil;
+  
+  for i := texNFCount - 1 downto 0 do
+    if StrUp( Extension ) = texFormats[ i ].Extension Then
+      texFormats[ i ].MemLoader( Memory, pData, w, h );
+
+  if not Assigned( pData ) Then
+    begin
+      log_Add( 'Unable to load texture: From Memory' );
+      zgl_Destroy;
+      exit;
+    end;
+
+  Result         := tex_Add;
+  Result.Width   := w;
+  Result.Height  := h;
+  Result.U       := 1;
+  Result.V       := 1;
+  Result.FramesX := 1;
+  Result.FramesY := 1;
+  Result.Flags   := Flags;
+  if TransparentColor <> $FF000000 Then
+    tex_CalcTransparent( pData, TransparentColor, w, h );
+  tex_Create( Result^, pData );
+  
+  log_Add( 'Successful loading of texture: From Memory' );
   
   FreeMemory( pData );
 end;

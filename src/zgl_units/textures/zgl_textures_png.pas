@@ -73,7 +73,9 @@ type
     R, G, B, A : Byte;
   end;
 
-procedure png_LoadFromFile( const FileName : PChar; var pData : Pointer; var W, H : WORD );
+procedure png_Load( var pData : Pointer; var W, H : WORD );
+procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
+procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 
 procedure png_ReadIHDR;
 procedure png_ReadPLTE;
@@ -111,10 +113,9 @@ var
 
   pngIDATEnd      : DWORD;
 
-procedure png_LoadFromFile;
+procedure png_Load;
   label _exit;
 begin
-  mem_LoadFromFile( pngMem, FileName );
   mem_Read( pngMem, pngSignature[ 0 ], 8 );
 
   if pngSignature <> PNG_SIGNATURE Then
@@ -181,6 +182,21 @@ _exit:
     pngHeaderOk := FALSE;
     pngRowUsed  := TRUE;
   end;
+end;
+
+procedure png_LoadFromFile;
+begin
+  mem_LoadFromFile( pngMem, FileName );
+  png_Load( pData, W, H );
+end;
+
+procedure png_LoadFromMemory;
+begin
+  pngMem.Size     := Memory.Size;
+  pngMem.Memory   := Allocmem( Memory.Size );
+  pngMem.Position := Memory.Position;
+  Move( Memory.Memory^, pngMem.Memory^, Memory.Size );
+  png_Load( pData, W, H );
 end;
 
 procedure png_ReadIHDR;
@@ -535,7 +551,7 @@ begin
 
           if Result < 0 Then
             begin
-              log_Add( 'PNG - ZLib error: ' + z_errmsg[ Result ] );
+              log_Add( 'PNG - ZLib error: ' + zError( Result ) );
               pngFail := TRUE;
               exit;
             end else

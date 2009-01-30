@@ -38,7 +38,8 @@ uses
   zgl_utils_3d,
   Utils;
 
-function  skmesh_LoadFromFile( const FileName : PChar; const Flags : DWORD ) : zglPSkMesh;
+function  skmesh_LoadFromFile( const FileName : String; const Flags : DWORD ) : zglPSkMesh;
+function  skmesh_LoadFromMemory( var Memory : zglTMemory; const Flags : DWORD ) : zglPSkMesh;
 procedure skmesh_Animate( const Mesh : zglPSkMesh; var State : zglTSkeletonState );
 procedure skmesh_Draw( const Mesh : zglPSkMesh; const State : zglPSkeletonState );
 procedure skmesh_DrawGroup( const Mesh : zglPSkMesh; const State : zglPSkeletonState; const Group : DWORD );
@@ -56,10 +57,7 @@ var
 
 function skmesh_LoadFromFile;
   var
-    i, j     : DWORD;
-    M        : zglTMemory;
-    DataID   : Byte;
-    TexLayer : Byte = 0;
+    Memory : zglTMemory;
 begin
   if not file_Exists( FileName ) Then
     begin
@@ -68,14 +66,22 @@ begin
       exit;
     end;
 
+  mem_LoadFromFile( Memory, FileName );
+  Result := skmesh_LoadFromMemory( Memory, Flags );
+  mem_Free( Memory );
+end;
+
+function skmesh_LoadFromMemory;
+  var
+    i, j     : DWORD;
+    DataID   : Byte;
+    TexLayer : Byte = 0;
+begin
   Result := AllocMem( SizeOf( zglTSkMesh ) );
 
-  mem_LoadFromFile( M, FileName );
-
-  if not zmf_ReadHeader( M ) Then
+  if not zmf_ReadHeader( Memory ) Then
     begin
-      log_Add( FileName + ' - not a ZenGL Mesh File' );
-      mem_Free( M );
+      log_Add( 'not a ZenGL Mesh File' );
       exit;
     end;
 
@@ -100,80 +106,79 @@ begin
   SetLength( Result.Weights, Result.VCount );
   SetLength( Result.BonePos, Result.BCount );
 
-  while M.Position < M.Size do
+  while Memory.Position < Memory.Size do
     begin
-      mem_Read( M, DataID, 1 );
+      mem_Read( Memory, DataID, 1 );
       case DataID of
         ZMF_VERTICES:
           begin
-            zmf_ReadVertices( M, Result.Vertices );
+            zmf_ReadVertices( Memory, Result.Vertices );
           end;
         ZMF_NORMALS:
           begin
-            zmf_ReadNormals( M, Result.Normals );
+            zmf_ReadNormals( Memory, Result.Normals );
           end;
         ZMF_TEXCOORDS:
           begin
             INC( TexLayer );
-            zmf_ReadTexCoords( M, Result.TexCoords, TexLayer );
+            zmf_ReadTexCoords( Memory, Result.TexCoords, TexLayer );
           end;
         ZMF_FACES:
           begin
-            zmf_ReadFaces( M, Result.Faces );
+            zmf_ReadFaces( Memory, Result.Faces );
           end;
         ZMF_GROUPS:
           begin
-            zmf_ReadGroups( M, Result.Groups );
+            zmf_ReadGroups( Memory, Result.Groups );
           end;
         ZMF_PACKED_VERTICES:
           begin
-            zmf_ReadPackedVertices( M, Result.Vertices );
+            zmf_ReadPackedVertices( Memory, Result.Vertices );
           end;
         ZMF_PACKED_NORMALS:
           begin
-            zmf_ReadPackedNormals( M, Result.Normals );
+            zmf_ReadPackedNormals( Memory, Result.Normals );
           end;
         ZMF_PACKED_TEXCOORDS:
           begin
             INC( TexLayer );
-            zmf_ReadPackedTexCoords( M, Result.TexCoords, TexLayer );
+            zmf_ReadPackedTexCoords( Memory, Result.TexCoords, TexLayer );
           end;
         ZMF_FACES_RANGE_WORD:
           begin
-            zmf_ReadFacesW( M, Result.Faces );
+            zmf_ReadFacesW( Memory, Result.Faces );
           end;
         ZMF_GROUPS_RANGE_WORD:
           begin
-            zmf_ReadGroupsW( M, Result.Groups );
+            zmf_ReadGroupsW( Memory, Result.Groups );
           end;
         ZMF_BONES:
           begin
-            zmf_ReadBones( M, Result.Bones );
+            zmf_ReadBones( Memory, Result.Bones );
           end;
         ZMF_WEIGHTS:
           begin
             SetLength( Result.WCount, Result.VCount );
-            mem_Read( M, Result.WCount[ 0 ], Result.VCount );
+            mem_Read( Memory, Result.WCount[ 0 ], Result.VCount );
             SetLength( Result.Weights, Result.VCount );
             for i := 0 to Result.VCount - 1 do
               SetLength( Result.Weights[ i ], Result.WCount[ i ] );
-            zmf_ReadWeights( M, Result.Weights, Result.WCount );
+            zmf_ReadWeights( Memory, Result.Weights, Result.WCount );
           end;
         ZMF_ACTION:
           begin
             SetLength( Result.Actions, Result.ACount + 1 );
-            mem_Read( M, Result.Actions[ Result.ACount ].FCount, 4 );
+            mem_Read( Memory, Result.Actions[ Result.ACount ].FCount, 4 );
             SetLength( Result.Actions[ Result.ACount ].Frames, Result.Actions[ Result.ACount ].FCount );
-            zmf_ReadAction( M, Result.Actions[ Result.ACount ] );
+            zmf_ReadAction( Memory, Result.Actions[ Result.ACount ] );
             INC( Result.ACount );
           end;
         ZMF_BONEPOS:
           begin
-            zmf_ReadBonePos( M, Result.BonePos );
+            zmf_ReadBonePos( Memory, Result.BonePos );
           end;
       end;
     end;
-  mem_Free( M );
 
   SetLength( Result.RIndices, Result.VCount );
   Result.RVCount := CalcRVC( Result.VCount, Result.Vertices, Result.RIndices );
@@ -479,7 +484,7 @@ begin
       BonePos[ i ].Matrix.a24 := BonePos[ i ].Translation.Y;
       BonePos[ i ].Matrix.a34 := BonePos[ i ].Translation.Z;
 
-      if Bones[ i ].Parent >= 0 Then
+      if Bones[ i ].Parent <> -1 Then
         BonePos[ i ].Matrix := matrix4f_Mul( BonePos[ Bones[ i ].Parent ].Matrix, BonePos[ i ].Matrix );
 
       BonePos[ i ].Point.X := BonePos[ i ].Matrix.a14;

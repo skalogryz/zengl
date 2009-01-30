@@ -24,16 +24,17 @@ unit zgl_types;
 interface
 uses 
   {$IFDEF LINUX}
-  openal
+  openal,
   {$ENDIF}
   {$IFDEF WIN32}
   Windows,
-  DirectSound
+  DirectSound,
   {$ENDIF}
   {$IFDEF DARWIN}
   MacOSAll,
-  openal
+  openal,
   {$ENDIF}
+  zgl_memory
   ;
 
 type
@@ -122,8 +123,9 @@ end;
 type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
-    Extension : String;
-    Loader    : procedure( const FileName : PChar; var pData : Pointer; var W, H : WORD );
+    Extension  : String;
+    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : WORD );
+    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 end;
 
 {------------------------------------------------------------------------------}
@@ -223,8 +225,9 @@ end;
 type
   zglPSoundFormat = ^zglTSoundFormat;
   zglTSoundFormat = record
-    Extension : String;
-    Loader    : procedure( const FileName : PChar; var Data : Pointer; var Size, Format, Frequency : Integer );
+    Extension  : String;
+    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
+    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
 end;
 
 {------------------------------------------------------------------------------}

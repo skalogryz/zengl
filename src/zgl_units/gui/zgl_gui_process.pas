@@ -33,9 +33,15 @@ uses
 
 procedure gui_ProcWidget( const Widget : zglPWidget );
 
-procedure gui_ProcEvents  ( const Event : zglPEvent );
-procedure gui_ProcButton  ( const Event : zglPEvent );
-procedure gui_ProcCheckBox( const Event : zglPEvent );
+procedure gui_ProcEvents     ( const Event : zglPEvent );
+procedure gui_ProcButton     ( const Event : zglPEvent );
+procedure gui_ProcCheckBox   ( const Event : zglPEvent );
+procedure gui_ProcRadioButton( const Event : zglPEvent );
+procedure gui_ProcLabel      ( const Event : zglPEvent );
+procedure gui_ProcEditBox    ( const Event : zglPEvent );
+procedure gui_ProcListBox    ( const Event : zglPEvent );
+procedure gui_ProcGroupBox   ( const Event : zglPEvent );
+procedure gui_ProcSpin       ( const Event : zglPEvent );
 
 implementation
 uses
@@ -45,8 +51,17 @@ procedure gui_ProcWidget;
   var
     i     : Integer;
     Event : zglTEvent;
+    w     : zglPWidget;
 begin
-  if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) Then
+  if Assigned( Widget.child ) Then
+    begin
+      w := Widget.child;
+      repeat
+        w := w.Next;
+        gui_ProcWidget( w );
+      until not Assigned( w.Next );
+    end;
+  if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) and col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.rect ) Then
     begin
       Event.mouse_pos.X := Widget.rect.X - mouse_X;
       Event.mouse_pos.Y := Widget.rect.Y - mouse_Y;
@@ -146,6 +161,8 @@ begin
         begin
           if Event.key_code = K_TAB Then
             Widget.focus := FALSE;
+          if Assigned( Widget.Next ) Then
+            Widget.Next.focus := TRUE;
           if Assigned( Widget.Events.OnKeyUp ) Then
             Widget.Events.OnKeyUp( Widget, key_code );
         end;
@@ -154,27 +171,24 @@ end;
 
 procedure gui_ProcButton;
 begin
-  gui_ProcEvents( Event );
-  with Event^ do
+  with Event^, zglTButtonDesc( Widget.desc^ ) do
     case _type of
       EVENT_MOUSE_CLICK:
         begin
-          if mouse_button = M_BLEFT Then
-            zglTButtonDesc( Widget.desc^ ).Pressed := TRUE;
+          Pressed := ( mouse_button = M_BLEFT );
         end;
       EVENT_MOUSE_UP:
         begin
           if mouse_button = M_BLEFT Then
-            zglTButtonDesc( Widget.desc^ ).Pressed := FALSE;
+            Pressed := FALSE;
         end;
       EVENT_MOUSE_LEAVE:
         begin
-          zglTButtonDesc( Widget.desc^ ).Pressed := FALSE;
+          Pressed := FALSE;
         end;
       EVENT_KEY_DOWN:
         begin
-          if ( key_code = K_SPACE ) or ( key_code = K_ENTER ) Then
-            zglTButtonDesc( Widget.desc^ ).Pressed := TRUE;
+          Pressed := ( ( key_code = K_SPACE ) or ( key_code = K_ENTER ) );
         end;
       EVENT_KEY_UP:
         begin
@@ -182,21 +196,21 @@ begin
             begin
               if Assigned( Widget.Events.OnClick ) Then
                 Widget.Events.OnClick( Widget );
-              zglTButtonDesc( Widget.desc^ ).Pressed := FALSE;
+              Pressed := FALSE;
             end;
         end;
     end;
+  gui_ProcEvents( Event );
 end;
 
 procedure gui_ProcCheckBox;
 begin
-  gui_ProcEvents( Event );
-  with Event^ do
+  with Event^, zglTCheckBoxDesc( Widget.desc^ ) do
     case _type of
       EVENT_MOUSE_CLICK:
         begin
           if mouse_button = M_BLEFT Then
-            zglTCheckBoxDesc( Widget.desc^ ).Checked := not zglTCheckBoxDesc( Widget.desc^ ).Checked;
+            Checked := not Checked;
         end;
       EVENT_KEY_UP:
         begin
@@ -204,10 +218,81 @@ begin
             begin
               if Assigned( Widget.Events.OnClick ) Then
                 Widget.Events.OnClick( Widget );
-              zglTCheckBoxDesc( Widget.desc^ ).Checked := not zglTCheckBoxDesc( Widget.desc^ ).Checked;
+              Checked := not Checked;
             end;
         end;
     end;
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcRadioButton;
+begin
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcLabel;
+begin
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcEditBox;
+begin
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcListBox;
+begin
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcGroupBox;
+begin
+end;
+
+procedure gui_ProcSpin;
+begin
+  with Event^, Widget.rect, zglTSpinDesc( Widget.desc^ ) do
+    case _type of
+      EVENT_MOUSE_MOVE:
+        begin
+          if mouse_Y < Y + H / 2 Then DPressed := FALSE;
+          if mouse_Y > Y + H / 2 Then UPressed := FALSE;
+        end;
+      EVENT_MOUSE_CLICK:
+        begin
+          if mouse_button = M_BLEFT Then
+            begin
+              if mouse_Y < Y + H / 2 Then
+                begin
+                  UPressed := TRUE;
+                  if Value < Max Then
+                    INC( Value );
+                end;
+              if mouse_Y > Y + H / 2 Then
+                begin
+                  DPressed := TRUE;
+                  if Value > Min Then
+                  DEC( Value );
+                end;
+            end;
+        end;
+      EVENT_MOUSE_UP:
+        begin
+          if mouse_button = M_BLEFT Then
+            begin
+              if mouse_Y < Y + H / 2 Then
+                UPressed := FALSE;
+              if mouse_Y > Y + H / 2 Then
+                DPressed := FALSE;
+            end;
+        end;
+      EVENT_MOUSE_LEAVE:
+        begin
+          UPressed := FALSE;
+          DPressed := FALSE;
+        end;
+    end;
+  gui_ProcEvents( Event );
 end;
 
 end.

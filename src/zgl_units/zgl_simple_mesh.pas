@@ -37,7 +37,8 @@ uses
   zgl_math,
   zgl_utils_3d;
 
-function  smesh_LoadFromFile( const FileName : PChar; const Flags : DWORD ) : zglPSMesh;
+function  smesh_LoadFromFile( const FileName : String; const Flags : DWORD ) : zglPSMesh;
+function  smesh_LoadFromMemory( var Memory : zglTMemory; const Flags : DWORD ) : zglPSMesh;
 procedure smesh_Animate( const Mesh : zglPSMesh; var State : zglTSimpleState );
 procedure smesh_Draw( const Mesh : zglPSMesh; const State : zglPSimpleState );
 procedure smesh_DrawGroup( const Mesh : zglPSMesh; const State : zglPSimpleState; const Group : DWORD );
@@ -50,10 +51,7 @@ var
 
 function smesh_LoadFromFile;
   var
-    i, f     : DWORD;
-    M        : zglTMemory;
-    DataID, t: Byte;
-    TexLayer : Byte = 0;
+    Memory : zglTMemory;
 begin
   if not file_Exists( FileName ) Then
     begin
@@ -62,16 +60,23 @@ begin
       exit;
     end;
 
-  Result := AllocMem( SizeOf( zglTSMesh ) );
+  mem_LoadFromFile( Memory, FileName );
+  Result := smesh_LoadFromMemory( Memory, Flags );
+  mem_Free( Memory );
+end;
 
-  mem_LoadFromFile( M, FileName );
-
-  if not zmf_ReadHeader( M ) Then
+function smesh_LoadFromMemory;
+  var
+    i, f      : DWORD;
+    DataID, t : Byte;
+    TexLayer  : Byte = 0;
+begin
+  if not zmf_ReadHeader( Memory ) Then
     begin
-      log_Add( FileName + ' - not a ZenGL Mesh File' );
-      mem_Free( M );
+      log_Add( 'not a ZenGL Mesh File' );
       exit;
     end;
+  Result := AllocMem( SizeOf( zglTSMesh ) );
 
   Result.Flags  := zmfHeader.Flags or Flags;
   Result.VCount := zmfHeader.VCount;
@@ -91,30 +96,30 @@ begin
   SetLength( Result.Faces, Result.FCount );
   SetLength( Result.Groups, Result.GCount );
   
-  while M.Position < M.Size do
+  while Memory.Position < Memory.Size do
     begin
-      mem_Read( M, DataID, 1 );
+      mem_Read( Memory, DataID, 1 );
       case DataID of
         ZMF_VERTICES:
           begin
-            zmf_ReadVertices( M, Result.Vertices );
+            zmf_ReadVertices( Memory, Result.Vertices );
           end;
         ZMF_NORMALS:
           begin
-            zmf_ReadNormals( M, Result.Normals );
+            zmf_ReadNormals( Memory, Result.Normals );
           end;
         ZMF_TEXCOORDS:
           begin
             INC( TexLayer );
-            zmf_ReadTexCoords( M, Result.TexCoords, TexLayer )
+            zmf_ReadTexCoords( Memory, Result.TexCoords, TexLayer )
           end;
         ZMF_FACES:
           begin
-            zmf_ReadFaces( M, Result.Faces );
+            zmf_ReadFaces( Memory, Result.Faces );
           end;
         ZMF_GROUPS:
           begin
-            zmf_ReadGroups( M, Result.Groups );
+            zmf_ReadGroups( Memory, Result.Groups );
           end;
         ZMF_FRAME:
           begin
@@ -122,28 +127,28 @@ begin
             SetLength( Result.Vertices, Result.VCount * Result.Frames );
             if zmfHeader.Flags and USE_NORMALS > 0 Then
               SetLength( Result.Normals, Result.VCount * Result.Frames );
-            zmf_ReadFrame( M, Result.Vertices, Result.Normals );
+            zmf_ReadFrame( Memory, Result.Vertices, Result.Normals );
           end;
         ZMF_PACKED_VERTICES:
           begin
-            zmf_ReadPackedVertices( M, Result.Vertices );
+            zmf_ReadPackedVertices( Memory, Result.Vertices );
           end;
         ZMF_PACKED_NORMALS:
           begin
-            zmf_ReadPackedNormals( M, Result.Normals );
+            zmf_ReadPackedNormals( Memory, Result.Normals );
           end;
         ZMF_PACKED_TEXCOORDS:
           begin
             INC( TexLayer );
-            zmf_ReadPackedTexCoords( M, Result.TexCoords, TexLayer );
+            zmf_ReadPackedTexCoords( Memory, Result.TexCoords, TexLayer );
           end;
         ZMF_FACES_RANGE_WORD:
           begin
-            zmf_ReadFacesW( M, Result.Faces );
+            zmf_ReadFacesW( Memory, Result.Faces );
           end;
         ZMF_GROUPS_RANGE_WORD:
           begin
-            zmf_ReadGroupsW( M, Result.Groups );
+            zmf_ReadGroupsW( Memory, Result.Groups );
           end;
         ZMF_PACKED_FRAME:
           begin
@@ -151,22 +156,21 @@ begin
             SetLength( Result.Vertices, Result.VCount * Result.Frames );
             if zmfHeader.Flags and USE_NORMALS > 0 Then
               SetLength( Result.Normals, Result.VCount * Result.Frames );
-            zmf_ReadPackedFrame( M, Result.Vertices, Result.Normals );
+            zmf_ReadPackedFrame( Memory, Result.Vertices, Result.Normals );
           end;
         ZMF_ACTION:
           begin
             SetLength( Result.Actions, Result.ACount + 1 );
-            mem_Read( M, t, 1 );
+            mem_Read( Memory, t, 1 );
             SetLength( Result.Actions[ Result.ACount ].Name, t );
-            mem_Read( M, Result.Actions[ Result.ACount ].Name,   t );
-            mem_Read( M, Result.Actions[ Result.ACount ].FPS,    4 );
-            mem_Read( M, Result.Actions[ Result.ACount ].FCount, 4 );
-            mem_Read( M, Result.Actions[ Result.ACount ].FFrame, 4 );
+            mem_Read( Memory, Result.Actions[ Result.ACount ].Name,   t );
+            mem_Read( Memory, Result.Actions[ Result.ACount ].FPS,    4 );
+            mem_Read( Memory, Result.Actions[ Result.ACount ].FCount, 4 );
+            mem_Read( Memory, Result.Actions[ Result.ACount ].FFrame, 4 );
             INC( Result.ACount );
           end;
       end;
     end;
-  mem_Free( M );
 
   SetLength( Result.RIndices, Result.VCount );
   Result.RVCount := CalcRVC( Result.VCount, Result.Vertices, Result.RIndices );
