@@ -60,10 +60,10 @@ begin
     begin
       w := Widget.child;
       repeat
-        //scissor_Begin( Round( w.Parent.rect.X ), Round( w.Parent.rect.Y ), Round( w.Parent.rect.W ), Round( w.Parent.rect.H ) );
+        scissor_Begin( Round( w.Parent.rect.X ), Round( w.Parent.rect.Y ), Round( w.Parent.rect.W ), Round( w.Parent.rect.H ) );
         w := w.Next;
         gui_DrawWidget( w );
-        //scissor_End;
+        scissor_End;
       until not Assigned( w.Next );
     end;
 end;
@@ -123,7 +123,8 @@ begin
   with zglTEditBoxDesc( Widget.desc^ ), Widget.rect do
     begin
       pr2d_Rect( X, Y, W, H, COLOR_EDIT, 255, PR2D_FILL );
-      pr2d_Rect( X, Y, W, H, $000000, 255, 0 );
+      pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, 0 );
+      pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, $000000, 255, 0 );
 
       text_Draw( Font, X + Font.Width[ Byte( ' ' ) ], Round( Y + ( H - Font.Height ) / 2 ), Text, 255, $FFFFFF, 0, 1 );
     end;

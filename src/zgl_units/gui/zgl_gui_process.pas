@@ -47,6 +47,9 @@ implementation
 uses
   zgl_gui_main;
 
+var
+  mouseTimeDown : Integer;
+
 procedure gui_ProcWidget;
   var
     i     : Integer;
@@ -73,6 +76,25 @@ begin
           gui_AddEvent( EVENT_MOUSE_ENTER, Widget, nil );
         end;
 
+      if mouse_Down( M_BLEFT ) Then
+        begin
+          INC( mouseTimeDown );
+          Event.mouse_button := M_BLEFT;
+          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, @Event.mouse_button );
+        end;
+      if mouse_Down( M_BRIGHT ) Then
+        begin
+          INC( mouseTimeDown );
+          Event.mouse_button := M_BRIGHT;
+          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, @Event.mouse_button );
+        end;
+      if mouse_Down( M_BMIDLE ) Then
+        begin
+          INC( mouseTimeDown );
+          Event.mouse_button := M_BMIDLE;
+          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, @Event.mouse_button );
+        end;
+
       if mouse_Click( M_BLEFT ) Then
         begin
           Event.mouse_button := M_BLEFT;
@@ -91,16 +113,19 @@ begin
 
       if mouse_Up( M_BLEFT ) Then
         begin
+          mouseTimeDown := 0;
           Event.mouse_button := M_BLEFT;
           gui_AddEvent( EVENT_MOUSE_UP, Widget, @Event.mouse_button );
         end;
       if mouse_Up( M_BRIGHT ) Then
         begin
+          mouseTimeDown := 0;
           Event.mouse_button := M_BRIGHT;
           gui_AddEvent( EVENT_MOUSE_UP, Widget, @Event.mouse_button );
         end;
       if mouse_Up( M_BMIDLE ) Then
         begin
+          mouseTimeDown := 0;
           Event.mouse_button := M_BMIDLE;
           gui_AddEvent( EVENT_MOUSE_UP, Widget, @Event.mouse_button );
         end;
@@ -133,7 +158,7 @@ begin
       EVENT_MOUSE_MOVE:
         begin
           if Assigned( Widget.Events.OnMouseMove ) Then
-            Widget.Events.OnMouseMove( Widget, Event.mouse_pos.X, Event.mouse_pos.Y );
+            Widget.Events.OnMouseMove( Widget, mouse_pos.X, mouse_pos.Y );
         end;
       EVENT_MOUSE_ENTER:
         begin
@@ -142,6 +167,7 @@ begin
         end;
       EVENT_MOUSE_LEAVE:
         begin
+          mouseTimeDown := 0;
           if Assigned( Widget.Events.OnMouseLeave ) Then
             Widget.Events.OnMouseLeave( Widget );
         end;
@@ -159,7 +185,7 @@ begin
         end;
       EVENT_KEY_UP:
         begin
-          if Event.key_code = K_TAB Then
+          if key_code = K_TAB Then
             Widget.focus := FALSE;
           if Assigned( Widget.Next ) Then
             Widget.Next.focus := TRUE;
@@ -257,6 +283,14 @@ begin
         begin
           if mouse_Y < Y + H / 2 Then DPressed := FALSE;
           if mouse_Y > Y + H / 2 Then UPressed := FALSE;
+        end;
+      EVENT_MOUSE_DOWN:
+        begin
+          if ( mouseTimeDown > 50 ) and ( mouse_button = M_BLEFT ) Then
+            begin
+              DEC( mouseTimeDown, 15 );
+              gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
+            end;
         end;
       EVENT_MOUSE_CLICK:
         begin
