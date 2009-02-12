@@ -26,7 +26,7 @@ interface
 uses
   GL, GLext,
   zgl_types;
-  
+
 procedure skybox_Init( const Top, Bottom, Left, Right, Front, Back : zglPTexture );
 procedure skybox_Draw;
 
@@ -39,7 +39,7 @@ var
   sb_Right  : zglPTexture;
   sb_Front  : zglPTexture;
   sb_Back   : zglPTexture;
-  
+
 procedure skybox_Init;
 begin
   sb_Top    := Top;
@@ -53,7 +53,7 @@ end;
 procedure skybox_Draw;
 begin
   glEnable( GL_TEXTURE_2D );
-  
+
   // Top
   glBindTexture  ( GL_TEXTURE_2D, sb_Top.ID                           );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -77,7 +77,7 @@ begin
   glTexCoord2f( sb_Bottom.U, sb_Bottom.V ); glVertex3f(  1, -1,  1 );
   glTexCoord2f( sb_Bottom.U, 0           ); glVertex3f( -1, -1,  1 );
   glEnd;
-  
+
   // Left
   glBindTexture  ( GL_TEXTURE_2D, sb_Left.ID                          );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -101,7 +101,7 @@ begin
   glTexCoord2f( sb_Right.U, sb_Right.V ); glVertex3f( 1,  1,  1 );
   glTexCoord2f( 0,          sb_Right.V ); glVertex3f( 1,  1, -1 );
   glEnd;
-  
+
   // Back
   glBindTexture  ( GL_TEXTURE_2D, sb_Back.ID                          );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -125,9 +125,9 @@ begin
   glTexCoord2f( 0,          sb_Front.V ); glVertex3f(  1,  1, 1 );
   glTexCoord2f( 0,          0          ); glVertex3f(  1, -1, 1 );
   glEnd;
-  
+
   glDisable( GL_TEXTURE_2D );
-  
+
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 

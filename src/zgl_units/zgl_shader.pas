@@ -31,7 +31,7 @@ uses
   zgl_global_var,
   zgl_log,
   Utils;
-  
+
 const
   SHADER_ARB          = 0;
   SHADER_GLSL         = 1;
@@ -39,13 +39,13 @@ const
   SHADER_FRAGMENT_ARB = $8804;
   SHADER_VERTEX       = $8B31;
   SHADER_FRAGMENT     = $8B30;
-  
+
 function  shader_InitARB : Boolean;
 function  shader_LoadFromFileARB( const FileName : PChar; const ShaderType : DWORD ) : DWORD;
 procedure shader_BeginARB( const Shader, ShaderType : DWORD );
 procedure shader_EndARB( const ShaderType : DWORD );
 procedure shader_FreeARB( const Shader : DWORD );
-  
+
 function  shader_InitGLSL : Boolean;
 function  shader_LoadFromFile( const FileName : PChar; const ShaderType : DWORD; const Link : Boolean ) : DWORD;
 procedure shader_Attach( const Attach : DWORD );
@@ -123,7 +123,7 @@ begin
     end;
 
   _string := PChar( s );
-  
+
   glGenProgramsARB( 1, @Result );
   glBindProgramARB( ShaderType, Result );
   glProgramStringARB( ShaderType, GL_PROGRAM_FORMAT_ASCII_ARB, M.Size, _string );

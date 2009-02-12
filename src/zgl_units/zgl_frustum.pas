@@ -25,9 +25,9 @@ interface
 
 uses
   GL,
-  
+
   zgl_types;
-  
+
 procedure frustum_Calc( var f : zglTFrustum );
 
 function frustum_PointIn   ( const f : zglTFrustum; const x, y, z : Single )             : Boolean;
@@ -41,7 +41,7 @@ implementation
 
 procedure frustum_Calc;
   var
-  	p, m, clip : array [ 0..15 ] of Single;
+    p, m, clip : array [ 0..15 ] of Single;
     t          : Single;
 begin
   glGetFloatv( GL_PROJECTION_MATRIX, @p );

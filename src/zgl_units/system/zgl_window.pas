@@ -40,9 +40,9 @@ uses
   Utils;
 
 {const
-  MWM_DECOR_ALL         = 1 shl 0;  
+  MWM_DECOR_ALL         = 1 shl 0;
   MWM_HINTS_DECORATIONS = 1 shl 1;
-  
+
   PROP_MOTIF_WM_HINTS_ELEMENTS = 5;
 
 type
@@ -51,7 +51,7 @@ type
     functions   : LongWord;
     decorations : LongWord;
     inputMode   : LongInt;
-    Status      : LongWord;  
+    Status      : LongWord;
   end;}
 
 function  wnd_Create( const Width, Height : WORD ) : Boolean;
@@ -96,7 +96,7 @@ begin
                          PointerMotionMask or
                          KeyPressMask or
                          KeyReleaseMask;
-                               
+
   if app_FullScreen Then
     begin
       wnd_X := 0;
@@ -108,7 +108,7 @@ begin
         wnd_Attr.override_redirect := False;
         wnd_ValueMask := CWColormap or CWEventMask or CWX or CWY or CWCursor;
       end;
-                               
+
   wnd_Handle := XCreateWindow( scr_Display,
                                wnd_Root,
                                wnd_X, wnd_Y,
@@ -119,13 +119,13 @@ begin
                                ogl_VisualInfo^.visual,
                                wnd_ValueMask,
                                @wnd_Attr );
-                             
+
   if wnd_Handle = 0 Then
     begin
       u_Error( 'Cannot create window' );
       exit;
     end;
-    
+
   sizehints.flags      := PMinSize or PMaxSize;
   sizehints.min_width  := wnd_Width;
   sizehints.max_width  := wnd_Width;
@@ -137,13 +137,13 @@ begin
   //motifhints.decorations := MWM_DECOR_ALL * Byte( not app_FullScreen );
   //XChangeProperty( scr_Display, wnd_Handle, wnd_MotifAtom, wnd_MotifAtom, 32, 0, @motifhints, PROP_MOTIF_WM_HINTS_ELEMENTS );
   XSetWMNormalHints( scr_Display, wnd_Handle, @sizehints );
-  
+
   XMapRaised( scr_Display, wnd_Handle );
 
   wnd_DestroyAtom := XInternAtom( scr_Display, 'WM_DELETE_WINDOW', TRUE );
   wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', TRUE );
   XSetWMProtocols( scr_Display, wnd_Handle, @wnd_DestroyAtom, 1 );
-  
+
   if app_FullScreen Then
     begin
       XGrabKeyboard( scr_Display, wnd_Handle, True, GrabModeAsync, GrabModeAsync, CurrentTime );
@@ -153,7 +153,7 @@ begin
         XUngrabKeyboard( scr_Display, CurrentTime );
         XUngrabPointer( scr_Display, CurrentTime );
       end;
-      
+
   glXWaitX;
 {$ENDIF}
 {$IFDEF WIN32}
@@ -163,7 +163,7 @@ begin
 
   wnd_X := 0;
   wnd_Y := 0;
-  
+
   with wnd_Class do
     begin
       cbSize        := SizeOf( TWndClassEx );
@@ -179,13 +179,13 @@ begin
       hbrBackGround := GetStockObject( NULL_BRUSH );
       lpszClassName := wnd_ClassName;
     end;
-    
+
   if RegisterClassEx( wnd_Class ) = 0 Then
     begin
       u_Error( 'Cannot register window class' );
       exit;
     end;
-    
+
   if app_FullScreen Then
     wnd_Style := WS_POPUP or WS_VISIBLE
   else
@@ -202,7 +202,7 @@ begin
                                 0,
                                 wnd_INST,
                                 nil );
-                               
+
   if wnd_Handle = 0 Then
     begin
       u_Error( 'Cannot create window' );
@@ -309,7 +309,7 @@ begin
 {$IFDEF WIN32}
   // Странный костыль, но без него падает FPS после смены параметров окна
   wglMakeCurrent( wnd_DC, 0 );
-  
+
   if app_FullScreen Then
     wnd_Style := WS_POPUP or WS_VISIBLE
   else
@@ -334,7 +334,7 @@ begin
   AdjustWindowRectEx( r, 0, FALSE, 0 );
   SetWindowLong( wnd_Handle, GWL_STYLE, wnd_Style );
   SetWindowLong( wnd_Handle, GWL_EXSTYLE, wnd_StyleEx );
-  
+
   wglMakeCurrent( wnd_DC, ogl_Context );
 {$ENDIF}
 {$IFDEF DARWIN}

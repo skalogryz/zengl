@@ -22,7 +22,7 @@ unit zgl_types;
 {$I define.inc}
 
 interface
-uses 
+uses
   {$IFDEF LINUX}
   openal,
   {$ENDIF}
@@ -48,11 +48,11 @@ type
     Width  : array of Integer;
     Height : array of Integer;
 end;
-  
+
 {------------------------------------------------------------------------------}
 {-------------------------------- zgl_ini.pas ---------------------------------}
 {------------------------------------------------------------------------------}
-  
+
 type
   zglPINIKey = ^zglTINIKey;
   zglTINIKey = record
@@ -348,7 +348,7 @@ type
     a31, a32, a33, a34 : Single;
     a41, a42, a43, a44 : Single;
 end;
-  
+
 type
   zglPLine3D = ^zglTLine3D;
   zglTLine3D = record
@@ -362,7 +362,7 @@ type
     D      : Single;
     Normal : zglTPoint3D;
 end;
-  
+
 type
   zglPAABB = ^zglTAABB;
   zglTAABB = record
@@ -607,7 +607,7 @@ end;
 type
   zglPFrustum = ^zglTFrustum;
   zglTFrustum = array [ 0..5 ] of array[ 0..3 ] of Single;
-  
+
 {------------------------------------------------------------------------------}
 {------------------------------ zgl_octree.pas --------------------------------}
 {------------------------------------------------------------------------------}

@@ -169,7 +169,7 @@ begin
   alListenerfv( AL_POSITION,    @oal_Position );
   alListenerfv( AL_VELOCITY,    @oal_Velocity );
   alListenerfv( AL_ORIENTATION, @oal_Orientation );
-  
+
   alGenSources( 1, @sfSource );
   alGenBuffers( sfBufCount, @sfBuffers );
   {$ENDIF}
@@ -354,8 +354,8 @@ function snd_Play;
 begin
   Result := -1;
 
-  if ( not Assigned( Sound ) ) or 
-     ( not sndInitialized ) or 
+  if ( not Assigned( Sound ) ) or
+     ( not sndInitialized ) or
      ( not sndCanPlay ) Then exit;
 
   {$IFDEF LINUX_OR_DARWIN}
@@ -379,7 +379,7 @@ begin
   alSourcefv( Sound.Source[ Result ], AL_VELOCITY,  @oal_Velocity );
   alSourcef ( Sound.Source[ Result ], AL_GAIN,      sndVolume / 100 );
   alSourcei ( Sound.Source[ Result ], AL_FREQUENCY, Sound.Frequency );
-  
+
   if Loop Then
     alSourcei( Sound.Source[ Result ], AL_LOOPING, AL_TRUE )
   else
@@ -416,7 +416,7 @@ procedure snd_Stop;
   var
     i : Integer;
 begin
-  if ( not Assigned( Sound ) ) or 
+  if ( not Assigned( Sound ) ) or
      ( not sndInitialized ) Then exit;
 
   {$IFDEF LINUX_OR_DARWIN}

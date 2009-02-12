@@ -33,7 +33,7 @@ uses
   zgl_vbo,
   zgl_math,
   zgl_utils_3d;
-  
+
 procedure octree_Build( var Octree : zglTOctree; const MaxFacesPerNode, Flags : DWORD );
 procedure octree_Free( var Octree : zglTOctree );
 procedure octree_SortFacesByTexture( var Octree : zglTOctree; var Faces : array of DWORD; const left, right : DWORD );
@@ -69,9 +69,9 @@ function GetRenderDataSize( var Octree : zglTOctree; const FCount : DWORD; var F
     i : DWORD;
 begin
   Result := 1;
-  
+
   if FCount - 2 < 0 Then exit;
-  
+
   for i := 0 to FCount - 2 do
     if Octree.Textures[ Faces[ i ] ] <> Octree.Textures[ Faces[ i + 1 ] ] Then INC( Result );
 end;
@@ -111,7 +111,7 @@ begin
             RenderData[ 0 ].Indices := AllocMem( RenderData[ 0 ].ICount * 4 );
             RenderData[ 0 ].IBType  := GL_UNSIGNED_INT;
           end;
-      
+
       j := 0;
       if tLastVCount < 65536 Then
         begin
@@ -177,7 +177,7 @@ begin
 
                   INC( j, 3 );
                 end;
-                
+
           INC( i );
           z := i;
         end;
@@ -196,7 +196,7 @@ begin
                 begin
                   t := Octree.ICount * 4;
                   octree_AddIndices( Octree, RenderData[ i ].Indices, RenderData[ i ].ICount, 4 );
-                  FreeMem( RenderData[ i ].Indices ); 
+                  FreeMem( RenderData[ i ].Indices );
                   RenderData[ i ].Indices := Pointer( t );
                 end;
           end;
@@ -213,7 +213,7 @@ begin
                 begin
                   t := Octree.ICount * 4;
                   octree_AddIndices( Octree, RenderData[ i ].Indices, RenderData[ i ].ICount, 4 );
-                  FreeMem( RenderData[ i ].Indices ); 
+                  FreeMem( RenderData[ i ].Indices );
                   RenderData[ i ].Indices := Pointer( Octree.Indices + t );
                 end;
           end;
@@ -239,7 +239,7 @@ begin
   else
     if Flags and USE_MULTITEX2 > 0 Then
       Octree.Flags := Flags or USE_MULTITEX1;
-  
+
   tTexLevel := Byte( Octree.Flags and USE_MULTITEX1 > 0 ) +
                Byte( Octree.Flags and USE_MULTITEX2 > 0 ) +
                Byte( Octree.Flags and USE_MULTITEX3 > 0 );
@@ -292,7 +292,7 @@ begin
     end;
 
   vbo_Check( Octree.Flags );
-    
+
   if Octree.Flags and BUILD_PLANES > 0 Then
     begin
       SetLength( Octree.Planes, Octree.FCount );
@@ -303,14 +303,14 @@ begin
     end;
 
   if Octree.Flags and USE_VBO > 0 Then tbuildVBO := TRUE;
-    
+
   octree_AddNode( Octree, Octree.MainNode^, Octree.FCount, Faces );
   SetLength( Faces, 0 );
 
   if Octree.Flags and USE_VBO > 0 Then
     begin
       vbo_Build( Octree.IBuffer, Octree.VBuffer, Octree.ICount, Octree.VCount,
-                 Octree.Indices, 
+                 Octree.Indices,
                  Octree.Vertices, Octree.Normals,
                  Octree.TexCoords, Octree.MultiTexCoords,
                  Octree.Flags );
@@ -332,7 +332,7 @@ begin
 
   if Assigned( Octree.MainNode ) Then
     octree_DelNode( Octree.MainNode );
-    
+
   if Octree.Flags and USE_VBO > 0 Then
     vbo_Free( Octree.IBuffer, Octree.VBuffer, Octree.VCount, Octree.ICount );
 end;
@@ -437,7 +437,7 @@ begin
                     end;
                 end;
           end;
-          
+
       for ID := 0 to 7 do
         for i := 0 to FCount - 1 do
           if bFaces[ ID, i ] Then
@@ -544,7 +544,7 @@ begin
       Node.RDSize := GetRenderDataSize( Octree, IFCount, IFaces );
       SetLength( Node.RenderData, Node.RDSize );
       BuildRenderData( Octree, Node.RDSize, Node.RenderData, IFCount, IFaces );
-      
+
       if Octree.Flags and BUILD_PLANES > 0 Then
         begin
           Node.PCount := IFCount + DFCount;
@@ -633,7 +633,7 @@ procedure octree_Draw;
 begin
   Octree.r_DFacesCount := 0;
   Octree.r_NodeACount  := 0;
-  
+
   if Octree.Flags and USE_VBO > 0 Then
     begin
       PV := 0;
@@ -659,13 +659,13 @@ begin
       glClientActiveTextureARB( GL_TEXTURE0_ARB );
       glEnableClientState( GL_TEXTURE_COORD_ARRAY );
       glTexCoordPointer( 2, GL_FLOAT, 0, Pointer( PT ) );
-  
+
       if ogl_MaxTexLevels > 0 Then
         begin
           tTexLevel := Byte( Octree.Flags and USE_MULTITEX1 > 0 ) +
                        Byte( Octree.Flags and USE_MULTITEX2 > 0 ) +
                        Byte( Octree.Flags and USE_MULTITEX3 > 0 );
-  
+
           for i := 1 to tTexLevel do
             begin
               glClientActiveTextureARB( GL_TEXTURE0_ARB + i );
@@ -687,14 +687,14 @@ begin
     glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 
   octree_DrawDFaces( Octree, Octree.MainNode^, Frustum );
-  
+
   if Octree.Flags and USE_VBO > 0 Then
     glBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-  
+
   tTexLevel := 0;
 end;
 
@@ -712,7 +712,7 @@ begin
       glBegin( GL_LINES );
     end else
       Node := tDebugNode;
-      
+
   x := Node.Cube.Position.X;
   y := Node.Cube.Position.Y;
   z := Node.Cube.Position.Z;
@@ -727,7 +727,7 @@ begin
           tDebugNode := Node.SubNodes[ i ];
           octree_DrawDebug( Octree, Frustum );
         end;
-  
+
   // Т.к. писать в лоб все координаты линий - раздувать библиотеку, то поиздеваюсь немного :)
   for j := -1 to 1 do
     begin
@@ -749,7 +749,7 @@ begin
       glVertex3f( x - s, y + s, z - s * j );
       glVertex3f( x + s, y + s, z - s * j );
     end;
-    
+
   if Node = Octree.MainNode Then
     begin
       tDebugFirst := FALSE;

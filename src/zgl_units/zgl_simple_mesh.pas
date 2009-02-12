@@ -95,7 +95,7 @@ begin
     end;
   SetLength( Result.Faces, Result.FCount );
   SetLength( Result.Groups, Result.GCount );
-  
+
   while Memory.Position < Memory.Size do
     begin
       mem_Read( Memory, DataID, 1 );
@@ -315,7 +315,7 @@ begin
 
   {if Assigned( State ) and ( Mesh.Flags and BUILD_VBO_STATIC > 0 ) Then
     PV := PV + Mesh.VCount * 12 * ( Mesh.Actions[ State.nAction ].FFrame + State.nFrame );}
-                 
+
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
@@ -355,7 +355,7 @@ begin
         else
           glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_INT, Mesh.Indices );
       end;
-    
+
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
@@ -402,7 +402,7 @@ begin
               if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
             end;
       end;
-                 
+
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
@@ -442,7 +442,7 @@ begin
         else
           glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_INT, Mesh.Groups[ Group ].Indices );
       end;
-    
+
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );

@@ -28,11 +28,11 @@ uses
   zgl_opengl,
   zgl_fx_2d,
   zgl_math;
-  
+
 const
   PR2D_FILL   = $000001;
   PR2D_SMOOTH = $000002;
-  
+
 procedure pr2d_Pixel( const X, Y : Single; const Color : DWORD; const Alpha : Byte );
 procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const Alpha : Byte; const FX : DWORD );
 procedure pr2d_Triangle;
@@ -47,11 +47,11 @@ begin
   glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
 
   glEnable( GL_BLEND );
-  
+
   glBegin( GL_POINTS );
     gl_Vertex2f( X, Y + 1 );
   glEnd;
-  
+
   glDisable( GL_BLEND );
 end;
 
@@ -65,14 +65,14 @@ begin
       glEnable( GL_POLYGON_SMOOTH );
     end;
   glEnable( GL_BLEND );
-  
+
   glBegin( GL_LINES );
     if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
     gl_Vertex2f( X1, Y1 + 1 );
     if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
     gl_Vertex2f( X2, Y2 + 1 );
   glEnd;
-  
+
   if FX and PR2D_SMOOTH > 0 Then
     begin
       glDisable( GL_LINE_SMOOTH    );
@@ -110,15 +110,15 @@ begin
         gl_Vertex2f( X,         Y + 1 );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
         gl_Vertex2f( X + W,     Y + 1 );
-        
+
         gl_Vertex2f( X + W - 1, Y + 1 );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
         gl_Vertex2f( X + W - 1, Y + H );
-        
+
         gl_Vertex2f( X + W - 1, Y + H );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
         gl_Vertex2f( X,         Y + H );
-        
+
         gl_Vertex2f( X,         Y + H );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
         gl_Vertex2f( X,         Y + 1 );
@@ -143,10 +143,10 @@ begin
   glEnable( GL_BLEND );
 
   if Quality > 360 Then
-    k := 1
+    k := 360
   else
-    k := 1 / Quality;
-  
+    k := 360 / Quality;
+
   if FX and PR2D_FILL = 0 Then
     begin
       glBegin( GL_LINES );
@@ -190,10 +190,10 @@ begin
   glEnable( GL_BLEND );
 
   if Quality > 360 Then
-    k := 1
+    k := 360
   else
-    k := 1 / Quality;
-  
+    k := 360 / Quality;
+
   if FX and PR2D_FILL = 0 Then
     begin
       glBegin( GL_LINES );

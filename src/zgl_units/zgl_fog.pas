@@ -24,7 +24,7 @@ unit zgl_fog;
 interface
 uses
   GL, GLExt;
-  
+
 procedure fog_Enable;
 procedure fog_Disable;
 

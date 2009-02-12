@@ -38,7 +38,7 @@ type
     Result : Boolean;
     Offset : zglTPoint3D;
 end;
-  
+
 // point 3d
 function col3d_PointInTri( const Point, A, B, C : zglTPoint3D  ) : Boolean;
 function col3d_PointInAABB( const Point : zglTPoint3D; const AABB : zglTAABB ) : Boolean;
@@ -74,12 +74,12 @@ function col3d_PointInTri;
     Angle : Single;
 begin
   Result := FALSE;
- 
+
   Angle := vector_Angle( vector_Sub( A, Point ), vector_Sub( B, Point ) ) +
            vector_Angle( vector_Sub( B, Point ), vector_Sub( C, Point ) ) +
            vector_Angle( vector_Sub( C, Point ), vector_Sub( A, Point ) );
 
-	if Angle >= cv_pi * 2 * 0.999 Then Result := TRUE;
+  if Angle >= cv_pi * 2 * 0.999 Then Result := TRUE;
 end;
 
 function col3d_PointInAABB;
@@ -92,7 +92,7 @@ end;
 function col3d_PointInOBB;
   var
     tAABB  : zglTAABB;
-    tPoint : zglTPoint3D;
+    tPoint : zglTPoint3D = ( X:0; Y:0; Z:0 );
 begin
   // "создаем" AABB идентичный текущему OBB
   tAABB.Position := OBB.Position;
@@ -101,7 +101,7 @@ begin
   // трансформируем точку в систему координат OBB
   tPoint := vector_MulM3f( tPoint, OBB.Matrix );
 
-	Result := col3d_PointInAABB( tPoint, tAABB );
+  Result := col3d_PointInAABB( tPoint, tAABB );
 end;
 
 function col3d_PointInSphere;
@@ -169,7 +169,7 @@ begin
   tLine.p1 := vector_Add( OBB.Position, vector_MulM3f( vector_Sub( OBB.Position, Line.p1 ), OBB.Matrix ) );
   tLine.p2 := vector_MulM3f( Line.p2, OBB.Matrix );
 
-	Result := col3d_LinevsAABB( tLine, tAABB );
+  Result := col3d_LinevsAABB( tLine, tAABB );
 end;
 
 function col3d_LineVsSphere;
@@ -180,7 +180,7 @@ function col3d_LineVsSphere;
 begin
   p1 := vector_Sub( Line.p1, Sphere.Position );
   p2 := vector_Sub( Line.p2, Sphere.Position );
-  
+
   dx := p2.X - p1.X;
   dy := p2.Y - p1.Y;
   dz := p2.Z - p1.Z;
@@ -214,19 +214,19 @@ function col3d_PlaneVsSphere;
     Result := FALSE;
 
     t := sqr( Sphere.Radius * 0.5 );
-	  for i := 0 to 2 do
-    	begin
-		    c := line3d_ClosestPoint( Plane.Points[ i ], Plane.Points[ ( i + 1 ) mod 3 ], Sphere.Position );
+    for i := 0 to 2 do
+      begin
+        c := line3d_ClosestPoint( Plane.Points[ i ], Plane.Points[ ( i + 1 ) mod 3 ], Sphere.Position );
 
-    		dis := vector_FDistance( c, Sphere.Position );
+        dis := vector_FDistance( c, Sphere.Position );
 
-    		if dis < t Then
+        if dis < t Then
           begin
-  			    Result := TRUE;
+            Result := TRUE;
             t      := dis;
             Point  := c;
           end;
-    	end;
+      end;
 
     if Result Then dis := sqrt( t );
   end;
@@ -245,16 +245,16 @@ function col3d_PlaneVsSphere;
         end;
   end;
 begin
-	Result.Result := FALSE;
+  Result.Result := FALSE;
 
   distance := plane_Distance( Plane, Sphere.Position );
 
-	if abs( distance ) < Sphere.Radius Then
-  	begin
-		  Result.Offset := vector_MulV( Plane.Normal, distance );
+  if abs( distance ) < Sphere.Radius Then
+    begin
+      Result.Offset := vector_MulV( Plane.Normal, distance );
       point         := vector_Sub( Sphere.Position, Result.Offset );
 
-  		if col3d_PointInTri( point, Plane.Points[ 0 ], Plane.Points[ 1 ], Plane.Points[ 2 ] ) Then
+      if col3d_PointInTri( point, Plane.Points[ 0 ], Plane.Points[ 1 ], Plane.Points[ 2 ] ) Then
         begin
           Result.Offset := GetCollisionOffset( Plane.Normal, Sphere.Radius, distance );
           Result.Result := TRUE;
@@ -284,7 +284,7 @@ function col3d_AABBVsOBB;
   var
     tOBB : zglTOBB;
 begin
-	// "создаем" OBB идентичный AABB
+  // "создаем" OBB идентичный AABB
   tOBB.Position := AABB.Position;
   tOBB.Size     := AABB.Size;
 
@@ -503,7 +503,7 @@ function col3d_SphereVsNode;
 begin
   Result := FALSE;
   if not col3d_AABBVsSphere( Node.Cube, Sphere ) Then exit;
-  
+
   if Node.NInside Then
     for i := 0 to 7 do
       if Assigned( Node.SubNodes[ i ] ) Then
@@ -519,7 +519,7 @@ begin
             tResult := TRUE;
           end;
       end;
-      
+
   if tResult Then
     begin
       Result  := tResult;

@@ -39,7 +39,7 @@ uses
 
 function  tex_Add : zglPTexture;
 procedure tex_Del( Texture : zglPTexture );
-  
+
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
 function  tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
@@ -67,7 +67,7 @@ begin
   Result := @managerTexture.First;
   while Assigned( Result.Next ) do
     Result := Result.Next;
-      
+
   Result.Next := AllocMem( SizeOf( zglTTexture ) );
   FillChar( Result.Next^, SizeOf( zglTTexture ), 0 );
   Result.Next.Prev := Result;
@@ -108,7 +108,7 @@ begin
 
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
-  
+
   if Texture.Flags and TEX_RGB > 0 Then
     begin
       format  := GL_RGB;
@@ -120,7 +120,7 @@ begin
         iformat := GL_RGBA * Byte( scr_BPP = 32 ) or GL_RGBA16 * Byte( scr_BPP = 16 );
         cformat := GL_COMPRESSED_RGBA_ARB;
       end;
-  
+
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
   if Texture.Flags and TEX_MIPMAP = 0 Then
@@ -136,7 +136,7 @@ begin
         else
           gluBuild2DMipmaps( GL_TEXTURE_2D, cformat, Texture.Width, Texture.Height, format, GL_UNSIGNED_BYTE, pData )
       end;
-      
+
    glDisable( GL_TEXTURE_2D );
 end;
 
@@ -148,7 +148,7 @@ begin
   pData := AllocMem( Width * Height * 4 );
   for i := 0 to Width * Height - 1 do
     Move( Color, Pointer( pData + i * 4 )^, 4 );
-  
+
   Result         := tex_Add;
   Result.Width   := Width;
   Result.Height  := Height;
@@ -158,7 +158,7 @@ begin
   Result.FramesY := 1;
   Result.Flags   := Flags;
   tex_Create( Result^, pData );
-  
+
   FreeMemory( pData );
 end;
 
@@ -170,7 +170,7 @@ function tex_LoadFromFile;
 begin
   Result := nil;
   pData  := nil;
-  
+
   if not file_Exists( FileName ) Then
     begin
       log_Add( 'Cannot read ' + FileName );
@@ -200,9 +200,9 @@ begin
   if TransparentColor <> $FF000000 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
-  
+
   log_Add( 'Successful loading of texture: ' + FileName );
-  
+
   FreeMemory( pData );
 end;
 
@@ -214,7 +214,7 @@ function tex_LoadFromMemory;
 begin
   Result := nil;
   pData  := nil;
-  
+
   for i := texNFCount - 1 downto 0 do
     if StrUp( Extension ) = texFormats[ i ].Extension Then
       texFormats[ i ].MemLoader( Memory, pData, w, h );
@@ -237,9 +237,9 @@ begin
   if TransparentColor <> $FF000000 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
-  
+
   log_Add( 'Successful loading of texture: From Memory' );
-  
+
   FreeMemory( pData );
 end;
 
@@ -341,13 +341,13 @@ begin
   h := GetPOT( Height );
   U := Width  / w;
   V := Height / h;
-  
+
   SetLength( Data, Width * Height * 4 );
   Move( pData^, Pointer( Data )^, Width * Height * 4 );
   FreeMem( pData );
   pData := AllocMem( w * h * 4 );
   FillChar( pData^, w * h * 4, 0 );
-  
+
   for i := 0 to Height - 1 do
     for j := 0 to Width - 1 do
       begin
@@ -407,7 +407,7 @@ begin
   FreeMem( pData );
   pData := AllocMem( Width * Height * 3 );
   FillChar( pData^, Width * Height * 3, 0 );
-  
+
   for i := 0 to Height - 1 do
     for j := 0 to Width - 1 do
       begin
@@ -499,7 +499,7 @@ begin
   Result.V       := Texture.V;
   Result.FramesX := 1;
   Result.FramesY := 1;
-  Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 ) 
+  Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 )
                                   xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 )
                                   xor TEX_CONVERT_TO_POT * Byte( Texture.Flags and TEX_CONVERT_TO_POT > 0 );
   tex_Create( Result^, pData );

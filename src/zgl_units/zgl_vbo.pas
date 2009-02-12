@@ -28,7 +28,7 @@ uses
   zgl_const,
   zgl_types,
   zgl_global_var;
-  
+
 procedure vbo_Build( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD; Indices, Vertices, Normals, TexCoords, MultiTexCoords : Pointer; var Flags : DWORD );
 procedure vbo_Free( var IBuffer, VBuffer : DWORD; ICount, VCount : DWORD );
 procedure vbo_Check( var Flags : DWORD );
@@ -144,7 +144,7 @@ Begin
     tTexLevel := Byte( VBO.Flags and USE_MULTITEX1 > 0 ) +
                  Byte( VBO.Flags and USE_MULTITEX2 > 0 ) +
                  Byte( VBO.Flags and USE_MULTITEX3 > 0 );
-  
+
   if ogl_CanVBO Then
     begin
       PV := 0;
@@ -181,7 +181,7 @@ Begin
               glTexCoordPointer( 2, GL_FLOAT, 0, @VBO.MultiTexCoords[ 0 + VBO.VCount * ( i - 1 ) ] );
           end;
     end;
-    
+
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, Pointer( PV ) );
 

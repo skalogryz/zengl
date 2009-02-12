@@ -65,9 +65,9 @@ end;
 procedure ssprite2d_Draw;
   var
     Quad : array[ 0..3 ] of zglTPoint2D;
-    
+
     FU, FV : Single;
-    
+
     x1, x2 : Single;
     y1, y2 : Single;
     cX, cY : Single;
@@ -82,7 +82,7 @@ begin
     end;
 
   if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
-    
+
   // Текстурные координаты
   if FX and FX2D_FLIPX > 0 Then FU := Texture^.U else FU := 0;
   if FX and FX2D_FLIPY > 0 Then FV := Texture^.V else FV := 0;
@@ -142,30 +142,30 @@ begin
             Quad[ 3 ].X := X     + FX2D_VX4;
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
-      
+
   if FX and FX2D_COLORMIX > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
-      
+
   if FX and FX_BLEND > 0 Then
     glEnable( GL_BLEND )
   else
     glEnable( GL_ALPHA_TEST );
   glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
-   
+
    glBegin( GL_QUADS );
     if FX and FX2D_VCA > 0 Then
       begin
         glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
         glTexCoord2f( FU, Texture^.V - FV );
         gl_Vertex2fv( @Quad[ 0 ] );
-        
+
         glColor4ub  ( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
         glTexCoord2f( Texture^.U - FU, Texture^.V - FV );
         gl_Vertex2fv( @Quad[ 1 ] );
-        
+
         glColor4ub  ( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
         glTexCoord2f( Texture^.U - FU, FV );
         gl_Vertex2fv( @Quad[ 2 ] );
@@ -200,9 +200,9 @@ end;
 procedure asprite2d_Draw;
   var
     Quad : array[ 0..3 ] of zglTPoint2D;
-    
+
     tX, tY, tU, tV, SU, SV : Single;
-    
+
     x1, x2 : Single;
     y1, y2 : Single;
     cX, cY : Single;
@@ -217,7 +217,7 @@ begin
     end;
 
   if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
-    
+
   // Текстурные координаты
   SU := Texture.U / Texture.FramesX;
   SV := Texture.V / Texture.FramesY;
@@ -235,7 +235,7 @@ begin
   if tY < 1 Then tY := tY + Texture.FramesY;
   tX := tX * SU;
   tY := tY * SV;
-    
+
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
@@ -291,12 +291,12 @@ begin
             Quad[ 3 ].X := X     + FX2D_VX4;
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
-      
+
   if FX and FX2D_COLORMIX > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
-      
+
   if FX and FX_BLEND > 0 Then
     glEnable( GL_BLEND )
   else
@@ -349,9 +349,9 @@ end;
 procedure csprite2d_Draw;
   var
     Quad : array[ 0..3 ] of zglTPoint2D;
-    
+
     tU, tV, tX, tY, tW, tH : Single;
-    
+
     x1, x2 : Single;
     y1, y2 : Single;
     cX, cY : Single;
@@ -366,7 +366,7 @@ begin
     end;
 
   if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
-    
+
   // Текстурные координаты
   tX := ( 1 / ( Texture.Width  / Texture.U ) ) * CutRect.X;
   tY := ( 1 / ( Texture.Height / Texture.V ) ) * ( Texture.Height - CutRect.Y );
@@ -431,12 +431,12 @@ begin
             Quad[ 3 ].X := X     + FX2D_VX4;
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
-      
+
   if FX and FX2D_COLORMIX > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
-      
+
   if FX and FX_BLEND > 0 Then
     glEnable( GL_BLEND )
   else

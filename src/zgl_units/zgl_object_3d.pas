@@ -28,7 +28,7 @@ uses
   zgl_opengl,
   zgl_global_var,
   zgl_types;
-  
+
 const
   OBJ3D_TEXTURING     = $0000001;
   OBJ3D_MTEXTURING    = $0000002;
@@ -45,7 +45,7 @@ const
   MAT_SPECULAR        = $03;
   MAT_SHININESS       = $04;
   MAT_EMISSION        = $05;
-  
+
   SIDE_FRONT          = $01;
   SIDE_BACK           = $02;
   SIDE_FRONT_AND_BACK = $03;
@@ -80,7 +80,7 @@ procedure obj3d_Begin;
 begin
   obj3d_Enable( Flags );
   tLastFlags := Flags;
-  
+
   glPushMatrix;
 end;
 
@@ -88,7 +88,7 @@ procedure obj3d_End;
 begin
   obj3d_Disable( tLastFlags );
   tLastFlags := 0;
-  
+
   glPopMatrix;
 end;
 
@@ -103,19 +103,19 @@ begin
       gl_TexCoord2fv := @gl_MTexCoord2fv;
       glEnable( GL_TEXTURE_2D );
     end;
-    
+
   if Flags and OBJ3D_BLEND > 0 Then
     glEnable( GL_BLEND )
   else
     if Flags and OBJ3D_ALPHA_TEST > 0 Then
       glEnable( GL_ALPHA_TEST );
-      
+
   if Flags and OBJ3D_WIRE_FRAME > 0 Then
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    
+
   if Flags and OBJ3D_CULL_FACE > 0 Then
     glEnable( GL_CULL_FACE );
-    
+
   if Flags and OBJ3D_LIGHTING > 0 Then
     glEnable( GL_LIGHTING );
 
@@ -157,13 +157,13 @@ begin
   else
     if Flags and OBJ3D_ALPHA_TEST > 0 Then
       glDisable( GL_ALPHA_TEST );
-      
+
   if Flags and OBJ3D_WIRE_FRAME > 0 Then
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    
+
   if Flags and OBJ3D_CULL_FACE > 0 Then
     glDisable( GL_CULL_FACE );
-    
+
   if Flags and OBJ3D_LIGHTING > 0 Then
     glDisable( GL_LIGHTING );
 
@@ -226,7 +226,7 @@ begin
         clr[ 1 ] := ( ( Color and $FF00 ) shr 8 ) / 255;
         clr[ 2 ] := (   Color shr 16    )         / 255;
         clr[ 3 ] := ( 1 / 255 ) * Alpha;
-  
+
         glMaterialfv( GL_FRONT          * Byte( Side = SIDE_FRONT ) or
                       GL_BACK           * Byte( Side = SIDE_BACK ) or
                       GL_FRONT_AND_BACK * Byte( Side = SIDE_FRONT_AND_BACK ),

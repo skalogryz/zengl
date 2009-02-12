@@ -34,7 +34,7 @@ uses
   {$IFDEF LINUX}
   GLX,
   {$ENDIF}
-  
+
   zgl_file,
   zgl_memory,
 
@@ -131,7 +131,7 @@ exports
   zgl_Enable               name prefix + 'zgl_Enable',
   zgl_Disable              name prefix + 'zgl_Disable',
   log_Add                  name prefix + 'log_Add',
-  
+
   // Window
   wnd_SetCaption           name prefix + 'wnd_SetCaption',
   wnd_SetSize              name prefix + 'wnd_SetSize',
@@ -146,7 +146,7 @@ exports
   scr_SetFSAA              name prefix + 'scr_SetFSAA',
   scr_SetOptions           name prefix + 'scr_SetOptions',
   scr_CorrectResolution    name prefix + 'scr_CorrectResolution',
-  
+
   // INI
   ini_LoadFromFile         name prefix + 'ini_LoadFromFile',
   ini_SaveToFile           name prefix + 'ini_SaveToFile',
@@ -221,10 +221,10 @@ exports
   fx2d_SetVCA              name prefix + 'fx2d_SetVCA',
   fx2d_SetVertexes         name prefix + 'fx2d_SetVertexes',
   fx2d_SetScale            name prefix + 'fx2d_SetScale',
-  
+
   // Camera 2D
   cam2d_Set                name prefix + 'cam2d_Set',
-  
+
   // Primitives 2D
   pr2d_Pixel               name prefix + 'pr2d_Pixel',
   pr2d_Line                name prefix + 'pr2d_Line',
@@ -270,7 +270,7 @@ exports
   snd_StopFile             name prefix + 'snd_StopFile',
   snd_RestoreFile          name prefix + 'snd_RestoreFile',
 {$ENDIF}
-  
+
 {$IFDEF USE_3D}
   // Object 3D
   obj3d_Begin              name prefix + 'obj3d_Begin',
@@ -331,7 +331,7 @@ exports
   // VBO
   vbo_Build                name prefix + 'vbo_Build',
   vbo_Free                 name prefix + 'vbo_Free',
-  
+
   // Frustum
   frustum_Calc             name prefix + 'frustum_Calc',
   frustum_PointIn          name prefix + 'frustum_PointIn',
@@ -340,7 +340,7 @@ exports
   frustum_SphereIn         name prefix + 'frustum_SphereIn',
   frustum_BoxIn            name prefix + 'frustum_BoxIn',
   frustum_CubeIn           name prefix + 'frustum_CubeIn',
-  
+
   // Octree
   octree_Build             name prefix + 'octree_Build',
   octree_Free              name prefix + 'octree_Free',
@@ -348,13 +348,13 @@ exports
   octree_DrawDebug         name prefix + 'octree_DrawDebug',
   octree_DrawNode          name prefix + 'octree_DrawNode',
   octree_DrawDFaces        name prefix + 'octree_DrawDFaces',
-  
+
   // Light
   light_Enable             name prefix + 'light_Enable',
   light_Disable            name prefix + 'light_Disable',
   light_SetPosition        name prefix + 'light_SetPosition',
   light_SetMaterial        name prefix + 'light_SetMaterial',
-  
+
   // Fog
   fog_Enable               name prefix + 'fog_Enable',
   fog_Disable              name prefix + 'fog_Disable',
@@ -362,7 +362,7 @@ exports
   fog_SetColor             name prefix + 'fog_SetColor',
   fog_SetDensity           name prefix + 'fog_SetDensity',
   fog_SetBeginEnd          name prefix + 'fog_SetBeginEnd',
-  
+
   // SkyBox
   skybox_Init              name prefix + 'skybox_Init',
   skybox_Draw              name prefix + 'skybox_Draw',
@@ -402,7 +402,7 @@ exports
   shader_SetAttribPf       name prefix + 'shader_SetAttribPf',
   shader_SetParameter4f    name prefix + 'shader_SetParameter4f',
 {$ENDIF USE_3D}
-  
+
   // Math
   //
   m_Cos                    name prefix + 'm_Cos',
@@ -472,7 +472,7 @@ exports
   // triangles
   tri_GetNormal            name prefix + 'tri_GetNormal',
 {$ENDIF}
-  
+
   // Collision 2D
   col2d_PointInRect        name prefix + 'col2d_PointInRect',
   col2d_PointInCircle      name prefix + 'col2d_PointInCircle',
@@ -503,7 +503,7 @@ exports
   col2dEx_PolyCenter       name prefix + 'col2dEx_PolyCenter',
   col2dEx_PolyRect         name prefix + 'col2dEx_PolyRect',
   col2dEx_CalcLineCross    name prefix + 'col2dEx_CalcLineCross',
-  
+
 {$IFDEF USE_3D}
   // Collision 3D
   col3d_PointInTri         name prefix + 'col3d_PointInTri',
@@ -522,7 +522,7 @@ exports
   col3d_SphereVsSphere     name prefix + 'col3d_SphereVsSphere',
   col3d_SphereVsNode       name prefix + 'col3d_SphereVsNode',
 {$ENDIF USE_3D}
-  
+
   // Utils
   file_Open                name prefix + 'file_Open',
   file_Exists              name prefix + 'file_Exists',
@@ -555,7 +555,7 @@ begin
   // Вешаем движок на одно ядро
   GetSystemInfo( SysInfo );
   SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
-  
+
   wnd_INST := hInstance;
   {$ENDIF}
 end.

@@ -36,10 +36,10 @@ uses
   zgl_const,
   zgl_types,
   zgl_global_var,
-  
+
   zgl_keyboard,
   zgl_mouse,
-  
+
   zgl_camera_2d,
   zgl_render_target,
   zgl_timers,
@@ -51,10 +51,10 @@ uses
   zgl_opengl_simple,
   zgl_window,
   zgl_screen,
-  
+
   zgl_log,
   zgl_math,
-  
+
   Utils;
 
 procedure zgl_Init( const FSAA, StencilBits : Byte );
@@ -463,7 +463,7 @@ begin
   timer_Reset;
   timer_Add( @zgl_FPS, 1000 );
   while app_Work do
-    begin      
+    begin
       OSProcess;
 
       CanKillTimers := FALSE;
@@ -542,7 +542,7 @@ begin
   while XPending( scr_Display ) <> 0 do
     begin
       XNextEvent( scr_Display, @Event );
-      
+
       case Event._type of
         ClientMessage:
           if ( Event.xclient.message_type = wnd_Protocols ) and ( Event.xclient.data.l[ 0 ] = wnd_DestroyAtom ) Then app_Work := FALSE;
@@ -641,7 +641,7 @@ begin
                 end;
             end;
           end;
-          
+
         KeyPress:
           begin
             Key := xkey_to_winkey( XLookupKeysym( @Event.xkey, 0 ) );
@@ -683,7 +683,7 @@ begin
   case Msg of
     WM_CLOSE, WM_DESTROY, WM_QUIT:
       app_Work := FALSE;
-      
+
     WM_SETFOCUS:
       begin
         app_Focus := TRUE;
@@ -708,8 +708,8 @@ begin
         wnd_X := PRect( lParam ).Left;
         wnd_Y := PRect( lParam ).Top;
       end;
-      
-    WM_LBUTTONDOWN:
+
+    WM_LBUTTONDOWN, WM_LBUTTONDBLCLK:
       begin
         mouseDown[ M_BLEFT ]  := TRUE;
         if mouseCanClick[ M_BLEFT ] Then
@@ -718,7 +718,7 @@ begin
             mouseCanClick[ M_BLEFT ] := FALSE;
           end;
       end;
-    WM_MBUTTONDOWN:
+    WM_MBUTTONDOWN, WM_MBUTTONDBLCLK:
       begin
         mouseDown[ M_BMIDLE ] := TRUE;
         if mouseCanClick[ M_BMIDLE ] Then
@@ -727,7 +727,7 @@ begin
             mouseCanClick[ M_BMIDLE ] := FALSE;
           end;
       end;
-    WM_RBUTTONDOWN:
+    WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
       begin
         mouseDown[ M_BRIGHT ] := TRUE;
         if mouseCanClick[ M_BRIGHT ] Then
@@ -766,7 +766,7 @@ begin
               mouseWheel[ M_WDOWN ] := TRUE;
             end;
       end;
-      
+
     WM_KEYDOWN{, WM_SYSKEYDOWN}:
       begin
         Key := wParam;
@@ -969,5 +969,5 @@ initialization
 
   zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'wav' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
-
+  zgl_Reg( SND_FORMAT_MEM_LOADER, @wav_LoadFromMemory );
 end.

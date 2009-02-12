@@ -284,7 +284,7 @@ begin
         if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @State.Normals[ 0 ] );
         if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
       end;
-                 
+
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
@@ -324,7 +324,7 @@ begin
         else
           glDrawElements( GL_TRIANGLES, Mesh.FCount * 3, GL_UNSIGNED_INT, Mesh.Indices );
       end;
-    
+
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );
@@ -363,7 +363,7 @@ begin
         if Mesh.Flags and USE_NORMALS > 0 Then PN := Ptr( @State.Normals[ 0 ] );
         if Mesh.Flags and USE_TEXTURE > 0 Then PT := Ptr( @Mesh.TexCoords[ 0 ] );
       end;
-                 
+
   if Mesh.Flags and USE_NORMALS > 0 Then
     begin
       glEnableClientState( GL_NORMAL_ARRAY );
@@ -403,7 +403,7 @@ begin
         else
           glDrawElements( GL_TRIANGLES, Mesh.Groups[ Group ].FCount * 3, GL_UNSIGNED_INT, Mesh.Groups[ Group ].Indices );
       end;
-    
+
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glDisableClientState( GL_TEXTURE_COORD_ARRAY );

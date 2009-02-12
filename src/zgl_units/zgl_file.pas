@@ -55,7 +55,7 @@ const
   FOM_CREATE = $01; // Create
   FOM_OPENR  = $02; // Read
   FOM_OPENRW = $03; // Read&Write
-  
+
   // Seek Mode
   FSM_SET    = $01;
   FSM_CUR    = $02;

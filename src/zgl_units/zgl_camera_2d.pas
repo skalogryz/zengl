@@ -30,7 +30,7 @@ uses
   zgl_types,
   zgl_global_var,
   zgl_math;
-  
+
 procedure cam2d_Set( const Camera : zglPCamera2D );
 
 procedure cam2d_Vertex2f( X, Y : Single ); extdecl;
@@ -38,7 +38,7 @@ procedure cam2d_Vertex2fv( v : Pointer ); extdecl;
 
 var
   cam2dGlobal   : zglPCamera2D = nil;
-  constCamera2D : zglTCamera2D = ( X: 0; Y: 0 );
+  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0 );
 
 implementation
 

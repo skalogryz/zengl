@@ -216,11 +216,11 @@ begin
     XK_Control_L    : Result := K_CTRL_L;
     XK_Control_R    : Result := K_CTRL_R;
     XK_Alt_L        : Result := K_ALT_L;
-		XK_Alt_R        : Result := K_ALT_R;
+    XK_Alt_R        : Result := K_ALT_R;
     XK_Pause        : Result := K_PAUSE;
     XK_Escape       : Result := K_ESCAPE;
     XK_Space        : Result := K_SPACE;
-    
+
     XK_Page_Up      : Result := K_PAGEUP;
     XK_Page_Down    : Result := K_PAGEDOWN;
     XK_End          : Result := K_END;
@@ -228,12 +228,12 @@ begin
     XK_Sys_Req      : Result := K_SNAPSHOT;
     XK_Insert       : Result := K_INSERT;
     XK_Delete       : Result := K_DELETE;
-  
+
     XK_Left         : Result := K_LEFT;
     XK_Up           : Result := K_UP;
     XK_Right        : Result := K_RIGHT;
     XK_Down         : Result := K_DOWN;
-    
+
     XK_KP_Multiply  : Result := K_MULTIPLY;
     XK_KP_Add       : Result := K_ADD;
     XK_KP_Separator : Result := K_SEPARATOR;

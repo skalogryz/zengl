@@ -25,7 +25,7 @@ interface
 
 uses
   GL;
-  
+
 const
   FX_BLEND_NORMAL = $00;
   FX_BLEND_ADD    = $01;
@@ -33,7 +33,7 @@ const
   FX_BLEND_BLACK  = $03;
   FX_BLEND_WHITE  = $04;
   FX_BLEND_MASK   = $05;
-  
+
 procedure fx_SetBlendMode( const Mode : Byte );
 
 implementation

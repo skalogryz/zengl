@@ -85,14 +85,14 @@ begin
       rtType := RT_TYPE_FBO
     else
       rtType := RT_TYPE_SIMPLE;
-      
+
   case rtType of
     RT_TYPE_SIMPLE: Result.Next.Handle := nil;
     RT_TYPE_FBO:
       begin
         Result.Next.Handle := AllocMem( SizeOf( zglTFBO ) );
         pFBO := Result.Next.Handle;
-        
+
         glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
         if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_TRUE Then
@@ -128,7 +128,7 @@ begin
       begin
         Result.Next.Handle := AllocMem( SizeOf( zglTPBuffer ) );
         pPBuffer := Result.Next.Handle;
-        
+
         PBufferiAttr[ 0 ] := WGL_DRAW_TO_PBUFFER_ARB;
         PBufferiAttr[ 1 ] := GL_TRUE;
         PBufferiAttr[ 2 ] := WGL_COLOR_BITS_ARB;
@@ -230,9 +230,9 @@ begin
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
       else
-        glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ), 
+        glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
                     ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
-        
+
       if ( Target.rtType = RT_TYPE_FBO ) and ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
     end else

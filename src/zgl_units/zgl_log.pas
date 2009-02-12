@@ -24,7 +24,7 @@ unit zgl_log;
 interface
 uses
   zgl_file,
-  
+
   zgl_const,
   zgl_global_var,
   zgl_timers,
@@ -54,7 +54,7 @@ begin
   {$ENDIF}
   app_Log := TRUE;
   logstart := Round( timer_GetTicks );
-  
+
   file_Open( log, logfile, FOM_CREATE );
   log_Add( '############################', FALSE );
   log_Add( '# ' + cs_ZenGL + ' #', FALSE );

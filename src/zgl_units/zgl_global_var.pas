@@ -38,7 +38,7 @@ uses
   zgl_const,
   zgl_types,
   zgl_gui_types;
-  
+
 procedure zero;
 
 var
@@ -71,7 +71,7 @@ var
   app_Log      : Boolean;
 
   app_InitToHandle : Boolean;
-  
+
   app_FullScreen : Boolean;
 
   // call-back
@@ -81,38 +81,38 @@ var
 
   app_Pause     : Boolean;
   app_AutoPause : Boolean = TRUE;
-  
+
   app_Focus     : Boolean;
   app_AutoMinimize : Boolean;
-  
+
   {$IFDEF LINUX}
   app_Cursor : TCursor = None;
   app_XIM    : PXIM;
   app_XIC    : PXIC;
   {$ENDIF}
   app_ShowCursor : Boolean = TRUE;
-  
+
   app_FPS      : DWORD;
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
-  
+
   app_Flags : DWORD = APP_USE_LOG or COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
   {---------------------------------- WINDOW ----------------------------------}
   wnd_X      : WORD;
   wnd_Y      : WORD;
   wnd_Width  : WORD = defWidth;
   wnd_Height : WORD = defHeight;
-  
+
   wnd_Caption : String = cs_ZenGL;
-  
+
   {$IFDEF LINUX}
   wnd_Handle : TWindow;
   wnd_Root   : TWindow;
   wnd_Attr   : TXSetWindowAttributes;
   wnd_Title  : TXTextProperty;
-  
+
   wnd_ValueMask : DWORD;
-  
+
   wnd_DestroyAtom : TAtom;
   wnd_Protocols   : TAtom;
   //wnd_MotifAtom   : TAtom;
@@ -123,10 +123,10 @@ var
   wnd_INST      : HINST;
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
-  
+
   wnd_Style   : DWORD;
   wnd_StyleEx : DWORD;
-  
+
   wnd_CpnSize  : WORD;
   wnd_BrdSizeX : WORD;
   wnd_BrdSizeY : WORD;
@@ -144,7 +144,7 @@ var
   scr_Refresh : WORD;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
-  
+
   // Resolution Correct
   scr_ResCX   : Single = 1;
   scr_ResCY   : Single = 1;
@@ -152,11 +152,11 @@ var
   scr_AddCY   : Integer = 0;
   scr_SubCX   : Integer = 0;
   scr_SubCY   : Integer = 0;
-  
+
   {$IFDEF LINUX}
   scr_Display  : PDisplay;
   scr_Default  : cint;
-  
+
   scr_Settings  : TXF86VidModeModeInfo;
   scr_Desktop   : TXF86VidModeModeInfo;
   scr_ModeList  : array of PXF86VidModeModeInfo;
@@ -179,7 +179,7 @@ var
   ogl_zFar       : Single = 100;
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of DWORD;
-  
+
   ogl_Mode : WORD = 3; // 2D/3D Modes
 
   ogl_X      : WORD;
@@ -203,7 +203,7 @@ var
   ogl_MaxTexSize    : Integer;
   ogl_MaxAnisotropy : Integer;
   ogl_MaxTexLevels  : Integer;
-  
+
   {$IFDEF LINUX}
   ogl_Context    : GLXContext;
   ogl_VisualInfo : PXVisualInfo;

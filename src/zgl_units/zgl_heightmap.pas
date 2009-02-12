@@ -113,7 +113,7 @@ begin
 
   if Result.Flags and USE_VBO > 0 Then
     vbo_Build( Result.IBuffer, Result.VBuffer, Result.ICount, Result.VCount,
-               Result.Indices, 
+               Result.Indices,
                Result.Vertices, Result.Normals,
                Result.TexCoords, Result.MultiTexCoords,
                Result.Flags );

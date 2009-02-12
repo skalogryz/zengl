@@ -48,7 +48,7 @@ var
 procedure Set2DMode;
 begin
   ogl_Mode := 2;
-  
+
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity;

@@ -134,15 +134,15 @@ begin
   mouseUp[ M_BLEFT  ] := FALSE;
   mouseUp[ M_BMIDLE ] := FALSE;
   mouseUp[ M_BRIGHT ] := FALSE;
-  
+
   mouseClick[ M_BLEFT  ] := FALSE;
   mouseClick[ M_BMIDLE ] := FALSE;
   mouseClick[ M_BRIGHT ] := FALSE;
-  
+
   mouseCanClick[ M_BLEFT  ] := TRUE;
   mouseCanClick[ M_BMIDLE ] := TRUE;
   mouseCanClick[ M_BRIGHT ] := TRUE;
-  
+
   mouseWheel[ M_WUP   ] := FALSE;
   mouseWheel[ M_WDOWN ] := FALSE;
 end;

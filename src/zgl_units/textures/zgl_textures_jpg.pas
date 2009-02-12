@@ -40,11 +40,11 @@ uses
 
   zgl_memory,
   zgl_log;
-  
+
 {$IFDEF LINUX_OR_DARWIN}
 const
   INPUT_BUF_SIZE = 4096;
-  
+
 type
   zglPJPGDecoder = ^zglTJPGDecoder;
   zglTJPGDecoder = record
@@ -149,7 +149,7 @@ type
 
   function CreateStreamOnHGlobal(hglob: HGlobal; fDeleteOnRelease: BOOL;
     var stm: IStream): HResult; stdcall external 'ole32.dll' name 'CreateStreamOnHGlobal';
-    
+
 type
   zglPJPGData = ^zglTJPGData;
   zglTJPGData = record
@@ -178,7 +178,7 @@ var
   {$IFDEF WIN32}
   jpgData    : zglTJPGData;
   {$ENDIF}
-  
+
 {$IFDEF LINUX_OR_DARWIN}
 procedure jpeg_output_message( cinfo : j_common_ptr ); register;
   var
@@ -257,7 +257,7 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   jpgCInfo.err := jpeg_error( jerr );
   jpeg_create_decompress( @jpgCInfo );
-  
+
   if not Assigned( jpgCInfo.src ) Then
     begin
       jpgCInfo.src := jpeg_source_mgr_ptr( jpgCInfo.mem.alloc_small( j_common_ptr( @jpgCInfo ), JPOOL_PERMANENT, SizeOf( zglTJPGDecoder ) ) );
@@ -412,12 +412,12 @@ begin
   jpgData.Height := MulDiv( H, GetDeviceCaps( DC, LOGPIXELSY ), 2540 );
 
   FillChar( bi, SizeOf( bi ), 0 );
-  bi.bmiHeader.biSize	       := SizeOf( BITMAPINFOHEADER );
-  bi.bmiHeader.biBitCount	   := 32;
-  bi.bmiHeader.biWidth		   := jpgData.Width;
-  bi.bmiHeader.biHeight	     := jpgData.Height;
+  bi.bmiHeader.biSize        := SizeOf( BITMAPINFOHEADER );
+  bi.bmiHeader.biBitCount    := 32;
+  bi.bmiHeader.biWidth       := jpgData.Width;
+  bi.bmiHeader.biHeight      := jpgData.Height;
   bi.bmiHeader.biCompression := BI_RGB;
-  bi.bmiHeader.biPlanes		   := 1;
+  bi.bmiHeader.biPlanes      := 1;
   bmp := CreateDIBSection( DC, bi, DIB_RGB_COLORS, p, 0, 0 );
   SelectObject( DC, bmp );
   jpgData.Buffer.Render( DC, 0, 0, jpgData.Width, jpgData.Height, 0, H, W, -H, nil );

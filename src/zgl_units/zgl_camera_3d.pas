@@ -68,7 +68,7 @@ begin
   Camera.Matrix.a42 := -vector_Dot( cy, Camera.Position );
   Camera.Matrix.a43 := -vector_Dot( cz, Camera.Position );
   Camera.Matrix.a44 := 1;
-  
+
   glLoadMatrixf( @Camera.Matrix );
 end;
 

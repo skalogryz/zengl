@@ -61,8 +61,8 @@ begin
     begin
       ICount := FCount * 3;
 
-  	  SetLength( Caps, ICount );
-  	  SetLength( Indices, ICount );
+      SetLength( Caps, ICount );
+      SetLength( Indices, ICount );
       for i := 0 to FCount - 1 do
         for j := 0 to 2 do
           Indices[ i * 3 + j ] := AddIndex( Vertices[ Faces[ i, j ] ], Faces[ i, j ] );
@@ -136,7 +136,7 @@ begin
               if isSilhouetteEdge[ i * 3 + j ] Then
                 begin
                   v1 := Vertices[ Indices[ i * 3 + j ] ];
-    					    v2 := Vertices[ Indices[ i * 3 + ( j + 1 ) mod 3 ] ];
+                  v2 := Vertices[ Indices[ i * 3 + ( j + 1 ) mod 3 ] ];
                   eVertices[ eVCount ] := v2; INC( eVCount );
                   eVertices[ eVCount ] := v1; INC( eVCount );
                   v1.X := ( v1.X - mLight.X ) * Extrude;
@@ -148,7 +148,7 @@ begin
                   eVertices[ eVCount ] := v1; INC( eVCount );
                   eVertices[ eVCount ] := v2; INC( eVCount );
                 end;
-  		    end;
+          end;
 
       for i := 0 to FCount * 3 - 1 do
         begin
@@ -279,7 +279,7 @@ begin
   glDepthMask( GL_TRUE );
   glEnable( GL_DEPTH_TEST );
   glDepthFunc( GL_LEQUAL );
-    
+
   glColor3f( 1, 1, 1 );
 end;
 

@@ -30,30 +30,30 @@ const
   FX2D_VCA      = $000008;
   FX2D_VCHANGE  = $000010;
   FX2D_SCALE    = $000020;
-  
+
   FX_BLEND      = $000040;
-  
+
 procedure fx2d_SetColorMix( const Color : DWORD );
 procedure fx2d_SetVCA( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
 procedure fx2d_SetVertexes( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
 procedure fx2d_SetScale( const scaleX, scaleY : Single );
-  
+
 var
   // FX2D_COLORMIX
   FX2D_R : Byte = 255;
   FX2D_G : Byte = 255;
   FX2D_B : Byte = 255;
-  
+
   // FX2D_VCA
   FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 : Byte;
   FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 : Byte;
   FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 : Byte;
   FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 : Byte;
-  
+
   // FX2D_VCHANGE
   FX2D_VX1, FX2D_VX2, FX2D_VX3, FX2D_VX4 : Single;
   FX2D_VY1, FX2D_VY2, FX2D_VY3, FX2D_VY4 : Single;
-  
+
   // FX2D_SCALE
   FX2D_SX, FX2D_SY : Single;
 

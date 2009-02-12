@@ -36,7 +36,7 @@ uses
   zgl_sprite_2d,
   zgl_math,
   Utils;
-  
+
 function  font_Add : zglPFont;
 procedure font_Del( const Font : zglPFont );
 
@@ -82,7 +82,7 @@ function font_LoadFromFile;
     tX, tY, tW, tH : Single;
 begin
   Result := font_Add;
-  
+
   Result.Texture := tex_LoadFromFile( Texture, $FF000000, TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT );
   Result.Texture.FramesX := 13;
   Result.Texture.FramesY := 13;
@@ -92,7 +92,7 @@ begin
       zgl_Destroy;
       exit;
     end;
-    
+
   mem_LoadFromFile( M, FontInfo );
   mem_Read( M, ID, 13 );
   if ID <> ZGL_FONT_INFO Then
@@ -101,14 +101,14 @@ begin
       zgl_Destroy;
       exit;
     end;
-    
+
   mem_Read( M, Result.Height, 1 );
   for i := 0 to 255 do
     mem_Read( M, Result.Width[ i ], 1 );
   for i := 0 to 255 do
     begin
       mem_Read( M, j, 1 );
-      
+
       tX := j;
       tY := 1;
       while tX > 13 do
@@ -121,12 +121,12 @@ begin
       tH := Round( Result.Texture.Height / 13 );
       tX := Round( tX * tW );
       tY := Round( tY * tH );
-      
+
       tX := ( 1 / ( Result.Texture.Width  / Result.Texture.U ) ) * ( tX - tW );
       tY := ( 1 / ( Result.Texture.Height / Result.Texture.V ) ) * ( Result.Texture.Height - ( tY - tH ) );
       tW := tX + ( 1 / ( Result.Texture.Width  / Result.Texture.U ) ) * tW;
       tH := tY + ( 1 / ( Result.Texture.Height / Result.Texture.V ) ) * ( - tH );
-      
+
       Result.TexCoords[ i ][ 0 ].X := tX;
       Result.TexCoords[ i ][ 0 ].Y := tY;
       Result.TexCoords[ i ][ 1 ].X := tW;

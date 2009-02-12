@@ -27,7 +27,7 @@ uses
   GL,
   zgl_global_var,
   zgl_object_3d;
-  
+
 procedure light_Enable( const ID : Byte );
 procedure light_Disable( const ID : Byte );
 procedure light_SetPosition( const ID : Byte; const X, Y, Z, W : Single );

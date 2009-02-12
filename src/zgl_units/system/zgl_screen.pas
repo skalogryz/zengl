@@ -143,7 +143,7 @@ begin
 {$IFDEF LINUX}
   if Assigned( scr_Display ) Then
     XCloseDisplay( scr_Display );
-    
+
   scr_Display := XOpenDisplay( nil );
   if not Assigned( scr_Display ) Then
     begin
@@ -167,7 +167,7 @@ begin
     log_Add( 'XCreateIC - Fail' )
   else
     log_Add( 'XCreateIC - ok' );
-    
+
   scr_Default := DefaultScreen( scr_Display );
 
   if not XF86VidModeQueryExtension( scr_Display, @i, @j ) Then
@@ -225,7 +225,7 @@ begin
         if not Assigned( ogl_VisualInfo ) Then DEC( ogl_zDepth, 8 );
   if ogl_zDepth = 0 Then ogl_zDepth := 1;
   until Assigned( ogl_VisualInfo );
-  
+
   if not Assigned( ogl_VisualInfo ) Then
     begin
       u_Error( 'Cannot choose pixel format.' );
@@ -233,7 +233,7 @@ begin
     end;
 
   ogl_zDepth := ogl_VisualInfo.depth;
-  
+
   wnd_Root := RootWindow( scr_Display, ogl_VisualInfo.screen );
 {$ENDIF}
 {$IFDEF WIN32}
@@ -246,7 +246,7 @@ begin
       dmDisplayFrequency := GetDisplayRefresh;
       dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
     end;
-    
+
   log_Add( 'Current mode: ' + u_IntToStr( scr_Desktop.dmPelsWidth ) + ' x ' + u_IntToStr( scr_Desktop.dmPelsHeight ) );
 {$ENDIF}
   scr_GetResList;

@@ -28,7 +28,7 @@ uses
   zgl_memory,
   zgl_const,
   zgl_types;
-  
+
 type
   zglPZMFHeader = ^zglTZMFHeader;
   zglTZMFHeader = record

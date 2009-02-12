@@ -319,15 +319,15 @@ function vector_RotateQ;
   var
     vecQuat, resQuat : zglTQuaternion;
 begin
-	vecQuat.x := Vector.x;
-	vecQuat.y := Vector.y;
-	vecQuat.z := Vector.z;
-	vecQuat.w := 0;
- 
-	resQuat := quater_Mul( vecQuat, quater_Negate( Quaternion ) );
-	resQuat := quater_Mul( Quaternion, resQuat );
- 
-	Result.X := resQuat.x;
+  vecQuat.x := Vector.x;
+  vecQuat.y := Vector.y;
+  vecQuat.z := Vector.z;
+  vecQuat.w := 0;
+
+  resQuat := quater_Mul( vecQuat, quater_Negate( Quaternion ) );
+  resQuat := quater_Mul( Quaternion, resQuat );
+
+  Result.X := resQuat.x;
   Result.Y := resQuat.y;
   Result.Z := resQuat.z;
 end;
@@ -505,7 +505,7 @@ begin
   Matrix.a43 := t;
 end;
 
-function matrix4f_Determinant; 
+function matrix4f_Determinant;
 begin
   Result := Matrix.a11 * Matrix.a22 * Matrix.a33 +
             Matrix.a21 * Matrix.a32 * Matrix.a13 +
@@ -684,7 +684,7 @@ begin
   cosom := q1.X * q2.X + q1.Y * q2.Y + q1.Z * q2.Z + q1.W * q2.W;
 
   if cosom < 0 then
-    begin 
+    begin
       cosom := -cosom;
       p.X := -q2.X;
       p.Y := -q2.Y;
@@ -758,7 +758,7 @@ function line3d_ClosestPoint;
     v1, v2 : zglTPoint3D;
     d, t   : Single;
 begin
-	v1 := vector_Sub( Point, A );
+  v1 := vector_Sub( Point, A );
   v2 := vector_Normalize( vector_Sub( B, A ) );
   d  := vector_FDistance( A, B );
   t  := vector_Dot( v2, v1 );
@@ -766,14 +766,14 @@ begin
   if  t <= 0 Then
     begin
       Result := A;
-		  exit;
-  	end;
+      exit;
+    end;
 
   if sqr( t ) >= d Then
     begin
-	  	Result := B;
-		  exit;
-  	end;
+      Result := B;
+      exit;
+    end;
 
   Result := vector_Add( A, vector_MulV( v2, t ) );
 end;
@@ -792,7 +792,7 @@ end;
 
 function plane_Distance;
 begin
-	Result := Plane.Normal.X * Point.X + Plane.Normal.Y * Point.Y + Plane.Normal.Z * Point.Z + Plane.D;
+  Result := Plane.Normal.X * Point.X + Plane.Normal.Y * Point.Y + Plane.Normal.Z * Point.Z + Plane.D;
 end;
 
 function tri_GetNormal;

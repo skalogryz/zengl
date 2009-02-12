@@ -26,7 +26,7 @@ interface
 uses
   zgl_types,
   zgl_math;
-  
+
 // point 2d
 function col2d_PointInRect    ( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
 function col2d_PointInCircle  ( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
@@ -513,7 +513,7 @@ procedure col2dEx_PolyCenter;
 begin
   Ex := 0;
   Ey := 0;
-  
+
   for i := 0 to A.Count - 1 do
     Ex := Ex + A.Points[ i ].X;
   for i := 0 to A.Count - 1 do

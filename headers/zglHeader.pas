@@ -1,12 +1,13 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ build: 38                     }
-{ date:  30.01.09               }
+{ build: 39                     }
+{ date:  12.02.09               }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
 { ICQ:  496-929-849             }
+{ JID:  dr.andru@jabber.kiev.ua }
 { site: http://andru.2x4.ru     }
 {-------------------------------}
 unit zglHeader;
@@ -604,6 +605,7 @@ end;
     Events     : zglTEvents;
 
     parent     : zglPWidget;
+    child      : zglPWidget;
     Next, Prev : zglPWidget;
 end;
 
@@ -855,7 +857,7 @@ var
   zbuffer_Clear     : procedure;
 
 // SCISSOR
-  scissor_Begin : procedure( const X, Y, Width, Height : WORD );
+  scissor_Begin : procedure( X, Y, Width, Height : WORD );
   scissor_End   : procedure;
 
 // OBJECT 3D

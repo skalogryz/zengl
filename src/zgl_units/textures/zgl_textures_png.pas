@@ -254,7 +254,7 @@ procedure png_ReadIDAT;
 begin
   pngZData := AllocMem( 65535 );
   InflateInit_( pngZStream, zlib_version, SizeOf( TZStream ) );
-  
+
   png_GetPixelInfo;
   pngIDATEnd := pngMem.Position + pngChunk.Size;
 
@@ -287,22 +287,22 @@ begin
         else
           pngOffset := 1;
       end;
-    PNG_COLOR_PALETTE: 
+    PNG_COLOR_PALETTE:
       begin
         pngRowSize := ( pngHeader.Width * pngHeader.BitDepth + 7 ) div 8;
         pngOffset  := 1;
       end;
-    PNG_COLOR_RGB: 
+    PNG_COLOR_RGB:
       begin
         pngRowSize := ( pngHeader.Width * pngHeader.BitDepth * 3) div 8;
         pngOffset  := 3 * pngHeader.BitDepth div 8;
       end;
-    PNG_COLOR_GRAYSCALEALPHA: 
+    PNG_COLOR_GRAYSCALEALPHA:
       begin
         pngRowSize := ( pngHeader.Width * pngHeader.BitDepth * 2 ) div 8;
         pngOffset  := 2 * pngHeader.BitDepth div 8;
       end;
-    PNG_COLOR_RGBALPHA: 
+    PNG_COLOR_RGBALPHA:
       begin
         pngRowSize := ( pngHeader.Width * pngHeader.BitDepth * 4 ) div 8;
         pngOffset  := 4 * pngHeader.BitDepth div 8;
@@ -367,8 +367,8 @@ begin
     Byte( Dest^ ) := pngPalette[ ByteData, 0 ]; INC( Dest );
     Byte( Dest^ ) := pngPalette[ ByteData, 1 ]; INC( Dest );
     Byte( Dest^ ) := pngPalette[ ByteData, 2 ]; INC( Dest );
-    if ( pngPalette[ ByteData, 0 ] = pngPalette[ pngPaletteAlpha, 0 ] ) and 
-       ( pngPalette[ ByteData, 1 ] = pngPalette[ pngPaletteAlpha, 1 ] ) and 
+    if ( pngPalette[ ByteData, 0 ] = pngPalette[ pngPaletteAlpha, 0 ] ) and
+       ( pngPalette[ ByteData, 1 ] = pngPalette[ pngPaletteAlpha, 1 ] ) and
        ( pngPalette[ ByteData, 2 ] = pngPalette[ pngPaletteAlpha, 2 ] ) and pngHastRNS Then
       Byte( Dest^ ) := 0
     else
@@ -405,9 +405,9 @@ begin
       if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGB;
     PNG_COLOR_PALETTE, PNG_COLOR_GRAYSCALE:
       if ( pngHeader.BitDepth = 1 ) or ( pngHeader.BitDepth = 4 ) or ( pngHeader.BitDepth = 8 ) Then CopyP := png_CopyNonInterlacedPalette;
-    PNG_COLOR_RGBALPHA: 
+    PNG_COLOR_RGBALPHA:
       if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGBAlpha;
-    PNG_COLOR_GRAYSCALEALPHA: 
+    PNG_COLOR_GRAYSCALEALPHA:
       if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedGrayscaleAlpha;
   end;
 

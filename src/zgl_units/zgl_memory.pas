@@ -25,7 +25,7 @@ interface
 
 uses
   zgl_file;
-  
+
 type
   zglPMemory = ^zglTMemory;
   zglTMemory = record

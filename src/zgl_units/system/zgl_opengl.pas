@@ -50,7 +50,7 @@ procedure gl_MTexCoord2fv( const Coord : Pointer );
 
 var
   LoadEx : Boolean;
-  
+
   gl_TexCoord2f  : procedure( U, V : Single ); extdecl;
   gl_TexCoord2fv : procedure( Coord : Pointer ); extdecl;
   gl_Vertex2f    : procedure( X, Y : Single ); extdecl;
@@ -65,7 +65,7 @@ function gl_Create;
   var
     PixelFormat     : Integer;
     PixelFormatDesc : TPixelFormatDescriptor;
-    
+
     ga, gf : DWORD;
     i, j : DWORD;
   {$ENDIF}
@@ -75,7 +75,7 @@ function gl_Create;
   {$ENDIF}
 begin
   Result := FALSE;
-  
+
 {$IFDEF LINUX}
   ogl_Context := glXCreateContext( scr_Display, ogl_VisualInfo, 0, TRUE );
   if not Assigned( ogl_Context ) Then
@@ -87,7 +87,7 @@ begin
           exit;
         end;
     end;
-    
+
   if not glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context ) Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
@@ -138,7 +138,7 @@ begin
       exit;
     end;
   log_Add( 'Make Current OpenGL Context' );
-    
+
   gf := PixelFormatDesc.dwFlags and PFD_GENERIC_FORMAT;
   ga := PixelFormatDesc.dwFlags and PFD_GENERIC_ACCELERATED;
 
@@ -264,7 +264,7 @@ begin
         if not Assigned( ogl_Format ) Then DEC( ogl_zDepth, 8 );
   if ogl_zDepth = 0 Then ogl_zDepth := 1;
   until Assigned( ogl_Format );
-  
+
   if not Assigned( ogl_Format ) Then
     begin
       u_Error( 'Cannot choose pixel format.' );
@@ -291,7 +291,7 @@ begin
 {$ENDIF}
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
   log_Add( 'GL_RENDERER: ' + glGetString( GL_RENDERER ) );
-  
+
   gl_LoadEx;
 
   glHint( GL_LINE_SMOOTH_HINT,            GL_NICEST );
@@ -302,10 +302,10 @@ begin
   glShadeModel( GL_SMOOTH );
 
   glClearColor( 0, 0, 0, 0 );
-  
+
   glDepthFunc ( GL_LEQUAL );
   glClearDepth( 1.0 );
-  
+
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 
@@ -314,7 +314,7 @@ begin
   glDisable( GL_DEPTH_TEST );
   glDisable( GL_TEXTURE_2D );
   glEnable ( GL_NORMALIZE );
-  
+
   Result := TRUE;
 end;
 
@@ -351,17 +351,17 @@ begin
     exit
   else
     LoadEx := TRUE;
-    
+
   // Texture size
   glGetIntegerv( GL_MAX_TEXTURE_SIZE, @ogl_MaxTexSize );
   log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
 
   ogl_CanCompress := glext_ExtensionSupported( 'GL_ARB_texture_compression', glGetString( GL_EXTENSIONS ) );
   log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( ogl_CanCompress ) );
-  
+
   gl_Vertex2f  := @glVertex2f;
   gl_Vertex2fv := @glVertex2fv;
-    
+
   // Multitexturing
   gl_TexCoord2f  := @glTexCoord2f;
   gl_TexCoord2fv := @glTexCoord2fv;
@@ -384,7 +384,7 @@ begin
   glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @ogl_MaxAnisotropy );
   ogl_Anisotropy := ogl_MaxAnisotropy;
   log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( ogl_MaxAnisotropy ) );
-  
+
   glGetIntegerv( GL_MAX_LIGHTS, @ogl_MaxLights );
   log_Add( 'GL_MAX_LIGHTS: ' + u_IntToStr( ogl_MaxLights ) );
   glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
@@ -398,7 +398,7 @@ begin
       glLightfv( GL_LIGHT0 + i, GL_EMISSION, @matEMISSION );
       glLightf ( GL_LIGHT0 + i, GL_SHININESS, matSHININESS );
     end;}
-    
+
   // VBO
   glBindBufferARB := gl_GetProc( 'glBindBuffer' );
   if Assigned( glBindBufferARB ) Then
@@ -415,7 +415,7 @@ begin
     end else
       ogl_CanVBO := FALSE;
   log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( ogl_CanVBO ) );
-    
+
   // FBO
   glBindRenderbufferEXT := wglGetProcAddress( 'glBindRenderbufferEXT' );
   if Assigned( glBindRenderbufferEXT ) Then
@@ -435,7 +435,7 @@ begin
     end else
       ogl_CanFBO := FALSE;
    log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( ogl_CanFBO ) );
-    
+
   // PBUFFER
   {$IFDEF WIN32}
   wglCreatePbufferARB := gl_GetProc( 'wglCreatePbuffer' );
@@ -451,7 +451,7 @@ begin
   {$ENDIF}
 
   glActiveStencilFaceEXT := wglGetProcAddress( 'glActiveStencilFaceEXT' );
-    
+
   // WaitVSync
 {$IFDEF LINUX}
   glXGetVideoSyncSGI  := wglGetProcAddress( 'glXGetVideoSyncSGI' );
@@ -470,7 +470,7 @@ begin
       wglSwapIntervalEXT := wglGetProcAddress( 'wglSwapIntervalEXT' );
     end else
       ogl_CanVSync := FALSE;
-      
+
    wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormat' );
 {$ENDIF}
 {$IFDEF DARWIN}
