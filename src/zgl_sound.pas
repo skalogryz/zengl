@@ -120,7 +120,7 @@ procedure snd_Del( Sound : zglPSound );
 function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer ) : zglPSound;
 function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer ) : zglPSound;
 
-function  snd_Play( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;
+function  snd_Play( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean = FALSE ) : Integer;
 procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
 procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const ID : Integer );
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );
@@ -688,13 +688,15 @@ begin
         sfStream := managerSound.Formats[ i ].Stream;
     end;
 
+  if Assigned( sfStream ) then
+    sfStream.Loop     := Loop;
+
   if ( not Assigned( sfStream ) ) or
      ( not sfStream.CodecOpen( FileName, sfStream ) ) Then
     begin
       log_Add( 'Cannot play: ' + FileName );
       exit;
     end;
-  sfStream.Loop := Loop;
 
 {$IFDEF USE_OPENAL}
   for i := 0 to sfBufCount - 1 do
@@ -724,9 +726,9 @@ begin
   if Assigned( sfBuffer ) Then sfBuffer := nil;
   sfBuffer := dsu_CreateBuffer( sfStream.BufferSize, @buffDesc.FormatCode );
 
-  sfBuffer.Lock( 0, sfStream.BufferSize, ap1, as1, ap2, as2, 0 );
+  {sfBuffer.Lock( 0, sfStream.BufferSize, ap1, as1, ap2, as2, 0 );
   sfStream.CodecRead( ap1, as1, _End );
-  sfBuffer.Unlock( ap1, as1, ap2, as2 );
+  sfBuffer.Unlock( ap1, as1, ap2, as2 );}
 
   sfBuffer.SetCurrentPosition( 0 );
   sfLastPos := 0;

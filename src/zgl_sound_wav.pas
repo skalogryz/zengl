@@ -93,7 +93,7 @@ begin
 {$ELSE}
   with wavHeader do
     begin
-      BytesPerSample := BitsPerSample div 8 * ChannelNumber;
+      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
     end;
   format := Ptr( @WavHeader.FormatCode );
