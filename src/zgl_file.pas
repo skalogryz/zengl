@@ -1,0 +1,350 @@
+{
+ * Copyright © Kemka Andrey aka Andru
+ * mail: dr.andru@gmail.com
+ * site: http://andru-kun.ru
+ *
+ * This file is part of ZenGL
+ *
+ * ZenGL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * ZenGL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+}
+unit zgl_file;
+
+{$I zgl_config.cfg}
+
+interface
+
+uses
+  {$IFDEF LINUX_OR_DARWIN}
+  baseunix
+  {$ENDIF}
+  {$IFDEF WIN32}
+  Windows
+  {$ENDIF}
+  ;
+
+{$IFDEF LINUX_OR_DARWIN}
+type PFILE = Pointer;
+type zglTFile = PFILE;
+{$ENDIF}
+{$IFDEF WIN32}
+type zglTFile = THandle;
+{$ENDIF}
+
+type
+  zglTFileList = record
+    Count : Integer;
+    List  : array of String;
+end;
+
+const
+  // Open Mode
+  FOM_CREATE = $01; // Create
+  FOM_OPENR  = $02; // Read
+  FOM_OPENRW = $03; // Read&Write
+
+  // Seek Mode
+  FSM_SET    = $01;
+  FSM_CUR    = $02;
+  FSM_END    = $03;
+
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+function  file_Exists( const FileName : String ) : Boolean;
+function  file_Seek( var FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
+function  file_GetPos( var FileHandle : zglTFile ) : DWORD;
+function  file_Read( var FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
+function  file_Write( var FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
+procedure file_Trunc( var FileHandle : zglTFile; const count : DWORD );
+function  file_GetSize( var FileHandle : zglTFile ) : DWORD;
+procedure file_Flush( var FileHandle : zglTFile );
+procedure file_Close( var FileHandle : zglTFile );
+procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
+procedure file_GetName( const FileName : String; var Result : String );
+procedure file_GetExtension( const FileName : String; var Result : String );
+procedure file_SetPath( const Path : String );
+
+{$IFDEF LINUX_OR_DARWIN}
+// "Домо оригато" разработчикам FreePascal, которые принципиально
+// не портировали модуль libc на платформу x86_64
+type
+  Pdirent = ^dirent;
+  dirent  = record
+    d_ino    : DWORD;
+    d_off    : LongInt;
+    d_reclen : WORD;
+    d_type   : Byte;
+    d_name   : array[ 0..255 ] of Char;
+  end;
+
+type
+  TDirEnt       = dirent;
+  PPDirEnt      = ^PDirEnt;
+  PPPDirEnt     = ^PPDirEnt;
+  TSelectorFunc = function(const p1: PDirEnt): Integer; cdecl;
+  TCompareFunc  = function(const p1, p2: Pointer): Integer; cdecl;
+
+function fopen(__filename:Pchar; __modes:Pchar):PFILE;cdecl;external 'libc' name 'fopen';
+function fclose(__stream:PFILE):longint;cdecl;external 'libc' name 'fclose';
+function fflush(__stream:PFILE):longint;cdecl;external 'libc' name 'fflush';
+function fread(__ptr:pointer; __size:size_t; __n:size_t; __stream:PFILE):size_t;cdecl;external 'libc' name 'fread';
+function fwrite(__ptr:pointer; __size:size_t; __n:size_t; __s:PFILE):size_t;cdecl;external 'libc' name 'fwrite';
+function fseek(__stream:PFILE; __off:longint; __whence:longint):longint;cdecl;external 'libc' name 'fseek';
+function ftell(__stream:PFILE):longint;cdecl;external 'libc' name 'ftell';
+function ftruncate(__fd:longint; __length:LongInt):longint;cdecl;external 'libc' name 'ftruncate';
+function access(__name:Pchar; __type:longint):longint;cdecl;external 'libc' name 'access';
+function scandir(__dir:Pchar; __namelist:PPPdirent; __selector:TSelectorfunc; __cmp:TComparefunc):longint;cdecl;external 'libc' name 'scandir';
+function free( ptr : Pointer ):longint;cdecl;external 'libc' name 'free';
+{$ENDIF}
+
+var
+  filePath : String;
+
+implementation
+uses
+  zgl_const,
+  zgl_log,
+  zgl_utils;
+
+procedure file_Open;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  case Mode of
+    FOM_CREATE: FileHandle := fopen( PChar( filePath + FileName ), 'w' );
+    FOM_OPENR:  FileHandle := fopen( PChar( filePath + FileName ), 'r' );
+    FOM_OPENRW: FileHandle := fopen( PChar( filePath + FileName ), 'r+' );
+  end;
+{$ENDIF}
+{$IFDEF WIN32}
+  case Mode of
+    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
+    FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+  end;
+{$ENDIF}
+end;
+
+function file_Exists;
+  {$IFDEF WIN32}
+  var
+    FileHandle : DWORD;
+  {$ENDIF}
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  Result := not Boolean( access( PChar( filePath + FileName ), F_OK ) );
+{$ENDIF}
+{$IFDEF WIN32}
+  file_Open( FileHandle, filePath + FileName, FOM_OPENR );
+  Result := FileHandle <> INVALID_HANDLE_VALUE;
+  if Result Then
+    file_Close( FileHandle );
+{$ENDIF}
+end;
+
+function file_Seek;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  case Mode of
+    FSM_SET: Result := fseek( FileHandle, Offset, SEEK_SET );
+    FSM_CUR: Result := fseek( FileHandle, Offset, SEEK_CUR );
+    FSM_END: Result := fseek( FileHandle, Offset, SEEK_END );
+  end;
+{$ENDIF}
+{$IFDEF WIN32}
+  case Mode of
+    FSM_SET: Result := SetFilePointer( FileHandle, Offset, nil, FILE_BEGIN );
+    FSM_CUR: Result := SetFilePointer( FileHandle, Offset, nil, FILE_CURRENT );
+    FSM_END: Result := SetFilePointer( FileHandle, Offset, nil, FILE_END );
+  end;
+{$ENDIF}
+end;
+
+function file_GetPos;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  Result := ftell( FileHandle );
+{$ENDIF}
+{$IFDEF WIN32}
+  Result := SetFilePointer( FileHandle, 0, nil, FILE_CURRENT );
+{$ENDIF}
+end;
+
+function file_Read;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  Result := ftell( FileHandle );
+  if Result + count > file_GetSize( FileHandle ) Then
+    Result := file_GetSize( FileHandle ) - Result
+  else
+    Result := count;
+  fread( @buffer, count, 1, FileHandle );
+{$ENDIF}
+{$IFDEF WIN32}
+  ReadFile( FileHandle, buffer, count, Result, nil );
+{$ENDIF}
+end;
+
+function file_Write;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  Result := ftell( FileHandle );
+  if Result + count > file_GetSize( FileHandle ) Then
+    Result := file_GetSize( FileHandle ) - Result
+  else
+    Result := count;
+  fwrite( @buffer, count, 1, FileHandle );
+{$ENDIF}
+{$IFDEF WIN32}
+  WriteFile( FileHandle, buffer, count, Result, nil );
+{$ENDIF}
+end;
+
+procedure file_Trunc;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  ftruncate( DWORD( FileHandle ), count );
+{$ENDIF}
+end;
+
+function file_GetSize;
+  {$IFDEF LINUX_OR_DARWIN}
+  var
+    tmp : DWORD;
+  {$ENDIF}
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  // Весьма безумная реализация 8)
+  tmp := ftell( FileHandle );
+  fseek( FileHandle, 0, SEEK_END );
+  Result := ftell( FileHandle );
+  fseek( FileHandle, tmp, SEEK_SET );
+{$ENDIF}
+{$IFDEF WIN32}
+  Result := GetFileSize( FileHandle, nil );
+{$ENDIF}
+end;
+
+procedure file_Flush;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  fflush( FileHandle );
+{$ENDIF}
+{$IFDEF WIN32}
+  FlushFileBuffers( FileHandle );
+{$ENDIF}
+end;
+
+procedure file_Close;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  fclose( FileHandle );
+{$ENDIF}
+{$IFDEF WIN32}
+  CloseHandle( FileHandle );
+{$ENDIF}
+end;
+
+{$IFDEF LINUX_OR_DARWIN}
+function filter_file(const p1: PDirEnt): Integer; cdecl;
+begin
+  Result := Byte( p1.d_type = 8 );
+end;
+function filter_dir(const p1: PDirEnt): Integer; cdecl;
+begin
+  Result := Byte( p1.d_type = 4 );
+end;
+{$ENDIF}
+
+procedure file_Find;
+  {$IFDEF LINUX_OR_DARWIN}
+  var
+    FList : array of Pdirent;
+    i     : Integer;
+  {$ENDIF}
+  {$IFDEF WIN32}
+  var
+    First : THandle;
+    FList : WIN32_FIND_DATA;
+  {$ENDIF}
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  if FindDir Then
+    List.Count := scandir( PChar( Directory ), @FList, filter_dir, nil )
+  else
+    List.Count := scandir( PChar( Directory ), @FList, filter_file, nil );
+  if List.Count <> -1 Then
+    begin
+      SetLength( List.List, List.Count );
+      for i := 0 to List.Count - 1 do
+        begin
+          List.List[ i ] := FList[ i ].d_name;
+          Free( FList[ i ] );
+        end;
+      SetLength( FList, 0 );
+    end;
+{$ENDIF}
+{$IFDEF WIN32}
+  First := FindFirstFile( PChar( Directory ), FList );
+  repeat
+    if FindDir Then
+      begin
+        if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY = 0 Then continue;
+      end else
+        if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY > 0 Then continue;
+    SetLength( List.List, List.Count + 1 );
+    List.List[ List.Count ] := FList.cFileName;
+    INC( List.Count );
+  until not FindNextFile( First, FList );
+{$ENDIF}
+end;
+
+procedure GetStr( const Str : String; var Result : String; const d : Char );
+  var
+    i, pos, l : Integer;
+begin
+  l := length( Str );
+  for i := l downto 1 do
+    if Str[ i ] = d Then
+      begin
+        pos := i;
+        break;
+      end;
+  Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
+end;
+
+procedure file_GetName;
+  var
+    tmp : String;
+begin
+  GetStr( FileName, Result, '/' );
+  {$IFDEF WIN32}
+  if Result = '' Then
+    GetStr( FileName, Result, '\' );
+  {$ENDIF}
+  GetStr( Result, tmp, '.' );
+  Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
+end;
+
+procedure file_GetExtension;
+  var
+    i, pos, l : Integer;
+begin
+  GetStr( FileName, Result, '.' );
+end;
+
+procedure file_SetPath;
+begin
+  filePath := Path;
+end;
+
+end.
