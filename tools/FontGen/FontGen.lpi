@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <Title Value="FontGen"/>
+      <Icon Value="0"/>
+      <UseXPManifest Value="True"/>
+      <ActiveEditorIndexAtStart Value="2"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <Units Count="5">
+      <Unit0>
+        <Filename Value="FontGen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fontgen"/>
+        <CursorPos X="22" Y="65"/>
+        <TopLine Value="48"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="22"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="zgl_freetype.pas"/>
+        <UnitName Value="zgl_freetype"/>
+        <CursorPos X="29" Y="43"/>
+        <TopLine Value="35"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../../src/zgl_font.pas"/>
+        <UnitName Value="zgl_font"/>
+        <CursorPos X="16" Y="58"/>
+        <TopLine Value="52"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../../src/zgl_text.pas"/>
+        <UnitName Value="zgl_text"/>
+        <CursorPos X="20" Y="65"/>
+        <TopLine Value="60"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../../src/zgl_opengl_simple.pas"/>
+        <UnitName Value="zgl_opengl_simple"/>
+        <CursorPos X="30" Y="53"/>
+        <TopLine Value="37"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit4>
+    </Units>
+    <JumpHistory Count="18" HistoryIndex="17">
+      <Position1>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="77" Column="9" TopLine="52"/>
+      </Position1>
+      <Position2>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="67" Column="23" TopLine="53"/>
+      </Position2>
+      <Position3>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="60" Column="26" TopLine="52"/>
+      </Position3>
+      <Position4>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="72" Column="23" TopLine="63"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../src/zgl_font.pas"/>
+        <Caret Line="125" Column="47" TopLine="111"/>
+      </Position5>
+      <Position6>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="85" Column="5" TopLine="74"/>
+      </Position6>
+      <Position7>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="104" Column="5" TopLine="74"/>
+      </Position7>
+      <Position8>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="57" Column="38" TopLine="41"/>
+      </Position8>
+      <Position9>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="83" Column="22" TopLine="74"/>
+      </Position9>
+      <Position10>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="53" Column="31" TopLine="41"/>
+      </Position10>
+      <Position11>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="52" Column="42" TopLine="34"/>
+      </Position11>
+      <Position12>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="84" Column="53" TopLine="74"/>
+      </Position12>
+      <Position13>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="85" Column="26" TopLine="67"/>
+      </Position13>
+      <Position14>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="46" Column="3" TopLine="32"/>
+      </Position14>
+      <Position15>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="50" Column="20" TopLine="30"/>
+      </Position15>
+      <Position16>
+        <Filename Value="FontGen.pas"/>
+        <Caret Line="83" Column="23" TopLine="74"/>
+      </Position16>
+      <Position17>
+        <Filename Value="../../src/zgl_opengl_simple.pas"/>
+        <Caret Line="54" Column="25" TopLine="45"/>
+      </Position17>
+      <Position18>
+        <Filename Value="zgl_freetype.pas"/>
+        <Caret Line="215" Column="11" TopLine="197"/>
+      </Position18>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <Target>
+      <Filename Value="FontGen"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="../../src/;../../src/PasJPEG/"/>
+      <UnitOutputDirectory Value="tmp"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="Delphi"/>
+        <CStyleOperator Value="False"/>
+        <CPPInline Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <UseLineInfoUnit Value="False"/>
+        <StripSymbols Value="True"/>
+        <UseExternalDbgSyms Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

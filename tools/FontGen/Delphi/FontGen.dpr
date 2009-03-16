@@ -1,0 +1,3 @@
+{$I ../FontGen.pas}
+
+
