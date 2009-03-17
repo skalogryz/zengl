@@ -41,7 +41,7 @@ var
   fntDPI      : Integer = 96;
   fntSize     : Integer;
   fntPageSize : Integer = 512;
-  fntCCount   : Integer = 11; // Символов по горизонтали и вертикали
+  fntCCount   : Integer = 13; // Символов по горизонтали и вертикали
   fntPadding  : array[ 0..3 ] of Byte = ( 4, 4, 4, 4 );
 
   fntLibrary : FT_Library;
@@ -58,7 +58,6 @@ var
 
 implementation
 uses
-  math,
   zgl_const,
   zgl_main,
   zgl_log,
@@ -67,6 +66,14 @@ uses
   zgl_file,
   zgl_math_2d,
   zgl_utils;
+
+function Max( v1, v2 : Integer ) : Integer;
+begin
+  if v1 > v2 Then
+    Result := v1
+  else
+    Result := v2;
+end;
 
 function fnt_Init;
 begin
@@ -176,6 +183,8 @@ begin
 
   Font.Count.Pages := Font.Count.Chars div sqr( fntCCount ) + 1;
   SetLength( Font.Pages, Font.Count.Pages );
+  Font.MaxHeight := 0;
+  Font.MaxShiftY := 0;
   for i := 0 to Font.Count.Pages - 1 do
     begin
       Font.Pages[ i ]        := tex_Add;
@@ -216,7 +225,12 @@ begin
           Font.CharDesc[ fntCharsID[ cid ] ].TexCoords[ 3 ].Y := 1 - ( cy * cs + ( cs - fntBitmaps[ cid ].rows ) div 2 + fntBitmaps[ cid ].rows + fntPadding[ 3 ] ) * v;
 
           Font.MaxHeight := Max( Font.MaxHeight, fntBitmaps[ cid ].rows );
+          Font.MaxShiftY := Max( Font.MaxShiftY, Font.CharDesc[ fntCharsID[ cid ] ].ShiftY );
         end;
+      Font.Padding[ 0 ] := fntPadding[ 0 ];
+      Font.Padding[ 1 ] := fntPadding[ 1 ];
+      Font.Padding[ 2 ] := fntPadding[ 2 ];
+      Font.Padding[ 3 ] := fntPadding[ 3 ];
       tga_FlipVertically( PByteArray( pData )^, fntPageSize, fntPageSize, 4 );
       tex_Create( Font.Pages[ i ]^, pData );
       FreeMemory( pData );
@@ -236,6 +250,7 @@ begin
   file_Write( F, Font.Count.Pages, 2 );
   file_Write( F, Font.Count.Chars, 2 );
   file_Write( F, Font.MaxHeight,   4 );
+  file_Write( F, Font.MaxShiftY,   4 );
   file_Write( F, fntPadding[ 0 ],  4 );
   for i := 0 to Font.Count.Chars - 1 do
     begin

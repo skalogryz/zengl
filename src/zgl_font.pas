@@ -57,6 +57,7 @@ type
     Pages      : array of zglPTexture;
     CharDesc   : array[ 0..65535 ] of zglPCharDesc;
     MaxHeight  : Integer;
+    MaxShiftY  : Integer;
     Padding    : array[ 0..3 ] of Byte;
 
     Prev, Next : zglPFont;
@@ -128,6 +129,7 @@ begin
   mem_Read( fntMem, Result.Count.Pages,  2 );
   mem_Read( fntMem, Result.Count.Chars,  2 );
   mem_Read( fntMem, Result.MaxHeight,    4 );
+  mem_Read( fntMem, Result.MaxShiftY,    4 );
   mem_Read( fntMem, Result.Padding[ 0 ], 4 );
   SetLength( Result.Pages, Result.Count.Pages );
   for i := 0 to Result.Count.Chars - 1 do

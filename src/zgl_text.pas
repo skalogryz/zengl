@@ -65,7 +65,7 @@ begin
 
   {X := Round( X );
   Y := Round( Y );}
-  Y := Y - Font.Padding[ 1 ];
+  Y := Y - Font.MaxShiftY;
 
   lastPage := -1;
   c := font_GetUID( Text, 1, @i );

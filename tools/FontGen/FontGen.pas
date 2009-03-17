@@ -58,7 +58,7 @@ begin
       fntChars[ i ] := TRUE;
       INC( Font.Count.Chars );
     end;
-  fnt_SetCharSize( 30 );
+  fnt_SetCharSize( 24 );
   fnt_GenChars;
   fnt_GenPages;
   fnt_Save( 'test' );
@@ -66,11 +66,11 @@ begin
   fnt_Free;
   fnt_Done;
 
-  Font := font_LoadFromFile( 'test.zfi' );
-  Font.Pages[ 0 ] := tex_LoadFromFile( 'test_0.tga', $FF000000, TEX_DEFAULT_2D );
-  Font.Pages[ 1 ] := tex_LoadFromFile( 'test_1.tga', $FF000000, TEX_DEFAULT_2D );
+  {Font := font_LoadFromFile( 'test.zfi' );
+  Font.Pages[ 0 ] := tex_LoadFromFile( 'test_0.tga', $FF000000, TEX_DEFAULT_2D );}
+  {Font.Pages[ 1 ] := tex_LoadFromFile( 'test_1.tga', $FF000000, TEX_DEFAULT_2D );
   Font.Pages[ 2 ] := tex_LoadFromFile( 'test_2.tga', $FF000000, TEX_DEFAULT_2D );
-  Font.Pages[ 3 ] := tex_LoadFromFile( 'test_3.tga', $FF000000, TEX_DEFAULT_2D );
+  Font.Pages[ 3 ] := tex_LoadFromFile( 'test_3.tga', $FF000000, TEX_DEFAULT_2D );}
 end;
 
 procedure Draw;
@@ -80,7 +80,7 @@ procedure Draw;
 begin
   Set2DMode;
   ssprite2d_Draw( Font.Pages[ 0 ], 0, 0, 512, 512, 0 );
-  text_Draw( Font, 0, 600 - Font.MaxHeight, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+  text_Draw( Font, 0, 600 - Font.MaxHeight, 'FPS:Щ ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
   rect.X := 0;
   rect.Y := 0;
   rect.W := 100;
