@@ -340,7 +340,7 @@ begin
       vi                := ov_info( vf, -1 );
       Stream.Rate       := vi.rate;
       Stream.Channels   := vi.channels;
-      Stream.BufferSize := {$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * vi.channels ) ) {$ELSE} 64 * 1024 {$ENDIF};
+      Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
       zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
       Result := TRUE;
     end else

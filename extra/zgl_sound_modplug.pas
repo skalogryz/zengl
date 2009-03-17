@@ -181,7 +181,7 @@ begin
 
       Stream.Rate       := 44100;
       Stream.Channels   := 2;
-      Stream.BufferSize := {$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
+      Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
       zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
     end else
       Result := FALSE;

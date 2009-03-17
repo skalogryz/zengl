@@ -561,6 +561,7 @@ type
     Pages      : array of zglPTexture;
     CharDesc   : array[ 0..65535 ] of zglPCharDesc;
     MaxHeight  : Integer;
+    MaxShiftY  : Integer;
 
     Prev, Next : zglPFont;
 end;
@@ -1502,7 +1503,7 @@ var
   file_Flush        : procedure( var FileHandle : zglTFile );
   file_Close        : procedure( var FileHandle : zglTFile );
   file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
-  file_GetFileName  : procedure( const FileName : String; var Result : String );
+  file_GetName      : procedure( const FileName : String; var Result : String );
   file_GetExtension : procedure( const FileName : String; var Result : String );
   file_SetPath      : procedure( const Path : String );
 
@@ -1928,7 +1929,7 @@ begin
       file_Flush := dlsym( zglLib, 'file_Flush' );
       file_Close := dlsym( zglLib, 'file_Close' );
       file_Find := dlsym( zglLib, 'file_Find' );
-      file_GetFileName := dlsym( zglLib, 'file_GetFileName' );
+      file_GetName := dlsym( zglLib, 'file_GetName' );
       file_GetExtension := dlsym( zglLib, 'file_GetExtension' );
       file_SetPath := dlsym( zglLib, 'file_SetPath' );
 
