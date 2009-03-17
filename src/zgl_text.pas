@@ -159,7 +159,10 @@ function text_GetWidth;
     i : Integer;
     c : DWORD;
 begin
-  Result := 0;
+  if Text = '' Then exit;
+  i      := 1;
+  c      := font_GetUID( Text, i, @i );
+  Result := Font.CharDesc[ c ].ShiftX;
   i      := 1;
   while i <= length( Text ) do
     begin
