@@ -64,6 +64,7 @@ var
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
   app_WorkDir      : String;
+  app_UsrHomeDir   : String;
 
   // call-back
   app_PLoad   : procedure = zero;

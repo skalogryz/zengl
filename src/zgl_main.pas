@@ -54,19 +54,20 @@ const
   SYS_FPS         = 1;
   APP_PAUSED      = 2;
   APP_DIRECTORY   = 3;
-  LOG_FILENAME    = 4;
-  ZGL_VERSION     = 5;
-  SCR_ADD_X       = 6;
-  SCR_ADD_Y       = 7;
-  DESKTOP_WIDTH   = 8;
-  DESKTOP_HEIGHT  = 9;
-  RESOLUTION_LIST = 10;
-  MANAGER_TIMER   = 11;
-  MANAGER_TEXTURE = 12;
-  MANAGER_FONT    = 13;
-  MANAGER_RTARGET = 14;
-  MANAGER_SOUND   = 15;
-  MANAGER_GUI     = 16;
+  USR_HOMEDIR     = 4;
+  LOG_FILENAME    = 5;
+  ZGL_VERSION     = 6;
+  SCR_ADD_X       = 7;
+  SCR_ADD_Y       = 8;
+  DESKTOP_WIDTH   = 9;
+  DESKTOP_HEIGHT  = 10;
+  RESOLUTION_LIST = 11;
+  MANAGER_TIMER   = 12;
+  MANAGER_TEXTURE = 13;
+  MANAGER_FONT    = 14;
+  MANAGER_RTARGET = 15;
+  MANAGER_SOUND   = 16;
+  MANAGER_GUI     = 17;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 {$IFDEF WIN32}
@@ -283,6 +284,7 @@ begin
     SYS_FPS: Result := app_FPS;
     APP_PAUSED: Result := Byte( app_Pause );
     APP_DIRECTORY: Result := Ptr( PChar( app_WorkDir ) );
+    USR_HOMEDIR: Result := Ptr( PChar( app_UsrHomeDir ) );
     LOG_FILENAME: Result := Ptr( @logfile );
     //ZGL_VERSION: Result := cv_version;
     SCR_ADD_X: Result := scr_AddCX;
@@ -384,6 +386,8 @@ end;
 {$IFDEF LINUX}
 initialization
   app_WorkDir := './';
+
+  app_UsrHomeDir := getenv( 'HOME' );
 {$ENDIF}
 {$IFDEF WIN32}
 var
@@ -412,6 +416,8 @@ initialization
   appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   app_WorkDir := appPath + '/';
+
+  app_UsrHomDir := getenv( 'HOME' );
 {$ENDIF}
 
 end.

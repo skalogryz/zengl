@@ -92,20 +92,21 @@ var
 const
   SYS_FPS         = 1;  // DWORD,  := zgl_Get( SYS_FPS )
   APP_PAUSED      = 2;  // Boolean
-  APP_DIRECTORY   = 2;  // PChar
-  LOG_FILENAME    = 4;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
-  ZGL_VERSION     = 5;  // DWORD
-  SCR_ADD_X       = 6;  // DWORD
-  SCR_ADD_Y       = 7;  // DWORD
-  DESKTOP_WIDTH   = 8;  // DWORD
-  DESKTOP_HEIGHT  = 9;  // DWORD
-  RESOLUTION_LIST = 10;  // PResolutionList
-  MANAGER_TIMER   = 11; // zglPTimerManager
-  MANAGER_TEXTURE = 12; // zglPTextureManager
-  MANAGER_FONT    = 13; // zglPFontManager
-  MANAGER_RTARGET = 14; // zglTRenderTargetManager
-  MANAGER_SOUND   = 15; // zglPSoundManager
-  MANAGER_GUI     = 16; // zglPGUIManager
+  APP_DIRECTORY   = 3;  // PChar
+  USR_HOMEDIR     = 4;  // PChar
+  LOG_FILENAME    = 5;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
+  ZGL_VERSION     = 6;  // DWORD
+  SCR_ADD_X       = 7;  // DWORD
+  SCR_ADD_Y       = 8;  // DWORD
+  DESKTOP_WIDTH   = 9;  // DWORD
+  DESKTOP_HEIGHT  = 10; // DWORD
+  RESOLUTION_LIST = 11; // PResolutionList
+  MANAGER_TIMER   = 12; // zglPTimerManager
+  MANAGER_TEXTURE = 13; // zglPTextureManager
+  MANAGER_FONT    = 14; // zglPFontManager
+  MANAGER_RTARGET = 15; // zglTRenderTargetManager
+  MANAGER_SOUND   = 16; // zglPSoundManager
+  MANAGER_GUI     = 17; // zglPGUIManager
 
 var
   zgl_Get    : function( const What : DWORD ) : Ptr;
@@ -172,7 +173,7 @@ var
   ini_LoadFromFile : procedure( const FileName : String );
   ini_SaveToFile   : procedure( const FileName : String );
   ini_Add          : procedure( const Section, Key : String );
-  ini_IsKay        : function( const Section, Key : String ) : Boolean;
+  ini_IsKey        : function( const Section, Key : String ) : Boolean;
   ini_ReadKeyStr   : function( const Section, Key : String ) : PChar;
   ini_ReadKeyInt   : function( const Section, Key : String ) : Integer;
   ini_ReadKeyBool  : function( const Section, Key : String ) : Boolean;
@@ -1606,6 +1607,7 @@ begin
       ini_LoadFromFile := dlsym( zglLib, 'ini_LoadFromFile' );
       ini_SaveToFile := dlsym( zglLib, 'ini_SaveToFile' );
       ini_Add := dlsym( zglLib, 'ini_Add' );
+      ini_IsKey := dlsym( zglLib, 'ini_IsKey' );
       ini_ReadKeyStr := dlsym( zglLib, 'ini_ReadKeyStr' );
       ini_ReadKeyInt := dlsym( zglLib, 'ini_ReadKeyInt' );
       ini_ReadKeyBool := dlsym( zglLib, 'ini_ReadKeyBool' );

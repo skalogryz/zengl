@@ -64,6 +64,7 @@ function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 
 //function usleep(__useconds:longword):longint;cdecl;external 'libc';
 function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ):longint;cdecl;external 'libc';
+function getenv(_para1:Pchar):Pchar;cdecl;external 'libc' name 'getenv';
 {$ENDIF}
 
 {$IFDEF WIN32}
