@@ -53,19 +53,20 @@ const
   // zgl_Get
   SYS_FPS         = 1;
   APP_PAUSED      = 2;
-  LOG_FILENAME    = 3;
-  ZGL_VERSION     = 4;
-  SCR_ADD_X       = 5;
-  SCR_ADD_Y       = 6;
-  DESKTOP_WIDTH   = 7;
-  DESKTOP_HEIGHT  = 8;
-  RESOLUTION_LIST = 9;
-  MANAGER_TIMER   = 10;
-  MANAGER_TEXTURE = 11;
-  MANAGER_FONT    = 12;
-  MANAGER_RTARGET = 13;
-  MANAGER_SOUND   = 14;
-  MANAGER_GUI     = 15;
+  APP_DIRECTORY   = 3;
+  LOG_FILENAME    = 4;
+  ZGL_VERSION     = 5;
+  SCR_ADD_X       = 6;
+  SCR_ADD_Y       = 7;
+  DESKTOP_WIDTH   = 8;
+  DESKTOP_HEIGHT  = 9;
+  RESOLUTION_LIST = 10;
+  MANAGER_TIMER   = 11;
+  MANAGER_TEXTURE = 12;
+  MANAGER_FONT    = 13;
+  MANAGER_RTARGET = 14;
+  MANAGER_SOUND   = 15;
+  MANAGER_GUI     = 16;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 {$IFDEF WIN32}
@@ -281,6 +282,7 @@ begin
   case What of
     SYS_FPS: Result := app_FPS;
     APP_PAUSED: Result := Byte( app_Pause );
+    APP_DIRECTORY: Result := Ptr( PChar( app_WorkDir ) );
     LOG_FILENAME: Result := Ptr( @logfile );
     //ZGL_VERSION: Result := cv_version;
     SCR_ADD_X: Result := scr_AddCX;
@@ -378,5 +380,38 @@ begin
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := FALSE;
 end;
+
+{$IFDEF LINUX}
+initialization
+  app_WorkDir := './';
+{$ENDIF}
+{$IFDEF WIN32}
+var
+  FL, FP : PChar;
+  S      : String;
+initialization
+  wnd_INST := GetModuleHandle( nil );
+  GetMem( FL, 65535 );
+  GetMem( FP, 65535 );
+  GetModuleFileName( wnd_INST, FL, 65535 );
+  GetFullPathName( FL, 65535, FP, FL );
+  S := copy( String( FP ), 1, length( FP ) - length( FL ) );
+  app_WorkDir := PChar( S );
+  FL := nil;
+  FP := nil;
+{$ENDIF}
+{$IFDEF DARWIN}
+var
+  appBundle   : CFBundleRef;
+  appCFURLRef : CFURLRef;
+  appCFString : CFStringRef;
+  appPath     : array[ 0..8191 ] of Char;
+initialization
+  appBundle   := CFBundleGetMainBundle;
+  appCFURLRef := CFBundleCopyBundleURL( appBundle );
+  appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
+  CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
+  app_WorkDir := appPath + '/';
+{$ENDIF}
 
 end.

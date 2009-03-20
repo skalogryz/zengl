@@ -144,10 +144,10 @@ var
   sfStream : zglPSoundStream = nil;
   sfVolume : Single = 1;
   {$IFDEF USE_OPENAL}
-  sfFormat   : array[ 1..2 ] of TALenum = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
+  sfFormat   : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
   sfBufCount : Integer = 4;
-  sfSource   : TALuint;
-  sfBuffers  : array[ 0..3 ] of TALuint;
+  sfSource   : LongWord;
+  sfBuffers  : array[ 0..3 ] of LongWord;
   {$ELSE}
   sfBuffer  : IDirectSoundBuffer;
   sfLastPos : DWORD;
@@ -196,8 +196,13 @@ begin
       exit;
     end;
 
-  alcMakeContextCurrent( oal_Context );
-  log_Add( 'OpenAL: sound system initialized successful' );
+  if alcMakeContextCurrent( oal_Context ) Then
+    log_Add( 'OpenAL: sound system initialized successful' )
+  else
+    begin
+      log_Add( 'OpenAL: cannot set current context' );
+      exit;
+    end;
 
   alListenerfv( AL_POSITION,    @oal_Position );
   alListenerfv( AL_VELOCITY,    @oal_Velocity );
@@ -239,8 +244,8 @@ begin
     end;
 
 {$IFDEF USE_OPENAL}
-  alDeleteBuffers( sfBufCount, @sfBuffers[ 0 ] );
   alDeleteSources( 1, @sfSource );
+  alDeleteBuffers( sfBufCount, @sfBuffers[ 0 ] );
 
   log_Add( 'OpenAL: destroy current sound context' );
   alcDestroyContext( oal_Context );
@@ -296,9 +301,9 @@ procedure snd_Del;
     i : Integer;
 begin
 {$IFDEF USE_OPENAL}
-  alDeleteBuffers( 1, @Sound.Buffer );
   for i := 0 to Sound.sCount - 1 do
     alDeleteSources( 1, @Sound.Source[ i ] );
+  alDeleteBuffers( 1, @Sound.Buffer );
 {$ELSE}
   for i := 0 to Sound.sCount - 1 do
     Sound.Source[ i ] := nil;
@@ -394,7 +399,7 @@ function snd_Play;
   var
     i, j      : Integer;
     {$IFDEF USE_OPENAL}
-    sourcePos : array[ 0..2 ] of TALfloat;
+    sourcePos : array[ 0..2 ] of Single;
     {$ELSE}
     DSERROR : HRESULT;
     Status  : DWORD;
@@ -410,7 +415,7 @@ begin
 {$IFDEF USE_OPENAL}
   for i := 0 to Sound.sCount - 1 do
     begin
-      alGetSourcei( Sound.Source[ i ], AL_SOURCE_STATE, @j );
+      alGetSourcei( Sound.Source[ i ], AL_SOURCE_STATE, j );
       if j <> AL_PLAYING Then
          begin
            Result := i;
@@ -772,8 +777,8 @@ function snd_ProcFile;
   var
     _End : Boolean;
   {$IFDEF USE_OPENAL}
-    processed : TALint;
-    buffer    : TALuint;
+    processed : LongInt;
+    buffer    : LongWord;
     BytesRead : Integer;
   {$ELSE}
     as1, as2 : DWORD;
@@ -788,9 +793,9 @@ begin
         if ( not Assigned( sfStream ) ) or
            ( not sndInitialized ) Then break;
 
-        u_Sleep( 100 );
+        u_Sleep( 10 );
         {$IFDEF USE_OPENAL}
-        alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, @processed );
+        alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, processed );
         while ( processed > 0 ) and ( not sndStopFile ) do
           begin
             alSourceUnQueueBuffers( sfSource, 1, @buffer );

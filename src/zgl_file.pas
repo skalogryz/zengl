@@ -60,6 +60,7 @@ const
   FSM_END    = $03;
 
 procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+function  file_MakeDir( const Directory : String ) : Boolean;
 function  file_Exists( const FileName : String ) : Boolean;
 function  file_Seek( var FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
 function  file_GetPos( var FileHandle : zglTFile ) : DWORD;
@@ -77,6 +78,23 @@ procedure file_SetPath( const Path : String );
 {$IFDEF LINUX_OR_DARWIN}
 // "Домо оригато" разработчикам FreePascal, которые принципиально
 // не портировали модуль libc на платформу x86_64
+const
+  { POSIX file modes: group permission...  }
+  S_IRWXG = $0038;
+  S_IRGRP = $0020;
+  S_IWGRP = $0010;
+  S_IXGRP = $0008;
+  { POSIX file modes: other permission...  }
+  S_IRWXO = $0007;
+  S_IROTH = $0004;
+  S_IWOTH = $0002;
+  S_IXOTH = $0001;
+  { read/write search permission for everyone }
+  MODE_MKDIR = S_IWUSR or S_IRUSR or
+               S_IWGRP or S_IRGRP or
+               S_IWOTH or S_IROTH or
+               S_IXUSR or S_IXGRP or S_IXOTH;
+
 type
   Pdirent = ^dirent;
   dirent  = record
@@ -105,6 +123,7 @@ function ftruncate(__fd:longint; __length:LongInt):longint;cdecl;external 'libc'
 function access(__name:Pchar; __type:longint):longint;cdecl;external 'libc' name 'access';
 function scandir(__dir:Pchar; __namelist:PPPdirent; __selector:TSelectorfunc; __cmp:TComparefunc):longint;cdecl;external 'libc' name 'scandir';
 function free( ptr : Pointer ):longint;cdecl;external 'libc' name 'free';
+function mkdir(pathname:Pchar; mode:mode_t):longint;cdecl;external 'libc' name 'mkdir';
 {$ENDIF}
 
 var
@@ -131,6 +150,16 @@ begin
     FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
     FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
+{$ENDIF}
+end;
+
+function file_MakeDir;
+begin
+{$IFDEF LINUX_OR_DARWIN}
+  Result := mkdir( PChar( Directory ), MODE_MKDIR ) = 0;
+{$ENDIF}
+{$IFDEF WIN32}
+  Result := CreateDirectory( PChar( Directory ), 0 );
 {$ENDIF}
 end;
 

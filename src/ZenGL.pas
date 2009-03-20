@@ -112,6 +112,7 @@ exports
   ini_LoadFromFile         name prefix + 'ini_LoadFromFile',
   ini_SaveToFile           name prefix + 'ini_SaveToFile',
   ini_Add                  name prefix + 'ini_Add',
+  ini_IsKey                name prefix + 'ini_IsKey',
   ini_ReadKeyStr           name prefix + 'ini_ReadKeyStr',
   ini_ReadKeyInt           name prefix + 'ini_ReadKeyInt',
   ini_ReadKeyBool          name prefix + 'ini_ReadKeyBool',

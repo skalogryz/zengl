@@ -265,6 +265,7 @@ var
 
 implementation
 uses
+  zgl_application,
   zgl_main,
   zgl_file,
   zgl_log,
@@ -301,6 +302,16 @@ begin
   ogg_Library        := dlopen( libogg {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   vorbis_Library     := dlopen( libvorbis {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   vorbisfile_Library := dlopen( libvorbisfile {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  {$IFDEF DARWIN}
+  if ( ogg_Library        = LIB_ERROR ) and
+     ( vorbis_Library     = LIB_ERROR ) and
+     ( vorbisfile_Library = LIB_ERROR ) Then
+    begin
+      ogg_Library        := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libogg ), $001 );
+      vorbis_Library     := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbis ), $001 );
+      vorbisfile_Library := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbisfile ), $001 );
+    end;
+  {$ENDIF}
 
   if ( ogg_Library        <> LIB_ERROR ) and
      ( vorbis_Library     <> LIB_ERROR ) and

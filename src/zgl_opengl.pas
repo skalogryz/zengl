@@ -282,21 +282,19 @@ begin
   ogl_zDepth := 24;
   repeat
     ogl_Attr[ 0 ]  := AGL_RGBA;
-    ogl_Attr[ 1 ]  := AGL_BUFFER_SIZE;
-    ogl_Attr[ 2 ]  := scr_BPP;
-    ogl_Attr[ 3 ]  := AGL_RED_SIZE;
-    ogl_Attr[ 4 ]  := 8;
-    ogl_Attr[ 5 ]  := AGL_GREEN_SIZE;
-    ogl_Attr[ 6 ]  := 8;
-    ogl_Attr[ 7 ]  := AGL_BLUE_SIZE;
-    ogl_Attr[ 8 ]  := 8;
-    ogl_Attr[ 9 ]  := AGL_ALPHA_SIZE;
-    ogl_Attr[ 10 ] := 8;
-    ogl_Attr[ 11 ] := AGL_DOUBLEBUFFER;
-    ogl_Attr[ 12 ] := AGL_DEPTH_SIZE;
-    ogl_Attr[ 13 ] := ogl_zDepth;
-    ogl_Attr[ 14 ] := AGL_FULLSCREEN;
-    i := 15;
+    ogl_Attr[ 1 ]  := AGL_RED_SIZE;
+    ogl_Attr[ 2 ]  := 1;
+    ogl_Attr[ 3 ]  := AGL_GREEN_SIZE;
+    ogl_Attr[ 4 ]  := 1;
+    ogl_Attr[ 5 ]  := AGL_BLUE_SIZE;
+    ogl_Attr[ 6 ]  := 1;
+    ogl_Attr[ 7 ]  := AGL_ALPHA_SIZE;
+    ogl_Attr[ 8 ]  := 1;
+    ogl_Attr[ 9 ]  := AGL_DOUBLEBUFFER;
+    ogl_Attr[ 10 ] := AGL_DEPTH_SIZE;
+    ogl_Attr[ 11 ] := ogl_zDepth;
+    ogl_Attr[ 12 ] := AGL_FULLSCREEN;
+    i := 13;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := AGL_STENCIL_SIZE;

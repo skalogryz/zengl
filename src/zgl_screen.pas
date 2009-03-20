@@ -182,19 +182,17 @@ begin
   ogl_zDepth := 24;
   repeat
     ogl_Attr[ 0 ]  := GLX_RGBA;
-    ogl_Attr[ 1 ]  := GLX_BUFFER_SIZE;
-    ogl_Attr[ 2 ]  := scr_BPP;
-    ogl_Attr[ 3 ]  := GLX_RED_SIZE;
-    ogl_Attr[ 4 ]  := 8;
-    ogl_Attr[ 5 ]  := GLX_GREEN_SIZE;
-    ogl_Attr[ 6 ]  := 8;
-    ogl_Attr[ 7 ]  := GLX_BLUE_SIZE;
-    ogl_Attr[ 8 ]  := 8;
-    ogl_Attr[ 9 ]  := GLX_ALPHA_SIZE;
-    ogl_Attr[ 10 ] := 8;
-    ogl_Attr[ 11 ] := GLX_DOUBLEBUFFER;
-    ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
-    ogl_Attr[ 13 ] := ogl_zDepth;
+    ogl_Attr[ 1 ]  := GLX_RED_SIZE;
+    ogl_Attr[ 2 ]  := 1;
+    ogl_Attr[ 3 ]  := GLX_GREEN_SIZE;
+    ogl_Attr[ 4 ]  := 1;
+    ogl_Attr[ 5 ]  := GLX_BLUE_SIZE;
+    ogl_Attr[ 6 ]  := 1;
+    ogl_Attr[ 7 ]  := GLX_ALPHA_SIZE;
+    ogl_Attr[ 8 ]  := 1;
+    ogl_Attr[ 9 ]  := GLX_DOUBLEBUFFER;
+    ogl_Attr[ 10 ] := GLX_DEPTH_SIZE;
+    ogl_Attr[ 11 ] := ogl_zDepth;
     i := 14;
     if ogl_Stencil > 0 Then
       begin
@@ -411,6 +409,7 @@ begin
   wnd_FullScreen := FullScreen;
   scr_Vsync      := VSync;
   if not app_Work Then exit;
+  scr_SetVSync( scr_VSync );
 
   if ( Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
     wnd_FullScreen := TRUE;

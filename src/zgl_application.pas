@@ -63,6 +63,7 @@ var
   app_AutoMinimize : Boolean = TRUE;
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
+  app_WorkDir      : String;
 
   // call-back
   app_PLoad   : procedure = zero;

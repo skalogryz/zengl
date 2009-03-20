@@ -63,9 +63,12 @@ begin
 
   glColor4ub( textRGBA[ 0 ], textRGBA[ 1 ], textRGBA[ 2 ], textRGBA[ 3 ] );
 
-  {X := Round( X );
-  Y := Round( Y );}
   Y := Y - Font.MaxShiftY;
+  if Flags and TEXT_ALIGN_CENTER > 0 Then
+    X := X - Round( text_GetWidth( Font, Text, textStep ) / 2 ) * textScale
+  else
+    if Flags and TEXT_ALIGN_RIGHT > 0 Then
+      X := X - Round( text_GetWidth( Font, Text, textStep ) ) * textScale;
 
   lastPage := -1;
   c := font_GetUID( Text, 1, @i );
@@ -168,7 +171,7 @@ begin
     begin
       c := font_GetUID( Text, i, @i );
       if Assigned( Font.CharDesc[ c ] ) Then
-        Result := Result + Font.CharDesc[ c ].ShiftP;
+        Result := Result + Font.CharDesc[ c ].ShiftP + Step;
     end;
 end;
 

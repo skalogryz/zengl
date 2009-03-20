@@ -33,7 +33,7 @@ const
   LIB_ERROR  = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
   FILE_ERROR = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
 
-  cs_ZenGL = 'ZenGL 0.1.17';
+  cs_ZenGL = 'ZenGL 0.1.18';
 
   defWidth  = 800;
   defHeight = 600;

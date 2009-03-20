@@ -27,7 +27,7 @@ interface
 
 const
 {$IFDEF LINUX}
-  libopenal = 'libopenal.so';
+  libopenal = 'libopenal.so.1';
 {$ENDIF}
 {$IFDEF WIN32}
   libopenal = 'openal32.dll';
@@ -65,86 +65,56 @@ const
   AL_GAIN                                   =$100A;
   AL_FREQUENCY                              =$2001;
 
-
-type
-  // OpenAL enumerations.
-  TALenum = Integer;
-  PALenum = ^TALenum;
-  // OpenAL 32bit unsigned integer type.
-  TALuint = Cardinal;
-  PALuint = ^TALuint;
-  // OpenAL 32bit signed integer type.
-  TALint = Integer;
-  PALint = ^TALint;
-  // OpenAL 32bit floating point type.
-  TALfloat = Single;
-  PALfloat = ^TALfloat;
-  // OpenAL 32bit type.
-  TALsizei = Cardinal;
-  PALsizei = ^TALsizei;
-
-  // ALC enumerations.
-  TALCenum = integer;
-  PALCenum = ^TALCenum;
-  // ALC 8bit unsigned byte.
-  TALCubyte = Char;
-  PALCubyte = PChar;
-  // ALC void type
-  TALCvoid = Pointer;
-  PALCvoid = ^TALCvoid;
-  // ALC device
-  TALCdevice = TALCvoid;
-  PALCdevice = ^TALCdevice;
-  // ALC context
-  TALCcontext = TALCvoid;
-  PALCcontext = ^TALCcontext;
-  // ALC 32bit signed integer type.
-  TALCint = integer;
-  PALCint = ^TALCint;
-  // ALC 32bit floating point type.
-  TALCfloat = single;
-  PALCfloat = ^TALCfloat;
-
 function  InitOpenAL : Boolean;
 procedure FreeOpenAL;
+
+type
+  PALCdevice = ^ALCdevice;
+  ALCdevice  = record
+end;
+
+type
+  PALCcontext = ^ALCcontext;
+  ALCcontext  = record
+end;
 
 var
   oal_Library : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
 
   // Device
-  alcOpenDevice          : function(deviceName: PALCuByte): TALCdevice; cdecl;
-  alcCloseDevice         : procedure(device: TALCdevice); cdecl;
+  alcOpenDevice          : function(const devicename: PChar): PALCdevice; cdecl;
+  alcCloseDevice         : function(device: PALCdevice): Boolean; cdecl;
   // Context
-  alcCreateContext       : function(device: TALCdevice; attrlist: PALCint): TALCcontext; cdecl;
-  alcMakeContextCurrent  : function(context: TALCcontext): TALCenum; cdecl;
-  alcDestroyContext      : procedure(context: TALCcontext); cdecl;
+  alcCreateContext       : function(device: PALCdevice; const attrlist: plongint): PALCcontext; cdecl;
+  alcMakeContextCurrent  : function(context: PALCcontext): Boolean; cdecl;
+  alcDestroyContext      : procedure(context: PALCcontext); cdecl;
   // Listener
-  alListenerfv           : procedure(param: TALenum; values: PALfloat); cdecl;
+  alListenerfv           : procedure(param: longint; const values: PSingle); cdecl;
   // Sources
-  alGenSources           : procedure(n: TALsizei; sources: PALuint); cdecl;
-  alDeleteSources        : procedure(n: TALsizei; sources: PALuint); cdecl;
-  alSourcei              : procedure(source: TALuint; param: TALenum; value: TALint); cdecl;
-  alSourcef              : procedure(source: TALuint; param: TALenum; value: TALfloat); cdecl;
-  alSourcefv             : procedure(source: TALuint; param: TALenum; values: PALfloat); cdecl;
-  alGetSourcei           : procedure(source: TALuint; param: TALenum; value: PALint); cdecl;
-  alSourcePlay           : procedure(source: TALuint); cdecl;
-  alSourceStop           : procedure(source: TALuint); cdecl;
-  alSourceRewind         : procedure(source: TALuint); cdecl;
+  alGenSources           : procedure(n: longint; sources: PLongWord); cdecl;
+  alDeleteSources        : procedure(n: longint; const sources: PLongWord); cdecl;
+  alSourcei              : procedure(sid: LongWord; param: longint; value: longint); cdecl;
+  alSourcef              : procedure(sid: LongWord; param: longint; value: Single); cdecl;
+  alSourcefv             : procedure(sid: LongWord; param: longint; const values: PSingle); cdecl;
+  alGetSourcei           : procedure(sid: LongWord; param: longint; var value: longint); cdecl;
+  alSourcePlay           : procedure(sid: LongWord); cdecl;
+  alSourceStop           : procedure(sid: LongWord); cdecl;
+  alSourceRewind         : procedure(sid: LongWord); cdecl;
   //
-  alSourceQueueBuffers   : procedure(source: TALuint; n: TALsizei; buffers: PALuint); cdecl;
-  alSourceUnqueueBuffers : procedure(source: TALuint; n: TALsizei; buffers: PALuint); cdecl;
+  alSourceQueueBuffers   : procedure(sid: LongWord; numEntries: longint; const bids: PLongWord); cdecl;
+  alSourceUnqueueBuffers : procedure(sid: LongWord; numEntries: longint; bids: PLongWord); cdecl;
   // Buffers
-  alGenBuffers           : procedure(n: TALsizei; buffers: PALuint); cdecl;
-  alDeleteBuffers        : procedure(n: TALsizei; buffers: PALuint); cdecl;
-  alBufferData           : procedure(buffer: TALuint; format: TALenum; data: Pointer; size, freq: TALsizei); cdecl;
+  alGenBuffers           : procedure(n: longint; buffers: PLongWord); cdecl;
+  alDeleteBuffers        : procedure(n: longint; const buffers: PLongWord); cdecl;
+  alBufferData           : procedure(bid: LongWord; format: longint; data: Pointer; size: longint; freq: longint); cdecl;
 
-  oal_Device  : TALCdevice  = nil;
-  oal_Context : TALCcontext = nil;
+  oal_Device  : PALCdevice  = nil;
+  oal_Context : PALCcontext = nil;
 
   // Параметры слушателя
-  oal_Position    : array[ 0..2 ] of TALfloat = ( 0.0, 0.0, 0.0);  //позиция
-  oal_Velocity    : array[ 0..2 ] of TALfloat = ( 0.0, 0.0, 0.0 ); //движение
-  oal_Orientation : array[ 0..5 ] of TALfloat = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
+  oal_Position    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
+  oal_Velocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 ); //движение
+  oal_Orientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
 
 implementation
 uses
@@ -155,11 +125,11 @@ function InitOpenAL;
 begin
   Result := FALSE;
   oal_Library := dlopen( libopenal {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
-  {$IFDEF LINUX}
-  // Для надежности...
-  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.0' ), $001 );
-  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.1' ), $001 );
-  {$ENDIF}
+//  {$IFDEF LINUX}
+//  // Для надежности...
+//  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.0' ), $001 );
+//  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.1' ), $001 );
+//  {$ENDIF}
 
   if oal_Library <> LIB_ERROR Then
     begin

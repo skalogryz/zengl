@@ -38,6 +38,7 @@ procedure csprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Singl
 implementation
 uses
   zgl_application,
+  zgl_screen,
   zgl_opengl,
   zgl_opengl_all,
   zgl_camera_2d;
@@ -57,8 +58,8 @@ begin
       Result := ( sqr( cx - ( X - W - H ) ) + sqr( cy - ( Y - W - H ) ) < radius ) and
                 ( sqr( cx - ( X + W + H ) ) + sqr( cy - ( Y + W + H ) ) < radius );
     end else
-      Result := ( ( X + W + H >= ogl_CropX + cam2DGlobal.X ) and ( X - W - H <= ogl_CropW + cam2DGlobal.X ) and
-                  ( Y + H + W >= ogl_CropY + cam2DGlobal.Y ) and ( Y - W - H <= ogl_CropH + cam2DGlobal.Y ) );
+      Result := ( ( X + W + H >= ogl_CropX + cam2DGlobal.X ) and ( X - W - H <= ogl_CropW / scr_ResCX + cam2DGlobal.X ) and
+                  ( Y + H + W >= ogl_CropY + cam2DGlobal.Y ) and ( Y - W - H <= ogl_CropH / scr_ResCY + cam2DGlobal.Y ) );
 end;
 
 {------------------------------------------------------------------------------}

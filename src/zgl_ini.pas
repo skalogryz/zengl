@@ -54,6 +54,7 @@ end;
 procedure ini_LoadFromFile( const FileName : String );
 procedure ini_SaveToFile( const FileName : String );
 procedure ini_Add( const Section, Key : String );
+function  ini_IsKey( const Section, Key : String ) : Boolean;
 function  ini_ReadKeyStr( const Section, Key : String ) : PChar;
 function  ini_ReadKeyInt( const Section, Key : String ) : Integer;
 function  ini_ReadKeyBool( const Section, Key : String ) : Boolean;
@@ -163,6 +164,17 @@ begin
       SetLength( iniRec.Section[ ns ].Key, iniRec.Section[ ns ].Keys );
       iniRec.Section[ ns ].Key[ nk ].Name := u_StrUp( k );
     end;
+end;
+
+function ini_IsKey;
+  var
+    s, k : String;
+    i, j : Integer;
+begin
+  s := Section;
+  k := Key;
+
+  Result := INI_GetID( s, k, i, j );
 end;
 
 procedure ini_LoadFromFile;
