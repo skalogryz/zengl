@@ -92,19 +92,20 @@ var
 const
   SYS_FPS         = 1;  // DWORD,  := zgl_Get( SYS_FPS )
   APP_PAUSED      = 2;  // Boolean
-  LOG_FILENAME    = 3;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
-  ZGL_VERSION     = 4;  // DWORD
-  SCR_ADD_X       = 5;  // DWORD
-  SCR_ADD_Y       = 6;  // DWORD
-  DESKTOP_WIDTH   = 7;  // DWORD
-  DESKTOP_HEIGHT  = 8;  // DWORD
-  RESOLUTION_LIST = 9;  // PResolutionList
-  MANAGER_TIMER   = 10; // zglPTimerManager
-  MANAGER_TEXTURE = 11; // zglPTextureManager
-  MANAGER_FONT    = 12; // zglPFontManager
-  MANAGER_RTARGET = 13; // zglTRenderTargetManager
-  MANAGER_SOUND   = 14; // zglPSoundManager
-  MANAGER_GUI     = 15; // zglPGUIManager
+  APP_DIRECTORY   = 2;  // PChar
+  LOG_FILENAME    = 4;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
+  ZGL_VERSION     = 5;  // DWORD
+  SCR_ADD_X       = 6;  // DWORD
+  SCR_ADD_Y       = 7;  // DWORD
+  DESKTOP_WIDTH   = 8;  // DWORD
+  DESKTOP_HEIGHT  = 9;  // DWORD
+  RESOLUTION_LIST = 10;  // PResolutionList
+  MANAGER_TIMER   = 11; // zglPTimerManager
+  MANAGER_TEXTURE = 12; // zglPTextureManager
+  MANAGER_FONT    = 13; // zglPFontManager
+  MANAGER_RTARGET = 14; // zglTRenderTargetManager
+  MANAGER_SOUND   = 15; // zglPSoundManager
+  MANAGER_GUI     = 16; // zglPGUIManager
 
 var
   zgl_Get    : function( const What : DWORD ) : Ptr;
@@ -171,6 +172,7 @@ var
   ini_LoadFromFile : procedure( const FileName : String );
   ini_SaveToFile   : procedure( const FileName : String );
   ini_Add          : procedure( const Section, Key : String );
+  ini_IsKay        : function( const Section, Key : String ) : Boolean;
   ini_ReadKeyStr   : function( const Section, Key : String ) : PChar;
   ini_ReadKeyInt   : function( const Section, Key : String ) : Integer;
   ini_ReadKeyBool  : function( const Section, Key : String ) : Boolean;

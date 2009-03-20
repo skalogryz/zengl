@@ -85,28 +85,28 @@ var
   alcOpenDevice          : function(const devicename: PChar): PALCdevice; cdecl;
   alcCloseDevice         : function(device: PALCdevice): Boolean; cdecl;
   // Context
-  alcCreateContext       : function(device: PALCdevice; const attrlist: plongint): PALCcontext; cdecl;
+  alcCreateContext       : function(device: PALCdevice; const attrlist: PLongInt): PALCcontext; cdecl;
   alcMakeContextCurrent  : function(context: PALCcontext): Boolean; cdecl;
   alcDestroyContext      : procedure(context: PALCcontext); cdecl;
   // Listener
-  alListenerfv           : procedure(param: longint; const values: PSingle); cdecl;
+  alListenerfv           : procedure(param: LongInt; const values: PSingle); cdecl;
   // Sources
-  alGenSources           : procedure(n: longint; sources: PLongWord); cdecl;
-  alDeleteSources        : procedure(n: longint; const sources: PLongWord); cdecl;
-  alSourcei              : procedure(sid: LongWord; param: longint; value: longint); cdecl;
-  alSourcef              : procedure(sid: LongWord; param: longint; value: Single); cdecl;
-  alSourcefv             : procedure(sid: LongWord; param: longint; const values: PSingle); cdecl;
-  alGetSourcei           : procedure(sid: LongWord; param: longint; var value: longint); cdecl;
+  alGenSources           : procedure(n: LongInt; sources: PLongWord); cdecl;
+  alDeleteSources        : procedure(n: LongInt; const sources: PLongWord); cdecl;
+  alSourcei              : procedure(sid: LongWord; param: LongInt; value: LongInt); cdecl;
+  alSourcef              : procedure(sid: LongWord; param: LongInt; value: Single); cdecl;
+  alSourcefv             : procedure(sid: LongWord; param: LongInt; const values: PSingle); cdecl;
+  alGetSourcei           : procedure(sid: LongWord; param: LongInt; var value: LongInt); cdecl;
   alSourcePlay           : procedure(sid: LongWord); cdecl;
   alSourceStop           : procedure(sid: LongWord); cdecl;
   alSourceRewind         : procedure(sid: LongWord); cdecl;
   //
-  alSourceQueueBuffers   : procedure(sid: LongWord; numEntries: longint; const bids: PLongWord); cdecl;
-  alSourceUnqueueBuffers : procedure(sid: LongWord; numEntries: longint; bids: PLongWord); cdecl;
+  alSourceQueueBuffers   : procedure(sid: LongWord; numEntries: LongInt; const bids: PLongWord); cdecl;
+  alSourceUnqueueBuffers : procedure(sid: LongWord; numEntries: LongInt; bids: PLongWord); cdecl;
   // Buffers
-  alGenBuffers           : procedure(n: longint; buffers: PLongWord); cdecl;
-  alDeleteBuffers        : procedure(n: longint; const buffers: PLongWord); cdecl;
-  alBufferData           : procedure(bid: LongWord; format: longint; data: Pointer; size: longint; freq: longint); cdecl;
+  alGenBuffers           : procedure(n: LongInt; buffers: PLongWord); cdecl;
+  alDeleteBuffers        : procedure(n: LongInt; const buffers: PLongWord); cdecl;
+  alBufferData           : procedure(bid: LongWord; format: LongInt; data: Pointer; size: LongInt; freq: LongInt); cdecl;
 
   oal_Device  : PALCdevice  = nil;
   oal_Context : PALCcontext = nil;
