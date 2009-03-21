@@ -23,7 +23,7 @@ unit zgl_sound_modplug;
 
 interface
 uses
-  zgl_const,
+  zgl_types,
   zgl_main,
   zgl_sound,
   zgl_log,
