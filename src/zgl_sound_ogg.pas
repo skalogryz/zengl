@@ -58,29 +58,15 @@ unit zgl_sound_ogg;
       {$LINKLIB libogg_win32/libmsvcrt.a}
     {$ENDIF}
     {$IFDEF DARWIN}
-      {$L libogg_macos/bitwise}
-      {$L libogg_macos/framing}
-      {$L libogg_macos/analysis}
-      {$L libogg_macos/bitrate}
-      {$L libogg_macos/block}
-      {$L libogg_macos/codebook}
-      {$L libogg_macos/envelope}
-      {$L libogg_macos/floor0}
-      {$L libogg_macos/floor1}
-      {$L libogg_macos/info}
-      {$L libogg_macos/lookup}
-      {$L libogg_macos/lpc}
-      {$L libogg_macos/lsp}
-      {$L libogg_macos/mapping0}
-      {$L libogg_macos/mdct}
-      {$L libogg_macos/psy}
-      {$L libogg_macos/registry}
-      {$L libogg_macos/res0}
-      {$L libogg_macos/sharedbook}
-      {$L libogg_macos/smallft}
-      {$L libogg_macos/synthesis}
-      {$L libogg_macos/vorbisfile}
-      {$L libogg_macos/window}
+      {$IFDEF x86}
+        {$L libogg_macos_i386/libogg-i386-master}
+        {$L libogg_macos_i386/libvorbis-i386-master}
+        {$L libogg_macos_i386/libvorbisfile-i386-master}
+      {$ELSE}
+        {$L libogg_macos_ppc/libogg-ppc-master}
+        {$L libogg_macos_ppc/libvorbis-ppc-master}
+        {$L libogg_macos_ppc/libvorbisfile-ppc-master}
+      {$ENDIF}
       {$LINKLIB libgcc.a}
     {$ENDIF}
   {$ENDIF}

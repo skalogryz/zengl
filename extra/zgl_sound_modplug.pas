@@ -123,14 +123,10 @@ var
   mpLibrary : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
   mpFile    : PModPlugFile;
 
-  ModPlug_Load        : function(data: pointer; size: cint): PModPlugFile; cdecl;
-  ModPlug_Unload      : procedure(_file: PModPlugFile); cdecl;
-  ModPlug_Read        : function(_file: PModPlugFile; buffer: pointer; size: cint): cint; cdecl;
-  ModPlug_GetName     : function(_file: PModPlugFile): pcchar; cdecl;
-  ModPlug_GetLength   : function(_file: PModPlugFile): cint; cdecl;
-  ModPlug_Seek        : procedure(_file: PModPlugFile; millisecond: cint); cdecl;
-  ModPlug_GetSettings : procedure(settings: PModPlug_Settings); cdecl;
-  ModPlug_SetSettings : procedure(const settings: PModPlug_Settings); cdecl;
+  ModPlug_Load   : function(data: pointer; size: cint): PModPlugFile; cdecl;
+  ModPlug_Unload : procedure(_file: PModPlugFile); cdecl;
+  ModPlug_Read   : function(_file: PModPlugFile; buffer: pointer; size: cint): cint; cdecl;
+  ModPlug_Seek   : procedure(_file: PModPlugFile; millisecond: cint); cdecl;
 
 implementation
 
@@ -147,11 +143,7 @@ begin
       ModPlug_Load        := dlsym( mpLibrary, 'ModPlug_Load' );
       ModPlug_Unload      := dlsym( mpLibrary, 'ModPlug_Unload' );
       ModPlug_Read        := dlsym( mpLibrary, 'ModPlug_Read' );
-      ModPlug_GetName     := dlsym( mpLibrary, 'ModPlug_GetName' );
-      ModPlug_GetLength   := dlsym( mpLibrary, 'ModPlug_GetLength' );
       ModPlug_Seek        := dlsym( mpLibrary, 'ModPlug_Seek' );
-      ModPlug_GetSettings := dlsym( mpLibrary, 'ModPlug_GetSettings' );
-      ModPlug_SetSettings := dlsym( mpLibrary, 'ModPlug_SetSettings' );
 
       log_Add( 'ModPlug: Successful initialized'  );
       mpInit := TRUE;

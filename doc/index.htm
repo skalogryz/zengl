@@ -67,6 +67,7 @@
         <LI><a class="g" href="#ini_LoadFromFile">ini_LoadFromFile</a></LI>
         <LI><a class="g" href="#ini_SaveToFile">ini_SaveToFile</a></LI>
         <LI><a class="g" href="#ini_Add">ini_Add</a></LI>
+        <LI><a class="g" href="#ini_Key">ini_IsKey</a></LI>
         <LI><a class="g" href="#ini_ReadKeyStr">ini_ReadKeyStr</a></LI>
         <LI><a class="g" href="#ini_ReadKeyInt">ini_ReadKeyInt</a></LI>
         <LI><a class="g" href="#ini_ReadKeyBool">ini_ReadKeyBool</a></LI>
@@ -406,6 +407,7 @@
     <LI><a name="ini_LoadFromFile"/>
     <div class="code"><b>procedure</b> ini_LoadFromFile( <b>const</b> FileName : <b>String</b> );</div>
     <div align="justify">
+    Загрузить ini-файл <b>FileName</b>.
     </div>
     </LI><br>
 
@@ -413,6 +415,7 @@
     <LI><a name="ini_SaveToFile"/>
     <div class="code"><b>procedure</b> ini_SaveToFile( <b>const</b> FileName : <b>String</b> );</div>
     <div align="justify">
+    Сохраняет все созданные/считанные данные в ini-файл с именем <b>FileName</b>.
     </div>
     </LI><br>
 
@@ -420,6 +423,15 @@
     <LI><a name="ini_Add"/>
     <div class="code"><b>procedure</b> ini_Add( <b>const</b> Section, Key : <b>String</b> );</div>
     <div align="justify">
+    Добавляет в секцию <b>Section</b> ключ <b>Key</b>.
+    </div>
+    </LI><br>
+
+    <!--ini_IsKey-->
+    <LI><a name="ini_IsKey"/>
+    <div class="code"><b>function</b> ini_IsKey( <b>const</b> Section, Key : <b>String</b> ) : Boolean;</div>
+    <div align="justify">
+    Проверяет существует ли в секции <b>Section</b> ключ <b>Key</b>.
     </div>
     </LI><br>
 
@@ -427,6 +439,7 @@
     <LI><a name="ini_ReadKeyStr"/>
     <div class="code"><b>function</b> ini_ReadKeyStr( <b>const</b> Section, Key : <b>String</b> ) : PChar;</div>
     <div align="justify">
+    Считать строковое значение ключа <b>Key</b> из секции <b>Section</b>.
     </div>
     </LI><br>
 
@@ -434,6 +447,7 @@
     <LI><a name="ini_ReadKeyInt"/>
     <div class="code"><b>function</b> ini_ReadKeyInt( <b>const</b> Section, Key : <b>String</b> ) : Integer;</div>
     <div align="justify">
+    Считать числовое значение ключа <b>Key</b> из секции <b>Section</b>.
     </div>
     </LI><br>
 
@@ -441,6 +455,7 @@
     <LI><a name="ini_ReadKeyBool"/>
     <div class="code"><b>function</b> ini_ReadKeyBool( <b>const</b> Section, Key : <b>String</b> ) : Boolean;</div>
     <div align="justify">
+    Считать булевое значение ключа <b>Key</b> из секции <b>Section</b>.
     </div>
     </LI><br>
 
@@ -448,6 +463,7 @@
     <LI><a name="ini_WriteKeyStr"/>
     <div class="code"><b>function</b> ini_WriteKeyStr( <b>const</b> Section, Key, Value : <b>String</b> ) : Boolean;</div>
     <div align="justify">
+    Присвоить ключу <b>Key</b> из секции <b>Section</b> строковое значение <b>Value</b>. Функция возвратит True если ключ был найден.
     </div>
     </LI><br>
 
@@ -455,6 +471,7 @@
     <LI><a name="ini_WriteKeyInt"/>
     <div class="code"><b>function</b> ini_WriteKeyInt( <b>const</b> Section, Key : <b>String</b>; <b>const</b> Value : Integer ) : Boolean;</div>
     <div align="justify">
+    Присвоить ключу <b>Key</b> из секции <b>Section</b> числовое значение <b>Value</b>. Функция возвратит True если ключ был найден.
     </div>
     </LI><br>
 
@@ -462,6 +479,7 @@
     <LI><a name="ini_WriteKeyBool"/>
     <div class="code"><b>function</b> ini_WriteKeyBool( <b>const</b> Section, Key : <b>String</b>; <b>const</b> Value : Boolean ) : Boolean;</div>
     <div align="justify">
+    Присвоить ключу <b>Key</b> из секции <b>Section</b> булевое значение <b>Value</b>. Функция возвратит True если ключ был найден.
     </div>
     </LI>
   </UL>
@@ -476,6 +494,7 @@
     <LI><a name="mouse_X"/>
     <div class="code"><b>function</b> mouse_X : Integer;</div>
     <div align="justify">
+    Возвращает координаты мышки по оси X относительно координат окна.
     </div>
     </LI><br>
 
@@ -483,6 +502,7 @@
     <LI><a name="mouse_Y"/>
     <div class="code"><b>function</b> mouse_Y : Integer;</div>
     <div align="justify">
+    Возвращает координаты мышки по оси Y относительно координат окна.
     </div>
     </LI><br>
 
@@ -490,6 +510,7 @@
     <LI><a name="mouse_DX"/>
     <div class="code"><b>function</b> mouse_DX : Integer;</div>
     <div align="justify">
+    Возвращает значение смещения курсора мыши по оси X после последнего вызова mouse_Lock.
     </div>
     </LI><br>
 
@@ -497,6 +518,7 @@
     <LI><a name="mouse_DY"/>
     <div class="code"><b>function</b> mouse_DY : Integer;</div>
     <div align="justify">
+    Возвращает значение смещения курсора мыши по оси Y после последнего вызова mouse_Lock
     </div>
     </LI><br>
 
@@ -504,6 +526,7 @@
     <LI><a name="mouse_Down"/>
     <div class="code"><b>function</b> mouse_Down( <b>const</b> Button : Byte ) : Boolean;</div>
     <div align="justify">
+    Возвращает True, если нажата кнопка Button.
     </div>
     </LI><br>
 
@@ -511,6 +534,7 @@
     <LI><a name="mouse_Up"/>
     <div class="code"><b>function</b> mouse_Up( <b>const</b> Button : Byte ) : Boolean;</div>
     <div align="justify">
+    Возвращает True, если была отпущена кнопка Button после последнего вызова mouse_ClearState.
     </div>
     </LI><br>
 
@@ -518,6 +542,7 @@
     <LI><a name="mouse_Click"/>
     <div class="code"><b>function</b> mouse_Click( <b>const</b> Button : Byte ) : Boolean;</div>
     <div align="justify">
+    Возвращает True, если была нажата кнопка Button после последнего вызова mouse_ClearState.
     </div>
     </LI><br>
 
@@ -525,6 +550,7 @@
     <LI><a name="mouse_Wheel"/>
     <div class="code"><b>function</b> mouse_Wheel( <b>const</b> Axis : Byte ) : Boolean;</div>
     <div align="justify">
+    Возвращает True, если была осуществлена прокрутка скролла по направлению <b>Axis</b> после последнего вызова mouse_ClearState.
     </div>
     </LI><br>
 
@@ -532,6 +558,7 @@
     <LI><a name="mouse_ClearState"/>
     <div class="code"><b>procedure</b> mouse_ClearState;</div>
     <div align="justify">
+    Сбросить состояния.
     </div>
     </LI><br>
 
@@ -539,6 +566,7 @@
     <LI><a name="mouse_Lock"/>
     <div class="code"><b>procedure</b> mouse_Lock;</div>
     <div align="justify">
+    "Заблокировать" курсор мыши по центру окна
     </div>
     </LI>
   </UL>
