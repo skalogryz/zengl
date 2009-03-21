@@ -26,7 +26,7 @@ unit zgl_sprite_2d;
 interface
 
 uses
-  zgl_const,
+  zgl_types,
   zgl_textures,
   zgl_fx,
   zgl_math_2d;
@@ -37,6 +37,7 @@ procedure csprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Singl
 
 implementation
 uses
+  zgl_const,
   zgl_application,
   zgl_screen,
   zgl_opengl,

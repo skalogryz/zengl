@@ -25,7 +25,7 @@ unit zgl_font;
 
 interface
 uses
-  zgl_const,
+  zgl_types,
   zgl_textures,
   zgl_math_2d,
   zgl_file,

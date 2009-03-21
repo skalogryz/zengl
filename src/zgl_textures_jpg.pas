@@ -169,7 +169,7 @@ procedure jpg_FillData;
 
 implementation
 uses
-  zgl_const,
+  zgl_types,
   zgl_main,
   zgl_log;
 
@@ -323,7 +323,7 @@ begin
     m := GlobalLock( g );
     mem_Read( jpgMem, m^, jpgMem.Size );
     GlobalUnlock( g );
-    if CreateStreamOnHGlobal( DWORD( m ), FALSE, jpgData.Stream ) = S_OK Then
+    if CreateStreamOnHGlobal( Ptr( m ), FALSE, jpgData.Stream ) = S_OK Then
       if OleLoadPicture( jpgData.Stream, 0, FALSE, IPicture, jpgData.Buffer ) = S_OK Then jpg_FillData;
   finally
     if g <> 0 Then GlobalFree( g );

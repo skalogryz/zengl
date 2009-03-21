@@ -138,7 +138,6 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_sound,
   zgl_log,
   zgl_utils;

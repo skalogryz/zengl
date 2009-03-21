@@ -27,7 +27,7 @@ interface
 
 const
 {$IFDEF LINUX}
-  libopenal = 'libopenal.so.1';
+  libopenal = 'libopenal.so';
 {$ENDIF}
 {$IFDEF WIN32}
   libopenal = 'openal32.dll';
@@ -125,11 +125,11 @@ function InitOpenAL;
 begin
   Result := FALSE;
   oal_Library := dlopen( libopenal {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
-//  {$IFDEF LINUX}
-//  // Для надежности...
-//  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.0' ), $001 );
-//  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.1' ), $001 );
-//  {$ENDIF}
+  {$IFDEF LINUX}
+  // Для надежности...
+  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.1' ), $001 );
+  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.0' ), $001 );
+  {$ENDIF}
 
   if oal_Library <> LIB_ERROR Then
     begin

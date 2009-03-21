@@ -25,7 +25,7 @@ unit zgl_primitives_2d;
 
 interface
 uses
-  zgl_const;
+  zgl_types;
 
 const
   PR2D_FILL   = $000001;

@@ -31,7 +31,7 @@ uses
   {$ELSE}
   zgl_sound_dsound,
   {$ENDIF}
-  zgl_const,
+  zgl_types,
   zgl_file,
   zgl_memory;
 

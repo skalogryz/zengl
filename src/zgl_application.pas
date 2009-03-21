@@ -36,6 +36,7 @@ uses
   MacOSAll,
   {$ENDIF}
   zgl_const,
+  zgl_types,
   zgl_opengl_all
   ;
 
@@ -352,6 +353,7 @@ begin
             keysUp  [ Key ] := FALSE;
 
             case Key of
+              K_ENTER:;
               K_BACKSPACE: u_Backspace( keysText );
               K_TAB: key_InputText( '  ' );
             else
@@ -542,6 +544,7 @@ begin
               keysUp  [ Key ] := FALSE;
 
               case Key of
+                K_ENTER:;
                 K_BACKSPACE: u_Backspace( keysText );
                 K_TAB: key_InputText( '  ' );
               else

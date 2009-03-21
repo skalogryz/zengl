@@ -25,7 +25,7 @@ unit zgl_ini;
 
 interface
 uses
-  zgl_const,
+  zgl_types,
   zgl_memory;
 
 type

@@ -25,7 +25,7 @@ unit zgl_memory;
 
 interface
 uses
-  zgl_const;
+  zgl_types;
 
 type
   zglPMemory = ^zglTMemory;

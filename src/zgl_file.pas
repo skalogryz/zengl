@@ -27,11 +27,12 @@ interface
 
 uses
   {$IFDEF LINUX_OR_DARWIN}
-  baseunix
+  baseunix,
   {$ENDIF}
   {$IFDEF WIN32}
-  Windows
+  Windows,
   {$ENDIF}
+  zgl_types
   ;
 
 {$IFDEF LINUX_OR_DARWIN}
@@ -42,11 +43,7 @@ type zglTFile = PFILE;
 type zglTFile = THandle;
 {$ENDIF}
 
-type
-  zglTFileList = record
-    Count : Integer;
-    List  : array of String;
-end;
+type zglTFileList = zglTStringList;
 
 const
   // Open Mode
@@ -130,9 +127,7 @@ var
   filePath : String;
 
 implementation
-uses
-  zgl_const,
-  zgl_log,
+uses  zgl_log,
   zgl_utils;
 
 procedure file_Open;

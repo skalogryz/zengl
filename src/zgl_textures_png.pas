@@ -95,7 +95,7 @@ function  png_DecodeIDAT( Buffer : Pointer; Count : Integer ) : Integer;
 
 implementation
 uses
-  zgl_const,
+  zgl_types,
   zgl_main,
   zgl_log;
 

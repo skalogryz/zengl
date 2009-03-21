@@ -31,7 +31,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_const;
+  zgl_types;
 
 const
   // zgl_Reg
@@ -83,6 +83,7 @@ procedure zgl_Disable( const What : DWORD );
 
 implementation
 uses
+  zgl_const,
   zgl_application,
   zgl_screen,
   zgl_window,
@@ -417,7 +418,7 @@ initialization
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   app_WorkDir := appPath + '/';
 
-  app_UsrHomDir := getenv( 'HOME' );
+  app_UsrHomeDir := getenv( 'HOME' );
 {$ENDIF}
 
 end.

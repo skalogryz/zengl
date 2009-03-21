@@ -46,7 +46,7 @@ var
 
 implementation
 uses
-  zgl_const,
+  zgl_types,
   zgl_window,
   zgl_opengl,
   zgl_opengl_all,

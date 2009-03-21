@@ -23,9 +23,72 @@ unit zgl_sound_ogg;
 
 {$I zgl_config.cfg}
 
+{$IFDEF FPC}
+  {$IFDEF USE_OGG_STATIC}
+    {$IFDEF LINUX}
+      {$LINKLIB libogg.a}
+      {$LINKLIB libvorbis.a}
+      {$LINKLIB libvorbisfile.a}
+    {$ENDIF}
+    {$IFDEF WIN32}
+      {$L libogg_win32/bitwise}
+      {$L libogg_win32/framing}
+      {$L libogg_win32/analysis}
+      {$L libogg_win32/bitrate}
+      {$L libogg_win32/block}
+      {$L libogg_win32/codebook}
+      {$L libogg_win32/envelope}
+      {$L libogg_win32/floor0}
+      {$L libogg_win32/floor1}
+      {$L libogg_win32/info}
+      {$L libogg_win32/lookup}
+      {$L libogg_win32/lpc}
+      {$L libogg_win32/lsp}
+      {$L libogg_win32/mapping0}
+      {$L libogg_win32/mdct}
+      {$L libogg_win32/psy}
+      {$L libogg_win32/registry}
+      {$L libogg_win32/res0}
+      {$L libogg_win32/sharedbook}
+      {$L libogg_win32/smallft}
+      {$L libogg_win32/synthesis}
+      {$L libogg_win32/vorbisfile}
+      {$L libogg_win32/window}
+      {$LINKLIB libogg_win32/libgcc.a}
+      {$LINKLIB libogg_win32/libmsvcrt.a}
+    {$ENDIF}
+    {$IFDEF DARWIN}
+      {$L libogg_macos/bitwise}
+      {$L libogg_macos/framing}
+      {$L libogg_macos/analysis}
+      {$L libogg_macos/bitrate}
+      {$L libogg_macos/block}
+      {$L libogg_macos/codebook}
+      {$L libogg_macos/envelope}
+      {$L libogg_macos/floor0}
+      {$L libogg_macos/floor1}
+      {$L libogg_macos/info}
+      {$L libogg_macos/lookup}
+      {$L libogg_macos/lpc}
+      {$L libogg_macos/lsp}
+      {$L libogg_macos/mapping0}
+      {$L libogg_macos/mdct}
+      {$L libogg_macos/psy}
+      {$L libogg_macos/registry}
+      {$L libogg_macos/res0}
+      {$L libogg_macos/sharedbook}
+      {$L libogg_macos/smallft}
+      {$L libogg_macos/synthesis}
+      {$L libogg_macos/vorbisfile}
+      {$L libogg_macos/window}
+      {$LINKLIB libgcc.a}
+    {$ENDIF}
+  {$ENDIF}
+{$ENDIF}
+
 interface
 uses
-  zgl_const,
+  zgl_types,
   zgl_sound;
 
 const
@@ -244,6 +307,14 @@ function ogg_Seek( datasource : pointer; offset : cint64; whence : cint) : cint;
 function ogg_Close( datasource : pointer ) : cint; cdecl;
 function ogg_GetPos( datasource : pointer ) : clong; cdecl;
 
+{$IFDEF USE_OGG_STATIC}
+function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
+function ov_open_callbacks(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
+function ov_info(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl; external;
+function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl; external;
+function ov_time_seek(var vf: OggVorbis_File; pos: cdouble): cint; cdecl; external;
+{$ENDIF}
+
 var
   oggLoad   : Boolean;
   oggInit   : Boolean;
@@ -257,14 +328,17 @@ var
   vorbis_Library     : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
   vorbisfile_Library : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
 
+{$IFNDEF USE_OGG_STATIC}
   ov_clear          : function(var vf: OggVorbis_File): cint; cdecl;
   ov_open_callbacks : function(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl;
   ov_info           : function(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl;
   ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl;
   ov_time_seek      : function(var vf: OggVorbis_File; pos: cdouble): cint; cdecl;
+{$ENDIF}
 
 implementation
 uses
+  zgl_const,
   zgl_application,
   zgl_main,
   zgl_file,
@@ -299,6 +373,9 @@ end;
 
 procedure ogg_Init;
 begin
+{$IFDEF USE_OGG_STATIC}
+  oggInit := TRUE;
+{$ELSE}
   ogg_Library        := dlopen( libogg {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   vorbis_Library     := dlopen( libvorbis {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   vorbisfile_Library := dlopen( libvorbisfile {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
@@ -330,6 +407,7 @@ begin
         log_Add( 'Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile  );
         oggInit := FALSE;
       end;
+{$ENDIF}
 
   vc.read  := @ogg_Read;
   vc.seek  := @ogg_Seek;
@@ -407,11 +485,13 @@ initialization
   zgl_Reg( SND_FORMAT_STREAM, @oggStream );
 
 finalization
+{$IFNDEF USE_OGG_STATIC}
   if oggInit Then
     begin
       dlclose( ogg_Library );
       dlclose( vorbis_Library );
       dlclose( vorbisfile_Library );
     end;
+{$ENDIF}
 
 end.

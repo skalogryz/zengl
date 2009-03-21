@@ -26,7 +26,7 @@ unit zgl_textures;
 interface
 
 uses
-  zgl_const,
+  zgl_types,
   zgl_opengl_all,
   zgl_memory;
 

@@ -60,7 +60,7 @@ procedure tga_RLEDecode;
 
 implementation
 uses
-  zgl_const,
+  zgl_types,
   zgl_main,
   zgl_log;
 

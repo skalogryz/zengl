@@ -23,9 +23,7 @@ unit zgl_text;
 
 interface
 uses
-  zgl_const,
-  zgl_main,
-  zgl_opengl_all,
+  zgl_types,
   zgl_font,
   zgl_math_2d;
 
@@ -42,6 +40,8 @@ function  text_GetWidth( const Font : zglPFont; const Text : String; const Step 
 
 implementation
 uses
+  zgl_main,
+  zgl_opengl_all,
   zgl_opengl_simple,
   zgl_fx;
 

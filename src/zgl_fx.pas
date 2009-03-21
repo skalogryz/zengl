@@ -25,7 +25,7 @@ unit zgl_fx;
 
 interface
 uses
-  zgl_const;
+  zgl_types;
 
 const
   FX_BLEND_NORMAL = $00;

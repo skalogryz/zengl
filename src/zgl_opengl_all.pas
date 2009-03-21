@@ -25,10 +25,12 @@ unit zgl_opengl_all;
 {$IFDEF LINUX_OR_DARWIN}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
+{$IFDEF DARWIN}
+  {$LINKFRAMEWORK OpenGL}
+{$ENDIF}
 
 interface
 uses
-  zgl_log,
   {$IFDEF LINUX}
   X, XLib, XUtil
   {$ENDIF}
@@ -444,6 +446,7 @@ implementation
 uses
   math,
   zgl_const,
+  zgl_log,
   zgl_utils;
 
 function InitGL;
