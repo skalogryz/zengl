@@ -79,7 +79,10 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   GetCursorPos( cursorpos );
-  Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
+  if wnd_FullScreen Then
+    Result := cursorpos.X
+  else
+    Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
 {$ENDIF}
   Result := Round( Result / scr_ResCX );
 end;
@@ -91,7 +94,10 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   GetCursorPos( cursorpos );
-  Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
+  if wnd_FullScreen Then
+    Result := cursorpos.Y
+  else
+    Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
 {$ENDIF}
   Result := Round( Result / scr_ResCY );
 end;

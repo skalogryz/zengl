@@ -341,8 +341,8 @@ begin
       SetRect( r, 0, 0, wnd_Width, wnd_Height )
     end else
       begin
-        ogl_X := GetSystemMetrics( SM_CXSIZEFRAME );
-        ogl_Y := GetSystemMetrics( SM_CYCAPTION ) + GetSystemMetrics( SM_CYSIZEFRAME );
+        ogl_X := GetSystemMetrics( SM_CXSIZEFRAME ) * 2;
+        ogl_Y := GetSystemMetrics( SM_CYCAPTION ) + GetSystemMetrics( SM_CYSIZEFRAME ) * 2;
         SetRect( r, 0, 0,
                  wnd_Width  + ogl_X,
                  wnd_Height + ogl_Y );
