@@ -77,6 +77,7 @@ procedure zgl_Destroy;
 procedure zgl_Exit;
 procedure zgl_Reg( const What : DWORD; const UserData : Pointer );
 function  zgl_Get( const What : DWORD ) : Ptr;
+procedure zgl_GetSysDir;
 procedure zgl_GetMem( var Mem : Pointer; const Size : DWORD );
 procedure zgl_Enable( const What : DWORD );
 procedure zgl_Disable( const What : DWORD );
@@ -98,8 +99,48 @@ uses
   zgl_sound,
   zgl_utils;
 
+procedure zgl_GetSysDir;
+{$IFDEF LINUX}
+begin
+  app_WorkDir := './';
+
+  app_UsrHomeDir := getenv( 'HOME' ) + '/';
+{$ENDIF}
+{$IFDEF WIN32}
+var
+  FL, FP : PChar;
+  S      : String;
+begin
+  wnd_INST := GetModuleHandle( nil );
+  GetMem( FL, 65535 );
+  GetMem( FP, 65535 );
+  GetModuleFileName( wnd_INST, FL, 65535 );
+  GetFullPathName( FL, 65535, FP, FL );
+  S := copy( String( FP ), 1, length( FP ) - length( FL ) );
+  app_WorkDir := PChar( S );
+  FL := nil;
+  FP := nil;
+{$ENDIF}
+{$IFDEF DARWIN}
+var
+  appBundle   : CFBundleRef;
+  appCFURLRef : CFURLRef;
+  appCFString : CFStringRef;
+  appPath     : array[ 0..8191 ] of Char;
+begin
+  appBundle   := CFBundleGetMainBundle;
+  appCFURLRef := CFBundleCopyBundleURL( appBundle );
+  appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
+  CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
+  app_WorkDir := appPath + '/';
+
+  app_UsrHomeDir := getenv( 'HOME' ) + '/';
+{$ENDIF}
+end;
+
 procedure zgl_Init;
 begin
+  zgl_GetSysDir;
   log_Init;
 
   ogl_FSAA    := FSAA;
@@ -125,6 +166,7 @@ end;
 {$IFDEF WIN32}
 procedure zgl_InitToHandle;
 begin
+  zgl_GetSysDir;
   log_Init;
 
   ogl_FSAA    := FSAA;
@@ -383,42 +425,5 @@ begin
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := FALSE;
 end;
-
-{$IFDEF LINUX}
-initialization
-  app_WorkDir := './';
-
-  app_UsrHomeDir := getenv( 'HOME' );
-{$ENDIF}
-{$IFDEF WIN32}
-var
-  FL, FP : PChar;
-  S      : String;
-initialization
-  wnd_INST := GetModuleHandle( nil );
-  GetMem( FL, 65535 );
-  GetMem( FP, 65535 );
-  GetModuleFileName( wnd_INST, FL, 65535 );
-  GetFullPathName( FL, 65535, FP, FL );
-  S := copy( String( FP ), 1, length( FP ) - length( FL ) );
-  app_WorkDir := PChar( S );
-  FL := nil;
-  FP := nil;
-{$ENDIF}
-{$IFDEF DARWIN}
-var
-  appBundle   : CFBundleRef;
-  appCFURLRef : CFURLRef;
-  appCFString : CFStringRef;
-  appPath     : array[ 0..8191 ] of Char;
-initialization
-  appBundle   := CFBundleGetMainBundle;
-  appCFURLRef := CFBundleCopyBundleURL( appBundle );
-  appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
-  CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
-  app_WorkDir := appPath + '/';
-
-  app_UsrHomeDir := getenv( 'HOME' );
-{$ENDIF}
 
 end.

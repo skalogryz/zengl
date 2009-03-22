@@ -89,6 +89,7 @@ exports
   zgl_Exit                 name prefix + 'zgl_Exit',
   zgl_Reg                  name prefix + 'zgl_Reg',
   zgl_Get                  name prefix + 'zgl_Get',
+  zgl_GetSysDir            name prefix + 'zgl_GetSysDir',
   zgl_GetMem               name prefix + 'zgl_GetMem',
   zgl_Enable               name prefix + 'zgl_Enable',
   zgl_Disable              name prefix + 'zgl_Disable',

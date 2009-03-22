@@ -25,6 +25,7 @@ interface
 uses
   zgl_const,
   zgl_types,
+  zgl_application,
   zgl_main,
   zgl_sound,
   zgl_log,
@@ -137,6 +138,10 @@ begin
   {$IFDEF LINUX}
   if mpLibrary = LIB_ERROR Then
     mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  if mpLibrary = LIB_ERROR Then
+    mpLibrary := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libmodplug ), $001 );
   {$ENDIF}
 
   if mpLibrary <> LIB_ERROR Then
