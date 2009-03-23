@@ -61,7 +61,6 @@ var
   app_Pause        : Boolean;
   app_AutoPause    : Boolean = TRUE;
   app_Focus        : Boolean;
-  app_AutoMinimize : Boolean = TRUE;
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
   app_WorkDir      : String;
@@ -398,8 +397,11 @@ begin
       begin
         app_Focus := FALSE;
         if app_AutoPause Then app_Pause := TRUE;
-        if wnd_FullScreen Then scr_Reset;
-        if app_AutoMinimize Then ShowWindow( wnd_Handle, SW_MINIMIZE );
+        if wnd_FullScreen Then
+          begin
+            scr_Reset;
+            ShowWindow( wnd_Handle, SW_MINIMIZE );
+          end;
       end;
     WM_MOVING:
       begin
