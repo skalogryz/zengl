@@ -58,7 +58,7 @@ var
 
 implementation
 uses
-  zgl_const,
+  zgl_types,
   zgl_main,
   zgl_log,
   zgl_textures,

@@ -579,8 +579,8 @@ end;
 var
   font_Add            : function : zglPFont;
   font_Del            : procedure( Font : zglPFont );
-  font_LoadFromFile   : function( const Texture, FontInfo : String ) : zglPFont;
-  font_LoadFromMemory : function( const Texture, FontInfo : String ) : zglPFont;
+  font_LoadFromFile   : function( const FileName : String ) : zglPFont;
+  font_LoadFromMemory : function( const Memory : zglTMemory ) : zglPFont;
   text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
   text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
   text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
@@ -646,18 +646,22 @@ end;
     Next, Prev : zglPWidget;
 end;
 
-  //GUI Manager
-  zglPGUIManager = ^zglTGUIManager;
-  zglTGUIManager = record
-    Count : DWORD;
-    First : zglTWidget;
-end;
-
   zglTWidgetType = record
     _type  : Integer;
 
     OnDraw : procedure( const Widget : zglPWidget );
     OnProc : procedure( const Event  : zglPEvent );
+end;
+
+  //GUI Manager
+  zglPGUIManager = ^zglTGUIManager;
+  zglTGUIManager = record
+    Count : record
+              Items : DWORD;
+              Types : DWORD;
+            end;
+    First : zglTWidget;
+    Types : array of zglTWidgetType;
 end;
 
   //Event
