@@ -96,6 +96,7 @@ uses
   zgl_textures,
   zgl_render_target,
   zgl_font,
+  zgl_gui_main,
   zgl_sound,
   zgl_utils;
 
@@ -299,25 +300,25 @@ begin
             managerSound.Formats[ i ].Stream := UserData;
       end;
     // GUI
-    {WIDGET_TYPE_ID:
+    WIDGET_TYPE_ID:
       begin
-        if Integer( UserData ) > widgetTCount Then
+        if DWORD( UserData ) > managerGUI.Count.Types Then
           begin
-            SetLength( widgetTypes, widgetTCount + 1 );
-            widgetTypes[ widgetTCount ]._type := Integer( UserData );
-            widgetTLast := widgetTCount;
-            INC( widgetTCount );
+            SetLength( managerGUI.Types, managerGUI.Count.Types + 1 );
+            managerGUI.Types[ managerGUI.Count.Types ]._type := DWORD( UserData );
+            widgetTLast := managerGUI.Count.Types;
+            INC( managerGUI.Count.Types );
           end else
-            widgetTLast := Integer( UserData );
+            widgetTLast := DWORD( UserData );
       end;
     WIDGET_ONDRAW:
       begin
-        widgetTypes[ widgetTLast ].OnDraw := UserData;
+        managerGUI.Types[ widgetTLast ].OnDraw := UserData;
       end;
     WIDGET_ONPROC:
       begin
-        widgetTypes[ widgetTLast ].OnProc := UserData;
-      end;}
+        managerGUI.Types[ widgetTLast ].OnProc := UserData;
+      end;
   end;
 end;
 
@@ -383,9 +384,6 @@ begin
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := TRUE;
 
-  if What and APP_USE_AUTOMINIMIZE > 0 Then
-    app_AutoMinimize := TRUE;
-
   if What and APP_USE_LOG > 0 Then
     begin
       app_Log := TRUE;
@@ -412,9 +410,6 @@ begin
 
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := FALSE;
-
-  if What and APP_USE_AUTOMINIMIZE > 0 Then
-    app_AutoMinimize := FALSE;
 
   if What and APP_USE_LOG > 0 Then
     app_Log := FALSE;

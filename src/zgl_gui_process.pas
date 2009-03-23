@@ -174,7 +174,7 @@ begin
         begin
           if Event.mouse_button = M_BLEFT Then
             Widget.focus := TRUE;
-          if Assigned( Widget.Events.OnClick ) Then
+          if Assigned( Widget.Events.OnClick ) and ( Widget._type <> WIDGET_BUTTON ) Then
             Widget.Events.OnClick( Widget );
         end;
       EVENT_KEY_DOWN:
@@ -206,6 +206,8 @@ begin
         begin
           if mouse_button = M_BLEFT Then
             Pressed := FALSE;
+          if Assigned( Widget.Events.OnClick ) Then
+            Widget.Events.OnClick( Widget );
         end;
       EVENT_MOUSE_LEAVE:
         begin
