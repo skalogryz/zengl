@@ -25,6 +25,7 @@ unit zgl_gui_main;
 
 interface
 uses
+  zgl_types,
   zgl_gui_types;
 
 procedure gui_Init;
@@ -139,7 +140,7 @@ begin
   while Assigned( newEvent.Next ) do
     newEvent := newEvent.Next;
 
-  zgl_GetMem( newEvent.Next, SizeOf( zglTEvent ) );
+  zgl_GetMem( Pointer( newEvent.Next ), SizeOf( zglTEvent ) );
   case _type of
     EVENT_MOUSE_MOVE: Move( EventData^, newEvent.Next.mouse_pos, SizeOf( zglTPoint2D ) );
     EVENT_MOUSE_DOWN,
@@ -173,7 +174,7 @@ begin
   if Assigned ( Parent ) Then
     begin
       if not Assigned( Parent.child ) Then
-        zgl_GetMem( Parent.child, SizeOf( zglTWidget ) );
+        zgl_GetMem( Pointer( Parent.child ), SizeOf( zglTWidget ) );
       Result        := Parent.child;
       Result._type  := WIDGET_UNKNOWN;
       Result.parent := Parent;
@@ -183,7 +184,7 @@ begin
   while Assigned( Result.Next ) do
     Result := Result.Next;
 
-  zgl_GetMem( Result.Next, SizeOf( zglTWidget ) );
+  zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTWidget ) );
   Result.Next._type := _type;
   case _type of
     WIDGET_BUTTON:      size := SizeOf( zglTButtonDesc );

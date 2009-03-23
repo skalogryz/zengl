@@ -46,6 +46,7 @@ procedure gui_DrawSpin       ( const Widget : zglPWidget );
 
 implementation
 uses
+  zgl_types,
   zgl_opengl_all,
   zgl_opengl_simple,
   zgl_mouse,
