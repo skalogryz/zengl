@@ -57,6 +57,11 @@ uses
   zgl_font,
   zgl_text,
 
+  zgl_gui_main,
+  zgl_gui_types,
+  zgl_gui_process,
+  zgl_gui_render,
+
   zgl_primitives_2d,
   zgl_sprite_2d,
 
@@ -210,11 +215,11 @@ exports
   text_GetWidth            name prefix + 'text_GetWidth',
 
 {$IFDEF USE_GUI}
-  {gui_Init                 name prefix + 'gui_Init',
+  gui_Init                 name prefix + 'gui_Init',
   gui_Draw                 name prefix + 'gui_Draw',
   gui_Proc                 name prefix + 'gui_Proc',
   gui_AddWidget            name prefix + 'gui_AddWidget',
-  gui_DelWidget            name prefix + 'gui_DelWidget',}
+  gui_DelWidget            name prefix + 'gui_DelWidget',
 {$ENDIF}
 
 {$IFDEF USE_SOUND}

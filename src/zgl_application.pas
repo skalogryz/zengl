@@ -119,7 +119,7 @@ begin
   app_ProcessMessages;
 {$ENDIF}
 {$IFDEF WIN32}
-  while PeekMessage( Mess, wnd_Handle, 0, 0, PM_REMOVE ) do
+  while PeekMessage( Mess, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
       TranslateMessage( Mess );
       DispatchMessage( Mess );

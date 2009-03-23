@@ -14,12 +14,7 @@ all: clean
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
 macos: clean
-	$(FPC_MAC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM) -Cn
-	echo /System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib >> link.res
-	echo /System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib >> link.res
-	sh ppas.sh
-	rm link.res
-	rm ppas.sh
+	$(FPC_MAC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)
 
 win32: clean
 	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG

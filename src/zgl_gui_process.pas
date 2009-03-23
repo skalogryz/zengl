@@ -205,9 +205,11 @@ begin
       EVENT_MOUSE_UP:
         begin
           if mouse_button = M_BLEFT Then
-            Pressed := FALSE;
-          if Assigned( Widget.Events.OnClick ) Then
-            Widget.Events.OnClick( Widget );
+            begin
+              if Assigned( Widget.Events.OnClick ) and Pressed Then
+                Widget.Events.OnClick( Widget );
+              Pressed := FALSE;
+            end;
         end;
       EVENT_MOUSE_LEAVE:
         begin
