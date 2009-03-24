@@ -361,7 +361,7 @@ begin
     MANAGER_FONT:    Result := Ptr( @managerFont );
     MANAGER_RTARGET: Result := Ptr( @managerRTarget );
     MANAGER_SOUND:   Result := Ptr( @managerSound );
-    //MANAGER_GUI:     Result := Ptr( @managerGUI );
+    MANAGER_GUI:     Result := Ptr( @managerGUI );
   end;
 end;
 

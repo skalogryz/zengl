@@ -58,7 +58,7 @@ unit zgl_sound_ogg;
       {$LINKLIB libogg_win32/libmsvcrt.a}
     {$ENDIF}
     {$IFDEF DARWIN}
-      {$IFDEF x86}
+      {$IFDEF cpui386}
         {$L libogg_macos_i386/libogg-i386-master}
         {$L libogg_macos_i386/libvorbis-i386-master}
         {$L libogg_macos_i386/libvorbisfile-i386-master}

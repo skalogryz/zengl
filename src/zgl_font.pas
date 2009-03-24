@@ -187,6 +187,23 @@ end;
 
 function font_GetUID;
 begin
+  {$IF ( DEFINED(WIN32) and ( DEFINED(FPC) ) ) or DEFINED(USE_CP1251)}
+  case Byte( Text[ Pos ] ) of
+    0..127:
+      begin
+        Result := Byte( Text[ Pos ] );
+        if Assigned( Shift ) Then
+          Shift^ := Pos + 1;
+      end;
+
+    192..255:
+      begin
+        Result := Byte( Text[ Pos ] ) + 848;
+        if Assigned( Shift ) Then
+          Shift^ := Pos + 1;
+      end;
+  end;
+  {$ELSEIF}
   case Byte( Text[ Pos ] ) of
     0..127:
       begin
@@ -252,6 +269,7 @@ begin
           Shift^ := Pos + 1;
       end;
   end;
+  {$IFEND}
 end;
 
 end.

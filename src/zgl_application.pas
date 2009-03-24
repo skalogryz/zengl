@@ -550,8 +550,7 @@ begin
                 K_BACKSPACE: u_Backspace( keysText );
                 K_TAB: key_InputText( '  ' );
               else
-                //GetEventParameter( inEvent, kEventParamKeyMacCharCodes, typeChar, nil, 1, nil, @c[ 0 ] );
-                GetEventParameter( inEvent, kEventParamKeyUnicodes, typeUnicodeText, nil, 6, @len, @c[ 0 ] );
+                GetEventParameter( inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[ 0 ] );
                 for i := 0 to len - 1 do
                   key_InputText( c[ i ] );
               end;
