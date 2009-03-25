@@ -77,6 +77,8 @@ procedure ssprite2d_Draw;
     cX, cY : Single;
     c, s   : Single;
 begin
+  if not Assigned( Texture ) Then exit;
+
   if FX and FX2D_SCALE > 0 Then
     begin
       X := X + ( W - W * FX2D_SX ) / 2;
@@ -213,6 +215,8 @@ procedure asprite2d_Draw;
     cX, cY : Single;
     c, s   : Single;
 begin
+  if not Assigned( Texture ) Then exit;
+
   if FX and FX2D_SCALE > 0 Then
     begin
       X := X + ( W - W * FX2D_SX ) / 2;
@@ -362,6 +366,8 @@ procedure csprite2d_Draw;
     cX, cY : Single;
     c, s   : Single;
 begin
+  if not Assigned( Texture ) Then exit;
+
   if FX and FX2D_SCALE > 0 Then
     begin
       X := X + ( W - W * FX2D_SX ) / 2;
@@ -373,10 +379,13 @@ begin
   if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
 
   // Текстурные координаты
-  tX := ( 1 / ( Texture.Width  / Texture.U ) ) * CutRect.X;
-  tY := ( 1 / ( Texture.Height / Texture.V ) ) * ( Texture.Height - CutRect.Y );
-  tW := tX + ( 1 / ( Texture.Width  / Texture.U ) ) * CutRect.W;
-  tH := tY + ( 1 / ( Texture.Height / Texture.V ) ) * ( - CutRect.H );
+  // бред, ога :)
+  tU := 1 / ( Texture.Width  / Texture.U / Texture.U );
+  tV := 1 / ( Texture.Height / Texture.V / Texture.V );
+  tX := tU * CutRect.X;
+  tY := tV * ( Texture.Height / Texture.V - CutRect.Y );
+  tW := tX + tU * CutRect.W;
+  tH := tY + tV * ( - CutRect.H );
 
   if FX and FX2D_FLIPX > 0 Then tU := tW - tX else tU := 0;
   if FX and FX2D_FLIPY > 0 Then tV := tH - tY else tV := 0;

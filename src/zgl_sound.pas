@@ -300,6 +300,8 @@ procedure snd_Del;
   var
     i : Integer;
 begin
+  if not Assigned( Sound ) Then exit;
+
 {$IFDEF USE_OPENAL}
   for i := 0 to Sound.sCount - 1 do
     alDeleteSources( 1, @Sound.Source[ i ] );
@@ -343,7 +345,7 @@ begin
       if u_StrUp( ext ) = managerSound.Formats[ i ].Extension Then
         managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, f, Result.Frequency );
     end;
-    
+
   if not Assigned( Result.Data ) Then
     begin
       log_Add( 'Cannot load sound: ' + FileName );
@@ -376,7 +378,7 @@ begin
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerSound.Formats[ i ].Extension Then
       managerSound.Formats[ i ].MemLoader( Memory, Result.Data, Result.Size, f, Result.Frequency );
-      
+
   if not Assigned( Result.Data ) Then
     begin
       log_Add( 'Cannot load sound: From Memory' );
@@ -494,7 +496,8 @@ procedure snd_SetVolume;
     i, j : Integer;
     snd  : zglPSound;
 begin
-  if not sndInitialized Then exit;
+  if ( not Assigned( Sound ) ) or
+     ( not sndInitialized ) Then exit;
 
   if ID = SND_STREAM Then
     sfVolume := Volume
@@ -555,7 +558,8 @@ procedure snd_SetFrequency;
     i, j : Integer;
     snd  : zglPSound;
 begin
-  if not sndInitialized Then exit;
+  if ( not Assigned( Sound ) ) or
+     ( not sndInitialized ) Then exit;
 
 {$IFDEF USE_OPENAL}
   if Assigned( Sound ) Then
@@ -611,7 +615,8 @@ procedure snd_SetFrequencyCoeff;
     i, j : Integer;
     snd  : zglPSound;
 begin
-  if not sndInitialized Then exit;
+  if ( not Assigned( Sound ) ) or
+     ( not sndInitialized ) Then exit;
 
 {$IFDEF USE_OPENAL}
   if Assigned( Sound ) Then

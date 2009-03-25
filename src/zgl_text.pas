@@ -56,7 +56,7 @@ procedure text_Draw;
     c : Integer;
     lastPage : Integer;
 begin
-  if Text = '' Then exit;
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
 
   glEnable( GL_BLEND );
   glEnable( GL_TEXTURE_2D );
@@ -163,7 +163,7 @@ function text_GetWidth;
     c : DWORD;
 begin
   Result := 0;
-  if Text = '' Then exit;
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   i      := 1;
   c      := font_GetUID( Text, i, @i );
   Result := Font.CharDesc[ c ].ShiftX;

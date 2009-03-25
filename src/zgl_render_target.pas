@@ -214,6 +214,8 @@ end;
 
 procedure rtarget_Del;
 begin
+  if not Assigned( Target ) Then exit;
+
   case Target.rtType of
     RT_TYPE_FBO:
       begin

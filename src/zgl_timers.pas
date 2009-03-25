@@ -96,6 +96,8 @@ end;
 
 procedure timer_Del;
 begin
+  if not Assigned( Timer ) Then exit;
+
   if not CanKillTimers Then
     begin
       INC( TimersToKill );

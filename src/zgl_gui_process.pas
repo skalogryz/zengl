@@ -55,6 +55,8 @@ procedure gui_ProcWidget;
     Event : zglTEvent;
     w     : zglPWidget;
 begin
+  if not Assigned( Widget ) Then exit;
+
   if Assigned( Widget.child ) Then
     begin
       w := Widget.child;

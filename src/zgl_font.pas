@@ -109,6 +109,8 @@ procedure font_Del;
   var
     i : Integer;
 begin
+  if not Assigned( Font ) Then exit;
+
   for i := 0 to 65535 do
     if Assigned( Font.CharDesc[ i ] ) Then
       FreeMemory( Font.CharDesc[ i ] );
@@ -187,7 +189,7 @@ end;
 
 function font_GetUID;
 begin
-  {$IF ( DEFINED(WIN32) and ( DEFINED(FPC) ) ) or DEFINED(USE_CP1251)}
+  {$IF ( DEFINED(WIN32) and ( not DEFINED(FPC) ) ) or DEFINED(USE_CP1251)}
   case Byte( Text[ Pos ] ) of
     0..127:
       begin
@@ -203,7 +205,7 @@ begin
           Shift^ := Pos + 1;
       end;
   end;
-  {$ELSEIF}
+  {$ELSE}
   case Byte( Text[ Pos ] ) of
     0..127:
       begin

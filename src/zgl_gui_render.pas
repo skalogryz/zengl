@@ -57,6 +57,8 @@ procedure gui_DrawWidget;
   var
     w : zglPWidget;
 begin
+  if not Assigned( Widget ) Then exit;
+
   if Assigned( Widget.OnDraw ) Then Widget.OnDraw( Widget );
   if Assigned( Widget.child ) Then
     begin

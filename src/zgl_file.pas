@@ -311,7 +311,7 @@ begin
       SetLength( List.List, List.Count );
       for i := 0 to List.Count - 1 do
         begin
-          List.List[ i ] := FList[ i ].d_name;
+          List.List[ i ] := String( FList[ i ].d_name );
           Free( FList[ i ] );
         end;
       SetLength( FList, 0 );

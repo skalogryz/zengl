@@ -134,6 +134,8 @@ end;
 
 procedure tex_Del;
 begin
+  if not Assigned( Texture ) Then exit;
+
   glDeleteTextures( 1, @Texture.ID );
   if Assigned( Texture.Prev ) Then
     Texture.Prev.Next := Texture.Next;
@@ -312,16 +314,18 @@ end;
 
 procedure tex_SetFrameSize;
 begin
-if Texture.Flags and TEX_QUALITY_MEDIUM > 0 Then
-  begin
-    FrameWidth := FrameWidth div 2;
-    FrameHeight := FrameHeight div 2;
-  end else
-    if Texture.Flags and TEX_QUALITY_LOW > 0 Then
-      begin
-        FrameWidth := FrameWidth div 4;
-        FrameHeight := FrameHeight div 4;
-      end;
+  if not Assigned( Texture ) Then exit;
+
+  if Texture.Flags and TEX_QUALITY_MEDIUM > 0 Then
+    begin
+      FrameWidth := FrameWidth div 2;
+      FrameHeight := FrameHeight div 2;
+    end else
+      if Texture.Flags and TEX_QUALITY_LOW > 0 Then
+        begin
+          FrameWidth := FrameWidth div 4;
+          FrameHeight := FrameHeight div 4;
+        end;
 
   Texture.FramesX := Round( Texture.Width ) div FrameWidth;
   Texture.FramesY := Round( Texture.Height ) div FrameHeight;
@@ -334,6 +338,8 @@ function tex_SetMask;
     tData, mData : Pointer;
     pData        : Pointer;
 begin
+  if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) Then exit;
+
   tex_GetData( Texture, tData, tSize );
   tex_GetData( Mask, mData, mSize );
   zgl_GetMem( pData, Texture.Width * Texture.Height * 4 );
