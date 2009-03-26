@@ -57,56 +57,9 @@ const
   MODPLUG_RESAMPLE_SPLINE  = 2;
   MODPLUG_RESAMPLE_FIR     = 3;
 
-{***********************************************************************}
-{                       POSIX TYPE DEFINITIONS                          }
-{***********************************************************************}
-type
-  cint8   = shortint; pcint8   = ^cint8;
-  cuint8  = byte;     pcuint8  = ^cuint8;
-  cchar   = cint8;    pcchar   = ^cchar;
-  cschar  = cint8;    pcschar  = ^cschar;
-  cuchar  = cuint8;   pcuchar  = ^cuchar;
-  cint32  = longint;  pcint32  = ^cint32;
-  cuint32 = longword; pcuint32 = ^cuint32;
-  cint    = cint32;   pcint    = ^cint;
-  csint   = cint32;   pcsint   = ^csint;
-  cuint   = cuint32;  pcuint   = ^cuint;
-  cint64  = int64;    pcint64  = ^cint64;
-  cbool   = longbool; pcbool   = ^cbool;
-{$ifdef cpu64}
-  clong   = int64;    pclong   = ^clong;
-  cslong  = int64;    pcslong  = ^cslong;
-  culong  = qword;    pculong  = ^culong;
-{$else}
-  clong   = longint;  pclong   = ^clong;
-  cslong  = longint;  pcslong  = ^cslong;
-  culong  = cardinal; pculong  = ^culong;
-{$endif}
-  cfloat  = single;   pcfloat  = ^cfloat;
-  cdouble = double;   pcdouble = ^cdouble;
-
-  csize_t      = culong;
-
 type
   PModPlugFile = ^ModPlugFile;
   ModPlugFile = record
-  end;
-
-type
-  PModPlug_Settings = ^ModPlug_Settings;
-  ModPlug_Settings = record
-    mFlags          : cint;
-    mChannels       : cint;
-    mBits           : cint;
-    mFrequency      : cint;
-    mResamplingMode : cint;
-    mReverbDepth    : cint;
-    mReverbDelay    : cint;
-    mBassAmount     : cint;
-    mBassRange      : cint;
-    mSurroundDepth  : cint;
-    mSurroundDelay  : cint;
-    mLoopCount      : cint;
   end;
 
 procedure mp_Init;
@@ -125,10 +78,10 @@ var
   mpLibrary : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
   mpFile    : PModPlugFile;
 
-  ModPlug_Load   : function(data: pointer; size: cint): PModPlugFile; cdecl;
+  ModPlug_Load   : function(data: pointer; size: longint): PModPlugFile; cdecl;
   ModPlug_Unload : procedure(_file: PModPlugFile); cdecl;
-  ModPlug_Read   : function(_file: PModPlugFile; buffer: pointer; size: cint): cint; cdecl;
-  ModPlug_Seek   : procedure(_file: PModPlugFile; millisecond: cint); cdecl;
+  ModPlug_Read   : function(_file: PModPlugFile; buffer: pointer; size: longint): longint; cdecl;
+  ModPlug_Seek   : procedure(_file: PModPlugFile; millisecond: longint); cdecl;
 
 implementation
 
