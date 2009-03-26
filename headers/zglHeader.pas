@@ -518,6 +518,7 @@ type
   zglTCamera2D = record
     X, Y  : Single;
     Angle : Single;
+    Zoom  : zglTPoint2D;
 end;
 
 var

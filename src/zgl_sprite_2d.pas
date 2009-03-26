@@ -44,23 +44,29 @@ uses
   zgl_opengl_all,
   zgl_camera_2d;
 
-function sprite2d_InScreen( const X, Y, W, H : Single ) : Boolean;
+function sprite2d_InScreen( const X, Y, W, H, Angle : Single ) : Boolean;
   var
     cx, cy : Single;
+    sx, sy : Single;
     radius : Single;
 begin
 // т.к. zglTCamera2D можно крутить, проверка будет на попадание спрайта в "окружность"
 // расчет очень упрощенный
-  if cam2DGlobal.Angle > 0 Then
+  if ( cam2dGlobal.Angle <> 0 ) or ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) Then
     begin
-      radius := sqr( sqrt( sqr( ogl_CropW ) + sqr( ogl_CropH ) ) );
-      cx     := ogl_CropX + cam2DGlobal.X;
-      cy     := ogl_CropY + cam2DGlobal.Y;
-      Result := ( sqr( cx - ( X - W - H ) ) + sqr( cy - ( Y - W - H ) ) < radius ) and
-                ( sqr( cx - ( X + W + H ) ) + sqr( cy - ( Y + W + H ) ) < radius );
+      radius := sqr( ( W * cam2DGlobal.Zoom.X + H * cam2DGlobal.Zoom.Y ) / 2 + ( ogl_CropW + ogl_CropH ) / 2 );
+      cx := ogl_CropX + cam2dGlobal.X + ( ogl_CropW / scr_ResCX ) / 2;
+      cy := ogl_CropY + cam2dGlobal.Y + ( ogl_CropH / scr_ResCY ) / 2;
+      sx := ( X + W / 2 ) * cam2DGlobal.Zoom.X;
+      sy := ( Y + H / 2 ) * cam2DGlobal.Zoom.Y;
+      Result := sqr( cx - sx ) + sqr( cy - sy ) < radius;
     end else
-      Result := ( ( X + W + H >= ogl_CropX + cam2DGlobal.X ) and ( X - W - H <= ogl_CropW / scr_ResCX + cam2DGlobal.X ) and
-                  ( Y + H + W >= ogl_CropY + cam2DGlobal.Y ) and ( Y - W - H <= ogl_CropH / scr_ResCY + cam2DGlobal.Y ) );
+      if Angle <> 0 Then
+        Result := ( ( X + W + H / 2 >= ogl_CropX + cam2dGlobal.X ) and ( X - W - H / 2 <= ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H + W / 2 >= ogl_CropY + cam2dGlobal.Y ) and ( Y - W - H / 2 <= ogl_CropH / scr_ResCY + cam2dGlobal.Y ) )
+      else
+        Result := ( ( X + W >= ogl_CropX + cam2dGlobal.X ) and ( X <= ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H >= ogl_CropY + cam2dGlobal.Y ) and ( Y <= ogl_CropH / scr_ResCY + cam2dGlobal.Y ) );
 end;
 
 {------------------------------------------------------------------------------}
@@ -87,7 +93,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
+  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H, Angle ) ) Then Exit;
 
   // Текстурные координаты
   if FX and FX2D_FLIPX > 0 Then FU := Texture^.U else FU := 0;
@@ -225,7 +231,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
+  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H, Angle ) ) Then Exit;
 
   // Текстурные координаты
   SU := Texture.U / Texture.FramesX;
@@ -376,7 +382,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H ) ) Then Exit;
+  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H, Angle ) ) Then Exit;
 
   // Текстурные координаты
   // бред, ога :)

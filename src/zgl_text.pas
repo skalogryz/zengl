@@ -28,10 +28,13 @@ uses
   zgl_math_2d;
 
 const
-  TEXT_ALIGN_LEFT    = $000001;
-  TEXT_ALIGN_CENTER  = $000002;
-  TEXT_ALIGN_RIGHT   = $000004;
-  TEXT_ALIGN_JUSTIFY = $000008;
+  TEXT_HALIGN_LEFT    = $000001;
+  TEXT_HALIGN_CENTER  = $000002;
+  TEXT_HALIGN_RIGHT   = $000004;
+  TEXT_HALIGN_JUSTIFY = $000008;
+  TEXT_VALIGN_TOP     = $000010;
+  TEXT_VALIGN_CENTER  = $000020;
+  TEXT_VALIGN_BOTTOM  = $000040;
 
 procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
 procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
@@ -64,10 +67,10 @@ begin
   glColor4ub( textRGBA[ 0 ], textRGBA[ 1 ], textRGBA[ 2 ], textRGBA[ 3 ] );
 
   Y := Y - Font.MaxShiftY;
-  if Flags and TEXT_ALIGN_CENTER > 0 Then
+  if Flags and TEXT_HALIGN_CENTER > 0 Then
     X := X - Round( text_GetWidth( Font, Text, textStep ) / 2 ) * textScale
   else
-    if Flags and TEXT_ALIGN_RIGHT > 0 Then
+    if Flags and TEXT_HALIGN_RIGHT > 0 Then
       X := X - Round( text_GetWidth( Font, Text, textStep ) ) * textScale;
 
   lastPage := -1;

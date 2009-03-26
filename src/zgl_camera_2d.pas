@@ -27,12 +27,15 @@ unit zgl_camera_2d;
 {$ENDIF}
 
 interface
+uses
+  zgl_math_2d;
 
 type
   zglPCamera2D = ^zglTCamera2D;
   zglTCamera2D = record
     X, Y  : Single;
     Angle : Single;
+    Zoom  : zglTPoint2D;
 end;
 
 procedure cam2d_Set( const Camera : zglPCamera2D );
@@ -42,15 +45,14 @@ procedure cam2d_Vertex2fv( v : Pointer ); stdcall;
 
 var
   cam2dGlobal   : zglPCamera2D = nil;
-  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0 );
+  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
 
 implementation
 uses
   zgl_types,
   zgl_window,
   zgl_opengl,
-  zgl_opengl_all,
-  zgl_math_2d;
+  zgl_opengl_all;
 
 procedure cam2d_Set;
 begin
@@ -72,8 +74,16 @@ procedure cam2d_Vertex2f;
     sa, ca : Single;
     Xa, Ya : Single;
 begin
-  X := X - cam2dGlobal.X;
-  Y := Y - cam2dGlobal.Y;
+  if cam2dGlobal.Zoom.X = 1 Then
+    X := X - cam2dGlobal.X
+  else
+    X := ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( wnd_Width / 2 ) - ( wnd_Width / 2 ) * cam2dGlobal.Zoom.X );
+
+  if cam2dGlobal.Zoom.X = 1 Then
+    Y := Y - cam2dGlobal.Y
+  else
+    Y := ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( wnd_Height / 2 ) - ( wnd_Height / 2 ) * cam2dGlobal.Zoom.Y );
+
   if cam2dGlobal.Angle <> 0 Then
     begin
       sa := Sin( cam2dGlobal.Angle * rad2deg );
@@ -91,8 +101,17 @@ procedure cam2d_Vertex2fv;
     sa, ca : Single;
     v2a : array[ 0..1 ] of Single;
 begin
-  v2[ 0 ] := PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X;
-  v2[ 1 ] := PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y;
+  if cam2dGlobal.Zoom.X = 1 Then
+    v2[ 0 ] := PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X
+  else
+    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( wnd_Width / 2 ) - ( wnd_Width / 2 ) * cam2dGlobal.Zoom.X );
+
+  if cam2dGlobal.Zoom.Y = 1 Then
+    v2[ 1 ] := PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y
+  else
+    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( wnd_Height / 2 ) - ( wnd_Height / 2 ) * cam2dGlobal.Zoom.Y );
+
+
   if cam2dGlobal.Angle <> 0 Then
     begin
       sa := Sin( cam2dGlobal.Angle * rad2deg );
