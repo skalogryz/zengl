@@ -6,7 +6,7 @@
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <UseAppBundle Value="False"/>
-      <ActiveEditorIndexAtStart Value="5"/>
+      <ActiveEditorIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -88,9 +88,7 @@
         <UnitName Value="zgl_timers"/>
         <CursorPos X="11" Y="77"/>
         <TopLine Value="56"/>
-        <EditorIndex Value="6"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit7>
       <Unit8>
@@ -98,9 +96,7 @@
         <UnitName Value="zgl_main"/>
         <CursorPos X="11" Y="78"/>
         <TopLine Value="60"/>
-        <EditorIndex Value="2"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit8>
       <Unit9>
@@ -108,9 +104,7 @@
         <UnitName Value="zgl_sound"/>
         <CursorPos X="34" Y="385"/>
         <TopLine Value="375"/>
-        <EditorIndex Value="1"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit9>
       <Unit10>
@@ -118,9 +112,7 @@
         <UnitName Value="zgl_sound_wav"/>
         <CursorPos X="9" Y="110"/>
         <TopLine Value="91"/>
-        <EditorIndex Value="3"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit10>
       <Unit11>
@@ -128,23 +120,19 @@
         <UnitName Value="zgl_sound_ogg"/>
         <CursorPos X="7" Y="344"/>
         <TopLine Value="325"/>
-        <EditorIndex Value="4"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit11>
       <Unit12>
         <Filename Value="zgl_render_target.pas"/>
         <UnitName Value="zgl_render_target"/>
-        <CursorPos X="9" Y="136"/>
-        <TopLine Value="117"/>
-        <EditorIndex Value="5"/>
+        <CursorPos X="39" Y="132"/>
+        <TopLine Value="1"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit12>
     </Units>
-    <JumpHistory Count="9" HistoryIndex="8">
+    <JumpHistory Count="4" HistoryIndex="3">
       <Position1>
         <Filename Value="ZenGL.pas"/>
         <Caret Line="4" Column="6" TopLine="1"/>
@@ -161,26 +149,6 @@
         <Filename Value="ZenGL.pas"/>
         <Caret Line="481" Column="22" TopLine="462"/>
       </Position4>
-      <Position5>
-        <Filename Value="zgl_timers.pas"/>
-        <Caret Line="78" Column="15" TopLine="56"/>
-      </Position5>
-      <Position6>
-        <Filename Value="zgl_main.pas"/>
-        <Caret Line="68" Column="58" TopLine="56"/>
-      </Position6>
-      <Position7>
-        <Filename Value="zgl_sound_wav.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
-      </Position7>
-      <Position8>
-        <Filename Value="zgl_sound_ogg.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
-      </Position8>
-      <Position9>
-        <Filename Value="zgl_render_target.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
-      </Position9>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

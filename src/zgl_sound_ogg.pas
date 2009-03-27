@@ -405,6 +405,7 @@ end;
 
 function ogg_CodecOpen;
 begin
+  Result := FALSE;
   if not oggLoad Then ogg_Init;
   if not oggInit Then exit;
 
@@ -418,8 +419,7 @@ begin
       Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
       zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
       Result := TRUE;
-    end else
-      Result := FALSE;
+    end;
   ov_time_seek( vf, 0 );
 end;
 

@@ -138,14 +138,16 @@ procedure u_Backspace;
   var
     i, last : Integer;
 begin
+  if str = '' Then exit;
   i := 0;
-  while i < length( str ) do
+  last := 0;
+  while i <= length( str ) do
     begin
       last := i;
       font_GetUID( str, last, @i );
     end;
 
-  SetLength( str, last - 1 );
+  SetLength( str, last - 1 )
 end;
 
 function u_Length;

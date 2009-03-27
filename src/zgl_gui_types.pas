@@ -61,6 +61,7 @@ type
 
   //Events
   zglTEvents = record
+    OnFocus      : procedure( const Widget : zglPWidget; const Focus : Boolean );
     OnClick      : procedure( const Widget : zglPWidget );
     OnMouseUp    : procedure( const Widget : zglPWidget );
     OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single );

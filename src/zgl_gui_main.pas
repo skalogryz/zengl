@@ -43,6 +43,8 @@ var
   managerGUI  : zglTGUIManager;
   widgetTLast : DWORD;
 
+  cursorAlpha : Integer;
+
 implementation
 uses
   zgl_main,
@@ -111,6 +113,10 @@ procedure gui_Proc;
     Widget : zglPWidget;
     Event  : zglPEvent;
 begin
+  INC( cursorAlpha );
+  if cursorAlpha > 50 Then
+    cursorAlpha := 0;
+
   managerGUI.First.rect.W := wnd_Width;
   managerGUI.First.rect.H := wnd_Height;
 

@@ -619,6 +619,7 @@ type
 
   //Events
   zglTEvents = record
+    OnFocus      : procedure( const Widget : zglPWidget; const Focus : Boolean );
     OnClick      : procedure( const Widget : zglPWidget );
     OnMouseUp    : procedure( const Widget : zglPWidget );
     OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single );
@@ -1434,6 +1435,7 @@ var
   col2d_LineVsCircleXY : function( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte ) : Boolean;
   // rect
   col2d_Rect         : function( const Rect1, Rect2 : zglTRect ) : Boolean;
+  col2d_ClipRect     : function( const Rect1, Rect2 : zglTRect ) : zglTRect;
   col2d_RectInRect   : function( const Rect1, Rect2 : zglTRect ) : Boolean;
   col2d_RectInCircle : function( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
   col2d_RectVsCircle : function( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
@@ -1900,6 +1902,7 @@ begin
       col2d_LineVsCircle := dlsym( zglLib, 'col2d_LineVsCircle' );
       col2d_LineVsCircleXY := dlsym( zglLib, 'col2d_LineVsCircleXY' );
       col2d_Rect := dlsym( zglLib, 'col2d_Rect' );
+      col2d_ClipRect := dlsym( zglLib, 'col2d_ClipRect' );
       col2d_RectInRect := dlsym( zglLib, 'col2d_RectInRect' );
       col2d_RectInCircle := dlsym( zglLib, 'col2d_RectInCircle' );
       col2d_RectVsCircle := dlsym( zglLib, 'col2d_RectVsCircle' );

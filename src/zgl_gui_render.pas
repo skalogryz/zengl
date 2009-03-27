@@ -51,7 +51,37 @@ uses
   zgl_opengl_simple,
   zgl_mouse,
   zgl_primitives_2d,
-  zgl_text;
+  zgl_text,
+  zgl_gui_main,
+  zgl_math_2d,
+  zgl_collision_2d;
+
+procedure _button_draw( const x, y, w, h : Single; const mousein, pressed : Boolean );
+  var
+    color : DWORD;
+begin
+  color := COLOR_WIDGET;
+  if mousein  Then INC( color, $222222 );
+  pr2d_Rect( x, y, w, h, color, 255, PR2D_FILL );
+  pr2d_Rect( x, y, w, h, $000000, 255, 0 );
+
+  color := COLOR_LIGHT;
+  if pressed Then color := COLOR_WIDGET - $222222;
+  pr2d_Line( x + 1, y + 1, x + w - 2, y + 1, color, 255, 0 );
+  pr2d_Line( x + 1, y + 1, x + 1, y + h - 2, color, 255, 0 );
+  color := COLOR_WIDGET - $222222;
+  if pressed Then color := COLOR_LIGHT;
+  pr2d_Line( x + 1, y + h - 2, x + w - 2, y + h - 2, color, 255, 0 );
+  pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h - 2, color, 255, 0 );
+end;
+
+procedure _clip( const widget : zglPWidget );
+  var
+    clip : zglTRect;
+begin
+  clip := col2d_ClipRect( widget.rect, widget.parent.rect );
+  scissor_Begin( Round( clip.X + 2 ), Round( clip.Y + 2 ), Round( clip.W - 4 ), Round( clip.H - 4 ) );
+end;
 
 procedure gui_DrawWidget;
   var
@@ -64,7 +94,7 @@ begin
     begin
       w := Widget.child;
       repeat
-        scissor_Begin( Round( w.Parent.rect.X ), Round( w.Parent.rect.Y ), Round( w.Parent.rect.W ), Round( w.Parent.rect.H ) );
+        _clip( w.parent );
         w := w.Next;
         gui_DrawWidget( w );
         scissor_End;
@@ -73,27 +103,15 @@ begin
 end;
 
 procedure gui_DrawButton;
-  var
-    color : DWORD;
 begin
   with zglTButtonDesc( Widget.desc^ ), Widget.rect do
     begin
-      color := COLOR_WIDGET;
-      if Widget.mousein  Then INC( color, $222222 );
-      pr2d_Rect( X, Y, W, H, color, 255, PR2D_FILL );
-      pr2d_Rect( X, Y, W, H, $000000, 255, 0 );
+      _button_draw( X, Y, W, H, Widget.mousein, Pressed );
 
-      color := COLOR_LIGHT;
-      if Pressed Then color := COLOR_WIDGET - $222222;
-      pr2d_Line( X + 1, Y + 1, X + W - 2, Y + 1, color, 255, 0 );
-      pr2d_Line( X + 1, Y + 1, X + 1, Y + H - 2, color, 255, 0 );
-      color := COLOR_WIDGET - $222222;
-      if Pressed Then color := COLOR_LIGHT;
-      pr2d_Line( X + 1, Y + H - 2, X + W - 2, Y + H - 2, color, 255, 0 );
-      pr2d_Line( X + W - 2, Y + 1, X + W - 2, Y + H - 2, color, 255, 0 );
-
+      _clip( Widget );
       text_Draw( Font, Round( X + ( W - text_GetWidth( Font, Caption ) ) / 2 ) + Byte( Pressed ),
                        Round( Y + ( H - Font.MaxHeight ) / 2 ) + Byte( Pressed ), Caption );
+      scissor_End;
     end;
 end;
 
@@ -108,21 +126,40 @@ begin
       pr2d_Rect( X, Y, W, H, color, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W, H, $000000, 255, 0 );
       if Checked Then
-        pr2d_Rect( X + 2, Y + 2, W - 4, H - 4, color - $222222, 255, PR2D_FILL );
+        pr2d_Rect( X + 3, Y + 3, W - 6, H - 6, $000000, 255, PR2D_FILL );
 
       text_Draw( Font, X + W + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Round( Y + ( H - Font.MaxHeight ) / 2 ), Caption );
     end;
 end;
 
 procedure gui_DrawRadioButton;
+  var
+    color : DWORD;
 begin
+  with zglTRadioButtonDesc( Widget.desc^ ), Widget.rect do
+    begin
+      color := COLOR_WIDGET;
+      if Widget.mousein Then INC( color, $222222 );
+      pr2d_Circle( X + W / 2, Y + H / 2, W / 2, color, 255, 8, PR2D_FILL );
+      pr2d_Circle( X + W / 2, Y + H / 2, W / 2, $000000, 255, 8 );
+      if Checked Then
+        pr2d_Circle( X + W / 2, Y + H / 2, W / 3, $000000, 255, 8, PR2D_FILL );
+
+      text_Draw( Font, X + W + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Round( Y + ( H - Font.MaxHeight ) / 2 ), Caption );
+    end;
 end;
 
 procedure gui_DrawLabel;
 begin
+  with zglTCheckBoxDesc( Widget.desc^ ), Widget.rect do
+    begin
+      text_Draw( Font, X, Y, Caption );
+    end;
 end;
 
 procedure gui_DrawEditBox;
+  var
+    tw, th : Single;
 begin
   with zglTEditBoxDesc( Widget.desc^ ), Widget.rect do
     begin
@@ -130,7 +167,16 @@ begin
       pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, 0 );
       pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, $000000, 255, 0 );
 
-      text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Round( Y + ( H - Font.MaxHeight ) / 2 ), Text );
+      _clip( Widget );
+      th := Y + Round( ( H - Font.MaxHeight ) / 2 ) + 1;
+      text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, th, Text );
+
+      if Widget.focus Then
+        begin
+          tw := X + Font.CharDesc[ Byte( ' ' ) ].ShiftP + text_GetWidth( Font, Text );
+          pr2d_Line( tw, th, tw, th + Font.MaxHeight - Font.MaxShiftY, $FFFFFF, 255 * Byte( cursorAlpha < 25 ) );
+        end;
+      scissor_End;
     end;
 end;
 
@@ -156,48 +202,24 @@ begin
 end;
 
 procedure gui_DrawSpin;
-  var
-    color : DWORD;
 begin
   with zglTSpinDesc( Widget.desc^ ), Widget.rect do
     begin
-      color := COLOR_WIDGET;
-      if ( Widget.mousein ) and ( mouse_Y < Y + H / 2 ) Then INC( color, $222222 );
-      pr2d_Rect( X, Y, W, H, color, 255, PR2D_FILL );
-      pr2d_Rect( X, Y, W, H / 2, $000000, 255, 0 );
+      _button_draw( X, Y, W, H / 2, ( Widget.mousein ) and ( mouse_Y < Y + H / 2 ), UPressed );
       glColor4f( 0, 0, 0, 1 );
       glBegin( GL_TRIANGLES );
         gl_Vertex2f( X + W / 2 + Byte( UPressed ), Y + 2 + Byte( UPressed ) );
         gl_Vertex2f( X + W - 2 + Byte( UPressed ), Y + H / 2 - 2 + Byte( UPressed ) );
         gl_Vertex2f( X + 2 + Byte( UPressed ),     Y + H / 2 - 2 + Byte( UPressed ) );
       glEnd;
-      color := COLOR_LIGHT;
-      if UPressed Then color := COLOR_WIDGET - $222222;
-      pr2d_Line( X + 1, Y + 1, X + W - 2, Y + 1, color, 255, 0 );
-      pr2d_Line( X + 1, Y + 1, X + 1, Y + H / 2 - 2, color, 255, 0 );
-      color := COLOR_WIDGET - $222222;
-      if UPressed Then color := COLOR_LIGHT;
-      pr2d_Line( X + 1, Y + H / 2 - 2, X + W - 2, Y + H / 2 - 2, color, 255, 0 );
-      pr2d_Line( X + W - 2, Y + 1, X + W - 2, Y + H / 2 - 2, color, 255, 0 );
 
-      color := COLOR_WIDGET;
-      if ( Widget.mousein ) and ( mouse_Y > Y + H / 2 ) Then INC( color, $222222 );
-      pr2d_Rect( X, Y + H / 2, W, H / 2, color, 255, PR2D_FILL );
-      pr2d_Rect( X, Y + H / 2, W, H / 2, $000000, 255, 0 );
+      _button_draw( X, Y + H / 2, W, H / 2, ( Widget.mousein ) and ( mouse_Y > Y + H / 2 ), DPressed );
       glColor4f( 0, 0, 0, 1 );
       glBegin( GL_TRIANGLES );
         gl_Vertex2f( X + 2 + Byte( DPressed ),     Y + H / 2 + 2 + Byte( DPressed ) );
         gl_Vertex2f( X + W - 2 + Byte( DPressed ), Y + H / 2 + 2 + Byte( DPressed ) );
         gl_Vertex2f( X + W / 2 + Byte( DPressed ), Y + H - 2 + Byte( DPressed ) );
       glEnd;
-      color := COLOR_LIGHT;
-      if DPressed Then color := COLOR_WIDGET - $222222;
-      pr2d_Line( X + 1, Y + H / 2 + 1, X + W - 2, Y + H / 2 + 1, color, 255, 0 );
-      pr2d_Line( X + 1, Y + H / 2 + 1, X + 1, Y + H - 2, color, 255, 0 );
-      color := COLOR_WIDGET - $222222;
-      if DPressed Then color := COLOR_LIGHT;
-      pr2d_Line( X + 1, Y + H - 2, X + W - 2, Y + H - 2, color, 255, 0 );
-      pr2d_Line( X + W - 2, Y + H / 2 + 1, X + W - 2, Y + H - 2, color, 255, 0 );
     end;
 end;
 

@@ -89,7 +89,7 @@ var
   scr_Settings  : TXF86VidModeModeInfo;
   scr_Desktop   : TXF86VidModeModeInfo;
   scr_ModeCount : DWORD;
-  scr_ModeList  : PPXF86VidModeModeInfo;
+  scr_ModeList  : array of PXF86VidModeModeInfo;
   {$ENDIF}
   {$IFDEF WIN32}
   scr_Settings : DEVMODE;
@@ -277,7 +277,7 @@ begin
 {$IFDEF LINUX}
   for i := 0 to scr_ModeCount - 1 do
     begin
-      tmp_Settings := PXF86VidModeModeInfo( scr_ModeList + i * SizeOf( TXF86VidModeModeInfo ) )^;
+      tmp_Settings := scr_ModeList[ i ]^;
       if not Already( tmp_Settings.hdisplay, tmp_Settings.vdisplay ) Then
         begin
           INC( scr_ResList.Count );
@@ -312,6 +312,7 @@ begin
 {$IFDEF LINUX}
   scr_Reset;
   XFree( scr_ModeList );
+  SetLength( scr_ModeList, 0 );
   glXWaitX;
 {$ENDIF}
 {$IFDEF WIN32}
@@ -410,7 +411,7 @@ begin
   scr_Vsync      := VSync;
   if not app_Work Then exit;
   scr_SetVSync( scr_VSync );
-exit;
+
   if ( Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
     wnd_FullScreen := TRUE;
   if wnd_FullScreen Then
@@ -433,7 +434,7 @@ exit;
 {$IFDEF LINUX}
   for modeToSet := 0 to scr_ModeCount - 1 do
     begin
-      scr_Settings := PXF86VidModeModeInfo( scr_ModeList + modeToSet * SizeOf( TXF86VidModeModeInfo ) )^;
+      scr_Settings := scr_ModeList[ modeToSet ]^;
       if ( scr_Settings.hDisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
     end;
   if ( scr_Settings.hDisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then

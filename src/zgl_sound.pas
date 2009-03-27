@@ -699,7 +699,7 @@ begin
     end;
 
   if Assigned( sfStream ) then
-    sfStream.Loop     := Loop;
+    sfStream.Loop := Loop;
 
   if ( not Assigned( sfStream ) ) or
      ( not sfStream.CodecOpen( FileName, sfStream ) ) Then

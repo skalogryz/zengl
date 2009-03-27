@@ -38,6 +38,7 @@ function col2d_LineVsCircle  ( const L : zglTLine; const Circ : zglTCircle ) : B
 function col2d_LineVsCircleXY( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte ) : Boolean;
 // rect
 function col2d_Rect        ( const Rect1, Rect2 : zglTRect ) : Boolean;
+function col2d_ClipRect    ( const Rect1, Rect2 : zglTRect ) : zglTRect;
 function col2d_RectInRect  ( const Rect1, Rect2 : zglTRect ) : Boolean;
 function col2d_RectInCircle( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
 function col2d_RectVsCircle( const Rect : zglTRect; const Circ : zglTCircle ) : Boolean;
@@ -221,6 +222,26 @@ function col2d_Rect;
 begin
   Result := ( Rect1.X + Rect1.W >= Rect2.X ) and ( Rect1.X <= Rect2.X + Rect2.W ) and
             ( Rect1.Y + Rect1.H >= Rect2.Y ) and ( Rect1.Y <= Rect2.Y + Rect2.H );
+end;
+
+function col2d_ClipRect;
+begin
+  if ( Rect1.X < Rect2.X ) or ( Rect1.X > Rect2.X + Rect2.W ) Then
+    Result.X := Rect2.X
+  else
+    Result.X := Rect1.X;
+  if ( Rect1.Y < Rect2.Y ) or ( Rect1.Y > Rect2.Y + Rect2.H ) Then
+    Result.Y := Rect2.Y
+  else
+    Result.Y := Rect1.Y;
+
+  Result.W := ( Rect1.X + Rect1.W ) - Result.X;
+  Result.H := ( Rect1.Y + Rect1.H ) - Result.Y;
+
+  if Result.X + Result.W > Rect2.X + Rect2.W Then
+    Result.W := ( Rect2.X + Rect2.W ) - Result.X - 1;
+  if Result.Y + Result.H > Rect2.Y + Rect2.H Then
+    Result.H := ( Rect2.Y + Rect2.H ) - Result.Y - 1;
 end;
 
 function col2d_RectInRect;

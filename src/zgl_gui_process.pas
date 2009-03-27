@@ -39,6 +39,8 @@ procedure gui_ProcListBox    ( const Event : zglPEvent );
 procedure gui_ProcGroupBox   ( const Event : zglPEvent );
 procedure gui_ProcSpin       ( const Event : zglPEvent );
 
+type zglProcWidgetsCallback = procedure( const widget : zglPWidget; const data : Pointer );
+
 implementation
 uses
   zgl_gui_main,
@@ -48,6 +50,40 @@ uses
 
 var
   mouseTimeDown : Integer;
+
+procedure _proc( const callback : zglProcWidgetsCallback; const data : Pointer );
+  var
+    w, wc : zglPWidget;
+begin
+  w := managerGUI.First.Next;
+  while w <> nil do
+    begin
+      if Assigned( w.child ) Then
+        begin
+          wc := w.child;
+          repeat
+            wc := wc.Next;
+            callback( wc, data );
+          until not Assigned( wc.Next );
+        end;
+      callback( w, data );
+      w := w.Next;
+    end;
+end;
+
+procedure _focus_reset( const widget : zglPWidget; const data : Pointer );
+begin
+  if widget.Focus Then
+    gui_AddEvent( EVENT_FOCUS_OUT, widget, nil );
+  widget.Focus := FALSE;
+end;
+
+procedure _rbutton_reset( const widget : zglPWidget; const data : Pointer );
+begin
+  if widget._type = WIDGET_RADIOBUTTON Then
+    if zglTRadioButtonDesc( widget.desc^ ).Group = PInteger( data )^ Then
+      zglTRadioButtonDesc( widget.desc^ ).Checked := FALSE;
+end;
 
 procedure gui_ProcWidget;
   var
@@ -156,6 +192,16 @@ procedure gui_ProcEvents;
 begin
   with Event^ do
     case _type of
+      EVENT_FOCUS_IN:
+        begin
+          if Assigned( Widget.Events.OnFocus ) Then
+            Widget.Events.OnFocus( Widget, TRUE );
+        end;
+      EVENT_FOCUS_OUT:
+        begin
+          if Assigned( Widget.Events.OnFocus ) Then
+            Widget.Events.OnFocus( Widget, FALSE );
+        end;
       EVENT_MOUSE_MOVE:
         begin
           if Assigned( Widget.Events.OnMouseMove ) Then
@@ -174,8 +220,13 @@ begin
         end;
       EVENT_MOUSE_CLICK:
         begin
-          if Event.mouse_button = M_BLEFT Then
-            Widget.focus := TRUE;
+          _proc( _focus_reset, nil );
+          if not Widget.focus Then
+            begin
+              gui_AddEvent( EVENT_FOCUS_IN, Widget, nil );
+              Widget.focus := TRUE;
+            end;
+
           if Assigned( Widget.Events.OnClick ) and ( Widget._type <> WIDGET_BUTTON ) Then
             Widget.Events.OnClick( Widget );
         end;
@@ -187,9 +238,14 @@ begin
       EVENT_KEY_UP:
         begin
           if key_code = K_TAB Then
-            Widget.focus := FALSE;
-          if Assigned( Widget.Next ) Then
-            Widget.Next.focus := TRUE;
+            begin
+              _proc( _focus_reset, nil );
+              if Assigned( Widget.Next ) Then
+                begin
+                  gui_AddEvent( EVENT_FOCUS_IN, Widget.Next, nil );
+                  Widget.Next.focus := TRUE
+                end;
+            end;
           if Assigned( Widget.Events.OnKeyUp ) Then
             Widget.Events.OnKeyUp( Widget, key_code );
         end;
@@ -258,6 +314,17 @@ end;
 
 procedure gui_ProcRadioButton;
 begin
+  with Event^, zglTRadioButtonDesc( Widget.desc^ ) do
+    case _type of
+      EVENT_MOUSE_UP:
+        begin
+          if mouse_button = M_BLEFT Then
+            begin
+              _proc( _rbutton_reset, @Group );
+              Checked := TRUE;
+            end;
+        end;
+    end;
   gui_ProcEvents( Event );
 end;
 
@@ -268,6 +335,17 @@ end;
 
 procedure gui_ProcEditBox;
 begin
+  with Event^, zglTEditBoxDesc( Widget.desc^ ) do
+    case _type of
+      EVENT_FOCUS_IN:
+        begin
+          key_BeginReadText( Text, Max );
+        end;
+      EVENT_KEY_DOWN:
+        begin
+          key_EndReadText( Text );
+        end;
+    end;
   gui_ProcEvents( Event );
 end;
 
