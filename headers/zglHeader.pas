@@ -627,6 +627,7 @@ type
     OnMouseLeave : procedure( const Widget : zglPWidget );
     OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte );
     OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte );
+    OnSelectItem : procedure( const Widget : zglPWidget; const ItemIndex : Integer );
 end;
 
   //Widget
@@ -724,9 +725,10 @@ end;
 
   zglPListBoxDesc = ^zglTListBoxDesc;
   zglTListBoxDesc = record
-    Font   : zglPFont;
-    ICount : Integer;
-    Items  : array of String;
+    Font      : zglPFont;
+    ICount    : Integer;
+    Items     : array of String;
+    ItemIndex : Integer;
 end;
 
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;

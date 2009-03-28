@@ -31,7 +31,11 @@ const
   COLOR_WINDOW = $646866;
   COLOR_WIDGET = $424644;
   COLOR_LIGHT  = $BBBBBB;
+  COLOR_DARK   = $202422;
   COLOR_EDIT   = $36342E;
+  COLOR_SELECT = $DBB095;
+
+  SCROLL_SIZE  = 16;
 
 procedure gui_DrawWidget( const Widget : zglPWidget );
 
@@ -61,25 +65,59 @@ procedure _button_draw( const x, y, w, h : Single; const mousein, pressed : Bool
     color : DWORD;
 begin
   color := COLOR_WIDGET;
-  if mousein  Then INC( color, $222222 );
   pr2d_Rect( x, y, w, h, color, 255, PR2D_FILL );
   pr2d_Rect( x, y, w, h, $000000, 255, 0 );
 
   color := COLOR_LIGHT;
-  if pressed Then color := COLOR_WIDGET - $222222;
+  if pressed Then color := COLOR_DARK;
   pr2d_Line( x + 1, y + 1, x + w - 2, y + 1, color, 255, 0 );
   pr2d_Line( x + 1, y + 1, x + 1, y + h - 2, color, 255, 0 );
-  color := COLOR_WIDGET - $222222;
+  color := COLOR_DARK;
   if pressed Then color := COLOR_LIGHT;
   pr2d_Line( x + 1, y + h - 2, x + w - 2, y + h - 2, color, 255, 0 );
   pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h - 2, color, 255, 0 );
+  if pressed Then
+    pr2d_Rect( X, Y, W, H, COLOR_SELECT, 25, PR2D_FILL );
 end;
 
-procedure _clip( const widget : zglPWidget );
+procedure _scroll_draw( const x, y, h : Single );
+  var
+    sy : Single;
+begin
+  _button_draw( X, Y, SCROLL_SIZE, SCROLL_SIZE, false, false );
+  glColor4f( 0, 0, 0, 1 );
+  glBegin( GL_TRIANGLES );
+    gl_Vertex2f( X + SCROLL_SIZE / 2{ + Byte( UPressed )}, Y + 2{ + Byte( UPressed )} );
+    gl_Vertex2f( X + SCROLL_SIZE - 2{ + Byte( UPressed )}, Y + SCROLL_SIZE - 2{ + Byte( UPressed )} );
+    gl_Vertex2f( X + 2{ + Byte( UPressed )},               Y + SCROLL_SIZE - 2{ + Byte( UPressed )} );
+  glEnd;
+  _button_draw( X, Y + H - SCROLL_SIZE, SCROLL_SIZE, SCROLL_SIZE, false, false );
+  sy := Y + H - SCROLL_SIZE;
+  glColor4f( 0, 0, 0, 1 );
+  glBegin( GL_TRIANGLES );
+    gl_Vertex2f( X + 2{ + Byte( DPressed )},               sy + 2{ + Byte( DPressed )} );
+    gl_Vertex2f( X + SCROLL_SIZE - 2{ + Byte( DPressed )}, sy + 2{ + Byte( DPressed )} );
+    gl_Vertex2f( X + SCROLL_SIZE / 2{ + Byte( DPressed )}, sy + SCROLL_SIZE - 2{ + Byte( DPressed )} );
+  glEnd;
+end;
+
+procedure _clip( const widget : zglPWidget ); overload;
   var
     clip : zglTRect;
 begin
   clip := col2d_ClipRect( widget.rect, widget.parent.rect );
+  scissor_Begin( Round( clip.X + 2 ), Round( clip.Y + 2 ), Round( clip.W - 4 ), Round( clip.H - 4 ) );
+end;
+
+procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
+  var
+    clip : zglTRect;
+begin
+  clip.X := X;
+  clip.Y := Y;
+  clip.W := W;
+  clip.H := H;
+  clip := col2d_ClipRect( clip, widget.parent.rect );
   scissor_Begin( Round( clip.X + 2 ), Round( clip.Y + 2 ), Round( clip.W - 4 ), Round( clip.H - 4 ) );
 end;
 
@@ -108,6 +146,9 @@ begin
     begin
       _button_draw( X, Y, W, H, Widget.mousein, Pressed );
 
+      if Widget.focus Then
+        pr2d_Rect( X - 1, Y - 1, W + 2, H + 2, COLOR_SELECT, 155 );
+
       _clip( Widget );
       text_Draw( Font, Round( X + ( W - text_GetWidth( Font, Caption ) ) / 2 ) + Byte( Pressed ),
                        Round( Y + ( H - Font.MaxHeight ) / 2 ) + Byte( Pressed ), Caption );
@@ -116,34 +157,34 @@ begin
 end;
 
 procedure gui_DrawCheckBox;
-  var
-    color : DWORD;
 begin
   with zglTCheckBoxDesc( Widget.desc^ ), Widget.rect do
     begin
-      color := COLOR_WIDGET;
-      if Widget.mousein Then INC( color, $222222 );
-      pr2d_Rect( X, Y, W, H, color, 255, PR2D_FILL );
+      pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W, H, $000000, 255, 0 );
+      if Widget.mousein Then
+        pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, COLOR_SELECT, 55, PR2D_FILL );
       if Checked Then
         pr2d_Rect( X + 3, Y + 3, W - 6, H - 6, $000000, 255, PR2D_FILL );
+      if Widget.focus Then
+        pr2d_Rect( X - 1, Y - 1, W + 2, H + 2, COLOR_SELECT, 155 );
 
       text_Draw( Font, X + W + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Round( Y + ( H - Font.MaxHeight ) / 2 ), Caption );
     end;
 end;
 
 procedure gui_DrawRadioButton;
-  var
-    color : DWORD;
 begin
   with zglTRadioButtonDesc( Widget.desc^ ), Widget.rect do
     begin
-      color := COLOR_WIDGET;
-      if Widget.mousein Then INC( color, $222222 );
-      pr2d_Circle( X + W / 2, Y + H / 2, W / 2, color, 255, 8, PR2D_FILL );
+      pr2d_Circle( X + W / 2, Y + H / 2, W / 2, COLOR_WIDGET, 255, 8, PR2D_FILL );
       pr2d_Circle( X + W / 2, Y + H / 2, W / 2, $000000, 255, 8 );
+      if Widget.mousein Then
+        pr2d_Circle( X + W / 2, Y + H / 2, W / 2 - 1, COLOR_SELECT, 55, 8, PR2D_FILL );
       if Checked Then
         pr2d_Circle( X + W / 2, Y + H / 2, W / 3, $000000, 255, 8, PR2D_FILL );
+      if Widget.focus Then
+        pr2d_Circle( X + W / 2, Y + H / 2, W / 2 + 1, COLOR_SELECT, 155, 8 );
 
       text_Draw( Font, X + W + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Round( Y + ( H - Font.MaxHeight ) / 2 ), Caption );
     end;
@@ -166,6 +207,10 @@ begin
       pr2d_Rect( X, Y, W, H, COLOR_EDIT, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, 0 );
       pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, $000000, 255, 0 );
+      if Widget.mousein Then
+        pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, COLOR_SELECT, 55, PR2D_FILL );
+      if Widget.focus Then
+        pr2d_Rect( X, Y, W, H, COLOR_SELECT, 155 );
 
       _clip( Widget );
       th := Y + Round( ( H - Font.MaxHeight ) / 2 ) + 1;
@@ -181,7 +226,33 @@ begin
 end;
 
 procedure gui_DrawListBox;
+  var
+    i      : Integer;
+    sx, sy : Single;
 begin
+  with zglTListBoxDesc( Widget.desc^ ), Widget.rect do
+    begin
+      pr2d_Rect( X, Y, W - SCROLL_SIZE - 1, H, COLOR_EDIT, 255, PR2D_FILL );
+      pr2d_Rect( X, Y, W - SCROLL_SIZE - 1, H, COLOR_WIDGET, 255, 0 );
+      pr2d_Rect( X + 1, Y + 1, W - 2 - SCROLL_SIZE - 1, H - 2, $000000, 255, 0 );
+      if Widget.focus Then
+        pr2d_Rect( X, Y, W - SCROLL_SIZE - 1, H, COLOR_SELECT, 155 );
+
+      _scroll_draw( X + W - SCROLL_SIZE, Y, H );
+
+      _clip( Widget, X, Y, W - SCROLL_SIZE - 1, H );
+      for i := 0 to List.Count - 1 do
+        text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Y + i * Font.MaxHeight + i * 3 + 3, List.Items[ i ] );
+      scissor_End;
+
+      if ItemIndex > -1 Then
+        begin
+          pr2d_Rect( X + 2, Y + 3 + ItemIndex * Font.MaxHeight + ItemIndex * 3,
+                     W - 4 - SCROLL_SIZE - 1, Font.MaxHeight, COLOR_SELECT, 55, PR2D_FILL );
+          pr2d_Rect( X + 2, Y + 3 + ItemIndex * Font.MaxHeight + ItemIndex * 3,
+                     W - 4 - SCROLL_SIZE - 1, Font.MaxHeight, COLOR_SELECT, 155 );
+        end;
+    end;
 end;
 
 procedure gui_DrawGroupBox;

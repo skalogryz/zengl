@@ -449,6 +449,7 @@ exports
   col2d_LineVsCircle       name prefix + 'col2d_LineVsCircle',
   col2d_LineVsCircleXY     name prefix + 'col2d_LineVsCircleXY',
   col2d_Rect               name prefix + 'col2d_Rect',
+  col2d_ClipRect           name prefix + 'col2d_ClipRect',
   col2d_RectInRect         name prefix + 'col2d_RectInRect',
   col2d_RectInCircle       name prefix + 'col2d_RectInCircle',
   col2d_RectVsCircle       name prefix + 'col2d_RectVsCircle',

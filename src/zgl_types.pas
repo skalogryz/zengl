@@ -32,7 +32,7 @@ type
 type
   zglTStringList = record
     Count : Integer;
-    List  : array of String;
+    Items : array of String;
 end;
 
 implementation

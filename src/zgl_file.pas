@@ -308,10 +308,10 @@ begin
     List.Count := scandir( PChar( Directory ), @FList, filter_file, nil );
   if List.Count <> -1 Then
     begin
-      SetLength( List.List, List.Count );
+      SetLength( List.Items, List.Count );
       for i := 0 to List.Count - 1 do
         begin
-          List.List[ i ] := String( FList[ i ].d_name );
+          List.Items[ i ] := String( FList[ i ].d_name );
           Free( FList[ i ] );
         end;
       SetLength( FList, 0 );
@@ -325,8 +325,8 @@ begin
         if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY = 0 Then continue;
       end else
         if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY > 0 Then continue;
-    SetLength( List.List, List.Count + 1 );
-    List.List[ List.Count ] := FList.cFileName;
+    SetLength( List.Items, List.Count + 1 );
+    List.Items[ List.Count ] := FList.cFileName;
     INC( List.Count );
   until not FindNextFile( First, FList );
 {$ENDIF}

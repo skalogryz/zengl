@@ -44,6 +44,7 @@ type zglProcWidgetsCallback = procedure( const widget : zglPWidget; const data :
 implementation
 uses
   zgl_gui_main,
+  zgl_gui_render,
   zgl_mouse,
   zgl_keyboard,
   zgl_collision_2d;
@@ -350,7 +351,40 @@ begin
 end;
 
 procedure gui_ProcListBox;
+  var
+    li : Integer;
 begin
+  with Event^, zglTListBoxDesc( Widget.desc^ ) do
+    case _type of
+      EVENT_MOUSE_DOWN:
+        begin
+          li := -1;
+          if mouse_button = M_BLEFT Then
+            if mouse_X < Widget.rect.X + Widget.rect.W + Widget.parent.rect.X - SCROLL_SIZE - 2 Then
+              begin
+                li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - 3 ) div Font.MaxHeight );
+                li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
+              end;
+          if ( li < List.Count ) and ( li <> -1 ) Then
+            begin
+              if ( ItemIndex <> li ) and Assigned( Widget.Events.OnSelectItem ) Then
+                Widget.Events.OnSelectItem( Widget, li );
+              ItemIndex := li;
+            end;
+        end;
+      EVENT_KEY_UP:
+        begin
+          li := ItemIndex;
+          if key_code = K_UP   Then DEC( li );
+          if key_code = K_DOWN Then INC( li );
+          if ( li > -1 ) and ( li < List.Count ) Then
+            begin
+              if ( ItemIndex <> li ) and Assigned( Widget.Events.OnSelectItem ) Then
+                Widget.Events.OnSelectItem( Widget, li );
+              ItemIndex := li;
+            end;
+        end;
+    end;
   gui_ProcEvents( Event );
 end;
 
