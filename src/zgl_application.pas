@@ -552,7 +552,7 @@ begin
         case eKind of
           kEventRawKeyDown, kEventRawKeyRepeat:
             begin
-              Key := mackeys_to_winkeys( Key );
+              Key := mackey_to_scancode( Key );
               keysDown[ Key ] := TRUE;
               keysUp  [ Key ] := FALSE;
               keysLast[ KA_DOWN ] := Key;
@@ -576,7 +576,7 @@ begin
             end;
           kEventRawKeyUp:
             begin
-              Key := mackeys_to_winkeys( Key );
+              Key := mackey_to_scancode( Key );
               keysDown[ Key ] := FALSE;
               keysUp  [ Key ] := TRUE;
               keysLast[ KA_UP ] := Key;
