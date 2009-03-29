@@ -234,6 +234,7 @@ function app_ProcessMessages;
     i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of Char;
+    str : String;
     Key : DWORD;
 begin
 {$IFDEF LINUX}
@@ -342,7 +343,7 @@ begin
 
         KeyPress:
           begin
-            Key := xkey_to_winkey( XLookupKeysym( @Event.xkey, 0 ) );
+            Key := xkey_to_scancode( XLookupKeysym( @Event.xkey, 0 ), Event.xkey.keycode );
             keysDown[ Key ] := TRUE;
             keysUp  [ Key ] := FALSE;
             keysLast[ KA_DOWN ] := Key;
@@ -352,18 +353,21 @@ begin
             keysUp  [ Key ] := FALSE;
 
             case Key of
-              K_ENTER:;
+              K_ENTER, K_DELETE:;
               K_BACKSPACE: u_Backspace( keysText );
-              K_TAB: key_InputText( '  ' );
+              K_TAB:       key_InputText( '  ' );
             else
               len := Xutf8LookupString( app_XIC, @Event, @c[ 0 ], 6, @Keysym, @Status );
+              str := '';
               for i := 0 to len - 1 do
-                key_InputText( c[ i ] );
+                str := str + c[ i ];
+              if str <> '' Then
+                key_InputText( str );
             end;
           end;
         KeyRelease:
           begin
-            Key := xkey_to_winkey( XLookupKeysym( @Event.xkey, 0 ) );
+            Key := xkey_to_scancode( XLookupKeysym( @Event.xkey, 0 ), Event.xkey.keycode );
             keysDown[ Key ] := FALSE;
             keysUp  [ Key ] := TRUE;
             keysLast[ KA_UP ] := Key;
@@ -467,28 +471,40 @@ begin
             end;
       end;
 
-    WM_KEYDOWN://, WM_SYSKEYDOWN:
+    WM_KEYDOWN, WM_SYSKEYDOWN:
       begin
-        Key := wParam;
+        Key := winkey_to_scancode( wParam );
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
         keysLast[ KA_DOWN ] := Key;
+
+        Key := SCA( Key );
+        keysDown[ Key ] := TRUE;
+        keysUp  [ Key ] := FALSE;
+
+        if Msg = WM_SYSKEYDOWN Then
+          if Key = K_F4 Then
+            app_Work := FALSE;
       end;
-    WM_KEYUP://, WM_SYSKEYUP:
+    WM_KEYUP, WM_SYSKEYUP:
       begin
-        Key := wParam;
+        Key := winkey_to_scancode( wParam );
         keysDown[ Key ] := FALSE;
         keysUp  [ Key ] := TRUE;
         keysLast[ KA_UP ] := Key;
+
+        Key := SCA( Key );
+        keysDown[ Key ] := FALSE;
+        keysUp  [ Key ] := TRUE;
       end;
     WM_CHAR:
       begin
-        case wParam of
+        case winkey_to_scancode( wParam ) of
+          K_ENTER, K_DELETE:;
           K_BACKSPACE: Delete( keysText, Length( keysText ), 1 );
           K_TAB: key_InputText( '  ' );
         else
-          if ( wParam >= 32 ) and ( wParam <= 127 ) Then
-            key_InputText( Chr( wParam ) );
+          key_InputText( Chr( wParam ) );
         end;
       end;
   else
@@ -546,13 +562,16 @@ begin
               keysUp  [ Key ] := FALSE;
 
               case Key of
-                K_ENTER:;
+                K_ENTER, K_DELETE:;
                 K_BACKSPACE: u_Backspace( keysText );
-                K_TAB: key_InputText( '  ' );
+                K_TAB:       key_InputText( '  ' );
               else
                 GetEventParameter( inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[ 0 ] );
+                str := '';
                 for i := 0 to len - 1 do
-                  key_InputText( c[ i ] );
+                  str := str + c[ i ];
+                if str <> '' Then
+                  key_InputText( str );
               end;
             end;
           kEventRawKeyUp:

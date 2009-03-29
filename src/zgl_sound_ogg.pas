@@ -29,7 +29,7 @@ unit zgl_sound_ogg;
       {$LINKLIB libogg.a}
       {$LINKLIB libvorbis.a}
       {$LINKLIB libvorbisfile.a}
-    {$ENDIF}
+    {$ENDIF LINUX}
     {$IFDEF WIN32}
       {$L libogg_win32/bitwise}
       {$L libogg_win32/framing}

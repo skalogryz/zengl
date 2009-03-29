@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.17               }
-{ date:    14.03.09             }
+{ version: 0.1.23               }
+{ date:    29.03.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -206,103 +206,125 @@ var
 
 // KEYBOARD
 const
-  K_BACKSPACE = 8;
-  K_TAB       = 9;
-  K_ENTER     = 13;
-  K_SHIFT     = 16;
-  K_SHIFT_L   = 160;
-  K_SHIFT_R   = 161;
-  K_CTRL      = 17;
-  K_CTRL_L    = 162;
-  K_CTRL_R    = 163;
-  K_ALT       = 18;
-  K_ALT_L     = 164;
-  K_ALT_R     = 165;
-  K_PAUSE     = 19;
-  K_ESCAPE    = 27;
-  K_SPACE     = 32;
+  K_SYSRQ      = $B7;
+  K_PAUSE      = $C5;
+  K_ESCAPE     = $01;
+  K_ENTER      = $1C;
+  K_KP_ENTER   = $9C;
 
-  K_PAGEUP    = 33;
-  K_PAGEDOWN  = 34;
-  K_END       = 35;
-  K_HOME      = 36;
-  K_SNAPSHOT  = 44;
-  K_INSERT    = 45;
-  K_DELETE    = 46;
+  K_UP         = $C8;
+  K_DOWN       = $D0;
+  K_LEFT       = $CB;
+  K_RIGHT      = $CD;
 
-  K_LEFT      = 37;
-  K_UP        = 38;
-  K_RIGHT     = 39;
-  K_DOWN      = 40;
+  K_BACKSPACE  = $0E;
+  K_SPACE      = $39;
+  K_TAB        = $0F;
+  K_TILDA      = $29;
 
-  K_0         = 48;
-  K_1         = 49;
-  K_2         = 50;
-  K_3         = 51;
-  K_4         = 52;
-  K_5         = 53;
-  K_6         = 54;
-  K_7         = 55;
-  K_8         = 56;
-  K_9         = 57;
+  K_INSERT     = $D2;
+  K_DELETE     = $D3;
+  K_HOME       = $C7;
+  K_END        = $CF;
+  K_PAGEUP     = $C9;
+  K_PAGEDOWN   = $D1;
 
-  K_NUMPAD0   = 96;
-  K_NUMPAD1   = 97;
-  K_NUMPAD2   = 98;
-  K_NUMPAD3   = 99;
-  K_NUMPAD4   = 100;
-  K_NUMPAD5   = 101;
-  K_NUMPAD6   = 102;
-  K_NUMPAD7   = 103;
-  K_NUMPAD8   = 104;
-  K_NUMPAD9   = 105;
+  K_CTRL       = $FF - $01;
+  K_CTRL_L     = $1D;
+  K_CTRL_R     = $9D;
+  K_ALT        = $FF - $02;
+  K_ALT_L      = $38;
+  K_ALT_R      = $B8;
+  K_SHIFT      = $FF - $03;
+  K_SHIFT_L    = $2A;
+  K_SHIFT_R    = $36;
+  K_SUPER_L    = $DB;
+  K_SUPER_R    = $DC;
+  K_APP_MENU   = $DD;
 
-  K_MULTIPLY  = 106;
-  K_ADD       = 107;
-  K_SEPARATOR = 108;
-  K_SUBTRACT  = 109;
-  K_DECIMAL   = 110;
-  K_DIVIDE    = 111;
+  K_CAPSLOCK   = $3A;
+  K_NUMLOCK    = $45;
+  K_SCROLL     = $46;
 
-  K_A         = 65;
-  K_B         = 66;
-  K_C         = 67;
-  K_D         = 68;
-  K_E         = 69;
-  K_F         = 70;
-  K_G         = 71;
-  K_H         = 72;
-  K_I         = 73;
-  K_J         = 74;
-  K_K         = 75;
-  K_L         = 76;
-  K_M         = 77;
-  K_N         = 78;
-  K_O         = 79;
-  K_P         = 80;
-  K_Q         = 81;
-  K_R         = 82;
-  K_S         = 83;
-  K_T         = 84;
-  K_U         = 85;
-  K_V         = 86;
-  K_W         = 87;
-  K_X         = 88;
-  K_Y         = 89;
-  K_Z         = 90;
+  K_BRACKET_L  = $1A; // [ {
+  K_BRACKET_R  = $1B; // ] }
+  K_BACKSLASH  = $2B; // \
+  K_SLASH      = $35; // /
+  K_COMMA      = $33; // ,
+  K_DECIMAL    = $34; // .
+  K_SEMICOLON  = $27; // : ;
+  K_APOSTROPHE = $28; // ' "
 
-  K_F1        = 112;
-  K_F2        = 113;
-  K_F3        = 114;
-  K_F4        = 115;
-  K_F5        = 116;
-  K_F6        = 117;
-  K_F7        = 118;
-  K_F8        = 119;
-  K_F9        = 120;
-  K_F10       = 121;
-  K_F11       = 122;
-  K_F12       = 123;
+  K_0          = $0B;
+  K_1          = $02;
+  K_2          = $03;
+  K_3          = $04;
+  K_4          = $05;
+  K_5          = $06;
+  K_6          = $07;
+  K_7          = $08;
+  K_8          = $09;
+  K_9          = $0A;
+
+  K_MINUS      = $0C;
+  K_EQUALS     = $0D;
+
+  K_A          = $1E;
+  K_B          = $30;
+  K_C          = $2E;
+  K_D          = $20;
+  K_E          = $12;
+  K_F          = $21;
+  K_G          = $22;
+  K_H          = $23;
+  K_I          = $17;
+  K_J          = $24;
+  K_K          = $25;
+  K_L          = $26;
+  K_M          = $32;
+  K_N          = $31;
+  K_O          = $18;
+  K_P          = $19;
+  K_Q          = $10;
+  K_R          = $13;
+  K_S          = $1F;
+  K_T          = $14;
+  K_U          = $16;
+  K_V          = $2F;
+  K_W          = $11;
+  K_X          = $2D;
+  K_Y          = $15;
+  K_Z          = $2C;
+
+  K_KP_0       = $52;
+  K_KP_1       = $4F;
+  K_KP_2       = $50;
+  K_KP_3       = $51;
+  K_KP_4       = $4B;
+  K_KP_5       = $4C;
+  K_KP_6       = $4D;
+  K_KP_7       = $47;
+  K_KP_8       = $48;
+  K_KP_9       = $49;
+
+  K_KP_SUB     = $4A;
+  K_KP_ADD     = $4E;
+  K_KP_MUL     = $37;
+  K_KP_DIV     = $B5;
+  K_KP_DECIMAL = $53;
+
+  K_F1         = $3B;
+  K_F2         = $3C;
+  K_F3         = $3D;
+  K_F4         = $3E;
+  K_F5         = $3F;
+  K_F6         = $40;
+  K_F7         = $41;
+  K_F8         = $42;
+  K_F9         = $43;
+  K_F10        = $44;
+  K_F11        = $57;
+  K_F12        = $58;
 
   KA_DOWN     = 0;
   KA_UP       = 1;

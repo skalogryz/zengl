@@ -496,8 +496,7 @@ procedure snd_SetVolume;
     i, j : Integer;
     snd  : zglPSound;
 begin
-  if ( not Assigned( Sound ) ) or
-     ( not sndInitialized ) Then exit;
+  if not sndInitialized Then exit;
 
   if ID = SND_STREAM Then
     sfVolume := Volume
@@ -558,8 +557,7 @@ procedure snd_SetFrequency;
     i, j : Integer;
     snd  : zglPSound;
 begin
-  if ( not Assigned( Sound ) ) or
-     ( not sndInitialized ) Then exit;
+  if not sndInitialized Then exit;
 
 {$IFDEF USE_OPENAL}
   if Assigned( Sound ) Then
@@ -615,8 +613,7 @@ procedure snd_SetFrequencyCoeff;
     i, j : Integer;
     snd  : zglPSound;
 begin
-  if ( not Assigned( Sound ) ) or
-     ( not sndInitialized ) Then exit;
+  if not sndInitialized Then exit;
 
 {$IFDEF USE_OPENAL}
   if Assigned( Sound ) Then
@@ -698,12 +695,13 @@ begin
         sfStream := managerSound.Formats[ i ].Stream;
     end;
 
-  if Assigned( sfStream ) then
+  if Assigned( sfStream ) Then
     sfStream.Loop := Loop;
 
   if ( not Assigned( sfStream ) ) or
      ( not sfStream.CodecOpen( FileName, sfStream ) ) Then
     begin
+      sfStream := nil;
       log_Add( 'Cannot play: ' + FileName );
       exit;
     end;

@@ -181,7 +181,7 @@ procedure ini_LoadFromFile;
 begin
   ini_Free;
   if not file_Exists( FileName ) Then exit;
-  iniRec.FileName := String( FileName );
+  iniRec.FileName := FileName;
 
   mem_LoadFromFile( iniMem, FileName );
   ini_Process;
