@@ -202,7 +202,7 @@ begin
       begin
         Result := Byte( Text[ Pos ] ) + 848;
         if Assigned( Shift ) Then
-          Shift^ := Pos + 2;
+          Shift^ := Pos + 1;
       end;
   end;
   {$ELSE}
