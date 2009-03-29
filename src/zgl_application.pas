@@ -501,10 +501,10 @@ begin
       begin
         case winkey_to_scancode( wParam ) of
           K_ENTER, K_DELETE:;
-          K_BACKSPACE: Delete( keysText, Length( keysText ), 1 );
+          K_BACKSPACE: u_Backspace( keysText );
           K_TAB: key_InputText( '  ' );
         else
-          key_InputText( Chr( wParam ) );
+          key_InputText( AnsiToUtf8( Char( wParam ) ) );
         end;
       end;
   else

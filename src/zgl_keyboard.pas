@@ -168,15 +168,16 @@ procedure key_EndReadText( var Result : String );
 procedure key_ClearState;
 
 procedure key_InputText( const Text : String );
+function scancode_to_utf8( const ScanCode : Byte ) : Byte;
 {$IFDEF LINUX}
-function xkey_to_scancode( XKey, KeyCode : WORD ) : Byte;
+function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
 function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
 {$ENDIF}
 {$IFDEF WIN32}
-function winkey_to_scancode( WinKey : WORD ) : Byte;
+function winkey_to_scancode( WinKey : Integer ) : Byte;
 {$ENDIF}
 {$IFDEF DARWIN}
-function mackey_to_scancode( MacKey : WORD ) : Byte;
+function mackey_to_scancode( MacKey : Integer ) : Byte;
 {$ENDIF}
 function SCA( KeyCode : DWORD ) : DWORD;
 
@@ -230,8 +231,25 @@ begin
   keysLast[ KA_UP   ] := 0;
 end;
 
+procedure key_InputText;
+  var
+    c : Char;
+begin
+  if u_Length( keysText ) < keysMax Then
+    begin
+      if ( app_Flags and APP_USE_ENGLISH_INPUT > 0 ) and
+         ( Text[ 1 ] <> ' ' )  Then
+        begin
+          c := Char( scancode_to_utf8( keysLast[ 0 ] ) );
+          if c <> #0 Then
+            keysText := keysText + c;
+        end else
+          keysText := keysText + Text;
+    end;
+end;
+
 // Костыли мои костыли :)
-function scancode_to_utf8( const ScanCode : Byte ) : Byte;
+function scancode_to_utf8;
 begin
   Result := 0;
 
@@ -331,26 +349,9 @@ begin
     end;
 end;
 
-procedure key_InputText;
-  var
-    c : Char;
-begin
-  if u_Length( keysText ) < keysMax Then
-    begin
-      if ( app_Flags and APP_USE_ENGLISH_INPUT > 0 ) and
-         ( Text[ 1 ] <> ' ' )  Then
-        begin
-          c := Char( scancode_to_utf8( keysLast[ 0 ] ) );
-          if c <> #0 Then
-            keysText := keysText + c;
-        end else
-          keysText := keysText + Text;
-    end;
-end;
-
 {$IFDEF LINUX}
-// Большинство сканкодов можно получить простым преобразованием, оставил их себе
-// на память :)
+// Большинство сканкодов можно получить простым преобразованием, закомментированные
+// оставил себе на память :)
 function xkey_to_scancode;
 begin
   case XKey of
@@ -434,6 +435,7 @@ begin
   end;
 end;
 {$ENDIF}
+
 {$IFDEF WIN32}
 function winkey_to_scancode;
 begin
@@ -454,6 +456,7 @@ begin
   end;
 end;
 {$ENDIF}
+
 {$IFDEF DARWIN}
 function mackey_to_scancode;
 begin
