@@ -796,7 +796,7 @@ begin
         if ( not Assigned( sfStream ) ) or
            ( not sndInitialized ) Then break;
 
-        u_Sleep( 10 );
+        u_Sleep( 100 );
         {$IFDEF USE_OPENAL}
         alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, processed );
         while ( processed > 0 ) and ( not sndStopFile ) do
