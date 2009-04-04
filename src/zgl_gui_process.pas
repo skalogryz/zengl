@@ -47,6 +47,7 @@ uses
   zgl_gui_render,
   zgl_mouse,
   zgl_keyboard,
+  zgl_math_2d,
   zgl_collision_2d;
 
 var
@@ -353,38 +354,67 @@ end;
 procedure gui_ProcListBox;
   var
     li : Integer;
+    tb, bb : zglTRect;
 begin
-  with Event^, zglTListBoxDesc( Widget.desc^ ) do
-    case _type of
-      EVENT_MOUSE_DOWN:
-        begin
-          li := -1;
-          if mouse_button = M_BLEFT Then
-            if mouse_X < Widget.rect.X + Widget.rect.W + Widget.parent.rect.X - SCROLL_SIZE - 2 Then
-              begin
-                li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - 3 ) div Font.MaxHeight );
-                li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
-              end;
-          if ( li < List.Count ) and ( li <> -1 ) Then
-            begin
-              if ( ItemIndex <> li ) and Assigned( Widget.Events.OnSelectItem ) Then
-                Widget.Events.OnSelectItem( Widget, li );
-              ItemIndex := li;
-            end;
-        end;
-      EVENT_KEY_UP:
-        begin
-          li := ItemIndex;
-          if key_code = K_UP   Then DEC( li );
-          if key_code = K_DOWN Then INC( li );
-          if ( li > -1 ) and ( li < List.Count ) Then
-            begin
-              if ( ItemIndex <> li ) and Assigned( Widget.Events.OnSelectItem ) Then
-                Widget.Events.OnSelectItem( Widget, li );
-              ItemIndex := li;
-            end;
-        end;
+  with Event^, Widget.rect do
+    begin
+      tb.X := X + W - SCROLL_SIZE;
+      tb.Y := Y;
+      tb.W := SCROLL_SIZE;
+      tb.H := SCROLL_SIZE;
+      bb.X := X + W - SCROLL_SIZE;
+      bb.Y := Y + H - SCROLL_SIZE;
+      bb.W := SCROLL_SIZE;
+      bb.H := SCROLL_SIZE;
     end;
+  with Event^, zglTListBoxDesc( Widget.desc^ ) do
+    begin
+      li := -1;
+      case _type of
+        EVENT_MOUSE_CLICK:
+          begin
+            if col2d_PointInRect( mouse_X, mouse_Y, tb ) and ( mouse_button = M_BLEFT ) Then
+              li := ItemIndex - 1;
+            if col2d_PointInRect( mouse_X, mouse_Y, bb ) and ( mouse_button = M_BLEFT ) Then
+              li := ItemIndex + 1;
+          end;
+        EVENT_MOUSE_DOWN:
+          begin
+            if mouse_button = M_BLEFT Then
+              if mouse_X < Widget.rect.X + Widget.rect.W + Widget.parent.rect.X - SCROLL_SIZE - 2 Then
+                begin
+                  li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - 3 ) div Font.MaxHeight );
+                  li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
+                end;
+
+            if mouseTimeDown > 25 Then
+              begin
+                if col2d_PointInRect( mouse_X, mouse_Y, tb ) and ( mouse_button = M_BLEFT ) Then
+                  begin
+                    DEC( mouseTimeDown, 10 );
+                    li := ItemIndex - 1;
+                  end;
+                if col2d_PointInRect( mouse_X, mouse_Y, bb ) and ( mouse_button = M_BLEFT ) Then
+                  begin
+                    DEC( mouseTimeDown, 10 );
+                    li := ItemIndex + 1;
+                  end;
+              end;
+          end;
+        EVENT_KEY_UP:
+          begin
+            li := ItemIndex;
+            if key_code = K_UP   Then DEC( li );
+            if key_code = K_DOWN Then INC( li );
+          end;
+      end;
+    if ( li < List.Count ) and ( li <> -1 ) Then
+      begin
+        if ( ItemIndex <> li ) and Assigned( Widget.Events.OnSelectItem ) Then
+          Widget.Events.OnSelectItem( Widget, li );
+        ItemIndex := li;
+      end;
+  end;
   gui_ProcEvents( Event );
 end;
 

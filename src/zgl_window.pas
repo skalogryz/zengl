@@ -60,6 +60,7 @@ var
   {$IFDEF LINUX}
   wnd_Handle      : TWindow;
   wnd_Root        : TWindow;
+  wnd_WMClass     : TXClassHint;
   wnd_Attr        : TXSetWindowAttributes;
   wnd_Title       : TXTextProperty;
   wnd_ValueMask   : DWORD;
@@ -96,7 +97,7 @@ uses
 function wnd_Create;
   {$IFDEF LINUX}
   var
-    sizehints  : TXSizeHints;
+    sizehints : TXSizeHints;
   {$ENDIF}
   {$IFDEF DARWIN}
   var
@@ -156,6 +157,10 @@ begin
   sizehints.max_height := wnd_Height;
 
   XSetWMNormalHints( scr_Display, wnd_Handle, @sizehints );
+
+  wnd_WMClass.res_name  := 'ZenGL';
+  wnd_WMClass.res_class := 'ZenGL Class';
+  XSetClassHint( scr_Display, wnd_Handle, @wnd_WMClass );
 
   wnd_DestroyAtom := XInternAtom( scr_Display, 'WM_DELETE_WINDOW', TRUE );
   wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', TRUE );

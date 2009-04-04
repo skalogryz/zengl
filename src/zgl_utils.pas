@@ -62,7 +62,6 @@ function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl'
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 
-//function usleep(__useconds:longword):longint;cdecl;external 'libc';
 function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ):longint;cdecl;external 'libc';
 function getenv(_para1:Pchar):Pchar;cdecl;external 'libc' name 'getenv';
 {$ENDIF}
@@ -222,7 +221,6 @@ begin
   tv.tv_sec  := msec div 1000;
   tv.tv_usec := ( msec mod 1000 ) * 1000;
   select( 0, nil, nil, nil, tv );
-  //usleep( msec * 1000 );
 {$ENDIF}
 {$IFDEF WIN32}
   Sleep( msec );

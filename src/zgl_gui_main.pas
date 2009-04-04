@@ -204,7 +204,20 @@ begin
   end;
   zgl_GetMem( Result.Next.desc, size );
   if Assigned( Desc ) Then
-    Move( Desc^, Result.Next.desc^, size );
+    case _type of
+      WIDGET_LISTBOX:
+        with zglTListBoxDesc( Result.Next.desc^ ) do
+          begin
+            Font       := zglTListBoxDesc( Desc^ ).Font;
+            ItemIndex  := zglTListBoxDesc( Desc^ ).ItemIndex;
+            List.Count := zglTListBoxDesc( Desc^ ).List.Count;
+            SetLength( List.Items, List.Count );
+            for i := 0 to List.Count - 1 do
+              List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
+          end;
+    else
+      Move( Desc^, Result.Next.desc^, size );
+    end;
   Result.Next.data    := Data;
   if Assigned( Parent ) Then
     begin

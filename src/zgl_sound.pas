@@ -688,6 +688,12 @@ begin
         FreeMemory( sfStream.Buffer );
     end;
 
+  if not file_Exists( FileName ) Then
+    begin
+      log_Add( 'Cannot read ' + FileName );
+      exit;
+    end;
+
   for i := managerSound.Count.Formats - 1 downto 0 do
     begin
       file_GetExtension( FileName, ext );
@@ -707,6 +713,10 @@ begin
     end;
 
 {$IFDEF USE_OPENAL}
+  alSourceStop( sfSource );
+  alSourceRewind( sfSource );
+  alSourcei( sfSource, AL_BUFFER, 0 );
+
   for i := 0 to sfBufCount - 1 do
     begin
       BytesRead := sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize, _End );
@@ -863,6 +873,10 @@ begin
      ( not sndInitialized ) Then exit;
 
 {$IFDEF USE_OPENAL}
+  alSourceStop( sfSource );
+  alSourceRewind( sfSource );
+  alSourcei( sfSource, AL_BUFFER, 0 );
+
   for i := 0 to sfBufCount - 1 do
     begin
       BytesRead := sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize, _End );
@@ -873,8 +887,6 @@ begin
     end;
 
   alSourcei( sfSource, AL_LOOPING, AL_FALSE );
-  alSourceStop( sfSource );
-  alSourceRewind( sfSource );
   alSourcePlay( sfSource );
   alSourcef( sfSource, AL_GAIN, sfVolume );
   alSourcef( sfSource, AL_FREQUENCY, sfStream.Rate );

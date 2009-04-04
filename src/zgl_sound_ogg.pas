@@ -365,6 +365,16 @@ begin
   ogg_Library        := dlopen( libogg {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   vorbis_Library     := dlopen( libvorbis {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   vorbisfile_Library := dlopen( libvorbisfile {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  {$IFDEF LINUX}
+  if ( ogg_Library        = LIB_ERROR ) and
+     ( vorbis_Library     = LIB_ERROR ) and
+     ( vorbisfile_Library = LIB_ERROR ) Then
+    begin
+      ogg_Library        := dlopen( PChar( libogg + '.0' ), $001 );
+      vorbis_Library     := dlopen( PChar( libvorbis + '.0' ), $001 );
+      vorbisfile_Library := dlopen( PChar( libvorbisfile + '.3' ), $001 );
+    end;
+  {$ENDIF}
   {$IFDEF DARWIN}
   if ( ogg_Library        = LIB_ERROR ) and
      ( vorbis_Library     = LIB_ERROR ) and

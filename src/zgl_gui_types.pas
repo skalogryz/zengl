@@ -170,6 +170,7 @@ end;
     Font      : zglPFont;
     List      : zglTStringList;
     ItemIndex : Integer;
+    ItemShift : Integer;
 end;
 
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
