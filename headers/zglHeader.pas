@@ -40,7 +40,14 @@ type
   HGLRC   = DWORD;
   {$ENDIF}
 
+type
+  zglTStringList = record
+    Count : Integer;
+    Items : array of String;
+end;
+
 type zglTFile = DWORD;
+type zglTFileList = zglTStringList;
 type
   zglPMemory = ^zglTMemory;
   zglTMemory = record
@@ -113,17 +120,18 @@ var
   zgl_GetMem : procedure( var Mem : Pointer; const Size : DWORD );
 
 const
-  COLOR_BUFFER_CLEAR   = $000001;
-  DEPTH_BUFFER         = $000002;
-  DEPTH_BUFFER_CLEAR   = $000004;
-  DEPTH_MASK           = $000008;
-  STENCIL_BUFFER_CLEAR = $000010;
-  CORRECT_RESOLUTION   = $000020;
-  APP_USE_AUTOPAUSE    = $000040;
-  APP_USE_LOG          = $000080;
-  SND_CAN_PLAY         = $000100;
-  SND_CAN_PLAY_FILE    = $000200;
-  CROP_INVISIBLE       = $000400;
+  COLOR_BUFFER_CLEAR    = $000001;
+  DEPTH_BUFFER          = $000002;
+  DEPTH_BUFFER_CLEAR    = $000004;
+  DEPTH_MASK            = $000008;
+  STENCIL_BUFFER_CLEAR  = $000010;
+  CORRECT_RESOLUTION    = $000020;
+  APP_USE_AUTOPAUSE     = $000040;
+  APP_USE_LOG           = $000080;
+  APP_USE_ENGLISH_INPUT = $000100;
+  SND_CAN_PLAY          = $000200;
+  SND_CAN_PLAY_FILE     = $000400;
+  CROP_INVISIBLE        = $000800;
 
 var
   zgl_Enable  : procedure( const What : DWORD );
@@ -748,9 +756,9 @@ end;
   zglPListBoxDesc = ^zglTListBoxDesc;
   zglTListBoxDesc = record
     Font      : zglPFont;
-    ICount    : Integer;
-    Items     : array of String;
+    List      : zglTStringList;
     ItemIndex : Integer;
+    ItemShift : Integer;
 end;
 
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
@@ -1506,12 +1514,6 @@ var
   // sphere
   col3d_SphereVsSphere : function( const Sphere1, Sphere : zglTSphere ) : Boolean;
   col3d_SphereVsNode   : function( const Sphere : zglTSphere; const Octree : zglTOctree; const Node : zglTNode; const Callback : zglTCol3DCallback; const CData : Pointer ) : Boolean;}
-
-type
-  zglTFileList = record
-    Count : Integer;
-    List  : array of String;
-end;
 
 const
   // Open Mode
