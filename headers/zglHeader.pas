@@ -116,8 +116,9 @@ const
   MANAGER_GUI     = 17; // zglPGUIManager
 
 var
-  zgl_Get    : function( const What : DWORD ) : Ptr;
-  zgl_GetMem : procedure( var Mem : Pointer; const Size : DWORD );
+  zgl_Get       : function( const What : DWORD ) : Ptr;
+  zgl_GetSysDir : procedure;
+  zgl_GetMem    : procedure( var Mem : Pointer; const Size : DWORD );
 
 const
   COLOR_BUFFER_CLEAR    = $000001;
@@ -1461,10 +1462,10 @@ var
   col2d_PointInRect   : function( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
   col2d_PointInCircle : function( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
   // line 2d
-  col2d_Line           : function( const A, B : zglTLine ) : Boolean;
-  col2d_LineVsRect     : function( const A : zglTLine; const Rect : zglTRect ) : Boolean;
+  col2d_Line           : function( const A, B : zglTLine; ColPoint : zglPPoint2D ) : Boolean;
+  col2d_LineVsRect     : function( const A : zglTLine; const Rect : zglTRect; ColPoint : zglPPoint2D ) : Boolean;
   col2d_LineVsCircle   : function( const L : zglTLine; const Circ : zglTCircle ) : Boolean;
-  col2d_LineVsCircleXY : function( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte ) : Boolean;
+  col2d_LineVsCircleXY : function( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
   // rect
   col2d_Rect         : function( const Rect1, Rect2 : zglTRect ) : Boolean;
   col2d_ClipRect     : function( const Rect1, Rect2 : zglTRect ) : zglTRect;
@@ -1475,11 +1476,6 @@ var
   col2d_Circle         : function( const Circ1, Circ2 : zglTCircle ) : Boolean;
   col2d_CircleInCircle : function( const Circ1, Circ2 : zglTCircle ) : Boolean;
   col2d_CircleInRect   : function( const Circ : zglTCircle; const Rect : zglTRect ) : Boolean;
-  // extended
-  col2dEx_LastX : function : Single;
-  col2dEx_LastY : function : Single;
-  // line
-  col2dEx_CalcLineCross : procedure( const A, B : zglTLine );
 
 {// COLLISION 3D
 type
@@ -1618,6 +1614,7 @@ begin
       zgl_Exit := dlsym( zglLib, 'zgl_Exit' );
       zgl_Reg := dlsym( zglLib, 'zgl_Reg' );
       zgl_Get := dlsym( zglLib, 'zgl_Get' );
+      zgl_GetSysDir := dlsym( zglLib, 'zgl_GetSysDir' );
       zgl_GetMem := dlsym( zglLib, 'zgl_GetMem' );
       zgl_Enable := dlsym( zglLib, 'zgl_Enable' );
       zgl_Disable := dlsym( zglLib, 'zgl_Disable' );
@@ -1935,9 +1932,6 @@ begin
       col2d_Circle := dlsym( zglLib, 'col2d_Circle' );
       col2d_CircleInCircle := dlsym( zglLib, 'col2d_CircleInCircle' );
       col2d_CircleInRect := dlsym( zglLib, 'col2d_CircleInRect' );
-      col2dEx_LastX := dlsym( zglLib, 'col2dEx_LastX' );
-      col2dEx_LastY := dlsym( zglLib, 'col2dEx_LastY' );
-      col2dEx_CalcLineCross := dlsym( zglLib, 'col2dEx_CalcLineCross' );
 
       {col3d_PointInTri := dlsym( zglLib, 'col3d_PointInTri' );
       col3d_PointInAABB := dlsym( zglLib, 'col3d_PointInAABB' );

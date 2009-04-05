@@ -32,10 +32,10 @@ uses
 function col2d_PointInRect  ( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
 function col2d_PointInCircle( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
 // line 2d
-function col2d_Line          ( const A, B : zglTLine ) : Boolean;
-function col2d_LineVsRect    ( const A : zglTLine; const Rect : zglTRect ) : Boolean;
+function col2d_Line          ( const A, B : zglTLine; ColPoint : zglPPoint2D ) : Boolean;
+function col2d_LineVsRect    ( const A : zglTLine; const Rect : zglTRect; ColPoint : zglPPoint2D ) : Boolean;
 function col2d_LineVsCircle  ( const L : zglTLine; const Circ : zglTCircle ) : Boolean;
-function col2d_LineVsCircleXY( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte ) : Boolean;
+function col2d_LineVsCircleXY( const L : zglTLine; const Circ : zglTCircle; const Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
 // rect
 function col2d_Rect        ( const Rect1, Rect2 : zglTRect ) : Boolean;
 function col2d_ClipRect    ( const Rect1, Rect2 : zglTRect ) : zglTRect;
@@ -47,9 +47,6 @@ function col2d_Circle        ( const Circ1, Circ2 : zglTCircle ) : Boolean;
 function col2d_CircleInCircle( const Circ1, Circ2 : zglTCircle ) : Boolean;
 function col2d_CircleInRect  ( const Circ : zglTCircle; const Rect : zglTRect ) : Boolean;
 // extended
-function col2dEx_LastX : Single;
-function col2dEx_LastY : Single;
-// line
 procedure col2dEx_CalcLineCross( const A, B : zglTLine );
 
 implementation
@@ -114,8 +111,11 @@ begin
 
   Result := ( s >= 0 ) and ( s <= 1 ) and ( t >= 0 ) and ( t <= 1 );
 
-  lS := s;
-  lT := t;
+  if Assigned( ColPoint ) Then
+    begin
+      ColPoint.X := A.x0 + t * S1[ 0 ];
+      ColPoint.Y := A.y0 + t * S1[ 1 ];
+    end;
 end;
 
 function col2d_LineVsRect;
@@ -129,14 +129,14 @@ begin
       L.y0 := Rect.Y;
       L.x1 := Rect.X + Rect.W;
       L.y1 := Rect.Y + Rect.H;
-      Result := col2d_Line( A, L );
+      Result := col2d_Line( A, L, ColPoint );
       if not Result Then
         begin
           L.x0 := Rect.X;
           L.y0 := Rect.Y + Rect.H;
           L.x1 := Rect.X + Rect.W;
           L.y1 := Rect.Y;
-          Result := col2d_Line( A, L );
+          Result := col2d_Line( A, L, ColPoint );
         end;
     end;
 end;
@@ -200,7 +200,7 @@ begin
       l1.y0 := p1[ i     ].Y;
       l1.x1 := p1[ i + 1 ].X;
       l1.y1 := p1[ i + 1 ].Y;
-      if col2d_Line( l1, L ) Then
+      if col2d_Line( l1, L, ColPoint ) Then
         begin
           INC( t );
           if t = 1 Then
@@ -288,16 +288,6 @@ begin
             col2d_PointInRect( Circ.cX - Circ.Radius, Circ.cY + Circ.Radius, Rect ) and
             col2d_PointInRect( Circ.cX - Circ.Radius, Circ.cY - Circ.Radius, Rect ) and
             col2d_PointInRect( Circ.cX + Circ.Radius, Circ.cY - Circ.Radius, Rect );
-end;
-
-function col2dEx_LastX;
-begin
-  Result := lX;
-end;
-
-function col2dEx_LastY;
-begin
-  Result := lY;
 end;
 
 procedure col2dEx_CalcLineCross;

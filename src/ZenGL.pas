@@ -456,9 +456,6 @@ exports
   col2d_Circle             name prefix + 'col2d_Circle',
   col2d_CircleInCircle     name prefix + 'col2d_CircleInCircle',
   col2d_CircleInRect       name prefix + 'col2d_CircleInRect',
-  col2dEx_LastX            name prefix + 'col2dEx_LastX',
-  col2dEx_LastY            name prefix + 'col2dEx_LastY',
-  col2dEx_CalcLineCross    name prefix + 'col2dEx_CalcLineCross',
 
 {$IFDEF USE_3D}
   // Collision 3D
