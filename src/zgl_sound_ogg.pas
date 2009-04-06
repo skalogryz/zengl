@@ -74,7 +74,13 @@ unit zgl_sound_ogg;
 
 interface
 uses
+  {$IFDEF USE_OPENAL}
+  zgl_sound_openal,
+  {$ELSE}
+  zgl_sound_dsound,
+  {$ENDIF}
   zgl_types,
+  zgl_memory,
   zgl_sound;
 
 const
@@ -288,6 +294,10 @@ function  ogg_CodecRead( const Buffer : Pointer; const Count : DWORD; var _End :
 procedure ogg_CodecLoop;
 procedure ogg_CodecClose( var Stream : zglPSoundStream );
 
+procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
+
 function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
 function ogg_Seek( datasource : pointer; offset : cint64; whence : cint) : cint; cdecl;
 function ogg_Close( datasource : pointer ) : cint; cdecl;
@@ -304,7 +314,11 @@ function ov_time_seek(var vf: OggVorbis_File; pos: cdouble): cint; cdecl; extern
 var
   oggLoad   : Boolean;
   oggInit   : Boolean;
+  oggMemory : zglTMemory;
   oggStream : zglTSoundStream;
+  {$IFNDEF USE_OPENAL}
+  oggBufferDesc : zglTBufferDesc;
+  {$ENDIF}
 
   vi : pvorbis_info;
   vf : OggVorbis_File;
@@ -462,11 +476,85 @@ procedure ogg_CodecClose;
 begin
   if not oggInit Then exit;
   if not Assigned( vi ) Then exit;
-  vi:= nil;
+  vi := nil;
   ov_clear( vf );
   {$IFDEF WIN32}
   //file_Close( Stream._File );
   {$ENDIF}
+end;
+
+procedure ogg_Load;
+  var
+    BytesRead : Integer;
+    Buffer    : Pointer;
+    _End      : Boolean;
+    first     : Boolean;
+begin
+  if not oggLoad Then ogg_Init;
+  if not oggInit Then exit;
+
+  if ov_open_callbacks( nil, vf, oggMemory.Memory, oggMemory.Size, vc ) >= 0 Then
+    begin
+      vi        := ov_info( vf, -1 );
+      Frequency := vi.rate;
+      {$IFDEF USE_OPENAL}
+      case vi.channels of
+        1: format := AL_FORMAT_MONO16;
+        2: format := AL_FORMAT_STEREO16;
+      end;
+      {$ELSE}
+      with oggBufferDesc do
+        begin
+          FormatCode     := $0001;
+          ChannelNumber  := vi.channels;
+          SampleRate     := vi.rate;
+          BitsPerSample  := 16;
+          BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
+          BytesPerSecond := SampleRate * BytesPerSample;
+          cbSize         := SizeOf( zglTBufferDesc );
+        end;
+      format := Ptr( @oggBufferDesc.Formatcode );
+      {$ENDIF}
+
+      ov_time_seek( vf, 0 );
+
+      first := TRUE;
+      size  := 0;
+      zgl_GetMem( Buffer, 64 * 1024 );
+      repeat
+        BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
+        INC( size, BytesRead );
+        if not _End Then
+          begin
+            if first Then
+              zgl_GetMem( Data, BytesRead )
+            else
+              Data := ReallocMem( Data, size );
+            Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
+          end;
+        first := FALSE;
+      until _End;
+      Freemem( Buffer );
+
+      vi := nil;
+      ov_clear( vf );
+    end;
+  mem_Free( oggMemory );
+end;
+
+procedure ogg_LoadFromFile;
+begin
+  mem_LoadFromFile( oggMemory, FileName );
+  ogg_Load( Data, Size, Format, Frequency );
+end;
+
+procedure ogg_LoadFromMemory;
+begin
+  oggMemory.Size     := Memory.Size;
+  zgl_GetMem( oggMemory.Memory, Memory.Size );
+  oggMemory.Position := Memory.Position;
+  Move( Memory.Memory^, oggMemory.Memory^, Memory.Size );
+  ogg_Load( Data, Size, Format, Frequency );
 end;
 
 initialization
@@ -476,8 +564,8 @@ initialization
   oggStream.CodecLoop  := ogg_CodecLoop;
   oggStream.CodecClose := ogg_CodecClose;
   zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'OGG' ) );
-  zgl_Reg( SND_FORMAT_FILE_LOADER, nil );
-  zgl_Reg( SND_FORMAT_MEM_LOADER,  nil );
+  zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
+  zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
   zgl_Reg( SND_FORMAT_STREAM, @oggStream );
 
 finalization

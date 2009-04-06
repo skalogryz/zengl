@@ -205,7 +205,7 @@ end;
 
 procedure gui_DrawListBox;
   var
-    i      : Integer;
+    i, ty  : Integer;
     tb, bb : zglTRect;
     iShift : Integer;
 begin
@@ -220,7 +220,11 @@ begin
       _clip( Widget, X + 2, Y + 2, W - SCROLL_SIZE - 4, H - 4 );
       iShift := zglTScrollBarDesc( Widget.child.Next.desc^ ).Position;
       for i := 0 to List.Count - 1 do
-        text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Y + ( i - iShift ) * Font.MaxHeight + ( i  - iShift ) * 3 + 3, List.Items[ i ] );
+        begin
+          ty := Round( Y + ( i - iShift ) * Font.MaxHeight + ( i  - iShift ) * 3 + 3 );
+          if ( ty >= Y - Font.MaxHeight ) and ( ty <= Y + H + Font.MaxHeight ) Then
+            text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
+        end;
 
       if ItemIndex > -1 Then
         begin

@@ -470,6 +470,13 @@ procedure gui_ProcScrollBar;
 begin
   with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
     case _type of
+      EVENT_CREATE:
+        begin
+          case Kind of
+            SCROLLBAR_VERTICAL:   W := SCROLL_SIZE;
+            SCROLLBAR_HORIZONTAL: H := SCROLL_SIZE;
+          end;
+        end;
       EVENT_MOUSE_MOVE:
         begin
           if mouse_Y < Y + H - SCROLL_SIZE Then DPressed := FALSE;

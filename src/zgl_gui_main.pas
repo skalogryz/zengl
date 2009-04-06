@@ -248,18 +248,6 @@ begin
         Result.Next.OnProc := managerGUI.Types[ i ].OnProc;
       end;
 
-  // FIXME: это хак, надо бы чего-нить более человеческое :)
-  case _type of
-    WIDGET_SCROLLBAR:
-    if Assigned( Desc ) Then
-      begin
-        if ( zglTSCrollBarDesc( Desc^ ).Kind = SCROLLBAR_VERTICAL ) and ( W > SCROLL_SIZE ) Then
-          Result.Next.rect.W := SCROLL_SIZE;
-        if ( zglTSCrollBarDesc( Desc^ ).Kind = SCROLLBAR_HORIZONTAL ) and ( H > SCROLL_SIZE ) Then
-          Result.Next.rect.H := SCROLL_SIZE;
-      end;
-  end;
-
   Result.Next.Prev   := Result;
   Result.Next.Next   := nil;
   Result             := Result.Next;
