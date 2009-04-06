@@ -50,6 +50,7 @@ uses
   zgl_main,
   zgl_window,
   zgl_math_2d,
+  zgl_gui_std,
   zgl_gui_render,
   zgl_gui_process;
 
@@ -220,7 +221,7 @@ begin
             for i := 0 to List.Count - 1 do
               List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
 
-            gui_AddWidget( WIDGET_SCROLLBAR, X + W - SCROLL_SIZE, Y, SCROLL_SIZE, H, nil, nil, Result.Next );
+            gui_AddWidget( WIDGET_SCROLLBAR, X + W - SCROLL_SIZE, Y, SCROLL_SIZE, H, nil, nil, Result.Next ).Events.OnChange := gui_ScrollListBox;
           end;
     else
       Move( Desc^, Result.Next.desc^, managerGUI.Types[ _type - 1 ].DescSize );

@@ -137,7 +137,6 @@ procedure app_MainLoop;
     currTimer : zglPTimer;
     {$IFDEF WIN32}
     SysInfo : _SYSTEM_INFO;
-    Mess : tagMsg;
     {$ENDIF}
 begin
   {$IFDEF WIN32}

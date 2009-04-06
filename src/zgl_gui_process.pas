@@ -356,7 +356,11 @@ procedure gui_ProcListBox;
   var
     li     : Integer;
     tb, bb : zglTRect;
+    iShift : Integer;
+    iCount : Integer;
 begin
+  iCount := Round( ( Event.Widget.rect.H - 3 ) / ( zglTListBoxDesc( Event.Widget.desc^ ).Font.MaxHeight + 3 ) );
+  iShift := zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
   with Event^, Widget.rect do
     begin
       tb.X := X + W - SCROLL_SIZE;
@@ -379,7 +383,7 @@ begin
                 begin
                   li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - 3 ) div Font.MaxHeight );
                   li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
-                  li := li + zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
+                  li := li + iShift;
                 end;
           end;
         EVENT_KEY_UP:
@@ -391,19 +395,19 @@ begin
       end;
     if ( li < List.Count ) and ( li <> -1 ) Then
       begin
-        if ( ItemIndex <> li ) and Assigned( Widget.Events.OnSelectItem ) Then
-          Widget.Events.OnSelectItem( Widget, li );
+        if ( ItemIndex <> li ) and Assigned( Widget.Events.OnChange ) Then
+          Widget.Events.OnChange( Widget, li, li - ItemIndex );
         ItemIndex := li;
       end;
   end;
 
-  li := Round( ( Event.Widget.rect.H - 3 ) / ( zglTListBoxDesc( Event.Widget.desc^ ).Font.MaxHeight + 3 ) );
-  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - li;
+  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
   zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Step := 1;
-  {if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex <
+
+  if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex < iShift Then
     DEC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );
-  if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex >
-    INC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );}
+  if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex > iShift + iCount - 1 Then
+    INC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );
 
   gui_ProcEvents( Event );
 end;
@@ -437,13 +441,21 @@ begin
                 begin
                   UPressed := TRUE;
                   if Value < Max Then
-                    INC( Value );
+                    begin
+                      INC( Value );
+                      if Assigned( Widget.Events.OnChange ) Then
+                        Widget.Events.OnChange( Widget, Value, 1 );
+                    end;
                 end;
               if mouse_Y > Y + H / 2 Then
                 begin
                   DPressed := TRUE;
                   if Value > Min Then
-                  DEC( Value );
+                    begin
+                      DEC( Value );
+                      if Assigned( Widget.Events.OnChange ) Then
+                        Widget.Events.OnChange( Widget, Value, -1 );
+                    end;
                 end;
             end;
         end;
@@ -467,6 +479,8 @@ begin
 end;
 
 procedure gui_ProcScrollBar;
+  var
+    Change : Integer;
 begin
   with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
     case _type of
@@ -497,18 +511,22 @@ begin
               if mouse_Y < Y + SCROLL_SIZE Then
                 begin
                   UPressed := TRUE;
-                  if Position > 0 Then
-                    DEC( Position, Step );
-                  if Position < 0 Then
-                    Position := 0;
+                  Change := -Step;
+                  if Position + Change < 0 Then
+                    Change := 0 - Position;
+                  Position := Position + Change;
+                  if Assigned( Widget.Events.OnChange ) Then
+                    Widget.Events.OnChange( Widget, Position, Change );
                 end;
               if mouse_Y > Y + H - SCROLL_SIZE Then
                 begin
                   DPressed := TRUE;
-                  if Position < Max Then
-                    INC( Position, Step );
-                  if Position > Max Then
-                    Position := Max;
+                  Change := Step;
+                  if Position + Change > Max Then
+                    Change := Max - Position;
+                  Position := Position + Change;
+                  if Assigned( Widget.Events.OnChange ) Then
+                    Widget.Events.OnChange( Widget, Position, Change );
                 end;
             end;
         end;

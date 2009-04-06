@@ -36,6 +36,9 @@ const
   libopenal = '/System/Library/Frameworks/OpenAL.framework/OpenAL';
 {$ENDIF}
 
+  ALC_DEFAULT_DEVICE_SPECIFIER              =$1004;
+  ALC_DEVICE_SPECIFIER                      =$1005;
+
   AL_NONE                                   = 0;
   AL_FALSE                                  = 0;
   AL_TRUE                                   = 1;
@@ -81,6 +84,7 @@ end;
 var
   oal_Library : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
 
+  alcGetString           : function(device: PALCdevice; param: LongInt): PChar; cdecl;
   // Device
   alcOpenDevice          : function(const devicename: PChar): PALCdevice; cdecl;
   alcCloseDevice         : function(device: PALCdevice): Boolean; cdecl;
@@ -133,6 +137,7 @@ begin
 
   if oal_Library <> LIB_ERROR Then
     begin
+      alcGetString           := dlsym( oal_Library, 'alcGetString' );
       alcOpenDevice          := dlsym( oal_Library, 'alcOpenDevice' );
       alcCloseDevice         := dlsym( oal_Library, 'alcCloseDevice' );
       alcCreateContext       := dlsym( oal_Library, 'alcCreateContext' );

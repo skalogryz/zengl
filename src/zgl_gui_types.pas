@@ -78,7 +78,7 @@ type
     OnMouseLeave : procedure( const Widget : zglPWidget );
     OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte );
     OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte );
-    OnSelectItem : procedure( const Widget : zglPWidget; const ItemIndex : Integer );
+    OnChange     : procedure( const Widget : zglPWidget; const Value, Change : Integer );
 end;
 
   //Widget
