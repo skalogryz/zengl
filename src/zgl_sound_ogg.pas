@@ -524,7 +524,7 @@ begin
       repeat
         BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
-        if not _End Then
+        if BytesRead > 0 Then
           begin
             if first Then
               zgl_GetMem( Data, BytesRead )
