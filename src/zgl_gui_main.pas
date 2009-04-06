@@ -56,44 +56,58 @@ uses
 procedure gui_Init;
 begin
   // Button
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_BUTTON ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawButton );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcButton );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_BUTTON ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTButtonDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawButton );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcButton );
 
   // CheckBox
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_CHECKBOX ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawCheckBox );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcCheckBox );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_CHECKBOX ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTCheckBoxDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawCheckBox );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcCheckBox );
 
   // RadioButton
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_RADIOBUTTON ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawRadioButton );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcRadioButton );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_RADIOBUTTON ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTRadioButtonDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawRadioButton );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcRadioButton );
 
   // Label
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_LABEL ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawLabel );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcLabel );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_LABEL ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTLabelDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawLabel );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcLabel );
 
   // EditBox
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_EDITBOX ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawEditBox );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcEditBox );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_EDITBOX ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTEditBoxDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawEditBox );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcEditBox );
 
   // ListBox
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_LISTBOX ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawListBox );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcListBox );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_LISTBOX ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTListBoxDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawListBox );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcListBox );
 
   // GroupBox
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_GROUPBOX ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawGroupBox );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcGroupBox );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_GROUPBOX ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTGroupBoxDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawGroupBox );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcGroupBox );
 
   // Spin
-  zgl_Reg( WIDGET_TYPE_ID, Pointer( WIDGET_SPIN ) );
-  zgl_Reg( WIDGET_ONDRAW,  @gui_DrawSpin );
-  zgl_Reg( WIDGET_ONPROC,  @gui_ProcSpin );
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SPIN ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTSpinDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawSpin );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcSpin );
+
+  // ScrollBar
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SCROLLBAR ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTSCrollBarDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawScrollBar );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcScrollBar );
 end;
 
 procedure gui_Draw;
@@ -175,7 +189,8 @@ end;
 
 function gui_AddWidget;
   var
-    i, size : Integer;
+    i : Integer;
+    s : zglTScrollBarDesc;
 begin
   if Assigned ( Parent ) Then
     begin
@@ -192,17 +207,7 @@ begin
 
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTWidget ) );
   Result.Next._type := _type;
-  case _type of
-    WIDGET_BUTTON:      size := SizeOf( zglTButtonDesc );
-    WIDGET_CHECKBOX:    size := SizeOf( zglTCheckBoxDesc );
-    WIDGET_RADIOBUTTON: size := SizeOf( zglTRadioButtonDesc );
-    WIDGET_LABEL:       size := SizeOf( zglTLabelDesc );
-    WIDGET_EDITBOX:     size := SizeOf( zglTEditBoxDesc );
-    WIDGET_LISTBOX:     size := SizeOf( zglTListBoxDesc );
-    WIDGET_GROUPBOX:    size := SizeOf( zglTGroupBoxDesc );
-    WIDGET_SPIN:        size := SizeOf( zglTSpinDesc );
-  end;
-  zgl_GetMem( Result.Next.desc, size );
+  zgl_GetMem( Result.Next.desc, managerGUI.Types[ _type - 1 ].DescSize );
   if Assigned( Desc ) Then
     case _type of
       WIDGET_LISTBOX:
@@ -214,9 +219,11 @@ begin
             SetLength( List.Items, List.Count );
             for i := 0 to List.Count - 1 do
               List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
+
+            gui_AddWidget( WIDGET_SCROLLBAR, X + W - SCROLL_SIZE, Y, SCROLL_SIZE, H, nil, nil, Result.Next );
           end;
     else
-      Move( Desc^, Result.Next.desc^, size );
+      Move( Desc^, Result.Next.desc^, managerGUI.Types[ _type - 1 ].DescSize );
     end;
   Result.Next.data    := Data;
   if Assigned( Parent ) Then
@@ -240,9 +247,23 @@ begin
         Result.Next.OnDraw := managerGUI.Types[ i ].OnDraw;
         Result.Next.OnProc := managerGUI.Types[ i ].OnProc;
       end;
+
+  // FIXME: это хак, надо бы чего-нить более человеческое :)
+  case _type of
+    WIDGET_SCROLLBAR:
+    if Assigned( Desc ) Then
+      begin
+        if ( zglTSCrollBarDesc( Desc^ ).Kind = SCROLLBAR_VERTICAL ) and ( W > SCROLL_SIZE ) Then
+          Result.Next.rect.W := SCROLL_SIZE;
+        if ( zglTSCrollBarDesc( Desc^ ).Kind = SCROLLBAR_HORIZONTAL ) and ( H > SCROLL_SIZE ) Then
+          Result.Next.rect.H := SCROLL_SIZE;
+      end;
+  end;
+
   Result.Next.Prev   := Result;
   Result.Next.Next   := nil;
   Result             := Result.Next;
+  gui_AddEvent( EVENT_CREATE, Result, nil );
   INC( managerGUI.Count.Items );
 end;
 

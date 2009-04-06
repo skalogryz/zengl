@@ -46,14 +46,8 @@ function col2d_RectVsCircle( const Rect : zglTRect; const Circ : zglTCircle ) : 
 function col2d_Circle        ( const Circ1, Circ2 : zglTCircle ) : Boolean;
 function col2d_CircleInCircle( const Circ1, Circ2 : zglTCircle ) : Boolean;
 function col2d_CircleInRect  ( const Circ : zglTCircle; const Rect : zglTRect ) : Boolean;
-// extended
-procedure col2dEx_CalcLineCross( const A, B : zglTLine );
 
 implementation
-
-var
-  lX, lY   : Single;
-  lS, lT   : Single;
 
 function Dist( Ax, Ay, Bx, By, Cx, Cy : Single ) : Single;
   var
@@ -173,7 +167,6 @@ function col2d_LineVsCircleXY;
     p1      : array of zglTPoint2D;
     l1      : zglTLine;
     i, t, k : Integer;
-    x, y    : Single;
 begin
   if not col2d_LineVsCircle( L, Circ ) Then
     begin
@@ -203,17 +196,7 @@ begin
       if col2d_Line( l1, L, ColPoint ) Then
         begin
           INC( t );
-          if t = 1 Then
-            col2dEx_CalcLineCross( l1, L );
-          if t = 2 Then
-            begin
-              x   := lX;
-              y   := lY;
-              col2dEx_CalcLineCross( l1, L );
-              lX := ( x + lX ) / 2;
-              lY := ( y + lY ) / 2;
-              exit;
-            end;
+          if t = 2 Then exit;
         end;
     end;
 end;
@@ -288,17 +271,6 @@ begin
             col2d_PointInRect( Circ.cX - Circ.Radius, Circ.cY + Circ.Radius, Rect ) and
             col2d_PointInRect( Circ.cX - Circ.Radius, Circ.cY - Circ.Radius, Rect ) and
             col2d_PointInRect( Circ.cX + Circ.Radius, Circ.cY - Circ.Radius, Rect );
-end;
-
-procedure col2dEx_CalcLineCross;
-  var
-    S1 : array[ 0..1 ] of Single;
-begin
-  S1[ 0 ] := A.x1 - A.x0;
-  S1[ 1 ] := A.y1 - A.y0;
-
-  lX := A.x0 + lT * S1[ 0 ];
-  lY := A.y0 + lT * S1[ 1 ];
 end;
 
 end.

@@ -47,8 +47,9 @@ const
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_STREAM      = $000023;
   WIDGET_TYPE_ID         = $000030;
-  WIDGET_ONDRAW          = $000031;
-  WIDGET_ONPROC          = $000032;
+  WIDGET_DESC_SIZE       = $000031;
+  WIDGET_ONDRAW          = $000032;
+  WIDGET_ONPROC          = $000033;
 
   // zgl_Get
   SYS_FPS         = 1;
@@ -315,6 +316,10 @@ begin
             INC( managerGUI.Count.Types );
           end else
             widgetTLast := DWORD( UserData );
+      end;
+    WIDGET_DESC_SIZE:
+      begin
+        managerGUI.Types[ widgetTLast ].DescSize := DWORD( UserData );
       end;
     WIDGET_ONDRAW:
       begin

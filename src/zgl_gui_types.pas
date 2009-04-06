@@ -30,6 +30,7 @@ uses
   zgl_math_2d;
 
 const
+  // Widgets
   WIDGET_UNKNOWN     = 0;
   WIDGET_BUTTON      = 1;
   WIDGET_CHECKBOX    = 2;
@@ -39,21 +40,29 @@ const
   WIDGET_LISTBOX     = 6;
   WIDGET_GROUPBOX    = 7;
   WIDGET_SPIN        = 8;
+  WIDGET_SCROLLBAR   = 9;
 
-  EVENT_FOCUS_IN    = 1;
-  EVENT_FOCUS_OUT   = 2;
+  // ScrollBar
+  SCROLLBAR_VERTICAL   = 0;
+  SCROLLBAR_HORIZONTAL = 1;
 
-  EVENT_MOUSE_MOVE  = 3;
-  EVENT_MOUSE_ENTER = 4;
-  EVENT_MOUSE_LEAVE = 5;
-  EVENT_MOUSE_DOWN  = 6;
-  EVENT_MOUSE_UP    = 7;
-  EVENT_MOUSE_CLICK = 8;
-  EVENT_MOUSE_WHEEL = 9;
+  // Events
+  EVENT_CREATE      = 1;
 
-  EVENT_KEY_DOWN    = 10;
-  EVENT_KEY_UP      = 11;
-  EVENT_KEY_CHAR    = 12;
+  EVENT_FOCUS_IN    = 2;
+  EVENT_FOCUS_OUT   = 3;
+
+  EVENT_MOUSE_MOVE  = 4;
+  EVENT_MOUSE_ENTER = 5;
+  EVENT_MOUSE_LEAVE = 6;
+  EVENT_MOUSE_DOWN  = 7;
+  EVENT_MOUSE_UP    = 8;
+  EVENT_MOUSE_CLICK = 9;
+  EVENT_MOUSE_WHEEL = 10;
+
+  EVENT_KEY_DOWN    = 11;
+  EVENT_KEY_UP      = 12;
+  EVENT_KEY_CHAR    = 13;
 
 type
   zglPEvent  = ^zglTEvent;
@@ -91,7 +100,8 @@ end;
 end;
 
   zglTWidgetType = record
-    _type  : Integer;
+    _type    : Integer;
+    DescSize : DWORD;
 
     OnDraw : procedure( const Widget : zglPWidget );
     OnProc : procedure( const Event  : zglPEvent );
@@ -170,7 +180,6 @@ end;
     Font      : zglPFont;
     List      : zglTStringList;
     ItemIndex : Integer;
-    ItemShift : Integer;
 end;
 
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
@@ -184,6 +193,18 @@ end;
     Value    : Integer;
     Max      : Integer;
     Min      : Integer;
+
+    UPressed : Boolean;
+    DPressed : Boolean;
+end;
+
+  zglPScrollBarDesc = ^zglTScrollBarDesc;
+  zglTScrollBarDesc = record
+    Kind     : Byte;
+    Step     : Integer;
+    Position : Integer;
+    PageSize : Integer;
+    Max      : Integer;
 
     UPressed : Boolean;
     DPressed : Boolean;

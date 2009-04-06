@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.23               }
-{ date:    29.03.09             }
+{ date:    05.04.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -90,8 +90,9 @@ const
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_STREAM      = $000023;
   WIDGET_TYPE_ID         = $000030;
-  WIDGET_ONDRAW          = $000031;
-  WIDGET_ONPROC          = $000032;
+  WIDGET_DESC_SIZE       = $000031;
+  WIDGET_ONDRAW          = $000032;
+  WIDGET_ONPROC          = $000033;
 
 var
   zgl_Reg : procedure( const What : DWORD; const UserData : Pointer );
@@ -628,21 +629,25 @@ const
   WIDGET_LISTBOX     = 6;
   WIDGET_GROUPBOX    = 7;
   WIDGET_SPIN        = 8;
+  WIDGET_SCROLLBAR   = 9;
 
-  EVENT_FOCUS_IN    = 1;
-  EVENT_FOCUS_OUT   = 2;
+  // Events
+  EVENT_CREATE      = 1;
 
-  EVENT_MOUSE_MOVE  = 3;
-  EVENT_MOUSE_ENTER = 4;
-  EVENT_MOUSE_LEAVE = 5;
-  EVENT_MOUSE_DOWN  = 6;
-  EVENT_MOUSE_UP    = 7;
-  EVENT_MOUSE_CLICK = 8;
-  EVENT_MOUSE_WHEEL = 9;
+  EVENT_FOCUS_IN    = 2;
+  EVENT_FOCUS_OUT   = 3;
 
-  EVENT_KEY_DOWN    = 10;
-  EVENT_KEY_UP      = 11;
-  EVENT_KEY_CHAR    = 12;
+  EVENT_MOUSE_MOVE  = 4;
+  EVENT_MOUSE_ENTER = 5;
+  EVENT_MOUSE_LEAVE = 6;
+  EVENT_MOUSE_DOWN  = 7;
+  EVENT_MOUSE_UP    = 8;
+  EVENT_MOUSE_CLICK = 9;
+  EVENT_MOUSE_WHEEL = 10;
+
+  EVENT_KEY_DOWN    = 11;
+  EVENT_KEY_UP      = 12;
+  EVENT_KEY_CHAR    = 13;
 
 type
   zglPEvent  = ^zglTEvent;
@@ -680,7 +685,8 @@ end;
 end;
 
   zglTWidgetType = record
-    _type  : Integer;
+    _type    : Integer;
+    DescSize : DWORD;
 
     OnDraw : procedure( const Widget : zglPWidget );
     OnProc : procedure( const Event  : zglPEvent );
@@ -759,7 +765,6 @@ end;
     Font      : zglPFont;
     List      : zglTStringList;
     ItemIndex : Integer;
-    ItemShift : Integer;
 end;
 
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
@@ -773,6 +778,18 @@ end;
     Value    : Integer;
     Max      : Integer;
     Min      : Integer;
+
+    UPressed : Boolean;
+    DPressed : Boolean;
+end;
+
+  zglPScrollBarDesc = ^zglTScrollBarDesc;
+  zglTScrollBarDesc = record
+    Kind     : Byte;
+    Step     : Integer;
+    Position : Integer;
+    PageSize : Integer;
+    Max      : Integer;
 
     UPressed : Boolean;
     DPressed : Boolean;
@@ -1574,6 +1591,7 @@ var
   tmpCFURLRef  : CFURLRef;
   tmpCFString  : CFStringRef;
   tmpPath      : array[ 0..8191 ] of Char;
+  outItemHit   : SInt16;
   {$ENDIF}
 
 function u_IntToStr;
@@ -1975,11 +1993,14 @@ begin
       if Error Then
         begin
           Result := FALSE;
-          {$IFDEF LINUX_OR_DARWIN}
-          WriteLn( 'Error while loading ZenGL Engine' );
+          {$IFDEF LINUX}
+          WriteLn( 'Error while loading ZenGL' );
           {$ENDIF}
           {$IFDEF WIN32}
-          MessageBoxA( 0, 'Error while loading ZenGL Engine', 'Error', $00000010 );
+          MessageBoxA( 0, 'Error while loading ZenGL', 'Error', $00000010 );
+          {$ENDIF}
+          {$IFDEF DARWIN}
+          StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading ZenGL', nil, outItemHit );
           {$ENDIF}
         end;
 end;

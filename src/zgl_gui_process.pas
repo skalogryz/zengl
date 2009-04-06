@@ -38,6 +38,7 @@ procedure gui_ProcEditBox    ( const Event : zglPEvent );
 procedure gui_ProcListBox    ( const Event : zglPEvent );
 procedure gui_ProcGroupBox   ( const Event : zglPEvent );
 procedure gui_ProcSpin       ( const Event : zglPEvent );
+procedure gui_ProcScrollBar  ( const Event : zglPEvent );
 
 type zglProcWidgetsCallback = procedure( const widget : zglPWidget; const data : Pointer );
 
@@ -353,7 +354,7 @@ end;
 
 procedure gui_ProcListBox;
   var
-    li : Integer;
+    li     : Integer;
     tb, bb : zglTRect;
 begin
   with Event^, Widget.rect do
@@ -371,13 +372,6 @@ begin
     begin
       li := -1;
       case _type of
-        EVENT_MOUSE_CLICK:
-          begin
-            if col2d_PointInRect( mouse_X, mouse_Y, tb ) and ( mouse_button = M_BLEFT ) Then
-              li := ItemIndex - 1;
-            if col2d_PointInRect( mouse_X, mouse_Y, bb ) and ( mouse_button = M_BLEFT ) Then
-              li := ItemIndex + 1;
-          end;
         EVENT_MOUSE_DOWN:
           begin
             if mouse_button = M_BLEFT Then
@@ -385,21 +379,8 @@ begin
                 begin
                   li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - 3 ) div Font.MaxHeight );
                   li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
+                  li := li + zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
                 end;
-
-            if mouseTimeDown > 25 Then
-              begin
-                if col2d_PointInRect( mouse_X, mouse_Y, tb ) and ( mouse_button = M_BLEFT ) Then
-                  begin
-                    DEC( mouseTimeDown, 10 );
-                    li := ItemIndex - 1;
-                  end;
-                if col2d_PointInRect( mouse_X, mouse_Y, bb ) and ( mouse_button = M_BLEFT ) Then
-                  begin
-                    DEC( mouseTimeDown, 10 );
-                    li := ItemIndex + 1;
-                  end;
-              end;
           end;
         EVENT_KEY_UP:
           begin
@@ -415,6 +396,15 @@ begin
         ItemIndex := li;
       end;
   end;
+
+  li := Round( ( Event.Widget.rect.H - 3 ) / ( zglTListBoxDesc( Event.Widget.desc^ ).Font.MaxHeight + 3 ) );
+  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - li;
+  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Step := 1;
+  {if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex <
+    DEC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );
+  if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex >
+    INC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );}
+
   gui_ProcEvents( Event );
 end;
 
@@ -464,6 +454,64 @@ begin
               if mouse_Y < Y + H / 2 Then
                 UPressed := FALSE;
               if mouse_Y > Y + H / 2 Then
+                DPressed := FALSE;
+            end;
+        end;
+      EVENT_MOUSE_LEAVE:
+        begin
+          UPressed := FALSE;
+          DPressed := FALSE;
+        end;
+    end;
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcScrollBar;
+begin
+  with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
+    case _type of
+      EVENT_MOUSE_MOVE:
+        begin
+          if mouse_Y < Y + H - SCROLL_SIZE Then DPressed := FALSE;
+          if mouse_Y > Y + SCROLL_SIZE     Then UPressed := FALSE;
+        end;
+      EVENT_MOUSE_DOWN:
+        begin
+          if ( mouseTimeDown > 30 ) and ( mouse_button = M_BLEFT ) Then
+            begin
+              DEC( mouseTimeDown, 5 );
+              gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
+            end;
+        end;
+      EVENT_MOUSE_CLICK:
+        begin
+          if mouse_button = M_BLEFT Then
+            begin
+              if mouse_Y < Y + SCROLL_SIZE Then
+                begin
+                  UPressed := TRUE;
+                  if Position > 0 Then
+                    DEC( Position, Step );
+                  if Position < 0 Then
+                    Position := 0;
+                end;
+              if mouse_Y > Y + H - SCROLL_SIZE Then
+                begin
+                  DPressed := TRUE;
+                  if Position < Max Then
+                    INC( Position, Step );
+                  if Position > Max Then
+                    Position := Max;
+                end;
+            end;
+        end;
+      EVENT_MOUSE_UP:
+        begin
+          if mouse_button = M_BLEFT Then
+            begin
+              if mouse_Y < Y + H - SCROLL_SIZE Then
+                UPressed := FALSE;
+              if mouse_Y > Y + SCROLL_SIZE Then
                 DPressed := FALSE;
             end;
         end;
