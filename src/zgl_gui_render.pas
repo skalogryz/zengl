@@ -58,6 +58,7 @@ uses
   zgl_primitives_2d,
   zgl_text,
   zgl_gui_main,
+  zgl_gui_utils,
   zgl_math_2d,
   zgl_collision_2d;
 
@@ -79,26 +80,6 @@ begin
   pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h - 2, color, 255, 0 );
   if pressed Then
     pr2d_Rect( X, Y, W, H, COLOR_SELECT, 25, PR2D_FILL );
-end;
-
-procedure _clip( const widget : zglPWidget ); overload;
-  var
-    clip : zglTRect;
-begin
-  clip := col2d_ClipRect( widget.rect, widget.parent.rect );
-  scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
-end;
-
-procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
-  var
-    clip : zglTRect;
-begin
-  clip.X := X;
-  clip.Y := Y;
-  clip.W := W;
-  clip.H := H;
-  clip := col2d_ClipRect( clip, widget.parent.rect );
-  scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
 end;
 
 procedure gui_DrawWidget;
@@ -286,7 +267,7 @@ begin
       pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W, H, $000000, 255 );
 
-      sh := Round( ( H - SCROLL_SIZE * 2 ) / ( Max / Step ) );
+      sh := Round( ( H - SCROLL_SIZE * 2 ) / ( Max / PageSize ) );
       if sh < SCROLL_SIZE / 2 Then
         sh := Round( SCROLL_SIZE / 2 );
       sy := Round( Y + SCROLL_SIZE + ( ( H - SCROLL_SIZE * 2 - sh ) - ( H - SCROLL_SIZE * 2 - sh ) * ( ( Max - Position ) / Max ) ) );

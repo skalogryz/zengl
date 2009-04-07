@@ -50,9 +50,9 @@ uses
   zgl_main,
   zgl_window,
   zgl_math_2d,
-  zgl_gui_std,
+  zgl_gui_process,
   zgl_gui_render,
-  zgl_gui_process;
+  zgl_gui_utils;
 
 procedure gui_Init;
 begin

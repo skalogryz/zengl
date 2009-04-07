@@ -40,12 +40,11 @@ procedure gui_ProcGroupBox   ( const Event : zglPEvent );
 procedure gui_ProcSpin       ( const Event : zglPEvent );
 procedure gui_ProcScrollBar  ( const Event : zglPEvent );
 
-type zglProcWidgetsCallback = procedure( const widget : zglPWidget; const data : Pointer );
-
 implementation
 uses
   zgl_gui_main,
   zgl_gui_render,
+  zgl_gui_utils,
   zgl_mouse,
   zgl_keyboard,
   zgl_math_2d,
@@ -53,40 +52,6 @@ uses
 
 var
   mouseTimeDown : Integer;
-
-procedure _proc( const callback : zglProcWidgetsCallback; const data : Pointer );
-  var
-    w, wc : zglPWidget;
-begin
-  w := managerGUI.First.Next;
-  while w <> nil do
-    begin
-      if Assigned( w.child ) Then
-        begin
-          wc := w.child;
-          repeat
-            wc := wc.Next;
-            callback( wc, data );
-          until not Assigned( wc.Next );
-        end;
-      callback( w, data );
-      w := w.Next;
-    end;
-end;
-
-procedure _focus_reset( const widget : zglPWidget; const data : Pointer );
-begin
-  if widget.Focus Then
-    gui_AddEvent( EVENT_FOCUS_OUT, widget, nil );
-  widget.Focus := FALSE;
-end;
-
-procedure _rbutton_reset( const widget : zglPWidget; const data : Pointer );
-begin
-  if widget._type = WIDGET_RADIOBUTTON Then
-    if zglTRadioButtonDesc( widget.desc^ ).Group = PInteger( data )^ Then
-      zglTRadioButtonDesc( widget.desc^ ).Checked := FALSE;
-end;
 
 procedure gui_ProcWidget;
   var
@@ -216,6 +181,21 @@ begin
           if Assigned( Widget.Events.OnFocus ) Then
             Widget.Events.OnFocus( Widget, FALSE );
         end;
+      EVENT_DRAG_START:
+        begin
+          if Assigned( Widget.Events.OnStartDrag ) Then
+            Widget.Events.OnStartDrag( Widget );
+        end;
+      EVENT_DRAG_MOVE:
+        begin
+          if Assigned( Widget.Events.OnDrag ) Then
+            Widget.Events.OnDrag( Widget, 0, 0 );
+        end;
+      EVENT_DRAG_END:
+        begin
+          if Assigned( Widget.Events.OnEndDrag ) Then
+            Widget.Events.OnEndDrag( Widget, 0, 0 );
+        end;
       EVENT_MOUSE_MOVE:
         begin
           if Assigned( Widget.Events.OnMouseMove ) Then
@@ -234,7 +214,7 @@ begin
         end;
       EVENT_MOUSE_CLICK:
         begin
-          _proc( _focus_reset, nil );
+          gui_ProcCallback( gui_ResetFocus, nil );
           if not Widget.focus Then
             begin
               gui_AddEvent( EVENT_FOCUS_IN, Widget, nil );
@@ -258,7 +238,7 @@ begin
         begin
           if key_code = K_TAB Then
             begin
-              _proc( _focus_reset, nil );
+              gui_ProcCallback( gui_ResetFocus, nil );
               if Assigned( Widget.Next ) Then
                 begin
                   gui_AddEvent( EVENT_FOCUS_IN, Widget.Next, nil );
@@ -339,7 +319,7 @@ begin
         begin
           if mouse_button = M_BLEFT Then
             begin
-              _proc( _rbutton_reset, @Group );
+              gui_ProcCallback( gui_ResetChecked, @Group );
               Checked := TRUE;
             end;
         end;
@@ -376,6 +356,7 @@ procedure gui_ProcListBox;
     iCount : Integer;
 begin
   iCount := Round( ( Event.Widget.rect.H - 3 ) / ( zglTListBoxDesc( Event.Widget.desc^ ).Font.MaxHeight + 3 ) );
+  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).PageSize := iCount;
   iShift := zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
   with Event^, Widget.rect do
     begin
@@ -448,7 +429,7 @@ begin
         end;
       EVENT_MOUSE_DOWN:
         begin
-          if ( mouseTimeDown > 50 ) and ( mouse_button = M_BLEFT ) Then
+          if ( mouseTimeDown > 30 ) and ( mouse_button = M_BLEFT ) Then
             begin
               DEC( mouseTimeDown, 15 );
               gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
@@ -526,7 +507,7 @@ begin
         begin
           if ( mouseTimeDown > 30 ) and ( mouse_button = M_BLEFT ) Then
             begin
-              DEC( mouseTimeDown, 5 );
+              DEC( mouseTimeDown, 15 );
               gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
             end;
         end;

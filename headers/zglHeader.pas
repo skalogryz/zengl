@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.23               }
-{ date:    05.04.09             }
+{ version: 0.1.24               }
+{ date:    08.04.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -637,17 +637,21 @@ const
   EVENT_FOCUS_IN    = 2;
   EVENT_FOCUS_OUT   = 3;
 
-  EVENT_MOUSE_MOVE  = 4;
-  EVENT_MOUSE_ENTER = 5;
-  EVENT_MOUSE_LEAVE = 6;
-  EVENT_MOUSE_DOWN  = 7;
-  EVENT_MOUSE_UP    = 8;
-  EVENT_MOUSE_CLICK = 9;
-  EVENT_MOUSE_WHEEL = 10;
+  EVENT_DRAG_START  = 4;
+  EVENT_DRAG_MOVE   = 5;
+  EVENT_DRAG_END    = 6;
 
-  EVENT_KEY_DOWN    = 11;
-  EVENT_KEY_UP      = 12;
-  EVENT_KEY_CHAR    = 13;
+  EVENT_MOUSE_MOVE  = 7;
+  EVENT_MOUSE_ENTER = 8;
+  EVENT_MOUSE_LEAVE = 9;
+  EVENT_MOUSE_DOWN  = 10;
+  EVENT_MOUSE_UP    = 11;
+  EVENT_MOUSE_CLICK = 12;
+  EVENT_MOUSE_WHEEL = 13;
+
+  EVENT_KEY_DOWN    = 14;
+  EVENT_KEY_UP      = 15;
+  EVENT_KEY_CHAR    = 16;
 
 type
   zglPEvent  = ^zglTEvent;
@@ -656,6 +660,9 @@ type
   //Events
   zglTEvents = record
     OnFocus      : procedure( const Widget : zglPWidget; const Focus : Boolean );
+    OnStartDrag  : procedure( const Widget : zglPWidget );
+    OnDrag       : procedure( const Widget : zglPWidget; const X, Y : Single );
+    OnEndDrag    : procedure( const Widget : zglPWidget; const X, Y : Single );
     OnClick      : procedure( const Widget : zglPWidget );
     OnMouseUp    : procedure( const Widget : zglPWidget );
     OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single );
