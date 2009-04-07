@@ -395,12 +395,17 @@ begin
         EVENT_MOUSE_DOWN:
           begin
             if mouse_button = M_BLEFT Then
-              if mouse_X < Widget.rect.X + Widget.rect.W + Widget.parent.rect.X - SCROLL_SIZE - 2 Then
+              if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
                 begin
-                  li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - 3 ) div Font.MaxHeight );
-                  li := ( Round( mouse_Y - Widget.rect.Y + Widget.parent.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
+                  li := ( Round( mouse_Y - Widget.rect.Y - 3 ) div Font.MaxHeight );
+                  li := ( Round( mouse_Y - Widget.rect.Y - li * 3 - 3 ) div Font.MaxHeight );
                   li := li + iShift;
                 end;
+          end;
+        EVENT_MOUSE_WHEEL:
+          begin
+            if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
+              gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.child.Next, @Event.mouse_wheel );
           end;
         EVENT_KEY_UP:
           begin
