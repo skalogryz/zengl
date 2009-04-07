@@ -76,6 +76,7 @@ type
     OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single );
     OnMouseEnter : procedure( const Widget : zglPWidget );
     OnMouseLeave : procedure( const Widget : zglPWidget );
+    OnMouseWheel : procedure( const Widget : zglPWidget; const Axis : Byte );
     OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte );
     OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte );
     OnChange     : procedure( const Widget : zglPWidget; const Value, Change : Integer );
@@ -126,8 +127,9 @@ end;
     case byte of
       1: ( mouse_pos    : zglTPoint2D );
       2: ( mouse_button : Byte );
-      3: ( key_code     : Byte );
-      4: ( key_char     : PChar );
+      3: ( mouse_wheel  : Byte );
+      4: ( key_code     : Byte );
+      5: ( key_char     : PChar );
 end;
 
   //Event list

@@ -169,6 +169,17 @@ begin
           Event.mouse_button := M_BMIDLE;
           gui_AddEvent( EVENT_MOUSE_UP, Widget, @Event.mouse_button );
         end;
+
+      if mouse_Wheel( M_WUP ) Then
+        begin
+          Event.mouse_wheel := M_WUP;
+          gui_AddEvent( EVENT_MOUSE_WHEEL, Widget, @Event.mouse_wheel );
+        end;
+      if mouse_Wheel( M_WDOWN ) Then
+        begin
+          Event.mouse_wheel := M_WDOWN;
+          gui_AddEvent( EVENT_MOUSE_WHEEL, Widget, @Event.mouse_wheel );
+        end;
     end else
       begin
         if Widget.mousein Then
@@ -232,6 +243,11 @@ begin
 
           if Assigned( Widget.Events.OnClick ) and ( Widget._type <> WIDGET_BUTTON ) Then
             Widget.Events.OnClick( Widget );
+        end;
+      EVENT_MOUSE_WHEEL:
+        begin
+          if Assigned( Widget.Events.OnMouseWheel ) Then
+            Widget.Events.OnMouseWheel( Widget, mouse_wheel );
         end;
       EVENT_KEY_DOWN:
         begin
@@ -496,38 +512,17 @@ begin
           if mouse_Y < Y + H - SCROLL_SIZE Then DPressed := FALSE;
           if mouse_Y > Y + SCROLL_SIZE     Then UPressed := FALSE;
         end;
+      EVENT_MOUSE_LEAVE:
+        begin
+          UPressed := FALSE;
+          DPressed := FALSE;
+        end;
       EVENT_MOUSE_DOWN:
         begin
           if ( mouseTimeDown > 30 ) and ( mouse_button = M_BLEFT ) Then
             begin
               DEC( mouseTimeDown, 5 );
               gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
-            end;
-        end;
-      EVENT_MOUSE_CLICK:
-        begin
-          if mouse_button = M_BLEFT Then
-            begin
-              if mouse_Y < Y + SCROLL_SIZE Then
-                begin
-                  UPressed := TRUE;
-                  Change := -Step;
-                  if Position + Change < 0 Then
-                    Change := 0 - Position;
-                  Position := Position + Change;
-                  if Assigned( Widget.Events.OnChange ) Then
-                    Widget.Events.OnChange( Widget, Position, Change );
-                end;
-              if mouse_Y > Y + H - SCROLL_SIZE Then
-                begin
-                  DPressed := TRUE;
-                  Change := Step;
-                  if Position + Change > Max Then
-                    Change := Max - Position;
-                  Position := Position + Change;
-                  if Assigned( Widget.Events.OnChange ) Then
-                    Widget.Events.OnChange( Widget, Position, Change );
-                end;
             end;
         end;
       EVENT_MOUSE_UP:
@@ -540,10 +535,60 @@ begin
                 DPressed := FALSE;
             end;
         end;
-      EVENT_MOUSE_LEAVE:
+      EVENT_MOUSE_CLICK:
         begin
-          UPressed := FALSE;
-          DPressed := FALSE;
+          if mouse_button = M_BLEFT Then
+            begin
+              if Kind = SCROLLBAR_VERTICAL Then
+                begin
+                  if mouse_Y < Y + SCROLL_SIZE     Then UPressed := TRUE;
+                  if mouse_Y > Y + H - SCROLL_SIZE Then DPressed := TRUE;
+                end else
+                  begin
+                    if mouse_X < X + SCROLL_SIZE     Then UPressed := TRUE;
+                    if mouse_X > Y + W - SCROLL_SIZE Then DPressed := TRUE;
+                  end;
+
+              if UPressed Then
+                begin
+                  Change := -Step;
+                  if Position + Change < 0 Then
+                    Change := 0 - Position;
+                  Position := Position + Change;
+                  if Assigned( Widget.Events.OnChange ) Then
+                    Widget.Events.OnChange( Widget, Position, Change );
+                end;
+              if DPressed Then
+                begin
+                  Change := Step;
+                  if Position + Change > Max Then
+                    Change := Max - Position;
+                  Position := Position + Change;
+                  if Assigned( Widget.Events.OnChange ) Then
+                    Widget.Events.OnChange( Widget, Position, Change );
+                end;
+            end;
+        end;
+      EVENT_MOUSE_WHEEL:
+        begin
+          if mouse_wheel = M_WUP Then
+            begin
+              Change := -Step;
+              if Position + Change < 0 Then
+                Change := 0 - Position;
+              Position := Position + Change;
+              if Assigned( Widget.Events.OnChange ) Then
+                Widget.Events.OnChange( Widget, Position, Change );
+            end;
+          if mouse_wheel = M_WDOWN Then
+            begin
+              Change := Step;
+              if Position + Change > Max Then
+                Change := Max - Position;
+              Position := Position + Change;
+              if Assigned( Widget.Events.OnChange ) Then
+                Widget.Events.OnChange( Widget, Position, Change );
+            end;
         end;
     end;
   gui_ProcEvents( Event );

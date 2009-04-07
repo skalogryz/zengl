@@ -167,6 +167,7 @@ begin
     EVENT_MOUSE_DOWN,
     EVENT_MOUSE_UP,
     EVENT_MOUSE_CLICK: Move( EventData^, newEvent.Next.mouse_button, 1 );
+    EVENT_MOUSE_WHEEL: Move( EventData^, newEvent.Next.mouse_wheel, 1 );
 
     EVENT_KEY_DOWN,
     EVENT_KEY_UP    : Move( EventData^, newEvent.Next.key_code, 1 );
