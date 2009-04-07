@@ -210,13 +210,15 @@ begin
       repeat
         ogl_iAttr[ 0 ] := WGL_DRAW_TO_WINDOW_ARB;
         ogl_iAttr[ 1 ] := GL_TRUE;
-        ogl_iAttr[ 2 ] := WGL_SUPPORT_OPENGL_ARB;
-        ogl_iAttr[ 3 ] := GL_TRUE;
-        ogl_iAttr[ 4 ] := WGL_DOUBLE_BUFFER_ARB;
+        ogl_iAttr[ 2 ] := WGL_ACCELERATION_ARB;
+        ogl_iAttr[ 3 ] := WGL_FULL_ACCELERATION_ARB;
+        ogl_iAttr[ 4 ] := WGL_SUPPORT_OPENGL_ARB;
         ogl_iAttr[ 5 ] := GL_TRUE;
-        ogl_iAttr[ 6 ] := WGL_DEPTH_BITS_ARB;
-        ogl_iAttr[ 7 ] := ogl_zDepth;
-        i := 8;
+        ogl_iAttr[ 6 ] := WGL_DOUBLE_BUFFER_ARB;
+        ogl_iAttr[ 7 ] := GL_TRUE;
+        ogl_iAttr[ 8 ] := WGL_DEPTH_BITS_ARB;
+        ogl_iAttr[ 9 ] := ogl_zDepth;
+        i := 10;
         if ogl_Stencil > 0 Then
           begin
             ogl_iAttr[ i     ] := WGL_STENCIL_BITS_ARB;
