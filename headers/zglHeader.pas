@@ -682,6 +682,7 @@ end;
     rect       : zglTRect;
     focus      : Boolean;
     mousein    : Boolean;
+    draged     : Boolean;
 
     OnDraw     : procedure( const Widget : zglPWidget );
     OnProc     : procedure( const Event  : zglPEvent );

@@ -297,8 +297,7 @@ end;
 
 procedure gui_DrawScrollBar;
   var
-    r  : zglTRect;
-    sy : Single;
+    r : zglTRect;
 begin
   with zglTScrollBarDesc( Widget.desc^ ), Widget.rect do
     begin

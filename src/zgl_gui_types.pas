@@ -97,6 +97,7 @@ end;
     rect       : zglTRect;
     focus      : Boolean;
     mousein    : Boolean;
+    draged     : Boolean;
 
     OnDraw     : procedure( const Widget : zglPWidget );
     OnProc     : procedure( const Event  : zglPEvent );
@@ -132,6 +133,7 @@ end;
     widget     : zglPWidget;
     Next, Prev : zglPEvent;
     case byte of
+      0: ( drag_pos     : zglTPoint2D );
       1: ( mouse_pos    : zglTPoint2D );
       2: ( mouse_button : Byte );
       3: ( mouse_wheel  : Byte );

@@ -163,6 +163,7 @@ begin
 
   zgl_GetMem( Pointer( newEvent.Next ), SizeOf( zglTEvent ) );
   case _type of
+    EVENT_DRAG_MOVE: Move( EventData^, newEvent.Next.drag_pos, SizeOf( zglTPoint2D ) );
     EVENT_MOUSE_MOVE: Move( EventData^, newEvent.Next.mouse_pos, SizeOf( zglTPoint2D ) );
     EVENT_MOUSE_DOWN,
     EVENT_MOUSE_UP,
@@ -222,9 +223,7 @@ begin
             for i := 0 to List.Count - 1 do
               List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
 
-            gui_AddWidget( WIDGET_SCROLLBAR,
-                           X + W - SCROLL_SIZE + Parent.rect.X, Y + Parent.rect.Y, SCROLL_SIZE, H,
-                           nil, nil, Result.Next ).Events.OnChange := gui_ScrollListBox;
+            gui_AddWidget( WIDGET_SCROLLBAR, X + W - SCROLL_SIZE + Parent.rect.X, Y + Parent.rect.Y, SCROLL_SIZE, H, nil, nil, Result.Next );
           end;
     else
       Move( Desc^, Result.Next.desc^, managerGUI.Types[ _type - 1 ].DescSize );

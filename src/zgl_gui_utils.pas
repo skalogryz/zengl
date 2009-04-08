@@ -32,7 +32,7 @@ procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overloa
 
 type zglProcWidgetsCallback = procedure( widget : zglPWidget; const data : Pointer );
 
-procedure gui_ProcCallback( callback : zglProcWidgetsCallback; const data : Pointer );
+procedure gui_ProcCallback( widget : zglPWidget; callback : zglProcWidgetsCallback; const data : Pointer );
 procedure gui_ResetFocus( widget : zglPWidget; const data : Pointer );
 procedure gui_ResetChecked( widget : zglPWidget; const data : Pointer );
 
@@ -40,8 +40,7 @@ function gui_GetListItemsPerPage( Widget : zglPWidget ) : Integer;
 function gui_GetScrollRect( Widget : zglPWidget ) : zglTRect;
 
 procedure gui_ScrollChange( Widget : zglPWidget; const Change : Integer );
-
-procedure gui_ScrollListBox( Widget : zglPWidget; const Value, Change : Integer );
+procedure gui_ScrollXY2Pos( Widget : zglPWidget; const X, Y : Integer );
 
 implementation
 uses
@@ -73,19 +72,16 @@ end;
 
 procedure gui_ProcCallback;
   var
-    w, wc : zglPWidget;
+    w : zglPWidget;
 begin
-  w := managerGUI.First.Next;
+  if not Assigned( widget ) Then
+    w := managerGUI.First.Next
+  else
+    w := widget;
   while w <> nil do
     begin
       if Assigned( w.child ) Then
-        begin
-          wc := w.child;
-          repeat
-            wc := wc.Next;
-            callback( wc, data );
-          until not Assigned( wc.Next );
-        end;
+        gui_ProcCallback( w.child, callback, data );
       callback( w, data );
       w := w.Next;
     end;
@@ -137,7 +133,7 @@ end;
 
 function gui_GetListItemsPerPage;
 begin
-  Result := Round( ( Widget.rect.H - 3 ) / ( zglTListBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
+  Result := Round( ( Widget.rect.H - 3 * 2 ) / ( zglTListBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
 end;
 
 procedure gui_ScrollChange;
@@ -157,29 +153,24 @@ begin
     end;
 end;
 
-procedure gui_ScrollListBox;
+procedure gui_ScrollXY2Pos;
   var
-    ch     : Integer;
-    iShift : Integer;
-    iCount : Integer;
+    r : zglTRect;
+    P : Integer;
 begin
-  iCount := Round( ( Widget.parent.rect.H - 3 ) / ( zglTListBoxDesc( Widget.parent.desc^ ).Font.MaxHeight + 3 ) );
-  iShift := zglTScrollBarDesc( Widget.desc^ ).Position;
-
-  with zglTListBoxDesc( Widget.parent.desc^ ) do
-    begin
-      ch := 0;
-      if ItemIndex < iShift Then
-        ch := iShift - ItemIndex;
-      if ItemIndex > iShift + iCount - 1 Then
-        ch := ( iShift + iCount - 1 ) - ItemIndex;
-      if ch <> 0 Then
+  r := gui_GetScrollRect( Widget );
+  with zglTScrollBarDesc( Widget.desc^ ) do
+    if Kind = SCROLLBAR_VERTICAL Then
+      begin
+        P := Trunc( ( Max / ( Widget.rect.H - SCROLL_SIZE * 2 - r.H ) ) * ( Y - Widget.rect.Y - SCROLL_SIZE ) );
+        if P - Position <> 0 Then
+          gui_ScrollChange( Widget, P - Position );
+      end else
         begin
-          ItemIndex := ItemIndex + ch;
-          if Assigned( Widget.parent.Events.OnChange )  Then
-            Widget.parent.Events.OnChange( Widget.parent, ItemIndex, ch );
+          P := Round( ( Max / ( Widget.rect.W - SCROLL_SIZE * 2 - r.W ) ) * ( X - Widget.rect.X - SCROLL_SIZE ) );
+          if P - Position <> 0 Then
+            gui_ScrollChange( Widget, P - Position );
         end;
-    end;
 end;
 
 end.
