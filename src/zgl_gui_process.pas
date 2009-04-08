@@ -27,7 +27,7 @@ interface
 uses
   zgl_gui_types;
 
-procedure gui_ProcWidget( const Widget : zglPWidget );
+function gui_ProcWidget( const Widget : zglPWidget ) : Boolean;
 
 procedure gui_ProcEvents     ( const Event : zglPEvent );
 procedure gui_ProcButton     ( const Event : zglPEvent );
@@ -53,24 +53,35 @@ uses
 var
   mouseTimeDown : Integer;
 
-procedure gui_ProcWidget;
+function gui_ProcWidget;
   var
-    i     : Integer;
     Event : zglTEvent;
     w     : zglPWidget;
+    cproc : Boolean;
 begin
   if not Assigned( Widget ) Then exit;
 
+  cproc  := FALSE;
+  Result := FALSE;
   if Assigned( Widget.child ) Then
     begin
       w := Widget.child;
       repeat
         w := w.Next;
-        gui_ProcWidget( w );
+        if gui_ProcWidget( w ) Then
+          cproc := TRUE;
       until not Assigned( w.Next );
     end;
+  if cproc Then
+    begin
+      Result := TRUE;
+      exit;
+    end;
+
   if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) and col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.rect ) Then
     begin
+      Result := TRUE;
+
       Event.mouse_pos.X := Widget.rect.X - mouse_X;
       Event.mouse_pos.Y := Widget.rect.Y - mouse_Y;
       gui_AddEvent( EVENT_MOUSE_MOVE, Widget, @Event.mouse_pos );
@@ -156,11 +167,13 @@ begin
     begin
       if key_Last( KA_DOWN ) <> 0 Then
         begin
+          Result := TRUE;
           Event.key_code := key_Last( KA_DOWN );
           gui_AddEvent( EVENT_KEY_DOWN, Widget, @Event.key_code );
         end;
       if key_Last( KA_UP ) <> 0 Then
         begin
+          Result := TRUE;
           Event.key_code := key_Last( KA_UP );
           gui_AddEvent( EVENT_KEY_UP, Widget, @Event.key_code );
         end;
@@ -351,24 +364,12 @@ end;
 procedure gui_ProcListBox;
   var
     li     : Integer;
-    tb, bb : zglTRect;
     iShift : Integer;
     iCount : Integer;
 begin
-  iCount := Round( ( Event.Widget.rect.H - 3 ) / ( zglTListBoxDesc( Event.Widget.desc^ ).Font.MaxHeight + 3 ) );
+  iCount := gui_GetListItemsPerPage( Event.Widget );
   zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).PageSize := iCount;
   iShift := zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
-  with Event^, Widget.rect do
-    begin
-      tb.X := X + W - SCROLL_SIZE;
-      tb.Y := Y;
-      tb.W := SCROLL_SIZE;
-      tb.H := SCROLL_SIZE;
-      bb.X := X + W - SCROLL_SIZE;
-      bb.Y := Y + H - SCROLL_SIZE;
-      bb.W := SCROLL_SIZE;
-      bb.H := SCROLL_SIZE;
-    end;
   with Event^, zglTListBoxDesc( Widget.desc^ ) do
     begin
       li := -1;
@@ -407,9 +408,9 @@ begin
   zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Step := 1;
 
   if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex < iShift Then
-    DEC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );
+    zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex;
   if zglTListBoxDesc( Event.Widget.desc^ ).ItemIndex > iShift + iCount - 1 Then
-    INC( zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position );
+    zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := iShift + iCount - 1;
 
   gui_ProcEvents( Event );
 end;
@@ -429,9 +430,9 @@ begin
         end;
       EVENT_MOUSE_DOWN:
         begin
-          if ( mouseTimeDown > 30 ) and ( mouse_button = M_BLEFT ) Then
+          if ( mouseTimeDown > 15 ) and ( mouse_button = M_BLEFT ) Then
             begin
-              DEC( mouseTimeDown, 15 );
+              DEC( mouseTimeDown, 5 );
               gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
             end;
         end;
@@ -483,6 +484,7 @@ end;
 procedure gui_ProcScrollBar;
   var
     Change : Integer;
+    r      : zglTRect;
 begin
   with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
     case _type of
@@ -495,8 +497,15 @@ begin
         end;
       EVENT_MOUSE_MOVE:
         begin
-          if mouse_Y < Y + H - SCROLL_SIZE Then DPressed := FALSE;
-          if mouse_Y > Y + SCROLL_SIZE     Then UPressed := FALSE;
+          if Kind = SCROLLBAR_VERTICAL Then
+            begin
+              if mouse_Y > Y + SCROLL_SIZE     Then UPressed := FALSE;
+              if mouse_Y < Y + H - SCROLL_SIZE Then DPressed := FALSE;
+            end else
+              begin
+                if mouse_X > X + SCROLL_SIZE     Then UPressed := FALSE;
+                if mouse_X < X + W - SCROLL_SIZE Then DPressed := FALSE;
+              end;
         end;
       EVENT_MOUSE_LEAVE:
         begin
@@ -505,9 +514,9 @@ begin
         end;
       EVENT_MOUSE_DOWN:
         begin
-          if ( mouseTimeDown > 30 ) and ( mouse_button = M_BLEFT ) Then
+          if ( mouseTimeDown > 15 ) and ( mouse_button = M_BLEFT ) Then
             begin
-              DEC( mouseTimeDown, 15 );
+              DEC( mouseTimeDown, 5 );
               gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
             end;
         end;
@@ -515,10 +524,8 @@ begin
         begin
           if mouse_button = M_BLEFT Then
             begin
-              if mouse_Y < Y + H - SCROLL_SIZE Then
-                UPressed := FALSE;
-              if mouse_Y > Y + SCROLL_SIZE Then
-                DPressed := FALSE;
+              UPressed := FALSE;
+              DPressed := FALSE;
             end;
         end;
       EVENT_MOUSE_CLICK:
@@ -532,49 +539,37 @@ begin
                 end else
                   begin
                     if mouse_X < X + SCROLL_SIZE     Then UPressed := TRUE;
-                    if mouse_X > Y + W - SCROLL_SIZE Then DPressed := TRUE;
+                    if mouse_X > X + W - SCROLL_SIZE Then DPressed := TRUE;
                   end;
-
               if UPressed Then
-                begin
-                  Change := -Step;
-                  if Position + Change < 0 Then
-                    Change := 0 - Position;
-                  Position := Position + Change;
-                  if Assigned( Widget.Events.OnChange ) Then
-                    Widget.Events.OnChange( Widget, Position, Change );
-                end;
+                gui_ScrollChange( Widget, -Step );
+
               if DPressed Then
-                begin
-                  Change := Step;
-                  if Position + Change > Max Then
-                    Change := Max - Position;
-                  Position := Position + Change;
-                  if Assigned( Widget.Events.OnChange ) Then
-                    Widget.Events.OnChange( Widget, Position, Change );
-                end;
+                gui_ScrollChange( Widget, Step );
+
+              r := gui_GetScrollRect( Widget );
+              if not col2d_PointInRect( mouse_X, mouse_Y, r ) Then
+                if Kind = SCROLLBAR_VERTICAL Then
+                  begin
+                    if ( mouse_Y < r.Y ) and ( mouse_Y > Y + SCROLL_SIZE )Then
+                      gui_ScrollChange( Widget, -PageSize );
+                    if ( mouse_Y > r.Y + r.H ) and ( mouse_Y < Y + H - SCROLL_SIZE )Then
+                      gui_ScrollChange( Widget, PageSize );
+                  end else
+                    begin
+                      if ( mouse_X < r.X ) and ( mouse_X > X + SCROLL_SIZE )Then
+                        gui_ScrollChange( Widget, -PageSize );
+                      if ( mouse_X > r.X + r.W ) and ( mouse_X < X + W - SCROLL_SIZE )Then
+                        gui_ScrollChange( Widget, PageSize );
+                    end;
             end;
         end;
       EVENT_MOUSE_WHEEL:
         begin
           if mouse_wheel = M_WUP Then
-            begin
-              Change := -Step;
-              if Position + Change < 0 Then
-                Change := 0 - Position;
-              Position := Position + Change;
-              if Assigned( Widget.Events.OnChange ) Then
-                Widget.Events.OnChange( Widget, Position, Change );
-            end;
+            gui_ScrollChange( Widget, -Step );
           if mouse_wheel = M_WDOWN Then
-            begin
-              Change := Step;
-              if Position + Change > Max Then
-                Change := Max - Position;
-              Position := Position + Change;
-              if Assigned( Widget.Events.OnChange ) Then
-                Widget.Events.OnChange( Widget, Position, Change );
-            end;
+            gui_ScrollChange( Widget, Step );
         end;
     end;
   gui_ProcEvents( Event );

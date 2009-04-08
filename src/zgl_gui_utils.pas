@@ -24,24 +24,31 @@ unit zgl_gui_utils;
 interface
 
 uses
-  zgl_gui_types;
+  zgl_gui_types,
+  zgl_math_2d;
 
 procedure _clip( const widget : zglPWidget ); overload;
 procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
 
-type zglProcWidgetsCallback = procedure( const widget : zglPWidget; const data : Pointer );
+type zglProcWidgetsCallback = procedure( widget : zglPWidget; const data : Pointer );
 
-procedure gui_ProcCallback( const callback : zglProcWidgetsCallback; const data : Pointer );
-procedure gui_ResetFocus( const widget : zglPWidget; const data : Pointer );
-procedure gui_ResetChecked( const widget : zglPWidget; const data : Pointer );
+procedure gui_ProcCallback( callback : zglProcWidgetsCallback; const data : Pointer );
+procedure gui_ResetFocus( widget : zglPWidget; const data : Pointer );
+procedure gui_ResetChecked( widget : zglPWidget; const data : Pointer );
 
-procedure gui_ScrollListBox( const Widget : zglPWidget; const Value, Change : Integer );
+function gui_GetListItemsPerPage( Widget : zglPWidget ) : Integer;
+function gui_GetScrollRect( Widget : zglPWidget ) : zglTRect;
+
+procedure gui_ScrollChange( Widget : zglPWidget; const Change : Integer );
+
+procedure gui_ScrollListBox( Widget : zglPWidget; const Value, Change : Integer );
 
 implementation
 uses
   zgl_gui_main,
+  zgl_gui_render,
   zgl_opengl_simple,
-  zgl_math_2d,
+  zgl_mouse,
   zgl_collision_2d;
 
 procedure _clip( const widget : zglPWidget ); overload;
@@ -98,6 +105,58 @@ begin
       zglTRadioButtonDesc( widget.desc^ ).Checked := FALSE;
 end;
 
+function gui_GetScrollRect;
+begin
+  with Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
+    if Kind = SCROLLBAR_VERTICAL Then
+      begin
+        Result.W := SCROLL_SIZE;
+        if PageSize > 0 Then
+          Result.H := Round( ( H - SCROLL_SIZE * 2 ) / ( Max / PageSize ) )
+        else
+          Result.H := 0;
+        if Result.H < SCROLL_SIZE / 2 Then
+          Result.H := Round( SCROLL_SIZE / 2 );
+
+        Result.X := X;
+        Result.Y := Round( Y + SCROLL_SIZE + ( ( H - SCROLL_SIZE * 2 - Result.H ) - ( H - SCROLL_SIZE * 2 - Result.H ) * ( ( Max - Position ) / Max ) ) );
+      end else
+        begin
+          Result.H := SCROLL_SIZE;
+          if PageSize > 0 Then
+            Result.W := Round( ( W - SCROLL_SIZE * 2 ) / ( Max / PageSize ) )
+          else
+            Result.W := 0;
+          if Result.W < SCROLL_SIZE / 2 Then
+            Result.W := Round( SCROLL_SIZE / 2 );
+
+          Result.X := Round( X + SCROLL_SIZE + ( ( W - SCROLL_SIZE * 2 - Result.W ) - ( W - SCROLL_SIZE * 2 - Result.W ) * ( ( Max - Position ) / Max ) ) );
+          Result.Y := Y;
+        end;
+end;
+
+function gui_GetListItemsPerPage;
+begin
+  Result := Round( ( Widget.rect.H - 3 ) / ( zglTListBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
+end;
+
+procedure gui_ScrollChange;
+  var
+    ch : Integer;
+begin
+  with zglTScrollBarDesc( Widget.desc^ ) do
+    begin
+      ch := Change;
+      if Position + ch < 0 Then
+        ch := 0 - Position;
+      if Position + ch > Max Then
+        ch := Max - Position;
+      Position := Position + ch;
+      if Assigned( Widget.Events.OnChange ) Then
+        Widget.Events.OnChange( Widget, Position, ch );
+    end;
+end;
+
 procedure gui_ScrollListBox;
   var
     ch     : Integer;
@@ -111,9 +170,9 @@ begin
     begin
       ch := 0;
       if ItemIndex < iShift Then
-        ch := 1;
+        ch := iShift - ItemIndex;
       if ItemIndex > iShift + iCount - 1 Then
-        ch := -1;
+        ch := ( iShift + iCount - 1 ) - ItemIndex;
       if ch <> 0 Then
         begin
           ItemIndex := ItemIndex + ch;

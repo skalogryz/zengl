@@ -659,19 +659,19 @@ type
 
   //Events
   zglTEvents = record
-    OnFocus      : procedure( const Widget : zglPWidget; const Focus : Boolean );
-    OnStartDrag  : procedure( const Widget : zglPWidget );
-    OnDrag       : procedure( const Widget : zglPWidget; const X, Y : Single );
-    OnEndDrag    : procedure( const Widget : zglPWidget; const X, Y : Single );
-    OnClick      : procedure( const Widget : zglPWidget );
-    OnMouseUp    : procedure( const Widget : zglPWidget );
-    OnMouseMove  : procedure( const Widget : zglPWidget; const X, Y : Single );
-    OnMouseEnter : procedure( const Widget : zglPWidget );
-    OnMouseLeave : procedure( const Widget : zglPWidget );
-    OnMouseWheel : procedure( const Widget : zglPWidget; const Axis : Byte );
-    OnKeyDown    : procedure( const Widget : zglPWidget; const KeyCode : Byte );
-    OnKeyUp      : procedure( const Widget : zglPWidget; const KeyCode : Byte );
-    OnChange     : procedure( const Widget : zglPWidget; const Value, Change : Integer );
+    OnFocus      : procedure( Widget : zglPWidget; const Focus : Boolean );
+    OnStartDrag  : procedure( Widget : zglPWidget );
+    OnDrag       : procedure( Widget : zglPWidget; const X, Y : Single );
+    OnEndDrag    : procedure( Widget : zglPWidget; const X, Y : Single );
+    OnClick      : procedure( Widget : zglPWidget );
+    OnMouseUp    : procedure( Widget : zglPWidget );
+    OnMouseMove  : procedure( Widget : zglPWidget; const X, Y : Single );
+    OnMouseEnter : procedure( Widget : zglPWidget );
+    OnMouseLeave : procedure( Widget : zglPWidget );
+    OnMouseWheel : procedure( Widget : zglPWidget; const Axis : Byte );
+    OnKeyDown    : procedure( Widget : zglPWidget; const KeyCode : Byte );
+    OnKeyUp      : procedure( Widget : zglPWidget; const KeyCode : Byte );
+    OnChange     : procedure( Widget : zglPWidget; const Value, Change : Integer );
 end;
 
   //Widget
