@@ -55,7 +55,7 @@ type
 end;
 
 function  timer_Add( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
-procedure timer_Del( Timer : zglPTimer );
+procedure timer_Del( var Timer : zglPTimer );
 
 function  timer_GetTicks : Double;
 procedure timer_Reset;
@@ -111,6 +111,8 @@ begin
     Timer.Next.Prev := Timer.Prev;
   FreeMemory( Timer );
   DEC( managerTimer.Count );
+
+  Timer := nil;
 end;
 
 function timer_GetTicks;

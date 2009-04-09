@@ -116,7 +116,7 @@ end;
 function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( const BufferCount, SourceCount : Integer ) : zglPSound;
-procedure snd_Del( Sound : zglPSound );
+procedure snd_Del( var Sound : zglPSound );
 function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer ) : zglPSound;
 function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer ) : zglPSound;
 
@@ -324,6 +324,8 @@ begin
 
   FreeMemory( Sound );
   DEC( managerSound.Count.Items );
+
+  Sound := nil;
 end;
 
 function snd_LoadFromFile;

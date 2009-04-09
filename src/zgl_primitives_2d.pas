@@ -50,14 +50,45 @@ begin
   glEnable( GL_BLEND );
 
   glBegin( GL_POINTS );
-    gl_Vertex2f( X, Y + 1 );
+    gl_Vertex2f( X + 0.5, Y + 0.5 );
   glEnd;
 
   glDisable( GL_BLEND );
 end;
 
 procedure pr2d_Line;
+  var
+    _x1, _y1 : Single;
+    _x2, _y2 : Single;
 begin
+  if X1 < X2 Then
+    begin
+      _x1 := X1 + 0.5;
+      _x2 := X2 - 0.5;
+    end else
+      if X1 > X2 Then
+        begin
+          _x1 := X1 - 0.5;
+          _x2 := X2 + 0.5;
+        end else
+          begin
+            _x1 := X1 + 0.5;
+            _x2 := X2 + 0.5;
+          end;
+  if Y1 < Y2 Then
+    begin
+      _y1 := Y1 + 0.5;
+      _y2 := Y2 - 0.5;
+    end else
+      if Y1 > Y2 Then
+        begin
+          _y1 := Y1 - 0.5;
+          _y2 := Y2 + 0.5;
+        end else
+          begin
+            _y1 := Y1 + 0.5;
+            _y2 := Y2 + 0.5;
+          end;
   glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
 
   if FX and PR2D_SMOOTH > 0 Then
@@ -69,9 +100,9 @@ begin
 
   glBegin( GL_LINES );
     if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-    gl_Vertex2f( X1, Y1 + 1 );
+    gl_Vertex2f( _x1, _y1 );
     if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-    gl_Vertex2f( X2, Y2 + 1 );
+    gl_Vertex2f( _x2, _y2 );
   glEnd;
 
   if FX and PR2D_SMOOTH > 0 Then
@@ -104,21 +135,21 @@ begin
     begin
       glBegin( GL_LINES );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-        gl_Vertex2f( X,         Y + 1 );
+        gl_Vertex2f( X + 0.5,     Y + 0.5 );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-        gl_Vertex2f( X + W,     Y + 1 );
+        gl_Vertex2f( X + W - 0.5, Y + 0.5 );
 
-        gl_Vertex2f( X + W - 1, Y + 1 );
+        gl_Vertex2f( X + W - 0.5, Y + 0.5 );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
-        gl_Vertex2f( X + W - 1, Y + H );
+        gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
 
-        gl_Vertex2f( X + W - 1, Y + H );
+        gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
-        gl_Vertex2f( X,         Y + H );
+        gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
 
-        gl_Vertex2f( X,         Y + H );
+        gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
         if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-        gl_Vertex2f( X,         Y + 1 );
+        gl_Vertex2f( X + 0.5,     Y + 0.5 );
       glEnd;
     end;
 

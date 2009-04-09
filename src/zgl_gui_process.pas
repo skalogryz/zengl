@@ -53,6 +53,7 @@ uses
 var
   mouseTimeDown : Integer;
   widgetBDrag   : Boolean;
+  widgetDrag    : Boolean;
   mouseShiftX,
   mouseShiftY   : Integer;
 
@@ -67,6 +68,7 @@ begin
   if mouse_Up( M_BLEFT ) Then
     begin
       widgetBDrag   := FALSE;
+      widgetDrag    := FALSE;
       Widget.draged := FALSE;
       Event.drag_pos.X := mouse_X - mouseShiftX;
       Event.drag_pos.Y := mouse_Y - mouseShiftY;
@@ -95,6 +97,7 @@ begin
       Result := TRUE;
       exit;
     end;
+  if widgetDrag and ( not Widget.draged ) Then exit;
 
   if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) and col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.rect ) Then
     begin
@@ -109,6 +112,7 @@ begin
              ( mouseShiftY <> mouse_Y - Round( Widget.rect.Y ) ) ) and ( not Widget.draged ) Then
           begin
             Widget.draged := TRUE;
+            widgetDrag    := TRUE;
             if Assigned( Widget.Events.OnStartDrag ) Then
               Widget.Events.OnStartDrag( Widget );
             gui_AddEvent( EVENT_DRAG_START, Widget, nil );
@@ -403,8 +407,24 @@ procedure gui_ProcListBox;
     iCount : Integer;
 begin
   iCount := gui_GetListItemsPerPage( Event.Widget );
-  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).PageSize := iCount;
-  iShift := zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
+  with zglTListBoxDesc( Event.Widget.desc^ ), Event.Widget^, Event.Widget.rect do
+    begin
+      if ( List.Count > iCount ) and ( not Assigned( child ) ) Then
+        gui_AddWidget( WIDGET_SCROLLBAR, W - SCROLL_SIZE, 0, SCROLL_SIZE, H, nil, nil, Event.Widget );
+      if ( List.Count <= iCount ) and Assigned( Event.Widget.child ) Then
+        begin
+          gui_DelWidget( child.Next );
+          gui_DelWidget( child );
+        end;
+    end;
+
+  if Assigned( Event.Widget.child ) Then
+    begin
+      zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).PageSize := iCount;
+      iShift := zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
+    end else
+      iShift := 0;
+
   with Event^, zglTListBoxDesc( Widget.desc^ ) do
     begin
       li := -1;
@@ -421,8 +441,9 @@ begin
           end;
         EVENT_MOUSE_WHEEL:
           begin
-            if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
-              gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.child.Next, @Event.mouse_wheel );
+            if Assigned( Event.Widget.child ) Then
+              if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
+                gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.child.Next, @Event.mouse_wheel );
           end;
         EVENT_KEY_UP:
           begin
@@ -437,15 +458,21 @@ begin
           Widget.Events.OnChange( Widget, li, li - ItemIndex );
         ItemIndex := li;
 
-        if ItemIndex < iShift Then
-          zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex;
-        if ItemIndex > iShift + iCount - 1 Then
-          zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex - iCount + 1;
+        if Assigned( Event.Widget.child ) Then
+          begin
+            if ItemIndex < iShift Then
+              zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex;
+            if ItemIndex > iShift + iCount - 1 Then
+              zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex - iCount + 1;
+          end;
       end;
   end;
 
-  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
-  zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Step := 1;
+  if Assigned( Event.Widget.child ) Then
+    begin
+      zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
+      zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Step := 1;
+    end;
 
   gui_ProcEvents( Event );
 end;
@@ -534,18 +561,29 @@ begin
       EVENT_DRAG_START:
         begin
           r := gui_GetScrollRect( Widget );
-          if Kind = SCROLLBAR_VERTICAL Then
-            mouseShiftY := mouse_Y - Round( Widget.rect.Y + ( r.Y - Widget.rect.Y ) )
-          else
-            mouseShiftX := mouse_X - Round( Widget.rect.X + ( r.X - Widget.rect.X ) );
+          if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
+            begin
+              SDraged := TRUE;
+              if Kind = SCROLLBAR_VERTICAL Then
+                mouseShiftY := mouse_Y - Round( Widget.rect.Y + ( r.Y - Widget.rect.Y ) )
+              else
+                mouseShiftX := mouse_X - Round( Widget.rect.X + ( r.X - Widget.rect.X ) );
+            end;
         end;
       EVENT_DRAG_MOVE:
         begin
-          r := gui_GetScrollRect( Widget );
-          if Kind = SCROLLBAR_VERTICAL Then
-            gui_ScrollXY2Pos( Widget, 0, Round( drag_pos.Y ) )
-          else
-            gui_ScrollXY2Pos( Widget, Round( drag_pos.X ), 0 );
+          if SDraged Then
+            begin
+              r := gui_GetScrollRect( Widget );
+              if Kind = SCROLLBAR_VERTICAL Then
+                gui_ScrollXY2Pos( Widget, 0, Round( drag_pos.Y ) )
+              else
+                gui_ScrollXY2Pos( Widget, Round( drag_pos.X ), 0 );
+            end;
+        end;
+      EVENT_DRAG_END:
+        begin
+          SDraged := FALSE;
         end;
       EVENT_MOUSE_MOVE:
         begin

@@ -72,12 +72,12 @@ begin
 
   color := COLOR_LIGHT;
   if pressed Then color := COLOR_DARK;
-  pr2d_Line( x + 1, y + 1, x + w - 2, y + 1, color, 255, 0 );
-  pr2d_Line( x + 1, y + 1, x + 1, y + h - 2, color, 255, 0 );
+  pr2d_Line( x + 1, y + 1, x + w - 1, y + 1, color, 255, 0 );
+  pr2d_Line( x + 1, y + 1, x + 1, y + h - 1, color, 255, 0 );
   color := COLOR_DARK;
   if pressed Then color := COLOR_LIGHT;
-  pr2d_Line( x + 1, y + h - 2, x + w - 2, y + h - 2, color, 255, 0 );
-  pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h - 2, color, 255, 0 );
+  pr2d_Line( x + 1, y + h - 2, x + w - 1, y + h - 2, color, 255, 0 );
+  pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h, color, 255, 0 );
   if pressed Then
     pr2d_Rect( X, Y, W, H, COLOR_SELECT, 25, PR2D_FILL );
 end;
@@ -227,17 +227,22 @@ procedure gui_DrawListBox;
   var
     i, ty  : Integer;
     iShift : Integer;
+    subW   : Integer;
 begin
   with zglTListBoxDesc( Widget.desc^ ), Widget.rect do
     begin
-      pr2d_Rect( X, Y, W - SCROLL_SIZE - 1, H, COLOR_EDIT, 255, PR2D_FILL );
-      pr2d_Rect( X, Y, W - SCROLL_SIZE - 1, H, COLOR_WIDGET, 255, 0 );
-      pr2d_Rect( X + 1, Y + 1, W - 2 - SCROLL_SIZE - 1, H - 2, $000000, 255, 0 );
+      subW := ( SCROLL_SIZE + 1 ) * Byte( Assigned( Widget.child ) );
+      pr2d_Rect( X, Y, W - subW, H, COLOR_EDIT, 255, PR2D_FILL );
+      pr2d_Rect( X, Y, W - subW, H, COLOR_WIDGET, 255, 0 );
+      pr2d_Rect( X + 1, Y + 1, W - 2 - subW, H - 2, $000000, 255, 0 );
       if Widget.focus Then
-        pr2d_Rect( X, Y, W - SCROLL_SIZE - 1, H, COLOR_SELECT, 155 );
+        pr2d_Rect( X, Y, W - subW, H, COLOR_SELECT, 155 );
 
-      _clip( Widget, X + 2, Y + 2, W - SCROLL_SIZE - 4, H - 4 );
-      iShift := zglTScrollBarDesc( Widget.child.Next.desc^ ).Position;
+      _clip( Widget, X + 2, Y + 2, W - subW + 1 - 4, H - 4 );
+      if Assigned( Widget.child ) Then
+        iShift := zglTScrollBarDesc( Widget.child.Next.desc^ ).Position
+      else
+        iShift := 0;
       for i := 0 to List.Count - 1 do
         begin
           ty := Round( Y + ( i - iShift ) * Font.MaxHeight + ( i  - iShift ) * 3 + 3 );
@@ -248,9 +253,9 @@ begin
       if ItemIndex > -1 Then
         begin
           pr2d_Rect( X + 2, Y + 3 + ( ItemIndex - iShift ) * Font.MaxHeight + ( ItemIndex - iShift ) * 3,
-                     W - 4 - SCROLL_SIZE - 1, Font.MaxHeight, COLOR_SELECT, 55, PR2D_FILL );
+                     W - 4 - subW, Font.MaxHeight, COLOR_SELECT, 55, PR2D_FILL );
           pr2d_Rect( X + 2, Y + 3 + ( ItemIndex - iShift ) * Font.MaxHeight + ( ItemIndex - iShift ) * 3,
-                     W - 4 - SCROLL_SIZE - 1, Font.MaxHeight, COLOR_SELECT, 155 );
+                     W - 4 - subW, Font.MaxHeight, COLOR_SELECT, 155 );
         end;
       scissor_End;
     end;

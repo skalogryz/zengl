@@ -219,6 +219,7 @@ end;
 
     UPressed : Boolean;
     DPressed : Boolean;
+    SDraged  : Boolean;
 end;
 
 implementation

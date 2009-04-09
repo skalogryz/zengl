@@ -71,7 +71,7 @@ type
 end;
 
 function  font_Add : zglPFont;
-procedure font_Del( Font : zglPFont );
+procedure font_Del( var Font : zglPFont );
 
 function font_Load : zglPFont;
 function font_LoadFromFile( const FileName : String ) : zglPFont;
@@ -120,6 +120,8 @@ begin
     Font.Next.Prev := Font.Prev;
   FreeMemory( Font );
   DEC( managerFont.Count );
+
+  Font := nil;
 end;
 
 function font_Load;

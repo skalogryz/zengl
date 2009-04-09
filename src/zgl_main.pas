@@ -196,28 +196,45 @@ end;
 {$ENDIF}
 
 procedure zgl_Destroy;
+  var
+    p : Pointer;
 begin
   scr_Destroy;
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
-  while managerTimer.Count > 0 do
-    timer_Del( managerTimer.First.Next );
+  while managerTimer.Count > 1 do
+    begin
+      p := managerTimer.First.Next;
+      timer_Del( p );
+    end;
 
   log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
-  while managerRTarget.Count > 0 do
-    rtarget_Del( managerRTarget.First.Next );
+  while managerRTarget.Count > 1 do
+    begin
+      p := managerRTarget.First.Next;
+      rtarget_Del( p );
+    end;
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
-  while managerTexture.Count.Items > 0 do
-    tex_Del( managerTexture.First.Next );
+  while managerTexture.Count.Items > 1 do
+    begin
+      p := managerTexture.First.Next;
+      tex_Del( p );
+    end;
 
   log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
-  while managerFont.Count > 0 do
-    font_Del( managerFont.First.Next );
+  while managerFont.Count > 1 do
+    begin
+      p := managerFont.First.Next;
+      font_Del( p );
+    end;
 
   log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
-  while managerSound.Count.Items > 0 do
-    snd_Del( managerSound.First.Next );
+  while managerSound.Count.Items > 1 do
+    begin
+      p := managerSound.First.Next;
+      snd_Del( p );
+    end;
 
   snd_StopFile;
   snd_Free;

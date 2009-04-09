@@ -74,7 +74,7 @@ type
 end;
 
 function  rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
-procedure rtarget_Del( Target : zglPRenderTarget );
+procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
 
 var
@@ -246,6 +246,8 @@ begin
     FreeMemory( Target.Handle );
   FreeMemory( Target );
   DEC( managerRTarget.Count );
+
+  Target := nil;
 end;
 
 procedure rtarget_Set;

@@ -87,7 +87,7 @@ type
 end;
 
 function  tex_Add : zglPTexture;
-procedure tex_Del( Texture : zglPTexture );
+procedure tex_Del( var Texture : zglPTexture );
 
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
@@ -143,6 +143,8 @@ begin
     Texture.Next.Prev := Texture.Prev;
   FreeMemory( Texture );
   DEC( managerTexture.Count.Items );
+
+  Texture := nil;
 end;
 
 procedure tex_Create;

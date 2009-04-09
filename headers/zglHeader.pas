@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.24               }
-{ date:    08.04.09             }
+{ date:    09.04.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -211,7 +211,7 @@ end;
 
 var
   timer_Add      : function( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
-  timer_Del      : procedure( Timer : zglPTimer );
+  timer_Del      : procedure( var Timer : zglPTimer );
   timer_GetTicks : function : Double;
 
 // KEYBOARD
@@ -429,7 +429,7 @@ const
 
 var
   tex_Add            : function : zglPTexture;
-  tex_Del            : procedure( Texture : zglPTexture );
+  tex_Del            : procedure( var Texture : zglPTexture );
   tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
   tex_CreateZero     : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
   tex_LoadFromFile   : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
@@ -485,7 +485,7 @@ const
 
 var
   rtarget_Add : function( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
-  rtarget_Del : procedure( Target : zglPRenderTarget );
+  rtarget_Del : procedure( var Target : zglPRenderTarget );
   rtarget_Set : procedure( const Target : zglPRenderTarget );
 
 // 2D
@@ -610,7 +610,7 @@ end;
 
 var
   font_Add            : function : zglPFont;
-  font_Del            : procedure( Font : zglPFont );
+  font_Del            : procedure( var Font : zglPFont );
   font_LoadFromFile   : function( const FileName : String ) : zglPFont;
   font_LoadFromMemory : function( const Memory : zglTMemory ) : zglPFont;
   text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
@@ -872,7 +872,7 @@ var
   snd_Init              : function : Boolean;
   snd_Free              : procedure;
   snd_Add               : function( const BufferCount, SourceCount : Integer ) : zglPSound;
-  snd_Del               : procedure( Sound : zglPSound );
+  snd_Del               : procedure( var Sound : zglPSound );
   snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer ) : zglPSound;
   snd_LoadFromMemory    : function( const Memory : zglTMemory; Extension : String; const SourceCount : Integer ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;

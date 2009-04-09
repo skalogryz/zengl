@@ -56,9 +56,9 @@ begin
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity;
   if app_Flags and CORRECT_RESOLUTION > 0 Then
-    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, 0, 1 )
+    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
   else
-    glOrtho( 0, wnd_Width, wnd_Height, 0, 0, 1 );
+    glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
   scr_SetViewPort;

@@ -33,7 +33,7 @@ procedure gui_Draw;
 procedure gui_Proc;
 
 procedure gui_AddEvent( const _type : Integer; const Widget : zglPWidget; const EventData : Pointer );
-procedure gui_DelEvent( Event : zglPEvent );
+procedure gui_DelEvent( var Event : zglPEvent );
 
 function  gui_AddWidget( const _type : Integer; const X, Y, W, H : Single; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
 procedure gui_DelWidget( var Widget : zglPWidget );
@@ -127,6 +127,7 @@ procedure gui_Proc;
   var
     Widget : zglPWidget;
     Event  : zglPEvent;
+    p      : Pointer;
 begin
   INC( cursorAlpha );
   if cursorAlpha > 50 Then
@@ -150,7 +151,10 @@ begin
       Event := Event.Next;
     end;
   while eventList.Count > 0 do
-    gui_DelEvent( eventList.First.Next );
+    begin
+      p := eventList.First.Next;
+      gui_DelEvent( p );
+    end;
 end;
 
 procedure gui_AddEvent;
@@ -188,6 +192,8 @@ begin
     Event.Next.Prev := Event.Prev;
   Freemem( Event );
   DEC( eventList.Count );
+
+  Event := nil;
 end;
 
 function gui_AddWidget;
@@ -200,6 +206,8 @@ begin
       if not Assigned( Parent.child ) Then
         zgl_GetMem( Pointer( Parent.child ), SizeOf( zglTWidget ) );
       Result        := Parent.child;
+      //Result.Next   := nil;
+      //Result.Prev   := nil;
       Result._type  := WIDGET_UNKNOWN;
       Result.parent := Parent;
     end else
@@ -222,8 +230,6 @@ begin
             SetLength( List.Items, List.Count );
             for i := 0 to List.Count - 1 do
               List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
-
-            gui_AddWidget( WIDGET_SCROLLBAR, X + W - SCROLL_SIZE + Parent.rect.X, Y + Parent.rect.Y, SCROLL_SIZE, H, nil, nil, Result.Next );
           end;
     else
       Move( Desc^, Result.Next.desc^, managerGUI.Types[ _type - 1 ].DescSize );
@@ -259,13 +265,31 @@ begin
 end;
 
 procedure gui_DelWidget;
+  var
+    p : Pointer;
 begin
   if Assigned( Widget.Prev ) Then
-    Widget.Prev.Next := Widget.Next;
+    if Assigned( Widget.Next ) Then // FIXME: хмм...
+      Widget.Prev.Next := Widget.Next;
   if Assigned( Widget.Next ) Then
     Widget.Next.Prev := Widget.Prev;
+
+  if Assigned( Widget.child ) Then
+    begin
+      p := Widget.child.Next;
+      while Assigned( p ) do
+        begin
+          gui_DelWidget( p );
+          p := Widget.child.Next;
+        end;
+      gui_DelWidget( Widget.child );
+    end;
+
+  Freemem( Widget.desc );
   Freemem( Widget );
   DEC( managerGUI.Count.Items );
+
+  Widget := nil;
 end;
 
 end.
