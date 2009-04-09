@@ -205,35 +205,35 @@ begin
   while managerTimer.Count > 1 do
     begin
       p := managerTimer.First.Next;
-      timer_Del( p );
+      timer_Del( zglPTimer( p ) );
     end;
 
   log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 1 do
     begin
       p := managerRTarget.First.Next;
-      rtarget_Del( p );
+      rtarget_Del( zglPRenderTarget( p ) );
     end;
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 1 do
     begin
       p := managerTexture.First.Next;
-      tex_Del( p );
+      tex_Del( zglPTexture( p ) );
     end;
 
   log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
   while managerFont.Count > 1 do
     begin
       p := managerFont.First.Next;
-      font_Del( p );
+      font_Del( zglPFont( p ) );
     end;
 
   log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
   while managerSound.Count.Items > 1 do
     begin
       p := managerSound.First.Next;
-      snd_Del( p );
+      snd_Del( zglPSound( p ) );
     end;
 
   snd_StopFile;

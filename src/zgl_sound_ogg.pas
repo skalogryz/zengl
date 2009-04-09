@@ -529,7 +529,7 @@ begin
             if first Then
               zgl_GetMem( Data, BytesRead )
             else
-              Data := ReallocMem( Data, size );
+              Data := SysReallocMem( Data, size );
             Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
           end;
         first := FALSE;

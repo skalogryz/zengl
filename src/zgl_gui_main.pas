@@ -153,7 +153,7 @@ begin
   while eventList.Count > 0 do
     begin
       p := eventList.First.Next;
-      gui_DelEvent( p );
+      gui_DelEvent( zglPEvent( p ) );
     end;
 end;
 
@@ -279,7 +279,7 @@ begin
       p := Widget.child.Next;
       while Assigned( p ) do
         begin
-          gui_DelWidget( p );
+          gui_DelWidget( zglPWidget( p ) );
           p := Widget.child.Next;
         end;
       gui_DelWidget( Widget.child );
