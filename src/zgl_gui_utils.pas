@@ -108,7 +108,7 @@ begin
       begin
         Result.W := SCROLL_SIZE;
         if PageSize > 0 Then
-          Result.H := Round( ( H - SCROLL_SIZE * 2 ) / ( Max / PageSize ) )
+          Result.H := Round( ( H - SCROLL_SIZE * 2 ) / ( ( Max + PageSize ) / PageSize ) )
         else
           Result.H := 0;
         if Result.H < SCROLL_SIZE / 2 Then
@@ -120,7 +120,7 @@ begin
         begin
           Result.H := SCROLL_SIZE;
           if PageSize > 0 Then
-            Result.W := Round( ( W - SCROLL_SIZE * 2 ) / ( Max / PageSize ) )
+            Result.W := Round( ( W - SCROLL_SIZE * 2 ) / ( ( Max + PageSize ) / PageSize ) )
           else
             Result.W := 0;
           if Result.W < SCROLL_SIZE / 2 Then

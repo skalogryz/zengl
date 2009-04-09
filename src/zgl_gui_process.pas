@@ -469,10 +469,13 @@ begin
   end;
 
   if Assigned( Event.Widget.child ) Then
-    begin
-      zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
-      zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Step := 1;
-    end;
+    with zglTScrollBarDesc( Event.Widget.child.Next.desc^ ) do
+      begin
+        Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
+        Step := 1;
+        if Position > Max Then
+          Position := Max;
+      end;
 
   gui_ProcEvents( Event );
 end;
@@ -621,7 +624,7 @@ begin
       EVENT_MOUSE_CLICK:
         begin
           r := gui_GetScrollRect( Widget );
-          if mouse_button = M_BLEFT Then
+          if ( mouse_button = M_BLEFT ) and ( not SDraged ) Then
             begin
               if Kind = SCROLLBAR_VERTICAL Then
                 begin

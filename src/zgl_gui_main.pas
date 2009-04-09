@@ -206,8 +206,6 @@ begin
       if not Assigned( Parent.child ) Then
         zgl_GetMem( Pointer( Parent.child ), SizeOf( zglTWidget ) );
       Result        := Parent.child;
-      //Result.Next   := nil;
-      //Result.Prev   := nil;
       Result._type  := WIDGET_UNKNOWN;
       Result.parent := Parent;
     end else
