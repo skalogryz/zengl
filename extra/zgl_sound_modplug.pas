@@ -66,7 +66,7 @@ procedure mp_Init;
 function  mp_CodecOpen( const FileName : String; var Stream : zglPSoundStream ) : Boolean;
 function  mp_CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
 procedure mp_CodecLoop;
-procedure mp_CodecClose( var Stream : zglPSoundStream );
+procedure mp_CodecClose;
 
 var
   Formats : array[ 0..MAX_FORMATS - 1 ] of zglTSoundStream;

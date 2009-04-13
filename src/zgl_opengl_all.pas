@@ -274,6 +274,7 @@ type
   procedure glLoadIdentity; stdcall; external libGL;
   procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGL;
   procedure glMultMatrixf(const m: PGLfloat); stdcall; external libGL;
+  procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGL;
   // Vertex
   procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
   procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;

@@ -38,9 +38,10 @@ const
   WIDGET_LABEL       = 4;
   WIDGET_EDITBOX     = 5;
   WIDGET_LISTBOX     = 6;
-  WIDGET_GROUPBOX    = 7;
-  WIDGET_SPIN        = 8;
-  WIDGET_SCROLLBAR   = 9;
+  WIDGET_COMBOBOX    = 7;
+  WIDGET_GROUPBOX    = 8;
+  WIDGET_SPIN        = 9;
+  WIDGET_SCROLLBAR   = 10;
 
   // ScrollBar
   SCROLLBAR_VERTICAL   = 0;
@@ -191,6 +192,16 @@ end;
     Font      : zglPFont;
     List      : zglTStringList;
     ItemIndex : Integer;
+end;
+
+  zglPComboBoxDesc = ^zglTComboBoxDesc;
+  zglTComboBoxDesc = record
+    Font          : zglPFont;
+    List          : zglTStringList;
+    ItemIndex     : Integer;
+    DropDownCount : Integer;
+
+    DropedDown    : Boolean;
 end;
 
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;

@@ -127,8 +127,6 @@ var
   filePath : String;
 
 implementation
-uses
-  zgl_utils;
 
 procedure file_Open;
 begin

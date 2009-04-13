@@ -355,6 +355,7 @@ begin
   if not Assigned( Result.Data ) Then
     begin
       log_Add( 'Cannot load sound: ' + FileName );
+      snd_Del( Result );
       exit;
     end;
 
@@ -678,8 +679,6 @@ procedure snd_PlayFile;
     {$IFDEF USE_OPENAL}
     BytesRead : Integer;
     {$ELSE}
-    ap1, ap2 : Pointer;
-    as1, as2 : DWORD;
     buffDesc : zglTBufferDesc;
     {$ENDIF}
 begin
@@ -750,10 +749,6 @@ begin
   if Assigned( sfBuffer ) Then sfBuffer := nil;
   sfBuffer := dsu_CreateBuffer( sfStream.BufferSize, @buffDesc.FormatCode );
 
-  {sfBuffer.Lock( 0, sfStream.BufferSize, ap1, as1, ap2, as2, 0 );
-  sfStream.CodecRead( ap1, as1, _End );
-  sfBuffer.Unlock( ap1, as1, ap2, as2 );}
-
   sfBuffer.SetCurrentPosition( 0 );
   sfLastPos := 0;
   sfBuffer.Play( 0, 0, DSBPLAY_LOOPING );
@@ -800,10 +795,10 @@ function snd_ProcFile;
     buffer    : LongWord;
     BytesRead : Integer;
   {$ELSE}
-    as1, as2 : DWORD;
-    ap1, ap2 : Pointer;
-    Pos      : DWORD;
-    NeedFill : DWORD;
+    Block1, Block2 : Pointer;
+    b1Size, b2Size : DWORD;
+    Position       : DWORD;
+    FillSize       : DWORD;
   {$ENDIF}
 begin
   try
@@ -826,24 +821,24 @@ begin
             DEC( processed );
           end;
         {$ELSE}
-        while DWORD( sfBuffer.GetCurrentPosition( @Pos, @as2 ) ) = DSERR_BUFFERLOST do
+        while DWORD( sfBuffer.GetCurrentPosition( @Position, @b1Size ) ) = DSERR_BUFFERLOST do
           sfBuffer.Restore;
 
-        NeedFill := ( sfStream.BufferSize + Pos - sfLastPos ) mod sfStream.BufferSize;
+        FillSize := ( sfStream.BufferSize + Position - sfLastPos ) mod sfStream.BufferSize;
 
-        ap1 := nil;
-        ap2 := nil;
-        as1 := 0;
-        as2 := 0;
+        Block1 := nil;
+        Block2 := nil;
+        b1Size := 0;
+        b2Size := 0;
 
-        sfBuffer.Lock( sfLastPos, NeedFill, ap1, as1, ap2, as2, 0 );
-        sfLastPos := Pos;
+        sfBuffer.Lock( sfLastPos, FillSize, Block1, b1Size, Block2, b2Size, 0 );
+        sfLastPos := Position;
 
-        sfStream.CodecRead( ap1, as1, _End );
-        if ( as2 <> 0 ) and ( not _End ) Then
-          sfStream.CodecRead( ap2, as2, _End );
+        sfStream.CodecRead( Block1, b1Size, _End );
+        if ( b2Size <> 0 ) and ( not _End ) Then
+          sfStream.CodecRead( Block2, b2Size, _End );
 
-        sfBuffer.Unlock( ap1, as1, ap2, as2 );
+        sfBuffer.Unlock( Block1, b1Size, Block2, b2Size );
         {$ENDIF}
         if _End then
           begin

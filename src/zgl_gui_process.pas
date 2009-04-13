@@ -36,6 +36,7 @@ procedure gui_ProcRadioButton( const Event : zglPEvent );
 procedure gui_ProcLabel      ( const Event : zglPEvent );
 procedure gui_ProcEditBox    ( const Event : zglPEvent );
 procedure gui_ProcListBox    ( const Event : zglPEvent );
+procedure gui_ProcComboBox   ( const Event : zglPEvent );
 procedure gui_ProcGroupBox   ( const Event : zglPEvent );
 procedure gui_ProcSpin       ( const Event : zglPEvent );
 procedure gui_ProcScrollBar  ( const Event : zglPEvent );
@@ -477,6 +478,21 @@ begin
           Position := Max;
       end;
 
+  gui_ProcEvents( Event );
+end;
+
+procedure gui_ProcComboBox;
+begin
+  with Event^, zglTComboBoxDesc( Widget.desc^ ), Widget.rect do
+    begin
+      case _type of
+        EVENT_MOUSE_CLICK:
+          begin
+            if ( mouse_button = M_BLEFT ) and ( mouse_X > X + W - H + 2 ) Then
+              DropedDown := not DropedDown;
+          end;
+      end;
+    end;
   gui_ProcEvents( Event );
 end;
 

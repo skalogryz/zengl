@@ -112,7 +112,7 @@ begin
 var
   FL, FP : PChar;
   S      : String;
-  t      : array[ 0..255 ] of Char;
+  t      : array[ 0..MAX_PATH - 1 ] of Char;
 begin
   wnd_INST := GetModuleHandle( nil );
   GetMem( FL, 65535 );
@@ -124,7 +124,7 @@ begin
   FL := nil;
   FP := nil;
 
-  GetEnvironmentVariable( 'APPDATA', t, 255 );
+  GetEnvironmentVariable( 'APPDATA', t, MAX_PATH );
   app_UsrHomeDir := t;
   app_UsrHomeDir := app_UsrHomeDir + '\';
 {$ENDIF}

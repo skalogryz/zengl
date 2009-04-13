@@ -41,7 +41,7 @@ function  wnd_Create( const Width, Height : WORD ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
-procedure wnd_SetCaption( NewCaption : String );
+procedure wnd_SetCaption( const NewCaption : String );
 procedure wnd_SetSize( const Width, Height : WORD );
 procedure wnd_SetPos( const X, Y : WORD );
 procedure wnd_ShowCursor( const Show : Boolean );

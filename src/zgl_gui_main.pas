@@ -48,6 +48,7 @@ var
 implementation
 uses
   zgl_main,
+  zgl_opengl_all,
   zgl_window,
   zgl_math_2d,
   zgl_gui_process,
@@ -92,6 +93,12 @@ begin
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawListBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcListBox );
 
+  // ComboBox
+  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_COMBOBOX ) );
+  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTComboBoxDesc ) ) );
+  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawComboBox );
+  zgl_Reg( WIDGET_ONPROC,    @gui_ProcComboBox );
+
   // GroupBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_GROUPBOX ) );
   zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTGroupBoxDesc ) ) );
@@ -115,12 +122,14 @@ procedure gui_Draw;
   var
     Widget : zglPWidget;
 begin
+  glEnable( GL_DEPTH_TEST );
   Widget := managerGUI.First.Next;
   while Widget <> nil do
     begin
       gui_DrawWidget( Widget );
       Widget := Widget.Next;
     end;
+  glDisable( GL_DEPTH_TEST );
 end;
 
 procedure gui_Proc;
@@ -228,6 +237,17 @@ begin
             SetLength( List.Items, List.Count );
             for i := 0 to List.Count - 1 do
               List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
+          end;
+      WIDGET_COMBOBOX:
+        with zglTComboBoxDesc( Result.Next.desc^ ) do
+          begin
+            Font          := zglTComboBoxDesc( Desc^ ).Font;
+            ItemIndex     := zglTComboBoxDesc( Desc^ ).ItemIndex;
+            DropDownCount := zglTComboBoxDesc( Desc^ ).DropDownCount;
+            List.Count := zglTListBoxDesc( Desc^ ).List.Count;
+            SetLength( List.Items, List.Count );
+            for i := 0 to List.Count - 1 do
+              List.Items[ i ] := zglTComboBoxDesc( Desc^ ).List.Items[ i ];
           end;
     else
       Move( Desc^, Result.Next.desc^, managerGUI.Types[ _type - 1 ].DescSize );

@@ -37,6 +37,11 @@ const
 
   SCROLL_SIZE  = 16;
 
+  SCROLL_UP    = 0;
+  SCROLL_DOWN  = 1;
+  SCROLL_LEFT  = 2;
+  SCROLL_RIGHT = 3;
+
 procedure gui_DrawWidget( const Widget : zglPWidget );
 
 procedure gui_DrawButton     ( const Widget : zglPWidget );
@@ -45,6 +50,7 @@ procedure gui_DrawRadioButton( const Widget : zglPWidget );
 procedure gui_DrawLabel      ( const Widget : zglPWidget );
 procedure gui_DrawEditBox    ( const Widget : zglPWidget );
 procedure gui_DrawListBox    ( const Widget : zglPWidget );
+procedure gui_DrawComboBox   ( const Widget : zglPWidget );
 procedure gui_DrawGroupBox   ( const Widget : zglPWidget );
 procedure gui_DrawSpin       ( const Widget : zglPWidget );
 procedure gui_DrawScrollBar  ( const Widget : zglPWidget );
@@ -61,6 +67,14 @@ uses
   zgl_gui_utils,
   zgl_math_2d,
   zgl_collision_2d;
+
+procedure _lock;
+begin
+end;
+
+procedure _unlock;
+begin
+end;
 
 procedure _button_draw( const x, y, w, h : Single; const pressed : Boolean );
   var
@@ -82,43 +96,44 @@ begin
     pr2d_Rect( X, Y, W, H, COLOR_SELECT, 25, PR2D_FILL );
 end;
 
-procedure _scrolls_draw( const X1, Y1, X2, Y2, Size : Single; const Vertical, UPressed, DPressed : Boolean );
+procedure _scroll_draw( const X, Y, W, H : Single; const _type : Integer; const Pressed : Boolean );
 begin
-  _button_draw( X1, Y1, Size, Size, UPressed );
+  _button_draw( X, Y, W, H, Pressed );
   glColor4f( 0, 0, 0, 1 );
-  if Vertical Then
-    begin
-      glBegin( GL_TRIANGLES );
-        gl_Vertex2f( X1 + Size / 2 + Byte( UPressed ), Y1 + 2 + Byte( UPressed ) );
-        gl_Vertex2f( X1 + Size - 2 + Byte( UPressed ), Y1 + Size - 2 + Byte( UPressed ) );
-        gl_Vertex2f( X1 + 2 + Byte( UPressed ),        Y1 + Size - 2 + Byte( UPressed ) );
-      glEnd;
-    end else
+  case _type of
+    SCROLL_UP:
       begin
         glBegin( GL_TRIANGLES );
-          gl_Vertex2f( X1 + 2 + Byte( UPressed ),        Y1 + Size / 2 + Byte( UPressed ) );
-          gl_Vertex2f( X1 + Size - 2 + Byte( UPressed ), Y1 + 2 + Byte( UPressed )        );
-          gl_Vertex2f( X1 + Size - 2 + Byte( UPressed ), Y1 + Size - 2 + Byte( UPressed ) );
+          gl_Vertex2f( X + W / 2 + Byte( Pressed ), Y + 3 + Byte( Pressed )     );
+          gl_Vertex2f( X + W - 3 + Byte( Pressed ), Y + H - 3 + Byte( Pressed ) );
+          gl_Vertex2f( X + 3 + Byte( Pressed ),     Y + H - 3 + Byte( Pressed ) );
         glEnd;
       end;
-
-  _button_draw( X2, Y2, Size, Size, DPressed );
-  glColor4f( 0, 0, 0, 1 );
-  if Vertical Then
-    begin
-      glBegin( GL_TRIANGLES );
-        gl_Vertex2f( X2 + 2 + Byte( DPressed ),        Y2 + 2 + Byte( DPressed ) );
-        gl_Vertex2f( X2 + Size - 2 + Byte( DPressed ), Y2 + 2 + Byte( DPressed ) );
-        gl_Vertex2f( X2 + Size / 2 + Byte( DPressed ), Y2 + Size - 2 + Byte( DPressed ) );
-      glEnd;
-    end else
+    SCROLL_DOWN:
       begin
         glBegin( GL_TRIANGLES );
-          gl_Vertex2f( X2 + 2 + Byte( DPressed ),        Y2 + 2 + Byte( DPressed ) );
-          gl_Vertex2f( X2 + Size - 2 + Byte( DPressed ), Y2 + Size / 2 + Byte( DPressed ) );
-          gl_Vertex2f( X2 + 2 + Byte( DPressed ),        Y2 + Size - 2 + Byte( DPressed ) );
+          gl_Vertex2f( X + 3 + Byte( Pressed ),     Y + 3 + Byte( Pressed )     );
+          gl_Vertex2f( X + W - 3 + Byte( Pressed ), Y + 3 + Byte( Pressed )     );
+          gl_Vertex2f( X + W / 2 + Byte( Pressed ), Y + H - 3 + Byte( Pressed ) );
         glEnd;
       end;
+    SCROLL_LEFT:
+      begin
+        glBegin( GL_TRIANGLES );
+          gl_Vertex2f( X + 3 + Byte( Pressed ),     Y + H / 2 + Byte( Pressed ) );
+          gl_Vertex2f( X + W - 3 + Byte( Pressed ), Y + 3 + Byte( Pressed )     );
+          gl_Vertex2f( X + W - 3 + Byte( Pressed ), Y + H - 3 + Byte( Pressed ) );
+        glEnd;
+      end;
+    SCROLL_RIGHT:
+      begin
+        glBegin( GL_TRIANGLES );
+          gl_Vertex2f( X + 3 + Byte( Pressed ),     Y + 3 + Byte( Pressed )     );
+          gl_Vertex2f( X + W - 3 + Byte( Pressed ), Y + H / 2 + Byte( Pressed ) );
+          gl_Vertex2f( X + 3 + Byte( Pressed ),     Y + H - 3 + Byte( Pressed ) );
+        glEnd;
+      end;
+  end;
 end;
 
 procedure gui_DrawWidget;
@@ -217,7 +232,7 @@ begin
       if Widget.focus Then
         begin
           tw := X + Font.CharDesc[ Byte( ' ' ) ].ShiftP + text_GetWidth( Font, Text );
-          pr2d_Line( tw, th, tw, th + Font.MaxHeight - Font.MaxShiftY, $FFFFFF, 255 * Byte( cursorAlpha < 25 ) );
+          pr2d_Line( tw, th, tw, th + Font.MaxHeight, $FFFFFF, 255 * Byte( cursorAlpha < 25 ) );
         end;
       scissor_End;
     end;
@@ -245,7 +260,7 @@ begin
         iShift := 0;
       for i := 0 to List.Count - 1 do
         begin
-          ty := Round( Y + ( i - iShift ) * Font.MaxHeight + ( i  - iShift ) * 3 + 3 );
+          ty := Round( Y + ( i - iShift ) * Font.MaxHeight + ( i - iShift ) * 3 + 3 );
           if ( ty >= Y - Font.MaxHeight ) and ( ty <= Y + H + Font.MaxHeight ) Then
             text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
         end;
@@ -258,6 +273,53 @@ begin
                      W - 4 - subW, Font.MaxHeight, COLOR_SELECT, 155 );
         end;
       scissor_End;
+    end;
+end;
+
+procedure gui_DrawComboBox;
+  var
+    i : Integer;
+    tw, ty, th : Single;
+begin
+  with zglTComboBoxDesc( Widget.desc^ ), Widget^, Widget.rect do
+    begin
+      pr2d_Rect( X, Y, W, H, COLOR_EDIT, 255, PR2D_FILL );
+      pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, 0 );
+      pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, $000000, 255, 0 );
+      if not DropedDown Then
+        begin
+          if Widget.mousein Then
+            pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, COLOR_SELECT, 55, PR2D_FILL );
+          if Widget.focus Then
+            pr2d_Rect( X, Y, W, H, COLOR_SELECT, 155 );
+        end;
+
+      _clip( Widget, X + 2, Y + 2, W - 4 - H, H - 2 );
+      th := Y + Round( ( H - Font.MaxHeight ) / 2 ) + 1;
+      if ItemIndex > -1 Then
+        text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, th, List.Items[ ItemIndex ] );
+      scissor_End;
+
+      _scroll_draw( X + W - H + 2, Y + 2, H - 4, H - 4, SCROLL_DOWN, mousein and ( mouse_X > X + W - H + 2 ) and mouse_Down( M_BLEFT ) );
+
+      if DropedDown Then
+        begin
+          th := DropDownCount * ( Font.MaxHeight + 3 ) + 3;
+          glTranslatef( 0, 0, 0.1 );
+          pr2d_Rect( X, Y + H, W, th, COLOR_EDIT, 255, PR2D_FILL );
+          pr2d_Rect( X, Y + H, W, th, COLOR_WIDGET, 255, 0 );
+          pr2d_Rect( X + 1, Y + H, W - 2, th - 1, $000000, 255, 0 );
+
+          scissor_Begin( Round( X + 2 ), Round( Y + H ), Round( W - 4 ), Round( th - 3 ) );
+          for i := 0 to List.Count - 1 do
+            begin
+              ty := Round( Y + H + ( i{ - iShift} ) * Font.MaxHeight + ( i{ - iShift} ) * 3 + 3 );
+              if ( ty >= Y - Font.MaxHeight ) and ( ty <= Y + H + th ) Then
+                text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
+            end;
+          scissor_End;
+          glTranslatef( 0, 0, -0.1 );
+        end;
     end;
 end;
 
@@ -282,21 +344,8 @@ procedure gui_DrawSpin;
 begin
   with zglTSpinDesc( Widget.desc^ ), Widget.rect do
     begin
-      _button_draw( X, Y, W, H / 2, UPressed );
-      glColor4f( 0, 0, 0, 1 );
-      glBegin( GL_TRIANGLES );
-        gl_Vertex2f( X + W / 2 + Byte( UPressed ), Y + 2 + Byte( UPressed ) );
-        gl_Vertex2f( X + W - 2 + Byte( UPressed ), Y + H / 2 - 2 + Byte( UPressed ) );
-        gl_Vertex2f( X + 2 + Byte( UPressed ),     Y + H / 2 - 2 + Byte( UPressed ) );
-      glEnd;
-
-      _button_draw( X, Y + H / 2, W, H / 2, DPressed );
-      glColor4f( 0, 0, 0, 1 );
-      glBegin( GL_TRIANGLES );
-        gl_Vertex2f( X + 2 + Byte( DPressed ),     Y + H / 2 + 2 + Byte( DPressed ) );
-        gl_Vertex2f( X + W - 2 + Byte( DPressed ), Y + H / 2 + 2 + Byte( DPressed ) );
-        gl_Vertex2f( X + W / 2 + Byte( DPressed ), Y + H - 2 + Byte( DPressed ) );
-      glEnd;
+      _scroll_draw( X, Y,         W, H / 2, SCROLL_UP,   UPressed );
+      _scroll_draw( X, Y + H / 2, W, H / 2, SCROLL_DOWN, DPressed );
     end;
 end;
 
@@ -313,9 +362,14 @@ begin
       _button_draw( r.X, r.Y, r.W, r.H, false );
 
       if Kind = SCROLLBAR_VERTICAL Then
-        _scrolls_draw( X, Y, X, Y + H - SCROLL_SIZE, SCROLL_SIZE, TRUE, UPressed, DPressed )
-      else
-        _scrolls_draw( X, Y, X + W - SCROLL_SIZE, Y, SCROLL_SIZE, FALSE, UPressed, DPressed );
+        begin
+          _scroll_draw( X, Y,                   SCROLL_SIZE, SCROLL_SIZE, SCROLL_UP,   UPressed );
+          _scroll_draw( X, Y + H - SCROLL_SIZE, SCROLL_SIZE, SCROLL_SIZE, SCROLL_DOWN, DPressed );
+        end else
+          begin
+            _scroll_draw( X, Y,                   SCROLL_SIZE, SCROLL_SIZE, SCROLL_LEFT,  UPressed );
+            _scroll_draw( X + W - SCROLL_SIZE, Y, SCROLL_SIZE, SCROLL_SIZE, SCROLL_RIGHT, DPressed );
+          end;
     end;
 end;
 

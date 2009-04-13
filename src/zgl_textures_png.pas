@@ -71,7 +71,7 @@ type
   end;
 
   PByteArray = ^TByteArray;
-  TByteArray = array[ 0..65534 ] of Byte;
+  TByteArray = array[ 0..65535 ] of Byte;
 
   PColor = ^TColor;
   TColor = record
@@ -339,20 +339,8 @@ begin
 end;
 
 procedure png_CopyNonInterlacedRGBAlpha( Src, Dest : PByte );
-  var
-    i     : Integer;
-    Color : PColor;
 begin
-  Color := Pointer( Dest );
-  For i := 0 to pngHeader.Width - 1 do
-    begin
-      Color.R := Byte( Src^ ); INC( Src );
-      Color.G := Byte( Src^ ); INC( Src );
-      Color.B := Byte( Src^ ); INC( Src );
-      Color.A := Byte( Src^ ); INC( Src );
-      if Color.A = 0 Then Cardinal( Color^ ) := 0;
-      INC( Color );
-    end;
+  Move( Src^, Dest^, pngHeader.Width * 4 );
 end;
 
 procedure png_CopyNonInterlacedPalette( Src, Dest : PByte );
@@ -456,7 +444,7 @@ procedure png_FilterRow;
     pc := abs( a + b - c * 2 );
     {$ELSE}
     // Феерично, не правда ли? :)
-    // А все из-за Internal Error'а...
+    // А все из-за Internal Error'а в FreePascal...
     pc := a + b - c * 2;
     pc := abs( pc );
     {$ENDIF}
