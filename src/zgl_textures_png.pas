@@ -70,9 +70,6 @@ type
     InterlaceMethod   : Byte;
   end;
 
-  PByteArray = ^TByteArray;
-  TByteArray = array[ 0..65535 ] of Byte;
-
   PColor = ^TColor;
   TColor = record
     R, G, B, A : Byte;

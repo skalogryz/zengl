@@ -93,10 +93,10 @@ procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
 function  tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
-procedure tex_SetFrameSize( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
+procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
 function  tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
 
-procedure tex_Filter( const Texture : zglPTexture; const Flags : DWORD );
+procedure tex_Filter( Texture : zglPTexture; const Flags : DWORD );
 procedure tex_SetAnisotropy( const Level : Byte );
 
 procedure tex_CalcPOT( var pData : Pointer; var Width, Height : WORD; var U, V : Single );

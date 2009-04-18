@@ -140,7 +140,7 @@ procedure gui_DrawWidget;
   var
     w : zglPWidget;
 begin
-  if not Assigned( Widget ) Then exit;
+  if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
 
   if Assigned( Widget.OnDraw ) Then Widget.OnDraw( Widget );
   if Assigned( Widget.child ) Then

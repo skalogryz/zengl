@@ -53,8 +53,8 @@ uses
 
 var
   mouseTimeDown : Integer;
-  widgetBDrag   : Boolean;
-  widgetDrag    : Boolean;
+  dragBegin     : Boolean;
+  dragMove      : Boolean;
   mouseShiftX,
   mouseShiftY   : Integer;
 
@@ -64,12 +64,12 @@ function gui_ProcWidget;
     w     : zglPWidget;
     cproc : Boolean;
 begin
-  if not Assigned( Widget ) Then exit;
+  if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
 
   if mouse_Up( M_BLEFT ) Then
     begin
-      widgetBDrag   := FALSE;
-      widgetDrag    := FALSE;
+      dragBegin     := FALSE;
+      dragMove      := FALSE;
       Widget.draged := FALSE;
       Event.drag_pos.X := mouse_X - mouseShiftX;
       Event.drag_pos.Y := mouse_Y - mouseShiftY;
@@ -98,7 +98,7 @@ begin
       Result := TRUE;
       exit;
     end;
-  if widgetDrag and ( not Widget.draged ) Then exit;
+  if dragMove and ( not Widget.draged ) Then exit;
 
   if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) and col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.rect ) Then
     begin
@@ -108,12 +108,12 @@ begin
       Event.mouse_pos.Y := Widget.rect.Y - mouse_Y;
       gui_AddEvent( EVENT_MOUSE_MOVE, Widget, @Event.mouse_pos );
 
-      if widgetBDrag Then
+      if dragBegin Then
         if ( ( mouseShiftX <> mouse_X - Round( Widget.rect.X ) ) or
              ( mouseShiftY <> mouse_Y - Round( Widget.rect.Y ) ) ) and ( not Widget.draged ) Then
           begin
             Widget.draged := TRUE;
-            widgetDrag    := TRUE;
+            dragMove      := TRUE;
             if Assigned( Widget.Events.OnStartDrag ) Then
               Widget.Events.OnStartDrag( Widget );
             gui_AddEvent( EVENT_DRAG_START, Widget, nil );
@@ -127,11 +127,11 @@ begin
 
       if mouse_Click( M_BLEFT ) Then
         begin
-          if not widgetBDrag Then
+          if not dragBegin Then
             begin
               mouseShiftX := mouse_X - Round( Widget.rect.X );
               mouseShiftY := mouse_Y - Round( Widget.rect.Y );
-              widgetBDrag := TRUE;
+              dragBegin   := TRUE;
             end;
 
           Event.mouse_button := M_BLEFT;
@@ -411,7 +411,7 @@ begin
   with zglTListBoxDesc( Event.Widget.desc^ ), Event.Widget^, Event.Widget.rect do
     begin
       if ( List.Count > iCount ) and ( not Assigned( child ) ) Then
-        gui_AddWidget( WIDGET_SCROLLBAR, W - SCROLL_SIZE, 0, SCROLL_SIZE, H, nil, nil, Event.Widget );
+        gui_AddWidget( WIDGET_SCROLLBAR, W - SCROLL_SIZE, 0, SCROLL_SIZE, H, FALSE, TRUE, nil, nil, Event.Widget );
       if ( List.Count <= iCount ) and Assigned( Event.Widget.child ) Then
         begin
           gui_DelWidget( child.Next );

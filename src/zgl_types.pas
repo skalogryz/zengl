@@ -29,6 +29,9 @@ type
   DWORD = LongWord;
   Ptr   = {$IFDEF CPU64} QWORD {$ELSE} DWORD {$ENDIF};
 
+  PByteArray = ^TByteArray;
+  TByteArray = array[ 0..65535 ] of Byte;
+
 type
   zglTStringList = record
     Count : Integer;

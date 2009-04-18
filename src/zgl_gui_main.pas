@@ -35,7 +35,7 @@ procedure gui_Proc;
 procedure gui_AddEvent( const _type : Integer; const Widget : zglPWidget; const EventData : Pointer );
 procedure gui_DelEvent( var Event : zglPEvent );
 
-function  gui_AddWidget( const _type : Integer; const X, Y, W, H : Single; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
+function  gui_AddWidget( const _type : Integer; const X, Y, W, H : Single; const Focus, Visible : Boolean; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
 procedure gui_DelWidget( var Widget : zglPWidget );
 
 var
@@ -266,7 +266,13 @@ begin
       end;
   Result.Next.rect.W  := W;
   Result.Next.rect.H  := H;
-  Result.Next.focus   := FALSE;
+  if Focus Then
+    begin
+      gui_ProcCallback( nil, gui_ResetFocus, nil );
+      gui_AddEvent( EVENT_FOCUS_IN, Result.Next, nil );
+    end;
+  Result.Next.focus   := Focus;
+  Result.Next.visible := Visible;
   Result.Next.mousein := FALSE;
   for i := managerGUI.Count.Types - 1 downto 0 do
     if Result.Next._type = managerGUI.Types[ i ]._type Then

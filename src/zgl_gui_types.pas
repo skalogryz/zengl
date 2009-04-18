@@ -97,6 +97,7 @@ end;
     data       : Pointer;
     rect       : zglTRect;
     focus      : Boolean;
+    visible    : Boolean;
     mousein    : Boolean;
     draged     : Boolean;
 

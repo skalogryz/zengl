@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <ActiveEditorIndexAtStart Value="1"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <Units Count="31">
+      <Unit0>
+        <Filename Value="ZenFont.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ZenFont"/>
+        <CursorPos X="31" Y="75"/>
+        <TopLine Value="66"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="56"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="zgl_font_gen.pas"/>
+        <UnitName Value="zgl_font_gen"/>
+        <CursorPos X="48" Y="347"/>
+        <TopLine Value="330"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="27"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../../../../usr/lib/fpc/src/packages/x11/src/xlib.pp"/>
+        <UnitName Value="xlib"/>
+        <CursorPos X="21" Y="232"/>
+        <TopLine Value="212"/>
+        <UsageCount Value="12"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../../../../usr/lib/fpc/src/packages/x11/src/xrender.pp"/>
+        <UnitName Value="xrender"/>
+        <CursorPos X="4" Y="200"/>
+        <TopLine Value="182"/>
+        <UsageCount Value="11"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="xft.pas"/>
+        <UnitName Value="xft"/>
+        <CursorPos X="23" Y="416"/>
+        <TopLine Value="411"/>
+        <UsageCount Value="7"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../../Programming/ZenGL-0.1/tools/FontGen/zgl_freetype.pas"/>
+        <UnitName Value="zgl_freetype"/>
+        <CursorPos X="81" Y="170"/>
+        <TopLine Value="146"/>
+        <UsageCount Value="15"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_textures_tga.pas"/>
+        <UnitName Value="zgl_textures_tga"/>
+        <CursorPos X="7" Y="30"/>
+        <TopLine Value="23"/>
+        <UsageCount Value="14"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_types.pas"/>
+        <UnitName Value="zgl_types"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="7"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_memory.pas"/>
+        <UnitName Value="zgl_memory"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="12"/>
+        <UsageCount Value="7"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_textures_png.pas"/>
+        <UnitName Value="zgl_textures_png"/>
+        <CursorPos X="1" Y="73"/>
+        <TopLine Value="56"/>
+        <UsageCount Value="7"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../../Programming/ZenGL-0.1/tools/FontGen/FontGen.pas"/>
+        <UnitName Value="fontgen"/>
+        <CursorPos X="17" Y="53"/>
+        <TopLine Value="68"/>
+        <UsageCount Value="7"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_main.pas"/>
+        <UnitName Value="zgl_main"/>
+        <CursorPos X="3" Y="225"/>
+        <TopLine Value="199"/>
+        <UsageCount Value="7"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_font.pas"/>
+        <UnitName Value="zgl_font"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="177"/>
+        <UsageCount Value="9"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="../../../../usr/lib/fpc/src/rtl/inc/mathh.inc"/>
+        <CursorPos X="14" Y="78"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="8"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_textures.pas"/>
+        <UnitName Value="zgl_textures"/>
+        <CursorPos X="57" Y="205"/>
+        <TopLine Value="184"/>
+        <UsageCount Value="8"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="../../Programming/ZenGL-0.1/src/zgl_text.pas"/>
+        <UnitName Value="zgl_text"/>
+        <CursorPos X="37" Y="95"/>
+        <TopLine Value="89"/>
+        <UsageCount Value="8"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/struct.inc"/>
+        <CursorPos X="6" Y="2099"/>
+        <TopLine Value="2081"/>
+        <UsageCount Value="17"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/redef.inc"/>
+        <CursorPos X="10" Y="449"/>
+        <TopLine Value="596"/>
+        <UsageCount Value="14"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/ascdef.inc"/>
+        <CursorPos X="1" Y="313"/>
+        <TopLine Value="284"/>
+        <UsageCount Value="8"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/defines.inc"/>
+        <CursorPos X="6" Y="521"/>
+        <TopLine Value="503"/>
+        <UsageCount Value="9"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/func.inc"/>
+        <CursorPos X="51" Y="96"/>
+        <TopLine Value="66"/>
+        <UsageCount Value="16"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/base.inc"/>
+        <CursorPos X="6" Y="196"/>
+        <TopLine Value="178"/>
+        <UsageCount Value="11"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win32/windows.pp"/>
+        <UnitName Value="windows"/>
+        <CursorPos X="31" Y="31"/>
+        <TopLine Value="21"/>
+        <UsageCount Value="12"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="../../../../../../usr/lib/fpc/src/packages/winunits-jedi/src/jwawingdi.pas"/>
+        <UnitName Value="JwaWinGDI"/>
+        <CursorPos X="15" Y="4369"/>
+        <TopLine Value="4357"/>
+        <UsageCount Value="12"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="../../../../../../usr/lib/fpc/src/packages/winunits-jedi/src/jwawinnt.pas"/>
+        <UnitName Value="JwaWinNT"/>
+        <CursorPos X="22" Y="9272"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="8"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="../../../../../../usr/lib/fpc/src/packages/winunits-jedi/src/jwawintype.pas"/>
+        <UnitName Value="JwaWinType"/>
+        <CursorPos X="30" Y="1834"/>
+        <TopLine Value="1824"/>
+        <UsageCount Value="8"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/ascfun.inc"/>
+        <CursorPos X="50" Y="329"/>
+        <TopLine Value="311"/>
+        <UsageCount Value="10"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="../../../../../../usr/lib/fpc/src/rtl/win/wininc/unifun.inc"/>
+        <CursorPos X="10" Y="327"/>
+        <TopLine Value="309"/>
+        <UsageCount Value="9"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="../../src/zgl_text.pas"/>
+        <UnitName Value="zgl_text"/>
+        <CursorPos X="80" Y="161"/>
+        <TopLine Value="117"/>
+        <UsageCount Value="12"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="../../src/zgl_opengl_all.pas"/>
+        <UnitName Value="zgl_opengl_all"/>
+        <CursorPos X="3" Y="104"/>
+        <TopLine Value="79"/>
+        <UsageCount Value="12"/>
+        <SyntaxHighlighter Value="Delphi"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="../../../../../../usr/lib/fpc/src/packages/x11/src/xlib.pp"/>
+        <UnitName Value="xlib"/>
+        <CursorPos X="100" Y="241"/>
+        <TopLine Value="215"/>
+        <UsageCount Value="10"/>
+      </Unit30>
+    </Units>
+    <JumpHistory Count="29" HistoryIndex="28">
+      <Position1>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="212" Column="10" TopLine="194"/>
+      </Position1>
+      <Position2>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="467" Column="34" TopLine="447"/>
+      </Position2>
+      <Position3>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="204" Column="12" TopLine="181"/>
+      </Position3>
+      <Position4>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="478" Column="52" TopLine="452"/>
+      </Position4>
+      <Position5>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="222" Column="13" TopLine="204"/>
+      </Position5>
+      <Position6>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="221" Column="14" TopLine="204"/>
+      </Position6>
+      <Position7>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="465" Column="15" TopLine="447"/>
+      </Position7>
+      <Position8>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="197" Column="11" TopLine="179"/>
+      </Position8>
+      <Position9>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="469" Column="29" TopLine="455"/>
+      </Position9>
+      <Position10>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="464" Column="57" TopLine="446"/>
+      </Position10>
+      <Position11>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="476" Column="46" TopLine="457"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ZenFont.pas"/>
+        <Caret Line="33" Column="9" TopLine="1"/>
+      </Position12>
+      <Position13>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="478" Column="40" TopLine="462"/>
+      </Position13>
+      <Position14>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="466" Column="13" TopLine="449"/>
+      </Position14>
+      <Position15>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="197" Column="76" TopLine="179"/>
+      </Position15>
+      <Position16>
+        <Filename Value="ZenFont.pas"/>
+        <Caret Line="33" Column="8" TopLine="1"/>
+      </Position16>
+      <Position17>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="215" Column="1" TopLine="183"/>
+      </Position17>
+      <Position18>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="200" Column="9" TopLine="189"/>
+      </Position18>
+      <Position19>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="466" Column="17" TopLine="441"/>
+      </Position19>
+      <Position20>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="534" Column="100" TopLine="497"/>
+      </Position20>
+      <Position21>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="8" Column="117" TopLine="1"/>
+      </Position21>
+      <Position22>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="54" Column="12" TopLine="29"/>
+      </Position22>
+      <Position23>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="373" Column="53" TopLine="348"/>
+      </Position23>
+      <Position24>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="408" Column="53" TopLine="380"/>
+      </Position24>
+      <Position25>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="399" Column="14" TopLine="378"/>
+      </Position25>
+      <Position26>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="408" Column="36" TopLine="383"/>
+      </Position26>
+      <Position27>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="373" Column="38" TopLine="341"/>
+      </Position27>
+      <Position28>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="49" Column="20" TopLine="45"/>
+      </Position28>
+      <Position29>
+        <Filename Value="zgl_font_gen.pas"/>
+        <Caret Line="348" Column="25" TopLine="330"/>
+      </Position29>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <Target>
+      <Filename Value="./"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="../../src/"/>
+      <UnitOutputDirectory Value="tmp"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="Delphi"/>
+        <CStyleOperator Value="False"/>
+        <CPPInline Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <UseLineInfoUnit Value="False"/>
+        <StripSymbols Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="2">
+      <Item1>
+        <Name Value="ECodetoolError"/>
+      </Item1>
+      <Item2>
+        <Name Value="EFOpenError"/>
+      </Item2>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

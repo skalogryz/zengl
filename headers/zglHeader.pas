@@ -435,10 +435,10 @@ var
   tex_CreateZero     : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
   tex_LoadFromFile   : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
-  tex_SetFrameSize   : procedure( const Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
-  tex_SetMask        : function( const Texture, Mask : zglPTexture ) : zglPTexture;
+  tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
+  tex_SetMask        : function( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
   tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
-  tex_Filter         : procedure( const Texture : zglPTexture; const Flags : DWORD );
+  tex_Filter         : procedure( Texture : zglPTexture; const Flags : DWORD );
   tex_SetAnisotropy  : procedure( const Level : Byte );
 
 // RENDER TARGETS
@@ -934,16 +934,16 @@ const
   FSM_END    = $03;
 
 var
-  file_Open         : procedure( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+  file_Open         : procedure( const FileHandle : zglTFile; const FileName : String; const Mode : Byte );
   file_Exists       : function( const FileName : String ) : Boolean;
-  file_Seek         : function( var FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
-  file_GetPos       : function( var FileHandle : zglTFile ) : DWORD;
-  file_Read         : function( var FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
-  file_Write        : function( var FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
-  file_Trunc        : procedure( var FileHandle : zglTFile; const count : DWORD );
-  file_GetSize      : function( var FileHandle : zglTFile ) : DWORD;
-  file_Flush        : procedure( var FileHandle : zglTFile );
-  file_Close        : procedure( var FileHandle : zglTFile );
+  file_Seek         : function( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
+  file_GetPos       : function( const FileHandle : zglTFile ) : DWORD;
+  file_Read         : function( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
+  file_Write        : function( const FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
+  file_Trunc        : procedure( const FileHandle : zglTFile; const count : DWORD );
+  file_GetSize      : function( const FileHandle : zglTFile ) : DWORD;
+  file_Flush        : procedure( const FileHandle : zglTFile );
+  file_Close        : procedure( const FileHandle : zglTFile );
   file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
   file_GetName      : procedure( const FileName : String; var Result : String );
   file_GetExtension : procedure( const FileName : String; var Result : String );

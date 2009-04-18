@@ -1,0 +1,27 @@
+################
+# ZenGL 0.1.25 #
+################
+[00000001ms] Begin
+[00000003ms] GLX Extension - ok
+[00000008ms] XOpenIM - ok
+[00000008ms] XCreateIC - ok
+[00000008ms] XF86VidMode Extension - ok
+[00000009ms] glXChooseVisual: zDepth = 24; stencil = 0; fsaa = 0
+[00000009ms] Current mode: 1280 x 1024
+[00000094ms] GL_VERSION: 2.1.2 NVIDIA 180.41
+[00000094ms] GL_RENDERER: GeForce 7900 GS/PCI/SSE2/3DNOW!
+[00000094ms] GL_MAX_TEXTURE_SIZE: 4096
+[00000094ms] GL_ARB_TEXTURE_COMPRESSION: TRUE
+[00000094ms] GL_MAX_TEXTURE_UNITS_ARB: 4
+[00000094ms] GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: 16
+[00000094ms] GL_ARB_VERTEX_BUFFER_OBJECT: TRUE
+[00000094ms] GL_EXT_FRAMEBUFFER_OBJECT: TRUE
+[00000094ms] Support WaitVSync: TRUE
+[00000096ms] Set screen options: 800 x 600 x 32bpp windowed
+[00004613ms] Timers to free: 2
+[00004613ms] Render Targets to free: 0
+[00004613ms] Textures to free: 1
+[00004613ms] Fonts to free: 1
+[00004613ms] Sounds to free: 0
+[00004613ms] Average FPS: 996
+[00004613ms] End
