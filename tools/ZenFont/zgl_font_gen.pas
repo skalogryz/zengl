@@ -329,7 +329,6 @@ procedure fontgen_BuildFont;
     WFont      : HFONT;
     Bitmap     : BITMAPINFO;
     DIB        : DWORD;
-    CharABC    : TABC;
     CharSize   : TSize;
     TextMetric : TTextMetricW;
     Rect       : TRect;
@@ -468,7 +467,6 @@ begin
       TextOutW( WDC, 0, 0, @fg_CharsUID[ i ], 1 );
 
       GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );
-      GetCharABCWidthsW( WDC, fg_CharsUID[ i ], fg_CharsUID[ i ], CharABC );
       // Microsoft Sucks...
       FontGetSize( PByteArray( pData ), Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight, cx, cy, minX, minY );
       INC( cx );
@@ -532,7 +530,7 @@ begin
           Font.CharDesc[ CharUID ].ShiftY := Round( fg_CharsSize[ CharID ].Y );
           Font.CharDesc[ CharUID ].ShiftP := fg_CharsP[ CharID ];
 
-          sx := Round( fg_CharsSize[ CharID].W );
+          sx := Round( fg_CharsSize[ CharID ].W );
           sy := Round( fg_CharsSize[ CharID ].H );
           Font.CharDesc[ CharUID ].TexCoords[ 0 ].X := ( cx * cs + ( cs - sx ) div 2 - fg_FontPadding[ 0 ] ) * u;
           Font.CharDesc[ CharUID ].TexCoords[ 0 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 - fg_FontPadding[ 1 ] ) * v;
