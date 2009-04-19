@@ -45,12 +45,12 @@ var
   fg_CharsP      : array of Integer;
   fg_CharsImage  : array of array of Byte;
   fg_FontList    : zglTStringList;
-  fg_FontSize    : Integer = 20;
+  fg_FontSize    : Integer = 10;
   fg_FontBold    : Boolean;
   fg_FontItalic  : Boolean;
   fg_FontAA      : Boolean = TRUE;
-  fg_FontPadding : array[ 0..3 ] of Integer = ( 1, 1, 1, 1 );
-  fg_PageSize    : Integer = 512;
+  fg_FontPadding : array[ 0..3 ] of Byte = ( 2, 2, 2, 2 );
+  fg_PageSize    : Integer = 256;
   fg_PageChars   : Integer = 17;
 
 {$IFDEF LINUX}
@@ -178,6 +178,9 @@ uses
   math;
 
 {$IFDEF WIN32}
+{$IFNDEF FPC}
+type NEWTEXTMETRICEX = NEWTEXTMETRICEXW;
+{$ENDIF}
 function FontEnumProc(var _para1:ENUMLOGFONTEX;var _para2:NEWTEXTMETRICEX; _para3:longint; _para4:LPARAM):longint;stdcall;
 begin
   INC( fg_FontList.Count );
@@ -233,7 +236,7 @@ function fontgen_Init;
     Family    : PChar;
     {$ENDIF}
     {$IFDEF WIN32}
-    LFont : LOGFONT;
+    LFont : LOGFONTW;
     {$ENDIF}
 begin
   Result := FALSE;
@@ -267,7 +270,7 @@ begin
 {$IFDEF WIN32}
   LFont.lfCharSet := DEFAULT_CHARSET;
   LFont.lfFaceName[ 0 ] := #0;
-  EnumFontfg_FontListEx( wnd_DC, LFont, FontEnumProc, 0, 0 );
+  EnumFontFamiliesExW( wnd_DC, LFont, @FontEnumProc, 0, 0 );
 {$ENDIF}
 
   Result := TRUE;
@@ -328,7 +331,7 @@ procedure fontgen_BuildFont;
     DIB        : DWORD;
     CharABC    : TABC;
     CharSize   : TSize;
-    TextMetric : TTextMetric;
+    TextMetric : TTextMetricW;
     Rect       : TRect;
     minX, minY : Integer;
     {$ENDIF}
@@ -441,7 +444,11 @@ begin
   SetTextColor( WDC, $FFFFFF );
   SetBkColor  ( WDC, $000000 );
 
+  {$IFDEF FPC}
   GetTextMetricsW( WDC, @TextMetric );
+  {$ELSE}
+  GetTextMetricsW( WDC, TextMetric );
+  {$ENDIF}
 
   FillChar( Bitmap, SizeOf( BITMAPINFO ), 0 );
   Bitmap.bmiHeader.biWidth       := TextMetric.tmHeight * 2;
@@ -460,7 +467,7 @@ begin
       FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
       TextOutW( WDC, 0, 0, @fg_CharsUID[ i ], 1 );
 
-      GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, @CharSize );
+      GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );
       GetCharABCWidthsW( WDC, fg_CharsUID[ i ], fg_CharsUID[ i ], CharABC );
       // Microsoft Sucks...
       FontGetSize( PByteArray( pData ), Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight, cx, cy, minX, minY );

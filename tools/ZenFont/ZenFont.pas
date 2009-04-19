@@ -28,6 +28,8 @@ uses
   zgl_timers,
   zgl_keyboard,
   zgl_primitives_2d,
+  zgl_textures,
+  zgl_textures_tga,
   zgl_sprite_2d,
   zgl_font,
   zgl_text,
@@ -76,9 +78,18 @@ begin
       INC( Font.Count.Chars );
     end;
 
+  // Пока никакой автоматики и интерфейса, посему устанавливаем значения вручную
+  fg_FontSize   := 10;
+  fg_FontBold   := FALSE;
+  fg_FontItalic := FALSE;
+  fg_FontAA     := TRUE;
+  fg_PageSize   := 256;
+  fg_PageChars  := 17;
   fontgen_Init;
-  fontgen_BuildFont( Font, 'Verdana' );
-  fontgen_SaveFont( Font, 'Verdana' );
+  fontgen_BuildFont( Font, 'Liberation Mono' );
+  fontgen_SaveFont( Font, 'mono' );
+  {Font := font_LoadFromFile( 'mono.zfi' );
+  Font.Pages[ 0 ] := tex_LoadFromFile( 'mono_0.tga', $FF000000, TEX_DEFAULT_2D );}
 end;
 
 procedure Proc;
