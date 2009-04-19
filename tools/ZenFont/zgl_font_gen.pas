@@ -19,7 +19,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
-{$DEFINE UNICODE}
 unit zgl_font_gen;
 
 interface
@@ -40,13 +39,12 @@ procedure fontgen_BuildFont( var Font : zglPFont; const FontName : String );
 procedure fontgen_SaveFont( const Font : zglPFont; const FileName : String );
 
 var
-  Families  : zglTStringList;
-
   fg_CharsUse    : array[ 0..65535 ] of Boolean;
   fg_CharsUID    : array of WORD;
   fg_CharsSize   : array of zglTRect;
   fg_CharsP      : array of Integer;
   fg_CharsImage  : array of array of Byte;
+  fg_FontList    : zglTStringList;
   fg_FontSize    : Integer = 20;
   fg_FontBold    : Boolean;
   fg_FontItalic  : Boolean;
@@ -182,14 +180,14 @@ uses
 {$IFDEF WIN32}
 function FontEnumProc(var _para1:ENUMLOGFONTEX;var _para2:NEWTEXTMETRICEX; _para3:longint; _para4:LPARAM):longint;stdcall;
 begin
-  INC( Families.Count );
-  SetLength( Families.Items, Families.Count );
-  Families.Items[ Families.Count - 1 ] := _para1.elfLogFont.lfFaceName;
-  if Families.Count - 2 >= 0 Then
-    if Families.Items[ Families.Count - 1 ] = Families.Items[ Families.Count - 2 ] Then
+  INC( fg_FontList.Count );
+  SetLength( fg_FontList.Items, fg_FontList.Count );
+  fg_FontList.Items[ fg_FontList.Count - 1 ] := _para1.elfLogFont.lfFaceName;
+  if fg_FontList.Count - 2 >= 0 Then
+    if fg_FontList.Items[ fg_FontList.Count - 1 ] = fg_FontList.Items[ fg_FontList.Count - 2 ] Then
       begin
-        SetLength( Families.Items, Families.Count - 1 );
-        DEC( Families.Count );
+        SetLength( fg_FontList.Items, fg_FontList.Count - 1 );
+        DEC( fg_FontList.Count );
       end;
   Result := 1;
 end;
@@ -251,14 +249,14 @@ begin
   FcObjectSetAdd( ObjectSet, FC_FAMILY );
 
   Fonts := FcFontList( nil, Pattern, ObjectSet );
-  Families.Count := 0;
-  SetLength( Families.Items, 0 );
+  fg_FontList.Count := 0;
+  SetLength( fg_FontList.Items, 0 );
   for i := 0 to Fonts.nfont - 1 do
     begin
       FcPatternGetString( Fonts.fonts[ i ], FC_FAMILY, 0, @Family );
-      INC( Families.Count );
-      SetLength( Families.Items, Families.Count );
-      Families.Items[ Families.Count - 1 ] := Family;
+      INC( fg_FontList.Count );
+      SetLength( fg_FontList.Items, fg_FontList.Count );
+      fg_FontList.Items[ fg_FontList.Count - 1 ] := Family;
 
       Family := nil;
     end;
@@ -269,7 +267,7 @@ begin
 {$IFDEF WIN32}
   LFont.lfCharSet := DEFAULT_CHARSET;
   LFont.lfFaceName[ 0 ] := #0;
-  EnumFontFamiliesEx( wnd_DC, LFont, FontEnumProc, 0, 0 );
+  EnumFontfg_FontListEx( wnd_DC, LFont, FontEnumProc, 0, 0 );
 {$ENDIF}
 
   Result := TRUE;
@@ -296,13 +294,14 @@ end;
 
 procedure fontgen_BuildFont;
   var
-    pData  : Pointer;
-    i, j   : Integer;
-    cid    : Integer;
-    cx, cy : Integer;
-    sx, sy : Integer;
-    cs     : Integer;
-    u, v   : Single;
+    pData   : Pointer;
+    i, j    : Integer;
+    CharID  : Integer;
+    CharUID : WORD;
+    cx, cy  : Integer;
+    sx, sy  : Integer;
+    cs      : Integer;
+    u, v    : Single;
     {$IFDEF LINUX}
     scr_Visual : PVisual;
     Family     : array[ 0..255 ] of Char;
@@ -314,10 +313,10 @@ procedure fontgen_BuildFont;
 
     pixmap  : TPixmap;
     draw    : PXftDraw;
-		rWhite  : TXftColor;
+    rWhite  : TXftColor;
     rBlack  : TXftColor;
-		cWhite  : TXRenderColor = ( red: $FFFF; green: $FFFF; blue: $FFFF; alpha: $FFFF );
-		cBlack  : TXRenderColor = ( red: $0000; green: $0000; blue: $0000; alpha: $FFFF );
+    cWhite  : TXRenderColor = ( red: $FFFF; green: $FFFF; blue: $FFFF; alpha: $FFFF );
+    cBlack  : TXRenderColor = ( red: $0000; green: $0000; blue: $0000; alpha: $FFFF );
     image   : PXImage;
     color   : DWORD;
     r, g, b : DWORD;
@@ -373,6 +372,9 @@ begin
   XFontMatch := XftFontMatch( scr_Display, scr_Default, Pattern, @FcResult );
   XFont := XftFontOpenPattern( scr_Display, XFontMatch );
 
+  XftColorAllocValue( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @cWhite, @rWhite );
+  XftColorAllocValue( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @cBlack, @rBlack );
+
   for i := 0 to Font.Count.Chars - 1 do
     if XftCharExists( scr_Display, XFont, fg_CharsUID[ i ] ) Then
       begin
@@ -382,20 +384,19 @@ begin
         cy := XGlyphInfo.height;
         sx := XGlyphInfo.xOff;
         sy := XFont.ascent - XGlyphInfo.y + XGlyphInfo.height;
+        if cx > sx Then sx := cx;
+        if cy > sy Then sy := cy;
         fg_CharsSize[ i ].X := -XGlyphInfo.x;
         fg_CharsSize[ i ].Y := XGlyphInfo.height - XGlyphInfo.y;
         fg_CharsSize[ i ].W := cx;
         fg_CharsSize[ i ].H := cy;
         fg_CharsP   [ i ]   := XGlyphInfo.xOff;
 
-		    XftColorAllocValue( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @cWhite, @rWhite );
-		    XftColorAllocValue( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @cBlack, @rBlack );
-
-		    pixmap := XCreatePixmap( scr_Display, wnd_Root, sx, sy, DefaultDepth( scr_Display, scr_Default ) );
-		    draw   := XftDrawCreate( scr_Display, pixmap, scr_Visual, DefaultColormap( scr_Display, scr_Default ) );
+        pixmap := XCreatePixmap( scr_Display, wnd_Root, sx, sy, DefaultDepth( scr_Display, scr_Default ) );
+        draw   := XftDrawCreate( scr_Display, pixmap, scr_Visual, DefaultColormap( scr_Display, scr_Default ) );
 
         XftDrawRect( draw, @rBlack, 0, 0, sx, sy );
-				XftDrawString16( draw, @rWhite, XFont, XGlyphInfo.x, XGlyphInfo.y, @fg_CharsUID[ i ], 1 );
+        XftDrawString16( draw, @rWhite, XFont, XGlyphInfo.x, XGlyphInfo.y, @fg_CharsUID[ i ], 1 );
         image := XGetImage( scr_Display, pixmap, 0, 0, sx, sy, $FFFFFF, XYPixmap );
         SetLength( fg_CharsImage[ i ], cx * cy );
 
@@ -404,9 +405,9 @@ begin
           for sy := 0 to cy - 1 do
             begin
               color := image.f.get_pixel( image, sx, sy );
-							r := color and scr_Visual.red_mask;
-							g := color and scr_Visual.green_mask;
-							b := color and scr_Visual.blue_mask;
+              r := color and scr_Visual.red_mask;
+              g := color and scr_Visual.green_mask;
+              b := color and scr_Visual.blue_mask;
               while r > $FF do r := r shr 8;
               while g > $FF do g := g shr 8;
               while b > $FF do b := b shr 8;
@@ -414,11 +415,12 @@ begin
             end;
         image.f.destroy_image( image );
 
-		    XftColorFree( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @rWhite );
-		    XftColorFree( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @rBlack );
-		    XftDrawDestroy( draw );
-		    XFreePixmap( scr_Display, pixmap );
+        XftDrawDestroy( draw );
+        XFreePixmap( scr_Display, pixmap );
       end;
+
+  XftColorFree( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @rWhite );
+  XftColorFree( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @rBlack );
 
   XftFontClose( scr_Display, XFont );
   FcPatternDestroy( Pattern );
@@ -428,35 +430,35 @@ begin
     cs := FW_BOLD
   else
     cs := FW_NORMAL;
-	WFont := CreateFont( -MulDiv( fg_FontSize, GetDeviceCaps( wnd_DC, LOGPIXELSY ), 72 ), 0, 0, 0,
+  WFont := CreateFont( -MulDiv( fg_FontSize, GetDeviceCaps( wnd_DC, LOGPIXELSY ), 72 ), 0, 0, 0,
                        cs, Byte( fg_FontItalic ), 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-		                   ANTIALIASED_QUALITY * Byte( fg_FontAA ) or NONANTIALIASED_QUALITY * Byte( not fg_FontAA ),
-		                   DEFAULT_PITCH, PChar( FontName ) );
+                       ANTIALIASED_QUALITY * Byte( fg_FontAA ) or NONANTIALIASED_QUALITY * Byte( not fg_FontAA ),
+                       DEFAULT_PITCH, PChar( FontName ) );
 
   WDC := CreateCompatibleDC( 0 );
   SelectObject( WDC, WFont );
-	SetTextAlign( WDC, TA_LEFT or TA_TOP or TA_NOUPDATECP );
+  SetTextAlign( WDC, TA_LEFT or TA_TOP or TA_NOUPDATECP );
   SetTextColor( WDC, $FFFFFF );
   SetBkColor  ( WDC, $000000 );
 
   GetTextMetricsW( WDC, @TextMetric );
 
   FillChar( Bitmap, SizeOf( BITMAPINFO ), 0 );
-	Bitmap.bmiHeader.biWidth       := TextMetric.tmHeight * 2;
-	Bitmap.bmiHeader.biHeight      := -TextMetric.tmHeight * 2;
-	Bitmap.bmiHeader.biBitCount    := 32;
-	Bitmap.bmiHeader.biCompression := BI_RGB;
-	Bitmap.bmiHeader.biPlanes      := 1;
-	Bitmap.bmiHeader.biSize        := Sizeof( BITMAPINFOHEADER );
+  Bitmap.bmiHeader.biWidth       := TextMetric.tmHeight * 2;
+  Bitmap.bmiHeader.biHeight      := -TextMetric.tmHeight * 2;
+  Bitmap.bmiHeader.biBitCount    := 32;
+  Bitmap.bmiHeader.biCompression := BI_RGB;
+  Bitmap.bmiHeader.biPlanes      := 1;
+  Bitmap.bmiHeader.biSize        := Sizeof( BITMAPINFOHEADER );
 
-	DIB := CreateDIBSection( WDC, Bitmap, DIB_RGB_COLORS, pData, 0, 0 );
+  DIB := CreateDIBSection( WDC, Bitmap, DIB_RGB_COLORS, pData, 0, 0 );
   SelectObject( WDC, DIB );
   SetRect( Rect, 0, 0, Bitmap.bmiHeader.biWidth, TextMetric.tmHeight );
 
   for i := 0 to Font.Count.Chars - 1 do
     begin
       FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
-			TextOutW( WDC, 0, 0, @fg_CharsUID[ i ], 1 );
+      TextOutW( WDC, 0, 0, @fg_CharsUID[ i ], 1 );
 
       GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, @CharSize );
       GetCharABCWidthsW( WDC, fg_CharsUID[ i ], fg_CharsUID[ i ], CharABC );
@@ -465,7 +467,7 @@ begin
       INC( cx );
       INC( cy );
 
-      fg_CharsSize[ i ].X := CharABC.abcA;
+      fg_CharsSize[ i ].X := minX;
       fg_CharsSize[ i ].Y := cy - ( TextMetric.tmAscent - minY );
       fg_CharsSize[ i ].W := cx;
       fg_CharsSize[ i ].H := cy;
@@ -506,35 +508,36 @@ begin
       zgl_GetMem( pData, sqr( fg_PageSize ) * 4 );
       for j := 0 to sqr( fg_PageChars ) - 1 do
         begin
-          cid := j + i * sqr( fg_PageChars );
-          if cid > Font.Count.Chars - 1 Then break;
+          CharID := j + i * sqr( fg_PageChars );
+          if CharID > Font.Count.Chars - 1 Then break;
           cy  := j div fg_PageChars;
           cx  := j - cy * fg_PageChars;
-          fontgen_PutChar( pData, cx * cs + ( cs - Round( fg_CharsSize[ cid ].W ) ) div 2,
-                                  cy * cs + ( cs - Round( fg_CharsSize[ cid ].H ) ) div 2, cid );
-          SetLength( fg_CharsImage[ cid ], 0 );
+          fontgen_PutChar( pData, cx * cs + ( cs - Round( fg_CharsSize[ CharID ].W ) ) div 2,
+                                  cy * cs + ( cs - Round( fg_CharsSize[ CharID ].H ) ) div 2, CharID );
+          SetLength( fg_CharsImage[ CharID ], 0 );
 
-          zgl_GetMem( Pointer( Font.CharDesc[ fg_CharsUID[ cid ] ] ), SizeOf( zglTCharDesc ) );
-          Font.CharDesc[ fg_CharsUID[ cid ] ].Page   := i;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].Width  := Round( fg_CharsSize[ cid ].W );
-          Font.CharDesc[ fg_CharsUID[ cid ] ].Height := Round( fg_CharsSize[ cid ].H );
-          Font.CharDesc[ fg_CharsUID[ cid ] ].ShiftX := Round( fg_CharsSize[ cid ].X );
-          Font.CharDesc[ fg_CharsUID[ cid ] ].ShiftY := Round( fg_CharsSize[ cid ].Y );
-          Font.CharDesc[ fg_CharsUID[ cid ] ].ShiftP := fg_CharsP[ cid ];
+          CharUID := fg_CharsUID[ CharID ];
+          zgl_GetMem( Pointer( Font.CharDesc[ CharUID ] ), SizeOf( zglTCharDesc ) );
+          Font.CharDesc[ CharUID ].Page   := i;
+          Font.CharDesc[ CharUID ].Width  := Round( fg_CharsSize[ CharID ].W );
+          Font.CharDesc[ CharUID ].Height := Round( fg_CharsSize[ CharID ].H );
+          Font.CharDesc[ CharUID ].ShiftX := Round( fg_CharsSize[ CharID ].X );
+          Font.CharDesc[ CharUID ].ShiftY := Round( fg_CharsSize[ CharID ].Y );
+          Font.CharDesc[ CharUID ].ShiftP := fg_CharsP[ CharID ];
 
-          sx := Round( fg_CharsSize[ cid ].W );
-          sy := Round( fg_CharsSize[ cid ].H );
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 0 ].X := ( cx * cs + ( cs - sx ) div 2 - fg_FontPadding[ 0 ] ) * u;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 0 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 - fg_FontPadding[ 1 ] ) * v;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 1 ].X := ( cx * cs + ( cs - sx ) div 2 + sx + fg_FontPadding[ 2 ] ) * u;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 1 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 - fg_FontPadding[ 1 ] ) * v;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 2 ].X := ( cx * cs + ( cs - sx ) div 2 + sx + fg_FontPadding[ 2 ] ) * u;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 2 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 + sy + fg_FontPadding[ 3 ] ) * v;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 3 ].X := ( cx * cs + ( cs - sx ) div 2 - fg_FontPadding[ 0 ] ) * u;
-          Font.CharDesc[ fg_CharsUID[ cid ] ].TexCoords[ 3 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 + sy + fg_FontPadding[ 3 ] ) * v;
+          sx := Round( fg_CharsSize[ CharID].W );
+          sy := Round( fg_CharsSize[ CharID ].H );
+          Font.CharDesc[ CharUID ].TexCoords[ 0 ].X := ( cx * cs + ( cs - sx ) div 2 - fg_FontPadding[ 0 ] ) * u;
+          Font.CharDesc[ CharUID ].TexCoords[ 0 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 - fg_FontPadding[ 1 ] ) * v;
+          Font.CharDesc[ CharUID ].TexCoords[ 1 ].X := ( cx * cs + ( cs - sx ) div 2 + sx + fg_FontPadding[ 2 ] ) * u;
+          Font.CharDesc[ CharUID ].TexCoords[ 1 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 - fg_FontPadding[ 1 ] ) * v;
+          Font.CharDesc[ CharUID ].TexCoords[ 2 ].X := ( cx * cs + ( cs - sx ) div 2 + sx + fg_FontPadding[ 2 ] ) * u;
+          Font.CharDesc[ CharUID ].TexCoords[ 2 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 + sy + fg_FontPadding[ 3 ] ) * v;
+          Font.CharDesc[ CharUID ].TexCoords[ 3 ].X := ( cx * cs + ( cs - sx ) div 2 - fg_FontPadding[ 0 ] ) * u;
+          Font.CharDesc[ CharUID ].TexCoords[ 3 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 + sy + fg_FontPadding[ 3 ] ) * v;
 
-          Font.MaxHeight := Round( Max( Font.MaxHeight, fg_CharsSize[ cid ].H ) );
-          Font.MaxShiftY := Round( Max( Font.MaxShiftY, Font.CharDesc[ fg_CharsUID[ cid ] ].ShiftY ) );
+          Font.MaxHeight := Round( Max( Font.MaxHeight, fg_CharsSize[ CharID ].H ) );
+          Font.MaxShiftY := Round( Max( Font.MaxShiftY, Font.CharDesc[ CharUID ].ShiftY ) );
         end;
       Font.Padding[ 0 ] := fg_FontPadding[ 0 ];
       Font.Padding[ 1 ] := fg_FontPadding[ 1 ];
