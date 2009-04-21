@@ -75,7 +75,8 @@ uses
 
   zgl_frustum,
 
-  zgl_utils;
+  zgl_utils, zgl_const, zgl_gui_utils, zgl_opengl_all, zgl_sound_dsound,
+  zgl_sound_openal, zgl_types;
 
 const
 // Ненавижу Apple! :)

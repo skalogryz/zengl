@@ -233,6 +233,9 @@ begin
           begin
             Font       := zglTListBoxDesc( Desc^ ).Font;
             ItemIndex  := zglTListBoxDesc( Desc^ ).ItemIndex;
+            ItemHeight := zglTListBoxDesc( Desc^ ).ItemHeight;
+            if ItemHeight = 0 Then
+              ItemHeight := Font.MaxHeight + 4;
             List.Count := zglTListBoxDesc( Desc^ ).List.Count;
             SetLength( List.Items, List.Count );
             for i := 0 to List.Count - 1 do
@@ -243,6 +246,9 @@ begin
           begin
             Font          := zglTComboBoxDesc( Desc^ ).Font;
             ItemIndex     := zglTComboBoxDesc( Desc^ ).ItemIndex;
+            ItemHeight    := zglTComboBoxDesc( Desc^ ).ItemHeight;
+            if ItemHeight = 0 Then
+              ItemHeight := Font.MaxHeight + 4;
             DropDownCount := zglTComboBoxDesc( Desc^ ).DropDownCount;
             List.Count := zglTListBoxDesc( Desc^ ).List.Count;
             SetLength( List.Items, List.Count );

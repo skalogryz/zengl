@@ -190,9 +190,10 @@ end;
 
   zglPListBoxDesc = ^zglTListBoxDesc;
   zglTListBoxDesc = record
-    Font      : zglPFont;
-    List      : zglTStringList;
-    ItemIndex : Integer;
+    Font       : zglPFont;
+    List       : zglTStringList;
+    ItemIndex  : Integer;
+    ItemHeight : Integer;
 end;
 
   zglPComboBoxDesc = ^zglTComboBoxDesc;
@@ -200,6 +201,7 @@ end;
     Font          : zglPFont;
     List          : zglTStringList;
     ItemIndex     : Integer;
+    ItemHeight    : Integer;
     DropDownCount : Integer;
 
     DropedDown    : Boolean;

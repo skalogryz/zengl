@@ -241,6 +241,7 @@ end;
 procedure gui_DrawListBox;
   var
     i, ty  : Integer;
+    ShiftY : Integer;
     iShift : Integer;
     subW   : Integer;
 begin
@@ -258,19 +259,18 @@ begin
         iShift := zglTScrollBarDesc( Widget.child.Next.desc^ ).Position
       else
         iShift := 0;
+      ShiftY := ( ItemHeight - Font.MaxHeight ) div 2 + 2;
       for i := 0 to List.Count - 1 do
         begin
-          ty := Round( Y + ( i - iShift ) * Font.MaxHeight + ( i - iShift ) * 3 + 3 );
-          if ( ty >= Y - Font.MaxHeight ) and ( ty <= Y + H + Font.MaxHeight ) Then
+          ty := Round( Y + ( i - iShift ) * ItemHeight + ShiftY );
+          if ( ty >= Y - ItemHeight ) and ( ty <= Y + H + ItemHeight ) Then
             text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
         end;
 
       if ItemIndex > -1 Then
         begin
-          pr2d_Rect( X + 2, Y + 3 + ( ItemIndex - iShift ) * Font.MaxHeight + ( ItemIndex - iShift ) * 3,
-                     W - 4 - subW, Font.MaxHeight, COLOR_SELECT, 55, PR2D_FILL );
-          pr2d_Rect( X + 2, Y + 3 + ( ItemIndex - iShift ) * Font.MaxHeight + ( ItemIndex - iShift ) * 3,
-                     W - 4 - subW, Font.MaxHeight, COLOR_SELECT, 155 );
+          pr2d_Rect( X + 2, Y + 2 + ( ItemIndex - iShift ) * ItemHeight, W - 4 - subW, ItemHeight, COLOR_SELECT, 55, PR2D_FILL );
+          pr2d_Rect( X + 2, Y + 2 + ( ItemIndex - iShift ) * ItemHeight, W - 4 - subW, ItemHeight, COLOR_SELECT, 155 );
         end;
       scissor_End;
     end;
@@ -278,7 +278,7 @@ end;
 
 procedure gui_DrawComboBox;
   var
-    i : Integer;
+    i, ShiftY : Integer;
     tw, ty, th : Single;
 begin
   with zglTComboBoxDesc( Widget.desc^ ), Widget^, Widget.rect do
@@ -286,13 +286,8 @@ begin
       pr2d_Rect( X, Y, W, H, COLOR_EDIT, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W, H, COLOR_WIDGET, 255, 0 );
       pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, $000000, 255, 0 );
-      if not DropedDown Then
-        begin
-          if Widget.mousein Then
-            pr2d_Rect( X + 1, Y + 1, W - 2, H - 2, COLOR_SELECT, 55, PR2D_FILL );
-          if Widget.focus Then
-            pr2d_Rect( X, Y, W, H, COLOR_SELECT, 155 );
-        end;
+      if ( not DropedDown ) and Widget.focus Then
+        pr2d_Rect( X, Y, W, H, COLOR_SELECT, 155 );
 
       _clip( Widget, X + 2, Y + 2, W - 4 - H, H - 2 );
       th := Y + Round( ( H - Font.MaxHeight ) / 2 ) + 1;
@@ -304,17 +299,18 @@ begin
 
       if DropedDown Then
         begin
-          th := DropDownCount * ( Font.MaxHeight + 3 ) + 3;
+          th := DropDownCount * ItemHeight + 4;
           glTranslatef( 0, 0, 0.1 );
           pr2d_Rect( X, Y + H, W, th, COLOR_EDIT, 255, PR2D_FILL );
           pr2d_Rect( X, Y + H, W, th, COLOR_WIDGET, 255, 0 );
           pr2d_Rect( X + 1, Y + H, W - 2, th - 1, $000000, 255, 0 );
 
+          ShiftY := ( ItemHeight - Font.MaxHeight ) div 2 + 2;
           scissor_Begin( Round( X + 2 ), Round( Y + H ), Round( W - 4 ), Round( th - 3 ) );
           for i := 0 to List.Count - 1 do
             begin
-              ty := Round( Y + H + ( i{ - iShift} ) * Font.MaxHeight + ( i{ - iShift} ) * 3 + 3 );
-              if ( ty >= Y - Font.MaxHeight ) and ( ty <= Y + H + th ) Then
+              ty := Round( Y + H + ( i{ - iShift} ) * ItemHeight + ShiftY );
+              if ( ty >= Y - ItemHeight ) and ( ty <= Y + H + th ) Then
                 text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
             end;
           scissor_End;

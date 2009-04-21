@@ -70,7 +70,7 @@ procedure log_Add;
     str : String;
 begin
   if not app_Log Then exit;
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF LINUX}
   writeln( Message );
   {$ENDIF}
   if Timings Then
