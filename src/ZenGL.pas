@@ -24,12 +24,16 @@ library ZenGL;
 {$I zgl_config.cfg}
 
 uses
+  zgl_const,
+  zgl_types,
+
   zgl_main,
   zgl_application,
 
   zgl_screen,
   zgl_window,
   zgl_opengl,
+  zgl_opengl_all,
   zgl_opengl_simple,
 
   zgl_timers,
@@ -48,6 +52,8 @@ uses
   zgl_render_target,
 
   zgl_sound,
+  zgl_sound_dsound,
+  zgl_sound_openal,
   zgl_sound_wav,
   zgl_sound_ogg,
 
@@ -61,6 +67,7 @@ uses
   zgl_gui_types,
   zgl_gui_process,
   zgl_gui_render,
+  zgl_gui_utils,
 
   zgl_primitives_2d,
   zgl_sprite_2d,
@@ -75,8 +82,7 @@ uses
 
   zgl_frustum,
 
-  zgl_utils, zgl_const, zgl_gui_utils, zgl_opengl_all, zgl_sound_dsound,
-  zgl_sound_openal, zgl_types;
+  zgl_utils;
 
 const
 // Ненавижу Apple! :)
