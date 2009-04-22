@@ -29,7 +29,8 @@ uses
 
 const
   pi      = 3.1415926;
-  rad2deg = 0.017453292;
+  rad2deg = 57.29578049;
+  deg2rad = 0.017453292;
 
 type
   zglPPoint2D = ^zglTPoint2D;

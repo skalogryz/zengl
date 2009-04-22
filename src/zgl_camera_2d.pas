@@ -86,8 +86,8 @@ begin
 
   if cam2dGlobal.Angle <> 0 Then
     begin
-      sa := Sin( cam2dGlobal.Angle * rad2deg );
-      ca := Cos( cam2dGlobal.Angle * rad2deg );
+      sa := Sin( cam2dGlobal.Angle * deg2rad );
+      ca := Cos( cam2dGlobal.Angle * deg2rad );
       Xa := wnd_Width  / 2 + ( X - wnd_Width / 2 ) * ca - ( Y - wnd_Height / 2 ) * sa;
       Ya := wnd_Height / 2 + ( X - wnd_Width / 2 ) * sa + ( Y - wnd_Height / 2 ) * ca;
       glVertex2f( Xa, Ya );
@@ -114,8 +114,8 @@ begin
 
   if cam2dGlobal.Angle <> 0 Then
     begin
-      sa := Sin( cam2dGlobal.Angle * rad2deg );
-      ca := Cos( cam2dGlobal.Angle * rad2deg );
+      sa := Sin( cam2dGlobal.Angle * deg2rad );
+      ca := Cos( cam2dGlobal.Angle * deg2rad );
       v2a[ 0 ] := wnd_Width  / 2 + ( v2[ 0 ] - wnd_Width / 2 ) * ca - ( v2[ 1 ] - wnd_Height / 2 ) * sa;
       v2a[ 1 ] := wnd_Height / 2 + ( v2[ 0 ] - wnd_Width / 2 ) * sa + ( v2[ 1 ] - wnd_Height / 2 ) * ca;
       glVertex2fv( @v2a[ 0 ] );

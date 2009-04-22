@@ -42,7 +42,8 @@ uses
   zgl_window,
   zgl_screen,
   zgl_opengl,
-  zgl_opengl_all;
+  zgl_opengl_all,
+  zgl_math_3d;
 
 var
   tSCount  : WORD;
@@ -73,8 +74,8 @@ begin
 
   glEnable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
-  gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
+  ogl_Perspective := matrix4f_Perspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
+  glLoadMatrixf( @ogl_Perspective );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
   scr_SetViewPort;

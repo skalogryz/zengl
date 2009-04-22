@@ -106,8 +106,8 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * rad2deg );
-      c := Cos( Angle * rad2deg );
+      s := Sin( Angle * deg2rad );
+      c := Cos( Angle * deg2rad );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin
@@ -254,8 +254,8 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * rad2deg );
-      c := Cos( Angle * rad2deg );
+      s := Sin( Angle * deg2rad );
+      c := Cos( Angle * deg2rad );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin
@@ -397,8 +397,8 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * rad2deg );
-      c := Cos( Angle * rad2deg );
+      s := Sin( Angle * deg2rad );
+      c := Cos( Angle * deg2rad );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin

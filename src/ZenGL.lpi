@@ -23,13 +23,13 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="43">
+    <Units Count="44">
       <Unit0>
         <Filename Value="ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ZenGL"/>
-        <CursorPos X="14" Y="46"/>
-        <TopLine Value="54"/>
+        <CursorPos X="16" Y="244"/>
+        <TopLine Value="224"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="25"/>
         <Loaded Value="True"/>
@@ -331,6 +331,13 @@
         <UsageCount Value="20"/>
         <SyntaxHighlighter Value="Text"/>
       </Unit42>
+      <Unit43>
+        <Filename Value="zgl_camera_3d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_camera_3d"/>
+        <UsageCount Value="20"/>
+        <SyntaxHighlighter Value="Text"/>
+      </Unit43>
     </Units>
     <JumpHistory Count="2" HistoryIndex="1">
       <Position1>
@@ -339,7 +346,7 @@
       </Position1>
       <Position2>
         <Filename Value="ZenGL.pas"/>
-        <Caret Line="46" Column="14" TopLine="43"/>
+        <Caret Line="46" Column="14" TopLine="46"/>
       </Position2>
     </JumpHistory>
   </ProjectOptions>

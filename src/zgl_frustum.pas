@@ -26,6 +26,7 @@ unit zgl_frustum;
 interface
 
 uses
+  zgl_opengl,
   zgl_opengl_all,
   zgl_math_3d;
 
@@ -33,7 +34,7 @@ type
   zglPFrustum = ^zglTFrustum;
   zglTFrustum = array [ 0..5 ] of array[ 0..3 ] of Single;
 
-procedure frustum_Calc( var f : zglTFrustum );
+procedure frustum_Calc( var f : zglTFrustum; const View : zglTMatrix4f );
 
 function frustum_PointIn   ( const f : zglTFrustum; const x, y, z : Single )             : Boolean;
 function frustum_PPointIn  ( const f : zglTFrustum; const Vertex : zglTPoint3D )         : Boolean;
@@ -48,9 +49,12 @@ procedure frustum_Calc;
   var
     p, m, clip : array [ 0..15 ] of Single;
     t          : Single;
+    i, j : Integer;
 begin
-  glGetFloatv( GL_PROJECTION_MATRIX, @p );
-  glGetFloatv( GL_MODELVIEW_MATRIX,  @m );
+  //glGetFloatv( GL_PROJECTION_MATRIX, @p );
+  //glGetFloatv( GL_MODELVIEW_MATRIX,  @m );
+  zglPMatrix4f( @p[ 0 ] )^ := ogl_Perspective;
+  zglPMatrix4f( @m[ 0 ] )^ := View;
 
   clip[ 0 ] := m[ 0 ] * p[ 0 ] + m[ 1 ] * p[ 4 ] + m[ 2 ] * p[ 8 ]  + m[ 3 ] * p[ 12 ];
   clip[ 1 ] := m[ 0 ] * p[ 1 ] + m[ 1 ] * p[ 5 ] + m[ 2 ] * p[ 9 ]  + m[ 3 ] * p[ 13 ];
