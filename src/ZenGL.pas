@@ -66,6 +66,9 @@ uses
   zgl_sprite_2d,
 
   zgl_camera_3d,
+  zgl_frustum,
+
+  zgl_sky,
 
   zgl_file,
   zgl_memory,
@@ -74,8 +77,6 @@ uses
   zgl_math_3d,
 
   zgl_collision_2d,
-
-  zgl_frustum,
 
   zgl_utils;
 
@@ -251,6 +252,10 @@ exports
   frustum_SphereIn         name prefix + 'frustum_SphereIn',
   frustum_BoxIn            name prefix + 'frustum_BoxIn',
   frustum_CubeIn           name prefix + 'frustum_CubeIn',
+
+  // Sky
+  skybox_Init              name prefix + 'skybox_Init',
+  skybox_Draw              name prefix + 'skybox_Draw',
 
   // Math
   //

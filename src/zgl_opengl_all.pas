@@ -258,7 +258,6 @@ type
   // Viewport
   procedure glViewport(x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble); stdcall; external libGL;
-  procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); stdcall; external libGLU;
   procedure glScissor(x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   // Depth
   procedure glDepthFunc(func: GLenum); stdcall; external libGL;
@@ -278,6 +277,7 @@ type
   // Vertex
   procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
   procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;
+  procedure glVertex3f(x, y, z: GLfloat); stdcall; external libGL;
   // Texture
   procedure glBindTexture(target: GLenum; texture: GLuint); stdcall; external libGL;
   procedure glGenTextures(n: GLsizei; textures: PGLuint); stdcall; external libGL;

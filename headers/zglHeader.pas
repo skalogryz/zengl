@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.24               }
-{ date:    14.04.09             }
+{ version: 0.1.26               }
+{ date:    24.04.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -369,7 +369,7 @@ var
 
 // GL
   Set2DMode : procedure;
-  Set3DMode : procedure( FOVY : Single );
+  Set3DMode : procedure( FOVY : Single = 45 );
 
 // TEXTURES
 type
@@ -896,12 +896,88 @@ var
   snd_StopFile          : procedure;
   snd_ResumeFile        : procedure;
 
+// 3D
+type
+  zglPPoint3D = ^zglTPoint3D;
+  zglTPoint3D = record
+    case Byte of
+    1: ( x, y, z : Single );
+    2: ( point : array[ 0..2 ] of Single );
+end;
+
+type
+  zglPMatrix4f = ^zglTMatrix4f;
+  zglTMatrix4f = record
+    a11, a12, a13, a14 : Single;
+    a21, a22, a23, a24 : Single;
+    a31, a32, a33, a34 : Single;
+    a41, a42, a43, a44 : Single;
+end;
+
+// Camera 3D
+type
+  zglPCamera3D = ^zglTCamera3D;
+  zglTCamera3D = record
+    Position : zglTPoint3D;
+    Rotation : zglTPoint3D;
+    Matrix   : zglTMatrix4f;
+end;
+
+var
+  cam3d_Set      : procedure( const Camera : zglTCamera3D );
+  cam3d_CalcView : procedure( var Camera : zglTCamera3D );
+  cam3d_LookAt   : procedure( var Camera : zglTCamera3D; const Eyes, Up : zglTPoint3D );
+
+// Frustum
+type
+  zglPFrustum = ^zglTFrustum;
+  zglTFrustum = array [ 0..5 ] of array[ 0..3 ] of Single;
+
+var
+  frustum_Calc : procedure( var f : zglTFrustum; const View : zglTMatrix4f );
+
+  frustum_PointIn    : function( const f : zglTFrustum; const x, y, z : Single )             : Boolean;
+  frustum_PPointIn   : function( const f : zglTFrustum; const Vertex : zglTPoint3D )         : Boolean;
+  frustum_TriangleIn : function( const f : zglTFrustum; const v1, v2, v3 : zglTPoint3D )     : Boolean;
+  frustum_SphereIn   : function( const f : zglTFrustum; const x, y, z, r : Single )          : Boolean;
+  frustum_BoxIn      : function( const f : zglTFrustum; const x, y, z, bx, by, bz : Single ) : Boolean;
+  frustum_CubeIn     : function( const f : zglTFrustum; const x, y, z, size : Single )       : Boolean;
+
 // MATH
   m_Cos       : function( Angle : Integer ) : Single;
   m_Sin       : function( Angle : Integer ) : Single;
   m_Distance  : function( const x1, y1, x2, y2 : Single ) : Single;
   m_FDistance : function( const x1, y1, x2, y2 : Single ) : Single;
   m_Angle     : function( const x1, y1, x2, y2 : Single ) : Single;
+// MATH 3D
+  // Vector
+  vector_Get       : function( const x, y, z : Single ) : zglTPoint3D;
+  vector_Add       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Sub       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Mul       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Div       : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_AddV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_SubV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_MulV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_DivV      : function( const Vector : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  vector_MulM4f    : function( const Vector : zglTPoint3D; const Matrix : zglTMatrix4f ) : zglTPoint3D;
+  vector_Negate    : function( const Vector : zglTPoint3D ) : zglTPoint3D;
+  vector_Normalize : function( const Vector : zglTPoint3D ) : zglTPoint3D;
+  vector_Cross     : function( const Vector1, Vector2 : zglTPoint3D ) : zglTPoint3D;
+  vector_Dot       : function( const Vector1, Vector2 : zglTPoint3D ) : Single;
+  vector_Lerp      : function( const Vector1, Vector2 : zglTPoint3D; const Value : Single ) : zglTPoint3D;
+  // Matrix 4x4
+  matrix4f_Frustum         : function( const Left, Right, Bottom, Top, zNear, zFar : Single ) : zglTMatrix4f;
+  matrix4f_Perspective     : function( const FOVY, Aspect, zNear, zFar : Single ) : zglTMatrix4f;
+  matrix4f_FromVectorAngle : function( const Vector : zglTPoint3D; const Angle : Single ) : zglTMatrix4f;
+  matrix4f_SetPos          : procedure( var Matrix : zglTMatrix4f; const X, Y, Z : Single );
+  matrix4f_SetRot          : procedure( var Matrix : zglTMatrix4f; const aX, aY, aZ : Single  );
+  matrix4f_Determinant     : function( const Matrix : zglTMatrix4f ) : Single;
+  matrix4f_Inverse         : function( const Matrix : zglTMatrix4f ) : zglTMatrix4f;
+  matrix4f_Transpose       : function( const Matrix : zglTMatrix4f ) : zglTMatrix4f;
+  matrix4f_Translate       : function( const Matrix : zglTMatrix4f; const tX, tY, tZ : Single ) : zglTMatrix4f;
+  matrix4f_Rotate          : function( const Matrix : zglTMatrix4f; const Vector : zglTPoint3D; const Angle : Single ) : zglTMatrix4f;
+  matrix4f_Mul             : function( const Matrix1, Matrix2 : zglTMatrix4f ) : zglTMatrix4f;
 
 // COLLISION 2D
   col2d_PointInRect   : function( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
@@ -1152,6 +1228,10 @@ begin
       snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
       snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );
 
+      cam3d_Set := dlsym( zglLib, 'cam3d_Set' );
+      cam3d_CalcView := dlsym( zglLib, 'cam3d_CalcView' );
+      cam3d_LookAt := dlsym( zglLib, 'cam3d_LookAt' );
+
       frustum_Calc := dlsym( zglLib, 'frustum_Calc' );
       frustum_PointIn := dlsym( zglLib, 'frustum_PointIn' );
       frustum_PPointIn := dlsym( zglLib, 'frustum_PPointIn' );
@@ -1165,6 +1245,34 @@ begin
       m_Distance := dlsym( zglLib, 'm_Distance' );
       m_FDistance := dlsym( zglLib, 'm_FDistance' );
       m_Angle := dlsym( zglLib, 'm_Angle' );
+
+      vector_Get := dlsym( zglLib, 'vector_Get' );
+      vector_Add := dlsym( zglLib, 'vector_Add' );
+      vector_Sub := dlsym( zglLib, 'vector_Sub' );
+      vector_Mul := dlsym( zglLib, 'vector_Mul' );
+      vector_Div := dlsym( zglLib, 'vector_Div' );
+      vector_AddV := dlsym( zglLib, 'vector_AddV' );
+      vector_SubV := dlsym( zglLib, 'vector_SubV' );
+      vector_MulV := dlsym( zglLib, 'vector_MulV' );
+      vector_DivV := dlsym( zglLib, 'vector_DivV' );
+      vector_MulM4f := dlsym( zglLib, 'vector_MulM4f' );
+      vector_Negate := dlsym( zglLib, 'vector_Negate' );
+      vector_Normalize := dlsym( zglLib, 'vector_Normalize' );
+      vector_Cross := dlsym( zglLib, 'vector_Cross' );
+      vector_Dot := dlsym( zglLib, 'vector_Dot' );
+      vector_Lerp := dlsym( zglLib, 'vector_Lerp' );
+
+      matrix4f_Frustum := dlsym( zglLib, 'matrix4f_Frustum' );
+      matrix4f_Perspective := dlsym( zglLib, 'matrix4f_Perspective' );
+      matrix4f_FromVectorAngle := dlsym( zglLib, 'matrix4f_FromVectorAngle' );
+      matrix4f_SetPos := dlsym( zglLib, 'matrix4f_SetPos' );
+      matrix4f_SetRot := dlsym( zglLib, 'matrix4f_SetRot' );
+      matrix4f_Determinant := dlsym( zglLib, 'matrix4f_Determinant' );
+      matrix4f_Inverse := dlsym( zglLib, 'matrix4f_Inverse' );
+      matrix4f_Transpose := dlsym( zglLib, 'matrix4f_Transpose' );
+      matrix4f_Translate := dlsym( zglLib, 'matrix4f_Translate' );
+      matrix4f_Rotate := dlsym( zglLib, 'matrix4f_Rotate' );
+      matrix4f_Mul := dlsym( zglLib, 'matrix4f_Mul' );
 
       col2d_PointInRect := dlsym( zglLib, 'col2d_PointInRect' );
       col2d_PointInCircle := dlsym( zglLib, 'col2d_PointInCircle' );

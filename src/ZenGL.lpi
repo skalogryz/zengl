@@ -23,13 +23,13 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="44">
+    <Units Count="45">
       <Unit0>
         <Filename Value="ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ZenGL"/>
-        <CursorPos X="16" Y="244"/>
-        <TopLine Value="224"/>
+        <CursorPos X="30" Y="3"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="25"/>
         <Loaded Value="True"/>
@@ -338,6 +338,13 @@
         <UsageCount Value="20"/>
         <SyntaxHighlighter Value="Text"/>
       </Unit43>
+      <Unit44>
+        <Filename Value="zgl_sky.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_sky"/>
+        <UsageCount Value="20"/>
+        <SyntaxHighlighter Value="Text"/>
+      </Unit44>
     </Units>
     <JumpHistory Count="2" HistoryIndex="1">
       <Position1>
