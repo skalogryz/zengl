@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.26               }
-{ date:    24.04.09             }
+{ date:    27.04.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -1203,7 +1203,7 @@ begin
       font_LoadFromFile := dlsym( zglLib, 'font_LoadFromFile' );
       font_LoadFromMemory := dlsym( zglLib, 'font_LoadFromMemory' );
       text_Draw := dlsym( zglLib, 'text_Draw' );
-      text_DrawEx := dlsym( zglLib, 'text_Draw' );
+      text_DrawEx := dlsym( zglLib, 'text_DrawEx' );
       text_DrawInRect := dlsym( zglLib, 'text_DrawInRect' );
       text_GetWidth := dlsym( zglLib, 'text_GetWidth' );
 

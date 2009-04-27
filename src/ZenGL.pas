@@ -214,6 +214,7 @@ exports
   font_LoadFromFile        name prefix + 'font_LoadFromFile',
   font_LoadFromMemory      name prefix + 'font_LoadFromMemory',
   text_Draw                name prefix + 'text_Draw',
+  text_DrawEx              name prefix + 'text_DrawEx',
   text_DrawInRect          name prefix + 'text_DrawInRect',
   text_GetWidth            name prefix + 'text_GetWidth',
 
@@ -240,9 +241,11 @@ exports
   snd_ResumeFile           name prefix + 'snd_ResumeFile',
 
   // Camera 3D
-  cam3d_Set,
-  cam3d_CalcView,
-  cam3d_LookAt,
+  cam3d_Set                name prefix + 'cam3d_Set',
+  cam3d_CalcView           name prefix + 'cam3d_CalcView',
+  cam3d_LookAt             name prefix + 'cam3d_LookAt',
+  cam3d_Fly                name prefix + 'cam3d_Fly',
+  cam3d_Strafe             name prefix + 'cam3d_Strafe',
 
   // Frustum
   frustum_Calc             name prefix + 'frustum_Calc',

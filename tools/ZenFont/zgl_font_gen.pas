@@ -402,7 +402,6 @@ begin
         image := XGetImage( scr_Display, pixmap, 0, 0, sx, sy, $FFFFFF, XYPixmap );
         SetLength( fg_CharsImage[ i ], cx * cy );
 
-        // Обычный Move для image.data не канает :(
         for sx := 0 to cx - 1 do
           for sy := 0 to cy - 1 do
             begin

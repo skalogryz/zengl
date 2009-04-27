@@ -38,6 +38,8 @@ end;
 procedure cam3d_Set( const Camera : zglTCamera3D );
 procedure cam3d_CalcView( var Camera : zglTCamera3D );
 procedure cam3d_LookAt( var Camera : zglTCamera3D; const Eyes, Up : zglTPoint3D );
+procedure cam3d_Fly( var Camera : zglTCamera3D; const Speed : Single );
+procedure cam3d_Strafe( var Camera : zglTCamera3D; const Speed : Single );
 
 implementation
 uses
@@ -96,6 +98,31 @@ begin
 
       Matrix := matrix4f_Inverse( Matrix );
     end;
+end;
+
+procedure cam3d_Fly;
+  var
+    Vector : zglTPoint3D;
+begin
+  Vector.X :=  Cos( Camera.Rotation.Y ) * Cos( Camera.Rotation.X );
+  Vector.Y := -Sin( Camera.Rotation.X );
+  Vector.Z :=  Sin( Camera.Rotation.Y ) * Cos( Camera.Rotation.X );
+  Camera.Position := vector_Add( Camera.Position, vector_MulV( Vector, Speed ) );
+end;
+
+procedure cam3d_Strafe;
+  var
+    Cross, Vector : zglTPoint3D;
+    Up : zglTPoint3D;
+begin
+  Up.X := 0;
+  Up.Y := 1;
+  Up.Z := 0;
+  Vector.X := Cos( Camera.Rotation.Y ) * Cos( Camera.Rotation.X );
+  Vector.Y := Sin( Camera.Rotation.X );
+  Vector.Z := Sin( Camera.Rotation.Y ) * Cos( Camera.Rotation.X );
+  Cross := vector_Cross( Up, Vector );
+  Camera.Position := vector_Add( Camera.Position, vector_MulV( Cross, Speed ) );
 end;
 
 end.
