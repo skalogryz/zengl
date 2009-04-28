@@ -180,13 +180,7 @@ begin
               end;
         end else
           begin
-            currTimer := @managerTimer.First;
-            if currTimer <> nil Then
-              for z := 0 to managerTimer.Count do
-                begin
-                  currTimer^.LastTick := timer_GetTicks;
-                  currTimer := currTimer^.Next;
-                end;
+            timer_Reset;
             u_Sleep( 10 );
           end;
 

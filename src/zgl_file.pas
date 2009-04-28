@@ -334,6 +334,7 @@ procedure GetStr( const Str : String; var Result : String; const d : Char );
   var
     i, pos, l : Integer;
 begin
+  pos := 0;
   l := length( Str );
   for i := l downto 1 do
     if Str[ i ] = d Then

@@ -65,20 +65,12 @@ uses
   zgl_primitives_2d,
   zgl_sprite_2d,
 
-  zgl_camera_3d,
-  zgl_frustum,
-
-  zgl_sky,
-
   zgl_file,
   zgl_memory,
 
   zgl_math_2d,
-  zgl_math_3d,
 
-  zgl_collision_2d,
-
-  zgl_utils;
+  zgl_collision_2d;
 
 const
 // Ненавижу Apple! :)
@@ -240,26 +232,6 @@ exports
   snd_StopFile             name prefix + 'snd_StopFile',
   snd_ResumeFile           name prefix + 'snd_ResumeFile',
 
-  // Camera 3D
-  cam3d_Set                name prefix + 'cam3d_Set',
-  cam3d_CalcView           name prefix + 'cam3d_CalcView',
-  cam3d_LookAt             name prefix + 'cam3d_LookAt',
-  cam3d_Fly                name prefix + 'cam3d_Fly',
-  cam3d_Strafe             name prefix + 'cam3d_Strafe',
-
-  // Frustum
-  frustum_Calc             name prefix + 'frustum_Calc',
-  frustum_PointIn          name prefix + 'frustum_PointIn',
-  frustum_PPointIn         name prefix + 'frustum_PPointIn',
-  frustum_TriangleIn       name prefix + 'frustum_TriangleIn',
-  frustum_SphereIn         name prefix + 'frustum_SphereIn',
-  frustum_BoxIn            name prefix + 'frustum_BoxIn',
-  frustum_CubeIn           name prefix + 'frustum_CubeIn',
-
-  // Sky
-  skybox_Init              name prefix + 'skybox_Init',
-  skybox_Draw              name prefix + 'skybox_Draw',
-
   // Math
   //
   m_Cos                    name prefix + 'm_Cos',
@@ -267,34 +239,6 @@ exports
   m_Distance               name prefix + 'm_Distance',
   m_FDistance              name prefix + 'm_FDistance',
   m_Angle                  name prefix + 'm_Angle',
-  // Vector
-  vector_Get               name prefix + 'vector_Get',
-  vector_Add               name prefix + 'vector_Add',
-  vector_Sub               name prefix + 'vector_Sub',
-  vector_Mul               name prefix + 'vector_Mul',
-  vector_Div               name prefix + 'vector_Div',
-  vector_AddV              name prefix + 'vector_AddV',
-  vector_SubV              name prefix + 'vector_SubV',
-  vector_MulV              name prefix + 'vector_MulV',
-  vector_DivV              name prefix + 'vector_DivV',
-  vector_MulM4f            name prefix + 'vector_MulM4f',
-  vector_Negate            name prefix + 'vector_Negate',
-  vector_Normalize         name prefix + 'vector_Normalize',
-  vector_Cross             name prefix + 'vector_Cross',
-  vector_Dot               name prefix + 'vector_Dot',
-  vector_Lerp              name prefix + 'vector_Lerp',
-  // Matrix
-  matrix4f_Frustum         name prefix + 'matrix4f_Frustum',
-  matrix4f_Perspective     name prefix + 'matrix4f_Perspective',
-  matrix4f_SetPos          name prefix + 'matrix4f_SetPos',
-  matrix4f_SetRot          name prefix + 'matrix4f_SetRot',
-  matrix4f_FromVectorAngle name prefix + 'matrix4f_FromVectorAngle',
-  matrix4f_Determinant     name prefix + 'matrix4f_Determinant',
-  matrix4f_Inverse         name prefix + 'matrix4f_Inverse',
-  matrix4f_Transpose       name prefix + 'matrix4f_Transpose',
-  matrix4f_Translate       name prefix + 'matrix4f_Translate',
-  matrix4f_Rotate          name prefix + 'matrix4f_Rotate',
-  matrix4f_Mul             name prefix + 'matrix4f_Mul',
 
   // Collision 2D
   col2d_PointInRect        name prefix + 'col2d_PointInRect',

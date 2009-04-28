@@ -400,8 +400,6 @@ begin
   for i := 1 to Result.sCount - 1 do
     ds_Device.DuplicateSoundBuffer( Result.Source[ 0 ], Result.Source[ i ] );
 {$ENDIF}
-
-  log_Add( 'Successful loading of sound: From Memory' );
 end;
 
 function snd_Play;

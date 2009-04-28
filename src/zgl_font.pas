@@ -50,8 +50,8 @@ type
   zglPFont = ^zglTFont;
   zglTFont = record
     Count      : record
-                   Pages : WORD;
-                   Chars : WORD;
+      Pages : WORD;
+      Chars : WORD;
                  end;
 
     Pages      : array of zglPTexture;
@@ -154,10 +154,10 @@ end;
 
 function font_LoadFromFile;
 begin
+  Result := nil;
   if not file_Exists( FileName ) Then
     begin
       log_Add( 'Cannot read ' + FileName );
-      zgl_Destroy;
       exit;
     end;
 
@@ -166,7 +166,6 @@ begin
   if fntID <> ZGL_FONT_INFO Then
     begin
       log_Add( FileName + ' - it''s not a ZenGL font info file' );
-      zgl_Destroy;
       exit;
     end else
       Result := font_Load;
@@ -174,6 +173,7 @@ end;
 
 function font_LoadFromMemory;
 begin
+  Result := nil;
   fntMem.Size     := Memory.Size;
   zgl_GetMem( fntMem.Memory, Memory.Size );
   fntMem.Position := Memory.Position;
@@ -183,7 +183,6 @@ begin
   if fntID <> ZGL_FONT_INFO Then
     begin
       log_Add( 'Unable to determinate ZenGL font info: From Memory' );
-      zgl_Destroy;
       exit;
     end else
       Result := font_Load;

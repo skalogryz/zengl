@@ -34,8 +34,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_opengl_all,
-  zgl_math_3d
+  zgl_opengl_all
   ;
 
 function  gl_Create : Boolean;
@@ -51,7 +50,6 @@ var
   ogl_FOVY       : Single = 45;
   ogl_zNear      : Single = 0.1;
   ogl_zFar       : Single = 100;
-  ogl_Perspective: zglTMatrix4f;
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of DWORD;
 

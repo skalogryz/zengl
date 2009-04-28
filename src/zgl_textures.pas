@@ -198,7 +198,7 @@ begin
           gluBuild2DMipmaps( GL_TEXTURE_2D, cformat, Texture.Width, Texture.Height, format, GL_UNSIGNED_BYTE, pData )
       end;
 
-   glDisable( GL_TEXTURE_2D );
+  glDisable( GL_TEXTURE_2D );
 
   if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
     begin
@@ -239,11 +239,12 @@ begin
   Result := nil;
   pData  := nil;
 
+  Result := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+
   if not file_Exists( FileName ) Then
     begin
       log_Add( 'Cannot read ' + FileName );
-      zgl_Destroy;
-      halt;
+      exit;
     end;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
@@ -256,10 +257,10 @@ begin
   if not Assigned( pData ) Then
     begin
       log_Add( 'Unable to load texture: ' + FileName );
-      zgl_Destroy;
       exit;
     end;
 
+  tex_Del( Result );
   Result         := tex_Add;
   Result.Width   := w;
   Result.Height  := h;
@@ -286,6 +287,8 @@ begin
   Result := nil;
   pData  := nil;
 
+  Result := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
       managerTexture.Formats[ i ].MemLoader( Memory, pData, w, h );
@@ -293,10 +296,10 @@ begin
   if not Assigned( pData ) Then
     begin
       log_Add( 'Unable to load texture: From Memory' );
-      zgl_Destroy;
       exit;
     end;
 
+  tex_Del( Result );
   Result         := tex_Add;
   Result.Width   := w;
   Result.Height  := h;
@@ -308,8 +311,6 @@ begin
   if TransparentColor <> $FF000000 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
-
-  log_Add( 'Successful loading of texture: From Memory' );
 
   FreeMemory( pData );
 end;
@@ -335,7 +336,7 @@ end;
 
 function tex_SetMask;
   var
-    i            : DWORD;
+    i            : Integer;
     tSize, mSize : Integer;
     tData, mData : Pointer;
     pData        : Pointer;

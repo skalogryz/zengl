@@ -85,6 +85,9 @@ const
 
   // DataType
   GL_UNSIGNED_BYTE                  = $1401;
+  GL_UNSIGNED_SHORT                 = $1403;
+  GL_UNSIGNED_INT                   = $1405;
+  GL_FLOAT                          = $1406;
 
   // PixelFormat
   GL_RGB                            = $1907;
@@ -149,6 +152,7 @@ const
 
   // Texture
   GL_TEXTURE_2D                     = $0DE1;
+  GL_TEXTURE0_ARB                   = $84C0;
   GL_MAX_TEXTURE_SIZE               = $0D33;
   GL_MAX_TEXTURE_UNITS_ARB          = $84E2;
   GL_TEXTURE_MAX_ANISOTROPY_EXT     = $84FE;
@@ -182,6 +186,12 @@ const
   GL_TEXTURE_MIN_FILTER             = $2801;
   GL_TEXTURE_WRAP_S                 = $2802;
   GL_TEXTURE_WRAP_T                 = $2803;
+
+  // Vertex Array
+  GL_VERTEX_ARRAY                   = $8074;
+  GL_NORMAL_ARRAY                   = $8075;
+  GL_INDEX_ARRAY                    = $8077;
+  GL_TEXTURE_COORD_ARRAY            = $8078;
 
   // FBO
   GL_FRAMEBUFFER_EXT                = $8D40;
@@ -271,6 +281,7 @@ type
   // Matrix
   procedure glMatrixMode(mode: GLenum); stdcall; external libGL;
   procedure glLoadIdentity; stdcall; external libGL;
+  procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); stdcall; external libGLU;
   procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGL;
   procedure glMultMatrixf(const m: PGLfloat); stdcall; external libGL;
   procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGL;
@@ -278,6 +289,7 @@ type
   procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
   procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;
   procedure glVertex3f(x, y, z: GLfloat); stdcall; external libGL;
+  procedure glVertexPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
   // Texture
   procedure glBindTexture(target: GLenum; texture: GLuint); stdcall; external libGL;
   procedure glGenTextures(n: GLsizei; textures: PGLuint); stdcall; external libGL;
@@ -289,12 +301,17 @@ type
   procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
   function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; stdcall; external libGLU;
+  // Normal
+  procedure glNormalPointer(atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
+  //
+  procedure glDrawElements(mode: GLenum; count: GLsizei; atype: GLenum; const indices: Pointer); stdcall; external libGL;
 var
   glActiveTextureARB: procedure(texture: GLenum); stdcall;
   glClientActiveTextureARB: procedure(texture: GLenum); stdcall;
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
+  procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
 var
   glMultiTexCoord2fARB: procedure(target: GLenum; s: GLfloat; t: GLfloat); stdcall;
   glMultiTexCoord2fvARB: procedure(target: GLenum; const v: PGLfloat); stdcall;
