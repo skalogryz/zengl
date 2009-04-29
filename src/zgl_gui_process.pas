@@ -460,8 +460,8 @@ begin
           begin
             if ItemIndex < iShift Then
               zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex;
-            if ItemIndex > iShift + iCount - 1 Then
-              zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex - iCount + 1;
+            if ItemIndex > iShift + iCount - 2 Then
+              zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex - iCount + 2;
           end;
       end;
   end;
@@ -469,7 +469,7 @@ begin
   if Assigned( Event.Widget.child ) Then
     with zglTScrollBarDesc( Event.Widget.child.Next.desc^ ) do
       begin
-        Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
+        Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount + 1;
         Step := 1;
         if Position > Max Then
           Position := Max;

@@ -633,6 +633,18 @@ const
   WIDGET_SPIN        = 9;
   WIDGET_SCROLLBAR   = 10;
 
+  // ScrollBar
+  SCROLLBAR_VERTICAL   = 0;
+  SCROLLBAR_HORIZONTAL = 1;
+
+  // Align
+  ALIGN_NONE    = 0;
+  ALIGN_CLIENT  = 1;
+  ALIGN_LEFT    = 2;
+  ALIGN_RIGHT   = 3;
+  ALIGN_TOP     = 4;
+  ALIGN_BOTTOM  = 5;
+
   // Events
   EVENT_CREATE      = 1;
 
@@ -682,6 +694,8 @@ end;
     desc       : Pointer;
     data       : Pointer;
     rect       : zglTRect;
+    client     : zglTRect;
+    align      : DWORD;
     focus      : Boolean;
     mousein    : Boolean;
     draged     : Boolean;
