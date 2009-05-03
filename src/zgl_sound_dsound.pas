@@ -26,8 +26,7 @@ unit zgl_sound_dsound;
 interface
 uses
   Windows,
-  math,
-  zgl_math_3d;
+  math;
 
 const
   DS_OK                       = $00000000;
@@ -132,8 +131,8 @@ var
   DirectSoundCreate : function (lpGuid: PGUID; out ppDS: IDirectSound; pUnkOuter: IUnknown): HResult; stdcall;
 
   ds_Device      : IDirectSound;
-  ds_Position    : zglTPoint3D;
-  ds_Plane       : zglTPoint3D;
+  ds_Position    : array[ 0..2 ] of Single;
+  ds_Plane       : array[ 0..2 ] of Single;
   ds_Orientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 );
 
 implementation
@@ -188,17 +187,17 @@ function dsu_CalcPos;
   var
     dist, angle : Single;
 begin
-  ds_Plane.X := ds_Orientation[ 1 ] * ds_Orientation[ 5 ] - ds_Orientation[ 2 ] * ds_Orientation[ 4 ];
-  ds_Plane.Y := ds_Orientation[ 2 ] * ds_Orientation[ 3 ] - ds_Orientation[ 0 ] * ds_Orientation[ 5 ];
-  ds_Plane.Z := ds_Orientation[ 0 ] * ds_Orientation[ 4 ] - ds_Orientation[ 1 ] * ds_Orientation[ 3 ];
+  ds_Plane[ 0 ] := ds_Orientation[ 1 ] * ds_Orientation[ 5 ] - ds_Orientation[ 2 ] * ds_Orientation[ 4 ];
+  ds_Plane[ 1 ] := ds_Orientation[ 2 ] * ds_Orientation[ 3 ] - ds_Orientation[ 0 ] * ds_Orientation[ 5 ];
+  ds_Plane[ 2 ] := ds_Orientation[ 0 ] * ds_Orientation[ 4 ] - ds_Orientation[ 1 ] * ds_Orientation[ 3 ];
 
-  dist := sqrt( sqr( X - ds_Position.X ) + sqr( Y - ds_Position.Y ) + sqr( Z - ds_Position.Z ) );
+  dist := sqrt( sqr( X - ds_Position[ 0 ] ) + sqr( Y - ds_Position[ 1 ] ) + sqr( Z - ds_Position[ 2 ] ) );
   if dist = 0 then
     angle := 0
   else
-    angle := ( ds_Plane.X * ( X - ds_Position.X ) +
-               ds_Plane.Y * ( Y - ds_Position.Y ) +
-               ds_Plane.Z * ( Z - ds_Position.Z ) ) / dist;
+    angle := ( ds_Plane[ 0 ] * ( X - ds_Position[ 0 ] ) +
+               ds_Plane[ 1 ] * ( Y - ds_Position[ 1 ] ) +
+               ds_Plane[ 2 ] * ( Z - ds_Position[ 2 ] ) ) / dist;
   Result := Trunc( 10000 * angle * 0.1 );
   if Result < -10000 Then Result := -10000;
   if Result > 10000  Then Result := 10000;
