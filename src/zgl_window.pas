@@ -130,7 +130,7 @@ begin
     end else
       begin
         wnd_Attr.override_redirect := False;
-        wnd_ValueMask := CWColormap or CWEventMask or CWX or CWY or CWCursor;
+        wnd_ValueMask := CWColormap or CWEventMask or CWX or CWY or CWCursor or CWBorderPixel;
       end;
 
   wnd_Handle := XCreateWindow( scr_Display,
