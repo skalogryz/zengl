@@ -441,7 +441,7 @@ begin
       Stream.Rate       := vi.rate;
       Stream.Channels   := vi.channels;
       Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
-      GetMem( Stream.Buffer, Stream.BufferSize );
+      zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
       Result := TRUE;
     end;
   ov_time_seek( vf, 0 );

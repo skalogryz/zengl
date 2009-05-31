@@ -149,7 +149,6 @@ var
   sfBufCount : Integer = 4;
   sfSource   : LongWord;
   sfBuffers  : array[ 0..3 ] of LongWord;
-  sfLastProc : LongInt;
   {$ELSE}
   sfBuffer  : IDirectSoundBuffer;
   sfLastPos : DWORD;
