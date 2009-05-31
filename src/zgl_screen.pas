@@ -76,6 +76,8 @@ var
   scr_ResList : zglTResolutionList;
 
   // Resolution Correct
+  scr_ResW  : Integer;
+  scr_ResH  : Integer;
   scr_ResCX : Single  = 1;
   scr_ResCY : Single  = 1;
   scr_AddCX : Integer = 0;
@@ -551,6 +553,8 @@ end;
 
 procedure scr_CorrectResolution;
 begin
+  scr_ResW  := Width;
+  scr_ResH  := Height;
   scr_ResCX := wnd_Width  / Width;
   scr_ResCY := wnd_Height / Height;
 

@@ -441,7 +441,7 @@ begin
       Stream.Rate       := vi.rate;
       Stream.Channels   := vi.channels;
       Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
-      zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
+      GetMem( Stream.Buffer, Stream.BufferSize );
       Result := TRUE;
     end;
   ov_time_seek( vf, 0 );
@@ -478,9 +478,6 @@ begin
   if not Assigned( vi ) Then exit;
   vi := nil;
   ov_clear( vf );
-  {$IFDEF WIN32}
-  //file_Close( Stream._File );
-  {$ENDIF}
 end;
 
 procedure ogg_Load;
@@ -518,21 +515,25 @@ begin
 
       ov_time_seek( vf, 0 );
 
-      first := TRUE;
-      size  := 0;
+      size := 0;
       zgl_GetMem( Buffer, 64 * 1024 );
+      // Т.к. ov_pcm_total почему-то возвращает бред, приходится извращаться :)
+      repeat
+        BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
+        INC( size, BytesRead );
+      until _End;
+      vi := nil;
+      ov_clear( vf );
+
+      zgl_GetMem( Data, size );
+      ov_open_callbacks( nil, vf, oggMemory.Memory, oggMemory.Size, vc );
+      ov_time_seek( vf, 0 );
+      size := 0;
       repeat
         BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
         if BytesRead > 0 Then
-          begin
-            if first Then
-              zgl_GetMem( Data, BytesRead )
-            else
-              Data := SysReallocMem( Data, size );
-            Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
-          end;
-        first := FALSE;
+          Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
       until _End;
       Freemem( Buffer );
 

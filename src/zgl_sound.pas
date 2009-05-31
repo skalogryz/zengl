@@ -117,10 +117,10 @@ function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( const BufferCount, SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
-function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer ) : zglPSound;
-function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer ) : zglPSound;
+function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer = 16 ) : zglPSound;
+function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 16 ) : zglPSound;
 
-function  snd_Play( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean = FALSE ) : Integer;
+function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
 procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
 procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const ID : Integer );
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );
@@ -140,6 +140,7 @@ var
   sndCanPlay     : Boolean = TRUE;
   sndCanPlayFile : Boolean = TRUE;
   sndStopFile    : Boolean = FALSE;
+  sndAutoPaused  : Boolean;
 
   sfStream : zglPSoundStream = nil;
   sfVolume : Single = 1;
@@ -148,6 +149,7 @@ var
   sfBufCount : Integer = 4;
   sfSource   : LongWord;
   sfBuffers  : array[ 0..3 ] of LongWord;
+  sfLastProc : LongInt;
   {$ELSE}
   sfBuffer  : IDirectSoundBuffer;
   sfLastPos : DWORD;
@@ -683,12 +685,11 @@ begin
   if ( not sndInitialized ) or
      ( not sndCanPlayFile ) Then exit;
 
-  if Assigned( sfStream ) and sfStream.Played Then
+  if Assigned( sfStream ) Then
     begin
       snd_StopFile;
+      FreeMemory( sfStream.Buffer );
       sfStream.CodecClose( sfStream );
-      if Assigned( sfStream.Buffer ) Then
-        FreeMemory( sfStream.Buffer );
     end;
 
   if not file_Exists( FileName ) Then
@@ -779,7 +780,9 @@ begin
   alSourceRewind( sfSource );
   alSourcei( sfSource, AL_BUFFER, 0 );
 {$ELSE}
-  TerminateThread( Thread, 0 );
+  sndStopFile := TRUE;
+  while sndStopFile do;
+
   CloseHandle( Thread );
   sfBuffer.Stop;
 {$ENDIF}
@@ -799,58 +802,60 @@ function snd_ProcFile;
     FillSize       : DWORD;
   {$ENDIF}
 begin
-  try
-    while not sndStopFile do
-      begin
-        if ( not Assigned( sfStream ) ) or
-           ( not sndInitialized ) Then break;
+  {$IFDEF USE_OPENAL}
+  processed := 0;
+  while processed < 1 do
+    alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, processed );
+  {$ENDIF}
+  while not sndStopFile do
+    begin
+      if ( not Assigned( sfStream ) ) or
+         ( not sndInitialized ) Then break;
 
-        u_Sleep( 100 );
-        {$IFDEF USE_OPENAL}
-        alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, processed );
-        while ( processed > 0 ) and ( not sndStopFile ) do
-          begin
-            alSourceUnQueueBuffers( sfSource, 1, @buffer );
+      u_Sleep( 100 );
+      {$IFDEF USE_OPENAL}
+      alGetSourcei( sfSource, AL_BUFFERS_PROCESSED, processed );
+      while ( processed > 0 ) and ( not sndStopFile ) do
+        begin
+          alSourceUnQueueBuffers( sfSource, 1, @buffer );
 
-            BytesRead := sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize, _End );
-            alBufferData( buffer, sfFormat[ sfStream.Channels ], sfStream.Buffer, BytesRead, sfStream.Rate );
-            alSourceQueueBuffers( sfSource, 1, @buffer );
+          BytesRead := sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize, _End );
+          alBufferData( buffer, sfFormat[ sfStream.Channels ], sfStream.Buffer, BytesRead, sfStream.Rate );
+          alSourceQueueBuffers( sfSource, 1, @buffer );
 
-            DEC( processed );
-          end;
-        {$ELSE}
-        while DWORD( sfBuffer.GetCurrentPosition( @Position, @b1Size ) ) = DSERR_BUFFERLOST do
-          sfBuffer.Restore;
+          DEC( processed );
+        end;
+      {$ELSE}
+      while DWORD( sfBuffer.GetCurrentPosition( @Position, @b1Size ) ) = DSERR_BUFFERLOST do
+        sfBuffer.Restore;
 
-        FillSize := ( sfStream.BufferSize + Position - sfLastPos ) mod sfStream.BufferSize;
+      FillSize := ( sfStream.BufferSize + Position - sfLastPos ) mod sfStream.BufferSize;
 
-        Block1 := nil;
-        Block2 := nil;
-        b1Size := 0;
-        b2Size := 0;
+      Block1 := nil;
+      Block2 := nil;
+      b1Size := 0;
+      b2Size := 0;
 
-        sfBuffer.Lock( sfLastPos, FillSize, Block1, b1Size, Block2, b2Size, 0 );
-        sfLastPos := Position;
+      sfBuffer.Lock( sfLastPos, FillSize, Block1, b1Size, Block2, b2Size, 0 );
+      sfLastPos := Position;
 
-        sfStream.CodecRead( Block1, b1Size, _End );
-        if ( b2Size <> 0 ) and ( not _End ) Then
-          sfStream.CodecRead( Block2, b2Size, _End );
+      sfStream.CodecRead( Block1, b1Size, _End );
+      if ( b2Size <> 0 ) and ( not _End ) Then
+        sfStream.CodecRead( Block2, b2Size, _End );
 
-        sfBuffer.Unlock( Block1, b1Size, Block2, b2Size );
-        {$ENDIF}
-        if _End then
-          begin
-            if sfStream.Loop Then
-              sfStream.CodecLoop
-            else
-              begin
-                sfStream^.Played := FALSE;
-                break;
-              end;
-          end;
-      end;
-  except
-  end;
+      sfBuffer.Unlock( Block1, b1Size, Block2, b2Size );
+      {$ENDIF}
+      if _End then
+        begin
+          if sfStream.Loop Then
+            sfStream.CodecLoop
+          else
+            begin
+              sfStream^.Played := FALSE;
+              break;
+            end;
+        end;
+    end;
 {$IFDEF USE_OPENAL}
   alSourceQueueBuffers( sfSource, 1, @buffer );
 {$ELSE}
@@ -879,7 +884,7 @@ begin
   for i := 0 to sfBufCount - 1 do
     begin
       BytesRead := sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize, _End );
-      //if BytesRead <= 0 Then break;
+      if BytesRead <= 0 Then break;
 
       alBufferData( sfBuffers[ i ], sfFormat[ sfStream.Channels ], sfStream.Buffer, BytesRead, sfStream.Rate );
       alSourceQueueBuffers( sfSource, 1, @sfBuffers[ i ] );

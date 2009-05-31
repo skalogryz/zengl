@@ -79,14 +79,14 @@ procedure png_Load( var pData : Pointer; var W, H : WORD );
 procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
 procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 
-procedure png_ReadIHDR;
+procedure png_ReadIHDR( var pngData : Pointer );
 procedure png_ReadPLTE;
-procedure png_ReadIDAT;
+procedure png_ReadIDAT( var pngData : Pointer );
 procedure png_ReadtRNS;
 
 procedure png_GetPixelInfo;
 
-procedure png_DecodeNonInterlaced;
+procedure png_DecodeNonInterlaced( var pngData : Pointer );
 procedure png_FilterRow;
 function  png_DecodeIDAT( Buffer : Pointer; Count : Integer ) : Integer;
 
@@ -98,7 +98,6 @@ uses
 
 var
   pngMem          : zglTMemory;
-  pngData         : array of Byte;
   pngFail         : Boolean;
   pngHeader       : zglTPNGHeader;
   pngHeaderOk     : Boolean;
@@ -151,13 +150,13 @@ begin
     if pngChunk.Name = 'IDAT' Then pngHasIDAT := TRUE;
 
     if pngChunk.Name = 'IHDR' Then
-      png_ReadIHDR
+      png_ReadIHDR( pData )
     else
       if pngChunk.Name = 'PLTE' Then
         png_ReadPLTE
       else
         if pngChunk.Name = 'IDAT' Then
-          png_ReadIDAT
+          png_ReadIDAT( pData )
         else
           if pngChunk.Name = 'tRNS' Then
             png_ReadtRNS
@@ -173,14 +172,11 @@ begin
       goto _exit;
     end;
 
-  zgl_GetMem( pData, pngHeader.Width * pngHeader.Height * 4 );
-  Move( pngData[ 0 ], pData^, pngHeader.Width * pngHeader.Height * 4 );
   W := pngHeader.Width;
   H := pngHeader.Height;
 
 _exit:
   begin
-    SetLength( pngData, 0 );
     mem_Free( pngMem );
     pngFail     := FALSE;
     pngHasIDAT  := FALSE;
@@ -223,7 +219,7 @@ begin
   mem_Read( pngMem, pngHeader.CompressionMethod, 1 );
   mem_Read( pngMem, pngHeader.FilterMethod, 1 );
   mem_Read( pngMem, pngHeader.InterlaceMethod, 1 );
-  SetLength( pngData, pngHeader.Width * pngHeader.Height * 4 );
+  zgl_GetMem( pngData, pngHeader.Width * pngHeader.Height * 4 );
 
   mem_Seek( pngMem, pngChunk.Size - SizeOf( zglTPNGHeader ), FSM_CUR );
 
@@ -267,7 +263,7 @@ begin
   zgl_GetMem( Pointer( pngRowBuffer[ FALSE ] ), pngRowSize + 1 );
   zgl_GetMem( Pointer( pngRowBuffer[ TRUE ] ), pngRowSize + 1 );
 
-  png_DecodeNonInterlaced;
+  png_DecodeNonInterlaced( pngData );
 
   InflateEnd( pngZStream );
   FreeMem( pngZData, 65535 );
@@ -419,7 +415,7 @@ begin
 
       png_FilterRow;
 
-      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], @pngData[ pngHeader.Height * pngHeader.Width * 4 - pngHeader.Width * 4 * i ] );
+      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( pngData ) + pngHeader.Height * pngHeader.Width * 4 - pngHeader.Width * 4 * i ) );
 
       pngRowUsed := not pngRowUsed;
     end;
@@ -431,7 +427,7 @@ procedure png_FilterRow;
     Paeth                      : Byte;
     PP, Left, Above, AboveLeft : Integer;
 
-  function PaethPredictor( a, b, c : Byte ) : Byte;
+  function PaethPredictor( a, b, c : Byte ) : Byte; {$IFDEF USE_INLINE} inline; {$ENDIF}
     var
       pa, pb, pc : Integer;
   begin

@@ -202,7 +202,10 @@ begin
   if Result < -10000 Then Result := -10000;
   if Result > 10000  Then Result := 10000;
 
-  Volume := sndVolume / dist;
+  if dist = 0 Then
+    Volume := sndVolume
+  else
+    Volume := sndVolume / dist;
   if Volume < 0 Then Volume := 0;
 end;
 

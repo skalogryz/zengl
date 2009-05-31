@@ -74,7 +74,6 @@ var
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
   wnd_Style     : DWORD;
-  wnd_StyleEx   : DWORD;
   wnd_CpnSize   : WORD;
   wnd_BrdSizeX  : WORD;
   wnd_BrdSizeY  : WORD;
@@ -213,7 +212,7 @@ begin
     wnd_Style := WS_POPUP or WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  wnd_Handle := CreateWindowEx( wnd_StyleEx * Byte( not wnd_FullScreen ),
+  wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
                                 wnd_ClassName,
                                 PChar( wnd_Caption ),
                                 wnd_Style,
@@ -319,6 +318,7 @@ procedure wnd_Update;
 {$IFDEF WIN32}
   var
     r : TRect;
+    FullScreen : Boolean;
 {$ENDIF}
 begin
 {$IFDEF LINUX}
@@ -329,15 +329,20 @@ begin
   wnd_ShowCursor( app_ShowCursor );
 {$ENDIF}
 {$IFDEF WIN32}
+  if app_Focus Then
+    FullScreen := wnd_FullScreen
+  else
+    FullScreen := FALSE;
+
   // Странный костыль, но без него падает FPS после смены параметров окна
   wglMakeCurrent( wnd_DC, 0 );
 
-  if wnd_FullScreen Then
-    wnd_Style := WS_EX_TOPMOST or WS_POPUP or WS_VISIBLE
+  if FullScreen Then
+    wnd_Style := WS_POPUP or WS_VISIBLE
   else
-    wnd_Style := WS_EX_TOPMOST or WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+    wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  if wnd_FullScreen Then
+  if FullScreen Then
     begin
       ogl_X := 0;
       ogl_Y := 0;
@@ -355,7 +360,7 @@ begin
 
   AdjustWindowRectEx( r, 0, FALSE, 0 );
   SetWindowLong( wnd_Handle, GWL_STYLE, wnd_Style );
-  SetWindowLong( wnd_Handle, GWL_EXSTYLE, wnd_StyleEx );
+  SetWindowLong( wnd_Handle, GWL_EXSTYLE, WS_EX_TOPMOST * Byte( FullScreen ) );
 
   wglMakeCurrent( wnd_DC, ogl_Context );
 {$ENDIF}
@@ -474,10 +479,6 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
 begin
-  if ( app_ShowCursor ) and ( not Show ) Then
-    ShowCursor( FALSE )
-  else
-    ShowCursor( TRUE );
   app_ShowCursor := Show;
 {$ENDIF}
 {$IFDEF DARWIN}

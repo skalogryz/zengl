@@ -60,7 +60,7 @@ var
   app_WorkTime     : DWORD;
   app_Pause        : Boolean;
   app_AutoPause    : Boolean = TRUE;
-  app_Focus        : Boolean;
+  app_Focus        : Boolean = TRUE;
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
   app_WorkDir      : String;
@@ -94,6 +94,7 @@ uses
   zgl_keyboard,
   zgl_mouse,
   zgl_timers,
+  zgl_sound,
   zgl_utils;
 
 procedure zero;
@@ -138,6 +139,14 @@ procedure app_MainLoop;
     {$IFDEF WIN32}
     SysInfo : _SYSTEM_INFO;
     {$ENDIF}
+    procedure Draw;
+    begin
+      scr_Clear;
+      app_PDraw;
+      scr_Flush;
+      if not app_Pause Then
+        INC( app_FPSCount );
+    end;
 begin
   {$IFDEF WIN32}
   // Багнутое MS-поделко требует патча :)
@@ -161,6 +170,12 @@ begin
       CanKillTimers := FALSE;
       if not app_Pause Then
         begin
+          if sndAutoPaused Then
+            begin
+              sndAutoPaused := FALSE;
+              snd_ResumeFile;
+            end;
+
           currTimer := @managerTimer.First;
           if currTimer <> nil Then
             for z := 0 to managerTimer.Count do
@@ -180,8 +195,15 @@ begin
               end;
         end else
           begin
+            if Assigned( sfStream ) and ( sfStream.Played ) Then
+              begin
+                sndAutoPaused := TRUE;
+                snd_StopFile;
+              end;
+
             timer_Reset;
             u_Sleep( 10 );
+            Draw;
           end;
 
       CanKillTimers := TRUE;
@@ -192,6 +214,7 @@ begin
       app_PUpdate( timer_GetTicks - odt );
       odt := timer_GetTicks;
 
+      if app_Pause Then continue;
       dt := timer_GetTicks - t;
       if dt >= 1 Then
         begin
@@ -199,11 +222,7 @@ begin
             begin
               t := t + 1;
 
-              scr_Clear;
-              app_PDraw;
-              scr_Flush;
-              if not app_Pause Then
-                INC( app_FPSCount );
+              Draw;
             end else
               t := t + dt;
         end;
@@ -242,7 +261,6 @@ begin
         FocusIn:
           begin
             app_Focus := TRUE;
-            if app_Pause Then timer_Reset;
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
             FillChar( keysUp[ 0 ], 256, 0 );
@@ -253,7 +271,6 @@ begin
           end;
         FocusOut:
           begin
-            if wnd_FullScreen Then exit;
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
           end;
@@ -378,33 +395,51 @@ begin
     WM_CLOSE, WM_DESTROY, WM_QUIT:
       app_Work := FALSE;
 
-    WM_SETFOCUS:
+    WM_DISPLAYCHANGE:
       begin
-        app_Focus := TRUE;
-        app_Pause := FALSE;
-        FillChar( keysDown[ 0 ], 256, 0 );
-        FillChar( keysUp[ 0 ], 256, 0 );
-        FillChar( mouseDown[ 0 ], 3, 0 );
-        FillChar( mouseCanClick[ 0 ], 3, 1 );
-        FillChar( mouseClick[ 0 ], 3, 0 );
-        FillChar( mouseWheel[ 0 ], 2, 0 );
-        if wnd_FullScreen Then scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
+        wnd_Update;
       end;
-    WM_KILLFOCUS:
-      begin
-        app_Focus := FALSE;
-        if app_AutoPause Then app_Pause := TRUE;
-        if wnd_FullScreen Then
-          begin
-            scr_Reset;
-            ShowWindow( wnd_Handle, SW_MINIMIZE );
-          end;
-      end;
+    WM_ACTIVATE:
+      if app_Work then
+        begin
+          app_Focus := not ( LOWORD( wparam ) = WA_INACTIVE ) and ( HIWORD( wparam ) = 0 );
+
+          if app_Focus Then
+            begin
+              app_Pause := FALSE;
+              FillChar( keysDown[ 0 ], 256, 0 );
+              FillChar( keysUp[ 0 ], 256, 0 );
+              FillChar( mouseDown[ 0 ], 3, 0 );
+              FillChar( mouseCanClick[ 0 ], 3, 1 );
+              FillChar( mouseClick[ 0 ], 3, 0 );
+              FillChar( mouseWheel[ 0 ], 2, 0 );
+              if wnd_FullScreen Then
+                scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
+              if app_Flags and CORRECT_RESOLUTION > 0 Then
+                scr_CorrectResolution( scr_ResW, scr_ResH );
+            end else
+              begin
+                if app_AutoPause Then app_Pause := TRUE;
+                if wnd_FullScreen Then
+                  begin
+                    scr_Reset;
+                    ShowWindow( wnd_Handle, SW_MINIMIZE );
+                  end;
+              end;
+        end;
     WM_MOVING:
       begin
         wnd_X := PRect( lParam ).Left;
         wnd_Y := PRect( lParam ).Top;
       end;
+    WM_SETCURSOR:
+      begin
+        if ( not app_Pause ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not app_ShowCursor ) Then
+          SetCursor( 0 )
+        else
+          SetCursor( LoadCursor( 0, IDC_ARROW ) );
+      end;
+
 
     WM_LBUTTONDOWN, WM_LBUTTONDBLCLK:
       begin
@@ -516,7 +551,6 @@ begin
         kEventWindowActivated:
           begin
             app_Focus := TRUE;
-            if app_Pause Then timer_Reset;
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
             FillChar( keysUp[ 0 ], 256, 0 );
