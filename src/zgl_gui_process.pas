@@ -66,6 +66,9 @@ function gui_ProcWidget;
 begin
   if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
 
+  gui_AlignWidget( Widget );
+  gui_UpdateClient( Widget );
+
   if mouse_Up( M_BLEFT ) Then
     begin
       dragBegin     := FALSE;

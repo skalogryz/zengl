@@ -86,6 +86,7 @@ var
 
 implementation
 uses
+  zgl_main,
   zgl_application,
   zgl_screen,
   zgl_opengl,
@@ -107,6 +108,12 @@ begin
   Result     := FALSE;
   wnd_Width  := Width;
   wnd_Height := Height;
+
+  if app_Flags and WND_USE_AUTOCENTER > 0 Then
+    begin
+      wnd_X := ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2;
+      wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
+    end;
 {$IFDEF LINUX}
   ogl_X := 0;
   ogl_Y := 0;
@@ -212,17 +219,20 @@ begin
     wnd_Style := WS_POPUP or WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
-                                wnd_ClassName,
-                                PChar( wnd_Caption ),
-                                wnd_Style,
-                                wnd_X, wnd_Y,
-                                wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ),
-                                0,
-                                0,
-                                wnd_INST,
-                                nil );
+  if ogl_Format = 0 Then
+    wnd_Handle := CreateWindowEx( 0, wnd_ClassName, '', WS_POPUP, 0, 0, 0, 0, 0, 0, wnd_INST, nil )
+  else
+    wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
+                                  wnd_ClassName,
+                                  PChar( wnd_Caption ),
+                                  wnd_Style,
+                                  wnd_X, wnd_Y,
+                                  wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
+                                  wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ),
+                                  0,
+                                  0,
+                                  wnd_INST,
+                                  nil );
 
   if wnd_Handle = 0 Then
     begin
@@ -236,6 +246,7 @@ begin
       u_Error( 'Cannot get device context' );
       exit;
     end;
+  BringWindowToTop( wnd_Handle );
 {$ENDIF}
 {$IFDEF DARWIN}
   size.Left   := wnd_X;
@@ -370,6 +381,9 @@ begin
   app_Work := TRUE;
   wnd_SetCaption( wnd_Caption );
   wnd_SetSize( wnd_Width, wnd_Height );
+
+  if app_Flags and WND_USE_AUTOCENTER > 0 Then
+    wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2 );
 end;
 
 procedure wnd_SetCaption;
@@ -412,7 +426,10 @@ begin
 {$ENDIF}
   ogl_Width  := Width;
   ogl_Height := Height;
-  SetCurrentMode;
+  if app_Flags and CORRECT_RESOLUTION > 0 Then
+    scr_CorrectResolution( scr_ResW, scr_ResH )
+  else
+    SetCurrentMode;
 end;
 
 procedure wnd_SetPos;
@@ -432,14 +449,14 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   if wnd_Handle <> 0 Then
-    if not wnd_FullScreen Then
+    if ( not wnd_FullScreen ) or ( not app_Focus ) Then
       begin
         GetWindowRect( wnd_Handle, Rect );
-        SetWindowPos( wnd_Handle, 0, X, Y, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOZORDER or SWP_SHOWWINDOW );
+        SetWindowPos( wnd_Handle, 0, X, Y, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOACTIVATE );
       end else
         begin
           GetWindowRect( wnd_Handle, Rect );
-          SetWindowPos( wnd_Handle, 0, 0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOZORDER or SWP_SHOWWINDOW );
+          SetWindowPos( wnd_Handle, 0, 0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOACTIVATE );
         end;
 {$ENDIF}
 {$IFDEF DARWIN}

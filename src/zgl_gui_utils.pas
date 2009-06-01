@@ -30,6 +30,9 @@ uses
 procedure _clip( const widget : zglPWidget ); overload;
 procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
 
+procedure gui_AlignWidget( widget : zglPWidget );
+procedure gui_UpdateClient( widget : zglPWidget );
+
 type zglProcWidgetsCallback = procedure( widget : zglPWidget; const data : Pointer );
 
 procedure gui_ProcCallback( widget : zglPWidget; callback : zglProcWidgetsCallback; const data : Pointer );
@@ -54,7 +57,7 @@ procedure _clip( const widget : zglPWidget ); overload;
   var
     clip : zglTRect;
 begin
-  clip := col2d_ClipRect( widget.rect, widget.parent.rect );
+  clip := col2d_ClipRect( widget.rect, widget.parent.client );
   scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
 end;
 
@@ -66,8 +69,49 @@ begin
   clip.Y := Y;
   clip.W := W;
   clip.H := H;
-  clip := col2d_ClipRect( clip, widget.parent.rect );
+  clip := col2d_ClipRect( clip, widget.parent.client );
   scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
+end;
+
+procedure gui_AlignWidget;
+begin
+  with widget^ do
+    case align of
+      ALIGN_NONE:;
+      ALIGN_CLIENT: rect := parent.client;
+      ALIGN_LEFT:
+        begin
+          rect.X := parent.client.X;
+          rect.Y := parent.client.Y;
+          rect.H := parent.client.H;
+        end;
+      ALIGN_RIGHT:
+        begin
+          rect.X := parent.client.X + parent.client.W - rect.W;
+          rect.Y := parent.client.Y;
+          rect.H := parent.client.H;
+        end;
+      ALIGN_TOP:
+        begin
+          rect.X := parent.client.X;
+          rect.Y := parent.client.Y;
+          rect.W := parent.client.W;
+        end;
+      ALIGN_BOTTOM:
+        begin
+          rect.X := parent.client.X;
+          rect.Y := parent.client.Y + parent.client.H - rect.H;
+          rect.W := parent.client.W;
+        end;
+    end;
+end;
+
+procedure gui_UpdateClient;
+begin
+  widget.client.X := widget.rect.X + 2;
+  widget.client.Y := widget.rect.Y + 2;
+  widget.client.W := widget.rect.W - 4;
+  widget.client.H := widget.rect.H - 4;
 end;
 
 procedure gui_ProcCallback;

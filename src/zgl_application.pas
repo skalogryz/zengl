@@ -83,7 +83,7 @@ var
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
 
-  app_Flags : DWORD = APP_USE_LOG or COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
+  app_Flags : DWORD = WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
 
 implementation
 uses
@@ -131,6 +131,15 @@ begin
 {$ENDIF}
 end;
 
+procedure app_Draw;
+begin
+  scr_Clear;
+  app_PDraw;
+  scr_Flush;
+  if not app_Pause Then
+    INC( app_FPSCount );
+end;
+
 procedure app_MainLoop;
   var
     i, z : Integer;
@@ -139,14 +148,6 @@ procedure app_MainLoop;
     {$IFDEF WIN32}
     SysInfo : _SYSTEM_INFO;
     {$ENDIF}
-    procedure Draw;
-    begin
-      scr_Clear;
-      app_PDraw;
-      scr_Flush;
-      if not app_Pause Then
-        INC( app_FPSCount );
-    end;
 begin
   {$IFDEF WIN32}
   // Багнутое MS-поделко требует патча :)
@@ -203,7 +204,6 @@ begin
 
             timer_Reset;
             u_Sleep( 10 );
-            Draw;
           end;
 
       CanKillTimers := TRUE;
@@ -222,7 +222,7 @@ begin
             begin
               t := t + 1;
 
-              Draw;
+              app_Draw;
             end else
               t := t + dt;
         end;
@@ -231,6 +231,9 @@ end;
 
 function app_ProcessMessages;
   var
+  {$IFDEF WIN32}
+    ps : TPaintStruct;
+  {$ENDIF}
   {$IFDEF LINUX}
     Event  : TXEvent;
     Keysym : TKeySym;
@@ -395,20 +398,28 @@ begin
     WM_CLOSE, WM_DESTROY, WM_QUIT:
       app_Work := FALSE;
 
+    WM_PAINT:
+      if app_Work then
+        begin
+          BeginPaint( wnd_Handle, ps );
+          app_Draw;
+          EndPaint( wnd_Handle, ps );
+        end;
     WM_DISPLAYCHANGE:
       begin
         wnd_Update;
       end;
     WM_KILLFOCUS:
-      begin
-        app_Focus := FALSE;
-        if app_AutoPause Then app_Pause := TRUE;
-        if wnd_FullScreen Then
-          begin
-            scr_Reset;
-            //ShowWindow( wnd_Handle, SW_SHOWNOACTIVATE );
-          end;
-      end;
+      if app_Work Then
+        begin
+          app_Focus := FALSE;
+          if app_AutoPause Then app_Pause := TRUE;
+          if wnd_FullScreen Then
+            begin
+              scr_Reset;
+              wnd_Update;
+            end;
+        end;
     WM_SETFOCUS:
       begin
         app_Focus := TRUE;
@@ -421,8 +432,12 @@ begin
         FillChar( mouseWheel[ 0 ], 2, 0 );
         if wnd_FullScreen Then
           scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
-        if app_Flags and CORRECT_RESOLUTION > 0 Then
-          scr_CorrectResolution( scr_ResW, scr_ResH );
+      end;
+    WM_NCHITTEST:
+      begin
+        Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+        if ( not app_Focus ) and ( Result = HTCAPTION ) Then
+          Result := HTCLIENT;
       end;
     WM_MOVING:
       begin
@@ -436,7 +451,6 @@ begin
         else
           SetCursor( LoadCursor( 0, IDC_ARROW ) );
       end;
-
 
     WM_LBUTTONDOWN, WM_LBUTTONDBLCLK:
       begin

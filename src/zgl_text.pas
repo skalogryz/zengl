@@ -73,6 +73,12 @@ begin
     if Flags and TEXT_HALIGN_RIGHT > 0 Then
       X := X - Round( text_GetWidth( Font, Text, textStep ) ) * textScale;
 
+  if Flags and TEXT_VALIGN_CENTER > 0 Then
+    Y := Y - Round( Font.MaxHeight / 2 ) * textScale
+  else
+    if Flags and TEXT_VALIGN_BOTTOM > 0 Then
+      Y := Y - Font.MaxHeight * textScale;
+
   lastPage := -1;
   c := font_GetUID( Text, 1, @i );
   i := 1;
