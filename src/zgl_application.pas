@@ -399,34 +399,31 @@ begin
       begin
         wnd_Update;
       end;
-    WM_ACTIVATE:
-      if app_Work then
-        begin
-          app_Focus := not ( LOWORD( wparam ) = WA_INACTIVE ) and ( HIWORD( wparam ) = 0 );
-
-          if app_Focus Then
-            begin
-              app_Pause := FALSE;
-              FillChar( keysDown[ 0 ], 256, 0 );
-              FillChar( keysUp[ 0 ], 256, 0 );
-              FillChar( mouseDown[ 0 ], 3, 0 );
-              FillChar( mouseCanClick[ 0 ], 3, 1 );
-              FillChar( mouseClick[ 0 ], 3, 0 );
-              FillChar( mouseWheel[ 0 ], 2, 0 );
-              if wnd_FullScreen Then
-                scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
-              if app_Flags and CORRECT_RESOLUTION > 0 Then
-                scr_CorrectResolution( scr_ResW, scr_ResH );
-            end else
-              begin
-                if app_AutoPause Then app_Pause := TRUE;
-                if wnd_FullScreen Then
-                  begin
-                    scr_Reset;
-                    ShowWindow( wnd_Handle, SW_MINIMIZE );
-                  end;
-              end;
-        end;
+    WM_KILLFOCUS:
+      begin
+        app_Focus := FALSE;
+        if app_AutoPause Then app_Pause := TRUE;
+        if wnd_FullScreen Then
+          begin
+            scr_Reset;
+            //ShowWindow( wnd_Handle, SW_SHOWNOACTIVATE );
+          end;
+      end;
+    WM_SETFOCUS:
+      begin
+        app_Focus := TRUE;
+        app_Pause := FALSE;
+        FillChar( keysDown[ 0 ], 256, 0 );
+        FillChar( keysUp[ 0 ], 256, 0 );
+        FillChar( mouseDown[ 0 ], 3, 0 );
+        FillChar( mouseCanClick[ 0 ], 3, 1 );
+        FillChar( mouseClick[ 0 ], 3, 0 );
+        FillChar( mouseWheel[ 0 ], 2, 0 );
+        if wnd_FullScreen Then
+          scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
+        if app_Flags and CORRECT_RESOLUTION > 0 Then
+          scr_CorrectResolution( scr_ResW, scr_ResH );
+      end;
     WM_MOVING:
       begin
         wnd_X := PRect( lParam ).Left;

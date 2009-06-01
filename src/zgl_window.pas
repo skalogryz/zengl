@@ -403,7 +403,7 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   if not app_InitToHandle Then
-    SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOZORDER or SWP_SHOWWINDOW );
+    SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
   SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
