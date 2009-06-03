@@ -204,34 +204,35 @@ begin
       WordsArray[ i ].X := X;
       WordsArray[ i ].Y := Y;
       X := X + WordsArray[ i ].W - WordsArray[ i ].ShiftX;
-      if X >= Rect.X + Rect.W Then
+      if ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) Then
         begin
           X := Round( Rect.X );
-          Y := Y + Font.MaxHeight;
+          Y := Y + Round( Font.MaxHeight * textScale );
           WordsArray[ i ].X := X - SpaceShift;
           WordsArray[ i ].Y := Y;
           X := X + WordsArray[ i ].W - SpaceShift;
 
           if Flags and TEXT_HALIGN_JUSTIFY > 0 Then
             begin
-              W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W );
-              while W > ( i - 1 ) - l do
-                begin
-                  for b := l + 1 to i - 1 do
-                    INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
-                  W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W );
-                end;
+              W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+              if ( i - 1 ) - l > 0 Then
+                while W > ( i - 1 ) - l do
+                  begin
+                    for b := l + 1 to i - 1 do
+                      INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
+                    W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+                  end;
               WordsArray[ i - 1 ].X := WordsArray[ i - 1 ].X + W;
             end else
               if Flags and TEXT_HALIGN_CENTER > 0 Then
                 begin
-                  W := ( Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W ) ) div 2;
+                  W := ( Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift ) ) div 2;
                   for b := l to i - 1 do
                     INC( WordsArray[ b ].X, W );
                 end else
                   if Flags and TEXT_HALIGN_RIGHT > 0 Then
                     begin
-                      W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W );
+                      W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
                       for b := l to i - 1 do
                         INC( WordsArray[ b ].X, W );
                     end;
