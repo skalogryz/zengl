@@ -176,7 +176,6 @@ begin
   scissor_Begin( X, Y, W, H );
 
   WordsCount := u_Words( Text );
-  writeln(WordsCount);
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
