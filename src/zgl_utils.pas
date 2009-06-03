@@ -167,19 +167,15 @@ end;
 
 function u_Words;
   var
-    i, m : Integer;
+    i : Integer;
 begin
   Result := 0;
-  m := 0;
+  if Str = '' Then exit;
   for i := 1 to length( Str ) do
-    begin
-      if ( Str[ i ] <> d ) and ( m = 0 ) Then
-        begin
-          INC( Result );
-          m := 1;
-        end;
-      if ( Str[ i ] = d ) and ( m = 1 ) Then m := 0;
-    end;
+    if Str[ i ] = d Then
+      INC( Result );
+  if Str[ 1 ] <> ' ' Then
+    INC( Result );
 end;
 
 function u_GetWord;

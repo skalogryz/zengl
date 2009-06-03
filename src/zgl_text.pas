@@ -176,6 +176,7 @@ begin
   scissor_Begin( X, Y, W, H );
 
   WordsCount := u_Words( Text );
+  writeln(WordsCount);
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -183,13 +184,13 @@ begin
   l := length( Text );
   b := 1;
   for i := 0 to WordsCount - 1 do
-    for j := b to l + 1 do
-      if ( Text[ j ] = ' ' ) or ( j = l + 1 ) Then
+    for j := b to l do
+      if ( ( Text[ j ] = ' ' ) and ( j <> 1 ) ) or ( j = l ) Then
         begin
           if b = 1 Then
             WordsArray[ i ].str := Copy( Text, b, j - b )
           else
-            WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 );
+            WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
           WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
           WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetUID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
           b := j + 1;
