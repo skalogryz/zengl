@@ -36,9 +36,17 @@ const
   TEXT_VALIGN_CENTER  = $000020;
   TEXT_VALIGN_BOTTOM  = $000040;
 
+type
+  zglTTextWord = record
+    X, Y, W : Integer;
+    ShiftX  : Integer;
+    str     : String;
+end;
+
 procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
 procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Alpha : Byte = 255; const Flags : DWORD = 0 );
+procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
+procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
 function  text_GetWidth( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
 
 implementation
@@ -46,7 +54,8 @@ uses
   zgl_main,
   zgl_opengl_all,
   zgl_opengl_simple,
-  zgl_fx;
+  zgl_fx,
+  zgl_utils;
 
 var
   textRGBA  : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
@@ -74,7 +83,7 @@ begin
       X := X - Round( text_GetWidth( Font, Text, textStep ) ) * textScale;
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
-    Y := Y - Round( Font.MaxHeight / 2 ) * textScale
+    Y := Y - ( Font.MaxHeight div 2 ) * textScale
   else
     if Flags and TEXT_VALIGN_BOTTOM > 0 Then
       Y := Y - Font.MaxHeight * textScale;
@@ -145,11 +154,20 @@ begin
   textStep      := 0;
 end;
 
+// TODO:
+// - оптимизировать количество DIP'ов
+// - добавить переносы строк по LF символу
 procedure text_DrawInRect;
   var
+    i, j, b, l : Integer;
     X, Y, W, H : Integer;
+    SpaceShift : Integer;
+    WordsArray : array of zglTTextWord;
+    WordsCount : Integer;
 begin
-  if Text = '' Then exit;
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
+
+  SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
 
   X := Round( Rect.X );
   Y := Round( Rect.Y );
@@ -157,13 +175,107 @@ begin
   H := Round( Rect.H );
   scissor_Begin( X, Y, W, H );
 
-  glEnable( GL_BLEND );
-  glEnable( GL_TEXTURE_2D );
+  WordsCount := u_Words( Text );
+  SetLength( WordsArray, WordsCount + 1 );
+  WordsArray[ WordsCount ].str := ' ';
+  WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
 
-  glDisable( GL_BLEND );
-  glDisable( GL_TEXTURE_2D );
+  l := length( Text );
+  b := 1;
+  for i := 0 to WordsCount - 1 do
+    for j := b to l + 1 do
+      if ( Text[ j ] = ' ' ) or ( j = l + 1 ) Then
+        begin
+          if b = 1 Then
+            WordsArray[ i ].str := Copy( Text, b, j - b )
+          else
+            WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 );
+          WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
+          WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetUID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
+          b := j + 1;
+          break;
+        end;
 
+  l := 0;
+  if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
+    INC( WordsCount );
+  for i := 0 to WordsCount - 1 do
+    begin
+      WordsArray[ i ].X := X;
+      WordsArray[ i ].Y := Y;
+      X := X + WordsArray[ i ].W - WordsArray[ i ].ShiftX;
+      if X >= Rect.X + Rect.W Then
+        begin
+          X := Round( Rect.X );
+          Y := Y + Font.MaxHeight;
+          WordsArray[ i ].X := X - SpaceShift;
+          WordsArray[ i ].Y := Y;
+          X := X + WordsArray[ i ].W - SpaceShift;
+
+          if Flags and TEXT_HALIGN_JUSTIFY > 0 Then
+            begin
+              W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W );
+              while W > ( i - 1 ) - l do
+                begin
+                  for b := l + 1 to i - 1 do
+                    INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
+                  W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W );
+                end;
+              WordsArray[ i - 1 ].X := WordsArray[ i - 1 ].X + W;
+            end else
+              if Flags and TEXT_HALIGN_CENTER > 0 Then
+                begin
+                  W := ( Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W ) ) div 2;
+                  for b := l to i - 1 do
+                    INC( WordsArray[ b ].X, W );
+                end else
+                  if Flags and TEXT_HALIGN_RIGHT > 0 Then
+                    begin
+                      W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W );
+                      for b := l to i - 1 do
+                        INC( WordsArray[ b ].X, W );
+                    end;
+          l := i;
+        end;
+    end;
+  if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
+    DEC( WordsCount );
+
+  if Flags and TEXT_VALIGN_CENTER > 0 Then
+    begin
+      H := ( Round( Rect.Y + Rect.H ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
+      for i := 0 to WordsCount - 1 do
+        INC( WordsArray[ i ].Y, H );
+    end else
+      if Flags and TEXT_VALIGN_BOTTOM > 0 Then
+        begin
+          H := Round( Rect.Y + Rect.H ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight );
+          for i := 0 to WordsCount - 1 do
+            INC( WordsArray[ i ].Y, H );
+        end;
+
+  for i := 0 to WordsCount - 1 do
+    text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str );
+
+  SetLength( WordsArray, 0 );
   scissor_End;
+end;
+
+procedure text_DrawInRectEx;
+begin
+  textRGBA[ 0 ] :=   Color and $FF;
+  textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
+  textRGBA[ 2 ] :=   Color             shr 16;
+  textRGBA[ 3 ] := Alpha;
+  textScale     := Scale;
+  textStep      := Step;
+  text_DrawInRect( Font, Rect, Text, Flags );
+  textRGBA[ 0 ] := 255;
+  textRGBA[ 1 ] := 255;
+  textRGBA[ 2 ] := 255;
+  textRGBA[ 3 ] := 255;
+  textScale     := 1;
+  textStep      := 0;
 end;
 
 function text_GetWidth;

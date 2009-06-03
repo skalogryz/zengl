@@ -433,7 +433,7 @@ begin
     cs := FW_NORMAL;
   WFont := CreateFont( -MulDiv( fg_FontSize, GetDeviceCaps( wnd_DC, LOGPIXELSY ), 72 ), 0, 0, 0,
                        cs, Byte( fg_FontItalic ), 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                       ANTIALIASED_QUALITY * Byte( fg_FontAA ) or NONANTIALIASED_QUALITY * Byte( not fg_FontAA ),
+                       5{ANTIALIASED_QUALITY} * Byte( fg_FontAA ) or NONANTIALIASED_QUALITY * Byte( not fg_FontAA ),
                        DEFAULT_PITCH, PChar( FontName ) );
 
   WDC := CreateCompatibleDC( 0 );
@@ -458,18 +458,18 @@ begin
 
   DIB := CreateDIBSection( WDC, Bitmap, DIB_RGB_COLORS, pData, 0, 0 );
   SelectObject( WDC, DIB );
-  SetRect( Rect, 0, 0, Bitmap.bmiHeader.biWidth, TextMetric.tmHeight );
+  SetRect( Rect, 0, 0, Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight );
 
   for i := 0 to Font.Count.Chars - 1 do
     begin
       FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
-      TextOutW( WDC, 0, 0, @fg_CharsUID[ i ], 1 );
+      TextOutW( WDC, 1, 1, @fg_CharsUID[ i ], 1 );
 
       GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );
       // Microsoft Sucks...
       FontGetSize( PByteArray( pData ), Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight, cx, cy, minX, minY );
-      INC( cx );
-      INC( cy );
+      INC( cx, 1 + Byte( fg_FontAA ) );
+      INC( cy, 1 + Byte( fg_FontAA ) );
 
       fg_CharsSize[ i ].X := minX;
       fg_CharsSize[ i ].Y := cy - ( TextMetric.tmAscent - minY );

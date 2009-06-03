@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.26               }
-{ date:    28.04.09             }
+{ version: 0.1.27               }
+{ date:    02.06.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -617,6 +617,7 @@ var
   text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
   text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
   text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
+  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
   text_GetWidth       : function( const Font : zglPFont; const Text : String ) : Single;
 
 // GUI
@@ -899,7 +900,7 @@ var
   snd_Free              : procedure;
   snd_Add               : function( const BufferCount, SourceCount : Integer ) : zglPSound;
   snd_Del               : procedure( var Sound : zglPSound );
-  snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer ) : zglPSound;
+  snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer = 16 ) : zglPSound;
   snd_LoadFromMemory    : function( const Memory : zglTMemory; Extension : String; const SourceCount : Integer ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer );

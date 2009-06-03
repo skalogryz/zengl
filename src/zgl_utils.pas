@@ -49,6 +49,9 @@ function u_StrDown( const str : String ) : String;
 procedure u_Backspace( var str : String );
 // Возвращает количество символов в utf8-строке
 function  u_Length( const str : String ) : Integer;
+// Вовзвращает количество слов, разделеных разделителем d
+function  u_Words( const str : String; const d : Char = ' ' ) : Integer;
+function  u_GetWord( const Str : String; const n : Integer; const d : Char = ' ' ) : String;
 
 procedure u_Error( const errStr : String );
 procedure u_Warning( const errStr : String );
@@ -160,6 +163,46 @@ begin
       INC( Result );
       font_GetUID( str, i, @i );
     end;
+end;
+
+function u_Words;
+  var
+    i, m : Integer;
+begin
+  Result := 0;
+  m := 0;
+  for i := 1 to length( Str ) do
+    begin
+      if ( Str[ i ] <> d ) and ( m = 0 ) Then
+        begin
+          INC( Result );
+          m := 1;
+        end;
+      if ( Str[ i ] = d ) and ( m = 1 ) Then m := 0;
+    end;
+end;
+
+function u_GetWord;
+  label b;
+  var
+    i, p : Integer;
+begin
+  i := 0;
+  Result := d + Str;
+
+b:
+  INC( i );
+  p := Pos( d, Result );
+  while Result[ p ] = d do Delete( Result, p, 1 );
+
+  p := Pos( d, Result );
+  if n > i Then
+    begin
+      Delete( Result, 1, p - 1 );
+      goto b;
+    end;
+
+  Delete( Result, p, length( Result ) - p + 1 );
 end;
 
 procedure u_Error;

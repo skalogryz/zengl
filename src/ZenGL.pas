@@ -208,6 +208,7 @@ exports
   text_Draw                name prefix + 'text_Draw',
   text_DrawEx              name prefix + 'text_DrawEx',
   text_DrawInRect          name prefix + 'text_DrawInRect',
+  text_DrawInRectEx        name prefix + 'text_DrawInRectEx',
   text_GetWidth            name prefix + 'text_GetWidth',
 
   gui_Init                 name prefix + 'gui_Init',

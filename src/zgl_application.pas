@@ -261,6 +261,11 @@ begin
         ClientMessage:
           if ( Event.xclient.message_type = wnd_Protocols ) and ( Event.xclient.data.l[ 0 ] = wnd_DestroyAtom ) Then app_Work := FALSE;
 
+        Expose:
+          if app_Work Then
+            begin
+              app_Draw;
+            end;
         FocusIn:
           begin
             app_Focus := TRUE;
