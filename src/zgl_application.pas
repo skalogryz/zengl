@@ -532,12 +532,12 @@ begin
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
         keysLast[ KA_DOWN ] := Key;
-        DpKeyPress( Key );
+        DoKeyPress( Key );
 
         Key := SCA( Key );
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
-        DpKeyPress( Key );
+        DoKeyPress( Key );
 
         if Msg = WM_SYSKEYDOWN Then
           if Key = K_F4 Then
