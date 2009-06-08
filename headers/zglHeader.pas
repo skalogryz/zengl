@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.27               }
-{ date:    02.06.09             }
+{ version: 0.1.28               }
+{ date:    08.06.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -131,9 +131,10 @@ const
   APP_USE_AUTOPAUSE     = $000040;
   APP_USE_LOG           = $000080;
   APP_USE_ENGLISH_INPUT = $000100;
-  SND_CAN_PLAY          = $000200;
-  SND_CAN_PLAY_FILE     = $000400;
-  CROP_INVISIBLE        = $000800;
+  WND_USE_AUTOCENTER    = $000200;
+  SND_CAN_PLAY          = $000400;
+  SND_CAN_PLAY_FILE     = $000800;
+  CROP_INVISIBLE        = $001000;
 
 var
   zgl_Enable  : procedure( const What : DWORD );
@@ -342,6 +343,7 @@ const
 var
   key_Down          : function( const KeyCode : Byte ) : Boolean;
   key_Up            : function( const KeyCode : Byte ) : Boolean;
+  key_Press         : function( const KeyCode : Byte ) : Boolean;
   key_Last          : function( const KeyAction : Byte ) : Byte;
   key_BeginReadText : procedure( const Text : String; const MaxSymbols : WORD );
   key_EndReadText   : procedure( var Result : String );
@@ -609,6 +611,15 @@ type
     First : zglTFont;
 end;
 
+const
+  TEXT_HALIGN_LEFT    = $000001;
+  TEXT_HALIGN_CENTER  = $000002;
+  TEXT_HALIGN_RIGHT   = $000004;
+  TEXT_HALIGN_JUSTIFY = $000008;
+  TEXT_VALIGN_TOP     = $000010;
+  TEXT_VALIGN_CENTER  = $000020;
+  TEXT_VALIGN_BOTTOM  = $000040;
+
 var
   font_Add            : function : zglPFont;
   font_Del            : procedure( var Font : zglPFont );
@@ -836,7 +847,7 @@ var
   gui_Init      : procedure;
   gui_Draw      : procedure;
   gui_Proc      : procedure;
-  gui_AddWidget : function( const _type : Integer; const X, Y, W, H : Single; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
+  gui_AddWidget : function( const _type : Integer; const X, Y, W, H : Single; const Focus, Visible : Boolean; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
   gui_DelWidget : procedure( var Widget : zglPWidget );
 
 // Sound
@@ -902,7 +913,7 @@ var
   snd_Del               : procedure( var Sound : zglPSound );
   snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer = 16 ) : zglPSound;
   snd_LoadFromMemory    : function( const Memory : zglTMemory; Extension : String; const SourceCount : Integer ) : zglPSound;
-  snd_Play              : function( const Sound : zglPSound; const X, Y, Z : Single; const Loop : Boolean ) : Integer;
+  snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer );
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
   snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
@@ -1078,6 +1089,7 @@ begin
 
       key_Down := dlsym( zglLib, 'key_Down' );
       key_Up := dlsym( zglLib, 'key_Up' );
+      key_Press := dlsym( zglLib, 'key_Press' );
       key_Last := dlsym( zglLib, 'key_Last' );
       key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
       key_EndReadText := dlsym( zglLib, 'key_EndReadText' );

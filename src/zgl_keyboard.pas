@@ -162,6 +162,7 @@ const
 
 function  key_Down( const KeyCode : Byte ) : Boolean;
 function  key_Up( const KeyCode : Byte ) : Boolean;
+function  key_Press( const KeyCode : Byte ) : Boolean;
 function  key_Last( const KeyAction : Byte ) : Byte;
 procedure key_BeginReadText( const Text : String; const MaxSymbols : WORD );
 procedure key_EndReadText( var Result : String );
@@ -179,14 +180,20 @@ function winkey_to_scancode( WinKey : Integer ) : Byte;
 {$IFDEF DARWIN}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
 {$ENDIF}
-function SCA( KeyCode : DWORD ) : DWORD;
+function  SCA( KeyCode : DWORD ) : DWORD;
+procedure DoKeyPress( KeyCode : DWORD );
 
 var
-  keysDown : array[ 0..255 ] of Boolean;
-  keysUp   : array[ 0..255 ] of Boolean;
-  keysText : String = '';
-  keysMax  : WORD;
-  keysLast : array[ 0..1 ] of Byte;
+  keysDown     : array[ 0..255 ] of Boolean;
+  keysUp       : array[ 0..255 ] of Boolean;
+  keysPress    : array[ 0..255 ] of Boolean;
+  keysCanPress : array[ 0..255 ] of Boolean;
+  keysText     : String = '';
+  keysMax      : WORD;
+  keysLast     : array[ 0..1 ] of Byte;
+  {$IFDEF LINUX}
+  keysRepeat : Integer; // Костыль, да :)
+  {$ENDIF}
 
 implementation
 uses
@@ -202,7 +209,11 @@ end;
 function key_Up;
 begin
   Result := keysUp[ KeyCode ];
-//  keysUp[ KeyCode ] := FALSE;
+end;
+
+function key_Press;
+begin
+  Result := keysPress[ KeyCode ];
 end;
 
 function key_Last;
@@ -223,10 +234,17 @@ end;
 
 procedure key_ClearState;
   var
-    i : Byte;
+    i : Integer;
 begin
+  {$IFDEF LINUX}
+  if keysRepeat < 2 Then
+  {$ENDIF}
   for i := 0 to 255 do
-    keysUp[ i ] := FALSE;
+    begin
+      keysUp      [ i ] := FALSE;
+      keysPress   [ i ] := FALSE;
+      keysCanPress[ i ] := TRUE;
+    end;
   keysLast[ KA_DOWN ] := 0;
   keysLast[ KA_UP   ] := 0;
 end;
@@ -586,6 +604,18 @@ begin
   if ( KeyCode = K_SHIFT_L ) or ( KeyCode = K_SHIFT_R ) Then Result := K_SHIFT;
   if ( KeyCode = K_CTRL_L ) or ( KeyCode = K_CTRL_R ) Then Result := K_CTRL;
   if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;
+end;
+
+procedure DoKeyPress;
+begin
+  {$IFDEF LINUX}
+  if keysRepeat < 2 Then
+  {$ENDIF}
+  if keysCanPress[ KeyCode ] Then
+    begin
+      keysPress   [ KeyCode ] := TRUE;
+      keysCanPress[ KeyCode ] := FALSE;
+    end;
 end;
 
 end.

@@ -49,7 +49,7 @@ function u_StrDown( const str : String ) : String;
 procedure u_Backspace( var str : String );
 // Возвращает количество символов в utf8-строке
 function  u_Length( const str : String ) : Integer;
-// Вовзвращает количество слов, разделеных разделителем d
+// Возвращает количество слов, разделеных разделителем d
 function  u_Words( const str : String; const d : Char = ' ' ) : Integer;
 function  u_GetWord( const Str : String; const n : Integer; const d : Char = ' ' ) : String;
 

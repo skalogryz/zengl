@@ -142,6 +142,7 @@ exports
   // Keyboard
   key_Down                 name prefix + 'key_Down',
   key_Up                   name prefix + 'key_Up',
+  key_Press                name prefix + 'key_Press',
   key_Last                 name prefix + 'key_Last',
   key_BeginReadText        name prefix + 'key_BeginReadText',
   key_EndReadText          name prefix + 'key_EndReadText',

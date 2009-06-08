@@ -32,7 +32,7 @@ procedure SetCurrentMode;
 procedure zbuffer_SetDepth( const zNear, zFar : Single );
 procedure zbuffer_Clear;
 
-procedure scissor_Begin( X, Y, Width, Height : WORD );
+procedure scissor_Begin( X, Y, Width, Height : Integer );
 procedure scissor_End;
 
 implementation
@@ -101,6 +101,8 @@ end;
 
 procedure scissor_Begin;
 begin
+  if ( Width < 0 ) or ( Height < 0 ) Then
+    exit;
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     begin
       X      := Trunc( X * scr_ResCX + scr_AddCX );
@@ -127,6 +129,8 @@ end;
 procedure scissor_End;
 begin
   glDisable( GL_SCISSOR_TEST );
+  if tSCount - 1 < 0 Then
+    exit;
   DEC( tSCount );
   ogl_CropX := tScissor[ tSCount ][ 0 ];
   ogl_CropY := tScissor[ tSCount ][ 1 ];

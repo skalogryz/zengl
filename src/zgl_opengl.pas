@@ -55,14 +55,14 @@ var
 
   ogl_Mode : WORD = 3; // 2D/3D Modes
 
-  ogl_X      : WORD;
-  ogl_Y      : WORD;
-  ogl_Width  : WORD;
-  ogl_Height : WORD;
-  ogl_CropX  : WORD;
-  ogl_CropY  : WORD;
-  ogl_CropW  : WORD;
-  ogl_CropH  : WORD;
+  ogl_X      : Integer;
+  ogl_Y      : Integer;
+  ogl_Width  : Integer;
+  ogl_Height : Integer;
+  ogl_CropX  : Integer;
+  ogl_CropY  : Integer;
+  ogl_CropW  : Integer;
+  ogl_CropH  : Integer;
 
   ogl_Extensions    : String;
   ogl_3DAccelerator : Boolean;
@@ -161,13 +161,15 @@ begin
           iPixelType   := PFD_TYPE_RGBA;
           cColorBits   := scr_BPP;
           cAlphaBits   := 8;
-          cDepthBits   := 24;
-          cStencilBits := 0;
+          cDepthBits   := ogl_zDepth;
+          cStencilBits := ogl_Stencil;
           iLayerType   := PFD_MAIN_PLANE;
         end;
       PixelFormat := ChoosePixelFormat( wnd_DC, @PixelFormatDesc );
     end else
       PixelFormat := ogl_Format;
+  if ogl_FSAA = 0 Then
+    ogl_Format := PixelFormat;
 
   if not SetPixelFormat( wnd_DC, PixelFormat, @PixelFormatDesc ) Then
     begin

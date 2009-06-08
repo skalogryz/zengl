@@ -37,23 +37,23 @@ uses
   zgl_const
   ;
 
-function  wnd_Create( const Width, Height : WORD ) : Boolean;
+function  wnd_Create( const Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
 procedure wnd_SetCaption( const NewCaption : String );
-procedure wnd_SetSize( const Width, Height : WORD );
-procedure wnd_SetPos( const X, Y : WORD );
+procedure wnd_SetSize( const Width, Height : Integer );
+procedure wnd_SetPos( const X, Y : Integer );
 procedure wnd_ShowCursor( const Show : Boolean );
 {$IFDEF DARWIN}
 procedure wnd_Select;
 {$ENDIF}
 
 var
-  wnd_X          : WORD;
-  wnd_Y          : WORD;
-  wnd_Width      : WORD = defWidth;
-  wnd_Height     : WORD = defHeight;
+  wnd_X          : Integer;
+  wnd_Y          : Integer;
+  wnd_Width      : Integer = defWidth;
+  wnd_Height     : Integer = defHeight;
   wnd_FullScreen : Boolean;
   wnd_Caption    : String = cs_ZenGL;
 
@@ -74,9 +74,9 @@ var
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
   wnd_Style     : DWORD;
-  wnd_CpnSize   : WORD;
-  wnd_BrdSizeX  : WORD;
-  wnd_BrdSizeY  : WORD;
+  wnd_CpnSize   : Integer;
+  wnd_BrdSizeX  : Integer;
+  wnd_BrdSizeY  : Integer;
   {$ENDIF}
   {$IFDEF DARWIN}
   wnd_Handle  : WindowRef;

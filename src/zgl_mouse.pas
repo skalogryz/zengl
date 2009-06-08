@@ -120,19 +120,16 @@ end;
 function mouse_Up;
 begin
   Result := mouseUp[ Button ];
-//  mouseUp[ Button ] := FALSE;
 end;
 
 function mouse_Click;
 begin
   Result := mouseClick[ Button ];
-//  mouseClick[ Button ] := FALSE;
 end;
 
 function mouse_Wheel;
 begin
   Result := mouseWheel[ Axis ];
-//  mouseWheel[ Axis ] := FALSE;
 end;
 
 procedure mouse_ClearState;

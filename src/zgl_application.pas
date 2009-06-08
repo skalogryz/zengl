@@ -118,6 +118,9 @@ procedure OSProcess;
 begin
 {$IFDEF LINUX}
   app_ProcessMessages;
+  if keysRepeat > 1 Then
+  writeln(keysRepeat);
+  keysRepeat := 0;
 {$ENDIF}
 {$IFDEF WIN32}
   while PeekMessage( Mess, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
@@ -272,6 +275,8 @@ begin
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
             FillChar( keysUp[ 0 ], 256, 0 );
+            FillChar( keysPress[ 0 ], 256, 0 );
+            FillChar( keysCanPress[ 0 ], 256, 1 );
             FillChar( mouseDown[ 0 ], 3, 0 );
             FillChar( mouseCanClick[ 0 ], 3, 1 );
             FillChar( mouseClick[ 0 ], 3, 0 );
@@ -361,14 +366,17 @@ begin
 
         KeyPress:
           begin
+            INC( keysRepeat );
             Key := xkey_to_scancode( XLookupKeysym( @Event.xkey, 0 ), Event.xkey.keycode );
             keysDown[ Key ] := TRUE;
             keysUp  [ Key ] := FALSE;
             keysLast[ KA_DOWN ] := Key;
+            DoKeyPress( Key );
 
             Key := SCA( Key );
             keysDown[ Key ] := TRUE;
             keysUp  [ Key ] := FALSE;
+            DoKeyPress( Key );
 
             case Key of
               K_ENTER, K_DELETE:;
@@ -385,9 +393,10 @@ begin
           end;
         KeyRelease:
           begin
+            INC( keysRepeat );
             Key := xkey_to_scancode( XLookupKeysym( @Event.xkey, 0 ), Event.xkey.keycode );
-            keysDown[ Key ] := FALSE;
-            keysUp  [ Key ] := TRUE;
+            keysDown[ Key ]  := FALSE;
+            keysUp  [ Key ]  := TRUE;
             keysLast[ KA_UP ] := Key;
 
             Key := SCA( Key );
@@ -431,6 +440,8 @@ begin
         app_Pause := FALSE;
         FillChar( keysDown[ 0 ], 256, 0 );
         FillChar( keysUp[ 0 ], 256, 0 );
+        FillChar( keysPress[ 0 ], 256, 0 );
+        FillChar( keysCanPress[ 0 ], 256, 1 );
         FillChar( mouseDown[ 0 ], 3, 0 );
         FillChar( mouseCanClick[ 0 ], 3, 1 );
         FillChar( mouseClick[ 0 ], 3, 0 );
@@ -521,10 +532,12 @@ begin
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
         keysLast[ KA_DOWN ] := Key;
+        DpKeyPress( Key );
 
         Key := SCA( Key );
         keysDown[ Key ] := TRUE;
         keysUp  [ Key ] := FALSE;
+        DpKeyPress( Key );
 
         if Msg = WM_SYSKEYDOWN Then
           if Key = K_F4 Then
@@ -570,6 +583,8 @@ begin
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
             FillChar( keysUp[ 0 ], 256, 0 );
+            FillChar( keysPress[ 0 ], 256, 0 );
+            FillChar( keysCanPress[ 0 ], 256, 1 );
             FillChar( mouseDown[ 0 ], 3, 0 );
             FillChar( mouseCanClick[ 0 ], 3, 1 );
             FillChar( mouseClick[ 0 ], 3, 0 );
