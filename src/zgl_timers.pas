@@ -88,6 +88,7 @@ begin
   Result.Next.Active   := TRUE;
   Result.Next.Interval := Interval;
   Result.Next.OnTimer  := OnTimer;
+  Result.Next.LastTick := timer_GetTicks;
   Result.Next.Prev     := Result;
   Result.Next.Next     := nil;
   Result := Result.Next;
@@ -102,6 +103,7 @@ begin
     begin
       INC( TimersToKill );
       aTimersToKill[ TimersToKill ] := Timer;
+      Timer := nil;
       exit;
     end;
 
