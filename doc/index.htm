@@ -167,7 +167,7 @@
 
     <!--wnd_SetSize-->
     <LI><a name='wnd_SetSize'>
-    <div class='code'><b>procedure</b> wnd_SetSize( <b>const</b> Width, Height : WORD );</div>
+    <div class='code'><b>procedure</b> wnd_SetSize( <b>const</b> Width, Height : Integer );</div>
     <div align='justify'>
     Устанавливает размеры окна. Аргументы <b>Width</b> и <b>Height</b> отвечают за ширину и высоту окна.
     </div>
@@ -175,7 +175,7 @@
 
     <!--wnd_SetPos-->
     <LI><a name='wnd_SetPos'>
-    <div class='code'><b>procedure</b> wnd_SetPos( <b>const</b> X, Y : WORD );</div>
+    <div class='code'><b>procedure</b> wnd_SetPos( <b>const</b> X, Y : Integer );</div>
     <div align='justify'>
     Устанавливает позицию окна. Аргументы <b>X</b> и <b>Y</b> служат координатами.
     </div>
@@ -228,7 +228,7 @@
 
     <!--scissor_Begin-->
     <LI><a name='scissor_Begin'>
-    <div class='code'><b>procedure</b> scissor_Begin( X, Y, Width, Height : WORD );</div>
+    <div class='code'><b>procedure</b> scissor_Begin( X, Y, Width, Height : Integer );</div>
     <div align='justify'>
     Ограничивает область рендеринга. Функция работает в 'накопительном' режиме, т.е. каждый вызов запоминается, и при сбросе текущего состояния функцией scissor_End, будет установлено предыдущее.
     </div>

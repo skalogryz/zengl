@@ -73,7 +73,7 @@ var
   wnd_INST      : HINST;
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
-  wnd_Style     : DWORD;
+  wnd_Style     : Integer;
   wnd_CpnSize   : Integer;
   wnd_BrdSizeX  : Integer;
   wnd_BrdSizeY  : Integer;
@@ -216,7 +216,7 @@ begin
     end;
 
   if wnd_FullScreen Then
-    wnd_Style := WS_POPUP or WS_VISIBLE
+    wnd_Style := {WS_POPUP or }WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   if ogl_Format = 0 Then
@@ -349,7 +349,7 @@ begin
   wglMakeCurrent( wnd_DC, 0 );
 
   if FullScreen Then
-    wnd_Style := WS_POPUP or WS_VISIBLE
+    wnd_Style := {WS_POPUP or }WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 

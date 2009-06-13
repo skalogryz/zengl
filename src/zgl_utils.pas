@@ -141,7 +141,7 @@ procedure u_Backspace;
     i, last : Integer;
 begin
   if str = '' Then exit;
-  i := 0;
+  i := 1;
   last := 0;
   while i <= length( str ) do
     begin
@@ -157,7 +157,7 @@ function u_Length;
     i : Integer;
 begin
   Result := 0;
-  i := 0;
+  i := 1;
   while i < length( str ) do
     begin
       INC( Result );
