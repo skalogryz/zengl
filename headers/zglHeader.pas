@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.28               }
-{ date:    08.06.09             }
+{ date:    14.06.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -145,8 +145,8 @@ var
 
 // WINDOW
   wnd_SetCaption : procedure( const NewCaption : String );
-  wnd_SetSize    : procedure( const Width, Height : WORD );
-  wnd_SetPos     : procedure( const X, Y : WORD );
+  wnd_SetSize    : procedure( const Width, Height : Integer );
+  wnd_SetPos     : procedure( const X, Y : Integer );
   wnd_ShowCursor : procedure( const Show : Boolean );
 
 // SCREEN
@@ -176,7 +176,7 @@ var
   zbuffer_Clear     : procedure;
 
 // SCISSOR
-  scissor_Begin : procedure( X, Y, Width, Height : WORD );
+  scissor_Begin : procedure( X, Y, Width, Height : Integer );
   scissor_End   : procedure;
 
 // INI

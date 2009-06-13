@@ -233,7 +233,7 @@ begin
     end else
       begin
         glBegin( GL_TRIANGLE_STRIP );
-        for i := 0 to Quality do
+        for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );
             gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + xRadius * SinTable[ Round( i * k ) ] );
