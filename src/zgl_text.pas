@@ -212,16 +212,15 @@ begin
           WordsArray[ i ].Y := Y;
           X := X + WordsArray[ i ].W - SpaceShift;
 
-          if Flags and TEXT_HALIGN_JUSTIFY > 0 Then
+          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) Then
             begin
               W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
-              if ( i - 1 ) - l > 0 Then
-                while W > ( i - 1 ) - l do
-                  begin
-                    for b := l + 1 to i - 1 do
-                      INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
-                    W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
-                  end;
+              while W > ( i - 1 ) - l do
+                begin
+                  for b := l + 1 to i - 1 do
+                    INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
+                  W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+                end;
               WordsArray[ i - 1 ].X := WordsArray[ i - 1 ].X + W;
             end else
               if Flags and TEXT_HALIGN_CENTER > 0 Then
