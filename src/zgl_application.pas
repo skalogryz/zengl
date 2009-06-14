@@ -565,12 +565,15 @@ begin
       end;
     WM_CHAR:
       begin
-        log_add( u_IntToStr( wParam ) + ' = ' + u_IntToStr( winkey_to_scancode( wParam ) ) );
         case winkey_to_scancode( wParam ) of
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
+          {$IF ( DEFINED(WIN32) and ( not DEFINED(FPC) ) ) or DEFINED(USE_CP1251)}
           key_InputText( AnsiToUtf8( Char( wParam ) ) );
+          {$ELSE}
+          key_InputText( Char( wParam ) );
+          {$IFEND}
         end;
       end;
   else
