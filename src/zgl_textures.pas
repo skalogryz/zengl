@@ -103,6 +103,7 @@ procedure tex_CalcPOT( var pData : Pointer; var Width, Height : WORD; var U, V :
 procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcInvert( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcRGB( var pData : Pointer; const Width, Height : WORD );
+procedure tex_CalcRGBA( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : Integer; const Width, Height : WORD );
 
 procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
@@ -158,7 +159,9 @@ begin
   if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
     tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
   if Texture.Flags and TEX_RGB > 0 Then
-    tex_CalcRGB( pData, Texture.Width, Texture.Height );
+    tex_CalcRGB( pData, Texture.Width, Texture.Height )
+  else
+    tex_CalcRGBA( pData, Texture.Width, Texture.Height );
 
   if Texture.Flags and TEX_COMPRESS >= 1 Then
     if not ogl_CanCompress Then
@@ -530,6 +533,20 @@ begin
       end;
 
   SetLength( Data, 0 );
+end;
+
+procedure tex_CalcRGBA;
+  var
+    i, j : Integer;
+begin
+  for i := 0 to Height - 1 do
+    for j := 0 to Width - 1 do
+      if PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 3 )^ = 0 Then
+        begin
+          PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 0 )^ := 0;
+          PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 1 )^ := 0;
+          PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 2 )^ := 0;
+        end;
 end;
 
 procedure tex_CalcTransparent;
