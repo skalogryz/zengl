@@ -103,7 +103,6 @@ procedure tex_CalcPOT( var pData : Pointer; var Width, Height : WORD; var U, V :
 procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcInvert( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcRGB( var pData : Pointer; const Width, Height : WORD );
-procedure tex_CalcRGBA( var pData : Pointer; const Width, Height : WORD );
 procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : Integer; const Width, Height : WORD );
 
 procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
@@ -159,9 +158,7 @@ begin
   if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
     tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
   if Texture.Flags and TEX_RGB > 0 Then
-    tex_CalcRGB( pData, Texture.Width, Texture.Height )
-  else
-    tex_CalcRGBA( pData, Texture.Width, Texture.Height );
+    tex_CalcRGB( pData, Texture.Width, Texture.Height );
 
   if Texture.Flags and TEX_COMPRESS >= 1 Then
     if not ogl_CanCompress Then
@@ -272,7 +269,7 @@ begin
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Flags;
-  if TransparentColor <> $FF000000 Then
+  if Flags and TEX_RGB = 0 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -311,7 +308,7 @@ begin
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Flags;
-  if TransparentColor <> $FF000000 Then
+  if Flags and TEX_RGB = 0 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -535,71 +532,65 @@ begin
   SetLength( Data, 0 );
 end;
 
-procedure tex_CalcRGBA;
-  var
-    i, j : Integer;
-begin
-  for i := 0 to Height - 1 do
-    for j := 0 to Width - 1 do
-      if PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 3 )^ = 0 Then
-        begin
-          PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 0 )^ := 0;
-          PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 1 )^ := 0;
-          PByte( Ptr( pData ) + j * 4 + i * Width * 4 + 2 )^ := 0;
-        end;
-end;
-
 procedure tex_CalcTransparent;
   var
     i       : Integer;
     r, g, b : Byte;
-begin
-  r := ( TransparentColor and $FF     );
-  g := ( TransparentColor and $FF00   ) shr 8;
-  b := ( TransparentColor and $FF0000 ) shr 16;
-  for i := 0 to Width * Height - 1 do
+    procedure Fill( var pData : Pointer; i, Width, Height : Integer ); {$IFDEF USE_INLINE} inline; {$ENDIF}
     begin
-      if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = b ) and
+      PByte( Ptr( pData ) + 0 + i * 4 )^ := 0;
+      PByte( Ptr( pData ) + 1 + i * 4 )^ := 0;
+      PByte( Ptr( pData ) + 2 + i * 4 )^ := 0;
+      PByte( Ptr( pData ) + 3 + i * 4 )^ := 0;
+
+      if i + Width <= Width * Height - 1 Then
+        if PByte( Ptr( pData ) + ( i + Width ) * 4 + 3 )^ > 0 Then
+          begin
+            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 0 )^;
+            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 2 )^;
+          end;
+
+      if i + 1 <= Width * Height - 1 Then
+        if PByte( Ptr( pData ) + ( i + 1 ) * 4 + 3 )^ > 0 Then
+          begin
+            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 0 )^;
+            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 2 )^;
+          end;
+
+      if i - 1 > 0 Then
+        if PByte( Ptr( pData ) + ( i - 1 ) * 4 + 3 )^ > 0 Then
+          begin
+            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 0 )^;
+            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 2 )^;
+          end;
+
+      if i - Width > 0 Then
+        if PByte( Ptr( pData ) + ( i - Width ) * 4 + 3 )^ > 0 Then
+          begin
+            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 0 )^;
+            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 2 )^;
+          end;
+    end;
+begin
+  if TransparentColor = $FF000000 Then
+    begin
+      for i := 0 to Width * Height - 1 do
+        if ( PByte( Ptr( pData ) + 3 + i * 4 )^ = 0 ) Then
+          Fill( pData, i, Width, Height );
+    end else
+      begin
+        r := ( TransparentColor and $FF     );
+        g := ( TransparentColor and $FF00   ) shr 8;
+        b := ( TransparentColor and $FF0000 ) shr 16;
+        for i := 0 to Width * Height - 1 do
+      if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and
          ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
          ( PByte( Ptr( pData ) + 2 + i * 4 )^ = r ) Then
-        begin
-          PByte( Ptr( pData ) + 0 + i * 4 )^ := 0;
-          PByte( Ptr( pData ) + 1 + i * 4 )^ := 0;
-          PByte( Ptr( pData ) + 2 + i * 4 )^ := 0;
-          PByte( Ptr( pData ) + 3 + i * 4 )^ := 0;
-
-          if i + Width <= Width * Height - 1 Then
-            if PByte( Ptr( pData ) + ( i + Width ) * 4 + 3 )^ > 0 Then
-              begin
-                PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 0 )^;
-                PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 1 )^;
-                PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 2 )^;
-              end;
-
-          if i + 1 <= Width * Height - 1 Then
-            if PByte( Ptr( pData ) + ( i + 1 ) * 4 + 3 )^ > 0 Then
-              begin
-                PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 0 )^;
-                PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 1 )^;
-                PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 2 )^;
-              end;
-
-          if i - 1 > 0 Then
-            if PByte( Ptr( pData ) + ( i - 1 ) * 4 + 3 )^ > 0 Then
-              begin
-                PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 0 )^;
-                PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 1 )^;
-                PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 2 )^;
-              end;
-
-          if i - Width > 0 Then
-            if PByte( Ptr( pData ) + ( i - Width ) * 4 + 3 )^ > 0 Then
-              begin
-                PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 0 )^;
-                PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 1 )^;
-                PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 2 )^;
-              end;
-        end;
+        Fill( pData, i, Width, Height );
     end;
 end;
 
