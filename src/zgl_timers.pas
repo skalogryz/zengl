@@ -129,10 +129,10 @@ function timer_GetTicks;
 begin
 {$IFDEF LINUX}
   fpGetTimeOfDay( @t_tmr, nil );
-  {.$Q-}
+  {$Q-}
   // FIXME: почему-то overflow вылетает с флагом -Co
   Result := t_tmr.tv_sec * 1000 + t_tmr.tv_usec / 1000 - t_start;
-  {.$Q+}
+  {$Q+}
 {$ENDIF}
 {$IFDEF WIN32}
   QueryPerformanceCounter( T );

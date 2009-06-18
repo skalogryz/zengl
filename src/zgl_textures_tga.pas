@@ -54,8 +54,8 @@ procedure tga_Load( var pData : Pointer; var W, H : WORD );
 procedure tga_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
 procedure tga_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 
-procedure tga_FlipVertically( var Data : array of Byte; w, h, pixelSize : Integer );
-procedure tga_FlipHorizontally( var Data : array of Byte; w, h, pixelSize : Integer );
+procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
+procedure tga_FlipHorizontally( var Data : Pointer; w, h, pixelSize : Integer );
 procedure tga_RLEDecode;
 
 implementation
@@ -98,9 +98,9 @@ begin
     end;
 
   if ( tgaHeader.ImgSpec.Desc and ( 1 shl 4 ) ) <> 0 Then
-    tga_FlipHorizontally( tgaData, tgaHeader.ImgSpec.Width, tgaHeader.ImgSpec.Height, pixelSize );
+    tga_FlipHorizontally( Pointer( tgaData ), tgaHeader.ImgSpec.Width, tgaHeader.ImgSpec.Height, pixelSize );
   if ( tgaHeader.ImgSpec.Desc and ( 1 shl 5 ) ) <> 0 Then
-    tga_FlipVertically( tgaData, tgaHeader.ImgSpec.Width, tgaHeader.ImgSpec.Height, pixelSize );
+    tga_FlipVertically( Pointer( tgaData ), tgaHeader.ImgSpec.Width, tgaHeader.ImgSpec.Height, pixelSize );
 
   if tgaHeader.ImageType <> 2 Then
     begin
@@ -199,9 +199,9 @@ begin
 
   for i := 0 to h shr 1 - 1 do
     begin
-      Move( Data[ i * w * pixelSize ], scanLine[ 0 ], w * pixelSize );
-      Move( Data[ ( h - i - 1 ) * w * pixelSize ], Data[ i * w * pixelSize ], w * pixelSize );
-      Move( scanLine[ 0 ], Data[ ( h - i - 1 ) * w * pixelSize ], w * pixelSize );
+      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
+      Move( Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, Pointer( Ptr( Data ) + i * w * pixelSize )^, w * pixelSize );
+      Move( scanLine[ 0 ], Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, w * pixelSize );
     end;
 end;
 
@@ -214,10 +214,10 @@ begin
 
   for i := 0 to h - 1 do
     begin
-      Move( Data[ i * w * pixelSize ], scanLine[ 0 ], w * pixelSize );
+      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
       for x := 0 to w shr 1 do
         for j := 0 to pixelSize - 1 do
-          scanLine[ x * pixelSize + j ] := scanLine[ ( w - 1 - x ) * pixelSize + j ];
+          PByte( Ptr( Data ) +  x * pixelSize + j )^ := scanLine[ ( w - 1 - x ) * pixelSize + j ];
     end;
 end;
 

@@ -73,7 +73,7 @@ var
   wnd_INST      : HINST;
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
-  wnd_Style     : Integer;
+  wnd_Style     : DWORD;
   wnd_CpnSize   : Integer;
   wnd_BrdSizeX  : Integer;
   wnd_BrdSizeY  : Integer;
@@ -190,9 +190,6 @@ begin
   wnd_BrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
   wnd_BrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
 
-  wnd_X := 0;
-  wnd_Y := 0;
-
   with wnd_Class do
     begin
       cbSize        := SizeOf( TWndClassEx );
@@ -216,11 +213,11 @@ begin
     end;
 
   if wnd_FullScreen Then
-    wnd_Style := {WS_POPUP or }WS_VISIBLE
+    wnd_Style := WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   if ogl_Format = 0 Then
-    wnd_Handle := CreateWindowEx( 0, wnd_ClassName, '', WS_POPUP, 0, 0, 0, 0, 0, 0, wnd_INST, nil )
+    wnd_Handle := CreateWindowEx( 0, wnd_ClassName, '', 0, 0, 0, 0, 0, 0, 0, wnd_INST, nil )
   else
     wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
                                   wnd_ClassName,
@@ -287,7 +284,6 @@ begin
   wnd_Events[ 9 ].eventKind   := kEventMouseWheelMoved;
   wnd_Events[ 10 ].eventClass := kEventClassMouse;
   wnd_Events[ 10 ].eventKind  := kEventMouseDragged;
-  //InstallEventHandler( GetWindowEventTarget( wnd_Handle ), NewEventHandlerUPP( @app_ProcessMessages ), 3, @wnd_Events[ 0 ], nil, nil );
   InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 11, @wnd_Events[ 0 ], nil, nil );
 
   wnd_Select;
@@ -349,7 +345,7 @@ begin
   wglMakeCurrent( wnd_DC, 0 );
 
   if FullScreen Then
-    wnd_Style := {WS_POPUP or }WS_VISIBLE
+    wnd_Style := WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 

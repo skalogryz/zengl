@@ -81,7 +81,7 @@ var
   {$IFDEF LINUX}
   ogl_Context    : GLXContext;
   ogl_VisualInfo : PXVisualInfo;
-  ogl_Attr       : array[ 0..31 ] of DWORD;
+  ogl_Attr       : array[ 0..31 ] of Integer;
   {$ENDIF}
   {$IFDEF WIN32}
   ogl_Context : HGLRC;

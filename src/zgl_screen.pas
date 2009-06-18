@@ -68,10 +68,10 @@ type
 end;
 
 var
-  scr_Width   : WORD;
-  scr_Height  : WORD;
-  scr_BPP     : WORD;
-  scr_Refresh : WORD;
+  scr_Width   : Integer;
+  scr_Height  : Integer;
+  scr_BPP     : Integer;
+  scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
 
@@ -100,8 +100,8 @@ var
   {$IFDEF DARWIN}
   scr_Display  : CGDirectDisplayID;
   scr_Desktop  : CFDictionaryRef;
-  scr_DesktopW : WORD;
-  scr_DesktopH : WORD;
+  scr_DesktopW : Integer;
+  scr_DesktopH : Integer;
   scr_Settings : CFDictionaryRef;
   {$ENDIF}
 

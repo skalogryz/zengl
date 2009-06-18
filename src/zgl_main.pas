@@ -47,7 +47,7 @@ const
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_STREAM      = $000023;
   WIDGET_TYPE_ID         = $000030;
-  WIDGET_DESC_SIZE       = $000031;
+  WIDGET_FILL_DESC       = $000031;
   WIDGET_ONDRAW          = $000032;
   WIDGET_ONPROC          = $000033;
 
@@ -334,9 +334,9 @@ begin
           end else
             widgetTLast := DWORD( UserData );
       end;
-    WIDGET_DESC_SIZE:
+    WIDGET_FILL_DESC:
       begin
-        managerGUI.Types[ widgetTLast ].DescSize := DWORD( UserData );
+        managerGUI.Types[ widgetTLast ].FillDesc := UserData;
       end;
     WIDGET_ONDRAW:
       begin
