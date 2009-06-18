@@ -59,61 +59,61 @@ procedure gui_Init;
 begin
   // Button
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_BUTTON ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTButtonDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillButtonDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawButton );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcButton );
 
   // CheckBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_CHECKBOX ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTCheckBoxDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillCheckBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawCheckBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcCheckBox );
 
   // RadioButton
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_RADIOBUTTON ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTRadioButtonDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillRadioButtonDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawRadioButton );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcRadioButton );
 
   // Label
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_LABEL ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTLabelDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillLabelDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawLabel );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcLabel );
 
   // EditBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_EDITBOX ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTEditBoxDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillEditBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawEditBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcEditBox );
 
   // ListBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_LISTBOX ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTListBoxDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillListBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawListBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcListBox );
 
   // ComboBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_COMBOBOX ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTComboBoxDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillComboBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawComboBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcComboBox );
 
   // GroupBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_GROUPBOX ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTGroupBoxDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillGroupBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawGroupBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcGroupBox );
 
   // Spin
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SPIN ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTSpinDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillSpinDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawSpin );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcSpin );
 
   // ScrollBar
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SCROLLBAR ) );
-  zgl_Reg( WIDGET_DESC_SIZE, Pointer( SizeOf( zglTSCrollBarDesc ) ) );
+  zgl_Reg( WIDGET_FILL_DESC, @gui_FillScrollBarDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawScrollBar );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcScrollBar );
 end;
@@ -225,40 +225,8 @@ begin
 
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTWidget ) );
   Result.Next._type := _type;
-  zgl_GetMem( Result.Next.desc, managerGUI.Types[ _type - 1 ].DescSize );
-  if Assigned( Desc ) Then
-    case _type of
-      WIDGET_LISTBOX:
-        with zglTListBoxDesc( Result.Next.desc^ ) do
-          begin
-            Font       := zglTListBoxDesc( Desc^ ).Font;
-            ItemIndex  := zglTListBoxDesc( Desc^ ).ItemIndex;
-            ItemHeight := zglTListBoxDesc( Desc^ ).ItemHeight;
-            if ItemHeight = 0 Then
-              ItemHeight := Font.MaxHeight + 4;
-            List.Count := zglTListBoxDesc( Desc^ ).List.Count;
-            SetLength( List.Items, List.Count );
-            for i := 0 to List.Count - 1 do
-              List.Items[ i ] := zglTListBoxDesc( Desc^ ).List.Items[ i ];
-          end;
-      WIDGET_COMBOBOX:
-        with zglTComboBoxDesc( Result.Next.desc^ ) do
-          begin
-            Font          := zglTComboBoxDesc( Desc^ ).Font;
-            ItemIndex     := zglTComboBoxDesc( Desc^ ).ItemIndex;
-            ItemHeight    := zglTComboBoxDesc( Desc^ ).ItemHeight;
-            if ItemHeight = 0 Then
-              ItemHeight := Font.MaxHeight + 4;
-            DropDownCount := zglTComboBoxDesc( Desc^ ).DropDownCount;
-            List.Count := zglTListBoxDesc( Desc^ ).List.Count;
-            SetLength( List.Items, List.Count );
-            for i := 0 to List.Count - 1 do
-              List.Items[ i ] := zglTComboBoxDesc( Desc^ ).List.Items[ i ];
-          end;
-    else
-      Move( Desc^, Result.Next.desc^, managerGUI.Types[ _type - 1 ].DescSize );
-    end;
-  Result.Next.data    := Data;
+  managerGUI.Types[ _type - 1 ].FillDesc( Desc, Result.Next.desc );
+  Result.Next.data  := Data;
   if Assigned( Parent ) Then
     begin
       Result.Next.parent := parent;

@@ -39,6 +39,7 @@ procedure fontgen_BuildFont( var Font : zglPFont; const FontName : String );
 procedure fontgen_SaveFont( const Font : zglPFont; const FileName : String );
 
 var
+  fg_Font        : zglPFont;
   fg_CharsUse    : array[ 0..65535 ] of Boolean;
   fg_CharsUID    : array of WORD;
   fg_CharsSize   : array of zglTRect;
@@ -183,6 +184,8 @@ type NEWTEXTMETRICEX = NEWTEXTMETRICEXW;
 {$ENDIF}
 function FontEnumProc(var _para1:ENUMLOGFONTEX;var _para2:NEWTEXTMETRICEX; _para3:longint; _para4:LPARAM):longint;stdcall;
 begin
+  if not ( _para1.elfLogFont.lfFaceName[ 0 ] in [ 'A'..'Z', 'a'..'z', '0'..'9' ] ) Then exit;
+
   INC( fg_FontList.Count );
   SetLength( fg_FontList.Items, fg_FontList.Count );
   fg_FontList.Items[ fg_FontList.Count - 1 ] := _para1.elfLogFont.lfFaceName;
@@ -195,7 +198,7 @@ begin
   Result := 1;
 end;
 
-procedure FontGetSize( const pData : PByteArray; const W, H : Integer; var nW, nH, mX, mY : Integer );
+procedure FontGetSize( const pData : Pointer; const W, H : Integer; var nW, nH, mX, mY : Integer );
   var
     i, j       : Integer;
     maxX, minX : Integer;
@@ -207,7 +210,7 @@ begin
   minY := H;
   for i := 0 to W - 1 do
     for j := 0 to H - 1 do
-      if pData[ i * 4 + j * W * 4 ] > 0 Then
+      if PByte( Ptr( pData ) +  i * 4 + j * W * 4 )^ > 0 Then
         begin
           if i < minX Then minX := i;
           if i > maxX Then maxX := i;
@@ -236,7 +239,7 @@ function fontgen_Init;
     Family    : PChar;
     {$ENDIF}
     {$IFDEF WIN32}
-    LFont : LOGFONTW;
+    LFont : LOGFONT;
     {$ENDIF}
 begin
   Result := FALSE;
@@ -268,9 +271,9 @@ begin
   FcPatternDestroy( Pattern );
 {$ENDIF}
 {$IFDEF WIN32}
+  FillChar( LFont, SizeOf( LFont ), 0 );
   LFont.lfCharSet := DEFAULT_CHARSET;
-  LFont.lfFaceName[ 0 ] := #0;
-  EnumFontFamiliesExW( wnd_DC, LFont, @FontEnumProc, 0, 0 );
+  EnumFontFamiliesEx( wnd_DC, LFont, @FontEnumProc, 0, 0 );
 {$ENDIF}
 
   Result := TRUE;
@@ -282,6 +285,8 @@ procedure fontgen_PutChar( var pData : Pointer; const X, Y, ID : Integer );
     fw, fh : Integer;
     ps : Byte;
 begin
+  if length( fg_CharsImage[ ID ] ) = 0 Then exit;
+
   fw := Round( fg_CharsSize[ ID ].W );
   fh := Round( fg_CharsSize[ ID ].H );
 
@@ -305,6 +310,7 @@ procedure fontgen_BuildFont;
     sx, sy  : Integer;
     cs      : Integer;
     u, v    : Single;
+    MaxWidth: Integer;
     {$IFDEF LINUX}
     scr_Visual : PVisual;
     Family     : array[ 0..255 ] of Char;
@@ -345,6 +351,7 @@ begin
         Font.CharDesc[ i ] := nil;
       end;
 
+  MaxWidth := 0;
   SetLength( fg_CharsSize,  Font.Count.Chars );
   SetLength( fg_CharsUID,   Font.Count.Chars );
   SetLength( fg_CharsImage, Font.Count.Chars );
@@ -393,6 +400,10 @@ begin
         fg_CharsSize[ i ].W := cx;
         fg_CharsSize[ i ].H := cy;
         fg_CharsP   [ i ]   := XGlyphInfo.xOff;
+        MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].W + fg_FontPadding[ 0 ] + fg_FontPadding[ 2 ] ) );
+        MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].H + fg_FontPadding[ 1 ] + fg_FontPadding[ 3 ] ) );
+
+        if ( sx = 0 ) or ( sy = 0 ) Then continue;
 
         pixmap := XCreatePixmap( scr_Display, wnd_Root, sx, sy, DefaultDepth( scr_Display, scr_Default ) );
         draw   := XftDrawCreate( scr_Display, pixmap, scr_Visual, DefaultColormap( scr_Display, scr_Default ) );
@@ -463,21 +474,23 @@ begin
   for i := 0 to Font.Count.Chars - 1 do
     begin
       FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
-      TextOutW( WDC, 1, 1, @fg_CharsUID[ i ], 1 );
+      TextOutW( WDC, TextMetric.tmMaxCharWidth div 2, TextMetric.tmHeight div 2, @fg_CharsUID[ i ], 1 );
 
       GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );
       // Microsoft Sucks...
-      FontGetSize( PByteArray( pData ), Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight, cx, cy, minX, minY );
+      FontGetSize( pData, Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight, cx, cy, minX, minY );
       INC( cx, 1 + Byte( fg_FontAA ) );
       INC( cy, 1 + Byte( fg_FontAA ) );
 
-      fg_CharsSize[ i ].X := minX;
-      fg_CharsSize[ i ].Y := cy - ( TextMetric.tmAscent - minY );
+      fg_CharsSize[ i ].X := minX - TextMetric.tmMaxCharWidth div 2;
+      fg_CharsSize[ i ].Y := cy - ( TextMetric.tmAscent - ( minY - TextMetric.tmHeight div 2 ) );
       fg_CharsSize[ i ].W := cx;
       fg_CharsSize[ i ].H := cy;
       fg_CharsP   [ i ]   := CharSize.cx;
       SetLength( fg_CharsImage[ i ], cx * cy );
       FillChar( fg_CharsImage[ i, 0 ], cx * cy, $FF );
+      MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].W + fg_FontPadding[ 0 ] + fg_FontPadding[ 2 ] + Byte( fg_FontAA ) ) );
+      MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].H + fg_FontPadding[ 1 ] + fg_FontPadding[ 3 ] + Byte( fg_FontAA ) ) );
 
       for sx := minX to cx + minX - 1 do
         for sy := minY to cy + minY - 1 do
@@ -490,7 +503,8 @@ begin
   DeleteDC( WDC );
   DeleteObject( WFont );
 {$ENDIF}
-
+  if MaxWidth = 0 Then MaxWidth := 1;
+  fg_PageChars := fg_PageSize div MaxWidth;
   cs := fg_PageSize div fg_PageChars;
 
   Font.Count.Pages := Font.Count.Chars div sqr( fg_PageChars ) + 1;
@@ -547,7 +561,7 @@ begin
       Font.Padding[ 1 ] := fg_FontPadding[ 1 ];
       Font.Padding[ 2 ] := fg_FontPadding[ 2 ];
       Font.Padding[ 3 ] := fg_FontPadding[ 3 ];
-      tga_FlipVertically( PByteArray( pData )^, fg_PageSize, fg_PageSize, 4 );
+      tga_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
       tex_Create( Font.Pages[ i ]^, pData );
       FreeMemory( pData );
     end;

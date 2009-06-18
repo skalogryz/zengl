@@ -394,11 +394,13 @@ begin
     case _type of
       EVENT_FOCUS_IN:
         begin
-          key_BeginReadText( Text, Max );
+          if not ReadOnly Then
+            key_BeginReadText( Text, Max );
         end;
       EVENT_KEY_DOWN:
         begin
-          key_EndReadText( Text );
+          if not ReadOnly Then
+            key_EndReadText( Text );
         end;
     end;
   gui_ProcEvents( Event );
