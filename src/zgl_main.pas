@@ -153,15 +153,15 @@ begin
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
   if not scr_Create Then exit;
+
+  app_Initialized := TRUE;
+  if ( wnd_Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
+    wnd_FullScreen := TRUE;
+
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
   if not gl_Create Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
-
-  if ( wnd_Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
-    wnd_FullScreen := TRUE;
-  if wnd_FullScreen Then
-    scr_SetOptions( wnd_Width, wnd_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
 
   Set2DMode;
   wnd_ShowCursor( FALSE );
@@ -439,7 +439,11 @@ begin
     app_AutoPause := FALSE;
 
   if What and APP_USE_LOG > 0 Then
-    app_Log := FALSE;
+    begin
+      app_Log := FALSE;
+      if log <> FILE_ERROR Then
+        log_Close;
+    end;
 
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := FALSE;
