@@ -243,6 +243,7 @@ begin
       u_Error( 'Cannot get device context' );
       exit;
     end;
+  ShowWindow( wnd_Handle, SW_NORMAL );
   BringWindowToTop( wnd_Handle );
 {$ENDIF}
 {$IFDEF DARWIN}
