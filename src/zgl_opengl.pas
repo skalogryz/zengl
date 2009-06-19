@@ -168,8 +168,6 @@ begin
       PixelFormat := ChoosePixelFormat( wnd_DC, @PixelFormatDesc );
     end else
       PixelFormat := ogl_Format;
-  if ogl_FSAA = 0 Then
-    ogl_Format := PixelFormat;
 
   if not SetPixelFormat( wnd_DC, PixelFormat, @PixelFormatDesc ) Then
     begin
