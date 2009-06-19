@@ -411,7 +411,7 @@ begin
   scr_BPP        := BPP;
   wnd_FullScreen := FullScreen;
   scr_Vsync      := VSync;
-  if not app_Work Then exit;
+  if not app_Initialized Then exit;
   scr_SetVSync( scr_VSync );
 
   if ( Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
@@ -548,7 +548,8 @@ begin
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
   else
     log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp windowed' );
-  wnd_Update;
+  if app_Work Then
+    wnd_Update;
 end;
 
 procedure scr_CorrectResolution;

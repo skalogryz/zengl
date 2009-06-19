@@ -56,6 +56,7 @@ function app_ProcessMessages( inHandlerCallRef: EventHandlerCallRef; inEvent: Ev
 procedure app_CalcFPS;
 
 var
+  app_Initialized  : Boolean;
   app_Work         : Boolean;
   app_WorkTime     : DWORD;
   app_Pause        : Boolean;

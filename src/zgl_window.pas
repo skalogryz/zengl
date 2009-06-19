@@ -109,7 +109,7 @@ begin
   wnd_Width  := Width;
   wnd_Height := Height;
 
-  if app_Flags and WND_USE_AUTOCENTER > 0 Then
+  if ( app_Flags and WND_USE_AUTOCENTER > 0 ) and ( not wnd_FullScreen ) Then
     begin
       wnd_X := ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2;
       wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
@@ -202,7 +202,7 @@ begin
       hIconSm       := LoadIcon  ( wnd_INST, MakeIntResource( 'MAINICON' ) );
       hCursor       := LoadCursor( wnd_INST, IDC_ARROW );
       lpszMenuName  := nil;
-      hbrBackGround := GetStockObject( NULL_BRUSH );
+      hbrBackGround := GetStockObject( BLACK_BRUSH );
       lpszClassName := wnd_ClassName;
     end;
 
@@ -213,7 +213,7 @@ begin
     end;
 
   if wnd_FullScreen Then
-    wnd_Style := WS_VISIBLE
+    wnd_Style := WS_POPUP or WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
