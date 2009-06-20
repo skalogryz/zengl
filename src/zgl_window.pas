@@ -201,7 +201,7 @@ begin
       hIconSm       := LoadIcon  ( wnd_INST, MakeIntResource( 'MAINICON' ) );
       hCursor       := LoadCursor( wnd_INST, IDC_ARROW );
       lpszMenuName  := nil;
-      hbrBackGround := GetStockObject( NULL_BRUSH );
+      hbrBackGround := GetStockObject( BLACK_BRUSH );
       lpszClassName := wnd_ClassName;
     end;
 
