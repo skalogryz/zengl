@@ -221,7 +221,7 @@ begin
   if ogl_Format = 0 Then
     wnd_Handle := CreateWindowEx( 0, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
+    wnd_Handle := CreateWindowEx( 0,
                                   wnd_ClassName,
                                   PChar( wnd_Caption ),
                                   wnd_Style,
@@ -326,7 +326,6 @@ end;
 procedure wnd_Update;
 {$IFDEF WIN32}
   var
-    r : TRect;
     FullScreen : Boolean;
 {$ENDIF}
 begin
@@ -357,15 +356,12 @@ begin
       ogl_Y := 0;
       wnd_X := 0;
       wnd_Y := 0;
-      SetRect( r, 0, 0, wnd_Width, wnd_Height )
     end else
       begin
         ogl_X := GetSystemMetrics( SM_CXDLGFRAME ) * 2;
         ogl_Y := GetSystemMetrics( SM_CYCAPTION ) + GetSystemMetrics( SM_CYDLGFRAME ) * 2;
-        SetRect( r, 0, 0, wnd_Width + ogl_X, wnd_Height + ogl_Y );
       end;
 
-  AdjustWindowRectEx( r, 0, FALSE, 0 );
   SetWindowLong( wnd_Handle, GWL_STYLE, wnd_Style );
   SetWindowLong( wnd_Handle, GWL_EXSTYLE, WS_EX_TOPMOST * Byte( FullScreen ) );
 
