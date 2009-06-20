@@ -203,6 +203,16 @@ begin
   {$ELSE}
     wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormat' );
   {$ENDIF}
+  if ( not Assigned( wglChoosePixelFormatARB ) ) and ( ogl_Format = 0 ) Then
+    begin
+      wnd_First := FALSE;
+      ogl_Format := PixelFormat;
+      gl_Destroy;
+      wnd_Destroy;
+      wnd_Create( wnd_Width, wnd_Height );
+      Result := gl_Create;
+      exit;
+    end;
   if ( ogl_Format = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not app_InitToHandle ) Then
     begin
       ogl_zDepth := 24;
@@ -258,6 +268,7 @@ begin
 
       if ogl_Format <> 0 Then
         begin
+          wnd_First := FALSE;
           gl_Destroy;
           wnd_Destroy;
           wnd_Create( wnd_Width, wnd_Height );

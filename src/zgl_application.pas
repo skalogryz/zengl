@@ -233,9 +233,6 @@ end;
 
 function app_ProcessMessages;
   var
-  {$IFDEF WIN32}
-    ps : TPaintStruct;
-  {$ENDIF}
   {$IFDEF LINUX}
     Event  : TXEvent;
     Keysym : TKeySym;
@@ -425,9 +422,8 @@ begin
     WM_PAINT:
       if app_Work then
         begin
-          BeginPaint( wnd_Handle, ps );
           app_Draw;
-          EndPaint( wnd_Handle, ps );
+          ValidateRect( wnd_Handle, 0 );
         end;
     WM_DISPLAYCHANGE:
       begin
@@ -438,7 +434,7 @@ begin
         begin
           app_Focus := FALSE;
           if app_AutoPause Then app_Pause := TRUE;
-          if wnd_FullScreen Then
+          if ( wnd_FullScreen ) and ( not wnd_First ) Then
             begin
               scr_Reset;
               wnd_Update;
@@ -456,7 +452,7 @@ begin
         FillChar( mouseCanClick[ 0 ], 3, 1 );
         FillChar( mouseClick[ 0 ], 3, 0 );
         FillChar( mouseWheel[ 0 ], 2, 0 );
-        if wnd_FullScreen Then
+        if ( wnd_FullScreen ) and ( not wnd_First ) Then
           scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
       end;
     WM_NCHITTEST:

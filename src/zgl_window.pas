@@ -45,9 +45,7 @@ procedure wnd_SetCaption( const NewCaption : String );
 procedure wnd_SetSize( const Width, Height : Integer );
 procedure wnd_SetPos( const X, Y : Integer );
 procedure wnd_ShowCursor( const Show : Boolean );
-{$IFDEF DARWIN}
 procedure wnd_Select;
-{$ENDIF}
 
 var
   wnd_X          : Integer;
@@ -68,6 +66,7 @@ var
   wnd_Protocols   : TAtom;
   {$ENDIF}
   {$IFDEF WIN32}
+  wnd_First     : Boolean = TRUE; // Microsoft Sucks! :)
   wnd_Handle    : HWND;
   wnd_DC        : HDC;
   wnd_INST      : HINST;
@@ -92,7 +91,7 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,
-  zgl_utils;
+  zgl_utils,zgl_log;
 
 function wnd_Create;
   {$IFDEF LINUX}
@@ -109,7 +108,7 @@ begin
   wnd_Width  := Width;
   wnd_Height := Height;
 
-  if ( app_Flags and WND_USE_AUTOCENTER > 0 ) and ( not wnd_FullScreen ) Then
+  if app_Flags and WND_USE_AUTOCENTER > 0 Then
     begin
       wnd_X := ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2;
       wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
@@ -202,7 +201,7 @@ begin
       hIconSm       := LoadIcon  ( wnd_INST, MakeIntResource( 'MAINICON' ) );
       hCursor       := LoadCursor( wnd_INST, IDC_ARROW );
       lpszMenuName  := nil;
-      hbrBackGround := GetStockObject( BLACK_BRUSH );
+      hbrBackGround := GetStockObject( NULL_BRUSH );
       lpszClassName := wnd_ClassName;
     end;
 
@@ -213,20 +212,26 @@ begin
     end;
 
   if wnd_FullScreen Then
-    wnd_Style := WS_POPUP or WS_VISIBLE
+    begin
+      wnd_X     := 0;
+      wnd_Y     := 0;
+      wnd_Style := WS_POPUP or WS_VISIBLE;
+    end else
+      wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+  if ogl_Format = 0 Then
+    wnd_Handle := CreateWindowEx( 0, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
-                                wnd_ClassName,
-                                PChar( wnd_Caption ),
-                                wnd_Style,
-                                wnd_X, wnd_Y,
-                                wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ),
-                                0,
-                                0,
-                                wnd_INST,
-                                nil );
+    wnd_Handle := CreateWindowEx( WS_EX_TOPMOST * Byte( wnd_FullScreen ),
+                                  wnd_ClassName,
+                                  PChar( wnd_Caption ),
+                                  wnd_Style,
+                                  wnd_X, wnd_Y,
+                                  wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
+                                  wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ),
+                                  0,
+                                  0,
+                                  wnd_INST,
+                                  nil );
 
   if wnd_Handle = 0 Then
     begin
@@ -240,8 +245,7 @@ begin
       u_Error( 'Cannot get device context' );
       exit;
     end;
-  ShowWindow( wnd_Handle, SW_NORMAL );
-  BringWindowToTop( wnd_Handle );
+  wnd_Select;
 {$ENDIF}
 {$IFDEF DARWIN}
   size.Left   := wnd_X;
@@ -358,9 +362,7 @@ begin
       begin
         ogl_X := GetSystemMetrics( SM_CXDLGFRAME ) * 2;
         ogl_Y := GetSystemMetrics( SM_CYCAPTION ) + GetSystemMetrics( SM_CYDLGFRAME ) * 2;
-        SetRect( r, 0, 0,
-                 wnd_Width  + ogl_X,
-                 wnd_Height + ogl_Y );
+        SetRect( r, 0, 0, wnd_Width + ogl_X, wnd_Height + ogl_Y );
       end;
 
   AdjustWindowRectEx( r, 0, FALSE, 0 );
@@ -427,10 +429,6 @@ begin
 end;
 
 procedure wnd_SetPos;
-  {$IFDEF WIN32}
-  var
-    Rect : TRect;
-  {$ENDIF}
 begin
   wnd_X := X;
   wnd_Y := Y;
@@ -444,14 +442,9 @@ begin
 {$IFDEF WIN32}
   if wnd_Handle <> 0 Then
     if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      begin
-        GetWindowRect( wnd_Handle, Rect );
-        SetWindowPos( wnd_Handle, 0, X, Y, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOACTIVATE );
-      end else
-        begin
-          GetWindowRect( wnd_Handle, Rect );
-          SetWindowPos( wnd_Handle, 0, 0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOACTIVATE );
-        end;
+      SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOACTIVATE )
+    else
+      SetWindowPos( wnd_Handle, 0, 0, 0, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then
@@ -502,12 +495,16 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF DARWIN}
 procedure wnd_Select;
 begin
+  {$IFDEF WIN32}
+  ShowWindow( wnd_Handle, SW_NORMAL );
+  BringWindowToTop( wnd_Handle );
+  {$ENDIF}
+  {$IFDEF DARWIN}
   SelectWindow( wnd_Handle );
   ShowWindow( wnd_Handle );
+  {$ENDIF}
 end;
-{$ENDIF}
 
 end.

@@ -157,7 +157,7 @@ procedure mouse_Lock;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  XWarpPointer( scr_display, None, wnd_Handle, 0, 0, 0, 0, wnd_X + wnd_Width div 2, wnd_Y + wnd_Height div 2 );
+  XWarpPointer( scr_display, None, wnd_Handle, 0, 0, 0, 0, wnd_Width div 2, wnd_Height div 2 );
 {$ENDIF}
 {$IFDEF WIN32}
   SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
