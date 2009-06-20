@@ -91,7 +91,7 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,
-  zgl_utils,zgl_log;
+  zgl_utils;
 
 function wnd_Create;
   {$IFDEF LINUX}
@@ -221,7 +221,7 @@ begin
   if ogl_Format = 0 Then
     wnd_Handle := CreateWindowEx( WS_EX_TOOLWINDOW, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Handle := CreateWindowEx( 0,
+    wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW,
                                   wnd_ClassName,
                                   PChar( wnd_Caption ),
                                   wnd_Style,
@@ -342,9 +342,6 @@ begin
   else
     FullScreen := FALSE;
 
-  // Странный костыль, но без него падает FPS после смены параметров окна
-  wglMakeCurrent( wnd_DC, 0 );
-
   if FullScreen Then
     wnd_Style := WS_VISIBLE
   else
@@ -363,9 +360,7 @@ begin
       end;
 
   SetWindowLong( wnd_Handle, GWL_STYLE, wnd_Style );
-  SetWindowLong( wnd_Handle, GWL_EXSTYLE, WS_EX_TOPMOST * Byte( FullScreen ) );
-
-  wglMakeCurrent( wnd_DC, ogl_Context );
+  SetWindowLong( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
 {$IFDEF DARWIN}
   aglSetCurrentContext( ogl_Context );
