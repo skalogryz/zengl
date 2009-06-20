@@ -219,7 +219,7 @@ begin
     end else
       wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   if ogl_Format = 0 Then
-    wnd_Handle := CreateWindowEx( 0, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
+    wnd_Handle := CreateWindowEx( WS_EX_TOOLWINDOW, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
     wnd_Handle := CreateWindowEx( 0,
                                   wnd_ClassName,

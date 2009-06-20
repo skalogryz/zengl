@@ -449,6 +449,7 @@ begin
         FillChar( keysPress[ 0 ], 256, 0 );
         FillChar( keysCanPress[ 0 ], 256, 1 );
         FillChar( mouseDown[ 0 ], 3, 0 );
+        FillChar( mouseUp[ 0 ], 3, 0 );
         FillChar( mouseCanClick[ 0 ], 3, 1 );
         FillChar( mouseClick[ 0 ], 3, 0 );
         FillChar( mouseWheel[ 0 ], 2, 0 );
@@ -586,6 +587,10 @@ begin
   case eClass of
     kEventClassWindow:
       case eKind of
+        kEventWindowDrawContent:
+          begin
+            app_Draw;
+          end;
         kEventWindowActivated:
           begin
             app_Focus := TRUE;
