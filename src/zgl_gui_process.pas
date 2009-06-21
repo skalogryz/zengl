@@ -461,7 +461,7 @@ begin
           Widget.Events.OnChange( Widget, li, li - ItemIndex );
         ItemIndex := li;
 
-        if Assigned( Event.Widget.child ) Then
+        if Assigned( Event.Widget.child ) and ( Event._type <> EVENT_MOUSE_DOWN ) Then
           begin
             if ItemIndex < iShift Then
               zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex;

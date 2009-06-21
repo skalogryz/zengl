@@ -90,7 +90,7 @@ const
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_STREAM      = $000023;
   WIDGET_TYPE_ID         = $000030;
-  WIDGET_DESC_SIZE       = $000031;
+  WIDGET_DESC_FILL       = $000031;
   WIDGET_ONDRAW          = $000032;
   WIDGET_ONPROC          = $000033;
 
@@ -709,6 +709,7 @@ end;
     client     : zglTRect;
     align      : DWORD;
     focus      : Boolean;
+    visible    : Boolean;
     mousein    : Boolean;
     draged     : Boolean;
 
@@ -723,7 +724,7 @@ end;
 
   zglTWidgetType = record
     _type    : Integer;
-    DescSize : DWORD;
+    FillDesc : procedure( Src : Pointer; var Desc : Pointer );
 
     OnDraw : procedure( const Widget : zglPWidget );
     OnProc : procedure( const Event  : zglPEvent );
@@ -802,7 +803,8 @@ end;
   zglTListBoxDesc = record
     Font      : zglPFont;
     List      : zglTStringList;
-    ItemIndex : Integer;
+    ItemIndex  : Integer;
+    ItemHeight : Integer;
 end;
 
   zglPComboBoxDesc = ^zglTComboBoxDesc;
@@ -1156,6 +1158,7 @@ begin
       text_Draw := dlsym( zglLib, 'text_Draw' );
       text_DrawEx := dlsym( zglLib, 'text_DrawEx' );
       text_DrawInRect := dlsym( zglLib, 'text_DrawInRect' );
+      text_DrawInRectEx := dlsym( zglLib, 'text_DrawInRectEx' );
       text_GetWidth := dlsym( zglLib, 'text_GetWidth' );
 
       gui_Init := dlsym( zglLib, 'gui_Init' );
