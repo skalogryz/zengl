@@ -23,6 +23,7 @@ program ZenFont;
 
 uses
   uUI,
+  zgl_const,
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -112,6 +113,8 @@ begin
   timer_Add( @Proc, 16 );
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
+
+  zgl_Disable( APP_USE_LOG );
 
   zgl_Init;
 end.

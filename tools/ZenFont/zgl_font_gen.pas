@@ -21,6 +21,8 @@
 }
 unit zgl_font_gen;
 
+{.$DEFINE USE_PNG}
+
 interface
 uses
   {$IFDEF LINUX}
@@ -28,6 +30,11 @@ uses
   {$ENDIF}
   {$IFDEF WIN32}
   Windows,
+  {$ENDIF}
+  {$IFDEF USE_PNG}
+  SysUtils,
+  Imaging,
+  ImagingTypes,
   {$ENDIF}
   zgl_types,
   zgl_math_2d,
@@ -276,6 +283,8 @@ begin
   EnumFontFamiliesEx( wnd_DC, LFont, @FontEnumProc, 0, 0 );
 {$ENDIF}
 
+  u_SortList( fg_FontList, 0, fg_FontList.Count - 1 );
+
   Result := TRUE;
 end;
 
@@ -444,7 +453,7 @@ begin
     cs := FW_NORMAL;
   WFont := CreateFont( -MulDiv( fg_FontSize, GetDeviceCaps( wnd_DC, LOGPIXELSY ), 72 ), 0, 0, 0,
                        cs, Byte( fg_FontItalic ), 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                       5{ANTIALIASED_QUALITY} * Byte( fg_FontAA ) or NONANTIALIASED_QUALITY * Byte( not fg_FontAA ),
+                       5 * Byte( fg_FontAA ) or ANTIALIASED_QUALITY * Byte( not fg_FontAA ),
                        DEFAULT_PITCH, PChar( FontName ) );
 
   WDC := CreateCompatibleDC( 0 );
@@ -473,7 +482,7 @@ begin
 
   for i := 0 to Font.Count.Chars - 1 do
     begin
-      FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
+      Windows.FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
       TextOutW( WDC, TextMetric.tmMaxCharWidth div 2, TextMetric.tmHeight div 2, @fg_CharsUID[ i ], 1 );
 
       GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );
@@ -574,6 +583,9 @@ procedure fontgen_SaveFont;
     i, c : Integer;
     Data : Pointer;
     size : Integer;
+    {$IFDEF USE_PNG}
+    Image : TImageData;
+    {$ENDIF}
 begin
   file_Open( F, FileName + '.zfi', FOM_CREATE );
   file_Write( F, ZGL_FONT_INFO, 13 );
@@ -611,6 +623,13 @@ begin
       file_Write( F, Data^, sqr( fg_PageSize ) * size );
       file_Close( F );
       FreeMemory( Data );
+
+      {$IFDEF USE_PNG}
+      LoadImageFromFile( FileName + '_' + u_IntToStr( i ) + '.tga', Image );
+      ConvertImage( Image, ifA8R8G8B8 );
+      SaveImageToFile( FileName + '_' + u_IntToStr( i ) + '.png', Image );
+      DeleteFile( FileName + '_' + u_IntToStr( i ) + '.tga' );
+      {$ENDIF}
     end;
 end;
 

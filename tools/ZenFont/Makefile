@@ -1,6 +1,12 @@
 FPC     = fpc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../src -Fu../../extra
+INCLUDE = -Fu../../src \
+-FiImaging/Source \
+-FuImaging/Source \
+-FuImaging/Source/JpegLib \
+-FuImaging/Source/ZLib \
+-FuImaging/Extras/Extensions \
+-FuImaging/Extras/Extensions/J2KObjects
 OUTPUT  = ./
 TMP     = -FUtmp
 TARGET  = ZenFont

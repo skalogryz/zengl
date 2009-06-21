@@ -34,6 +34,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
+  zgl_types,
   zgl_log
   ;
 
@@ -52,6 +53,7 @@ function  u_Length( const str : String ) : Integer;
 // Возвращает количество слов, разделеных разделителем d
 function  u_Words( const str : String; const d : Char = ' ' ) : Integer;
 function  u_GetWord( const Str : String; const n : Integer; const d : Char = ' ' ) : String;
+procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 
 procedure u_Error( const errStr : String );
 procedure u_Warning( const errStr : String );
@@ -199,6 +201,32 @@ b:
     end;
 
   Delete( Result, p, length( Result ) - p + 1 );
+end;
+
+procedure u_SortList;
+  var
+    Lo, Hi : Integer;
+    Mid, T : String;
+begin
+  Lo  := iLo;
+  Hi  := iHi;
+  Mid := List.Items[ ( Lo + Hi ) shr 1 ];
+
+  repeat
+    while List.Items[ Lo ] < Mid do INC( Lo );
+    while List.Items[ Hi ] > Mid do DEC( Hi );
+    if Lo <= Hi then
+      begin
+        T                := List.Items[ Lo ];
+        List.Items[ Lo ] := List.Items[ Hi ];
+        List.Items[ Hi ] := T;
+        INC( Lo );
+        DEC( Hi );
+      end;
+  until Lo > Hi;
+
+  if Hi > iLo Then u_SortList( List, iLo, Hi );
+  if Lo < iHi Then u_SortList( List, Lo, iHi );
 end;
 
 procedure u_Error;
