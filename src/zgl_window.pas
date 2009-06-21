@@ -155,7 +155,11 @@ begin
       exit;
     end;
 
-  sizehints.flags      := PMinSize or PMaxSize;
+  sizehints.flags      := PPosition or PSize or PMinSize or PMaxSize;
+  sizehints.x          := wnd_X;
+  sizehints.y          := wnd_Y;
+  sizehints.width      := wnd_Width;
+  sizehints.height     := wnd_Height;
   sizehints.min_width  := wnd_Width;
   sizehints.max_width  := wnd_Width;
   sizehints.min_height := wnd_Height;
