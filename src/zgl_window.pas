@@ -320,11 +320,7 @@ begin
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  if ReleaseWindow( wnd_Handle ) <> noErr Then
-    begin
-      u_Error( 'Cannot destroy window' );
-      wnd_Handle := nil;
-    end;
+  ReleaseWindow( wnd_Handle );
 {$ENDIF}
 end;
 
