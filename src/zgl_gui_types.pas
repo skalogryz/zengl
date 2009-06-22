@@ -47,6 +47,10 @@ const
   SCROLLBAR_VERTICAL   = 0;
   SCROLLBAR_HORIZONTAL = 1;
 
+  // Select Mode
+  SELECT_BY_CLICK = 0;
+  SELECT_BY_DOWN  = 1;
+
   // Align
   ALIGN_NONE    = 0;
   ALIGN_CLIENT  = 1;
@@ -205,6 +209,7 @@ end;
     List       : zglTStringList;
     ItemIndex  : Integer;
     ItemHeight : Integer;
+    SelectMode : Integer;
 end;
 
   zglPComboBoxDesc = ^zglTComboBoxDesc;
@@ -338,6 +343,7 @@ begin
   with zglTListBoxDesc( Desc^ ) do
     begin
       Font       := zglTListBoxDesc( Src^ ).Font;
+      SelectMode := zglTListBoxDesc( Src^ ).SelectMode;
       ItemIndex  := zglTListBoxDesc( Src^ ).ItemIndex;
       ItemHeight := zglTListBoxDesc( Src^ ).ItemHeight;
       if ItemHeight = 0 Then

@@ -55,8 +55,6 @@ var
 
   ogl_Mode : WORD = 3; // 2D/3D Modes
 
-  ogl_X      : Integer;
-  ogl_Y      : Integer;
   ogl_Width  : Integer;
   ogl_Height : Integer;
   ogl_CropX  : Integer;

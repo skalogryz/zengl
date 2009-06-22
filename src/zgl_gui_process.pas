@@ -435,12 +435,17 @@ begin
     begin
       li := -1;
       case _type of
-        EVENT_MOUSE_DOWN:
+        EVENT_MOUSE_CLICK:
           begin
             if mouse_button = M_BLEFT Then
               li := ( Round( mouse_Y - Widget.rect.Y - 4 ) div ItemHeight ) + iShift;
             if ( mouse_X > Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 ) and Assigned( Event.Widget.child ) Then
               li := -1;
+          end;
+        EVENT_MOUSE_DOWN:
+          begin
+            if SelectMode = SELECT_BY_DOWN Then
+              gui_AddEvent( EVENT_MOUSE_CLICK, Widget, @Event.mouse_button );
           end;
         EVENT_MOUSE_WHEEL:
           begin
@@ -461,7 +466,7 @@ begin
           Widget.Events.OnChange( Widget, li, li - ItemIndex );
         ItemIndex := li;
 
-        if Assigned( Event.Widget.child ) and ( Event._type <> EVENT_MOUSE_DOWN ) Then
+        if Assigned( Event.Widget.child ) and ( Event._type <> EVENT_MOUSE_DOWN ) and ( Event._type <> EVENT_MOUSE_CLICK ) Then
           begin
             if ItemIndex < iShift Then
               zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex;

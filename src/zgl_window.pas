@@ -114,9 +114,6 @@ begin
       wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
     end;
 {$IFDEF LINUX}
-  ogl_X := 0;
-  ogl_Y := 0;
-
   wnd_Attr.colormap   := XCreateColormap( scr_Display, wnd_Root, ogl_VisualInfo.visual, AllocNone );
   wnd_Attr.event_mask := ExposureMask or
                          FocusChangeMask or
@@ -323,7 +320,11 @@ begin
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  ReleaseWindow( wnd_Handle );
+  if ReleaseWindow( wnd_Handle ) <> noErr Then
+    begin
+      u_Error( 'Cannot destroy window' );
+      wnd_Handle := nil;
+    end;
 {$ENDIF}
 end;
 
@@ -350,18 +351,6 @@ begin
     wnd_Style := WS_VISIBLE
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-
-  if FullScreen Then
-    begin
-      ogl_X := 0;
-      ogl_Y := 0;
-      wnd_X := 0;
-      wnd_Y := 0;
-    end else
-      begin
-        ogl_X := GetSystemMetrics( SM_CXDLGFRAME ) * 2;
-        ogl_Y := GetSystemMetrics( SM_CYCAPTION ) + GetSystemMetrics( SM_CYDLGFRAME ) * 2;
-      end;
 
   SetWindowLong( wnd_Handle, GWL_STYLE, wnd_Style );
   SetWindowLong( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
@@ -393,8 +382,11 @@ begin
     SetWindowText( wnd_Handle, PChar( wnd_Caption ) );
 {$ENDIF}
 {$IFDEF DARWIN}
-  SetWTitle( wnd_Handle, wnd_Caption );
-  wnd_Select;
+  if Assigned( wnd_Handle ) Then
+    begin
+      SetWTitle( wnd_Handle, wnd_Caption );
+      wnd_Select;
+    end;
 {$ENDIF}
 end;
 
@@ -403,17 +395,20 @@ begin
   wnd_Width  := Width;
   wnd_Height := Height;
 {$IFDEF LINUX}
-  XResizewindow( scr_Display, wnd_Handle, Width, Height );
-  wnd_SetPos( wnd_X, wnd_Y );
+  if wnd_Handle <> 0 Then
+    XResizeWindow( scr_Display, wnd_Handle, Width, Height );
 {$ENDIF}
 {$IFDEF WIN32}
   if not app_InitToHandle Then
-    SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOACTIVATE );
+    wnd_SetPos( wnd_X, wnd_Y );
 {$ENDIF}
 {$IFDEF DARWIN}
-  SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
-  aglUpdateContext( ogl_Context );
-  wnd_Select;
+  if Assigned( wnd_Handle ) Then
+    begin
+      SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
+      aglUpdateContext( ogl_Context );
+      wnd_Select;
+    end;
 {$ENDIF}
   ogl_Width  := Width;
   ogl_Height := Height;
@@ -437,9 +432,9 @@ begin
 {$IFDEF WIN32}
   if wnd_Handle <> 0 Then
     if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOACTIVATE )
+      SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
     else
-      SetWindowPos( wnd_Handle, 0, 0, 0, wnd_Width + ogl_X, wnd_Height + ogl_Y, SWP_NOACTIVATE );
+      SetWindowPos( wnd_Handle, 0, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then
@@ -492,14 +487,14 @@ end;
 
 procedure wnd_Select;
 begin
-  {$IFDEF WIN32}
+{$IFDEF WIN32}
   ShowWindow( wnd_Handle, SW_NORMAL );
   BringWindowToTop( wnd_Handle );
-  {$ENDIF}
-  {$IFDEF DARWIN}
+{$ENDIF}
+{$IFDEF DARWIN}
   SelectWindow( wnd_Handle );
   ShowWindow( wnd_Handle );
-  {$ENDIF}
+{$ENDIF}
 end;
 
 end.

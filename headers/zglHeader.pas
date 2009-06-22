@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.28               }
-{ date:    14.06.09             }
+{ version: 0.1.29               }
+{ date:    22.06.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -649,6 +649,10 @@ const
   SCROLLBAR_VERTICAL   = 0;
   SCROLLBAR_HORIZONTAL = 1;
 
+  // Select Mode
+  SELECT_BY_CLICK = 0;
+  SELECT_BY_DOWN  = 1;
+
   // Align
   ALIGN_NONE    = 0;
   ALIGN_CLIENT  = 1;
@@ -801,10 +805,11 @@ end;
 
   zglPListBoxDesc = ^zglTListBoxDesc;
   zglTListBoxDesc = record
-    Font      : zglPFont;
-    List      : zglTStringList;
+    Font       : zglPFont;
+    List       : zglTStringList;
     ItemIndex  : Integer;
     ItemHeight : Integer;
+    SelectMode : Integer;
 end;
 
   zglPComboBoxDesc = ^zglTComboBoxDesc;

@@ -250,10 +250,6 @@ begin
   if not app_InitToHandle Then wnd_Destroy;
 
   app_PExit;
-
-{$IFDEF WIN32}
-  wnd_ShowCursor( TRUE );
-{$ENDIF}
   log_Add( 'End' );
   log_Close;
 end;

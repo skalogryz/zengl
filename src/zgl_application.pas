@@ -271,13 +271,9 @@ begin
             app_Focus := TRUE;
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
-            FillChar( keysUp[ 0 ], 256, 0 );
-            FillChar( keysPress[ 0 ], 256, 0 );
-            FillChar( keysCanPress[ 0 ], 256, 1 );
+            key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
-            FillChar( mouseCanClick[ 0 ], 3, 1 );
-            FillChar( mouseClick[ 0 ], 3, 0 );
-            FillChar( mouseWheel[ 0 ], 2, 0 );
+            mouse_ClearState;
           end;
         FocusOut:
           begin
@@ -445,14 +441,9 @@ begin
         app_Focus := TRUE;
         app_Pause := FALSE;
         FillChar( keysDown[ 0 ], 256, 0 );
-        FillChar( keysUp[ 0 ], 256, 0 );
-        FillChar( keysPress[ 0 ], 256, 0 );
-        FillChar( keysCanPress[ 0 ], 256, 1 );
+        key_ClearState;
         FillChar( mouseDown[ 0 ], 3, 0 );
-        FillChar( mouseUp[ 0 ], 3, 0 );
-        FillChar( mouseCanClick[ 0 ], 3, 1 );
-        FillChar( mouseClick[ 0 ], 3, 0 );
-        FillChar( mouseWheel[ 0 ], 2, 0 );
+        mouse_ClearState;
         if ( wnd_FullScreen ) and ( not wnd_First ) Then
           scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
       end;
@@ -596,13 +587,9 @@ begin
             app_Focus := TRUE;
             app_Pause := FALSE;
             FillChar( keysDown[ 0 ], 256, 0 );
-            FillChar( keysUp[ 0 ], 256, 0 );
-            FillChar( keysPress[ 0 ], 256, 0 );
-            FillChar( keysCanPress[ 0 ], 256, 1 );
+            key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
-            FillChar( mouseCanClick[ 0 ], 3, 1 );
-            FillChar( mouseClick[ 0 ], 3, 0 );
-            FillChar( mouseWheel[ 0 ], 2, 0 );
+            mouse_ClearState;
           end;
         kEventWindowDeactivated:
           begin
@@ -634,7 +621,17 @@ begin
               keysUp  [ Key ] := FALSE;
 
               case Key of
-                K_ENTER, K_DELETE:;
+                K_SYSRQ, K_PAUSE,
+                K_ESCAPE, K_ENTER, K_KP_ENTER,
+                K_UP, K_DOWN, K_LEFT, K_RIGHT,
+                K_INSERT, K_DELETE, K_HOME, K_END,
+                K_PAGEUP, K_PAGEDOWN,
+                K_CTRL_L, K_CTRL_R,
+                K_ALT_L, K_ALT_R,
+                K_SHIFT_L, K_SHIFT_R,
+                K_SUPER_L, K_SUPER_R,
+                K_APP_MENU,
+                K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
                 K_BACKSPACE: u_Backspace( keysText );
                 K_TAB:       key_InputText( '  ' );
               else
