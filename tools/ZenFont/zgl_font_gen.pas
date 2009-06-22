@@ -469,7 +469,7 @@ begin
   {$ENDIF}
 
   FillChar( Bitmap, SizeOf( BITMAPINFO ), 0 );
-  Bitmap.bmiHeader.biWidth       := TextMetric.tmHeight * 2;
+  Bitmap.bmiHeader.biWidth       := TextMetric.tmMaxCharWidth * 2;
   Bitmap.bmiHeader.biHeight      := -TextMetric.tmHeight * 2;
   Bitmap.bmiHeader.biBitCount    := 32;
   Bitmap.bmiHeader.biCompression := BI_RGB;
