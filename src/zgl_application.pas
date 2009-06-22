@@ -244,6 +244,7 @@ function app_ProcessMessages;
     mPos    : HIPoint;
     mButton : EventMouseButton;
     mWheel  : Integer;
+    bounds  : HIRect;
   {$ENDIF}
     i   : Integer;
     len : Integer;
@@ -591,7 +592,7 @@ begin
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState;
           end;
-        kEventWindowDeactivated:
+        kEventWindowDeactivated, kEventWindowCollapsed:
           begin
             if wnd_FullScreen Then exit;
             app_Focus := FALSE;
@@ -601,6 +602,12 @@ begin
           begin
             wnd_Handle := nil;
             app_Work   := FALSE;
+          end;
+        kEventWindowDragCompleted:
+          begin
+            GetEventParameter( inEvent, kEventParamBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
+            wnd_X := Round( bounds.origin.x );
+            wnd_Y := Round( bounds.origin.y );
           end;
       end;
 
@@ -661,20 +668,19 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            if wnd_FullScreen Then
-              GetEventParameter( inEvent, kEventParamMouseLocation, typeHIPoint, 0, SizeOf( HIPoint ), nil, @mPos )
-            else
-              GetEventParameter( inEvent, kEventParamWindowMouseLocation, typeHIPoint, 0, SizeOf( HIPoint ), nil, @mPos );
+            GetEventParameter( inEvent, kEventParamMouseLocation, typeHIPoint, 0, SizeOf( HIPoint ), nil, @mPos );
 
             if not mouseLock Then
               begin
-                mouseX := Round( mPos.X );
-                mouseY := Round( mPos.Y );
+                mouseX := Round( mPos.X ) - wnd_X;
+                mouseY := Round( mPos.Y ) - wnd_Y;
               end else
                 begin
                   mouseX := Round( mPos.X - wnd_Width  / 2 );
                   mouseY := Round( mPos.Y - wnd_Height / 2 );
                 end;
+            if mouseX < 0 Then mouseX := 0;
+            if mouseY < 0 Then mouseY := 0;
           end;
         kEventMouseDown:
           begin

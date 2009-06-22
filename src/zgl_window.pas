@@ -80,7 +80,7 @@ var
   {$IFDEF DARWIN}
   wnd_Handle  : WindowRef;
   wnd_Attr    : WindowAttributes;
-  wnd_Events  : array[ 0..10 ] of EventTypeSpec;
+  wnd_Events  : array[ 0..11 ] of EventTypeSpec;
   {$ENDIF}
 
 implementation
@@ -269,25 +269,27 @@ begin
   wnd_Events[ 1 ].eventKind  := kEventWindowActivated;
   wnd_Events[ 2 ].eventClass := kEventClassWindow;
   wnd_Events[ 2 ].eventKind  := kEventWindowDeactivated;
+  wnd_Events[ 3 ].eventClass := kEventClassWindow;
+  wnd_Events[ 3 ].eventKind  := kEventWindowCollapsed;
   // Keyboard
-  wnd_Events[ 3 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 3 ].eventKind  := kEventRawKeyDown;
   wnd_Events[ 4 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 4 ].eventKind  := kEventRawKeyUp;
+  wnd_Events[ 4 ].eventKind  := kEventRawKeyDown;
   wnd_Events[ 5 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 5 ].eventKind  := kEventRawKeyRepeat;
+  wnd_Events[ 5 ].eventKind  := kEventRawKeyUp;
+  wnd_Events[ 6 ].eventClass := kEventClassKeyboard;
+  wnd_Events[ 6 ].eventKind  := kEventRawKeyRepeat;
   // Mouse
-  wnd_Events[ 6 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 6 ].eventKind   := kEventMouseMoved;
   wnd_Events[ 7 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 7 ].eventKind   := kEventMouseDown;
+  wnd_Events[ 7 ].eventKind   := kEventMouseMoved;
   wnd_Events[ 8 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 8 ].eventKind   := kEventMouseUp;
+  wnd_Events[ 8 ].eventKind   := kEventMouseDown;
   wnd_Events[ 9 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 9 ].eventKind   := kEventMouseWheelMoved;
+  wnd_Events[ 9 ].eventKind   := kEventMouseUp;
   wnd_Events[ 10 ].eventClass := kEventClassMouse;
-  wnd_Events[ 10 ].eventKind  := kEventMouseDragged;
-  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 11, @wnd_Events[ 0 ], nil, nil );
+  wnd_Events[ 10 ].eventKind  := kEventMouseWheelMoved;
+  wnd_Events[ 11 ].eventClass := kEventClassMouse;
+  wnd_Events[ 11 ].eventKind  := kEventMouseDragged;
+  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 12, @wnd_Events[ 0 ], nil, nil );
 
   wnd_Select;
 {$ENDIF}

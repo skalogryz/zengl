@@ -55,8 +55,8 @@ procedure mouse_ClearState;
 procedure mouse_Lock;
 
 var
-  mouseX        : WORD;
-  mouseY        : WORD;
+  mouseX        : Integer;
+  mouseY        : Integer;
   mouseDown     : array[ 0..2 ] of Boolean;
   mouseUp       : array[ 0..2 ] of Boolean;
   mouseClick    : array[ 0..2 ] of Boolean;
