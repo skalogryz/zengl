@@ -245,6 +245,7 @@ function app_ProcessMessages;
     mButton : EventMouseButton;
     mWheel  : Integer;
     bounds  : HIRect;
+    SCAKey  : DWORD;
   {$ENDIF}
     i   : Integer;
     len : Integer;
@@ -420,7 +421,7 @@ begin
       if app_Work then
         begin
           app_Draw;
-          ValidateRect( wnd_Handle, 0 );
+          ValidateRect( wnd_Handle, nil );
         end;
     WM_DISPLAYCHANGE:
       begin
@@ -559,11 +560,10 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          {$IF ( DEFINED(WIN32) and ( not DEFINED(FPC) ) ) or DEFINED(USE_CP1251)}
-          key_InputText( AnsiToUtf8( Char( wParam ) ) );
-          {$ELSE}
-          key_InputText( Char( wParam ) );
-          {$IFEND}
+          if app_Flags and APP_USE_UTF8 > 0 Then
+            key_InputText( AnsiToUtf8( Char( wParam ) ) )
+          else
+            key_InputText( Char( wParam ) );
         end;
       end;
   else
@@ -616,16 +616,41 @@ begin
         GetEventParameter( inEvent, kEventParamKeyCode, typeUInt32, nil, 4, nil, @Key );
 
         case eKind of
+          kEventRawKeyModifiersChanged:
+            begin
+              GetEventParameter( inEvent, kEventParamKeyModifiers, typeUInt32, nil, 4, nil, @SCAKey );
+              for i := 0 to 2 do
+                if SCAKey and Modifier[ i ].bit > 0 Then
+                  begin
+                    if not keysDown[ Modifier[ i ].key ] Then
+                      DoKeyPress( Modifier[ i ].key );
+                    keysDown[ Modifier[ i ].key ] := TRUE;
+                    keysUp  [ Modifier[ i ].key ] := FALSE;
+                    keysLast[ KA_DOWN ]           := Modifier[ i ].key;
+                  end else
+                    begin
+                      if keysDown[ Modifier[ i ].key ] Then
+                        begin
+                          keysUp[ Modifier[ i ].key ] := TRUE;
+                          keysLast[ KA_UP ]           := Modifier[ i ].key;
+                        end;
+                      keysDown[ Modifier[ i ].key ] := FALSE;
+                    end;
+            end;
           kEventRawKeyDown, kEventRawKeyRepeat:
             begin
               Key := mackey_to_scancode( Key );
               keysDown[ Key ] := TRUE;
               keysUp  [ Key ] := FALSE;
               keysLast[ KA_DOWN ] := Key;
+              if eKind <> kEventRawKeyRepeat Then
+                DoKeyPress( Key );
 
               Key := SCA( Key );
               keysDown[ Key ] := TRUE;
               keysUp  [ Key ] := FALSE;
+              if eKind <> kEventRawKeyRepeat Then
+                DoKeyPress( Key );
 
               case Key of
                 K_SYSRQ, K_PAUSE,

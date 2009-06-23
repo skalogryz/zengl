@@ -1,6 +1,6 @@
 FPC     = fpc
 FPC_MAC = /usr/local/lib/fpc/2.2.2/ppc386
-FLAGS   = -O3 -XdsX -CX -Sd #-a
+FLAGS   = -O3 -XdsX -CX -Sd
 INCLUDE = -FuPasJPEG
 OUTPUT  = ./
 DESTDIR = /usr
@@ -10,7 +10,7 @@ TARGETW = ZenGL.dll
 TARGETM = libZenGL.dylib
 
 all: clean
-	$(FPC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX #-Aas
+	$(FPC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
 macos: clean

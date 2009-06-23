@@ -89,7 +89,7 @@ begin
       Y := Y - Font.MaxHeight * textScale;
 
   lastPage := -1;
-  c := font_GetUID( Text, 1, @i );
+  c := font_GetCID( Text, 1, @i );
   i := 1;
   if Assigned( Font.CharDesc[ c ] ) Then
     begin
@@ -99,7 +99,7 @@ begin
   glBegin( GL_QUADS );
   while i <= length( Text ) do
     begin
-      c := font_GetUID( Text, i, @i );
+      c := font_GetCID( Text, i, @i );
 
       if not Assigned( Font.CharDesc[ c ] ) Then continue;
 
@@ -191,7 +191,7 @@ begin
           else
             WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
           WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-          WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetUID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
+          WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
           b := j + 1;
           break;
         end;
@@ -286,13 +286,13 @@ begin
   Result := 0;
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   i  := 1;
-  c  := font_GetUID( Text, i, @i );
+  c  := font_GetCID( Text, i, @i );
   if Assigned( Font.CharDesc[ c ] ) Then
     Result := Font.CharDesc[ c ].ShiftX;
   i := 1;
   while i <= length( Text ) do
     begin
-      c := font_GetUID( Text, i, @i );
+      c := font_GetCID( Text, i, @i );
       if Assigned( Font.CharDesc[ c ] ) Then
         Result := Result + Font.CharDesc[ c ].ShiftP + Step;
     end;

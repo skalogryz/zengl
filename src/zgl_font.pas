@@ -77,11 +77,12 @@ function font_Load : zglPFont;
 function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
-// Get Unicode ID
-function font_GetUID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
 
 var
   managerFont : zglTFontManager;
+  font_GetCID : function( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
 
 implementation
 uses
@@ -188,25 +189,8 @@ begin
       Result := font_Load;
 end;
 
-function font_GetUID;
+function font_GetUTF8ID;
 begin
-  {$IF ( DEFINED(WIN32) and ( not DEFINED(FPC) ) ) or DEFINED(USE_CP1251)}
-  case Byte( Text[ Pos ] ) of
-    0..127:
-      begin
-        Result := Byte( Text[ Pos ] );
-        if Assigned( Shift ) Then
-          Shift^ := Pos + 1;
-      end;
-
-    192..255:
-      begin
-        Result := Byte( Text[ Pos ] ) + 848;
-        if Assigned( Shift ) Then
-          Shift^ := Pos + 1;
-      end;
-  end;
-  {$ELSE}
   case Byte( Text[ Pos ] ) of
     0..127:
       begin
@@ -272,7 +256,16 @@ begin
           Shift^ := Pos + 1;
       end;
   end;
-  {$IFEND}
+end;
+
+function font_GetCP1251ID;
+begin
+  if Assigned( Shift ) Then
+    Shift^ := Pos + 1;
+  case Byte( Text[ Pos ] ) of
+    0..127: Result := Byte( Text[ Pos ] );
+    192..255: Result := Byte( Text[ Pos ] ) + 848;
+  end;
 end;
 
 end.

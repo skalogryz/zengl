@@ -183,6 +183,18 @@ function mackey_to_scancode( MacKey : Integer ) : Byte;
 function  SCA( KeyCode : DWORD ) : DWORD;
 procedure DoKeyPress( KeyCode : DWORD );
 
+{$IFDEF DARWIN}
+type
+  zglTModifier = record
+    bit : Integer;
+    key : Integer;
+  end;
+const
+  Modifier : array[ 0..2 ] of zglTModifier = ( ( bit: 4096; key: K_CTRL ),
+                                               ( bit: 512;  key: K_SHIFT ),
+                                               ( bit: 256;  key: K_ALT ) );
+{$ENDIF}
+
 var
   keysDown     : array[ 0..255 ] of Boolean;
   keysUp       : array[ 0..255 ] of Boolean;

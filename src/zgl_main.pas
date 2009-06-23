@@ -147,6 +147,8 @@ end;
 
 procedure zgl_Init;
 begin
+  if not Assigned( font_GetCID ) Then
+    font_GetCID := font_GetCP1251ID;
   zgl_GetSysDir;
   log_Init;
 
@@ -417,6 +419,9 @@ begin
       log_Init;
     end;
 
+  if What and APP_USE_UTF8 > 0 Then
+    font_GetCID := font_GetUTF8ID;
+
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := TRUE;
 
@@ -444,6 +449,9 @@ begin
       if log <> FILE_ERROR Then
         log_Close;
     end;
+
+  if What and APP_USE_UTF8 > 0 Then
+    font_GetCID := font_GetCP1251ID;
 
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := FALSE;

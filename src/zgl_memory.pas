@@ -84,7 +84,7 @@ end;
 
 function mem_Read;
 begin
-  if ( Memory.Position >= 0 ) and ( count > 0 ) Then
+  if count > 0 Then
     begin
       Result := Memory.Size - Memory.Position;
       if Result > 0 Then
@@ -103,7 +103,7 @@ function mem_ReadSwap;
     i       : DWORD;
     pBuffer : array of Byte;
 begin
-  if ( Memory.Position >= 0 ) and ( count > 0 ) Then
+  if count > 0 Then
     begin
       Result := Memory.Size - Memory.Position;
       if Result > 0 Then

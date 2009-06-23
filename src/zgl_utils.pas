@@ -148,7 +148,7 @@ begin
   while i <= length( str ) do
     begin
       last := i;
-      font_GetUID( str, last, @i );
+      font_GetCID( str, last, @i );
     end;
 
   SetLength( str, last - 1 )
@@ -160,10 +160,10 @@ function u_Length;
 begin
   Result := 0;
   i := 1;
-  while i < length( str ) do
+  while i <= length( str ) do
     begin
       INC( Result );
-      font_GetUID( str, i, @i );
+      font_GetCID( str, i, @i );
     end;
 end;
 

@@ -45,10 +45,11 @@ const
   APP_USE_AUTOPAUSE     = $000040;
   APP_USE_LOG           = $000080;
   APP_USE_ENGLISH_INPUT = $000100;
-  WND_USE_AUTOCENTER    = $000200;
-  SND_CAN_PLAY          = $000400;
-  SND_CAN_PLAY_FILE     = $000800;
-  CROP_INVISIBLE        = $001000;
+  APP_USE_UTF8          = $000200;
+  WND_USE_AUTOCENTER    = $000400;
+  SND_CAN_PLAY          = $000800;
+  SND_CAN_PLAY_FILE     = $001000;
+  CROP_INVISIBLE        = $002000;
 
 implementation
 

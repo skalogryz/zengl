@@ -674,8 +674,8 @@ procedure snd_PlayFile;
   var
     i         : Integer;
     ext       : String;
-    _End      : Boolean;
     {$IFDEF USE_OPENAL}
+    _End      : Boolean;
     BytesRead : Integer;
     {$ELSE}
     buffDesc : zglTBufferDesc;
@@ -864,12 +864,12 @@ begin
 end;
 
 procedure snd_ResumeFile;
+{$IFDEF USE_OPENAL}
   var
     i    : Integer;
     _End : Boolean;
-    {$IFDEF USE_OPENAL}
     BytesRead : Integer;
-    {$ENDIF}
+{$ENDIF}
 begin
   if ( not Assigned( sfStream ) ) or
      ( sfStream.Played ) or

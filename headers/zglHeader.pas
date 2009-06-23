@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.29               }
-{ date:    22.06.09             }
+{ date:    23.06.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -131,10 +131,11 @@ const
   APP_USE_AUTOPAUSE     = $000040;
   APP_USE_LOG           = $000080;
   APP_USE_ENGLISH_INPUT = $000100;
-  WND_USE_AUTOCENTER    = $000200;
-  SND_CAN_PLAY          = $000400;
-  SND_CAN_PLAY_FILE     = $000800;
-  CROP_INVISIBLE        = $001000;
+  APP_USE_UTF8          = $000200;
+  WND_USE_AUTOCENTER    = $000400;
+  SND_CAN_PLAY          = $000800;
+  SND_CAN_PLAY_FILE     = $001000;
+  CROP_INVISIBLE        = $002000;
 
 var
   zgl_Enable  : procedure( const What : DWORD );
@@ -800,7 +801,8 @@ end;
     Font : zglPFont;
     Text : String;
 
-    Max  : Integer;
+    Max      : Integer;
+    ReadOnly : Boolean;
 end;
 
   zglPListBoxDesc = ^zglTListBoxDesc;
@@ -817,6 +819,7 @@ end;
     Font          : zglPFont;
     List          : zglTStringList;
     ItemIndex     : Integer;
+    ItemHeight    : Integer;
     DropDownCount : Integer;
 
     DropedDown    : Boolean;
@@ -848,6 +851,7 @@ end;
 
     UPressed : Boolean;
     DPressed : Boolean;
+    SDraged  : Boolean;
 end;
 
 var

@@ -619,7 +619,7 @@ begin
         g := ( TransparentColor and $FF00   ) shr 8;
         b := ( TransparentColor and $FF0000 ) shr 16;
         for i := 0 to Width * Height - 1 do
-      if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and
+      if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = b ) and
          ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
          ( PByte( Ptr( pData ) + 2 + i * 4 )^ = r ) Then
         Fill( pData, i, Width, Height );

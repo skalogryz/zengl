@@ -287,7 +287,6 @@ begin
           SetLength( scr_ResList.Height, scr_ResList.Count );
           scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.hdisplay;
           scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.vdisplay;
-//          log_Add( u_IntToStr( scr_ResList.Width[ scr_ResList.Count - 1 ] ) + 'x' + u_IntToStr( scr_ResList.Height[ scr_ResList.Count - 1 ] ) );
         end;
     end;
 {$ENDIF}
@@ -302,7 +301,6 @@ begin
           SetLength( scr_ResList.Height, scr_ResList.Count );
           scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.dmPelsWidth;
           scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.dmPelsHeight;
-//          log_Add( u_IntToStr( scr_ResList.Width[ scr_ResList.Count - 1 ] ) + 'x' + u_IntToStr( scr_ResList.Height[ scr_ResList.Count - 1 ] ) );
         end;
       INC( i );
     end;
@@ -437,17 +435,17 @@ begin
   for modeToSet := 0 to scr_ModeCount - 1 do
     begin
       scr_Settings := scr_ModeList[ modeToSet ]^;
-      if ( scr_Settings.hDisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
+      if ( scr_Settings.hdisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
     end;
-  if ( scr_Settings.hDisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
+  if ( scr_Settings.hdisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
     begin
       log_Add( 'Cannot find mode to set...' );
       exit;
     end;
 
   if ( wnd_FullScreen ) and
-     ( scr_Settings.hDisplay <> scr_Desktop.hDisplay ) and
-     ( scr_Settings.vDisplay <> scr_Desktop.vDisplay ) Then
+     ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and
+     ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
     begin
       XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
       XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );

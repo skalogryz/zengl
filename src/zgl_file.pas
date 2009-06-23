@@ -152,7 +152,7 @@ begin
   Result := mkdir( PChar( Directory ), MODE_MKDIR ) = 0;
 {$ENDIF}
 {$IFDEF WIN32}
-  Result := CreateDirectory( PChar( Directory ), 0 );
+  Result := CreateDirectory( PChar( Directory ), nil );
 {$ENDIF}
 end;
 
@@ -360,7 +360,7 @@ end;
 
 procedure file_GetExtension;
   var
-    i, pos, l : Integer;
+    i, pos : Integer;
 begin
   GetStr( FileName, Result, '.' );
 end;
