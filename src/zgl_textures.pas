@@ -336,35 +336,39 @@ end;
 
 function tex_SetMask;
   var
-    i            : Integer;
+    i, j         : Integer;
     tSize, mSize : Integer;
     tData, mData : Pointer;
     pData        : Pointer;
+    rW, mW       : Integer;
 begin
   if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) Then exit;
+
+  rW := Round( Texture.Width / Texture.U );
+  mW := Round( Mask.Width / Mask.U );
 
   tex_GetData( Texture, tData, tSize );
   tex_GetData( Mask, mData, mSize );
   zgl_GetMem( pData, Texture.Width * Texture.Height * 4 );
 
-  for i := 0 to Texture.Width * Texture.Height - 1 do
+  for i := 0 to Texture.Width - 1 do
+    for j := 0 to Texture.Height - 1 do
     begin
-      PByte( Ptr( pData ) + i * 4 + 0 )^ := PByte( Ptr( tData ) + i * tSize + 0 )^;
-      PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( tData ) + i * tSize + 1 )^;
-      PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( tData ) + i * tSize + 2 )^;
-      PByte( Ptr( pData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * mSize + 0 )^;
+      PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 0 )^ := PByte( Ptr( tData ) + i * tSize + j * rW * tSize + 0 )^;
+      PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 1 )^ := PByte( Ptr( tData ) + i * tSize + j * rW * tSize + 1 )^;
+      PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 2 )^ := PByte( Ptr( tData ) + i * tSize + j * rW * tSize + 2 )^;
+      PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 3 )^ := PByte( Ptr( mData ) + i * mSize + j * mW * mSize + 0 )^;
     end;
 
   Result         := tex_Add;
   Result.Width   := Texture.Width;
   Result.Height  := Texture.Height;
-  Result.U       := Texture.U;
-  Result.V       := Texture.V;
+  Result.U       := 1;
+  Result.V       := 1;
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 )
-                                  xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 )
-                                  xor TEX_CONVERT_TO_POT * Byte( Texture.Flags and TEX_CONVERT_TO_POT > 0 );
+                                  xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 );
   tex_Create( Result^, pData );
   tex_Del( Texture );
 
