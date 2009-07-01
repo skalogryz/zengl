@@ -394,12 +394,6 @@ procedure scr_SetOptions;
     b : Integer;
   {$ENDIF}
 begin
-  if ( scr_BPP <> 32 ) and ( scr_BPP <> 16 ) Then
-    begin
-      log_Add( 'Wrong screen option, only 32 or 16 bpp support. Set 16 bpp...' );
-      scr_BPP := 16;
-    end;
-
   ogl_Width      := Width;
   ogl_Height     := Height;
   wnd_Width      := Width;
@@ -449,7 +443,6 @@ begin
     begin
       XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
       XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
-      {XSetInputFocus( scr_Display, wnd_Handle, RevertToPointerRoot, CurrentTime );}
     end else
       begin
         scr_Reset;
@@ -515,26 +508,6 @@ begin
           u_Warning( 'Cannot set fullscreen mode.' );
           wnd_FullScreen := FALSE;
         end;
-      {CGDisplayCapture( scr_Display );
-      if scr_Refresh <> 0 Then
-        begin
-          scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display,
-                                                                        scr_BPP,
-                                                                        scr_Width, scr_Height,
-                                                                        scr_Refresh,
-                                                                        b );
-          scr_Refresh := b;
-        end;
-      if scr_Refresh = 0 Then
-        scr_Settings := CGDisplayBestModeForParameters( scr_Display, scr_BPP, scr_Width, scr_Height, b );
-
-      if b = 1 Then
-        CGDisplaySwitchToMode( scr_Display, scr_Settings )
-      else
-        begin
-          u_Warning( 'Cannot set fullscreen mode.' );
-          wnd_FullScreen := FALSE;
-        end;}
     end else
       begin
         aglSetDrawable( ogl_Context, nil );
@@ -582,18 +555,19 @@ begin
 
   if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
     begin
-      ogl_CropX := scr_AddCX;
-      ogl_CropY := scr_AddCY;
+      ogl_CropX := 0;
+      ogl_CropY := 0;
       ogl_CropW := wnd_Width - scr_AddCX * 2;
       ogl_CropH := wnd_Height - scr_AddCY * 2;
+      glViewPort( scr_AddCX, scr_AddCY, ogl_CropW, ogl_CropH );
     end else
       begin
         ogl_CropX := 0;
         ogl_CropY := 0;
         ogl_CropW := wnd_Width;
         ogl_CropH := wnd_Height;
+        glViewPort( 0, 0, ogl_CropW, ogl_CropH );
       end;
-  glViewPort( ogl_CropX, ogl_CropY, ogl_CropW, ogl_CropH );
 end;
 
 procedure scr_SetVSync;

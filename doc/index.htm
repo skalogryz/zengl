@@ -519,6 +519,7 @@
     <LI><a name='tex_Add'>
     <div class='code'><b>function</b> tex_Add : zglPTexture;</div>
     <div align='justify'>
+    Выделяет память под структуру zglTTexture в менеджере библиотеки и возвращает на нее указатель.
     </div>
     </LI><br>
 
@@ -526,6 +527,7 @@
     <LI><a name='tex_Del'>
     <div class='code'><b>procedure</b> tex_Del( <b>var</b> Texture : zglPTexture )</div>
     <div align='justify'>
+    Очищает память от созданной текстуры <b>Texture</b>. После успешной очистки в <b>Textrue</b> заносится значение <b>nil</b>.
     </div>
     </LI><br>
 
@@ -617,6 +619,7 @@
     <LI><a name='rtarget_Del'>
     <div class='code'><b>procedure</b> rtarget_Del( <b>var</b> Target : zglPRenderTarget );</div>
     <div align='justify'>
+    Очищает память от созданного RenderTarget'а <b>Target</b>. После успешной очистки в <b>Target</b> заносится значение <b>nil</b>. Принадлежащая RenderTarget'у текстура <b>Surface</b> остается в памяти.
     </div>
     </LI><br>
 
@@ -639,6 +642,15 @@
     <LI><a name='fx_SetBlendMode'>
     <div class='code'><b>procedure</b> fx_SetBlendMode( <b>const</b> Mode : Byte );</div>
     <div align='justify'>
+    Устанавливает режим блендинга <b>Mode</b>. Возможные константы:
+    <UL type="disc">
+      <LI><b>FX_BLEND_NORMAL</b> - обычный режим</LI>
+      <LI><b>FX_BLEND_ADD</b> -</LI>
+      <LI><b>FX_BLEND_MULT</b> -</LI>
+      <LI><b>FX_BLEND_BLACK</b> - чем темнее участок изображения тем он прозрачнее</LI>
+      <LI><b>FX_BLEND_WHITE</b> - чем светлее участок изображения тем он прозрачнее</LI>
+      <LI><b>FX_BLEND_MASK</b> - </LI>
+    </UL>
     </div>
     </LI><br>
 
@@ -708,7 +720,7 @@
     <LI><a name='pr2d_Circle'>
     <div class='code'><b>procedure</b> pr2d_Circle( <b>const</b> X, Y, Radius : Single; <b>const</b> Color : DWORD; <b>const</b> Alpha : Byte = 255; <b>const</b> Quality : WORD = 32; <b>const</b> FX : DWORD = 0 );</div>
     <div align='justify'>
-    Рисует окружность в координатах <b>X</b>, <b>Y</b> с радиусом <b>Radius</b>, цветом <b>Color</b> и значением альфы <b>Alpha</b>.
+    Рисует окружность с центром в координатах <b>X</b>, <b>Y</b>, радиусом <b>Radius</b>, цветом <b>Color</b> и значением альфы <b>Alpha</b>.
     </div>
     </LI><br>
 
@@ -716,6 +728,7 @@
     <LI><a name='pr2d_Ellipse'>
     <div class='code'><b>procedure</b> pr2d_Ellipse( <b>const</b> X, Y, xRadius, yRadius : Single; <b>const</b> Color : DWORD; <b>const</b> Alpha : Byte = 255; <b>const</b> Quality : WORD = 32; <b>const</b> FX : DWORD = 0 );</div>
     <div align='justify'>
+    Рисует эллипс с центром в координатах <b>X</b>, <b>Y</b>, радиусами <b>xRadius</b> и <b>yRadius</b>, цветом <b>Color</b> и значением альфы <b>Alpha</b>.
     </div>
     </LI>
   </UL>

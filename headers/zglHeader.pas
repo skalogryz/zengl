@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.29               }
-{ date:    23.06.09             }
+{ version: 0.1.30               }
+{ date:    01.07.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -998,6 +998,8 @@ var
 // Utils
 function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( Value : String ) : Integer;
+var
+  u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
 {$IFDEF LINUX_OR_DARWIN}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -1234,6 +1236,8 @@ begin
       mem_Write := dlsym( zglLib, 'mem_Write' );
       mem_SetSize := dlsym( zglLib, 'mem_SetSize' );
       mem_Free := dlsym( zglLib, 'mem_Free' );
+
+      u_SortList := dlsym( zglLib, 'u_SortList' );
     end else
       if Error Then
         begin

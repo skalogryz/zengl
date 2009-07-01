@@ -255,6 +255,10 @@ begin
         if Assigned( Shift ) Then
           Shift^ := Pos + 1;
       end;
+  else
+    Result := 0;
+    if Assigned( Shift ) Then
+      Shift^ := Pos + 1;
   end;
 end;
 
@@ -265,6 +269,8 @@ begin
   case Byte( Text[ Pos ] ) of
     0..127: Result := Byte( Text[ Pos ] );
     192..255: Result := Byte( Text[ Pos ] ) + 848;
+  else
+    Result := 0;
   end;
 end;
 

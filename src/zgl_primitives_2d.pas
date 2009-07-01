@@ -185,7 +185,7 @@ begin
         end;
     end else
       begin
-        glBegin( GL_TRIANGLE_STRIP );
+        glBegin( GL_TRIANGLES );
         for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );
@@ -232,7 +232,7 @@ begin
         end;
     end else
       begin
-        glBegin( GL_TRIANGLE_STRIP );
+        glBegin( GL_TRIANGLES );
         for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );

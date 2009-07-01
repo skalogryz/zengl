@@ -179,14 +179,14 @@ begin
       u_Error( 'Cannot create OpenGL context' );
       exit;
     end;
-  log_Add( 'Create OpenGL Context' );
+  if not wnd_First Then log_Add( 'Create OpenGL Context' );
 
   if not wglMakeCurrent( wnd_DC, ogl_Context ) Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
-  log_Add( 'Make Current OpenGL Context' );
+  if not wnd_First Then log_Add( 'Make Current OpenGL Context' );
 
   gf := PixelFormatDesc.dwFlags and PFD_GENERIC_FORMAT;
   ga := PixelFormatDesc.dwFlags and PFD_GENERIC_ACCELERATED;

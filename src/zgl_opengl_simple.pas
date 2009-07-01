@@ -45,8 +45,8 @@ uses
   zgl_opengl_all;
 
 var
-  tSCount  : WORD;
-  tScissor : array of array[ 0..3 ] of WORD;
+  tSCount  : Integer;
+  tScissor : array of array[ 0..3 ] of Integer;
 
 procedure Set2DMode;
 begin

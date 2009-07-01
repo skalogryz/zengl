@@ -222,7 +222,7 @@ begin
   if ogl_Format = 0 Then
     wnd_Handle := CreateWindowEx( WS_EX_TOOLWINDOW, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW,
+    wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ),
                                   wnd_ClassName,
                                   PChar( wnd_Caption ),
                                   wnd_Style,
@@ -432,9 +432,9 @@ begin
 {$IFDEF WIN32}
   if wnd_Handle <> 0 Then
     if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
+      SetWindowPos( wnd_Handle, HWND_NOTOPMOST, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
     else
-      SetWindowPos( wnd_Handle, 0, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
+      SetWindowPos( wnd_Handle, HWND_TOPMOST, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then

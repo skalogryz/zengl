@@ -80,7 +80,9 @@ begin
 
   file_Write( log, str[ 1 ], length( str ) );
 
+  {$IFDEF USE_LOG_FLUSH}
   log_Flush;
+  {$ENDIF}
 end;
 
 procedure log_Flush;

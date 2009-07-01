@@ -52,6 +52,7 @@ function  text_GetWidth( const Font : zglPFont; const Text : String; const Step 
 implementation
 uses
   zgl_main,
+  zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,
   zgl_fx,
@@ -164,8 +165,12 @@ procedure text_DrawInRect;
     SpaceShift : Integer;
     WordsArray : array of zglTTextWord;
     WordsCount : Integer;
+    LineFeed   : Boolean;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
+  if ( Rect.W <= ogl_CropX ) or ( Rect.H <= ogl_CropY ) or
+     ( Rect.X + Rect.W <= ogl_CropX ) or ( Rect.Y + Rect.H <= ogl_CropY ) or
+     ( Rect.X > ogl_CropW ) or ( Rect.Y > ogl_CropH ) Then exit;
 
   SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
 
@@ -175,26 +180,34 @@ begin
   H := Round( Rect.H );
   scissor_Begin( X, Y, W, H );
 
-  WordsCount := u_Words( Text );
+  WordsCount := u_Words( Text ) + u_Words( Text, #10 ) - 1;
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
 
+  LineFeed := FALSE;
   l := length( Text );
   b := 1;
   for i := 0 to WordsCount - 1 do
     for j := b to l do
-      if ( ( Text[ j ] = ' ' ) and ( j <> 1 ) ) or ( j = l ) Then
-        begin
-          if b = 1 Then
-            WordsArray[ i ].str := Copy( Text, b, j - b )
-          else
-            WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
-          WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-          WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
-          b := j + 1;
-          break;
-        end;
+      begin
+        LineFeed := Text[ j ] = #10;
+        if ( ( Text[ j ] = ' ' ) and ( j <> 1 ) ) or ( j = l ) or LineFeed Then
+          begin
+            if b = 1 Then
+              WordsArray[ i ].str := Copy( Text, b, j - b )
+            else
+              WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
+            WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
+            WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
+            if LineFeed Then
+              b := j + 2
+            else
+              b := j + 1;
+            LineFeed := FALSE;
+            break;
+          end;
+      end;
 
   l := 0;
   if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
@@ -204,15 +217,17 @@ begin
       WordsArray[ i ].X := X;
       WordsArray[ i ].Y := Y;
       X := X + WordsArray[ i ].W - WordsArray[ i ].ShiftX;
-      if ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) Then
+      if ( i > 0 ) and ( WordsArray[ i - 1 ].str[ length( WordsArray[ i - 1 ].str ) ] = #10 ) Then
+        LineFeed := TRUE;
+      if ( ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) ) or LineFeed Then
         begin
           X := Round( Rect.X );
           Y := Y + Round( Font.MaxHeight * textScale );
-          WordsArray[ i ].X := X - SpaceShift;
+          WordsArray[ i ].X := X - SpaceShift * Byte( not LineFeed );
           WordsArray[ i ].Y := Y;
           X := X + WordsArray[ i ].W - SpaceShift;
 
-          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) Then
+          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) and ( not LineFeed ) Then
             begin
               W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
               while W > ( i - 1 ) - l do
@@ -235,6 +250,7 @@ begin
                       for b := l to i - 1 do
                         INC( WordsArray[ b ].X, W );
                     end;
+          LineFeed := FALSE;
           l := i;
         end;
     end;

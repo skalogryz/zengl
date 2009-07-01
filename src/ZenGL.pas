@@ -70,7 +70,9 @@ uses
 
   zgl_math_2d,
 
-  zgl_collision_2d;
+  zgl_collision_2d,
+
+  zgl_utils;
 
 const
 // Ненавижу Apple! :)
@@ -280,7 +282,9 @@ exports
   mem_ReadSwap             name prefix + 'mem_ReadSwap',
   mem_Write                name prefix + 'mem_Write',
   mem_SetSize              name prefix + 'mem_SetSize',
-  mem_Free                 name prefix + 'mem_Free'
+  mem_Free                 name prefix + 'mem_Free',
+
+  u_SortList               name prefix + 'u_SortList'
   ;
 
 begin
