@@ -143,6 +143,7 @@ begin
 
   app_UsrHomeDir := getenv( 'HOME' ) + '/';
 {$ENDIF}
+  app_GetSysDirs := TRUE;
 end;
 
 procedure zgl_Init;
@@ -353,6 +354,12 @@ end;
 
 function zgl_Get;
 begin
+  if ( What = APP_DIRECTORY ) or ( What = USR_HOMEDIR ) Then
+    if not app_GetSysDirs Then zgl_GetSysDir;
+
+  if ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) Then
+    if not scr_Initialized Then scr_Init;
+
   case What of
     SYS_FPS: Result := app_FPS;
     APP_PAUSED: Result := Byte( app_Pause );

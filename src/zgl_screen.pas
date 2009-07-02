@@ -41,6 +41,7 @@ const
   REFRESH_MAXIMUM = 0;
   REFRESH_DEFAULT = 1;
 
+procedure scr_Init;
 function  scr_Create : Boolean;
 procedure scr_GetResList;
 procedure scr_Destroy;
@@ -74,6 +75,7 @@ var
   scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
+  scr_Initialized : Boolean;
 
   // Resolution Correct
   scr_ResW  : Integer;
@@ -136,14 +138,14 @@ begin
 end;
 {$ENDIF}
 
-function scr_Create;
-  {$IFDEF LINUX}
+procedure scr_Init;
   var
     i, j : Integer;
-  {$ENDIF}
 begin
-  Result := FALSE;
+  scr_Initialized := TRUE;
 {$IFDEF LINUX}
+  log_Init;
+
   if Assigned( scr_Display ) Then
     XCloseDisplay( scr_Display );
 
@@ -153,6 +155,46 @@ begin
       u_Error( 'Cannot connect to X server.' );
       exit;
     end;
+
+  scr_Default := DefaultScreen( scr_Display );
+
+  if not XF86VidModeQueryExtension( scr_Display, @i, @j ) Then
+    begin
+      u_Error( 'XF86VidMode Extension not found' );
+      exit;
+    end else log_Add( 'XF86VidMode Extension - ok' );
+  XF86VidModeGetAllModeLines( scr_Display, scr_Default, @scr_ModeCount, @scr_ModeList );
+  XF86VidModeGetModeLine( scr_Display, scr_Default, @scr_Desktop.dotclock, PXF86VidModeModeLine( Pointer( @scr_Desktop ) + SizeOf( scr_Desktop.dotclock ) ) );
+{$ENDIF}
+{$IFDEF WIN32}
+  with scr_Desktop do
+    begin
+      dmSize             := SizeOf( DEVMODE );
+      dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
+      dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
+      dmBitsPerPel       := GetDisplayColors;
+      dmDisplayFrequency := GetDisplayRefresh;
+      dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
+    end;
+{$ENDIF}
+{$IFDEF DARWIN}
+  scr_Display  := CGMainDisplayID;
+  scr_Desktop  := CGDisplayCurrentMode( scr_Display );
+  scr_DesktopW := CGDisplayPixelsWide( scr_Display );
+  scr_DesktopH := CGDisplayPixelsHigh( scr_Display );
+{$ENDIF}
+end;
+
+function scr_Create;
+  {$IFDEF LINUX}
+  var
+    i, j : Integer;
+  {$ENDIF}
+begin
+  Result := FALSE;
+{$IFDEF LINUX}
+  scr_Init;
+
   if not glXQueryExtension( scr_Display, i, j ) Then
     begin
       u_Error( 'GLX Extension not found' );
@@ -170,16 +212,6 @@ begin
     log_Add( 'XCreateIC - Fail' )
   else
     log_Add( 'XCreateIC - ok' );
-
-  scr_Default := DefaultScreen( scr_Display );
-
-  if not XF86VidModeQueryExtension( scr_Display, @i, @j ) Then
-    begin
-      u_Error( 'XF86VidMode Extension not found' );
-      exit;
-    end else log_Add( 'XF86VidMode Extension - ok' );
-  XF86VidModeGetAllModeLines( scr_Display, scr_Default, @scr_ModeCount, @scr_ModeList );
-  XF86VidModeGetModeLine( scr_Display, scr_Default, @scr_Desktop.dotclock, PXF86VidModeModeLine( Pointer( @scr_Desktop ) + SizeOf( scr_Desktop.dotclock ) ) );
 
   ogl_zDepth := 24;
   repeat
@@ -237,21 +269,10 @@ begin
   wnd_Root := RootWindow( scr_Display, ogl_VisualInfo.screen );
 {$ENDIF}
 {$IFDEF WIN32}
-  with scr_Desktop do
-    begin
-      dmSize             := SizeOf( DEVMODE );
-      dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
-      dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
-      dmBitsPerPel       := GetDisplayColors;
-      dmDisplayFrequency := GetDisplayRefresh;
-      dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
-    end;
+  scr_Init;
 {$ENDIF}
 {$IFDEF DARWIN}
-  scr_Display  := CGMainDisplayID;
-  scr_Desktop  := CGDisplayCurrentMode( scr_Display );
-  scr_DesktopW := CGDisplayPixelsWide( scr_Display );
-  scr_DesktopH := CGDisplayPixelsHigh( scr_Display );
+  scr_Init;
 {$ENDIF}
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
   scr_GetResList;

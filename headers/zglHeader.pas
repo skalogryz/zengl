@@ -346,7 +346,7 @@ var
   key_Up            : function( const KeyCode : Byte ) : Boolean;
   key_Press         : function( const KeyCode : Byte ) : Boolean;
   key_Last          : function( const KeyAction : Byte ) : Byte;
-  key_BeginReadText : procedure( const Text : String; const MaxSymbols : WORD );
+  key_BeginReadText : procedure( const Text : String; const MaxSymbols : Integer = -1 );
   key_EndReadText   : procedure( var Result : String );
   key_ClearState    : procedure;
 

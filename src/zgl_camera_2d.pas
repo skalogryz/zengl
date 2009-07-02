@@ -50,7 +50,6 @@ var
 implementation
 uses
   zgl_types,
-  zgl_window,
   zgl_opengl,
   zgl_opengl_all;
 
@@ -77,19 +76,19 @@ begin
   if cam2dGlobal.Zoom.X = 1 Then
     X := X - cam2dGlobal.X
   else
-    X := ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( wnd_Width / 2 ) - ( wnd_Width / 2 ) * cam2dGlobal.Zoom.X );
+    X := ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width / 2 ) - ( ogl_Width / 2 ) * cam2dGlobal.Zoom.X );
 
   if cam2dGlobal.Zoom.X = 1 Then
     Y := Y - cam2dGlobal.Y
   else
-    Y := ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( wnd_Height / 2 ) - ( wnd_Height / 2 ) * cam2dGlobal.Zoom.Y );
+    Y := ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y );
 
   if cam2dGlobal.Angle <> 0 Then
     begin
       sa := Sin( cam2dGlobal.Angle * deg2rad );
       ca := Cos( cam2dGlobal.Angle * deg2rad );
-      Xa := wnd_Width  / 2 + ( X - wnd_Width / 2 ) * ca - ( Y - wnd_Height / 2 ) * sa;
-      Ya := wnd_Height / 2 + ( X - wnd_Width / 2 ) * sa + ( Y - wnd_Height / 2 ) * ca;
+      Xa := ogl_Width  / 2 + ( X - ogl_Width / 2 ) * ca - ( Y - ogl_Height / 2 ) * sa;
+      Ya := ogl_Height / 2 + ( X - ogl_Width / 2 ) * sa + ( Y - ogl_Height / 2 ) * ca;
       glVertex2f( Xa, Ya );
     end else
       glVertex2f( X, Y );
@@ -104,20 +103,20 @@ begin
   if cam2dGlobal.Zoom.X = 1 Then
     v2[ 0 ] := PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X
   else
-    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( wnd_Width / 2 ) - ( wnd_Width / 2 ) * cam2dGlobal.Zoom.X );
+    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width / 2 ) - ( ogl_Width / 2 ) * cam2dGlobal.Zoom.X );
 
   if cam2dGlobal.Zoom.Y = 1 Then
     v2[ 1 ] := PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y
   else
-    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( wnd_Height / 2 ) - ( wnd_Height / 2 ) * cam2dGlobal.Zoom.Y );
+    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y );
 
 
   if cam2dGlobal.Angle <> 0 Then
     begin
       sa := Sin( cam2dGlobal.Angle * deg2rad );
       ca := Cos( cam2dGlobal.Angle * deg2rad );
-      v2a[ 0 ] := wnd_Width  / 2 + ( v2[ 0 ] - wnd_Width / 2 ) * ca - ( v2[ 1 ] - wnd_Height / 2 ) * sa;
-      v2a[ 1 ] := wnd_Height / 2 + ( v2[ 0 ] - wnd_Width / 2 ) * sa + ( v2[ 1 ] - wnd_Height / 2 ) * ca;
+      v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * ca - ( v2[ 1 ] - ogl_Height / 2 ) * sa;
+      v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * sa + ( v2[ 1 ] - ogl_Height / 2 ) * ca;
       glVertex2fv( @v2a[ 0 ] );
     end else
       glVertex2fv( @v2[ 0 ] );

@@ -41,6 +41,7 @@ uses
   zgl_application,
   zgl_window,
   zgl_screen,
+  zgl_Camera_2d,
   zgl_opengl,
   zgl_opengl_all;
 
@@ -103,6 +104,13 @@ procedure scissor_Begin;
 begin
   if ( Width < 0 ) or ( Height < 0 ) Then
     exit;
+  if cam2DGlobal <> @constCamera2D Then
+    begin
+      X      := Trunc( ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width  / 2 ) - ( ogl_Width  / 2 ) * cam2dGlobal.Zoom.X ) );
+      Y      := Trunc( ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y ) );
+      Width  := Trunc( Width  * cam2DGlobal.Zoom.X );
+      Height := Trunc( Height * cam2DGlobal.Zoom.Y );
+    end;
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     begin
       X      := Trunc( X * scr_ResCX + scr_AddCX );
