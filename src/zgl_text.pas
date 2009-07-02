@@ -180,7 +180,11 @@ begin
   H := Round( Rect.H );
   scissor_Begin( X, Y, W, H );
 
-  WordsCount := u_Words( Text ) + u_Words( Text, #10 ) - 1;
+  WordsCount := u_Words( Text, #10 ) - 1;
+  if WordsCount > 0 Then
+    WordsCount := WordsCount + u_Words( Text )
+  else
+    WordsCount := u_Words( Text );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
