@@ -184,6 +184,9 @@ var
   ini_LoadFromFile : procedure( const FileName : String );
   ini_SaveToFile   : procedure( const FileName : String );
   ini_Add          : procedure( const Section, Key : String );
+  ini_Del          : procedure( const Section, Key : String );
+  ini_Clear        : procedure( const Section : String );
+  ini_IsSection    : function( const Section : String ) : Boolean;
   ini_IsKey        : function( const Section, Key : String ) : Boolean;
   ini_ReadKeyStr   : procedure( const Section, Key : String; var Result : String );
   ini_ReadKeyInt   : function( const Section, Key : String ) : Integer;
@@ -1087,6 +1090,9 @@ begin
       ini_LoadFromFile := dlsym( zglLib, 'ini_LoadFromFile' );
       ini_SaveToFile := dlsym( zglLib, 'ini_SaveToFile' );
       ini_Add := dlsym( zglLib, 'ini_Add' );
+      ini_Del := dlsym( zglLib, 'ini_Del' );
+      ini_Clear := dlsym( zglLib, 'ini_Clear' );
+      ini_IsSection := dlsym( zglLib, 'ini_IsSection' );
       ini_IsKey := dlsym( zglLib, 'ini_IsKey' );
       ini_ReadKeyStr := dlsym( zglLib, 'ini_ReadKeyStr' );
       ini_ReadKeyInt := dlsym( zglLib, 'ini_ReadKeyInt' );

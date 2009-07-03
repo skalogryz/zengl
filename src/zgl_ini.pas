@@ -54,6 +54,9 @@ end;
 procedure ini_LoadFromFile( const FileName : String );
 procedure ini_SaveToFile( const FileName : String );
 procedure ini_Add( const Section, Key : String );
+procedure ini_Del( const Section, Key : String );
+procedure ini_Clear( const Section : String );
+function  ini_IsSection( const Section : String ) : Boolean;
 function  ini_IsKey( const Section, Key : String ) : Boolean;
 procedure ini_ReadKeyStr( const Section, Key : String; var Result : String );
 function  ini_ReadKeyInt( const Section, Key : String ) : Integer;
@@ -62,6 +65,8 @@ function  ini_WriteKeyStr( const Section, Key, Value : String ) : Boolean;
 function  ini_WriteKeyInt( const Section, Key : String; const Value : Integer ) : Boolean;
 function  ini_WriteKeyBool( const Section, Key : String; const Value : Boolean ) : Boolean;
 
+procedure ini_CopyKey( var k1, k2 : zglTINIKey );
+procedure ini_CopySection( var s1, s2 : zglTINISection );
 function  ini_GetID( S, K : String; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;
 procedure ini_Free;
@@ -142,8 +147,8 @@ procedure ini_Add;
     s, k   : String;
     ns, nk : Integer;
 begin
-  s := String( Section );
-  k := String( Key );
+  s := Section;
+  k := Key;
 
   ini_GetID( s, k, ns, nk );
 
@@ -164,6 +169,65 @@ begin
       SetLength( iniRec.Section[ ns ].Key, iniRec.Section[ ns ].Keys );
       iniRec.Section[ ns ].Key[ nk ].Name := k;
     end;
+end;
+
+procedure ini_Del;
+  var
+    s, k : String;
+    i, ns, nk : Integer;
+begin
+  s := Section;
+  k := Key;
+
+  if ( k <> '' ) and ini_IsKey( s, k ) and ini_GetID( s, k, ns, nk ) Then
+    begin
+      DEC( iniRec.Section[ ns ].Keys );
+      for i := nk to iniRec.Section[ ns ].Keys - 1 do
+        ini_CopyKey( iniRec.Section[ ns ].Key[ i ], iniRec.Section[ ns ].Key[ i + 1 ] );
+      SetLength( iniRec.Section[ ns ].Key, iniRec.Section[ ns ].Keys + 1 );
+    end else
+      if ini_IsSection( s ) Then
+        begin
+          ini_GetID( s, k, ns, nk );
+
+          DEC( iniRec.Sections );
+          for i := ns to iniRec.Sections - 1 do
+            ini_CopySection( iniRec.Section[ i ], iniRec.Section[ i + 1 ] );
+          SetLength( iniRec.Section, iniRec.Sections + 1 );
+        end;
+end;
+
+procedure ini_Clear;
+  var
+    s : String;
+    i, ns, nk : Integer;
+begin
+  s := Section;
+
+  if s = '' Then
+    begin
+      iniRec.Sections := 0;
+      SetLength( iniRec.Section, 0 );
+    end else
+      if ini_IsSection( s ) Then
+        begin
+          ini_GetID( s, '', ns, nk );
+
+          iniRec.Section[ ns ].Keys := 0;
+          SetLength( iniRec.Section[ ns ].Key, 0 );
+        end;
+end;
+
+function ini_IsSection;
+  var
+    s : String;
+    i, j : Integer;
+begin
+  s := Section;
+
+  i := -1;
+  INI_GetID( s, '', i, j );
+  Result := i <> -1;
 end;
 
 function ini_IsKey;
@@ -223,7 +287,7 @@ begin
   s := Section;
   k := Key;
 
-  if INI_GetID( s, k, i, j ) Then
+  if ini_GetID( s, k, i, j ) Then
     Result := iniRec.Section[ i ].Key[ j ].Value;
 end;
 
@@ -309,6 +373,23 @@ begin
         ini_WriteKeyBool( Section, Key, Value );
         Result := FALSE;
       end;
+end;
+
+procedure ini_CopyKey;
+begin
+  k1.Name  := k2.Name;
+  k1.Value := k2.Value;
+end;
+
+procedure ini_CopySection;
+  var
+    i : Integer;
+begin
+  s1.Name := s2.Name;
+  s1.Keys := s2.Keys;
+  SetLength( s1.Key, s1.Keys + 1 );
+  for i := 0 to s1.Keys do
+    ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
 end;
 
 function ini_GetID;
