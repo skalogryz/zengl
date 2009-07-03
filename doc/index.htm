@@ -306,7 +306,31 @@
     <LI><a name='ini_Add'>
     <div class='code'><b>procedure</b> ini_Add( <b>const</b> Section, Key : <b>String</b> );</div>
     <div align='justify'>
-    Добавляет в секцию <b>Section</b> ключ <b>Key</b>.
+    Добавляет в секцию <b>Section</b> ключ <b>Key</b>. Если секция <b>Section</b> не существует, она будет создана.
+    </div>
+    </LI><br>
+
+    <!--ini_Del-->
+    <LI><a name='ini_Del'>
+    <div class='code'><b>procedure</b> ini_Del( <b>const</b> Section, Key : <b>String</b> );</div>
+    <div align='justify'>
+    Удаляет ключ <b>Key</b> из секции <b>Section</b>. Если аргумент <b>Key</b> передать пустым, удалится вся секция <b>Section</b>.
+    </div>
+    </LI><br>
+
+    <!--ini_Clearl-->
+    <LI><a name='ini_Clear'>
+    <div class='code'><b>procedure</b> ini_Clear( <b>const</b> Section : <b>String</b> );</div>
+    <div align='justify'>
+    Удаляет все ключи из секции <b>Section</b>.
+    </div>
+    </LI><br>
+
+    <!--ini_IsSection-->
+    <LI><a name='ini_IsSection'>
+    <div class='code'><b>function</b> ini_IsSection( <b>const</b> Section : <b>String</b> ) : Boolean;</div>
+    <div align='justify'>
+    Проверяет существует секция <b>Section</b>.
     </div>
     </LI><br>
 
@@ -320,9 +344,9 @@
 
     <!--ini_ReadKeyStr-->
     <LI><a name='ini_ReadKeyStr'>
-    <div class='code'><b>function</b> ini_ReadKeyStr( <b>const</b> Section, Key : <b>String</b> ) : PChar;</div>
+    <div class='code'><b>function</b> ini_ReadKeyStr( <b>const</b> Section, Key : <b>String</b>; <b>var</b> Result : String );</div>
     <div align='justify'>
-    Считать строковое значение ключа <b>Key</b> из секции <b>Section</b>.
+    Считать строковое значение ключа <b>Key</b> из секции <b>Section</b> и записать результат в <b>Result</b>.
     </div>
     </LI><br>
 
