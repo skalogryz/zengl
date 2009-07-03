@@ -447,6 +447,16 @@ begin
   if What and DEPTH_MASK > 0 Then
     glDepthMask( GL_FALSE );
 
+  if What and CORRECT_RESOLUTION > 0 Then
+    begin
+      scr_ResCX := 1;
+      scr_ResCY := 1;
+      scr_AddCX := 0;
+      scr_AddCY := 0;
+      scr_SubCX := 0;
+      scr_SubCY := 0;
+    end;
+
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := FALSE;
 

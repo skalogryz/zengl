@@ -55,7 +55,7 @@ procedure ini_LoadFromFile( const FileName : String );
 procedure ini_SaveToFile( const FileName : String );
 procedure ini_Add( const Section, Key : String );
 function  ini_IsKey( const Section, Key : String ) : Boolean;
-function  ini_ReadKeyStr( const Section, Key : String ) : PChar;
+procedure ini_ReadKeyStr( const Section, Key : String; var Result : String );
 function  ini_ReadKeyInt( const Section, Key : String ) : Integer;
 function  ini_ReadKeyBool( const Section, Key : String ) : Boolean;
 function  ini_WriteKeyStr( const Section, Key, Value : String ) : Boolean;
@@ -153,7 +153,7 @@ begin
       ns := iniRec.Sections - 1;
 
       SetLength( iniRec.Section, iniRec.Sections );
-      iniRec.Section[ ns ].Name := u_StrUp( s );
+      iniRec.Section[ ns ].Name := s;
     end;
 
   if nk = -1 Then
@@ -162,7 +162,7 @@ begin
       nk := iniRec.Section[ ns ].Keys - 1;
 
       SetLength( iniRec.Section[ ns ].Key, iniRec.Section[ ns ].Keys );
-      iniRec.Section[ ns ].Key[ nk ].Name := u_StrUp( k );
+      iniRec.Section[ ns ].Key[ nk ].Name := k;
     end;
 end;
 
@@ -215,7 +215,7 @@ begin
   file_Close( F );
 end;
 
-function ini_ReadKeyStr;
+procedure ini_ReadKeyStr;
   var
     s, k : String;
     i, j : Integer;
@@ -224,7 +224,7 @@ begin
   k := Key;
 
   if INI_GetID( s, k, i, j ) Then
-    Result := PChar( iniRec.Section[ i ].Key[ j ].Value );
+    Result := iniRec.Section[ i ].Key[ j ].Value;
 end;
 
 function ini_ReadKeyInt;

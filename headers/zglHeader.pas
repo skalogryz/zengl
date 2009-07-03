@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.30               }
-{ date:    01.07.09             }
+{ version: 0.1.31               }
+{ date:    03.07.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -185,7 +185,7 @@ var
   ini_SaveToFile   : procedure( const FileName : String );
   ini_Add          : procedure( const Section, Key : String );
   ini_IsKey        : function( const Section, Key : String ) : Boolean;
-  ini_ReadKeyStr   : function( const Section, Key : String ) : PChar;
+  ini_ReadKeyStr   : procedure( const Section, Key : String; var Result : String );
   ini_ReadKeyInt   : function( const Section, Key : String ) : Integer;
   ini_ReadKeyBool  : function( const Section, Key : String ) : Boolean;
   ini_WriteKeyStr  : function( const Section, Key, Value : String ) : Boolean;
