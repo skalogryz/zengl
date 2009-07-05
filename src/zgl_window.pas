@@ -488,7 +488,6 @@ end;
 procedure wnd_Select;
 begin
 {$IFDEF WIN32}
-  ShowWindow( wnd_Handle, SW_NORMAL );
   BringWindowToTop( wnd_Handle );
 {$ENDIF}
 {$IFDEF DARWIN}
