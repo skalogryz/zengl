@@ -40,6 +40,8 @@ type
   zglTTextWord = record
     X, Y, W : Integer;
     ShiftX  : Integer;
+    LF      : Boolean;
+    LFShift : Integer;
     str     : String;
 end;
 
@@ -65,8 +67,8 @@ var
 
 procedure text_Draw;
   var
-    i : Integer;
-    c : Integer;
+    i, c : Integer;
+    sx : Single;
     lastPage : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
@@ -82,6 +84,7 @@ begin
   else
     if Flags and TEXT_HALIGN_RIGHT > 0 Then
       X := X - Round( text_GetWidth( Font, Text, textStep ) ) * textScale;
+  sx := X;
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
     Y := Y - ( Font.MaxHeight div 2 ) * textScale
@@ -100,6 +103,11 @@ begin
   glBegin( GL_QUADS );
   while i <= length( Text ) do
     begin
+      if Text[ i ] = #10 Then
+        begin
+          X := sx;
+          Y := Y + Font.MaxHeight;
+        end;
       c := font_GetCID( Text, i, @i );
 
       if not Assigned( Font.CharDesc[ c ] ) Then continue;
@@ -157,7 +165,6 @@ end;
 
 // TODO:
 // - оптимизировать количество DIP'ов
-// - добавить переносы строк по LF символу
 procedure text_DrawInRect;
   var
     i, j, b, l : Integer;
@@ -182,11 +189,7 @@ begin
   X := X + 1;
   Y := Y + 1;
 
-  WordsCount := u_Words( Text, #10 ) - 1;
-  if WordsCount > 0 Then
-    WordsCount := WordsCount + u_Words( Text )
-  else
-    WordsCount := u_Words( Text );
+  WordsCount := u_Words( Text );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -194,23 +197,41 @@ begin
   LineFeed := FALSE;
   l := length( Text );
   b := 1;
+  W := 0;
+  H := 2;
   for i := 0 to WordsCount - 1 do
     for j := b to l do
       begin
         LineFeed := Text[ j ] = #10;
         if ( ( Text[ j ] = ' ' ) and ( j <> 1 ) ) or ( j = l ) or LineFeed Then
           begin
+            if ( j < l ) and ( Text[ j + 1 ] = #10 ) Then
+              begin
+                INC( W );
+                INC( H );
+                continue;
+              end;
+            if ( j > 1 ) and ( Text[ j - 1 ] = ' ' ) Then
+              begin
+                INC( H );
+                continue;
+              end;
             if b = 1 Then
               WordsArray[ i ].str := Copy( Text, b, j - b )
             else
-              WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
-            WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-            WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, 2, @H ) ].ShiftX;
+              WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + 1 * Byte( not LineFeed ) - W );
+            WordsArray[ i ].LF      := LineFeed;
+            WordsArray[ i ].LFShift := W + 1;
+            WordsArray[ i ].W       := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
+            if length( WordsArray[ i ].str ) > H - 1 Then
+              WordsArray[ i ].ShiftX  := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, H, @H ) ].ShiftX;
             if LineFeed Then
               b := j + 2
             else
               b := j + 1;
             LineFeed := FALSE;
+            W := 0;
+            H := 2;
             break;
           end;
       end;
@@ -224,12 +245,13 @@ begin
       WordsArray[ i ].X := X;
       WordsArray[ i ].Y := Y;
       X := X + WordsArray[ i ].W - SpaceShift;
-      if ( i > 0 ) and ( WordsArray[ i - 1 ].str[ length( WordsArray[ i - 1 ].str ) ] = #10 ) Then
-        LineFeed := TRUE;
+      if i > 0 Then
+        LineFeed := WordsArray[ i - 1 ].LF;
       if ( ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) ) or LineFeed Then
         begin
           X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed ) - SpaceShift * Byte( Flags and TEXT_HALIGN_CENTER > 0 );
-          Y := Y + Round( Font.MaxHeight * textScale );
+          if i > 0 Then
+          Y := Y + Round( Font.MaxHeight * textScale ) * WordsArray[ i - 1 ].LFShift;
           WordsArray[ i ].X := X;
           WordsArray[ i ].Y := Y;
           X := X + WordsArray[ i ].W - SpaceShift;
