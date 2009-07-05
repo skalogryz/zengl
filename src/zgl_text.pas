@@ -39,7 +39,6 @@ const
 type
   zglTTextWord = record
     X, Y, W : Integer;
-    ShiftX  : Integer;
     str     : String;
 end;
 
@@ -180,11 +179,7 @@ begin
   H := Round( Rect.H );
   scissor_Begin( X, Y, W, H );
 
-  WordsCount := u_Words( Text, #10 ) - 1;
-  if WordsCount > 0 Then
-    WordsCount := WordsCount + u_Words( Text )
-  else
-    WordsCount := u_Words( Text );
+  WordsCount := u_Words( Text );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -202,8 +197,7 @@ begin
               WordsArray[ i ].str := Copy( Text, b, j - b )
             else
               WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
-            WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-            WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, 1, @H ) ].ShiftX;
+            WordsArray[ i ].W     := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
             if LineFeed Then
               b := j + 2
             else
@@ -212,6 +206,9 @@ begin
             break;
           end;
       end;
+  WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
+  for i := 0 to WordsCount - 1 do
+    writeln( '"', WordsArray[ i ].str, '"' );
 
   l := 0;
   if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
@@ -220,16 +217,16 @@ begin
     begin
       WordsArray[ i ].X := X;
       WordsArray[ i ].Y := Y;
-      X := X + WordsArray[ i ].W - WordsArray[ i ].ShiftX;
+      X := X + WordsArray[ i ].W - SpaceShift;
       if ( i > 0 ) and ( WordsArray[ i - 1 ].str[ length( WordsArray[ i - 1 ].str ) ] = #10 ) Then
         LineFeed := TRUE;
       if ( ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) ) or LineFeed Then
         begin
           X := Round( Rect.X );
           Y := Y + Round( Font.MaxHeight * textScale );
-          WordsArray[ i ].X := X - SpaceShift * Byte( not LineFeed );
+          WordsArray[ i ].X := X;
           WordsArray[ i ].Y := Y;
-          X := X + WordsArray[ i ].W - SpaceShift;
+          X := X + WordsArray[ i ].W - SpaceShift * Byte( not LineFeed );
 
           if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) and ( not LineFeed ) Then
             begin
@@ -306,10 +303,6 @@ begin
   Result := 0;
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   i  := 1;
-  c  := font_GetCID( Text, i, @i );
-  if Assigned( Font.CharDesc[ c ] ) Then
-    Result := Font.CharDesc[ c ].ShiftX;
-  i := 1;
   while i <= length( Text ) do
     begin
       c := font_GetCID( Text, i, @i );
