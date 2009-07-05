@@ -1,7 +1,7 @@
 {
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -113,7 +113,6 @@ begin
     Result := Result.Next;
 
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
-  FillChar( Result.Next^, SizeOf( zglTRenderTarget ), 0 );
 
   if ( not ogl_CanFBO ) and ( rtType = RT_TYPE_FBO ) Then
     {$IFDEF WIN32}
