@@ -193,6 +193,7 @@ begin
           DEC( iniRec.Sections );
           for i := ns to iniRec.Sections - 1 do
             ini_CopySection( iniRec.Section[ i ], iniRec.Section[ i + 1 ] );
+          iniRec.Section[ iniRec.Sections ].Keys := 0;
           SetLength( iniRec.Section, iniRec.Sections + 1 );
         end;
 end;

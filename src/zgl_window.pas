@@ -128,7 +128,7 @@ begin
       wnd_X := 0;
       wnd_Y := 0;
       wnd_Attr.override_redirect := True;
-      wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWX or CWY or CWCursor;
+      wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWX or CWY or CWCursor or CWBorderPixel;
     end else
       begin
         wnd_Attr.override_redirect := False;
