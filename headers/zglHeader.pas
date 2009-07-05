@@ -8,7 +8,7 @@
 { mail: dr.andru@gmail.com      }
 { ICQ:  496-929-849             }
 { JID:  dr.andru@jabber.kiev.ua }
-{ site: http://andru-kun.ru     }
+{ site: http://andru-kun.inf.ua }
 {-------------------------------}
 unit zglHeader;
 
