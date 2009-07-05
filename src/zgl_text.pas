@@ -39,6 +39,7 @@ const
 type
   zglTTextWord = record
     X, Y, W : Integer;
+    ShiftX  : Integer;
     str     : String;
 end;
 
@@ -178,8 +179,14 @@ begin
   W := Round( Rect.W );
   H := Round( Rect.H );
   scissor_Begin( X, Y, W, H );
+  X := X + 1;
+  Y := Y + 1;
 
-  WordsCount := u_Words( Text );
+  WordsCount := u_Words( Text, #10 ) - 1;
+  if WordsCount > 0 Then
+    WordsCount := WordsCount + u_Words( Text )
+  else
+    WordsCount := u_Words( Text );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -197,7 +204,8 @@ begin
               WordsArray[ i ].str := Copy( Text, b, j - b )
             else
               WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + Byte( j = j ) );
-            WordsArray[ i ].W     := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
+            WordsArray[ i ].W      := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
+            WordsArray[ i ].ShiftX := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, 2, @H ) ].ShiftX;
             if LineFeed Then
               b := j + 2
             else
@@ -220,11 +228,11 @@ begin
         LineFeed := TRUE;
       if ( ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) ) or LineFeed Then
         begin
-          X := Round( Rect.X );
+          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed );
           Y := Y + Round( Font.MaxHeight * textScale );
           WordsArray[ i ].X := X;
           WordsArray[ i ].Y := Y;
-          X := X + WordsArray[ i ].W - SpaceShift * Byte( not LineFeed );
+          X := X + WordsArray[ i ].W - SpaceShift;
 
           if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) and ( not LineFeed ) Then
             begin
