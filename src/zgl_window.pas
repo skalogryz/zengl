@@ -128,11 +128,11 @@ begin
       wnd_X := 0;
       wnd_Y := 0;
       wnd_Attr.override_redirect := True;
-      wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWX or CWY or CWCursor or CWBorderPixel;
+      wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWX or CWY or CWWidth or CWHeight or CWCursor or CWBorderPixel;
     end else
       begin
         wnd_Attr.override_redirect := False;
-        wnd_ValueMask := CWColormap or CWEventMask or CWX or CWY or CWCursor or CWBorderPixel;
+        wnd_ValueMask := CWColormap or CWEventMask or CWX or CWY or CWWidth or CWHeight or CWCursor or CWBorderPixel;
       end;
 
   wnd_Handle := XCreateWindow( scr_Display,
@@ -172,8 +172,7 @@ begin
   wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', TRUE );
   XSetWMProtocols( scr_Display, wnd_Handle, @wnd_DestroyAtom, 1 );
 
-  XMapWindow( scr_Display, wnd_Handle );
-  glXWaitX;
+  wnd_Select;
 
   if wnd_FullScreen Then
     begin
@@ -302,7 +301,6 @@ procedure wnd_Destroy;
 begin
 {$IFDEF LINUX}
   XDestroyWindow( scr_Display, wnd_Handle );
-  glXWaitX;
 {$ENDIF}
 {$IFDEF WIN32}
   if ( wnd_DC > 0 ) and ( ReleaseDC( wnd_Handle, wnd_DC ) = 0 ) Then
@@ -338,7 +336,6 @@ begin
   wnd_Destroy;
   wnd_Create( wnd_Width, wnd_Height );
   glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
-  glXWaitGL;
   wnd_ShowCursor( app_ShowCursor );
 {$ENDIF}
 {$IFDEF WIN32}
@@ -370,7 +367,6 @@ procedure wnd_SetCaption;
 begin
   wnd_Caption := NewCaption;
 {$IFDEF LINUX}
-  glXWaitGL;
   if wnd_Handle <> 0 Then
     begin
       XStringListToTextProperty( @wnd_Caption, 1, @wnd_Title );
@@ -487,6 +483,10 @@ end;
 
 procedure wnd_Select;
 begin
+{$IFDEF LINUX}
+  XMapWindow( scr_Display, wnd_Handle );
+  glXWaitX;
+{$ENDIF}
 {$IFDEF WIN32}
   BringWindowToTop( wnd_Handle );
 {$ENDIF}

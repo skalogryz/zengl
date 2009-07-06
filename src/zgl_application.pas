@@ -172,6 +172,14 @@ begin
       OSProcess;
 
       CanKillTimers := FALSE;
+      {$IFDEF LINUX_OR_DARWIN}
+      // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
+      if wnd_FullScreen Then
+        begin
+          app_Focus := TRUE;
+          app_Pause := FALSE;
+        end;
+      {$ENDIF}
       if not app_Pause Then
         begin
           if sndAutoPaused Then

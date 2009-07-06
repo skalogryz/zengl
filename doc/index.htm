@@ -253,6 +253,7 @@
     <LI><a name='timer_Add'>
     <div class='code'><b>function</b> timer_Add( <b>const</b> OnTimer : Pointer; <b>const</b> Interval : DWORD ) : zglPTimer;</div>
     <div align='justify'>
+    Создает новый таймер и возвращает на него указатель. Каждые <b>Interval</b> миллисекунд будет выполняться функция <b>OnTimer</b>.
     </div>
     </LI><br>
 
@@ -260,6 +261,7 @@
     <LI><a name='timer_Del'>
     <div class='code'><b>procedure</b> timer_Del( <b>var</b> Timer : zglPTimer );</div>
     <div align='justify'>
+    Удаляет созданный таймер по ссылке <b>Timer</b>.
     </div>
     </LI><br>
 
@@ -661,20 +663,36 @@
   <!--zgl_fx.pas-->
   <p><hr>
   <a name='zgl_fx'><h2 style='color: #DD0000'>zgl_fx.pas</h2>
+  <b>Константы:</b><br>
+  <UL>
+  <LI>Константы для установки режима блендинга(<a href='#fx_SetBlendMode'>fx_SetBlendMode</a>):</LI>
+    <UL type="disc">
+      <LI><b>FX_BLEND_NORMAL</b> - обычный режим</LI>
+      <LI><b>FX_BLEND_ADD</b> - аддитивный режим</LI>
+      <LI><b>FX_BLEND_MULT</b> - </LI>
+      <LI><b>FX_BLEND_BLACK</b> - чем темнее участок изображения тем он прозрачнее</LI>
+      <LI><b>FX_BLEND_WHITE</b> - чем светлее участок изображения тем он прозрачнее</LI>
+      <LI><b>FX_BLEND_MASK</b> - </LI>
+    </UL>
+  <LI>Константы для вывода спрайтов(<a href='#ssprite2d_Draw'>ssprite2d_Draw</a>, <a href='#asprite2d_Draw'>asprite2d_Draw</a> и <a href='#csprite2d_Draw'>csprite2d_Draw</a>):</LI>
+    <UL type="disc">
+      <LI><b>FX2D_FLIPX</b> - отразить текстуру по горизонтали</LI>
+      <LI><b>FX2D_FLIPY</b> - отразить текстуру по вертикали</LI>
+      <LI><b>FX2D_COLORMIX</b> - использовать смешивание цвета(<a href='#fx2d_SetColorMix'>fx2d_SetColorMix</a>)</LI>
+      <LI><b>FX2D_VCA</b> - использовать для вершин спрайта установленные значения цвета и альфы(<a href='#fx2d_SetVCA'>fx2d_SetVCA</a>). Действует также с <a href='#pr2d_Rect'>pr2d_Rect</a> и <a href='#pr2d_Line'>pr2d_Line</a></LI>
+      <LI><b>FX2D_VCHANGE</b> - добавить к координатам вершин смещения установленные функцией <a href='#fx2d_SetVertexes'>fx2d_SetVertexes</a>. Действует также с <a href='#pr2d_Rect'>pr2d_Rect</a> и <a href='#pr2d_Line'>pr2d_Line</a></LI>
+      <LI><b>FX2D_SCALE</b> - использовать масштабирование по горизонтали и вертикали, установленное функцией <a href='#fx2d_SetScale'>fx2d_SetScale</a></LI>
+      <LI><b>FX_BLEND</b> - использовать блендинг</LI>
+    </UL>
+  </UL>
+  <b>Функции:</b><br>
   <UL type='disc'>
     <!--fx_SetBlendMode-->
     <LI><a name='fx_SetBlendMode'>
     <div class='code'><b>procedure</b> fx_SetBlendMode( <b>const</b> Mode : Byte );</div>
     <div align='justify'>
-    Устанавливает режим блендинга <b>Mode</b>. Возможные константы:
-    <UL type="disc">
-      <LI><b>FX_BLEND_NORMAL</b> - обычный режим</LI>
-      <LI><b>FX_BLEND_ADD</b> -</LI>
-      <LI><b>FX_BLEND_MULT</b> -</LI>
-      <LI><b>FX_BLEND_BLACK</b> - чем темнее участок изображения тем он прозрачнее</LI>
-      <LI><b>FX_BLEND_WHITE</b> - чем светлее участок изображения тем он прозрачнее</LI>
-      <LI><b>FX_BLEND_MASK</b> - </LI>
-    </UL>
+    Устанавливает режим блендинга <b>Mode</b>. Возможные константы перечислены выше.
+
     </div>
     </LI><br>
 
@@ -715,6 +733,12 @@
   <!--zgl_primitives_2d.pas-->
   <p><hr>
   <a name='zgl_primitives_2d'><h2 style='color: #DD0000'>zgl_primitives_2d.pas</h2>
+  <b>Константы:</b><br>
+    <UL type="disc">
+      <LI><b>PR2D_FILL</b> - использовать вывод примитивов с заливкой</LI>
+      <LI><b>PR2D_SMOOTH</b> - использовать сглаживание</LI>
+    </UL>
+  <b>Функции:</b><br>
   <UL type='disc'>
     <!--pr2d_Pixel-->
     <LI><a name='pr2d_Pixel'>
@@ -767,6 +791,7 @@
     <LI><a name='ssprite2d_Draw'>
     <div class='code'><b>procedure</b> ssprite2d_Draw( <b>const</b> Texture : zglPTexture; X, Y, W, H, Angle : Single; <b>const</b> Alpha : Byte = 255; <b>const</b> FX : DWORD = FX_BLEND );</div>
     <div align='justify'>
+    Рисует спрайт используя текстуру <b>Texture</b> в координатах <b>X</b>, <b>Y</b>, размерами <b>W</b>(ширина) и <b>H</b>(высота), градусом поворота <b>Angle</b> и альфой <b>Alpha</b>.
     </div>
     </LI><br>
 
@@ -774,6 +799,7 @@
     <LI><a name='asprite2d_Draw'>
     <div class='code'><b>procedure</b> asprite2d_Draw( <b>const</b> Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; <b>const</b> Alpha : Byte = 255; <b>const</b> FX : DWORD = FX_BLEND );</div>
     <div align='justify'>
+    Рисует спрайт используя текстуру <b>Texture</b> в координатах <b>X</b>, <b>Y</b>, размерами <b>W</b>(ширина) и <b>H</b>(высота), градусом поворота <b>Angle</b> и альфой <b>Alpha</b>. Из текстуры выбирается кадр <b>Frame</b>. Размер одного кадра устанавливается функцией <a href='#tex_SetFrameSize'>tex_SetFramesSize</a>.
     </div>
     </LI><br>
 
@@ -781,6 +807,7 @@
     <LI><a name='csprite2d_Draw'>
     <div class='code'><b>procedure</b> csprite2d_Draw( <b>const</b> Texture : zglPTexture; X, Y, W, H, Angle : Single; <b>const</b> CutRect : zglTRect; <b>const</b> Alpha : Byte = 255; <b>const</b> FX : DWORD = FX_BLEND );</div>
     <div align='justify'>
+    Рисует спрайт используя текстуру <b>Texture</b> в координатах <b>X</b>, <b>Y</b>, размерами <b>W</b>(ширина) и <b>H</b>(высота), градусом поворота <b>Angle</b> и альфой <b>Alpha</b>. <b>CutRect</b> указывает какую часть текстуры использовать.
     </div>
     </LI><br>
   </UL>
