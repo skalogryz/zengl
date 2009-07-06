@@ -212,7 +212,8 @@ begin
             if ( j < l ) and ( Text[ j + 1 ] = #10 ) Then
               begin
                 INC( W );
-                font_GetCID( WordsArray[ i ].str, H, @H );
+                if length( WordsArray[ i ].str ) > H - 1 Then
+                  font_GetCID( WordsArray[ i ].str, H, @H );
                 continue;
               end;
             if ( j > 1 ) and ( Text[ j - 1 ] = ' ' ) Then
