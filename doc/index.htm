@@ -34,6 +34,48 @@
   <!--zgl_main.pas-->
   <p><hr>Справка далеко не полная, и находится в стадии разработки. По мере "устаканивания" некоторых функций библиотеки, тут будет появляться их описание.<hr>
   <a name='zgl_main'><h2 style='color: #DD0000'>zgl_main.pas</h2>
+  <b>Константы:</b>
+  <UL type='disc'>
+  <LI>Константы используемые с функцией <a href='#zgl_Reg'>zgl_Reg</a>:</LI>
+    <UL type="disc">
+      <LI><b>SYS_LOAD</b> - регистрирует функцию, что будет вызвана сразу после инициализации</LI>
+      <LI><b>SYS_DRAW</b> - регистрирует функцию, что будет вызываться каждую итерацию главного цикла</LI>
+      <LI><b>SYS_UPDATE</b> - регистрирует функцию, что будет вызываться каждую итерацию главного цикла и возвращать разницу времени между последним вызовом(dt)</LI>
+      <LI><b>SYS_EXIT</b> - регистрирует функцию, которая будет вызвана после завершения работы библиотеки и очистки всех ресурсов</LI>
+      <LI><b>TEX_FORMAT_EXTENSION</b> - начинает регистрацию нового формата графического формата</LI>
+      <LI><b>TEX_FORMAT_FILE_LOADER</b> - регистрирует функцию загрузки граф. формата из файла</LI>
+      <LI><b>TEX_FORMAT_MEM_LOADER</b> - регистрирует функцию загрузки граф. формата из памяти</LI>
+      <LI><b>SND_FORMAT_EXTENSION</b> - начинает регистрацию нового формата аудио-файла</LI>
+      <LI><b>SND_FORMAT_FILE_LOADER</b> - регистрирует функцию загрузки аудио-файла из файла</LI>
+      <LI><b>SND_FORMAT_MEM_LOADER</b> - регистрирует функцию загрузки аудио-файла из памяти</LI>
+      <LI><b>SND_FORMAT_STREAM</b> - регистрирует структуру zglTSoundStream, в которой указаны формат, функции декодинга потока и пр. параметры</LI>
+      <!--LI><b>WIDGET_TYPE_ID</b> - начинает регистрацию нового типа виджета</LI>
+      <LI><b>WIDGET_FILL_DESC</b> - регистрирует функцию, которая будет заполнять структуру описания виджета</LI>
+      <LI><b>WIDGET_ONDRAW</b> - регистрирует функцию отрисовки виджета</LI>
+      <LI><b>WIDGET_ONPROC</b> - регистрирует функцию обработки виджета</LI-->
+    </UL>
+  <LI>Константы используемые с функцией <a href='#zgl_Get'>zgl_Get</a>:</LI>
+    <UL type="disc">
+      <LI><b>SYS_FPS</b> - возвращает количество кадров в секунду</LI>
+      <LI><b>APP_PAUSED</b> - возвращает 1, если приложение на паузе</LI>
+      <LI><b>APP_DIRECTORY</b> - возвращает PChar строку содержащую путь к директории, откуда было запущено приложение</LI>
+      <LI><b>USR_HOMEDIR</b> - возвращает PChar строку содежащую путь к домашней директории пользователя</LI>
+      <LI><b>LOG_FILENAME</b> - возвращает указатель на PChar строку, содержащую путь и имя log-файла. По указателю путь и имя можно изменить</LI>
+      <!--LI><b>ZGL_VERSION</b> - </LI-->
+      <LI><b>SCR_ADD_X</b> - возвращает смещение по X, если используется CORRECT_RESOLUTION</LI>
+      <LI><b>SCR_ADD_Y</b> - возвращает смещение по Y, если используется CORRECT_RESOLUTION</LI>
+      <LI><b>DESKTOP_WIDTH</b> - возвращает текущее разрешение экрана пользователя по ширине</LI>
+      <LI><b>DESKTOP_HEIGHT</b> - возвращает текущее разрешение экрана пользователя по высоте</LI>
+      <LI><b>RESOLUTION_LIST</b> - возвращает указатель на структуру zglTResolutionList, что содержит список поддерживаемых разрешений</LI>
+      <!--LI><b>MANAGER_TIMER</b> - </LI>
+      <LI><b>MANAGER_TEXTURE</b> - </LI>
+      <LI><b>MANAGER_FONT</b> - </LI>
+      <LI><b>MANAGER_RTARGET</b> - </LI>
+      <LI><b>MANAGER_SOUND</b> - </LI>
+      <LI><b>MANAGER_GUI</b> - </LI-->
+    </UL>
+  </UL>
+  <b>Функции:</b><br>
   <UL type='disc'>
     <!--zgl_Init-->
     <LI><a name='zgl_Init'>
@@ -475,7 +517,7 @@
     <LI><a name='mouse_Lock'>
     <div class='code'><b>procedure</b> mouse_Lock;</div>
     <div align='justify'>
-    'Заблокировать' курсор мыши по центру окна
+    "Заблокировать" курсор мыши по центру окна
     </div>
     </LI>
   </UL>
@@ -540,6 +582,32 @@
   <!--zgl_textures.pas-->
   <p><hr>
   <a name='zgl_textures'><h2 style='color: #DD0000'>zgl_textures.pas</h2>
+  <b>Константы:</b><br>
+  <UL type="disc">
+  <LI>Константы используемые при создании текстуры:</LI>
+    <UL type="disc">
+      <LI><b>TEX_MIPMAP</b> - сгенерировать mip-уровни</LI>
+      <LI><b>TEX_CLAMP</b> - </LI>
+      <LI><b>TEX_REPEAT</b> - </LI>
+      <LI><b>TEX_COMPRESS</b> - использовать сжатие</LI>
+      <LI><b>TEX_CONVERT_TO_POT</b> - если размер текстуры не кратен степени два, к ней добавится черная рамка(на спрайтах она видна не будет), и размеры будут соответствовать ближайшим по кратности степени 2</LI>
+
+      <LI><b>TEX_GRAYSCALE</b> - обесцветить текстуру</LI>
+      <LI><b>TEX_INVERT</b> - инвертировать цвета</LI>
+
+      <LI><b>TEX_FILTER_NEAREST</b> - не использовать фильтрацию</LI>
+      <LI><b>TEX_FILTER_LINEAR</b> - использовать линейную фильтрацию</LI>
+      <LI><b>TEX_FILTER_BILINEAR</b> - использовать билинейную фильтрацию</LI>
+      <LI><b>TEX_FILTER_TRILINEAR</b> - использовать трилинейную фильтрацию</LI>
+      <LI><b>TEX_FILTER_ANISOTROPY</b> - использовать анизотропную фильтрацию</LI>
+
+      <LI><b>TEX_RGB</b> - создать текстуру без альфа-канала</LI>
+
+      <LI><b>TEX_QUALITY_LOW</b> - уменьшить текстуру в четыри раза</LI>
+      <LI><b>TEX_QUALITY_MEDIUM</b> - уменьшить текстуру в два раза</LI>
+    </UL>
+  </UL>
+  <b>Функции:</b><br>
   <UL type='disc'>
     <!--tex_Add-->
     <LI><a name='tex_Add'>
@@ -632,6 +700,21 @@
   <!--zgl_render_target.pas-->
   <p><hr>
   <a name='zgl_render_target'><h2 style='color: #DD0000'>zgl_render_target.pas</h2>
+  <b>Константы:</b><br>
+  <UL type="disc">
+  <LI>Константы типов RenderTargets:</LI>
+    <UL type="disc">
+      <LI><b>RT_TYPE_SIMPLE</b> - обычный, использует функцию glCopyTexSubImage2D</LI>
+      <LI><b>RT_TYPE_FBO</b> - использует FBO</LI>
+      <LI><b>RT_TYPE_PBUFFER</b> - использует PBuffer(только для Windows)</LI>
+    </UL>
+  <LI>Константы режимов работы RenderTargets:</LI>
+    <UL type="disc">
+      <LI><b>RT_FULL_SCREEN</b> - копирует весь экран</LI>
+      <LI><b>RT_CLEAR_SCREEN</b> - очищает содержимое перед рендерингом нового</LI>
+    </UL>
+  </UL>
+  <b>Функции:</b><br>
   <UL type='disc'>
     <!--rtarget_Add-->
     <LI><a name='rtarget_Add'>
@@ -664,7 +747,7 @@
   <p><hr>
   <a name='zgl_fx'><h2 style='color: #DD0000'>zgl_fx.pas</h2>
   <b>Константы:</b><br>
-  <UL>
+  <UL type="disc">
   <LI>Константы для установки режима блендинга(<a href='#fx_SetBlendMode'>fx_SetBlendMode</a>):</LI>
     <UL type="disc">
       <LI><b>FX_BLEND_NORMAL</b> - обычный режим</LI>
