@@ -241,8 +241,6 @@ begin
           end;
       end;
   WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
-  for i := 0 to WordsCount - 1 do
-    writeln( WordsArray[i].str );
 
   l := 0;
   if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
