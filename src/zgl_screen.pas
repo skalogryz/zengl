@@ -216,18 +216,20 @@ begin
   ogl_zDepth := 24;
   repeat
     ogl_Attr[ 0 ]  := GLX_RGBA;
-    ogl_Attr[ 1 ]  := GLX_RED_SIZE;
-    ogl_Attr[ 2 ]  := 1;
-    ogl_Attr[ 3 ]  := GLX_GREEN_SIZE;
-    ogl_Attr[ 4 ]  := 1;
-    ogl_Attr[ 5 ]  := GLX_BLUE_SIZE;
-    ogl_Attr[ 6 ]  := 1;
-    ogl_Attr[ 7 ]  := GLX_ALPHA_SIZE;
-    ogl_Attr[ 8 ]  := 1;
-    ogl_Attr[ 9 ]  := GLX_DOUBLEBUFFER;
-    ogl_Attr[ 10 ] := GLX_DEPTH_SIZE;
-    ogl_Attr[ 11 ] := ogl_zDepth;
-    i := 12;
+    ogl_Attr[ 1 ]  := GL_TRUE;
+    ogl_Attr[ 2 ]  := GLX_RED_SIZE;
+    ogl_Attr[ 3 ]  := 8;
+    ogl_Attr[ 4 ]  := GLX_GREEN_SIZE;
+    ogl_Attr[ 5 ]  := 8;
+    ogl_Attr[ 6 ]  := GLX_BLUE_SIZE;
+    ogl_Attr[ 7 ]  := 8;
+    ogl_Attr[ 8 ]  := GLX_ALPHA_SIZE;
+    ogl_Attr[ 9 ]  := 8;
+    ogl_Attr[ 10 ]  := GLX_DOUBLEBUFFER;
+    ogl_Attr[ 11 ] := GL_TRUE;
+    ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
+    ogl_Attr[ 13 ] := ogl_zDepth;
+    i := 14;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := GLX_STENCIL_SIZE;

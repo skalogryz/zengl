@@ -161,7 +161,7 @@ begin
   if ( wnd_Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
     wnd_FullScreen := TRUE;
   {$IFDEF LINUX}
-  if wnd_FullScreen Then
+  if ( wnd_FullScreen ) and ( ( wnd_Width <> zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height <> zgl_Get( DESKTOP_HEIGHT ) ) ) Then
     scr_SetOptions( wnd_Width, wnd_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
   {$ENDIF}
 
