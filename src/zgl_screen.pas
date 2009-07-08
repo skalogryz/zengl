@@ -225,7 +225,7 @@ begin
     ogl_Attr[ 7 ]  := 8;
     ogl_Attr[ 8 ]  := GLX_ALPHA_SIZE;
     ogl_Attr[ 9 ]  := 8;
-    ogl_Attr[ 10 ]  := GLX_DOUBLEBUFFER;
+    ogl_Attr[ 10 ] := GLX_DOUBLEBUFFER;
     ogl_Attr[ 11 ] := GL_TRUE;
     ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
     ogl_Attr[ 13 ] := ogl_zDepth;

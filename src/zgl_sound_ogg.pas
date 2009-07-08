@@ -486,14 +486,34 @@ procedure ogg_Load;
     Buffer    : Pointer;
     _End      : Boolean;
     first     : Boolean;
+
+    _vi : pvorbis_info;
+    _vf : OggVorbis_File;
+    _vc : ov_callbacks;
+
+  function CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+    var
+      BytesRead : Integer;
+  begin
+    BytesRead := 0;
+    repeat
+      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
+
+      if Result = -3  Then break;
+      BytesRead := BytesRead + Result;
+    until ( Result = 0 ) or ( BytesRead = Count );
+
+    _End   := Result = 0;
+    Result := BytesRead;
+  end;
 begin
   if not oggLoad Then ogg_Init;
   if not oggInit Then exit;
 
-  if ov_open_callbacks( nil, vf, oggMemory.Memory, oggMemory.Size, vc ) >= 0 Then
+  if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
     begin
-      vi        := ov_info( vf, -1 );
-      Frequency := vi.rate;
+      _vi       := ov_info( _vf, -1 );
+      Frequency := _vi.rate;
       {$IFDEF USE_OPENAL}
       case vi.channels of
         1: format := AL_FORMAT_MONO16;
@@ -503,8 +523,8 @@ begin
       with oggBufferDesc do
         begin
           FormatCode     := $0001;
-          ChannelNumber  := vi.channels;
-          SampleRate     := vi.rate;
+          ChannelNumber  := _vi.channels;
+          SampleRate     := _vi.rate;
           BitsPerSample  := 16;
           BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
           BytesPerSecond := SampleRate * BytesPerSample;
@@ -513,32 +533,32 @@ begin
       format := Ptr( @oggBufferDesc.Formatcode );
       {$ENDIF}
 
-      ov_time_seek( vf, 0 );
+      ov_time_seek( _vf, 0 );
 
       size := 0;
       zgl_GetMem( Buffer, 64 * 1024 );
       // Т.к. ov_pcm_total почему-то возвращает бред, приходится извращаться :)
       repeat
-        BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
+        BytesRead := CodecRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
       until _End;
-      vi := nil;
-      ov_clear( vf );
+      _vi := nil;
+      ov_clear( _vf );
 
       zgl_GetMem( Data, size );
-      ov_open_callbacks( nil, vf, oggMemory.Memory, oggMemory.Size, vc );
-      ov_time_seek( vf, 0 );
+      ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc );
+      ov_time_seek( _vf, 0 );
       size := 0;
       repeat
-        BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
+        BytesRead := CodecRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
         if BytesRead > 0 Then
           Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
       until _End;
       Freemem( Buffer );
 
-      vi := nil;
-      ov_clear( vf );
+      _vi := nil;
+      ov_clear( _vf );
     end;
   mem_Free( oggMemory );
 end;
