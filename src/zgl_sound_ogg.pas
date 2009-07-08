@@ -515,7 +515,7 @@ begin
       _vi       := ov_info( _vf, -1 );
       Frequency := _vi.rate;
       {$IFDEF USE_OPENAL}
-      case vi.channels of
+      case _vi.channels of
         1: format := AL_FORMAT_MONO16;
         2: format := AL_FORMAT_STEREO16;
       end;
