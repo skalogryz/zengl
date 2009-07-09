@@ -562,6 +562,11 @@ end;
 var
   cam2d_Set : procedure( const Camera : zglPCamera2D );
 
+// Render 2D
+  batch2d_Begin : procedure;
+  batch2d_End   : procedure;
+  batch2d_Flush : procedure;
+
 // Primitives 2D
 const
   PR2D_FILL   = $000001;
@@ -1156,6 +1161,10 @@ begin
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );
 
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );
+
+      batch2d_Begin := dlsym( zglLib, 'batch2d_Begin' );
+      batch2d_End := dlsym( zglLib, 'batch2d_End' );
+      batch2d_Flush := dlsym( zglLib, 'batch2d_Flush' );
 
       pr2d_Pixel := dlsym( zglLib, 'pr2d_Pixel' );
       pr2d_Line := dlsym( zglLib, 'pr2d_Line' );

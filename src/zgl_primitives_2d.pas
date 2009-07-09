@@ -40,20 +40,26 @@ procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : DWO
 implementation
 uses
   zgl_opengl_all,
+  zgl_render_2d,
   zgl_math_2d,
   zgl_fx;
 
 procedure pr2d_Pixel;
 begin
+  if ( not b2d_Started ) or batch2d_Check( GL_POINTS, 1, nil ) Then
+    begin
+      glEnable( GL_BLEND );
+      glBegin( GL_POINTS );
+    end;
+
   glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  gl_Vertex2f( X + 0.5, Y + 0.5 );
 
-  glEnable( GL_BLEND );
-
-  glBegin( GL_POINTS );
-    gl_Vertex2f( X + 0.5, Y + 0.5 );
-  glEnd;
-
-  glDisable( GL_BLEND );
+  if not b2d_Started Then
+    begin
+      glEnd;
+      glDisable( GL_BLEND );
+    end;
 end;
 
 procedure pr2d_Line;
@@ -89,71 +95,95 @@ begin
             _y1 := Y1 + 0.5;
             _y2 := Y2 + 0.5;
           end;
+
+  if ( not b2d_Started ) or batch2d_Check( GL_LINES, 1, nil ) Then
+    begin
+      if FX and PR2D_SMOOTH > 0 Then
+        begin
+          glEnable( GL_LINE_SMOOTH    );
+          glEnable( GL_POLYGON_SMOOTH );
+        end;
+      glEnable( GL_BLEND );
+
+      glBegin( GL_LINES );
+    end;
+
   glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+  gl_Vertex2f( _x1, _y1 );
+  if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+  gl_Vertex2f( _x2, _y2 );
 
-  if FX and PR2D_SMOOTH > 0 Then
+  if not b2d_Started Then
     begin
-      glEnable( GL_LINE_SMOOTH    );
-      glEnable( GL_POLYGON_SMOOTH );
-    end;
-  glEnable( GL_BLEND );
+      glEnd;
 
-  glBegin( GL_LINES );
-    if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-    gl_Vertex2f( _x1, _y1 );
-    if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-    gl_Vertex2f( _x2, _y2 );
-  glEnd;
-
-  if FX and PR2D_SMOOTH > 0 Then
-    begin
-      glDisable( GL_LINE_SMOOTH    );
-      glDisable( GL_POLYGON_SMOOTH );
+      if FX and PR2D_SMOOTH > 0 Then
+        begin
+          glDisable( GL_LINE_SMOOTH    );
+          glDisable( GL_POLYGON_SMOOTH );
+        end;
+      glDisable( GL_BLEND );
     end;
-  glDisable( GL_BLEND );
 end;
 
 procedure pr2d_Rect;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
-
-  glEnable( GL_BLEND );
-
  if FX and PR2D_FILL > 0 Then
    begin
-      glBegin( GL_QUADS );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-        gl_Vertex2f( X,     Y );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-        gl_Vertex2f( X + W, Y );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
-        gl_Vertex2f( X + W, Y + H );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
-        gl_Vertex2f( X,     Y + H );
-      glEnd;
+      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, 1, nil ) Then
+        begin
+          glEnable( GL_BLEND );
+          glBegin( GL_QUADS );
+        end;
+
+      glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      gl_Vertex2f( X,     Y );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+      gl_Vertex2f( X + W, Y );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+      gl_Vertex2f( X + W, Y + H );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+      gl_Vertex2f( X,     Y + H );
+
+      if not b2d_Started Then
+        begin
+          glEnd;
+          glDisable( GL_BLEND );
+        end;
    end else
     begin
-      glBegin( GL_LINES );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-        gl_Vertex2f( X + 0.5,     Y + 0.5 );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-        gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, 1, nil ) Then
+        begin
+          glEnable( GL_BLEND );
+          glBegin( GL_LINES );
+        end;
 
-        gl_Vertex2f( X + W - 0.5, Y + 0.5 );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
-        gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+      glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      gl_Vertex2f( X + 0.5,     Y + 0.5 );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+      gl_Vertex2f( X + W - 0.5, Y + 0.5 );
 
-        gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
-        gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+      gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+      gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
 
-        gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
-        if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-        gl_Vertex2f( X + 0.5,     Y + 0.5 );
-      glEnd;
+      gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+      gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+
+      gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      gl_Vertex2f( X + 0.5,     Y + 0.5 );
+
+      if not b2d_Started Then
+        begin
+          glEnd;
+          glDisable( GL_BLEND );
+        end;
     end;
-
-  glDisable( GL_BLEND );
 end;
 
 procedure pr2d_Circle;

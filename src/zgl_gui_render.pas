@@ -60,6 +60,7 @@ uses
   zgl_types,
   zgl_opengl_all,
   zgl_opengl_simple,
+  zgl_render_2d,
   zgl_mouse,
   zgl_primitives_2d,
   zgl_text,
@@ -99,6 +100,8 @@ end;
 procedure _scroll_draw( const X, Y, W, H : Single; const _type : Integer; const Pressed : Boolean );
 begin
   _button_draw( X, Y, W, H, Pressed );
+  if b2d_Started Then
+    batch2d_Flush;
   glColor4f( 0, 0, 0, 1 );
   case _type of
     SCROLL_UP:

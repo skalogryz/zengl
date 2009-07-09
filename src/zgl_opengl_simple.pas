@@ -41,7 +41,8 @@ uses
   zgl_application,
   zgl_window,
   zgl_screen,
-  zgl_Camera_2d,
+  zgl_render_2d,
+  zgl_camera_2d,
   zgl_opengl,
   zgl_opengl_all;
 
@@ -102,6 +103,8 @@ end;
 
 procedure scissor_Begin;
 begin
+  if b2d_Started Then
+    batch2d_Flush;
   if ( Width < 0 ) or ( Height < 0 ) Then
     exit;
   if cam2DGlobal <> @constCamera2D Then
@@ -136,6 +139,8 @@ end;
 
 procedure scissor_End;
 begin
+  if b2d_Started Then
+    batch2d_Flush;
   glDisable( GL_SCISSOR_TEST );
   if tSCount - 1 < 0 Then
     exit;

@@ -21,6 +21,8 @@
 }
 unit zgl_text;
 
+{$I zgl_config.cfg}
+
 interface
 uses
   zgl_types,
@@ -57,6 +59,7 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,
+  zgl_render_2d,
   zgl_fx,
   zgl_utils;
 
@@ -72,7 +75,8 @@ procedure text_Draw;
     lastPage : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
-
+  if b2d_Started Then
+    batch2d_Flush;
   glEnable( GL_BLEND );
   glEnable( GL_TEXTURE_2D );
 

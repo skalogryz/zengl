@@ -72,10 +72,17 @@ var
 
 implementation
 uses
-  zgl_opengl_all;
+  zgl_opengl_all,
+  zgl_render_2d;
 
 procedure fx_SetBlendMode;
 begin
+  if b2d_Started and ( Mode <> b2dcur_Blend ) Then
+    begin
+      batch2d_Flush;
+      b2d_New := TRUE;
+    end;
+  b2dcur_Blend := Mode;
   case Mode of
     FX_BLEND_NORMAL : glBlendFunc( GL_SRC_ALPHA,           GL_ONE_MINUS_SRC_ALPHA );
     FX_BLEND_ADD    : glBlendFunc( GL_SRC_ALPHA,           GL_ONE                 );
@@ -88,6 +95,12 @@ end;
 
 procedure fx2d_SetColorMix;
 begin
+  if b2d_Started and ( Color <> b2dcur_Color ) Then
+    begin
+      batch2d_Flush;
+      b2d_New := TRUE;
+    end;
+  b2dcur_Color := Color;
   FX2D_R :=   Color and $FF;
   FX2D_G := ( Color and $FF00 ) shr 8;
   FX2D_B :=   Color             shr 16;
