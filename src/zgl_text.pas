@@ -245,6 +245,7 @@ begin
             break;
           end;
       end;
+  WordsArray[ WordsCount - 1 ].LF := TRUE;
   WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
 
   l := 0;
@@ -285,7 +286,7 @@ begin
                 end else
                   if Flags and TEXT_HALIGN_RIGHT > 0 Then
                     begin
-                      W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+                      W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift * Byte( not WordsArray[ i - 1 ].LF ) );
                       for b := l to i - 1 do
                         INC( WordsArray[ b ].X, W );
                     end;
