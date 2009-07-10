@@ -53,6 +53,7 @@ uses
 
   zgl_fx,
   zgl_camera_2d,
+  zgl_render_2d,
 
   zgl_font,
   zgl_text,
@@ -193,11 +194,6 @@ exports
 
   // Camera 2D
   cam2d_Set                name prefix + 'cam2d_Set',
-
-  // Render 2D
-  batch2d_Begin            name prefix + 'batch2d_Begin',
-  batch2d_End              name prefix + 'batch2d_End',
-  batch2d_Flush            name prefix + 'batch2d_Flush',
 
   // Primitives 2D
   pr2d_Pixel               name prefix + 'pr2d_Pixel',

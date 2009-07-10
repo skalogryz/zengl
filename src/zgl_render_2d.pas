@@ -23,6 +23,7 @@ unit zgl_render_2d;
 
 interface
 uses
+  zgl_types,
   zgl_opengl_all,
   zgl_textures;
 
