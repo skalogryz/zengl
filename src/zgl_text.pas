@@ -258,7 +258,7 @@ begin
       X := X + WordsArray[ i ].W - SpaceShift;
       if i > 0 Then
         LineFeed := WordsArray[ i - 1 ].LF;
-      if ( ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) ) or LineFeed Then
+      if ( ( X >= Rect.X + Rect.W - 1 ) and ( i - l > 0 ) ) or LineFeed Then
         begin
           X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed ) - SpaceShift * Byte( Flags and TEXT_HALIGN_CENTER > 0 );
           if i > 0 Then
@@ -269,24 +269,24 @@ begin
 
           if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) and ( not LineFeed ) Then
             begin
-              W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+              W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
               while W > ( i - 1 ) - l do
                 begin
                   for b := l + 1 to i - 1 do
                     INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
-                  W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+                  W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
                 end;
               WordsArray[ i - 1 ].X := WordsArray[ i - 1 ].X + W;
             end else
               if Flags and TEXT_HALIGN_CENTER > 0 Then
                 begin
-                  W := ( Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift ) ) div 2;
+                  W := ( Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift ) ) div 2;
                   for b := l to i - 1 do
                     INC( WordsArray[ b ].X, W );
                 end else
                   if Flags and TEXT_HALIGN_RIGHT > 0 Then
                     begin
-                      W := Round( Rect.X + Rect.W ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift * Byte( not WordsArray[ i - 1 ].LF ) );
+                      W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift * Byte( not WordsArray[ i - 1 ].LF ) );
                       for b := l to i - 1 do
                         INC( WordsArray[ b ].X, W );
                     end;
@@ -299,13 +299,13 @@ begin
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
     begin
-      H := ( Round( Rect.Y + Rect.H ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
+      H := ( Round( Rect.Y + Rect.H - 1 ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
       for i := 0 to WordsCount - 1 do
         INC( WordsArray[ i ].Y, H );
     end else
       if Flags and TEXT_VALIGN_BOTTOM > 0 Then
         begin
-          H := Round( Rect.Y + Rect.H ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight );
+          H := Round( Rect.Y + Rect.H - 1 ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight );
           for i := 0 to WordsCount - 1 do
             INC( WordsArray[ i ].Y, H );
         end;

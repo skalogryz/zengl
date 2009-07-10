@@ -116,8 +116,8 @@ begin
     end;
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     begin
-      X      := Trunc( X * scr_ResCX + scr_AddCX );
-      Y      := Trunc( Y * scr_ResCY + scr_AddCY );
+      X      := Round( X * scr_ResCX + scr_AddCX );
+      Y      := Round( Y * scr_ResCY + scr_AddCY );
       Width  := Round( Width * scr_ResCX );
       Height := Round( Height * scr_ResCY );
     end;
