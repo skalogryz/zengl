@@ -82,7 +82,7 @@ begin
 
   glColor4ub( textRGBA[ 0 ], textRGBA[ 1 ], textRGBA[ 2 ], textRGBA[ 3 ] );
 
-  Y := Y - Font.MaxShiftY;
+  Y := Y - Font.MaxShiftY * textScale;
   if Flags and TEXT_HALIGN_CENTER > 0 Then
     X := X - Round( text_GetWidth( Font, Text, textStep ) / 2 ) * textScale
   else
