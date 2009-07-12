@@ -376,10 +376,16 @@ procedure scr_Flush;
     sync : LongWord;
 begin
 {$IFDEF LINUX}
-  if ( scr_VSync ) and ( ogl_CanVSync ) Then
+  if scr_VSync Then
     begin
-      glXGetVideoSyncSGI( sync );
-      glXWaitVideoSyncSGI( 2, ( sync + 1 ) mod 2, sync );
+      if ogl_CanVSync2 Then
+        glXSwapIntervalSGI( 1 )
+      else
+        if ogl_CanVSync Then
+          begin
+            glXGetVideoSyncSGI( sync );
+            glXWaitVideoSyncSGI( 2, ( sync + 1 ) mod 2, sync );
+          end;
       glFinish;
     end;
 

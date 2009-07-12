@@ -368,6 +368,7 @@ const
   procedure glXWaitX; cdecl; external libGL;
 
 var
+  glXSwapIntervalSGI: function( interval: Integer): Integer; cdecl;
   glXGetVideoSyncSGI: function(var counter: LongWord): Integer; cdecl;
   glXWaitVideoSyncSGI: function(divisor, remainder: Integer; var count: LongWord): Integer; cdecl;
 {$ENDIF}

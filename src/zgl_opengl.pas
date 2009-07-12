@@ -77,6 +77,7 @@ var
   ogl_MaxTexLevels  : Integer;
 
   {$IFDEF LINUX}
+  ogl_CanVSync2  : Boolean;
   ogl_Context    : GLXContext;
   ogl_VisualInfo : PXVisualInfo;
   ogl_Attr       : array[ 0..31 ] of Integer;
@@ -546,6 +547,12 @@ begin
       glXWaitVideoSyncSGI := gl_GetProc( 'glXWaitVideoSyncSGI' );
     end else
       ogl_CanVSync := FALSE;
+  if not ogl_CanVSync Then
+    begin
+      glXSwapIntervalSGI := gl_GetProc( 'glXSwapIntervalSGI' );
+      ogl_CanVSync  := Assigned( glXSwapIntervalSGI );
+      ogl_CanVSync2 := ogl_CanVSync;
+    end;
 {$ENDIF}
 {$IFDEF WIN32}
   wglGetSwapIntervalEXT := gl_GetProc( 'wglGetSwapIntervalEXT' );
