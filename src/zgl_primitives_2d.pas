@@ -46,13 +46,13 @@ uses
 
 procedure pr2d_Pixel;
 begin
-  if ( not b2d_Started ) or batch2d_Check( GL_POINTS, 1, nil ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
     begin
       glEnable( GL_BLEND );
       glBegin( GL_POINTS );
     end;
 
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
   gl_Vertex2f( X + 0.5, Y + 0.5 );
 
   if not b2d_Started Then
@@ -96,7 +96,7 @@ begin
             _y2 := Y2 + 0.5;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_LINES, 1, nil ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -108,7 +108,7 @@ begin
       glBegin( GL_LINES );
     end;
 
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
   if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
   gl_Vertex2f( _x1, _y1 );
   if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
@@ -131,13 +131,13 @@ procedure pr2d_Rect;
 begin
  if FX and PR2D_FILL > 0 Then
    begin
-      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, 1, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX_BLEND, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_QUADS );
         end;
 
-      glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+      glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
       gl_Vertex2f( X,     Y );
       if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
@@ -154,13 +154,13 @@ begin
         end;
    end else
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, 1, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_LINES );
         end;
 
-      glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+      glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
       gl_Vertex2f( X + 0.5,     Y + 0.5 );
       if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
@@ -191,7 +191,7 @@ procedure pr2d_Circle;
     i : Integer;
     k : Single;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   if FX and PR2D_SMOOTH > 0 Then
     begin
@@ -238,7 +238,7 @@ procedure pr2d_Ellipse;
     i : Integer;
     k : Single;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   if FX and PR2D_SMOOTH > 0 Then
     begin

@@ -488,9 +488,9 @@ begin
     begin
       P := Ptr( pData ) + i * 4;
       Gray := Round(
-                       PByte( P + 0 )^ * 0.3  +
-                       PByte( P + 1 )^ * 0.59 +
-                       PByte( P + 2 )^ * 0.11
+                       PByte( P + 0 )^ * 0.299 +
+                       PByte( P + 1 )^ * 0.587 +
+                       PByte( P + 2 )^ * 0.114
                      );
 
       PByte( P + 0 )^ := Gray;

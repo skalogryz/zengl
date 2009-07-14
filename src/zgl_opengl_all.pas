@@ -187,6 +187,31 @@ const
   GL_TEXTURE_WRAP_S                 = $2802;
   GL_TEXTURE_WRAP_T                 = $2803;
 
+  GL_COMBINE_ARB                    = $8570;
+  GL_COMBINE_RGB_ARB                = $8571;
+  GL_COMBINE_ALPHA_ARB              = $8572;
+  GL_SOURCE0_RGB_ARB                = $8580;
+  GL_SOURCE1_RGB_ARB                = $8581;
+  GL_SOURCE2_RGB_ARB                = $8582;
+  GL_SOURCE0_ALPHA_ARB              = $8588;
+  GL_SOURCE1_ALPHA_ARB              = $8589;
+  GL_SOURCE2_ALPHA_ARB              = $858A;
+  GL_OPERAND0_RGB_ARB               = $8590;
+  GL_OPERAND1_RGB_ARB               = $8591;
+  GL_OPERAND2_RGB_ARB               = $8592;
+  GL_OPERAND0_ALPHA_ARB             = $8598;
+  GL_OPERAND1_ALPHA_ARB             = $8599;
+  GL_OPERAND2_ALPHA_ARB             = $859A;
+  GL_RGB_SCALE_ARB                  = $8573;
+  GL_ADD_SIGNED_ARB                 = $8574;
+  GL_INTERPOLATE_ARB                = $8575;
+  GL_SUBTRACT_ARB                   = $84E7;
+  GL_CONSTANT_ARB                   = $8576;
+  GL_PRIMARY_COLOR_ARB              = $8577;
+  GL_PREVIOUS_ARB                   = $8578;
+  GL_DOT3_RGB                       = $86AE;
+  GL_DOT3_RGBA                      = $86AF;
+
   // Vertex Array
   GL_VERTEX_ARRAY                   = $8074;
   GL_NORMAL_ARRAY                   = $8075;
@@ -216,6 +241,12 @@ const
   GL_STENCIL_TEST                   = $0B90;
   GL_ALPHA_TEST                     = $0BC0;
   GL_SCISSOR_TEST                   = $0C11;
+
+  // StencilOp
+  GL_KEEP                           = $1E00;
+  GL_REPLACE                        = $1E01;
+  GL_INCR                           = $1E02;
+  GL_DECR                           = $1E03;
 
   // VBO
   GL_BUFFER_SIZE_ARB                = $8764;

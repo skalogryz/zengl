@@ -32,8 +32,7 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
-  zgl_types
-  ;
+  zgl_types;
 
 {$IFDEF LINUX_OR_DARWIN}
 type PFILE = Pointer;

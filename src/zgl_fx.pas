@@ -38,11 +38,12 @@ const
   FX2D_FLIPX    = $000001;
   FX2D_FLIPY    = $000002;
   FX2D_COLORMIX = $000004;
-  FX2D_VCA      = $000008;
-  FX2D_VCHANGE  = $000010;
-  FX2D_SCALE    = $000020;
+  FX2D_COLORSET = $000008;
+  FX2D_VCA      = $000010;
+  FX2D_VCHANGE  = $000020;
+  FX2D_SCALE    = $000040;
 
-  FX_BLEND      = $000040;
+  FX_BLEND      = $100000;
 
 procedure fx_SetBlendMode( const Mode : Byte );
 
@@ -101,31 +102,31 @@ begin
       b2d_New := TRUE;
     end;
   b2dcur_Color := Color;
-  FX2D_R :=   Color and $FF;
+  FX2D_R :=   Color             shr 16;
   FX2D_G := ( Color and $FF00 ) shr 8;
-  FX2D_B :=   Color             shr 16;
+  FX2D_B :=   Color and $FF;
 end;
 
 procedure fx2d_SetVCA;
 begin
-  FX2D_VR1 :=   C1 and $FF;
+  FX2D_VR1 :=   C1             shr 16;
   FX2D_VG1 := ( C1 and $FF00 ) shr 8;
-  FX2D_VB1 :=   C1             shr 16;
+  FX2D_VB1 :=   C1 and $FF;
   FX2D_VA1 := A1;
 
-  FX2D_VR2 :=   C2 and $FF;
+  FX2D_VR2 :=   C2             shr 16;
   FX2D_VG2 := ( C2 and $FF00 ) shr 8;
-  FX2D_VB2 :=   C2             shr 16;
+  FX2D_VB2 :=   C2 and $FF;
   FX2D_VA2 := A2;
 
-  FX2D_VR3 :=   C3 and $FF;
+  FX2D_VR3 :=   C3             shr 16;
   FX2D_VG3 := ( C3 and $FF00 ) shr 8;
-  FX2D_VB3 :=   C3             shr 16;
+  FX2D_VB3 :=   C3 and $FF;
   FX2D_VA3 := A3;
 
-  FX2D_VR4 :=   C4 and $FF;
+  FX2D_VR4 :=   C4             shr 16;
   FX2D_VG4 := ( C4 and $FF00 ) shr 8;
-  FX2D_VB4 :=   C4             shr 16;
+  FX2D_VB4 :=   C4 and $FF;
   FX2D_VA4 := A4;
 end;
 

@@ -34,8 +34,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_opengl_all
-  ;
+  zgl_opengl_all;
 
 function  gl_Create : Boolean;
 procedure gl_Destroy;

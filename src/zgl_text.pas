@@ -37,6 +37,7 @@ const
   TEXT_VALIGN_TOP     = $000010;
   TEXT_VALIGN_CENTER  = $000020;
   TEXT_VALIGN_BOTTOM  = $000040;
+  TEXT_FX_VCA         = $000080;
 
 type
   zglTTextWord = record
@@ -105,45 +106,91 @@ begin
       glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
     end;
   glBegin( GL_QUADS );
-  while i <= length( Text ) do
+  if Flags and TEXT_FX_VCA > 0 Then
     begin
-      if Text[ i ] = #10 Then
+      while i <= length( Text ) do
         begin
-          X := sx;
-          Y := Y + Font.MaxHeight;
+          if Text[ i ] = #10 Then
+            begin
+              X := sx;
+              Y := Y + Font.MaxHeight;
+            end;
+          c := font_GetCID( Text, i, @i );
+
+          if not Assigned( Font.CharDesc[ c ] ) Then continue;
+
+          if lastPage <> Font.CharDesc[ c ].Page Then
+            begin
+              lastPage := Font.CharDesc[ c ].Page;
+
+              glEnd;
+
+              glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
+              glBegin( GL_QUADS );
+            end;
+
+          glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 0 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX - Font.Padding[ 0 ] ) * textScale,
+                       Y + ( Font.CharDesc[ c ].ShiftY + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) - Font.Padding[ 1 ] ) * textScale );
+
+          glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 1 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale,
+                       Y + ( Font.CharDesc[ c ].ShiftY + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) - Font.Padding[ 1 ] ) * textScale );
+
+          glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 2 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX + Font.CharDesc[ c ].Width ) * textScale + Font.Padding[ 2 ],
+                       Y + ( Font.CharDesc[ c ].ShiftY + Font.CharDesc[ c ].Height + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) + Font.Padding[ 3 ] ) * textScale );
+
+          glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 3 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX - Font.Padding[ 0 ] ) * textScale,
+                       Y + ( Font.CharDesc[ c ].ShiftY + Font.CharDesc[ c ].Height + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) + Font.Padding[ 3 ] ) * textScale );
+
+          X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;
         end;
-      c := font_GetCID( Text, i, @i );
-
-      if not Assigned( Font.CharDesc[ c ] ) Then continue;
-
-      if lastPage <> Font.CharDesc[ c ].Page Then
+    end else
+      while i <= length( Text ) do
         begin
-          lastPage := Font.CharDesc[ c ].Page;
+          if Text[ i ] = #10 Then
+            begin
+              X := sx;
+              Y := Y + Font.MaxHeight;
+            end;
+          c := font_GetCID( Text, i, @i );
 
-          glEnd;
+          if not Assigned( Font.CharDesc[ c ] ) Then continue;
 
-          glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
-          glBegin( GL_QUADS );
+          if lastPage <> Font.CharDesc[ c ].Page Then
+            begin
+              lastPage := Font.CharDesc[ c ].Page;
+
+              glEnd;
+
+              glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
+              glBegin( GL_QUADS );
+            end;
+
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 0 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX - Font.Padding[ 0 ] ) * textScale,
+                       Y + ( Font.CharDesc[ c ].ShiftY + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) - Font.Padding[ 1 ] ) * textScale );
+
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 1 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale,
+                       Y + ( Font.CharDesc[ c ].ShiftY + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) - Font.Padding[ 1 ] ) * textScale );
+
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 2 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX + Font.CharDesc[ c ].Width ) * textScale + Font.Padding[ 2 ],
+                       Y + ( Font.CharDesc[ c ].ShiftY + Font.CharDesc[ c ].Height + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) + Font.Padding[ 3 ] ) * textScale );
+
+          glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 3 ] );
+          gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX - Font.Padding[ 0 ] ) * textScale,
+                       Y + ( Font.CharDesc[ c ].ShiftY + Font.CharDesc[ c ].Height + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) + Font.Padding[ 3 ] ) * textScale );
+
+          X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;
         end;
-
-      glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 0 ] );
-      gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX - Font.Padding[ 0 ] ) * textScale,
-                   Y + ( Font.CharDesc[ c ].ShiftY + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) - Font.Padding[ 1 ] ) * textScale );
-
-      glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 1 ] );
-      gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale,
-                   Y + ( Font.CharDesc[ c ].ShiftY + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) - Font.Padding[ 1 ] ) * textScale );
-
-      glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 2 ] );
-      gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX + Font.CharDesc[ c ].Width ) * textScale + Font.Padding[ 2 ],
-                   Y + ( Font.CharDesc[ c ].ShiftY + Font.CharDesc[ c ].Height + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) + Font.Padding[ 3 ] ) * textScale );
-
-      glTexCoord2fv( @Font.CharDesc[ c ].TexCoords[ 3 ] );
-      gl_Vertex2f( X + ( Font.CharDesc[ c ].ShiftX - Font.Padding[ 0 ] ) * textScale,
-                   Y + ( Font.CharDesc[ c ].ShiftY + Font.CharDesc[ c ].Height + ( Font.MaxHeight - Font.CharDesc[ c ].Height ) + Font.Padding[ 3 ] ) * textScale );
-
-      X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;
-    end;
   glEnd;
 
   glDisable( GL_BLEND );
@@ -152,9 +199,9 @@ end;
 
 procedure text_DrawEx;
 begin
-  textRGBA[ 0 ] :=   Color and $FF;
+  textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
-  textRGBA[ 2 ] :=   Color             shr 16;
+  textRGBA[ 2 ] :=   Color and $FF;
   textRGBA[ 3 ] := Alpha;
   textScale     := Scale;
   textStep      := Step;
@@ -234,7 +281,12 @@ begin
             WordsArray[ i ].LFShift := W + 1;
             WordsArray[ i ].W       := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
             if length( WordsArray[ i ].str ) > H - 1 Then
-              WordsArray[ i ].ShiftX  := Font.CharDesc[ font_GetCID( WordsArray[ i ].str, H, @H ) ].ShiftX;
+              begin
+                W := font_GetCID( WordsArray[ i ].str, H, @H );
+                while not Assigned( Font.CharDesc[ W ] ) do
+                  W := font_GetCID( WordsArray[ i ].str, H, @H );
+                WordsArray[ i ].ShiftX := Font.CharDesc[ W ].ShiftX;
+              end;
             if LineFeed Then
               b := j + 2
             else
@@ -319,9 +371,9 @@ end;
 
 procedure text_DrawInRectEx;
 begin
-  textRGBA[ 0 ] :=   Color and $FF;
+  textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
-  textRGBA[ 2 ] :=   Color             shr 16;
+  textRGBA[ 2 ] :=   Color and $FF;
   textRGBA[ 3 ] := Alpha;
   textScale     := Scale;
   textStep      := Step;

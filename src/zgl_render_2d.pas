@@ -30,13 +30,14 @@ uses
 procedure batch2d_Begin;
 procedure batch2d_End;
 procedure batch2d_Flush;
-function  batch2d_Check( const Mode, Blend : DWORD; const Texture : zglPTexture ) : Boolean;
+function  batch2d_Check( const Mode, FX : DWORD; const Texture : zglPTexture ) : Boolean;
 
 var
   b2d_Started  : Boolean;
   b2d_New      : Boolean;
   b2d_Batches  : Integer;
   b2dcur_Mode  : DWORD;
+  b2dcur_FX    : DWORD;
   b2dcur_Blend : DWORD;
   b2dcur_Color : DWORD;
   b2dcur_Tex   : zglPTexture;
@@ -56,6 +57,7 @@ begin
   batch2d_Flush;
   b2d_Batches  := 0;
   b2dcur_Mode  := 0;
+  b2dcur_FX    := 0;
   b2dcur_Blend := 0;
   b2dcur_Color := $FFFFFF;
   b2dcur_Tex   := nil;
@@ -80,16 +82,18 @@ function batch2d_Check;
 begin
   if ( Mode <> b2dcur_Mode ) or
      ( Texture <> b2dcur_Tex ) or
-     ( ( Blend <> 1 ) and ( b2dcur_Blend <> 0 ) ) Then
+     ( FX and FX2D_COLORSET <> b2dcur_FX and FX2D_COLORSET ) or
+     ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) Then
     begin
       if not b2d_New Then
         batch2d_Flush;
       b2d_New := TRUE;
     end;
 
-  b2dcur_Mode  := Mode;
-  b2dcur_Tex   := Texture;
-  if Blend = 0 Then
+  b2dcur_Mode := Mode;
+  b2dcur_Tex  := Texture;
+  b2dcur_FX   := FX;
+  if FX and FX_BLEND = 0 Then
     b2dcur_Blend := 0;
 
   Result := b2d_New;

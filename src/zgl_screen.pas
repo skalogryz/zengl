@@ -34,8 +34,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_opengl_all
-  ;
+  zgl_opengl_all;
 
 const
   REFRESH_MAXIMUM = 0;

@@ -78,7 +78,7 @@ begin
   else
     X := ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width / 2 ) - ( ogl_Width / 2 ) * cam2dGlobal.Zoom.X );
 
-  if cam2dGlobal.Zoom.X = 1 Then
+  if cam2dGlobal.Zoom.Y = 1 Then
     Y := Y - cam2dGlobal.Y
   else
     Y := ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y );
