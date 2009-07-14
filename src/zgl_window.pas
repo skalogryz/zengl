@@ -34,8 +34,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_const
-  ;
+  zgl_const;
 
 function  wnd_Create( const Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
@@ -114,6 +113,7 @@ begin
       wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
     end;
 {$IFDEF LINUX}
+  FillChar( wnd_Attr, SizeOf( wnd_Attr ), 0 );
   wnd_Attr.colormap   := XCreateColormap( scr_Display, wnd_Root, ogl_VisualInfo.visual, AllocNone );
   wnd_Attr.event_mask := ExposureMask or
                          FocusChangeMask or
@@ -128,12 +128,8 @@ begin
       wnd_X := 0;
       wnd_Y := 0;
       wnd_Attr.override_redirect := True;
-      wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWX or CWY or CWWidth or CWHeight or CWCursor or CWBorderPixel;
-    end else
-      begin
-        wnd_Attr.override_redirect := False;
-        wnd_ValueMask := CWColormap or CWEventMask or CWX or CWY or CWWidth or CWHeight or CWCursor or CWBorderPixel;
-      end;
+    end else wnd_Attr.override_redirect := False;
+  wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
 
   wnd_Handle := XCreateWindow( scr_Display,
                                wnd_Root,
