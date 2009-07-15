@@ -263,6 +263,7 @@ begin
 {$IFDEF USE_OPENAL}
   alDeleteSources( 1, @sfSource );
   alDeleteBuffers( sfBufCount, @sfBuffers[ 0 ] );
+  alDeleteSources( length( oal_Sources ), @oal_Sources[ 0 ] );
 
   log_Add( 'OpenAL: destroy current sound context' );
   alcDestroyContext( oal_Context );
@@ -418,7 +419,6 @@ function snd_Play;
     i, j      : Integer;
     {$IFDEF USE_OPENAL}
     sourcePos : array[ 0..2 ] of Single;
-    sourceNew : Boolean;
     {$ELSE}
     DSERROR : HRESULT;
     Status  : DWORD;
