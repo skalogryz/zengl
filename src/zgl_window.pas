@@ -446,22 +446,21 @@ begin
   if wnd_Handle = 0 Then exit;
 
   app_ShowCursor := Show;
-  case Show of
-    TRUE:
+  if Show Then
+    begin
       if app_Cursor <> None Then
         begin
           XFreeCursor( scr_Display, app_Cursor );
           app_Cursor := None;
           XDefineCursor( scr_Display, wnd_Handle, app_Cursor );
         end;
-    FALSE:
+    end else
       begin
-        mask := XCreatePixmap( scr_Display, wnd_Handle, 1, 1, 1 );
+        mask := XCreatePixmap( scr_Display, wnd_Root, 1, 1, 1 );
         FillChar( xcolor, SizeOf( xcolor ), 0 );
         app_Cursor := XCreatePixmapCursor( scr_Display, mask, mask, @xcolor, @xcolor, 0, 0 );
         XDefineCursor( scr_Display, wnd_Handle, app_Cursor );
       end;
-   end;
 {$ENDIF}
 {$IFDEF WIN32}
 begin
