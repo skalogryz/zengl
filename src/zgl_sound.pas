@@ -39,8 +39,7 @@ uses
   {$ENDIF}
   zgl_types,
   zgl_file,
-  zgl_memory
-  ;
+  zgl_memory;
 
 const
   SND_ALL    = -2;
@@ -115,7 +114,7 @@ end;
 
 function  snd_Init : Boolean;
 procedure snd_Free;
-function  snd_Add( const BufferCount, SourceCount : Integer ) : zglPSound;
+function  snd_Add( const SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
 function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer = 16 ) : zglPSound;
 function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 16 ) : zglPSound;
@@ -128,7 +127,7 @@ procedure snd_SetFrequencyCoeff( const Sound : zglPSound; const Coefficient : Si
 
 procedure snd_PlayFile( const FileName : String; const Loop : Boolean );
 procedure snd_StopFile;
-function  snd_ProcFile( data : Pointer ) : PInteger;
+function  snd_ProcFile( data : Pointer ) : PInteger; {$IFDEF WIN32} stdcall; {$ENDIF}
 procedure snd_ResumeFile;
 
 var
@@ -215,6 +214,19 @@ begin
 
   alGenSources( 1, @sfSource );
   alGenBuffers( sfBufCount, @sfBuffers );
+
+  while TRUE do
+    begin
+      SetLength( oal_Sources, length( oal_Sources ) + 1 );
+      alGenSources( 1, @oal_Sources[ length( oal_Sources ) - 1 ] );
+      if oal_Sources[ length( oal_Sources ) - 1 ] = 0 Then
+        begin
+          SetLength( oal_Sources, length( oal_Sources ) - 1 );
+          SetLength( oal_Pointer, length( oal_Sources ) - 1 );
+          break;
+        end;
+    end;
+  log_Add( 'OpenAL: generate ' + u_IntToStr( length( oal_Sources ) ) + ' source' );
 {$ELSE}
   log_Add( 'DirectSound: load DSound.dll' );
   if not InitDSound Then
@@ -287,12 +299,11 @@ begin
   Result           := Result.Next;
 
 {$IFDEF USE_OPENAL}
-  if BufferCount > 0 Then
-    alGenBuffers( BufferCount, @Result.Buffer );
+  alGenBuffers( 1, @Result.Buffer );
   Result.sCount := SourceCount;
   SetLength( Result.Source, SourceCount );
   for i := 0 to SourceCount - 1 do
-    alGenSources( 1, @Result.Source[ i ] );
+    Result.Source[ i ] := 0;
 {$ELSE}
   Result.sCount := SourceCount;
   SetLength( Result.Source, SourceCount );
@@ -308,15 +319,13 @@ begin
   if not Assigned( Sound ) Then exit;
 
 {$IFDEF USE_OPENAL}
-  for i := 0 to Sound.sCount - 1 do
-    alDeleteSources( 1, @Sound.Source[ i ] );
   alDeleteBuffers( 1, @Sound.Buffer );
 {$ELSE}
+  FreeMemory( Sound.Data );
   for i := 0 to Sound.sCount - 1 do
     Sound.Source[ i ] := nil;
 {$ENDIF}
   SetLength( Sound.Source, 0 );
-  FreeMemory( Sound.Data );
 
   if Assigned( Sound.Prev ) Then
     Sound.Prev.Next := Sound.Next;
@@ -344,7 +353,7 @@ begin
       log_Add( 'Cannot read ' + FileName );
       exit;
     end;
-  Result := snd_Add( 1, SourceCount );
+  Result := snd_Add( SourceCount );
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     begin
@@ -362,6 +371,7 @@ begin
 
 {$IFDEF USE_OPENAL}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
+  FreeMemory( Result.Data );
 {$ELSE}
   Result.Source[ 0 ] := dsu_CreateBuffer( Result.Size, Pointer( f ) );
   dsu_FillData( Result.Source[ 0 ], Result.Data, Result.Size );
@@ -381,7 +391,7 @@ begin
 
   if not sndInitialized Then exit;
 
-  Result := snd_Add( 1, SourceCount );
+  Result := snd_Add( SourceCount );
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerSound.Formats[ i ].Extension Then
@@ -408,6 +418,7 @@ function snd_Play;
     i, j      : Integer;
     {$IFDEF USE_OPENAL}
     sourcePos : array[ 0..2 ] of Single;
+    sourceNew : Boolean;
     {$ELSE}
     DSERROR : HRESULT;
     Status  : DWORD;
@@ -423,6 +434,9 @@ begin
 {$IFDEF USE_OPENAL}
   for i := 0 to Sound.sCount - 1 do
     begin
+      if Sound.Source[ i ] = 0 Then
+        Sound.Source[ i ] := oal_Getsource( @Sound.Source[ i ] );
+
       alGetSourcei( Sound.Source[ i ], AL_SOURCE_STATE, j );
       if j <> AL_PLAYING Then
          begin
@@ -458,7 +472,10 @@ begin
           if ( Status and DSBSTATUS_BUFFERLOST ) <> 0 Then
             begin
               Sound.Source[ i ].Restore;
-              dsu_FillData( Sound.Source[ i ], Sound.Data, Sound.Size );
+              if i = 0 Then
+                dsu_FillData( Sound.Source[ i ], Sound.Data, Sound.Size )
+              else
+                ds_Device.DuplicateSoundBuffer( Sound.Source[ 0 ], Sound.Source[ i ] );
             end;
           Result := i;
           break;
@@ -821,6 +838,8 @@ begin
           BytesRead := sfStream.CodecRead( sfStream.Buffer, sfStream.BufferSize, _End );
           alBufferData( buffer, sfFormat[ sfStream.Channels ], sfStream.Buffer, BytesRead, sfStream.Rate );
           alSourceQueueBuffers( sfSource, 1, @buffer );
+
+          if _End Then break;
 
           DEC( processed );
         end;

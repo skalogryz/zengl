@@ -71,6 +71,8 @@ const
 function  InitOpenAL : Boolean;
 procedure FreeOpenAL;
 
+function oal_GetSource( const Source : Pointer ) : LongWord;
+
 type
   PALCdevice = ^ALCdevice;
   ALCdevice  = record
@@ -114,11 +116,16 @@ var
 
   oal_Device  : PALCdevice  = nil;
   oal_Context : PALCcontext = nil;
+  oal_Sources : array of LongWord;
+  oal_Pointer : array of Pointer;
 
   // Параметры слушателя
   oal_Position    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
   oal_Velocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 ); //движение
   oal_Orientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
+
+  // Форматы звука для количества каналов
+  oal_Format  : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
 
 implementation
 uses
@@ -167,6 +174,25 @@ end;
 procedure FreeOpenAL;
 begin
   dlclose( oal_Library );
+end;
+
+function oal_GetSource;
+  var
+    i, state : Integer;
+begin
+  Result := 0;
+  for i := 0 to length( oal_Sources ) - 1 do
+    begin
+      alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, state );
+      if state <> AL_PLAYING Then
+        begin
+          if Assigned( oal_Pointer[ i ] ) Then
+            LongWord( oal_Pointer[ i ]^ ) := 0;
+          oal_Pointer[ i ] := Source;
+          Result := oal_Sources[ i ];
+          break;
+        end;
+    end;
 end;
 
 end.

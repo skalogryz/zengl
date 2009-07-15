@@ -533,8 +533,6 @@ begin
       format := Ptr( @oggBufferDesc.Formatcode );
       {$ENDIF}
 
-      ov_time_seek( _vf, 0 );
-
       size := 0;
       zgl_GetMem( Buffer, 64 * 1024 );
       // Т.к. ov_pcm_total почему-то возвращает бред, приходится извращаться :)
@@ -547,7 +545,6 @@ begin
 
       zgl_GetMem( Data, size );
       ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc );
-      ov_time_seek( _vf, 0 );
       size := 0;
       repeat
         BytesRead := CodecRead( Buffer, 64 * 1024, _End );

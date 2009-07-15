@@ -36,9 +36,7 @@ uses
   MacOSAll,
   {$ENDIF}
   zgl_const,
-  zgl_types,
-  zgl_opengl_all
-  ;
+  zgl_types;
 
 procedure zero;
 procedure zerou( dt : Double );
@@ -91,7 +89,6 @@ implementation
 uses
   zgl_screen,
   zgl_window,
-  zgl_opengl,
   zgl_log,
   zgl_keyboard,
   zgl_mouse,
