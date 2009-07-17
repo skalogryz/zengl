@@ -79,7 +79,7 @@ var
   {$ENDIF}
   app_ShowCursor : Boolean = TRUE;
 
-  app_FPS      : DWORD = 1000;
+  app_FPS      : DWORD;
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
 
@@ -193,9 +193,8 @@ begin
                   begin
                     if j > currTimer^.LastTick + currTimer^.Interval Then
                       begin
+                        currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
                         currTimer^.OnTimer;
-                        j := timer_GetTicks;
-                        currTimer^.LastTick := j;
                       end;
                   end else currTimer^.LastTick := timer_GetTicks;
 
