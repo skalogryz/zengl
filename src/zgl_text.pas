@@ -390,16 +390,25 @@ function text_GetWidth;
   var
     i : Integer;
     c : DWORD;
+    lResult : Single;
 begin
-  Result := 0;
+  lResult := 0;
+  Result  := 0;
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   i  := 1;
   while i <= length( Text ) do
     begin
       c := font_GetCID( Text, i, @i );
-      if Assigned( Font.CharDesc[ c ] ) Then
-        Result := Result + Font.CharDesc[ c ].ShiftP + Step;
+      if c = 10 Then
+        begin
+          lResult := Result;
+          Result  := 0;
+        end else
+          if Assigned( Font.CharDesc[ c ] ) Then
+            Result := Result + Font.CharDesc[ c ].ShiftP + Step;
     end;
+  if lResult > Result Then
+    Result := lResult;
 end;
 
 end.
