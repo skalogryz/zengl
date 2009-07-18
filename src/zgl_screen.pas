@@ -34,6 +34,7 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
+  zgl_types,
   zgl_opengl_all;
 
 const
@@ -92,7 +93,7 @@ var
   scr_Settings  : TXF86VidModeModeInfo;
   scr_Desktop   : TXF86VidModeModeInfo;
   scr_ModeCount : DWORD;
-  scr_ModeList  : array of PXF86VidModeModeInfo;
+  scr_ModeList  : PPXF86VidModeModeInfo;
   {$ENDIF}
   {$IFDEF WIN32}
   scr_Settings : DEVMODE;
@@ -301,7 +302,7 @@ begin
 {$IFDEF LINUX}
   for i := 0 to scr_ModeCount - 1 do
     begin
-      tmp_Settings := scr_ModeList[ i ]^;
+      tmp_Settings := PXF86VidModeModeInfo( Ptr( scr_ModeList^ ) + i * SizeOf( TXF86VidModeModeInfo ) )^;
       if not Already( tmp_Settings.hdisplay, tmp_Settings.vdisplay ) Then
         begin
           INC( scr_ResList.Count );
@@ -334,7 +335,6 @@ begin
 {$IFDEF LINUX}
   scr_Reset;
   XFree( scr_ModeList );
-  SetLength( scr_ModeList, 0 );
   glXWaitX;
 {$ENDIF}
 {$IFDEF WIN32}
@@ -456,7 +456,7 @@ begin
 {$IFDEF LINUX}
   for modeToSet := 0 to scr_ModeCount - 1 do
     begin
-      scr_Settings := scr_ModeList[ modeToSet ]^;
+      scr_Settings := PXF86VidModeModeInfo( Ptr( scr_ModeList^ ) + modeToSet * SizeOf( TXF86VidModeModeInfo ) )^;
       if ( scr_Settings.hdisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
     end;
   if ( scr_Settings.hdisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
