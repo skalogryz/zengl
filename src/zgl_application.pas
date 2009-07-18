@@ -143,7 +143,7 @@ end;
 procedure app_MainLoop;
   var
     i, z : Integer;
-    j, dt, odt : Double;
+    j, dt : Double;
     currTimer : zglPTimer;
     {$IFDEF WIN32}
     SysInfo : _SYSTEM_INFO;
@@ -160,7 +160,7 @@ begin
   app_PLoad;
   scr_Flush;
 
-  odt := timer_GetTicks;
+  dt := timer_GetTicks;
   timer_Reset;
   timer_Add( @app_CalcFPS, 1000 );
   while app_Work do
@@ -218,8 +218,8 @@ begin
       TimersToKill  := 0;
 
       if app_Pause Then continue;
-      app_PUpdate( timer_GetTicks - odt );
-      odt := timer_GetTicks;
+      app_PUpdate( timer_GetTicks - dt );
+      dt := timer_GetTicks;
       app_Draw;
     end;
 end;

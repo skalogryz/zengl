@@ -455,6 +455,12 @@ procedure tex_CalcPOT;
 begin
   w := u_GetPOT( Width );
   h := u_GetPOT( Height );
+  if ( w = Width ) and ( h = Height ) Then
+    begin
+      U := 1;
+      V := 1;
+      exit;
+    end;
   U := Width  / w;
   V := Height / h;
 
@@ -462,16 +468,17 @@ begin
   Move( pData^, Pointer( Data )^, Width * Height * 4 );
   FreeMem( pData );
   zgl_GetMem( pData, w * h * 4 );
-  FillChar( pData^, w * h * 4, 0 );
 
   for i := 0 to Height - 1 do
     for j := 0 to Width - 1 do
-      begin
-        PByte( Ptr( pData ) + j * 4 + i * w * 4 + 0 )^ := Data[ j * 4 + i * Width * 4 + 0 ];
-        PByte( Ptr( pData ) + j * 4 + i * w * 4 + 1 )^ := Data[ j * 4 + i * Width * 4 + 1 ];
-        PByte( Ptr( pData ) + j * 4 + i * w * 4 + 2 )^ := Data[ j * 4 + i * Width * 4 + 2 ];
-        PByte( Ptr( pData ) + j * 4 + i * w * 4 + 3 )^ := Data[ j * 4 + i * Width * 4 + 3 ];
-      end;
+      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 + 0 )^ := PDWORD( @Data[ j * 4 + i * Width * 4 ] )^;
+
+  for i := Height to h - 1 do
+    for j := 0 to Width - 1 do
+      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + j * 4 + ( Height - 1 ) * w * 4 )^;
+  for i := 0 to h - 1 do
+    for j := Width to w - 1 do
+      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
 
   Width  := w;
   Height := h;
@@ -618,14 +625,14 @@ begin
           Fill( pData, i, Width, Height );
     end else
       begin
-        r := ( TransparentColor and $FF     );
+        r := ( TransparentColor and $FF0000 ) shr 16;
         g := ( TransparentColor and $FF00   ) shr 8;
-        b := ( TransparentColor and $FF0000 ) shr 16;
+        b := ( TransparentColor and $FF     );
         for i := 0 to Width * Height - 1 do
-      if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = b ) and
-         ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
-         ( PByte( Ptr( pData ) + 2 + i * 4 )^ = r ) Then
-        Fill( pData, i, Width, Height );
+          if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and
+             ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
+             ( PByte( Ptr( pData ) + 2 + i * 4 )^ = b ) Then
+            Fill( pData, i, Width, Height );
     end;
 end;
 
