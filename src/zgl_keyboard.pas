@@ -51,7 +51,7 @@ const
   K_BACKSPACE  = $0E;
   K_SPACE      = $39;
   K_TAB        = $0F;
-  K_TILDA      = $29;
+  K_TILDE      = $29;
 
   K_INSERT     = $D2;
   K_DELETE     = $D3;
@@ -284,7 +284,7 @@ begin
   Result := 0;
 
   case ScanCode of
-    K_TILDA:  Result := 96;
+    K_TILDE:  Result := 96;
     K_MINUS,
     K_KP_SUB: Result := 45;
     K_EQUALS: Result := 61;
@@ -399,7 +399,7 @@ begin
     //XK_BackSpace:    Result := K_BACKSPACE;
     //XK_Space:        Result := K_SPACE;
     //XK_Tab:          Result := K_TAB;
-    //XK_Grave:        Result := K_TILDA;
+    //XK_Grave:        Result := K_TILDE;
 
     XK_Insert:       Result := K_INSERT;
     XK_Delete:       Result := K_DELETE;

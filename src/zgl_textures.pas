@@ -368,6 +368,7 @@ begin
   Result.FramesY := 1;
   Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 )
                                   xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 );
+  tex_CalcTransparent( pData, $FF000000, Result.Width, Result.Height );
   tex_Create( Result^, pData );
   tex_Del( Texture );
 

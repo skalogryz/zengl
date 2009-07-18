@@ -217,7 +217,11 @@ begin
         timer_Del( aTimersToKill[ i ] );
       TimersToKill  := 0;
 
-      if app_Pause Then continue;
+      if app_Pause Then
+        begin
+          dt := timer_GetTicks;
+          continue;
+        end;
       app_PUpdate( timer_GetTicks - dt );
       dt := timer_GetTicks;
       app_Draw;
