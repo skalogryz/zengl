@@ -191,15 +191,6 @@ procedure pr2d_Circle;
     i : Integer;
     k : Single;
 begin
-  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-
-  if FX and PR2D_SMOOTH > 0 Then
-    begin
-      glEnable( GL_LINE_SMOOTH    );
-      glEnable( GL_POLYGON_SMOOTH );
-    end;
-  glEnable( GL_BLEND );
-
   if Quality > 360 Then
     k := 360
   else
@@ -207,30 +198,70 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      glBegin( GL_LINES );
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
+        begin
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glEnable( GL_LINE_SMOOTH    );
+              glEnable( GL_POLYGON_SMOOTH );
+            end;
+          glEnable( GL_BLEND );
+
+          glBegin( GL_LINES );
+        end;
+
+      glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       for i := 0 to Quality - 1 do
         begin
           gl_Vertex2f( X + Radius * CosTable[ Round( i * k ) ], Y + Radius * SinTable[ Round( i * k ) ] );
           gl_Vertex2f( X + Radius * CosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ Round( ( i + 1 ) * k ) ] );
         end;
+
+      if not b2d_Started Then
+        begin
+          glEnd;
+
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glDisable( GL_LINE_SMOOTH    );
+              glDisable( GL_POLYGON_SMOOTH );
+            end;
+          glDisable( GL_BLEND );
+        end;
     end else
       begin
-        glBegin( GL_TRIANGLES );
+        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND, nil ) Then
+          begin
+            if FX and PR2D_SMOOTH > 0 Then
+              begin
+                glEnable( GL_LINE_SMOOTH    );
+                glEnable( GL_POLYGON_SMOOTH );
+              end;
+            glEnable( GL_BLEND );
+
+            glBegin( GL_TRIANGLES );
+          end;
+
+        glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
         for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );
             gl_Vertex2f( X + Radius * CosTable[ Round( i * k ) ], Y + Radius * SinTable[ Round( i * k ) ] );
             gl_Vertex2f( X + Radius * CosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ Round( ( i + 1 ) * k ) ] );
           end;
-      end;
-  glEnd;
 
-  if FX and PR2D_SMOOTH > 0 Then
-    begin
-      glDisable( GL_LINE_SMOOTH    );
-      glDisable( GL_POLYGON_SMOOTH );
-    end;
-  glDisable( GL_BLEND );
+        if not b2d_Started Then
+          begin
+            glEnd;
+
+            if FX and PR2D_SMOOTH > 0 Then
+              begin
+                glDisable( GL_LINE_SMOOTH    );
+                glDisable( GL_POLYGON_SMOOTH );
+              end;
+            glDisable( GL_BLEND );
+          end;
+      end;
 end;
 
 procedure pr2d_Ellipse;
@@ -238,15 +269,6 @@ procedure pr2d_Ellipse;
     i : Integer;
     k : Single;
 begin
-  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-
-  if FX and PR2D_SMOOTH > 0 Then
-    begin
-      glEnable( GL_LINE_SMOOTH    );
-      glEnable( GL_POLYGON_SMOOTH );
-    end;
-  glEnable( GL_BLEND );
-
   if Quality > 360 Then
     k := 360
   else
@@ -254,30 +276,70 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      glBegin( GL_LINES );
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
+        begin
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glEnable( GL_LINE_SMOOTH    );
+              glEnable( GL_POLYGON_SMOOTH );
+            end;
+          glEnable( GL_BLEND );
+
+          glBegin( GL_LINES );
+        end;
+
+      glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + xRadius * SinTable[ Round( i * k ) ] );
-          gl_Vertex2f( X + yRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
+          gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + yRadius * SinTable[ Round( i * k ) ] );
+          gl_Vertex2f( X + xRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
+        end;
+
+      if not b2d_Started Then
+        begin
+          glEnd;
+
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glDisable( GL_LINE_SMOOTH    );
+              glDisable( GL_POLYGON_SMOOTH );
+            end;
+          glDisable( GL_BLEND );
         end;
     end else
       begin
-        glBegin( GL_TRIANGLES );
+        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND, nil ) Then
+          begin
+            if FX and PR2D_SMOOTH > 0 Then
+              begin
+                glEnable( GL_LINE_SMOOTH    );
+                glEnable( GL_POLYGON_SMOOTH );
+              end;
+            glEnable( GL_BLEND );
+
+            glBegin( GL_TRIANGLES );
+          end;
+
+        glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
         for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + xRadius * SinTable[ Round( i * k ) ] );
-            gl_Vertex2f( X + yRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
+            gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + yRadius * SinTable[ Round( i * k ) ] );
+            gl_Vertex2f( X + xRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
+          end;
+
+        if not b2d_Started Then
+          begin
+            glEnd;
+
+            if FX and PR2D_SMOOTH > 0 Then
+              begin
+                glDisable( GL_LINE_SMOOTH    );
+                glDisable( GL_POLYGON_SMOOTH );
+              end;
+            glDisable( GL_BLEND );
           end;
       end;
-  glEnd;
-
-  if FX and PR2D_SMOOTH > 0 Then
-    begin
-      glDisable( GL_LINE_SMOOTH    );
-      glDisable( GL_POLYGON_SMOOTH );
-    end;
-  glDisable( GL_BLEND );
 end;
 
 end.
