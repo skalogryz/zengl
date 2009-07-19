@@ -160,7 +160,7 @@ begin
     tex_CalcRGB( pData, Texture.Width, Texture.Height );
 
   if Texture.Flags and TEX_COMPRESS >= 1 Then
-    if not ogl_CanCompress Then
+    if ( not ogl_CanCompressE ) and ( not ogl_CanCompressA ) Then
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
   glEnable( GL_TEXTURE_2D );
@@ -173,12 +173,18 @@ begin
     begin
       format  := GL_RGB;
       iformat := GL_RGB * Byte( scr_BPP = 32 ) or GL_RGB16 * Byte( scr_BPP = 16 );
-      cformat := GL_COMPRESSED_RGB_ARB;
+      if ogl_CanCompressE Then
+        cformat := GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+      else
+        cformat := GL_COMPRESSED_RGB_ARB;
     end else
       begin
         format  := GL_RGBA;
         iformat := GL_RGBA * Byte( scr_BPP = 32 ) or GL_RGBA16 * Byte( scr_BPP = 16 );
-        cformat := GL_COMPRESSED_RGBA_ARB;
+        if ogl_CanCompressE Then
+          cformat := GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+        else
+          cformat := GL_COMPRESSED_RGBA_ARB;
       end;
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -368,7 +374,6 @@ begin
   Result.FramesY := 1;
   Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 )
                                   xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 );
-  tex_CalcTransparent( pData, $FF000000, Result.Width, Result.Height );
   tex_Create( Result^, pData );
   tex_Del( Texture );
 

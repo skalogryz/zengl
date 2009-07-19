@@ -165,6 +165,8 @@ const
   GL_RGBA16                         = $805B;
   GL_COMPRESSED_RGB_ARB             = $84ED;
   GL_COMPRESSED_RGBA_ARB            = $84EE;
+  GL_COMPRESSED_RGB_S3TC_DXT1_EXT   = $83F0;
+  GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  = $83F3;
   // Texture Env Mode
   GL_MODULATE                       = $2100;
   GL_DECAL                          = $2101;

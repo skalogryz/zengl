@@ -42,7 +42,7 @@
       <LI><b>SYS_DRAW</b> - регистрирует функцию, что будет вызываться каждую итерацию главного цикла</LI>
       <LI><b>SYS_UPDATE</b> - регистрирует функцию, что будет вызываться каждую итерацию главного цикла и возвращать разницу времени между последним вызовом(dt)</LI>
       <LI><b>SYS_EXIT</b> - регистрирует функцию, которая будет вызвана после завершения работы библиотеки и очистки всех ресурсов</LI>
-      <LI><b>TEX_FORMAT_EXTENSION</b> - начинает регистрацию поддержки нового формата графического формата</LI>
+      <LI><b>TEX_FORMAT_EXTENSION</b> - начинает регистрацию поддержки нового графического формата</LI>
       <LI><b>TEX_FORMAT_FILE_LOADER</b> - регистрирует функцию загрузки граф. формата из файла</LI>
       <LI><b>TEX_FORMAT_MEM_LOADER</b> - регистрирует функцию загрузки граф. формата из памяти</LI>
       <LI><b>SND_FORMAT_EXTENSION</b> - начинает регистрацию поддержки нового формата аудио-файла</LI>
@@ -246,9 +246,9 @@
 
     <!--Set3DMode-->
     <LI><a name='Set3DMode'>
-    <div class='code'><b>procedure</b> Set3DMode( <b>const</b> FOV : Single = 45 );</div>
+    <div class='code'><b>procedure</b> Set3DMode( <b>const</b> FOVY : Single = 45 );</div>
     <div align='justify'>
-    Устанавливает перспективную проекцию с углом обзора <b>FOV</b>.
+    Устанавливает перспективную проекцию с углом обзора <b>FOVY</b>.
     </div>
     </LI><br>
 
@@ -762,6 +762,7 @@
       <LI><b>FX2D_FLIPX</b> - отразить текстуру по горизонтали</LI>
       <LI><b>FX2D_FLIPY</b> - отразить текстуру по вертикали</LI>
       <LI><b>FX2D_COLORMIX</b> - использовать смешивание цвета(<a href='#fx2d_SetColorMix'>fx2d_SetColorMix</a>)</LI>
+      <LI><b>FX2D_COLORSET</b> - использовать "заливку" цветом(<a href='#fx2d_SetColorMix'>fx2d_SetColorMix</a>). От FX2D_COLORMIX отличается тем, что цвет текстуры будет полностью заменен указанным цветом, а не смешиваться</LI>
       <LI><b>FX2D_VCA</b> - использовать для вершин спрайта установленные значения цвета и альфы(<a href='#fx2d_SetVCA'>fx2d_SetVCA</a>). Действует также с <a href='#pr2d_Rect'>pr2d_Rect</a> и <a href='#pr2d_Line'>pr2d_Line</a></LI>
       <LI><b>FX2D_VCHANGE</b> - добавить к координатам вершин смещения установленные функцией <a href='#fx2d_SetVertexes'>fx2d_SetVertexes</a>. Действует также с <a href='#pr2d_Rect'>pr2d_Rect</a> и <a href='#pr2d_Line'>pr2d_Line</a></LI>
       <LI><b>FX2D_SCALE</b> - использовать масштабирование по горизонтали и вертикали, установленное функцией <a href='#fx2d_SetScale'>fx2d_SetScale</a></LI>

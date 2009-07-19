@@ -26,8 +26,9 @@ unit zgl_types;
 interface
 
 type
-  DWORD = LongWord;
-  Ptr   = {$IFDEF CPU64} QWORD {$ELSE} DWORD {$ENDIF};
+  DWORD  = LongWord;
+  PDWORD = PLongWord;
+  Ptr    = {$IFDEF CPU64} QWORD {$ELSE} DWORD {$ENDIF};
 
   PByteArray = ^TByteArray;
   TByteArray = array[ 0..65535 ] of Byte;

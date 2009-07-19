@@ -443,9 +443,9 @@ procedure wnd_ShowCursor;
     mask   : TPixmap;
     xcolor : TXColor;
 begin
-  if wnd_Handle = 0 Then exit;
-
   app_ShowCursor := Show;
+
+  if wnd_Handle = 0 Then exit;
   if Show Then
     begin
       if app_Cursor <> None Then

@@ -64,7 +64,8 @@ var
   ogl_Extensions    : String;
   ogl_3DAccelerator : Boolean;
   ogl_CanVSync      : Boolean;
-  ogl_CanCompress   : Boolean;
+  ogl_CanCompressA  : Boolean;
+  ogl_CanCompressE  : Boolean;
   ogl_CanARB        : Boolean; // ARBvp/ARBfp шейдеры
   ogl_CanGLSL       : Boolean; // GLSL шейдеры
   ogl_CanVBO        : Boolean;
@@ -441,8 +442,10 @@ begin
   glGetIntegerv( GL_MAX_TEXTURE_SIZE, @ogl_MaxTexSize );
   log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
 
-  ogl_CanCompress := gl_IsSupported( 'GL_ARB_texture_compression', ogl_Extensions );
-  log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( ogl_CanCompress ) );
+  ogl_CanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', ogl_Extensions );
+  log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( ogl_CanCompressA ) );
+  ogl_CanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', ogl_Extensions );
+  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( ogl_CanCompressE ) );
 
   gl_Vertex2f  := @glVertex2f;
   gl_Vertex2fv := @glVertex2fv;

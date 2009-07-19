@@ -171,7 +171,7 @@ begin
   app_Work := TRUE;
 
   Set2DMode;
-  wnd_ShowCursor( FALSE );
+  wnd_ShowCursor( app_ShowCursor );
 
   app_MainLoop;
   zgl_Destroy;
@@ -195,7 +195,7 @@ begin
   app_Work := TRUE;
 
   Set2DMode;
-  wnd_ShowCursor( FALSE );
+  wnd_ShowCursor( app_ShowCursor );
 
   app_MainLoop;
   zgl_Destroy;

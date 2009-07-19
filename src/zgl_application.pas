@@ -77,7 +77,7 @@ var
   app_XIM    : PXIM;
   app_XIC    : PXIC;
   {$ENDIF}
-  app_ShowCursor : Boolean = TRUE;
+  app_ShowCursor : Boolean;
 
   app_FPS      : DWORD;
   app_FPSCount : DWORD;
