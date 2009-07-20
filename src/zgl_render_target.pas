@@ -28,6 +28,7 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  zgl_opengl,
   zgl_opengl_all,
   zgl_textures;
 
@@ -85,7 +86,7 @@ uses
   zgl_main,
   zgl_window,
   zgl_screen,
-  zgl_opengl,
+  zgl_render_2d,
   zgl_log;
 
 var
@@ -251,6 +252,8 @@ end;
 
 procedure rtarget_Set;
 begin
+  batch2d_Flush;
+
   if Assigned( Target ) Then
     begin
       lRTarget := Target;
