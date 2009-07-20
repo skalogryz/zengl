@@ -552,7 +552,7 @@ procedure tex_CalcTransparent;
   var
     i       : Integer;
     r, g, b : Byte;
-    procedure Fill( var pData : Pointer; i, Width, Height : Integer ); {$IFDEF USE_INLINE} inline; {$ENDIF}
+    procedure Fill; {$IFDEF USE_INLINE} inline; {$ENDIF}
     begin
       PByte( Ptr( pData ) + 0 + i * 4 )^ := 0;
       PByte( Ptr( pData ) + 1 + i * 4 )^ := 0;
@@ -627,8 +627,7 @@ begin
   if TransparentColor = $FF000000 Then
     begin
       for i := 0 to Width * Height - 1 do
-        if ( PByte( Ptr( pData ) + 3 + i * 4 )^ = 0 ) Then
-          Fill( pData, i, Width, Height );
+        if ( PByte( Ptr( pData ) + 3 + i * 4 )^ = 0 ) Then Fill;
     end else
       begin
         r := ( TransparentColor and $FF0000 ) shr 16;
@@ -637,8 +636,7 @@ begin
         for i := 0 to Width * Height - 1 do
           if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and
              ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
-             ( PByte( Ptr( pData ) + 2 + i * 4 )^ = b ) Then
-            Fill( pData, i, Width, Height );
+             ( PByte( Ptr( pData ) + 2 + i * 4 )^ = b ) Then Fill;
     end;
 end;
 
