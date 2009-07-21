@@ -365,7 +365,10 @@ begin
 {$IFDEF LINUX}
   if wnd_Handle <> 0 Then
     begin
-      XStringListToTextProperty( @wnd_Caption, 1, @wnd_Title );
+      if app_Flags and APP_USE_UTF8 > 0 Then
+        Xutf8TextListToTextProperty( scr_Display, @wnd_Caption, 1, XUTF8StringStyle, @wnd_Title )
+      else
+        XStringListToTextProperty( @wnd_Caption, 1, @wnd_Title );
       XSetWMName( scr_Display, wnd_Handle, @wnd_Title );
     end;
 {$ENDIF}

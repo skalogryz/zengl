@@ -1039,7 +1039,7 @@ function u_StrToInt;
   var
     E : Integer;
 begin
-  Val( Value, Result, E );
+  Val( String( Value ), Result, E );
 end;
 
 procedure zglFree;
