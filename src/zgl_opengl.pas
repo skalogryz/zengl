@@ -61,7 +61,7 @@ var
   ogl_CropW  : Integer;
   ogl_CropH  : Integer;
 
-  ogl_Extensions    : String;
+  ogl_Extensions    : AnsiString;
   ogl_3DAccelerator : Boolean;
   ogl_CanVSync      : Boolean;
   ogl_CanCompressA  : Boolean;

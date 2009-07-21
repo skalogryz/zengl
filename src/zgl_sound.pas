@@ -79,8 +79,8 @@ type
   zglPSoundStream = ^zglTSoundStream;
   zglTSoundStream = record
     _File      : zglTFile;
-    Extension  : String;
-    CodecOpen  : function( const FileName : String; var Stream : zglPSoundStream ) : Boolean;
+    Extension  : AnsiString;
+    CodecOpen  : function( const FileName : AnsiString; var Stream : zglPSoundStream ) : Boolean;
     CodecRead  : function( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
     CodecLoop  : procedure;
     CodecClose : procedure( var Stream : zglPSoundStream );
@@ -95,9 +95,9 @@ end;
 type
   zglPSoundFormat = ^zglTSoundFormat;
   zglTSoundFormat = record
-    Extension  : String;
+    Extension  : AnsiString;
     Stream     : zglPSoundStream;
-    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
+    FileLoader : procedure( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : Integer );
     MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
 end;
 
@@ -116,8 +116,8 @@ function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( const SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
-function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer = 16 ) : zglPSound;
-function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 16 ) : zglPSound;
+function  snd_LoadFromFile( const FileName : AnsiString; const SourceCount : Integer = 16 ) : zglPSound;
+function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 16 ) : zglPSound;
 
 function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
 procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
@@ -125,7 +125,7 @@ procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const I
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );
 procedure snd_SetFrequencyCoeff( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
 
-procedure snd_PlayFile( const FileName : String; const Loop : Boolean );
+procedure snd_PlayFile( const FileName : AnsiString; const Loop : Boolean );
 procedure snd_StopFile;
 function  snd_ProcFile( data : Pointer ) : PInteger; {$IFDEF WIN32} stdcall; {$ENDIF}
 procedure snd_ResumeFile;
@@ -343,7 +343,7 @@ function snd_LoadFromFile;
   var
     i   : Integer;
     f   : Integer;
-    ext : String;
+    ext : AnsiString;
 begin
   Result := nil;
 
@@ -690,7 +690,7 @@ end;
 procedure snd_PlayFile;
   var
     i         : Integer;
-    ext       : String;
+    ext       : AnsiString;
     {$IFDEF USE_OPENAL}
     _End      : Boolean;
     BytesRead : Integer;

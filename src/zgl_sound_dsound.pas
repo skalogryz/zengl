@@ -25,8 +25,7 @@ unit zgl_sound_dsound;
 
 interface
 uses
-  Windows,
-  math;
+  Windows;
 
 const
   DS_OK                       = $00000000;
@@ -144,7 +143,6 @@ uses
 
 function InitDSound;
 begin
-  Result            := FALSE;
   dsound_Library    := dlopen( 'DSound.dll' );
   DirectSoundCreate := dlsym( dsound_Library, 'DirectSoundCreate' );
   Result            := dsound_Library <> 0;
@@ -211,7 +209,7 @@ end;
 
 function dsu_CalcVolume;
 begin
-  if volume = 0 Then
+ if volume = 0 Then
     Result := -10000
   else
     Result := - Round( 1000 * ln( 1 / volume ) );

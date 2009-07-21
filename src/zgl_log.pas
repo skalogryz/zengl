@@ -29,14 +29,14 @@ uses
 
 procedure log_Init;
 procedure log_Close;
-procedure log_Add( const Message : String; const Timings : Boolean = TRUE );
+procedure log_Add( const Message : AnsiString; const Timings : Boolean = TRUE );
 procedure log_Flush;
-function  log_Timing : String;
+function  log_Timing : AnsiString;
 
 var
   log      : zglTFile;
   logstart : LongWord;
-  logfile  : PChar = 'log.txt';
+  logfile  : PAnsiChar = 'log.txt';
 
 implementation
 uses
@@ -67,7 +67,7 @@ end;
 
 procedure log_Add;
   var
-    str : String;
+    str : AnsiString;
 begin
   if not app_Log Then exit;
   {$IFDEF LINUX}

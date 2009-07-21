@@ -48,8 +48,8 @@ procedure FreeGL;
 function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
-function gl_GetProc( const Proc : PChar ) : Pointer;
-function gl_IsSupported( const Extension : String; const searchIn: String ) : Boolean;
+function gl_GetProc( const Proc : PAnsiChar ) : Pointer;
+function gl_IsSupported( const Extension : AnsiString; const searchIn: AnsiString ) : Boolean;
 
 var
   gl_TexCoord2f  : procedure( U, V : Single ); stdcall;
@@ -279,7 +279,7 @@ type
   procedure glFinish; stdcall; external libGL;
   procedure glFlush; stdcall; external libGL;
 
-  function  glGetString(name: GLenum): PChar; stdcall; external libGL;
+  function  glGetString(name: GLenum): PAnsiChar; stdcall; external libGL;
   procedure glHint(target, mode: GLenum); stdcall; external libGL;
 
   procedure glShadeModel(mode: GLenum); stdcall; external libGL;
@@ -426,7 +426,7 @@ const
   WGL_DRAW_TO_PBUFFER_ARB   = $202D;
 
 
-  function wglGetProcAddress(proc: PChar): Pointer; stdcall; external libGL;
+  function wglGetProcAddress(proc: PAnsiChar): Pointer; stdcall; external libGL;
 var
   wglChoosePixelFormatARB: function(hdc: HDC; const piAttribIList: PGLint; const pfAttribFList: PGLfloat; nMaxFormats: GLuint; piFormats: PGLint; nNumFormats: PGLuint): BOOL; stdcall;
   wglSwapIntervalEXT: function(interval: GLint): BOOL; stdcall;
@@ -496,7 +496,9 @@ var
 
 implementation
 uses
+  {$IFDEF FPC}
   math,
+  {$ENDIF}
   zgl_const,
   zgl_log,
   zgl_utils;
@@ -572,11 +574,11 @@ begin
   {$IFDEF WIN32}
   Result := wglGetProcAddress( Proc );
   if Result = nil Then
-    Result := wglGetProcAddress( PChar( Proc + 'ARB' ) );
+    Result := wglGetProcAddress( PAnsiChar( Proc + 'ARB' ) );
   {$ELSE}
   Result := dlsym( ogl_Library, Proc );
   if Result = nil Then
-    Result := dlsym( ogl_Library, PChar( Proc + 'ARB' ) );
+    Result := dlsym( ogl_Library, PAnsiChar( Proc + 'ARB' ) );
   {$ENDIF}
 end;
 

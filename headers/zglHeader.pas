@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.33               }
-{ date:    19.07.09             }
+{ version: 0.1.34               }
+{ date:    21.07.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -43,7 +43,7 @@ type
 type
   zglTStringList = record
     Count : Integer;
-    Items : array of String;
+    Items : array of AnsiString;
 end;
 
 type zglTFile = DWORD;
@@ -66,10 +66,10 @@ const
 {$IFDEF DARWIN}
   libZenGL = 'libZenGL.dylib';
 var
-  mainPath : String;
+  mainPath : AnsiString;
 {$ENDIF}
 
-function zglLoad( LibraryName : String; Error : Boolean = TRUE ) : Boolean;
+function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure zglFree;
 
 var
@@ -100,9 +100,9 @@ var
 const
   SYS_FPS         = 1;  // DWORD,  := zgl_Get( SYS_FPS )
   APP_PAUSED      = 2;  // Boolean
-  APP_DIRECTORY   = 3;  // PChar
-  USR_HOMEDIR     = 4;  // PChar
-  LOG_FILENAME    = 5;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
+  APP_DIRECTORY   = 3;  // PAnsiChar
+  USR_HOMEDIR     = 4;  // PAnsiChar
+  LOG_FILENAME    = 5;  // PPAnsiChar, := Pointer( zgl_Get( LOG_FILENAME ) )
   ZGL_VERSION     = 6;  // DWORD
   SCR_ADD_X       = 7;  // DWORD
   SCR_ADD_Y       = 8;  // DWORD
@@ -141,7 +141,7 @@ var
   zgl_Disable : procedure( const What : DWORD );
 
 // LOG
-  log_Add : procedure( const Message : String; const Timings : Boolean = TRUE );
+  log_Add : procedure( const Message : AnsiString; const Timings : Boolean = TRUE );
 
 // WINDOW
   wnd_SetCaption : procedure( const NewCaption : String );
@@ -180,19 +180,19 @@ var
   scissor_End   : procedure;
 
 // INI
-  ini_LoadFromFile : procedure( const FileName : String );
-  ini_SaveToFile   : procedure( const FileName : String );
-  ini_Add          : procedure( const Section, Key : String );
-  ini_Del          : procedure( const Section, Key : String );
-  ini_Clear        : procedure( const Section : String );
-  ini_IsSection    : function( const Section : String ) : Boolean;
-  ini_IsKey        : function( const Section, Key : String ) : Boolean;
-  ini_ReadKeyStr   : procedure( const Section, Key : String; var Result : String );
-  ini_ReadKeyInt   : function( const Section, Key : String ) : Integer;
-  ini_ReadKeyBool  : function( const Section, Key : String ) : Boolean;
-  ini_WriteKeyStr  : function( const Section, Key, Value : String ) : Boolean;
-  ini_WriteKeyInt  : function( const Section, Key : String; const Value : Integer ) : Boolean;
-  ini_WriteKeyBool : function( const Section, Key : String; const Value : Boolean ) : Boolean;
+  ini_LoadFromFile : procedure( const FileName : AnsiString );
+  ini_SaveToFile   : procedure( const FileName : AnsiString );
+  ini_Add          : procedure( const Section, Key : AnsiString );
+  ini_Del          : procedure( const Section, Key : AnsiString );
+  ini_Clear        : procedure( const Section : AnsiString );
+  ini_IsSection    : function( const Section : AnsiString ) : Boolean;
+  ini_IsKey        : function( const Section, Key : AnsiString ) : Boolean;
+  ini_ReadKeyStr   : procedure( const Section, Key : AnsiString; var Result : AnsiString );
+  ini_ReadKeyInt   : function( const Section, Key : AnsiString ) : Integer;
+  ini_ReadKeyBool  : function( const Section, Key : AnsiString ) : Boolean;
+  ini_WriteKeyStr  : function( const Section, Key, Value : AnsiString ) : Boolean;
+  ini_WriteKeyInt  : function( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
+  ini_WriteKeyBool : function( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
 
 // TIMERS
 type
@@ -348,8 +348,8 @@ var
   key_Up            : function( const KeyCode : Byte ) : Boolean;
   key_Press         : function( const KeyCode : Byte ) : Boolean;
   key_Last          : function( const KeyAction : Byte ) : Byte;
-  key_BeginReadText : procedure( const Text : String; const MaxSymbols : Integer = -1 );
-  key_EndReadText   : procedure( var Result : String );
+  key_BeginReadText : procedure( const Text : AnsiString; const MaxSymbols : Integer = -1 );
+  key_EndReadText   : procedure( var Result : AnsiString );
   key_ClearState    : procedure;
 
 // MOUSE
@@ -393,8 +393,8 @@ end;
 type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
-    Extension  : String;
-    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : WORD );
+    Extension  : AnsiString;
+    FileLoader : procedure( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
     MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 end;
 
@@ -437,8 +437,8 @@ var
   tex_Del            : procedure( var Texture : zglPTexture );
   tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
   tex_CreateZero     : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
-  tex_LoadFromFile   : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
-  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
+  tex_LoadFromFile   : function( const FileName : AnsiString; const TransparentColor, Flags : DWORD ) : zglPTexture;
+  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : AnsiString; const TransparentColor, Flags : DWORD ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
   tex_SetMask        : function( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
   tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
@@ -632,13 +632,13 @@ const
 var
   font_Add            : function : zglPFont;
   font_Del            : procedure( var Font : zglPFont );
-  font_LoadFromFile   : function( const FileName : String ) : zglPFont;
+  font_LoadFromFile   : function( const FileName : AnsiString ) : zglPFont;
   font_LoadFromMemory : function( const Memory : zglTMemory ) : zglPFont;
-  text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
-  text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-  text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
-  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-  text_GetWidth       : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
+  text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : AnsiString; const Flags : DWORD = 0 );
+  text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+  text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : AnsiString; const Flags : DWORD = 0 );
+  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+  text_GetWidth       : function( const Font : zglPFont; const Text : AnsiString; const Step : Single = 0.0 ) : Single;
 
 // GUI
 const
@@ -764,7 +764,7 @@ end;
       2: ( mouse_button : Byte );
       3: ( mouse_wheel  : Byte );
       4: ( key_code     : Byte );
-      5: ( key_char     : PChar );
+      5: ( key_char     : PAnsiChar );
 end;
 
   //Event list
@@ -776,7 +776,7 @@ end;
   zglPButtonDesc = ^zglTButtonDesc;
   zglTButtonDesc = record
     Font    : zglPFont;
-    Caption : String;
+    Caption : AnsiString;
 
     Pressed : Boolean;
 end;
@@ -784,7 +784,7 @@ end;
   zglPCheckBoxDesc = ^zglTCheckBoxDesc;
   zglTCheckBoxDesc = record
     Font    : zglPFont;
-    Caption : String;
+    Caption : AnsiString;
 
     Checked : Boolean;
 end;
@@ -792,7 +792,7 @@ end;
   zglPRadioButtonDesc = ^zglTRadioButtonDesc;
   zglTRadioButtonDesc = record
     Font    : zglPFont;
-    Caption : String;
+    Caption : AnsiString;
 
     Checked : Boolean;
     Group   : Integer;
@@ -801,13 +801,13 @@ end;
   zglPLabelDesc = ^zglTLabelDesc;
   zglTLabelDesc = record
     Font    : zglPFont;
-    Caption : String;
+    Caption : AnsiString;
 end;
 
   zglPEditBoxDesc = ^zglTEditBoxDesc;
   zglTEditBoxDesc = record
     Font : zglPFont;
-    Text : String;
+    Text : AnsiString;
 
     Max      : Integer;
     ReadOnly : Boolean;
@@ -836,7 +836,7 @@ end;
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
   zglTGroupBoxDesc = record
     Font    : zglPFont;
-    Caption : String;
+    Caption : AnsiString;
 end;
 
   zglPSpinDesc = ^zglTSpinDesc;
@@ -890,7 +890,7 @@ end;
 type
   zglPSoundDecoder = ^zglTSoundDecoder;
   zglTSoundDecoder = record
-    Extension  : String;
+    Extension  : AnsiString;
     BufferSize : Integer;
     Open       : function( var Stream : zglTSoundStream ) : Boolean;
     Read       : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
@@ -928,8 +928,8 @@ var
   snd_Free              : procedure;
   snd_Add               : function( const SourceCount : Integer ) : zglPSound;
   snd_Del               : procedure( var Sound : zglPSound );
-  snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer = 16 ) : zglPSound;
-  snd_LoadFromMemory    : function( const Memory : zglTMemory; Extension : String; const SourceCount : Integer ) : zglPSound;
+  snd_LoadFromFile      : function( const FileName : AnsiString; const SourceCount : Integer = 16 ) : zglPSound;
+  snd_LoadFromMemory    : function( const Memory : zglTMemory; Extension : AnsiString; const SourceCount : Integer ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer );
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
@@ -974,8 +974,8 @@ const
   FSM_END    = $03;
 
 var
-  file_Open         : procedure( const FileHandle : zglTFile; const FileName : String; const Mode : Byte );
-  file_Exists       : function( const FileName : String ) : Boolean;
+  file_Open         : procedure( const FileHandle : zglTFile; const FileName : AnsiString; const Mode : Byte );
+  file_Exists       : function( const FileName : AnsiString ) : Boolean;
   file_Seek         : function( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
   file_GetPos       : function( const FileHandle : zglTFile ) : DWORD;
   file_Read         : function( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
@@ -984,14 +984,14 @@ var
   file_GetSize      : function( const FileHandle : zglTFile ) : DWORD;
   file_Flush        : procedure( const FileHandle : zglTFile );
   file_Close        : procedure( const FileHandle : zglTFile );
-  file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
-  file_GetName      : procedure( const FileName : String; var Result : String );
-  file_GetExtension : procedure( const FileName : String; var Result : String );
-  file_SetPath      : procedure( const Path : String );
+  file_Find         : procedure( const Directory : AnsiString; var List : zglTFileList; const FindDir : Boolean = FALSE );
+  file_GetName      : procedure( const FileName : AnsiString; var Result : AnsiString );
+  file_GetExtension : procedure( const FileName : AnsiString; var Result : AnsiString );
+  file_SetPath      : procedure( const Path : AnsiString );
 
 var
-  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
-  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : String );
+  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : AnsiString );
+  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : AnsiString );
   mem_Seek         : function( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
   mem_Read         : function( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
   mem_Write        : function( var Memory : zglTMemory; const buffer; const count : DWORD ) : DWORD;
@@ -999,8 +999,8 @@ var
   mem_Free         : procedure( var Memory : zglTMemory );
 
 // Utils
-function u_IntToStr( Value : Integer ) : String;
-function u_StrToInt( Value : String ) : Integer;
+function u_IntToStr( Value : Integer ) : AnsiString;
+function u_StrToInt( Value : AnsiString ) : Integer;
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
@@ -1015,7 +1015,7 @@ function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kerne
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 
-function MessageBoxA( hWnd : DWORD; lpText, lpCaption : PChar; uType : DWORD) : Integer; stdcall; external 'user32.dll';
+function MessageBoxA( hWnd : DWORD; lpText, lpCaption : PAnsiChar; uType : DWORD) : Integer; stdcall; external 'user32.dll';
 {$ENDIF}
 
 implementation
@@ -1058,7 +1058,7 @@ begin
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
   {$ENDIF}
-  zglLib := dlopen( PChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
 
   if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
     begin

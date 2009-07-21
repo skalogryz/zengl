@@ -208,7 +208,6 @@ end;
 function gui_AddWidget;
   var
     i : Integer;
-    s : zglTScrollBarDesc;
 begin
   if Assigned ( Parent ) Then
     begin

@@ -31,14 +31,14 @@ uses
 type
   zglPINIKey = ^zglTINIKey;
   zglTINIKey = record
-    Name  : String;
-    Value : String;
+    Name  : AnsiString;
+    Value : AnsiString;
 end;
 
 type
   zglPINISection = ^zglTINISection;
   zglTINISection = record
-    Name : String;
+    Name : AnsiString;
     Keys : DWORD;
     Key  : array of zglTINIKey;
 end;
@@ -46,28 +46,28 @@ end;
 type
   zglPINI = ^zglTINI;
   zglTINI = record
-    FileName : String;
+    FileName : AnsiString;
     Sections : DWORD;
     Section  : array of zglTINISection;
 end;
 
-procedure ini_LoadFromFile( const FileName : String );
-procedure ini_SaveToFile( const FileName : String );
-procedure ini_Add( const Section, Key : String );
-procedure ini_Del( const Section, Key : String );
-procedure ini_Clear( const Section : String );
-function  ini_IsSection( const Section : String ) : Boolean;
-function  ini_IsKey( const Section, Key : String ) : Boolean;
-procedure ini_ReadKeyStr( const Section, Key : String; var Result : String );
-function  ini_ReadKeyInt( const Section, Key : String ) : Integer;
-function  ini_ReadKeyBool( const Section, Key : String ) : Boolean;
-function  ini_WriteKeyStr( const Section, Key, Value : String ) : Boolean;
-function  ini_WriteKeyInt( const Section, Key : String; const Value : Integer ) : Boolean;
-function  ini_WriteKeyBool( const Section, Key : String; const Value : Boolean ) : Boolean;
+procedure ini_LoadFromFile( const FileName : AnsiString );
+procedure ini_SaveToFile( const FileName : AnsiString );
+procedure ini_Add( const Section, Key : AnsiString );
+procedure ini_Del( const Section, Key : AnsiString );
+procedure ini_Clear( const Section : AnsiString );
+function  ini_IsSection( const Section : AnsiString ) : Boolean;
+function  ini_IsKey( const Section, Key : AnsiString ) : Boolean;
+procedure ini_ReadKeyStr( const Section, Key : AnsiString; var Result : AnsiString );
+function  ini_ReadKeyInt( const Section, Key : AnsiString ) : Integer;
+function  ini_ReadKeyBool( const Section, Key : AnsiString ) : Boolean;
+function  ini_WriteKeyStr( const Section, Key, Value : AnsiString ) : Boolean;
+function  ini_WriteKeyInt( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
+function  ini_WriteKeyBool( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
 
 procedure ini_CopyKey( var k1, k2 : zglTINIKey );
 procedure ini_CopySection( var s1, s2 : zglTINISection );
-function  ini_GetID( S, K : String; var idS, idK : Integer ) : Boolean;
+function  ini_GetID( S, K : AnsiString; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;
 procedure ini_Free;
 
@@ -80,7 +80,7 @@ var
   iniRec : zglTINI;
   iniMem : zglTMemory;
 
-function DelSpaces( str : String ) : String;
+function DelSpaces( str : AnsiString ) : AnsiString;
   var
     i, b, e : Integer;
 begin
@@ -102,7 +102,7 @@ begin
     Result := Result + str[ i ];
 end;
 
-procedure AddData( str : String );
+procedure AddData( str : AnsiString );
   var
     i, j, s, k, len : Integer;
 begin
@@ -144,7 +144,7 @@ end;
 
 procedure ini_Add;
   var
-    s, k   : String;
+    s, k   : AnsiString;
     ns, nk : Integer;
 begin
   s := Section;
@@ -173,7 +173,7 @@ end;
 
 procedure ini_Del;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, ns, nk : Integer;
 begin
   s := Section;
@@ -200,7 +200,7 @@ end;
 
 procedure ini_Clear;
   var
-    s : String;
+    s : AnsiString;
     i, ns, nk : Integer;
 begin
   s := Section;
@@ -221,7 +221,7 @@ end;
 
 function ini_IsSection;
   var
-    s : String;
+    s : AnsiString;
     i, j : Integer;
 begin
   s := Section;
@@ -233,7 +233,7 @@ end;
 
 function ini_IsKey;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
   s := Section;
@@ -257,7 +257,7 @@ procedure ini_SaveToFile;
   var
     F    : zglTFile;
     i, j : Integer;
-    s    : String;
+    s    : AnsiString;
 begin
   file_Open( F, FileName, FOM_CREATE );
   for i := 0 to iniRec.Sections - 1 do
@@ -282,7 +282,7 @@ end;
 
 procedure ini_ReadKeyStr;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
   s := Section;
@@ -294,11 +294,11 @@ end;
 
 function ini_ReadKeyInt;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
-  s := String( Section );
-  k := String( Key );
+  s := AnsiString( Section );
+  k := AnsiString( Key );
 
   if ini_GetID( s, k, i, j ) Then
     Result := u_StrToInt( iniRec.Section[ i ].Key[ j ].Value );
@@ -306,11 +306,11 @@ end;
 
 function ini_ReadKeyBool;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
-  s := String( Section );
-  k := String( Key );
+  s := AnsiString( Section );
+  k := AnsiString( Key );
 
   if ini_GetID( s, k, i, j ) Then
     Result := u_StrToBool( iniRec.Section[ i ].Key[ j ].Value );
@@ -318,7 +318,7 @@ end;
 
 function ini_WriteKeyStr;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
   s := Section;
@@ -338,7 +338,7 @@ end;
 
 function ini_WriteKeyInt;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
   s := Section;
@@ -358,7 +358,7 @@ end;
 
 function ini_WriteKeyBool;
   var
-    s, k : String;
+    s, k : AnsiString;
     i, j : Integer;
 begin
   s := Section;
@@ -395,7 +395,7 @@ end;
 
 function ini_GetID;
   var
-    S1, S2 : String;
+    S1, S2 : AnsiString;
     i, j   : Integer;
 begin
   idS := -1;
@@ -425,8 +425,8 @@ end;
 
 procedure ini_Process;
   var
-    c : Char;
-    s : String;
+    c : AnsiChar;
+    s : AnsiString;
     i : Integer;
 begin
   s := '';

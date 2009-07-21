@@ -86,9 +86,9 @@ end;
 var
   oal_Library : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
 
-  alcGetString           : function(device: PALCdevice; param: LongInt): PChar; cdecl;
+  alcGetString           : function(device: PALCdevice; param: LongInt): PAnsiChar; cdecl;
   // Device
-  alcOpenDevice          : function(const devicename: PChar): PALCdevice; cdecl;
+  alcOpenDevice          : function(const devicename: PAnsiChar): PALCdevice; cdecl;
   alcCloseDevice         : function(device: PALCdevice): Boolean; cdecl;
   // Context
   alcCreateContext       : function(device: PALCdevice; const attrlist: PLongInt): PALCcontext; cdecl;

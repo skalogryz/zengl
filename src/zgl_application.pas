@@ -63,8 +63,8 @@ var
   app_Focus        : Boolean = TRUE;
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
-  app_WorkDir      : String;
-  app_UsrHomeDir   : String;
+  app_WorkDir      : AnsiString;
+  app_UsrHomeDir   : AnsiString;
 
   // call-back
   app_PLoad   : procedure = zero;
@@ -246,8 +246,8 @@ function app_ProcessMessages;
   {$ENDIF}
     i   : Integer;
     len : Integer;
-    c   : array[ 0..5 ] of Char;
-    str : String;
+    c   : array[ 0..5 ] of AnsiChar;
+    str : AnsiString;
     Key : DWORD;
 begin
 {$IFDEF LINUX}
@@ -560,9 +560,9 @@ begin
           if wParam > 32 Then
             begin
               if app_Flags and APP_USE_UTF8 > 0 Then
-                key_InputText( AnsiToUtf8( Char( wParam ) ) )
+                key_InputText( AnsiToUtf8( String( wParam ) ) )
               else
-                key_InputText( Char( wParam ) );
+                key_InputText( AnsiChar( wParam ) );
             end;
         end;
       end;

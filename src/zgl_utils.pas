@@ -37,25 +37,25 @@ uses
   zgl_types,
   zgl_log;
 
-function u_IntToStr( const Value : Integer ) : String;
-function u_StrToInt( const Value : String ) : Integer;
-function u_BoolToStr( const Value : Boolean ) : String;
-function u_StrToBool( const Value : String ) : Boolean;
+function u_IntToStr( const Value : Integer ) : AnsiString;
+function u_StrToInt( const Value : AnsiString ) : Integer;
+function u_BoolToStr( const Value : Boolean ) : AnsiString;
+function u_StrToBool( const Value : AnsiString ) : Boolean;
 
 // Только для английских символов попадающих в диапазон 0..127
-function u_StrUp( const str : String ) : String;
-function u_StrDown( const str : String ) : String;
+function u_StrUp( const str : AnsiString ) : AnsiString;
+function u_StrDown( const str : AnsiString ) : AnsiString;
 // Удаляет один символ из utf8-строки
-procedure u_Backspace( var str : String );
+procedure u_Backspace( var str : AnsiString );
 // Возвращает количество символов в utf8-строке
-function  u_Length( const str : String ) : Integer;
+function  u_Length( const str : AnsiString ) : Integer;
 // Возвращает количество слов, разделеных разделителем d
-function  u_Words( const str : String; const d : Char = ' ' ) : Integer;
-function  u_GetWord( const Str : String; const n : Integer; const d : Char = ' ' ) : String;
+function  u_Words( const str : AnsiString; const d : AnsiChar = ' ' ) : Integer;
+function  u_GetWord( const Str : AnsiString; const n : Integer; const d : AnsiChar = ' ' ) : AnsiString;
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 
-procedure u_Error( const errStr : String );
-procedure u_Warning( const errStr : String );
+procedure u_Error( const errStr : AnsiString );
+procedure u_Warning( const errStr : AnsiString );
 
 function u_GetPOT( const v : Integer ) : Integer;
 
@@ -89,7 +89,7 @@ function u_StrToInt;
   var
     E : Integer;
 begin
-  Val( Value, Result, E );
+  Val( String( Value ), Result, E );
 end;
 
 function u_BoolToStr;
@@ -119,7 +119,7 @@ begin
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
-      Result[ i ] := Chr( Byte( Str[ i ] ) - 32 )
+      Result[ i ] := AnsiChar( Byte( Str[ i ] ) - 32 )
     else
       Result[ i ] := Str[ i ];
 end;
@@ -132,7 +132,7 @@ begin
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
-      Result[ i ] := Chr( Byte( Str[ i ] ) + 32 )
+      Result[ i ] := AnsiChar( Byte( Str[ i ] ) + 32 )
     else
       Result[ i ] := Str[ i ];
 end;
@@ -209,7 +209,7 @@ end;
 procedure u_SortList;
   var
     Lo, Hi : Integer;
-    Mid, T : String;
+    Mid, T : AnsiString;
 begin
   Lo  := iLo;
   Hi  := iHi;
@@ -242,7 +242,7 @@ begin
   WriteLn( 'ERROR: ' + errStr );
 {$ENDIF}
 {$IFDEF WIN32}
-  MessageBox( 0, PChar( errStr ), 'ERROR!', MB_OK or MB_ICONERROR );
+  MessageBoxA( 0, PAnsiChar( errStr ), 'ERROR!', MB_OK or MB_ICONERROR );
 {$ENDIF}
 {$IFDEF DARWIN}
   StandardAlert( kAlertNoteAlert, 'ERROR!', errStr, nil, outItemHit );
@@ -261,7 +261,7 @@ begin
   WriteLn( 'WARNING: ' + errStr );
 {$ENDIF}
 {$IFDEF WIN32}
-  MessageBox( 0, PChar( errStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
+  MessageBoxA( 0, PAnsiChar( errStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
 {$ENDIF}
 {$IFDEF DARWIN}
   StandardAlert( kAlertNoteAlert, 'WARNING!', errStr, nil, outItemHit );

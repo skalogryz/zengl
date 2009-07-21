@@ -572,7 +572,6 @@ end;
 
 procedure gui_ProcScrollBar;
   var
-    Change : Integer;
     r      : zglTRect;
 begin
   with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do

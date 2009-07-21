@@ -51,7 +51,7 @@ type
 end;
 
 procedure tga_Load( var pData : Pointer; var W, H : WORD );
-procedure tga_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
+procedure tga_LoadFromFile( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
 procedure tga_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 
 procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
@@ -263,7 +263,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'tga' ) );
+  zgl_Reg( TEX_FORMAT_EXTENSION, PAnsiChar( 'tga' ) );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @tga_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @tga_LoadFromMemory );
 

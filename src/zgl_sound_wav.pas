@@ -43,10 +43,10 @@ const
 type
   zglPWAVHeader = ^zglTWAVHeader;
   zglTWAVHeader = record
-    RIFFHeader       : array[ 1..4 ] of Char;
+    RIFFHeader       : array[ 1..4 ] of AnsiChar;
     FileSize         : Integer;
-    WAVEHeader       : array[ 1..4 ] of Char;
-    FormatHeader     : array[ 1..4 ] of Char;
+    WAVEHeader       : array[ 1..4 ] of AnsiChar;
+    FormatHeader     : array[ 1..4 ] of AnsiChar;
     FormatHeaderSize : Integer;
     FormatCode       : Word;
     ChannelNumber    : Word;
@@ -57,7 +57,7 @@ type
  end;
 
 procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
-procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure wav_LoadFromFile( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : DWORD );
 procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
 
 implementation
@@ -71,7 +71,7 @@ var
 
 procedure wav_Load;
   var
-    chunkName : array[ 0..3 ] of Char;
+    chunkName : array[ 0..3 ] of AnsiChar;
     skip      : Integer;
 begin
   mem_Read( wavMemory, wavHeader, SizeOf( zglTWAVHeader ) );
@@ -138,7 +138,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'WAV' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION, PAnsiChar( 'WAV' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @wav_LoadFromMemory );
 

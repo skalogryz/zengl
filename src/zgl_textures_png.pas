@@ -36,7 +36,7 @@ uses
   zgl_memory;
 
 const
-  PNG_SIGNATURE : array[ 0..7 ] of Char = ( #137, #80, #78, #71, #13, #10, #26, #10 );
+  PNG_SIGNATURE : array[ 0..7 ] of AnsiChar = ( #137, #80, #78, #71, #13, #10, #26, #10 );
 
   PNG_FILTER_NONE    = 0;
   PNG_FILTER_SUB     = 1;
@@ -52,7 +52,7 @@ const
 
 
 type
-  zglTPNGChunkName = array[ 0..3 ] of Char;
+  zglTPNGChunkName = array[ 0..3 ] of AnsiChar;
 
   zglPPNGChunk = ^zglTPNGChunk;
   zglTPNGChunk = record
@@ -76,7 +76,7 @@ type
   end;
 
 procedure png_Load( var pData : Pointer; var W, H : WORD );
-procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
+procedure png_LoadFromFile( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
 procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 
 procedure png_ReadIHDR( var pngData : Pointer );
@@ -101,7 +101,7 @@ var
   pngFail         : Boolean;
   pngHeader       : zglTPNGHeader;
   pngHeaderOk     : Boolean;
-  pngSignature    : array[ 0..7 ] of Char;
+  pngSignature    : array[ 0..7 ] of AnsiChar;
   pngChunk        : zglTPNGChunk;
   pngHasIDAT      : Boolean;
   pngHastRNS      : Boolean;
@@ -557,7 +557,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'png' ) );
+  zgl_Reg( TEX_FORMAT_EXTENSION, PAnsiChar( 'png' ) );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @png_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @png_LoadFromMemory );
 

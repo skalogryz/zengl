@@ -139,8 +139,10 @@ end;
 {$ENDIF}
 
 procedure scr_Init;
+  {$IFDEF LINUX}
   var
     i, j : Integer;
+  {$ENDIF}
 begin
   scr_Initialized := TRUE;
 {$IFDEF LINUX}
