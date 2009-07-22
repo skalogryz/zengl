@@ -79,7 +79,7 @@ var
   {$IFDEF DARWIN}
   wnd_Handle  : WindowRef;
   wnd_Attr    : WindowAttributes;
-  wnd_Events  : array[ 0..12 ] of EventTypeSpec;
+  wnd_Events  : array[ 0..13 ] of EventTypeSpec;
   {$ENDIF}
 
 implementation
@@ -266,27 +266,29 @@ begin
   wnd_Events[ 2 ].eventKind  := kEventWindowDeactivated;
   wnd_Events[ 3 ].eventClass := kEventClassWindow;
   wnd_Events[ 3 ].eventKind  := kEventWindowCollapsed;
+  wnd_Events[ 4 ].eventClass := kEventClassWindow;
+  wnd_Events[ 4 ].eventKind  := kEventWindowBoundsChanged;
   // Keyboard
-  wnd_Events[ 4 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 4 ].eventKind  := kEventRawKeyDown;
   wnd_Events[ 5 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 5 ].eventKind  := kEventRawKeyUp;
+  wnd_Events[ 5 ].eventKind  := kEventRawKeyDown;
   wnd_Events[ 6 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 6 ].eventKind  := kEventRawKeyRepeat;
+  wnd_Events[ 6 ].eventKind  := kEventRawKeyUp;
   wnd_Events[ 7 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 7 ].eventKind  := kEventRawKeyModifiersChanged;
+  wnd_Events[ 7 ].eventKind  := kEventRawKeyRepeat;
+  wnd_Events[ 8 ].eventClass := kEventClassKeyboard;
+  wnd_Events[ 8 ].eventKind  := kEventRawKeyModifiersChanged;
   // Mouse
-  wnd_Events[ 8 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 8 ].eventKind   := kEventMouseMoved;
   wnd_Events[ 9 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 9 ].eventKind   := kEventMouseDown;
+  wnd_Events[ 9 ].eventKind   := kEventMouseMoved;
   wnd_Events[ 10 ].eventClass := kEventClassMouse;
-  wnd_Events[ 10 ].eventKind  := kEventMouseUp;
+  wnd_Events[ 10 ].eventKind  := kEventMouseDown;
   wnd_Events[ 11 ].eventClass := kEventClassMouse;
-  wnd_Events[ 11 ].eventKind  := kEventMouseWheelMoved;
+  wnd_Events[ 11 ].eventKind  := kEventMouseUp;
   wnd_Events[ 12 ].eventClass := kEventClassMouse;
-  wnd_Events[ 12 ].eventKind  := kEventMouseDragged;
-  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 13, @wnd_Events[ 0 ], nil, nil );
+  wnd_Events[ 12 ].eventKind  := kEventMouseWheelMoved;
+  wnd_Events[ 13 ].eventClass := kEventClassMouse;
+  wnd_Events[ 13 ].eventKind  := kEventMouseDragged;
+  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 14, @wnd_Events[ 0 ], nil, nil );
 
   wnd_Select;
 {$ENDIF}

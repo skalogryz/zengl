@@ -238,10 +238,12 @@ function app_ProcessMessages;
   {$IFDEF DARWIN}
     eClass  : UInt32;
     eKind   : UInt32;
-    mPos    : HIPoint;
+    mPos    : Point;//HIPoint;
+    wmPos   : Point;
     mButton : EventMouseButton;
     mWheel  : Integer;
     bounds  : HIRect;
+    where   : Point;
     SCAKey  : DWORD;
   {$ENDIF}
     i   : Integer;
@@ -603,9 +605,9 @@ begin
             wnd_Handle := nil;
             app_Work   := FALSE;
           end;
-        kEventWindowDragCompleted:
+        kEventWindowBoundsChanged:
           begin
-            GetEventParameter( inEvent, kEventParamBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
+            GetEventParameter( inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
             wnd_X := Round( bounds.origin.x );
             wnd_Y := Round( bounds.origin.y );
           end;
@@ -693,7 +695,7 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            GetEventParameter( inEvent, kEventParamMouseLocation, typeHIPoint, 0, SizeOf( HIPoint ), nil, @mPos );
+            GetEventParameter( inEvent, kEventParamMouseLocation, typeHIPoint, nil, SizeOf( HIPoint ), nil, @mPos );
 
             if not mouseLock Then
               begin

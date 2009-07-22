@@ -52,7 +52,7 @@ var
 
 procedure Set2DMode;
 begin
-  ogl_Mode := 2;
+  if ogl_Mode <> 1 Then ogl_Mode := 2;
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
@@ -68,7 +68,7 @@ end;
 
 procedure Set3DMode;
 begin
-  ogl_Mode := 3;
+  if ogl_Mode <> 1 Then ogl_Mode := 3;
   ogl_FOVY := FOVY;
 
   glColor4ub( 255, 255, 255, 255 );
