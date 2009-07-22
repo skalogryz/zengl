@@ -525,6 +525,14 @@ begin
    log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( ogl_CanFBO ) );
 
   // PBUFFER
+{$IFDEF LINUX}
+  glXGetFBConfigs          := gl_GetProc( 'glXGetFBConfigs' );
+  glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfig' );
+  glXCreatePbuffer         := gl_GetProc( 'glXCreatePbuffer' );
+  glXDestroyPbuffer        := gl_GetProc( 'glXDestroyPbuffer' );
+  ogl_CanPBuffer           := Assigned( glXGetFBConfigs ) and Assigned( glXCreatePbuffer );
+  log_Add( 'GLX_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+{$ENDIF}
 {$IFDEF WIN32}
   wglCreatePbufferARB := gl_GetProc( 'wglCreatePbuffer' );
   if Assigned( wglCreatePbufferARB ) and Assigned( wglChoosePixelFormatARB ) Then

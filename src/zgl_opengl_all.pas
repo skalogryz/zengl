@@ -374,7 +374,9 @@ var
 
 {$IFDEF LINUX}
 type
-  GLXContext = Pointer;
+  GLXFBConfig = Pointer;
+  GLXContext  = Pointer;
+  GLXPBuffer  = TXID;
   GLXDrawable = TXID;
 
 const
@@ -390,6 +392,11 @@ const
 
   GLX_SAMPLES_SGIS = $186A1;
 
+  // PBuffer
+  GLX_PBUFFER_HEIGHT     = $8040;
+  GLX_PBUFFER_WIDTH      = $8041;
+  GLX_PRESERVED_CONTENTS = $801B;
+
   function  glXChooseVisual(dpy: PDisplay; screen: Integer; attribList: PInteger): PXVisualInfo; cdecl; external libGL;
   function  glXCreateContext(dpy: PDisplay; vis: PXVisualInfo; shareList: GLXContext; direct: Boolean): GLXContext; cdecl; external libGL;
   procedure glXDestroyContext(dpy: PDisplay; ctx: GLXContext); cdecl; external libGL;
@@ -404,6 +411,11 @@ var
   glXSwapIntervalSGI: function( interval: Integer): Integer; cdecl;
   glXGetVideoSyncSGI: function(var counter: LongWord): Integer; cdecl;
   glXWaitVideoSyncSGI: function(divisor, remainder: Integer; var count: LongWord): Integer; cdecl;
+
+  glXGetFBConfigs: function(dpy: PDisplay; screen: Integer; nelements: PInteger): GLXFBConfig; cdecl;
+  glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
+  glXCreatePbuffer: function(dpy: PDisplay; config: Integer; attribList: PInteger): GLXPBuffer; cdecl;
+  glXDestroyPbuffer: procedure(dpy: PDisplay; pbuf: GLXPBuffer); cdecl;
 {$ENDIF}
 {$IFDEF WIN32}
 const
@@ -424,7 +436,6 @@ const
 
   // PBuffer
   WGL_DRAW_TO_PBUFFER_ARB   = $202D;
-
 
   function wglGetProcAddress(proc: PAnsiChar): Pointer; stdcall; external libGL;
 var
@@ -472,6 +483,9 @@ type
 
   TAGLContext = Pointer;
 
+  TAGLPbuffer = Pointer;
+  PAGLPbuffer = ^TAGLPbuffer;
+
   function aglSetInt(ctx:TAGLContext; pname:GLenum; params:GLint):GLboolean;
 
 var
@@ -486,6 +500,9 @@ var
   aglSetFullScreen : function(ctx:TAGLContext; width:GLsizei; height:GLsizei; freq:GLsizei; device:GLint):GLboolean;cdecl;
   aglSwapBuffers : procedure(ctx:TAGLContext);cdecl;
   aglSetInteger : function(ctx:TAGLContext; pname:GLenum; params:PGLint):GLboolean;cdecl;
+  aglCreatePBuffer : function(width:GLint; height:GLint; target:GLenum; internalFormat:GLenum; max_level:longint; pbuffer:PAGLPbuffer):GLboolean;cdecl;
+  aglDestroyPBuffer : function(pbuffer:TAGLPbuffer):GLboolean;cdecl;
+  aglSetPBuffer : function(ctx:TAGLContext; pbuffer:TAGLPbuffer; face:GLint; level:GLint; screen:GLint):GLboolean;cdecl;
 {$ENDIF}
 
 var
