@@ -31,6 +31,9 @@ uses
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll,
+  {$ENDIF}
   zgl_opengl,
   zgl_opengl_all,
   zgl_textures;
@@ -64,6 +67,13 @@ type
     Handle : THandle;
     DC     : HDC;
     RC     : HGLRC;
+end;
+{$ENDIF}
+{$IFDEF DARWIN}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    PBuffer : TAGLPbuffer;
 end;
 {$ENDIF}
 
@@ -106,21 +116,22 @@ var
 
 function rtarget_Add;
   var
-    pFBO : zglPFBO;
+    pFBO     : zglPFBO;
+    pPBuffer : zglPPBuffer;
 {$IFDEF LINUX}
     i, n : Integer;
     fbconfig : GLXFBConfig;
     visualinfo : PXVisualInfo;
-    pPBuffer : zglPPBuffer;
     PBufferiAttr : array[ 0..8 ] of Integer;
 {$ENDIF}
 {$IFDEF WIN32}
     i            : Integer;
-    pPBuffer     : zglPPBuffer;
     PBufferiAttr : array[ 0..15 ] of Integer;
     PBufferfAttr : array[ 0..15 ] of Single;
     PixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : DWORD;
+{$ENDIF}
+{$IFDEF DARWIN}
 {$ENDIF}
 begin
   Result := @managerRTarget.First;
@@ -255,8 +266,7 @@ begin
                 log_Add( 'PBuffer: RC create - Error' );
                 ogl_CanPBuffer := FALSE;
                 exit;
-              end else
-                log_Add( 'PBuffer: RC create - Success' );
+              end;
             wglShareLists( ogl_Context, pPBuffer.RC );
           end else
             begin
@@ -264,6 +274,20 @@ begin
               ogl_CanPBuffer := FALSE;
               exit;
             end;
+      end;
+    {$ENDIF}
+    {$IFDEF DARWIN}
+    RT_TYPE_PBUFFER:
+      begin
+        zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
+        pPBuffer := Result.Next.Handle;
+
+        if aglCreatePBuffer( Surface.Width, Surface.Height, GL_TEXTURE_2D, GL_RGBA, 0, @pPBuffer.PBuffer ) = GL_FALSE Then
+          begin
+            log_Add( 'PBuffer: aglCreatePBuffer - failed' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end;
       end;
     {$ENDIF}
   end;
@@ -289,23 +313,23 @@ begin
         if glIsRenderBufferEXT( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
           glDeleteFramebuffersEXT( 1, @zglPFBO( Target.Handle ).FrameBuffer );
       end;
-  {$IFDEF LINUX}
     RT_TYPE_PBUFFER:
       begin
+        {$IFDEF LINUX}
         glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
-      end;
-  {$ENDIF}
-  {$IFDEF WIN32}
-    RT_TYPE_PBUFFER:
-      begin
+        {$ENDIF}
+        {$IFDEF WIN32}
         if zglPPBuffer( Target.Handle ).RC <> 0 Then
           wglDeleteContext( zglPPBuffer( Target.Handle ).RC );
         if zglPPBuffer( Target.Handle ).DC <> 0 Then
           wglReleasePbufferDCARB( zglPPBuffer( Target.Handle ).Handle, zglPPBuffer( Target.Handle ).DC );
         if zglPPBuffer( Target.Handle ).Handle <> 0 Then
           wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
+        {$ENDIF}
+        {$IFDEF DARWIN}
+        aglDestroyPBuffer( zglPPBuffer( Target.Handle ).PBuffer );
+        {$ENDIF}
       end;
-  {$ENDIF}
   end;
 
   if Assigned( Target.Prev ) Then
@@ -340,18 +364,18 @@ begin
             glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, zglPFBO( Target.Handle ).FrameBuffer );
             glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Target.Surface.ID, 0 );
           end;
-        {$IFDEF LINUX}
         RT_TYPE_PBUFFER:
           begin
+            {$IFDEF LINUX}
             glXMakeCurrent( scr_Display, zglPPBuffer( Target.Handle ).PBuffer, ogl_Context );
-          end;
-        {$ENDIF}
-        {$IFDEF WIN32}
-        RT_TYPE_PBUFFER:
-          begin
+            {$ENDIF}
+            {$IFDEF WIN32}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
+            {$ENDIF}
+            {$IFDEF DARWIN}
+            aglSetPBuffer( ogl_Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
+            {$ENDIF}
           end;
-        {$ENDIF}
       end;
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
@@ -382,20 +406,19 @@ begin
             end;
         end;
 
-        case lRTarget.rtType of
-          {$IFDEF LINUX}
-          RT_TYPE_PBUFFER:
-            begin
-              glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
-            end;
-          {$ENDIF}
-          {$IFDEF WIN32}
-          RT_TYPE_PBUFFER:
-            begin
-              wglMakeCurrent( wnd_DC, ogl_Context );
-            end;
-          {$ENDIF}
-        end;
+        if lRTarget.rtType = RT_TYPE_PBUFFER Then
+          begin
+            {$IFDEF LINUX}
+            glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
+            {$ENDIF}
+            {$IFDEF WIN32}
+            wglMakeCurrent( wnd_DC, ogl_Context );
+            {$ENDIF}
+            {$IFDEF DARWIN}
+            aglSetDrawable( ogl_Context, nil );
+            aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) );
+            {$ENDIF}
+          end;
 
         ogl_Mode := lMode;
         scr_SetViewPort;

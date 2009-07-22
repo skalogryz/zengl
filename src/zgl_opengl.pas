@@ -543,7 +543,19 @@ begin
       wglDestroyPbufferARB   := gl_GetProc( 'wglDestroyPbuffer'   );
     end else
       ogl_CanPBuffer := FALSE;
-  log_Add( 'WGL_ARB_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+  log_Add( 'WGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+{$ENDIF}
+{$IFDEF DARWIN}
+  aglCreatePBuffer := gl_GetProc( 'aglCreatePBuffer' );
+  if Assigned( aglCreatePBuffer ) Then
+    begin
+      ogl_CanPBuffer      := TRUE;
+      aglDestroyPBuffer   := gl_GetProc( 'aglDestroyPBuffer' );
+      aglSetPBuffer       := gl_GetProc( 'aglSetPBuffer' );
+      aglGetVirtualScreen := gl_GetProc( 'aglGetVirtualScreen' );
+    end else
+      ogl_CanPBuffer := FALSE;
+  log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
 {$ENDIF}
 
   {glActiveStencilFaceEXT := wglGetProcAddress( 'glActiveStencilFaceEXT' );}

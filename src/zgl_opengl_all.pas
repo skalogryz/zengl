@@ -500,6 +500,7 @@ var
   aglSetFullScreen : function(ctx:TAGLContext; width:GLsizei; height:GLsizei; freq:GLsizei; device:GLint):GLboolean;cdecl;
   aglSwapBuffers : procedure(ctx:TAGLContext);cdecl;
   aglSetInteger : function(ctx:TAGLContext; pname:GLenum; params:PGLint):GLboolean;cdecl;
+  aglGetVirtualScreen : function(ctx:TAGLContext):GLint;cdecl;
   aglCreatePBuffer : function(width:GLint; height:GLint; target:GLenum; internalFormat:GLenum; max_level:longint; pbuffer:PAGLPbuffer):GLboolean;cdecl;
   aglDestroyPBuffer : function(pbuffer:TAGLPbuffer):GLboolean;cdecl;
   aglSetPBuffer : function(ctx:TAGLContext; pbuffer:TAGLPbuffer; face:GLint; level:GLint; screen:GLint):GLboolean;cdecl;
