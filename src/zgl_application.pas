@@ -238,8 +238,7 @@ function app_ProcessMessages;
   {$IFDEF DARWIN}
     eClass  : UInt32;
     eKind   : UInt32;
-    mPos    : Point;//HIPoint;
-    wmPos   : Point;
+    mPos    : HIPoint;
     mButton : EventMouseButton;
     mWheel  : Integer;
     bounds  : HIRect;
