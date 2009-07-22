@@ -73,6 +73,7 @@ end;
 type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
+    Context : TAGLContext;
     PBuffer : TAGLPbuffer;
 end;
 {$ENDIF}
@@ -116,22 +117,23 @@ var
 
 function rtarget_Add;
   var
+    i        : Integer;
     pFBO     : zglPFBO;
     pPBuffer : zglPPBuffer;
 {$IFDEF LINUX}
-    i, n : Integer;
-    fbconfig : GLXFBConfig;
-    visualinfo : PXVisualInfo;
+    n            : Integer;
+    fbconfig     : GLXFBConfig;
+    visualinfo   : PXVisualInfo;
     PBufferiAttr : array[ 0..8 ] of Integer;
 {$ENDIF}
 {$IFDEF WIN32}
-    i            : Integer;
     PBufferiAttr : array[ 0..15 ] of Integer;
     PBufferfAttr : array[ 0..15 ] of Single;
     PixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : DWORD;
 {$ENDIF}
 {$IFDEF DARWIN}
+    PBufferdAttr : array[ 0..31 ] of DWORD;
 {$ENDIF}
 begin
   Result := @managerRTarget.First;
@@ -141,16 +143,9 @@ begin
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
 
   if ( not ogl_CanFBO ) and ( rtType = RT_TYPE_FBO ) Then
-    {$IFDEF LINUX}
     if ogl_CanPBuffer Then
       rtType := RT_TYPE_PBUFFER
     else
-    {$ENDIF}
-    {$IFDEF WIN32}
-    if ogl_CanPBuffer Then
-      rtType := RT_TYPE_PBUFFER
-    else
-    {$ENDIF}
       rtType := RT_TYPE_SIMPLE;
 
   if ( not ogl_CanPBuffer ) and ( rtType = RT_TYPE_PBUFFER ) Then
@@ -282,6 +277,55 @@ begin
         zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
         pPBuffer := Result.Next.Handle;
 
+        PBufferdAttr[ 0  ] := AGL_RGBA;
+        PBufferdAttr[ 1  ] := GL_TRUE;
+        PBufferdAttr[ 2  ] := AGL_RED_SIZE;
+        PBufferdAttr[ 3  ] := 8;
+        PBufferdAttr[ 4  ] := AGL_GREEN_SIZE;
+        PBufferdAttr[ 5  ] := 8;
+        PBufferdAttr[ 6  ] := AGL_BLUE_SIZE;
+        PBufferdAttr[ 7  ] := 8;
+        PBufferdAttr[ 8  ] := AGL_ALPHA_SIZE;
+        PBufferdAttr[ 9  ] := 8;
+        PBufferdAttr[ 10 ] := AGL_DEPTH_SIZE;
+        PBufferdAttr[ 11 ] := ogl_zDepth;
+        PBufferdAttr[ 12 ] := AGL_DOUBLEBUFFER;
+        PBufferdAttr[ 13 ] := AGL_FULLSCREEN;
+        i := 14;
+        if ogl_Stencil > 0 Then
+          begin
+            PBufferdAttr[ i     ] := AGL_STENCIL_SIZE;
+            PBufferdAttr[ i + 1 ] := ogl_Stencil;
+            INC( i, 2 );
+          end;
+        if ogl_FSAA > 0 Then
+          begin
+            PBufferdAttr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
+            PBufferdAttr[ i + 1 ] := 1;
+            PBufferdAttr[ i + 2 ] := AGL_SAMPLES_ARB;
+            PBufferdAttr[ i + 3 ] := ogl_FSAA;
+            INC( i, 4 );
+          end;
+        PBufferdAttr[ i ] := AGL_NONE;
+
+        DMGetGDeviceByDisplayID( DisplayIDType( scr_Display ), ogl_Device, FALSE );
+        ogl_Format := aglChoosePixelFormat( @ogl_Device, 1, @PBufferdAttr[ 0 ] );
+        if not Assigned( ogl_Format ) Then
+          begin
+            log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end;
+
+        pPBuffer.Context := aglCreateContext( ogl_Format, ogl_Context );
+        if not Assigned( pPBuffer.Context ) Then
+          begin
+            log_Add( 'PBuffer: aglCreateContext - failed' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end;
+        aglDestroyPixelFormat( ogl_Format );
+
         if aglCreatePBuffer( Surface.Width, Surface.Height, GL_TEXTURE_2D, GL_RGBA, 0, @pPBuffer.PBuffer ) = GL_FALSE Then
           begin
             log_Add( 'PBuffer: aglCreatePBuffer - failed' );
@@ -327,6 +371,7 @@ begin
           wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
         {$ENDIF}
         {$IFDEF DARWIN}
+        aglDestroyContext( zglPPBuffer( Target.Handle ).Context );
         aglDestroyPBuffer( zglPPBuffer( Target.Handle ).PBuffer );
         {$ENDIF}
       end;
@@ -373,7 +418,8 @@ begin
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
             {$ENDIF}
             {$IFDEF DARWIN}
-            aglSetPBuffer( ogl_Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
+            aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
+            aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
             {$ENDIF}
           end;
       end;
@@ -415,8 +461,8 @@ begin
             wglMakeCurrent( wnd_DC, ogl_Context );
             {$ENDIF}
             {$IFDEF DARWIN}
-            aglSetDrawable( ogl_Context, nil );
-            aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) );
+            aglSwapBuffers( zglPPBuffer( lRTarget.Handle ).Context );
+            aglSetCurrentContext( ogl_Context );
             {$ENDIF}
           end;
 

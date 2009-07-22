@@ -576,6 +576,10 @@ begin
       aglSetFullScreen      := dlsym( agl_Library, 'aglSetFullScreen' );
       aglSwapBuffers        := dlsym( agl_Library, 'aglSwapBuffers' );
       aglSetInteger         := dlsym( agl_Library, 'aglSetInteger' );
+      aglCreatePBuffer      := dlsym( agl_Library, 'aglCreatePBuffer' );
+      aglDestroyPBuffer     := dlsym( agl_Library, 'aglDestroyPBuffer' );
+      aglSetPBuffer         := dlsym( agl_Library, 'aglSetPBuffer' );
+      aglGetVirtualScreen   := dlsym( agl_Library, 'aglGetVirtualScreen' );
       Result := TRUE;
     end else
       Result := FALSE;
@@ -612,3 +616,4 @@ begin
 end;
 
 end.
+

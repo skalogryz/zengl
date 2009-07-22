@@ -291,16 +291,16 @@ begin
 
   ogl_zDepth := 24;
   repeat
-    ogl_Attr[ 0 ]  := AGL_RGBA;
-    ogl_Attr[ 1 ]  := AGL_RED_SIZE;
-    ogl_Attr[ 2 ]  := 1;
-    ogl_Attr[ 3 ]  := AGL_GREEN_SIZE;
-    ogl_Attr[ 4 ]  := 1;
-    ogl_Attr[ 5 ]  := AGL_BLUE_SIZE;
-    ogl_Attr[ 6 ]  := 1;
-    ogl_Attr[ 7 ]  := AGL_ALPHA_SIZE;
-    ogl_Attr[ 8 ]  := 1;
-    ogl_Attr[ 9 ]  := AGL_DOUBLEBUFFER;
+    ogl_Attr[ 0  ] := AGL_RGBA;
+    ogl_Attr[ 1  ] := AGL_RED_SIZE;
+    ogl_Attr[ 2  ] := 8;
+    ogl_Attr[ 3  ] := AGL_GREEN_SIZE;
+    ogl_Attr[ 4  ] := 8;
+    ogl_Attr[ 5  ] := AGL_BLUE_SIZE;
+    ogl_Attr[ 6  ] := 8;
+    ogl_Attr[ 7  ] := AGL_ALPHA_SIZE;
+    ogl_Attr[ 8  ] := 8;
+    ogl_Attr[ 9  ] := AGL_DOUBLEBUFFER;
     ogl_Attr[ 10 ] := AGL_DEPTH_SIZE;
     ogl_Attr[ 11 ] := ogl_zDepth;
     ogl_Attr[ 12 ] := AGL_FULLSCREEN;
@@ -315,9 +315,9 @@ begin
       begin
         ogl_Attr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
         ogl_Attr[ i + 1 ] := 1;
-        ogl_Attr[ i     ] := AGL_SAMPLES_ARB;
-        ogl_Attr[ i + 1 ] := ogl_FSAA;
-        INC( i, 2 );
+        ogl_Attr[ i + 2 ] := AGL_SAMPLES_ARB;
+        ogl_Attr[ i + 3 ] := ogl_FSAA;
+        INC( i, 4 );
       end;
     ogl_Attr[ i ] := AGL_NONE;
 
@@ -546,15 +546,7 @@ begin
   log_Add( 'WGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
 {$ENDIF}
 {$IFDEF DARWIN}
-  aglCreatePBuffer := gl_GetProc( 'aglCreatePBuffer' );
-  if Assigned( aglCreatePBuffer ) Then
-    begin
-      ogl_CanPBuffer      := TRUE;
-      aglDestroyPBuffer   := gl_GetProc( 'aglDestroyPBuffer' );
-      aglSetPBuffer       := gl_GetProc( 'aglSetPBuffer' );
-      aglGetVirtualScreen := gl_GetProc( 'aglGetVirtualScreen' );
-    end else
-      ogl_CanPBuffer := FALSE;
+  ogl_CanPBuffer := Assigned( aglCreatePBuffer );
   log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
 {$ENDIF}
 
@@ -596,3 +588,4 @@ begin
 end;
 
 end.
+
