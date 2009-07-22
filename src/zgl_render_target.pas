@@ -115,10 +115,11 @@ function rtarget_Add;
     PBufferiAttr : array[ 0..8 ] of Integer;
 {$ENDIF}
 {$IFDEF WIN32}
+    i            : Integer;
     pPBuffer     : zglPPBuffer;
     PBufferiAttr : array[ 0..15 ] of Integer;
-    PBufferfAttr : array[ 0..1 ] of Single;
-    PixelFormat  : Integer;
+    PBufferfAttr : array[ 0..15 ] of Single;
+    PixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : DWORD;
 {$ENDIF}
 begin
@@ -214,7 +215,7 @@ begin
         pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @PBufferiAttr[ 0 ] );
         if pPBuffer.PBuffer = 0 Then
           begin
-            log_Add( 'PBuffer: glXCreatePbuffer - fail' );
+            log_Add( 'PBuffer: glXCreatePbuffer - failed' );
             ogl_CanPBuffer := FALSE;
             exit;
           end;
@@ -226,40 +227,43 @@ begin
         zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
         pPBuffer := Result.Next.Handle;
 
-        PBufferiAttr[ 0 ]  := WGL_DRAW_TO_PBUFFER_ARB;
-        PBufferiAttr[ 1 ]  := GL_TRUE;
-        PBufferiAttr[ 2 ]  := WGL_COLOR_BITS_ARB;
-        PBufferiAttr[ 3 ]  := scr_BPP;
-        PBufferiAttr[ 4 ]  := WGL_ALPHA_BITS_ARB;
-        PBufferiAttr[ 5 ]  := 8;
-        PBufferiAttr[ 6 ]  := WGL_DEPTH_BITS_ARB;
-        PBufferiAttr[ 7 ]  := ogl_zDepth;
-        PBufferiAttr[ 8 ]  := WGL_PBUFFER_WIDTH_ARB;
-        PBufferiAttr[ 9 ]  := Surface.Width;
-        PBufferiAttr[ 10 ] := WGL_PBUFFER_HEIGHT_ARB;
-        PBufferiAttr[ 11 ] := Surface.Height;
-        PBufferiAttr[ 12 ] := 0;
+        FillChar( PBufferiAttr[ 0 ], 16 * 4, 0 );
+        FillChar( PBufferfAttr[ 0 ], 16 * 4, 0 );
 
-        PBufferfAttr[ 0 ] := 0;
-        PBufferfAttr[ 1 ] := 0;
+        PBufferiAttr[ 0  ] := WGL_DRAW_TO_PBUFFER_ARB;
+        PBufferiAttr[ 1  ] := GL_TRUE;
+        PBufferiAttr[ 2  ] := WGL_DOUBLE_BUFFER_ARB;
+        PBufferiAttr[ 3  ] := GL_FALSE;
+        PBufferiAttr[ 4  ] := WGL_COLOR_BITS_ARB;
+        PBufferiAttr[ 5  ] := scr_BPP;
+        PBufferiAttr[ 6  ] := WGL_DEPTH_BITS_ARB;
+        PBufferiAttr[ 7  ] := ogl_zDepth;
+        PBufferiAttr[ 8  ] := WGL_STENCIL_BITS_ARB;
+        PBufferiAttr[ 9  ] := ogl_Stencil;
+        PBufferiAttr[ 10 ] := WGL_ALPHA_BITS_ARB;
+        PBufferiAttr[ 11 ] := 8;
 
-        wglChoosePixelFormatARB( wnd_DC, @PBufferiAttr, @PBufferfAttr, 1, @PixelFormat, @nPixelFormat );
-        pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, PixelFormat, ogl_Width, ogl_Height, nil );
+        wglChoosePixelFormatARB( wnd_DC, @PBufferiAttr[ 0 ], @PBufferfAttr[ 0 ], 64, @PixelFormat, @nPixelFormat );
 
-        pPBuffer.DC := wglGetPbufferDCARB( pPBuffer.Handle );
-        pPBuffer.RC := wglCreateContext( pPBuffer.DC );
-
-        wglMakeCurrent( pPBuffer.Handle, pPBuffer.RC );
-        wglShareLists( wnd_DC, pPBuffer.RC );
-        wglMakeCurrent( wnd_DC, ogl_Context );
-
-        if pPBuffer.RC = 0 Then
+        pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, PixelFormat[ 0 ], Surface.Width, Surface.Height, nil );
+        if pPBuffer.Handle <> 0 Then
           begin
-            log_Add( 'PBuffer: RC create - Error' );
-            ogl_CanPBuffer := FALSE;
-            exit;
+            pPBuffer.DC := wglGetPbufferDCARB( pPBuffer.Handle );
+            pPBuffer.RC := wglCreateContext( pPBuffer.DC );
+            if pPBuffer.RC = 0 Then
+              begin
+                log_Add( 'PBuffer: RC create - Error' );
+                ogl_CanPBuffer := FALSE;
+                exit;
+              end else
+                log_Add( 'PBuffer: RC create - Success' );
+            wglShareLists( ogl_Context, pPBuffer.RC );
           end else
-            log_Add( 'PBuffer: RC create - Success' );
+            begin
+              log_Add( 'PBuffer: wglCreatePbufferARB - failed' );
+              ogl_CanPBuffer := FALSE;
+              exit;
+            end;
       end;
     {$ENDIF}
   end;
@@ -285,6 +289,12 @@ begin
         if glIsRenderBufferEXT( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
           glDeleteFramebuffersEXT( 1, @zglPFBO( Target.Handle ).FrameBuffer );
       end;
+  {$IFDEF LINUX}
+    RT_TYPE_PBUFFER:
+      begin
+        glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+      end;
+  {$ENDIF}
   {$IFDEF WIN32}
     RT_TYPE_PBUFFER:
       begin
@@ -339,7 +349,7 @@ begin
         {$IFDEF WIN32}
         RT_TYPE_PBUFFER:
           begin
-            wglMakeCurrent( zglPPBuffer( Target.Handle ).Handle, zglPPBuffer( Target.Handle ).RC );
+            wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
           end;
         {$ENDIF}
       end;
