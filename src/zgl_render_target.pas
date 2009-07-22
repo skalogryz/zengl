@@ -25,6 +25,9 @@ unit zgl_render_target;
 
 interface
 uses
+  {$IFDEF LINUX}
+  X, XLib, XUtil,
+  {$ENDIF}
   {$IFDEF WIN32}
   Windows,
   {$ENDIF}
@@ -46,6 +49,14 @@ type
     RenderBuffer : DWORD;
 end;
 
+{$IFDEF LINUX}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Handle  : Integer;
+    PBuffer : GLXPBuffer;
+end;
+{$ENDIF}
 {$IFDEF WIN32}
 type
   zglPPBuffer = ^zglTPBuffer;
@@ -96,19 +107,21 @@ var
 function rtarget_Add;
   var
     pFBO : zglPFBO;
+{$IFDEF LINUX}
+    i, n : Integer;
+    fbconfig : GLXFBConfig;
+    visualinfo : PXVisualInfo;
+    pPBuffer : zglPPBuffer;
+    PBufferiAttr : array[ 0..8 ] of Integer;
+{$ENDIF}
 {$IFDEF WIN32}
     pPBuffer     : zglPPBuffer;
-    PBufferiAttr : array[ 0..8 ] of Integer;
+    PBufferiAttr : array[ 0..15 ] of Integer;
     PBufferfAttr : array[ 0..1 ] of Single;
     PixelFormat  : Integer;
     nPixelFormat : DWORD;
 {$ENDIF}
 begin
-{$IFDEF WIN32}
-  PBufferfAttr[ 0 ] := 0;
-  PBufferfAttr[ 1 ] := 0;
-{$ENDIF}
-
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
     Result := Result.Next;
@@ -116,6 +129,11 @@ begin
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
 
   if ( not ogl_CanFBO ) and ( rtType = RT_TYPE_FBO ) Then
+    {$IFDEF LINUX}
+    if ogl_CanPBuffer Then
+      rtType := RT_TYPE_PBUFFER
+    else
+    {$ENDIF}
     {$IFDEF WIN32}
     if ogl_CanPBuffer Then
       rtType := RT_TYPE_PBUFFER
@@ -166,21 +184,64 @@ begin
         glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
       end;
+    {$IFDEF LINUX}
+    RT_TYPE_PBUFFER:
+      begin
+        zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
+        pPBuffer := Result.Next.Handle;
+
+        PBufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
+        PBufferiAttr[ 1 ] := Surface.Width;
+        PBufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
+        PBufferiAttr[ 3 ] := Surface.Height;
+        PBufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
+        PBufferiAttr[ 5 ] := GL_TRUE;
+        PBufferiAttr[ 6 ] := None;
+
+        fbconfig := glXGetFBConfigs( scr_Display, scr_Default, @n );
+        for i := 0 to n - 1 do
+          begin
+            visualinfo := glXGetVisualFromFBConfig( scr_Display, PInteger( fbconfig + i * 4 )^ );
+            if visualinfo.visualid = ogl_VisualInfo.visualid Then
+              begin
+                pPBuffer.Handle := PInteger( fbconfig + i * 4 )^;
+                break;
+              end;
+          end;
+        XFree( fbconfig );
+        XFree( visualinfo );
+
+        pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @PBufferiAttr[ 0 ] );
+        if pPBuffer.PBuffer = 0 Then
+          begin
+            log_Add( 'PBuffer: glXCreatePbuffer - fail' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end;
+      end;
+    {$ENDIF}
     {$IFDEF WIN32}
     RT_TYPE_PBUFFER:
       begin
         zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
         pPBuffer := Result.Next.Handle;
 
-        PBufferiAttr[ 0 ] := WGL_DRAW_TO_PBUFFER_ARB;
-        PBufferiAttr[ 1 ] := GL_TRUE;
-        PBufferiAttr[ 2 ] := WGL_COLOR_BITS_ARB;
-        PBufferiAttr[ 3 ] := scr_BPP;
-        PBufferiAttr[ 4 ] := WGL_ALPHA_BITS_ARB;
-        PBufferiAttr[ 5 ] := 8;
-        PBufferiAttr[ 6 ] := WGL_DEPTH_BITS_ARB;
-        PBufferiAttr[ 7 ] := ogl_zDepth;
-        PBufferiAttr[ 8 ] := 0;
+        PBufferiAttr[ 0 ]  := WGL_DRAW_TO_PBUFFER_ARB;
+        PBufferiAttr[ 1 ]  := GL_TRUE;
+        PBufferiAttr[ 2 ]  := WGL_COLOR_BITS_ARB;
+        PBufferiAttr[ 3 ]  := scr_BPP;
+        PBufferiAttr[ 4 ]  := WGL_ALPHA_BITS_ARB;
+        PBufferiAttr[ 5 ]  := 8;
+        PBufferiAttr[ 6 ]  := WGL_DEPTH_BITS_ARB;
+        PBufferiAttr[ 7 ]  := ogl_zDepth;
+        PBufferiAttr[ 8 ]  := WGL_PBUFFER_WIDTH_ARB;
+        PBufferiAttr[ 9 ]  := Surface.Width;
+        PBufferiAttr[ 10 ] := WGL_PBUFFER_HEIGHT_ARB;
+        PBufferiAttr[ 11 ] := Surface.Height;
+        PBufferiAttr[ 12 ] := 0;
+
+        PBufferfAttr[ 0 ] := 0;
+        PBufferfAttr[ 1 ] := 0;
 
         wglChoosePixelFormatARB( wnd_DC, @PBufferiAttr, @PBufferfAttr, 1, @PixelFormat, @nPixelFormat );
         pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, PixelFormat, ogl_Width, ogl_Height, nil );
@@ -269,6 +330,12 @@ begin
             glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, zglPFBO( Target.Handle ).FrameBuffer );
             glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Target.Surface.ID, 0 );
           end;
+        {$IFDEF LINUX}
+        RT_TYPE_PBUFFER:
+          begin
+            glXMakeCurrent( scr_Display, zglPPBuffer( Target.Handle ).PBuffer, ogl_Context );
+          end;
+        {$ENDIF}
         {$IFDEF WIN32}
         RT_TYPE_PBUFFER:
           begin
@@ -283,12 +350,12 @@ begin
         glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
                     ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
 
-      if ( Target.rtType = RT_TYPE_FBO ) and ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
+      if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
     end else
       begin
         case lRTarget.rtType of
-          RT_TYPE_SIMPLE:
+          RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
             begin
               glEnable( GL_TEXTURE_2D );
               tex_Filter( lRTarget.Surface, lRTarget.Flags );
@@ -303,16 +370,18 @@ begin
               glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
               glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
             end;
+        end;
+
+        case lRTarget.rtType of
+          {$IFDEF LINUX}
+          RT_TYPE_PBUFFER:
+            begin
+              glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
+            end;
+          {$ENDIF}
           {$IFDEF WIN32}
           RT_TYPE_PBUFFER:
             begin
-              glEnable( GL_TEXTURE_2D );
-              tex_Filter( lRTarget.Surface, lRTarget.Flags );
-              glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
-
-              glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
-
-              glDisable( GL_TEXTURE_2D );
               wglMakeCurrent( wnd_DC, ogl_Context );
             end;
           {$ENDIF}
@@ -320,7 +389,7 @@ begin
 
         ogl_Mode := lMode;
         scr_SetViewPort;
-        if ( ( lRTarget.rtType = RT_TYPE_SIMPLE ) or ( lRTarget.rtType = RT_TYPE_PBUFFER ) ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
+        if ( lRTarget.rtType = RT_TYPE_SIMPLE ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
           glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
       end;
 end;

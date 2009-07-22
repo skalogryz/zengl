@@ -219,7 +219,7 @@ begin
     begin
       if length( oal_Sources ) > 64 Then break; // 64 хватит с головой :)
       SetLength( oal_Sources, length( oal_Sources ) + 1 );
-      SetLength( oal_Pointer, length( oal_Pointer ) - 1 );
+      SetLength( oal_Pointer, length( oal_Pointer ) + 1 );
       alGenSources( 1, @oal_Sources[ length( oal_Sources ) - 1 ] );
       if oal_Sources[ length( oal_Sources ) - 1 ] = 0 Then
         begin
