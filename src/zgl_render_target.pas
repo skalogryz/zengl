@@ -182,10 +182,10 @@ begin
           end;
 
         case ogl_zDepth of
-          24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Surface.Width, Surface.Height );
-          32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Surface.Width, Surface.Height );
+          24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+          32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
         else
-          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Surface.Width, Surface.Height );
+          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
         end;
         glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
         glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
@@ -198,9 +198,9 @@ begin
         pPBuffer := Result.Next.Handle;
 
         PBufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
-        PBufferiAttr[ 1 ] := Surface.Width;
+        PBufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
         PBufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
-        PBufferiAttr[ 3 ] := Surface.Height;
+        PBufferiAttr[ 3 ] := Round( Surface.Height / Surface.V );
         PBufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
         PBufferiAttr[ 5 ] := GL_TRUE;
         PBufferiAttr[ 6 ] := None;
@@ -251,7 +251,7 @@ begin
 
         wglChoosePixelFormatARB( wnd_DC, @PBufferiAttr[ 0 ], @PBufferfAttr[ 0 ], 64, @PixelFormat, @nPixelFormat );
 
-        pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, PixelFormat[ 0 ], Surface.Width, Surface.Height, nil );
+        pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, PixelFormat[ 0 ], Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), nil );
         if pPBuffer.Handle <> 0 Then
           begin
             pPBuffer.DC := wglGetPbufferDCARB( pPBuffer.Handle );
@@ -398,7 +398,6 @@ begin
     begin
       lRTarget := Target;
       lMode := ogl_Mode;
-      ogl_Mode := 1;
 
       case Target.rtType of
         RT_TYPE_SIMPLE:
@@ -416,13 +415,16 @@ begin
             {$ENDIF}
             {$IFDEF WIN32}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
+            SetCurrentMode;
             {$ENDIF}
             {$IFDEF DARWIN}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
             aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
+            SetCurrentMode;
             {$ENDIF}
           end;
       end;
+      ogl_Mode := 1;
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
