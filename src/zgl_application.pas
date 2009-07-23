@@ -705,8 +705,18 @@ begin
                   mouseX := Round( mPos.X - wnd_Width  / 2 );
                   mouseY := Round( mPos.Y - wnd_Height / 2 );
                 end;
-            if mouseX < 0 Then mouseX := 0;
-            if mouseY < 0 Then mouseY := 0;
+
+            wnd_MouseIn := ( mPos.X > wnd_X ) and ( mPos.X < wnd_X + wnd_Width ) and
+                           ( mPos.Y > wnd_Y ) and ( mPos.Y < wnd_Y + wnd_Height );
+            if wnd_MouseIn Then
+              begin
+                if ( not app_ShowCursor ) and ( CGCursorIsVisible = 1 ) Then
+                  CGDisplayHideCursor( scr_Display );
+                if ( app_ShowCursor ) and ( CGCursorIsVisible = 0 ) Then
+                  CGDisplayShowCursor( scr_Display );
+              end else
+              if CGCursorIsVisible = 0 Then
+                CGDisplayShowCursor( scr_Display );
           end;
         kEventMouseDown:
           begin

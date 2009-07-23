@@ -80,6 +80,7 @@ var
   wnd_Handle  : WindowRef;
   wnd_Attr    : WindowAttributes;
   wnd_Events  : array[ 0..13 ] of EventTypeSpec;
+  wnd_MouseIn : Boolean;
   {$ENDIF}
 
 implementation
@@ -474,10 +475,6 @@ begin
 {$IFDEF DARWIN}
 begin
   app_ShowCursor := Show;
-  if app_ShowCursor Then
-    ShowCursor
-  else
-    HideCursor;
 {$ENDIF}
 end;
 
