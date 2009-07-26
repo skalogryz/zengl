@@ -645,6 +645,7 @@
     <LI><a name='tex_LoadFromFile'>
     <div class='code'><b>function</b> tex_LoadFromFile( <b>const</b> FileName : <b>String</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
     <div align='justify'>
+    Загружает из графического файла <b>FileName</b> данные, создает текстуру с указанным цветом прозрачности <b>TransparentColor</b>($FF000000 - использовать альфа-канал из файла) и флагами <b>Flags</b>. В качестве результат возвращает указатель на структуру zglTTexture.
     </div>
     </LI><br>
 
@@ -652,6 +653,7 @@
     <LI><a name='tex_LoadFromMemory'>
     <div class='code'><b>function</b> tex_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>String</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
     <div align='justify'>
+    Загружает из памяти <b>Memory</b>(файл целиком загруженный в память) данные, создает текстуру с указанным цветом прозрачности <b>TransparentColor</b>($FF000000 - использовать альфа-канал из файла) и флагами <b>Flags</b>. В качестве результат возвращает указатель на структуру zglTTexture. <b>Extension</b> указывает на формат файла в памяти.
     </div>
     </LI><br>
 
@@ -792,6 +794,7 @@
     <LI><a name='fx2d_SetVCA'>
     <div class='code'><b>procedure</b> fx2d_SetVCA( <b>const</b> c1, c2, c3, c4 : DWORD; <b>const</b> a1, a2, a3, a4 : Byte );</div>
     <div align='justify'>
+    Устанавливает цвет и альфу для каждой вершины спрайта, прямоугольника или линии. <b>c1</b>..<b>c4</b> отвечают за цвет, <b>a1</b>..<b>a4</b> за значение альфы.
     </div>
     </LI><br>
 
@@ -893,7 +896,7 @@
     <div align='justify'>
     Рисует спрайт используя текстуру <b>Texture</b> в координатах <b>X</b>, <b>Y</b>, размерами <b>W</b>(ширина) и <b>H</b>(высота), градусом поворота <b>Angle</b> и альфой <b>Alpha</b>. <b>CutRect</b> указывает какую часть текстуры использовать.
     </div>
-    </LI><br>
+    </LI>
   </UL>
   <div align='left'><a class='b' href='#index'>оглавление</a></div>
   </p>
