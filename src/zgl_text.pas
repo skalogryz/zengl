@@ -256,7 +256,6 @@ begin
   W := 0;
   H := 1;
   for i := 0 to WordsCount - 1 do
-  begin
     for j := b to l do
       begin
         LineFeed := Text[ j ] = #10;
@@ -299,8 +298,6 @@ begin
             break;
           end;
       end;
-      writeln( '"' + WordsArray[i].str + '"' );
-  end;
   WordsArray[ WordsCount - 1 ].LF := TRUE;
   WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
 

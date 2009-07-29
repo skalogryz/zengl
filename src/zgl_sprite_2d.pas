@@ -53,9 +53,9 @@ function sprite2d_InScreen( const X, Y, W, H, Angle : Single ) : Boolean;
 begin
 // т.к. zglTCamera2D можно крутить, проверка будет на попадание спрайта в "окружность"
 // расчет очень упрощенный
-  if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) Then
+  if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) or ( cam2dGlobal.Angle <> 0 ) Then
     begin
-      radius := sqr( ( W * cam2DGlobal.Zoom.X + H * cam2DGlobal.Zoom.Y ) / 2 + ( ogl_CropW + ogl_CropH ) / 2 );
+      radius := sqr( ( W * cam2DGlobal.Zoom.X + H * cam2DGlobal.Zoom.Y ) / 2 + ( ogl_CropW + ogl_CropH ) );
       cx := ogl_CropX + cam2dGlobal.X + ( ogl_CropW / scr_ResCX ) / 2;
       cy := ogl_CropY + cam2dGlobal.Y + ( ogl_CropH / scr_ResCY ) / 2;
       sx := ( X + W / 2 ) * cam2DGlobal.Zoom.X;
