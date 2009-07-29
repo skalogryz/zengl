@@ -245,6 +245,7 @@ begin
     if Text[ i ] = #10 Then
       INC( WordsCount );
   WordsCount := WordsCount + u_Words( Text );
+  writeln( WordsCount );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -255,6 +256,7 @@ begin
   W := 0;
   H := 1;
   for i := 0 to WordsCount - 1 do
+  begin
     for j := b to l do
       begin
         LineFeed := Text[ j ] = #10;
@@ -267,7 +269,7 @@ begin
                   font_GetCID( WordsArray[ i ].str, H, @H );
                 continue;
               end;
-            if ( j > 1 ) and ( Text[ j - 1 ] = ' ' ) Then
+            if ( j > 1 ) and ( ( Text[ j - 1 ] = ' ' ) and ( j <> l ) ) Then
               begin
                 INC( H );
                 continue;
@@ -297,6 +299,8 @@ begin
             break;
           end;
       end;
+      writeln( '"' + WordsArray[i].str + '"' );
+  end;
   WordsArray[ WordsCount - 1 ].LF := TRUE;
   WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
 

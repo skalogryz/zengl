@@ -250,6 +250,7 @@
     </Parsing>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
+      <TargetOS Value="Win32"/>
       <Optimizations>
         <OptimizationLevel Value="3"/>
       </Optimizations>

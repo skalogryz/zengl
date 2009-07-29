@@ -24,8 +24,6 @@ unit zgl_math_2d;
 {$I zgl_config.cfg}
 
 interface
-uses
-  zgl_const;
 
 const
   pi      = 3.1415926;

@@ -26,7 +26,7 @@ unit zgl_opengl;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil,
+  X, XUtil,
   {$ENDIF}
   {$IFDEF WIN32}
   Windows,

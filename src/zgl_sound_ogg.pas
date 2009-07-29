@@ -288,10 +288,17 @@ type
     callbacks       : ov_callbacks;
   end;
 
+  zglPOggStream = ^zglTOggStream;
+  zglTOggStream = record
+    vi : pvorbis_info;
+    vf : OggVorbis_File;
+    vc : ov_callbacks;
+  end;
+
 procedure ogg_Init;
-function  ogg_CodecOpen( const FileName : AnsiString; var Stream : zglPSoundStream ) : Boolean;
-function  ogg_CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-procedure ogg_CodecLoop;
+function  ogg_CodecOpen( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+function  ogg_CodecRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+procedure ogg_CodecLoop( var Stream : zglPSoundStream );
 procedure ogg_CodecClose( var Stream : zglPSoundStream );
 
 procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
@@ -312,17 +319,13 @@ function ov_time_seek(var vf: OggVorbis_File; pos: cdouble): cint; cdecl; extern
 {$ENDIF}
 
 var
-  oggLoad   : Boolean;
-  oggInit   : Boolean;
-  oggMemory : zglTMemory;
-  oggStream : zglTSoundStream;
+  oggLoad    : Boolean;
+  oggInit    : Boolean;
+  oggMemory  : zglTMemory;
+  oggDecoder : zglTSoundDecoder;
   {$IFNDEF USE_OPENAL}
   oggBufferDesc : zglTBufferDesc;
   {$ENDIF}
-
-  vi : pvorbis_info;
-  vf : OggVorbis_File;
-  vc : ov_callbacks;
 
   ogg_Library        : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
   vorbis_Library     : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
@@ -419,11 +422,6 @@ begin
       end;
 {$ENDIF}
 
-  vc.read  := @ogg_Read;
-  vc.seek  := @ogg_Seek;
-  vc.close := @ogg_Close;
-  vc.tell  := @ogg_GetPos;
-
   oggLoad := TRUE;
 end;
 
@@ -434,17 +432,25 @@ begin
   if not oggInit Then exit;
 
   file_Open( Stream._File, FileName, FOM_OPENR );
+  zgl_GetMem( Stream._Data, SizeOf( zglTOggStream ) );
 
-  if ov_open_callbacks( @Stream._File, vf, nil, 0, vc ) >= 0 Then
+  with zglTOggStream( Stream._Data^ ) do
     begin
-      vi                := ov_info( vf, -1 );
-      Stream.Rate       := vi.rate;
-      Stream.Channels   := vi.channels;
-      Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
-      zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
-      Result := TRUE;
+      vc.read  := @ogg_Read;
+      vc.seek  := @ogg_Seek;
+      vc.close := @ogg_Close;
+      vc.tell  := @ogg_GetPos;
+      if ov_open_callbacks( @Stream._File, vf, nil, 0, vc ) >= 0 Then
+        begin
+          vi                := ov_info( vf, -1 );
+          Stream.Rate       := vi.rate;
+          Stream.Channels   := vi.channels;
+          Stream.BufferSize := 64 * 1024;
+          zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
+          Result := TRUE;
+        end;
+      ov_time_seek( vf, 0 );
     end;
-  ov_time_seek( vf, 0 );
 end;
 
 function ogg_CodecRead;
@@ -455,7 +461,7 @@ begin
 
   BytesRead := 0;
   repeat
-    Result := ov_read( vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
+    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
 
     if Result = -3  Then break;
     BytesRead := BytesRead + Result;
@@ -469,15 +475,15 @@ procedure ogg_CodecLoop;
 begin
   if not oggInit Then exit;
 
-  ov_time_seek( vf, 0 );
+  ov_time_seek( zglTOggStream( Stream._Data^ ).vf, 0 );
 end;
 
 procedure ogg_CodecClose;
 begin
   if not oggInit Then exit;
-  if not Assigned( vi ) Then exit;
-  vi := nil;
-  ov_clear( vf );
+  if not Assigned( zglTOggStream( Stream._Data^ ).vi ) Then exit;
+  zglTOggStream( Stream._Data^ ).vi := nil;
+  ov_clear( zglTOggStream( Stream._Data^ ).vf );
 end;
 
 procedure ogg_Load;
@@ -576,15 +582,15 @@ begin
 end;
 
 initialization
-  oggStream.Extension  := 'OGG';
-  oggStream.CodecOpen  := ogg_CodecOpen;
-  oggStream.CodecRead  := ogg_CodecRead;
-  oggStream.CodecLoop  := ogg_CodecLoop;
-  oggStream.CodecClose := ogg_CodecClose;
+  oggDecoder.Ext   := 'OGG';
+  oggDecoder.Open  := ogg_CodecOpen;
+  oggDecoder.Read  := ogg_CodecRead;
+  oggDecoder.Loop  := ogg_CodecLoop;
+  oggDecoder.Close := ogg_CodecClose;
   zgl_Reg( SND_FORMAT_EXTENSION, PAnsiChar( 'OGG' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
-  zgl_Reg( SND_FORMAT_STREAM, @oggStream );
+  zgl_Reg( SND_FORMAT_DECODER,     @oggDecoder );
 
 finalization
 {$IFNDEF USE_OGG_STATIC}

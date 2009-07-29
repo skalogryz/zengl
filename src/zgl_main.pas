@@ -45,7 +45,7 @@ const
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
-  SND_FORMAT_STREAM      = $000023;
+  SND_FORMAT_DECODER     = $000023;
   WIDGET_TYPE_ID         = $000030;
   WIDGET_FILL_DESC       = $000031;
   WIDGET_ONDRAW          = $000032;
@@ -308,7 +308,7 @@ begin
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
         managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( AnsiString( PAnsiChar( UserData ) ) );
-        managerSound.Formats[ managerSound.Count.Formats ].Stream    := nil;
+        managerSound.Formats[ managerSound.Count.Formats ].Decoder   := nil;
       end;
     SND_FORMAT_FILE_LOADER:
       begin
@@ -319,11 +319,11 @@ begin
         managerSound.Formats[  managerSound.Count.Formats ].MemLoader := UserData;
         INC( managerSound.Count.Formats );
       end;
-    SND_FORMAT_STREAM:
+    SND_FORMAT_DECODER:
       begin
         for i := 0 to managerSound.Count.Formats - 1 do
-          if managerSound.Formats[ i ].Extension = zglPSoundStream( UserData ).Extension Then
-            managerSound.Formats[ i ].Stream := UserData;
+          if managerSound.Formats[ i ].Extension = zglPSoundDecoder( UserData ).Ext Then
+            managerSound.Formats[ i ].Decoder := UserData;
       end;
     // GUI
     WIDGET_TYPE_ID:

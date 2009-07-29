@@ -215,9 +215,9 @@ begin
   for i := 0 to h - 1 do
     begin
       Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
-      for x := 0 to w shr 1 do
+      for x := 0 to w - 1 do
         for j := 0 to pixelSize - 1 do
-          PByte( Ptr( Data ) +  x * pixelSize + j )^ := scanLine[ ( w - 1 - x ) * pixelSize + j ];
+          PByte( Ptr( Data ) +  i * w * pixelSize + x * pixelSize + j )^ := scanLine[ ( w - 1 - x ) * pixelSize + j ];
     end;
 end;
 

@@ -89,6 +89,7 @@ implementation
 uses
   zgl_screen,
   zgl_window,
+  zgl_opengl,
   zgl_log,
   zgl_keyboard,
   zgl_mouse,
@@ -176,14 +177,22 @@ begin
           app_Pause := FALSE;
         end;
       {$ENDIF}
-      if not app_Pause Then
+      if app_Focus Then
         begin
           if sndAutoPaused Then
             begin
               sndAutoPaused := FALSE;
               snd_ResumeFile;
             end;
+        end else
+          if Assigned( sfStream ) and ( sfStream.Played ) Then
+            begin
+              sndAutoPaused := TRUE;
+              snd_StopFile;
+            end;
 
+      if not app_Pause Then
+        begin
           currTimer := @managerTimer.First;
           if currTimer <> nil Then
             for z := 0 to managerTimer.Count do
@@ -202,12 +211,6 @@ begin
               end;
         end else
           begin
-            if Assigned( sfStream ) and ( sfStream.Played ) Then
-              begin
-                sndAutoPaused := TRUE;
-                snd_StopFile;
-              end;
-
             timer_Reset;
             u_Sleep( 10 );
           end;
@@ -411,31 +414,34 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   Result := 0;
+  if not app_Work Then
+    begin
+      Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+      exit;
+    end;
   case Msg of
     WM_CLOSE, WM_DESTROY, WM_QUIT:
       app_Work := FALSE;
 
     WM_PAINT:
-      if app_Work then
-        begin
-          app_Draw;
-          ValidateRect( wnd_Handle, nil );
-        end;
+      begin
+        app_Draw;
+        ValidateRect( wnd_Handle, nil );
+      end;
     WM_DISPLAYCHANGE:
       begin
         wnd_Update;
       end;
     WM_KILLFOCUS:
-      if app_Work Then
-        begin
-          app_Focus := FALSE;
-          if app_AutoPause Then app_Pause := TRUE;
-          if ( wnd_FullScreen ) and ( not wnd_First ) Then
-            begin
-              scr_Reset;
-              wnd_Update;
-            end;
-        end;
+      begin
+        app_Focus := FALSE;
+        if app_AutoPause Then app_Pause := TRUE;
+        if ( wnd_FullScreen ) and ( not wnd_First ) Then
+          begin
+            scr_Reset;
+            wnd_Update;
+          end;
+      end;
     WM_SETFOCUS:
       begin
         app_Focus := TRUE;
@@ -606,9 +612,16 @@ begin
           end;
         kEventWindowBoundsChanged:
           begin
-            GetEventParameter( inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
-            wnd_X := Round( bounds.origin.x );
-            wnd_Y := Round( bounds.origin.y );
+            if not wnd_FullScreen Then
+              begin
+                GetEventParameter( inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
+                wnd_X := Round( bounds.origin.x );
+                wnd_Y := Round( bounds.origin.y );
+              end else
+                begin
+                  wnd_X := 0;
+                  wnd_Y := 0;
+                end;
           end;
       end;
 

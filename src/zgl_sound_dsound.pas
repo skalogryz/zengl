@@ -209,7 +209,7 @@ end;
 
 function dsu_CalcVolume;
 begin
- if volume = 0 Then
+  if volume = 0 Then
     Result := -10000
   else
     Result := - Round( 1000 * ln( 1 / volume ) );

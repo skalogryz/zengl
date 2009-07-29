@@ -117,7 +117,7 @@ var
   oal_Device  : PALCdevice  = nil;
   oal_Context : PALCcontext = nil;
   oal_Sources : array of LongWord;
-  oal_Pointer : array of Pointer;
+  oal_SrcPtrs : array of Pointer;
 
   // Параметры слушателя
   oal_Position    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
@@ -186,9 +186,9 @@ begin
       alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, state );
       if state <> AL_PLAYING Then
         begin
-          if Assigned( oal_Pointer[ i ] ) Then
-            LongWord( oal_Pointer[ i ]^ ) := 0;
-          oal_Pointer[ i ] := Source;
+          if Assigned( oal_SrcPtrs[ i ] ) Then
+            LongWord( oal_SrcPtrs[ i ]^ ) := 0;
+          oal_SrcPtrs[ i ] := Source;
           Result := oal_Sources[ i ];
           break;
         end;
