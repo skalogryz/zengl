@@ -561,7 +561,7 @@ begin
           if wParam > 32 Then
             begin
               if app_Flags and APP_USE_UTF8 > 0 Then
-                key_InputText( AnsiToUtf8( String( wParam ) ) )
+                key_InputText( AnsiToUtf8( Char( wParam ) ) )
               else
                 key_InputText( AnsiChar( wParam ) );
             end;
