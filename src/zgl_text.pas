@@ -215,7 +215,7 @@ begin
 end;
 
 // TODO:
-// - оптимизировать количество DIP'ов
+// - Переписать весь этот говнокод
 procedure text_DrawInRect;
   var
     i, j, b, l : Integer;
@@ -245,7 +245,6 @@ begin
     if Text[ i ] = #10 Then
       INC( WordsCount );
   WordsCount := WordsCount + u_Words( Text );
-  writeln( WordsCount );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -273,7 +272,7 @@ begin
                 INC( H );
                 continue;
               end;
-            if b = 1 Then
+            if ( b = 1 ) and ( WordsCount > 1 ) Then
               WordsArray[ i ].str := Copy( Text, b, j - b )
             else
               WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + 1 * Byte( not LineFeed ) - W );
@@ -311,11 +310,11 @@ begin
       X := X + WordsArray[ i ].W - SpaceShift;
       if i > 0 Then
         LineFeed := WordsArray[ i - 1 ].LF;
-      if ( ( X >= Rect.X + Rect.W - 1 ) and ( i - l > 0 ) ) or LineFeed Then
+      if ( ( X + SpaceShift >= Rect.X + Rect.W - 1 ) and ( i - l > 0 ) ) or LineFeed Then
         begin
-          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed ) - SpaceShift * Byte( Flags and TEXT_HALIGN_CENTER > 0 );
+          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed );
           if i > 0 Then
-          Y := Y + Round( Font.MaxHeight * textScale ) * WordsArray[ i - 1 ].LFShift;
+            Y := Y + Round( Font.MaxHeight * textScale ) * WordsArray[ i - 1 ].LFShift;
           WordsArray[ i ].X := X;
           WordsArray[ i ].Y := Y;
           X := X + WordsArray[ i ].W - SpaceShift;
@@ -334,8 +333,13 @@ begin
               if Flags and TEXT_HALIGN_CENTER > 0 Then
                 begin
                   W := ( Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift ) ) div 2;
-                  for b := l to i - 1 do
-                    INC( WordsArray[ b ].X, W );
+                  if i = WordsCount - 1 Then
+                    begin
+                      for b := l to i - 1 do
+                        INC( WordsArray[ b ].X, W - SpaceShift div 2 );
+                    end else
+                      for b := l to i - 1 do
+                        INC( WordsArray[ b ].X, W );
                 end else
                   if Flags and TEXT_HALIGN_RIGHT > 0 Then
                     begin
