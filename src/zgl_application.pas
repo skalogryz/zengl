@@ -79,6 +79,8 @@ var
   {$ENDIF}
   app_ShowCursor : Boolean;
 
+  app_dt : Double;
+
   app_FPS      : DWORD;
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
@@ -144,7 +146,7 @@ end;
 procedure app_MainLoop;
   var
     i, z : Integer;
-    j, dt : Double;
+    j    : Double;
     currTimer : zglPTimer;
     {$IFDEF WIN32}
     SysInfo : _SYSTEM_INFO;
@@ -161,7 +163,7 @@ begin
   app_PLoad;
   scr_Flush;
 
-  dt := timer_GetTicks;
+  app_dt := timer_GetTicks;
   timer_Reset;
   timer_Add( @app_CalcFPS, 1000 );
   while app_Work do
@@ -222,11 +224,11 @@ begin
 
       if app_Pause Then
         begin
-          dt := timer_GetTicks;
+          app_dt := timer_GetTicks;
           continue;
         end;
-      app_PUpdate( timer_GetTicks - dt );
-      dt := timer_GetTicks;
+      app_PUpdate( timer_GetTicks - app_dt );
+      app_dt := timer_GetTicks;
       app_Draw;
     end;
 end;
@@ -599,11 +601,16 @@ begin
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState;
           end;
-        kEventWindowDeactivated, kEventWindowCollapsed:
+        kEventWindowDeactivated:
           begin
             if wnd_FullScreen Then exit;
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
+          end;
+        kEventWindowCollapsed:
+          begin
+            app_Focus := FALSE;
+            app_Pause := TRUE;
           end;
         kEventWindowClosed:
           begin
