@@ -74,14 +74,19 @@ unit zgl_sound_ogg;
 
 interface
 uses
+  zgl_main,
+  zgl_application,
+  zgl_sound,
   {$IFDEF USE_OPENAL}
   zgl_sound_openal,
   {$ELSE}
   zgl_sound_dsound,
   {$ENDIF}
-  zgl_types,
+  zgl_file,
   zgl_memory,
-  zgl_sound;
+  zgl_log,
+  zgl_utils,
+  zgl_types;
 
 const
 {$IFDEF LINUX}
@@ -296,10 +301,10 @@ type
   end;
 
 procedure ogg_Init;
-function  ogg_CodecOpen( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
-function  ogg_CodecRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-procedure ogg_CodecLoop( var Stream : zglPSoundStream );
-procedure ogg_CodecClose( var Stream : zglPSoundStream );
+function  ogg_DecoderOpen( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+function  ogg_DecoderRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+procedure ogg_DecoderLoop( var Stream : zglPSoundStream );
+procedure ogg_DecoderClose( var Stream : zglPSoundStream );
 
 procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
 procedure ogg_LoadFromFile( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : DWORD );
@@ -340,13 +345,6 @@ var
 {$ENDIF}
 
 implementation
-uses
-  zgl_const,
-  zgl_application,
-  zgl_main,
-  zgl_file,
-  zgl_log,
-  zgl_utils;
 
 function ogg_Read;
 begin
@@ -425,7 +423,7 @@ begin
   oggLoad := TRUE;
 end;
 
-function ogg_CodecOpen;
+function ogg_DecoderOpen;
 begin
   Result := FALSE;
   if not oggLoad Then ogg_Init;
@@ -453,7 +451,7 @@ begin
     end;
 end;
 
-function ogg_CodecRead;
+function ogg_DecoderRead;
   var
     BytesRead : Integer;
 begin
@@ -471,14 +469,14 @@ begin
   Result := BytesRead;
 end;
 
-procedure ogg_CodecLoop;
+procedure ogg_DecoderLoop;
 begin
   if not oggInit Then exit;
 
   ov_time_seek( zglTOggStream( Stream._Data^ ).vf, 0 );
 end;
 
-procedure ogg_CodecClose;
+procedure ogg_DecoderClose;
 begin
   if not oggInit Then exit;
   if not Assigned( zglTOggStream( Stream._Data^ ).vi ) Then exit;
@@ -497,7 +495,7 @@ procedure ogg_Load;
     _vf : OggVorbis_File;
     _vc : ov_callbacks;
 
-  function CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+  function DecoderRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
     var
       BytesRead : Integer;
   begin
@@ -543,7 +541,7 @@ begin
       zgl_GetMem( Buffer, 64 * 1024 );
       // Т.к. ov_pcm_total почему-то возвращает бред, приходится извращаться :)
       repeat
-        BytesRead := CodecRead( Buffer, 64 * 1024, _End );
+        BytesRead := DecoderRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
       until _End;
       _vi := nil;
@@ -553,7 +551,7 @@ begin
       ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc );
       size := 0;
       repeat
-        BytesRead := CodecRead( Buffer, 64 * 1024, _End );
+        BytesRead := DecoderRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
         if BytesRead > 0 Then
           Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
@@ -583,10 +581,10 @@ end;
 
 initialization
   oggDecoder.Ext   := 'OGG';
-  oggDecoder.Open  := ogg_CodecOpen;
-  oggDecoder.Read  := ogg_CodecRead;
-  oggDecoder.Loop  := ogg_CodecLoop;
-  oggDecoder.Close := ogg_CodecClose;
+  oggDecoder.Open  := ogg_DecoderOpen;
+  oggDecoder.Read  := ogg_DecoderRead;
+  oggDecoder.Loop  := ogg_DecoderLoop;
+  oggDecoder.Close := ogg_DecoderClose;
   zgl_Reg( SND_FORMAT_EXTENSION, PAnsiChar( 'OGG' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );

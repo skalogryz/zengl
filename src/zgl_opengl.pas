@@ -569,13 +569,8 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WIN32}
-  wglGetSwapIntervalEXT := gl_GetProc( 'wglGetSwapIntervalEXT' );
-  if Assigned( wglGetSwapIntervalEXT ) Then
-    begin
-      ogl_CanVSync := TRUE;
-      wglSwapIntervalEXT := gl_GetProc( 'wglSwapIntervalEXT' );
-    end else
-      ogl_CanVSync := FALSE;
+  wglSwapIntervalEXT := gl_GetProc( 'wglSwapIntervalEXT' );
+  ogl_CanVSync       := Assigned( wglSwapIntervalEXT );
 {$ENDIF}
 {$IFDEF DARWIN}
   if aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then

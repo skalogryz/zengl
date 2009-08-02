@@ -69,9 +69,9 @@ type
 end;
 
 var
-  scr_Width   : Integer;
-  scr_Height  : Integer;
-  scr_BPP     : Integer;
+  scr_Width   : Integer = 800;
+  scr_Height  : Integer = 600;
+  scr_BPP     : Integer = 32;
   scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
@@ -109,7 +109,6 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_main,
   zgl_application,
   zgl_window,
@@ -393,15 +392,8 @@ begin
   glXSwapBuffers( scr_Display, wnd_Handle );
 {$ENDIF}
 {$IFDEF WIN32}
-  if ogl_CanVSync Then
-    begin
-      sync := wglGetSwapIntervalEXT;
-      case scr_VSync of
-        TRUE  : if sync <> 1 then wglSwapIntervalEXT( 1 );
-        FALSE : if sync <> 0 then wglSwapIntervalEXT( 0 );
-      end;
-      glFinish;
-    end;
+  if scr_VSync Then
+    glFinish;
 
   SwapBuffers( wnd_DC );
 {$ENDIF}
@@ -603,6 +595,10 @@ end;
 procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
+{$IFDEF WIN32}
+  if ogl_CanVSync Then
+    wglSwapIntervalEXT( Byte( scr_VSync ) )
+{$ENDIF}
 {$IFDEF DARWIN}
   aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
 {$ENDIF}
@@ -627,8 +623,5 @@ begin
   else
     log_Add( 'Set FSAA: off' );
 end;
-
-initialization
-  scr_BPP := defBPP;
 
 end.

@@ -23,7 +23,6 @@ unit zgl_sound_modplug;
 
 interface
 uses
-  zgl_const,
   zgl_types,
   zgl_application,
   zgl_main,
@@ -63,20 +62,19 @@ type
   end;
 
 procedure mp_Init;
-function  mp_CodecOpen( const FileName : String; var Stream : zglPSoundStream ) : Boolean;
-function  mp_CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-procedure mp_CodecLoop;
-procedure mp_CodecClose;
+function  mp_DecoderOpen( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+function  mp_DecoderRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+procedure mp_DecoderLoop( var Stream : zglPSoundStream );
+procedure mp_DecoderClose( var Stream : zglPSoundStream );
 
 var
-  Formats : array[ 0..MAX_FORMATS - 1 ] of zglTSoundStream;
-  SUPPORT_FORMATS : array[ 0..MAX_FORMATS - 1 ] of String = ( 'MOD', 'IT',  'S3M', 'XM',  'IT',  '669', 'AMF', 'AMS', 'DBM', 'DMF', 'DSM', 'FAR',
-                                                              'MDL', 'MED', 'MTM', 'OKT', 'PTM', 'STM', 'ULT', 'UMX', 'MT2', 'PSM' );
+  Decoders : array[ 0..MAX_FORMATS - 1 ] of zglTSoundDecoder;
+  FORMATS  : array[ 0..MAX_FORMATS - 1 ] of AnsiString = ( 'MOD', 'IT',  'S3M', 'XM',  'IT',  '669', 'AMF', 'AMS', 'DBM', 'DMF', 'DSM', 'FAR',
+                                                           'MDL', 'MED', 'MTM', 'OKT', 'PTM', 'STM', 'ULT', 'UMX', 'MT2', 'PSM' );
 
   mpLoad    : Boolean;
   mpInit    : Boolean;
   mpLibrary : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
-  mpFile    : PModPlugFile;
 
   ModPlug_Load   : function(data: pointer; size: longint): PModPlugFile; cdecl;
   ModPlug_Unload : procedure(_file: PModPlugFile); cdecl;
@@ -115,7 +113,7 @@ begin
   mpLoad := TRUE;
 end;
 
-function mp_CodecOpen;
+function mp_DecoderOpen;
   var
     mem : zglTMemory;
 begin
@@ -123,41 +121,41 @@ begin
   if not mpInit Then exit;
 
   mem_LoadFromFile( mem, FileName );
-  mpFile := ModPlug_Load( mem.Memory, mem.Size );
+  PModPlugFile( Stream._Data ) := ModPlug_Load( mem.Memory, mem.Size );
   mem_Free( mem );
 
-  if Assigned( mpFile ) Then
+  if Assigned( Stream._Data ) Then
     begin
       Result := TRUE;
 
       Stream.Rate       := 44100;
       Stream.Channels   := 2;
-      Stream.BufferSize := 64 * 1024;//{$IFDEF USE_OPENAL} 20000 - ( 20000 mod ( 2 * Stream.Channels ) ) {$ELSE} 64 * 1024  {$ENDIF};
+      Stream.BufferSize := 64 * 1024;
       zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
     end else
       Result := FALSE;
 end;
 
-function mp_CodecRead;
+function mp_DecoderRead;
 begin
   if not mpInit Then exit;
 
-  Result := ModPlug_Read( mpFile, Buffer, Count );
+  Result := ModPlug_Read( PModPlugFile( Stream._Data ), Buffer, Count );
   _End := Result = 0;
 end;
 
-procedure mp_CodecLoop;
+procedure mp_DecoderLoop;
 begin
   if not mpInit Then exit;
 
-  ModPlug_Seek( mpFile, 0 );
+  ModPlug_Seek( PModPlugFile( Stream._Data ), 0 );
 end;
 
-procedure mp_CodecClose;
+procedure mp_DecoderClose;
 begin
   if not mpInit Then exit;
 
-  ModPlug_Unload( mpFile );
+  ModPlug_Unload( PModPlugFile( Stream._Data ) );
 end;
 
 var
@@ -165,15 +163,15 @@ var
 initialization
   for i := 0 to MAX_FORMATS - 1 do
     begin
-      Formats[ i ].Extension  := SUPPORT_FORMATS[ i ];
-      Formats[ i ].CodecOpen  := mp_CodecOpen;
-      Formats[ i ].CodecRead  := mp_CodecRead;
-      Formats[ i ].CodecLoop  := mp_CodecLoop;
-      Formats[ i ].CodecClose := mp_CodecClose;
-      zgl_Reg( SND_FORMAT_EXTENSION, PChar( SUPPORT_FORMATS[ i ] ) );
+      Decoders[ i ].Ext   := FORMATS[ i ];
+      Decoders[ i ].Open  := mp_DecoderOpen;
+      Decoders[ i ].Read  := mp_DecoderRead;
+      Decoders[ i ].Loop  := mp_DecoderLoop;
+      Decoders[ i ].Close := mp_DecoderClose;
+      zgl_Reg( SND_FORMAT_EXTENSION, PChar( FORMATS[ i ] ) );
       zgl_Reg( SND_FORMAT_FILE_LOADER, nil );
       zgl_Reg( SND_FORMAT_MEM_LOADER,  nil );
-      zgl_Reg( SND_FORMAT_STREAM, @Formats[ i ] );
+      zgl_Reg( SND_FORMAT_DECODER, @Decoders[ i ] );
     end;
 
 finalization
@@ -181,4 +179,3 @@ finalization
     dlclose( mpLibrary );
 
 end.
-

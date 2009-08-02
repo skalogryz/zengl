@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.34               }
-{ date:    21.07.09             }
+{ version: 0.1.35               }
+{ date:    02.08.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -88,7 +88,7 @@ const
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
-  SND_FORMAT_STREAM      = $000023;
+  SND_FORMAT_DECODER     = $000023;
   WIDGET_TYPE_ID         = $000030;
   WIDGET_DESC_FILL       = $000031;
   WIDGET_ONDRAW          = $000032;
@@ -426,11 +426,12 @@ const
   TEX_FILTER_ANISOTROPY = $000800;
 
   TEX_RGB               = $001000;
+  TEX_CALCULATE_ALPHA   = $002000;
 
   TEX_QUALITY_LOW       = $400000;
   TEX_QUALITY_MEDIUM    = $800000;
 
-  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_CONVERT_TO_POT or TEX_FILTER_LINEAR;
+  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_CONVERT_TO_POT or TEX_FILTER_LINEAR or TEX_CALCULATE_ALPHA;
 
 var
   tex_Add            : function : zglPTexture;
@@ -871,56 +872,62 @@ var
 
 // Sound
 const
-  SND_ALL = -2;
+  SND_ALL    = -2;
+  SND_STREAM = -3;
 
 type
-  zglPSoundStream = ^zglTSoundStream;
-  zglTSoundStream = record
-    ID       : Integer;
-    Source   : DWORD;
-    Buffer   : Pointer;
-    Data     : zglTMemory;
-    Rate     : Integer;
-    Channels : Integer;
-    Played   : Boolean;
-    Loop     : Boolean;
-    Reserver : array[ 0..3 ] of DWORD;
-end;
-
-type
+  zglPSound        = ^zglTSound;
+  zglPSoundStream  = ^zglTSoundStream;
   zglPSoundDecoder = ^zglTSoundDecoder;
-  zglTSoundDecoder = record
-    Extension  : AnsiString;
-    BufferSize : Integer;
-    Open       : function( var Stream : zglTSoundStream ) : Boolean;
-    Read       : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-    Loop       : procedure( var Stream : zglTSoundStream );
-    Close      : procedure( var Stream : zglTSoundStream );
-end;
-
-type
-  zglPSound = ^zglTSound;
-  zglTSound = record
-    Decoder    : zglPSoundDecoder;
-    Stream     : array of zglTSoundStream;
-    Data       : Pointer;
-    DataSize   : DWORD;
-
-    sCount     : Integer;
-    sPlaying   : Integer;
-
-    Prev, Next : zglPSound;
-end;
-
-type
+  zglPSoundFormat  = ^zglTSoundFormat;
   zglPSoundManager = ^zglTSoundManager;
+
+  zglTSound = record
+    Buffer       : DWORD;
+    sCount       : DWORD;
+    Source       : array of DWORD;
+
+    Data         : Pointer;
+    Size         : Integer;
+    Frequency    : Integer;
+
+    Prev, Next   : zglPSound;
+end;
+
+  zglTSoundStream = record
+    _Data      : Pointer;
+    _File      : zglTFile;
+    _Decoder   : zglPSoundDecoder;
+    Rate       : DWORD;
+    Channels   : DWORD;
+    Buffer     : Pointer;
+    BufferSize : DWORD;
+    Loop       : Boolean;
+    Played     : Boolean;
+end;
+
+  zglTSoundDecoder = record
+    Ext   : AnsiString;
+    Open  : function( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+    Read  : function( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+    Loop  : procedure( var Stream : zglPSoundStream );
+    Close : procedure( var Stream : zglPSoundStream );
+end;
+
+  zglTSoundFormat = record
+    Extension  : AnsiString;
+    Decoder    : zglPSoundDecoder;
+    FileLoader : procedure( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : Integer );
+    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
+end;
+
   zglTSoundManager = record
     Count   : record
       Items   : DWORD;
-      Decoder : DWORD;
+      Formats : DWORD;
               end;
     First   : zglTSound;
-    Decoder : array of zglTSoundDecoder;
+    Formats : array of zglTSoundFormat;
 end;
 
 var
@@ -928,13 +935,16 @@ var
   snd_Free              : procedure;
   snd_Add               : function( const SourceCount : Integer ) : zglPSound;
   snd_Del               : procedure( var Sound : zglPSound );
-  snd_LoadFromFile      : function( const FileName : AnsiString; const SourceCount : Integer = 16 ) : zglPSound;
-  snd_LoadFromMemory    : function( const Memory : zglTMemory; Extension : AnsiString; const SourceCount : Integer ) : zglPSound;
+  snd_LoadFromFile      : function( const FileName : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer );
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
   snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
   snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
+  snd_PlayFile          : procedure( const FileName : AnsiString; const Loop : Boolean = FALSE );
+  snd_StopFile          : procedure;
+  snd_ResumeFile        : procedure;
 
 // MATH
   m_Cos       : function( Angle : Integer ) : Single;
@@ -1199,6 +1209,9 @@ begin
       snd_SetVolume := dlsym( zglLib, 'snd_SetVolume' );
       snd_SetFrequency := dlsym( zglLib, 'snd_SetFrequency' );
       snd_SetFrequencyCoeff := dlsym( zglLib, 'snd_SetFrequencyCoeff' );
+      snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
+      snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
+      snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );
 
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );

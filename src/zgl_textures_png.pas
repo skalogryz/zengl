@@ -530,7 +530,7 @@ begin
           if avail_in = 0 Then
             begin
               if pngMem.Position + 65535 > pngIDATEnd Then
-                avail_in := mem_Read( pngMem, pngZData^, pngIDATEnd - pngMem.Position)
+                avail_in := mem_Read( pngMem, pngZData^, pngIDATEnd - pngMem.Position )
               else
                 avail_in := mem_Read( pngMem, pngZData^, 65535 );
 

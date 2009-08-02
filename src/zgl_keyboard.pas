@@ -209,8 +209,8 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_application,
+  zgl_main,
   zgl_utils;
 
 function key_Down;

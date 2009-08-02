@@ -47,11 +47,12 @@ const
   TEX_FILTER_ANISOTROPY = $000800;
 
   TEX_RGB               = $001000;
+  TEX_CALCULATE_ALPHA   = $002000;
 
   TEX_QUALITY_LOW       = $400000;
   TEX_QUALITY_MEDIUM    = $800000;
 
-  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT;
+  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT or TEX_CALCULATE_ALPHA;
 
 type
   zglPTexture = ^zglTTexture;
@@ -274,7 +275,9 @@ begin
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Flags;
-  if Flags and TEX_RGB = 0 Then
+  if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+    Result.Flags := Flags xor TEX_CALCULATE_ALPHA;
+  if ( Result.Flags and TEX_RGB = 0 ) and ( Result.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -313,8 +316,9 @@ begin
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Flags;
-  if Flags and TEX_RGB = 0 Then
-    tex_CalcTransparent( pData, TransparentColor, w, h );
+  if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+    Result.Flags := Flags xor TEX_CALCULATE_ALPHA;
+  if ( Result.Flags and TEX_RGB = 0 ) and ( Result.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
   tex_Create( Result^, pData );
 
   FreeMemory( pData );
@@ -476,12 +480,10 @@ begin
   zgl_GetMem( pData, w * h * 4 );
 
   for i := 0 to Height - 1 do
-    for j := 0 to Width - 1 do
-      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 + 0 )^ := PDWORD( @Data[ j * 4 + i * Width * 4 ] )^;
+    Move( Data[ i * Width * 4 ], PDWORD( Ptr( pData ) + i * w * 4 )^, Width * 4 );
 
   for i := Height to h - 1 do
-    for j := 0 to Width - 1 do
-      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + j * 4 + ( Height - 1 ) * w * 4 )^;
+    Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * 4 )^, PByte( Ptr( pData ) + i * w * 4 )^, Width * 4 );
   for i := 0 to h - 1 do
     for j := Width to w - 1 do
       PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;

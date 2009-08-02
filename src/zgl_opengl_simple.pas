@@ -37,8 +37,8 @@ procedure scissor_End;
 
 implementation
 uses
-  zgl_const,
   zgl_application,
+  zgl_main,
   zgl_window,
   zgl_screen,
   zgl_render_2d,

@@ -23,7 +23,6 @@ program ZenFont;
 
 uses
   uUI,
-  zgl_const,
   zgl_main,
   zgl_screen,
   zgl_window,

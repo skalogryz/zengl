@@ -27,8 +27,12 @@
       <LI><a class='b' href='#zgl_textures'><b>zgl_textures.pas</b></a></LI>
       <LI><a class='b' href='#zgl_render_target'><b>zgl_render_target.pas</b></a></LI>
       <LI><a class='b' href='#zgl_fx'><b>zgl_fx.pas</b></a></LI>
+      <LI><a class='b' href='#zgl_render_2d'><b>zgl_render_2d.pas</b></a></LI>
+      <LI><a class='b' href='#zgl_camera_2d'><b>zgl_camera_2d.pas</b></a></LI>
       <LI><a class='b' href='#zgl_primitives_2d'><b>zgl_primitives_2d.pas</b></a></LI>
       <LI><a class='b' href='#zgl_sprite_2d'><b>zgl_sprite_2d.pas</b></a></LI>
+      <LI><a class='b' href='#zgl_font'><b>zgl_font.pas</b></a></LI>
+      <LI><a class='b' href='#zgl_text'><b>zgl_text.pas</b></a></LI>
     </UL>
 
   <!--zgl_main.pas-->
@@ -332,7 +336,7 @@
   <UL type='disc'>
     <!--ini_LoadFromFile-->
     <LI><a name='ini_LoadFromFile'>
-    <div class='code'><b>procedure</b> ini_LoadFromFile( <b>const</b> FileName : <b>String</b> );</div>
+    <div class='code'><b>procedure</b> ini_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b> );</div>
     <div align='justify'>
     Загрузить ini-файл <b>FileName</b>.
     </div>
@@ -340,7 +344,7 @@
 
     <!--ini_SaveToFile-->
     <LI><a name='ini_SaveToFile'>
-    <div class='code'><b>procedure</b> ini_SaveToFile( <b>const</b> FileName : <b>String</b> );</div>
+    <div class='code'><b>procedure</b> ini_SaveToFile( <b>const</b> FileName : <b>AnsiString</b> );</div>
     <div align='justify'>
     Сохраняет все созданные/считанные данные в ini-файл с именем <b>FileName</b>.
     </div>
@@ -348,7 +352,7 @@
 
     <!--ini_Add-->
     <LI><a name='ini_Add'>
-    <div class='code'><b>procedure</b> ini_Add( <b>const</b> Section, Key : <b>String</b> );</div>
+    <div class='code'><b>procedure</b> ini_Add( <b>const</b> Section, Key : <b>AnsiString</b> );</div>
     <div align='justify'>
     Добавляет в секцию <b>Section</b> ключ <b>Key</b>. Если секция <b>Section</b> не существует, она будет создана.
     </div>
@@ -356,7 +360,7 @@
 
     <!--ini_Del-->
     <LI><a name='ini_Del'>
-    <div class='code'><b>procedure</b> ini_Del( <b>const</b> Section, Key : <b>String</b> );</div>
+    <div class='code'><b>procedure</b> ini_Del( <b>const</b> Section, Key : <b>AnsiString</b> );</div>
     <div align='justify'>
     Удаляет ключ <b>Key</b> из секции <b>Section</b>. Если аргумент <b>Key</b> передать пустым, удалится вся секция <b>Section</b>.
     </div>
@@ -364,7 +368,7 @@
 
     <!--ini_Clearl-->
     <LI><a name='ini_Clear'>
-    <div class='code'><b>procedure</b> ini_Clear( <b>const</b> Section : <b>String</b> );</div>
+    <div class='code'><b>procedure</b> ini_Clear( <b>const</b> Section : <b>AnsiString</b> );</div>
     <div align='justify'>
     Удаляет все ключи из секции <b>Section</b>.
     </div>
@@ -372,7 +376,7 @@
 
     <!--ini_IsSection-->
     <LI><a name='ini_IsSection'>
-    <div class='code'><b>function</b> ini_IsSection( <b>const</b> Section : <b>String</b> ) : Boolean;</div>
+    <div class='code'><b>function</b> ini_IsSection( <b>const</b> Section : <b>AnsiString</b> ) : Boolean;</div>
     <div align='justify'>
     Проверяет существует секция <b>Section</b>.
     </div>
@@ -380,7 +384,7 @@
 
     <!--ini_IsKey-->
     <LI><a name='ini_IsKey'>
-    <div class='code'><b>function</b> ini_IsKey( <b>const</b> Section, Key : <b>String</b> ) : Boolean;</div>
+    <div class='code'><b>function</b> ini_IsKey( <b>const</b> Section, Key : <b>AnsiString</b> ) : Boolean;</div>
     <div align='justify'>
     Проверяет существует ли в секции <b>Section</b> ключ <b>Key</b>.
     </div>
@@ -388,7 +392,7 @@
 
     <!--ini_ReadKeyStr-->
     <LI><a name='ini_ReadKeyStr'>
-    <div class='code'><b>function</b> ini_ReadKeyStr( <b>const</b> Section, Key : <b>String</b>; <b>var</b> Result : String );</div>
+    <div class='code'><b>function</b> ini_ReadKeyStr( <b>const</b> Section, Key : <b>AnsiString</b>; <b>var</b> Result : AnsiString );</div>
     <div align='justify'>
     Считать строковое значение ключа <b>Key</b> из секции <b>Section</b> и записать результат в <b>Result</b>.
     </div>
@@ -396,7 +400,7 @@
 
     <!--ini_ReadKeyInt-->
     <LI><a name='ini_ReadKeyInt'>
-    <div class='code'><b>function</b> ini_ReadKeyInt( <b>const</b> Section, Key : <b>String</b> ) : Integer;</div>
+    <div class='code'><b>function</b> ini_ReadKeyInt( <b>const</b> Section, Key : <b>AnsiString</b> ) : Integer;</div>
     <div align='justify'>
     Считать числовое значение ключа <b>Key</b> из секции <b>Section</b>.
     </div>
@@ -404,7 +408,7 @@
 
     <!--ini_ReadKeyBool-->
     <LI><a name='ini_ReadKeyBool'>
-    <div class='code'><b>function</b> ini_ReadKeyBool( <b>const</b> Section, Key : <b>String</b> ) : Boolean;</div>
+    <div class='code'><b>function</b> ini_ReadKeyBool( <b>const</b> Section, Key : <b>AnsiString</b> ) : Boolean;</div>
     <div align='justify'>
     Считать булевое значение ключа <b>Key</b> из секции <b>Section</b>.
     </div>
@@ -412,7 +416,7 @@
 
     <!--ini_WriteKeyStr-->
     <LI><a name='ini_WriteKeyStr'>
-    <div class='code'><b>function</b> ini_WriteKeyStr( <b>const</b> Section, Key, Value : <b>String</b> ) : Boolean;</div>
+    <div class='code'><b>function</b> ini_WriteKeyStr( <b>const</b> Section, Key, Value : <b>AnsiString</b> ) : Boolean;</div>
     <div align='justify'>
     Присвоить ключу <b>Key</b> из секции <b>Section</b> строковое значение <b>Value</b>. Функция возвратит True если ключ был найден.
     </div>
@@ -420,7 +424,7 @@
 
     <!--ini_WriteKeyInt-->
     <LI><a name='ini_WriteKeyInt'>
-    <div class='code'><b>function</b> ini_WriteKeyInt( <b>const</b> Section, Key : <b>String</b>; <b>const</b> Value : Integer ) : Boolean;</div>
+    <div class='code'><b>function</b> ini_WriteKeyInt( <b>const</b> Section, Key : <b>AnsiString</b>; <b>const</b> Value : Integer ) : Boolean;</div>
     <div align='justify'>
     Присвоить ключу <b>Key</b> из секции <b>Section</b> числовое значение <b>Value</b>. Функция возвратит True если ключ был найден.
     </div>
@@ -428,7 +432,7 @@
 
     <!--ini_WriteKeyBool-->
     <LI><a name='ini_WriteKeyBool'>
-    <div class='code'><b>function</b> ini_WriteKeyBool( <b>const</b> Section, Key : <b>String</b>; <b>const</b> Value : Boolean ) : Boolean;</div>
+    <div class='code'><b>function</b> ini_WriteKeyBool( <b>const</b> Section, Key : <b>AnsiString</b>; <b>const</b> Value : Boolean ) : Boolean;</div>
     <div align='justify'>
     Присвоить ключу <b>Key</b> из секции <b>Section</b> булевое значение <b>Value</b>. Функция возвратит True если ключ был найден.
     </div>
@@ -544,6 +548,14 @@
     </div>
     </LI><br>
 
+    <!--key_Press-->
+    <LI><a name='key_Up'>
+    <div class='code'><b>function</b> key_Press( <b>const</b> KeyCode : Byte ) : Boolean;</div>
+    <div align='justify'>
+    Возвращает True, если была нажата клавиша с кодом <b>KeyCode</b> после последнего вызова key_ClearState.
+    </div>
+    </LI><br>
+
     <!--key_Last-->
     <LI><a name='key_Last'>
     <div class='code'><b>function</b> key_Last( <b>const</b> KeyAction : Byte ) : Byte;</div>
@@ -554,7 +566,7 @@
 
     <!--key_BeginReadText-->
     <LI><a name='key_BeginReadText'>
-    <div class='code'><b>procedure</b> key_BeginReadText( <b>const</b> Text : <b>String</b>; <b>const</b> MaxSymbols : WORD );</div>
+    <div class='code'><b>procedure</b> key_BeginReadText( <b>const</b> Text : <b>AnsiString</b>; <b>const</b> MaxSymbols : WORD );</div>
     <div align='justify'>
     Сбрасывает уже набранный пользователем текст(присваивая ему значение аргумента <b>Text</b>), и "начинает" считывание нового текста, ограничивая количество вводимых символ до <b>MaxSymbols</b>.
     </div>
@@ -562,7 +574,7 @@
 
     <!--key_EndReadText-->
     <LI><a name='key_EndReadText'>
-    <div class='code'><b>function</b> key_EndReadText( <b>var</b> Result : <b>String</b> );</div>
+    <div class='code'><b>function</b> key_EndReadText( <b>var</b> Result : <b>AnsiString</b> );</div>
     <div align='justify'>
     В <b>Result</b> сохраняется набранная пользователем строка текста.
     </div>
@@ -574,7 +586,7 @@
     <div align='justify'>
     Сбрасывает значения всех нажатых и т.д. клавиш. Следует вызывать сразу после обработки ввода.
     </div>
-    </LI><br>
+    </LI>
   </UL>
   <div align='left'><a class='b' href='#index'>оглавление</a></div>
   </p>
@@ -643,7 +655,7 @@
 
     <!--tex_LoadFromFile-->
     <LI><a name='tex_LoadFromFile'>
-    <div class='code'><b>function</b> tex_LoadFromFile( <b>const</b> FileName : <b>String</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
+    <div class='code'><b>function</b> tex_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
     <div align='justify'>
     Загружает из графического файла <b>FileName</b> данные, создает текстуру с указанным цветом прозрачности <b>TransparentColor</b>($FF000000 - использовать альфа-канал из файла) и флагами <b>Flags</b>. В качестве результат возвращает указатель на структуру zglTTexture.
     </div>
@@ -651,7 +663,7 @@
 
     <!--tex_LoadFromMemory-->
     <LI><a name='tex_LoadFromMemory'>
-    <div class='code'><b>function</b> tex_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>String</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
+    <div class='code'><b>function</b> tex_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>AnsiString</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
     <div align='justify'>
     Загружает из памяти <b>Memory</b>(файл целиком загруженный в память) данные, создает текстуру с указанным цветом прозрачности <b>TransparentColor</b>($FF000000 - использовать альфа-канал из файла) и флагами <b>Flags</b>. В качестве результат возвращает указатель на структуру zglTTexture. <b>Extension</b> указывает на формат файла в памяти.
     </div>
@@ -817,6 +829,52 @@
   <div align='left'><a class='b' href='#index'>оглавление</a></div>
   </p>
 
+  <!--zgl_render_2d.pas-->
+  <p><hr>
+  <a name='zgl_render_2d'><h2 style='color: #DD0000'>zgl_render_2d.pas</h2>
+  <UL type='disc'>
+    <!--batch2d_Begin-->
+    <LI><a name='batch2d_Begin'>
+    <div class='code'><b>procedure</b> batch2d_Begin;</div>
+    <div align='justify'>
+    Начать отслеживать, и оптимизировать по количеству DIP'ов, вывод спрайтов с одинаковой текстурой или одинаковых по типу примитивов.
+    </div>
+    </LI><br>
+
+    <!--batch2d_End-->
+    <LI><a name='batch2d_Begin'>
+    <div class='code'><b>procedure</b> batch2d_End;</div>
+    <div align='justify'>
+    Переключиться в обычный режим вывода спрайтов/примитивов без оптимизации по количеству DIP'ов
+    </div>
+    </LI><br>
+
+    <!--batch2d_Flush-->
+    <LI><a name='batch2d_Begin'>
+    <div class='code'><b>procedure</b> batch2d_Flush;</div>
+    <div align='justify'>
+    Вывести на экран последнюю группу спрайтов/примитивов(по сути вызов glEnd). Следует обязательно вызывать в случаи выполнения каких-либо своих операций.
+    </div>
+    </LI>
+  </UL>
+  <div align='left'><a class='b' href='#index'>оглавление</a></div>
+  </p>
+
+  <!--zgl_camera_2d.pas-->
+  <p><hr>
+  <a name='zgl_camera_2d'><h2 style='color: #DD0000'>zgl_camera_2d.pas</h2>
+  <UL type='disc'>
+    <!--cam2d_Set-->
+    <LI><a name='cam2d_Set'>
+    <div class='code'><b>procedure</b> cam2d_Set( <b>const</b> Camera : zglPCamera2D );</div>
+    <div align='justify'>
+    Устанавливает текущую камеру используя указатель <b>Camera</b>.
+    </div>
+    </LI>
+  </UL>
+  <div align='left'><a class='b' href='#index'>оглавление</a></div>
+  </p>
+
   <!--zgl_primitives_2d.pas-->
   <p><hr>
   <a name='zgl_primitives_2d'><h2 style='color: #DD0000'>zgl_primitives_2d.pas</h2>
@@ -895,6 +953,88 @@
     <div class='code'><b>procedure</b> csprite2d_Draw( <b>const</b> Texture : zglPTexture; X, Y, W, H, Angle : Single; <b>const</b> CutRect : zglTRect; <b>const</b> Alpha : Byte = 255; <b>const</b> FX : DWORD = FX_BLEND );</div>
     <div align='justify'>
     Рисует спрайт используя текстуру <b>Texture</b> в координатах <b>X</b>, <b>Y</b>, размерами <b>W</b>(ширина) и <b>H</b>(высота), градусом поворота <b>Angle</b> и альфой <b>Alpha</b>. <b>CutRect</b> указывает какую часть текстуры использовать.
+    </div>
+    </LI>
+  </UL>
+  <div align='left'><a class='b' href='#index'>оглавление</a></div>
+  </p>
+
+  <!--zgl_font.pas-->
+  <p><hr>
+  <a name='zgl_font'><h2 style='color: #DD0000'>zgl_font.pas</h2>
+  <UL type='disc'>
+    <!--font_Add-->
+    <LI><a name='font_Add'>
+    <div class='code'><b>function</b> font_Add : zglPFont;</div>
+    <div align='justify'>
+    Выделяет память под структуру zglTFont в менеджере библиотеки и возвращает на нее указатель.
+    </div>
+    </LI><br>
+
+    <!--font_Del-->
+    <LI><a name='font_Del'>
+    <div class='code'><b>procedure</b> font_Del( <b>var</b> Font : zglPFont );</div>
+    <div align='justify'>
+    Очищает память от созданного шрифта <b>Font</b>. После успешной очистки в <b>Font</b> заносится значение <b>nil</b>.
+    </div>
+    </LI><br>
+
+    <!--font_LoadFromFile-->
+    <LI><a name='font_LoadFromFile'>
+    <div class='code'><b>function</b> font_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b> ) : zglPFont;</div>
+    <div align='justify'>
+    Загружает из файла <b>FileName</b> данные о шрифте, создает его и возвращает указатель.
+    </div>
+    </LI><br>
+
+    <!--font_LoadFromMemory-->
+    <LI><a name='font_LoadFromMemory'>
+    <div class='code'><b>function</b> font_LoadFromMemory( <b>const</b> Memory : zglTMemory ) : zglPFont;</div>
+    <div align='justify'>
+    Загружает из памяти <b>Memory</b>(файл целиком загруженный в память) данные о шрифте, создает его и возвращает указатель.
+    </div>
+    </LI>
+  </UL>
+  <div align='left'><a class='b' href='#index'>оглавление</a></div>
+  </p>
+
+  <!--zgl_text.pas-->
+  <p><hr>
+  <a name='zgl_text'><h2 style='color: #DD0000'>zgl_text.pas</h2>
+  <UL type='disc'>
+    <!--text_Draw-->
+    <LI><a name='text_Draw'>
+    <div class='code'><b>procedure</b> text_Draw( <b>const</b> Font : zglPFont; X, Y : Single; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Flags : DWORD = 0 );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--text_DrawEx-->
+    <LI><a name='text_DrawEx'>
+    <div class='code'><b>procedure</b> text_DrawEx( <b>const</b> Font : zglPFont; X, Y, Scale, Step : Single; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Alpha : Byte = 255; <b>const</b> Color : DWORD = $FFFFFF; <b>const</b> Flags : DWORD = 0 );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--text_DrawInRect-->
+    <LI><a name='text_DrawInRect'>
+    <div class='code'><b>procedure</b> text_DrawInRect( <b>const</b> Font : zglPFont; <b>const</b> Rect : zglTRect; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Flags : DWORD = 0 );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--text_DrawInRectEx-->
+    <LI><a name='text_DrawInRectEx'>
+    <div class='code'><b>procedure</b> text_DrawInRectEx( <b>const</b> Font : zglPFont; <b>const</b> Rect : zglTRect; <b>const</b> Scale, Step : Single; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Alpha : Byte = 0; <b>const</b> Color : DWORD = $FFFFFF; <b>const</b> Flags : DWORD = 0 );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--text_GetWidth-->
+    <LI><a name='text_GetWidth'>
+    <div class='code'><b>function</b> text_GetWidth( <b>const</b> Font : zglPFont; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Step : Single = 0.0 ) : Single;</div>
+    <div align='justify'>
+    Возвращает ширину в пикселах для текста <b>Text</b>, используя данные о шрифте <b>Font</b> и размер отступа между символами <b>Step</b>. Если в тексте содержатся символы переноса строки, то возвращается ширина наиболее длинной строки.
     </div>
     </LI>
   </UL>

@@ -26,15 +26,15 @@ unit zgl_window;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil,
+  X, XLib, XUtil
   {$ENDIF}
   {$IFDEF WIN32}
-  Windows,
+  Windows
   {$ENDIF}
   {$IFDEF DARWIN}
-  MacOSAll,
+  MacOSAll
   {$ENDIF}
-  zgl_const;
+  ;
 
 function  wnd_Create( const Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
@@ -49,10 +49,10 @@ procedure wnd_Select;
 var
   wnd_X          : Integer;
   wnd_Y          : Integer;
-  wnd_Width      : Integer = defWidth;
-  wnd_Height     : Integer = defHeight;
+  wnd_Width      : Integer = 800;
+  wnd_Height     : Integer = 600;
   wnd_FullScreen : Boolean;
-  wnd_Caption    : String = cs_ZenGL;
+  wnd_Caption    : String;
 
   {$IFDEF LINUX}
   wnd_Handle      : TWindow;
@@ -492,5 +492,8 @@ begin
   ShowWindow( wnd_Handle );
 {$ENDIF}
 end;
+
+initialization
+  wnd_Caption := cs_ZenGL;
 
 end.

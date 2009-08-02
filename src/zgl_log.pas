@@ -40,8 +40,8 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_application,
+  zgl_main,
   zgl_timers,
   zgl_utils;
 

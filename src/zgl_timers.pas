@@ -76,6 +76,7 @@ var
 
 implementation
 uses
+  zgl_application,
   zgl_main;
 
 function timer_Add;
@@ -148,6 +149,7 @@ procedure timer_Reset;
   var
     currTimer : zglPTimer;
 begin
+  app_dt := timer_GetTicks;
   currTimer := @managerTimer.First;
   while Assigned( currTimer ) do
     begin

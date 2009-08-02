@@ -35,7 +35,6 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_const,
   zgl_types;
 
 procedure zero;
@@ -85,10 +84,11 @@ var
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
 
-  app_Flags : DWORD = WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
+  app_Flags : DWORD;
 
 implementation
 uses
+  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_opengl,
@@ -97,6 +97,9 @@ uses
   zgl_mouse,
   zgl_timers,
   zgl_sound,
+  {$IFDEF USE_OPENAL}
+  zgl_sound_openal,
+  {$ENDIF}
   zgl_utils;
 
 procedure zero;
@@ -184,14 +187,32 @@ begin
           if sndAutoPaused Then
             begin
               sndAutoPaused := FALSE;
-              snd_ResumeFile;
+              {$IFDEF USE_OPENAL}
+              for i := 0 to length( oal_Sources ) - 1 do
+                if oal_SrcState[ i ] = AL_PLAYING Then
+                  alSourcePlay( oal_Sources[ i ] );
+              {$ENDIF}
+              if Assigned( sfStream ) Then
+                snd_ResumeFile;
             end;
         end else
-          if Assigned( sfStream ) and ( sfStream.Played ) Then
-            begin
-              sndAutoPaused := TRUE;
+          begin
+            sndAutoPaused := TRUE;
+            {$IFDEF USE_OPENAL}
+            for i := 0 to length( oal_Sources ) - 1 do
+              begin
+                alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
+                if z = AL_PLAYING Then
+                  begin
+                    oal_SrcState[ i ] := AL_PLAYING;
+                    alSourcePause( oal_Sources[ i ] );
+                  end else
+                    oal_SrcState[ i ] := AL_NONE;
+              end;
+            {$ENDIF}
+            if Assigned( sfStream ) and ( sfStream.Played ) Then
               snd_StopFile;
-            end;
+          end;
 
       if not app_Pause Then
         begin
@@ -818,5 +839,8 @@ begin
   app_FPSCount := 0;
   INC( app_WorkTime );
 end;
+
+initialization
+  app_Flags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CROP_INVISIBLE;
 
 end.

@@ -104,6 +104,7 @@ var
   alSourcefv             : procedure(sid: LongWord; param: LongInt; const values: PSingle); cdecl;
   alGetSourcei           : procedure(sid: LongWord; param: LongInt; var value: LongInt); cdecl;
   alSourcePlay           : procedure(sid: LongWord); cdecl;
+  alSourcePause          : procedure(sid: LongWord); cdecl;
   alSourceStop           : procedure(sid: LongWord); cdecl;
   alSourceRewind         : procedure(sid: LongWord); cdecl;
   //
@@ -118,6 +119,7 @@ var
   oal_Context : PALCcontext = nil;
   oal_Sources : array of LongWord;
   oal_SrcPtrs : array of Pointer;
+  oal_SrcState: array of LongWord;
 
   // Параметры слушателя
   oal_Position    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
@@ -129,7 +131,6 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_utils;
 
 function InitOpenAL;
@@ -158,6 +159,7 @@ begin
       alSourcefv             := dlsym( oal_Library, 'alSourcefv' );
       alGetSourcei           := dlsym( oal_Library, 'alGetSourcei' );
       alSourcePlay           := dlsym( oal_Library, 'alSourcePlay' );
+      alSourcePause          := dlsym( oal_Library, 'alSourcePause' );
       alSourceStop           := dlsym( oal_Library, 'alSourceStop' );
       alSourceRewind         := dlsym( oal_Library, 'alSourceRewind' );
       alSourceQueueBuffers   := dlsym( oal_Library, 'alSourceQueueBuffers' );

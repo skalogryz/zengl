@@ -118,8 +118,8 @@ function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( const SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
-function  snd_LoadFromFile( const FileName : AnsiString; const SourceCount : Integer = 16 ) : zglPSound;
-function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 16 ) : zglPSound;
+function  snd_LoadFromFile( const FileName : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
+function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
 
 function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
 procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
@@ -127,7 +127,7 @@ procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const I
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );
 procedure snd_SetFrequencyCoeff( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
 
-procedure snd_PlayFile( const FileName : AnsiString; const Loop : Boolean );
+procedure snd_PlayFile( const FileName : AnsiString; const Loop : Boolean = FALSE );
 procedure snd_StopFile;
 function  snd_ProcFile( data : Pointer ) : {$IFDEF WIN32} PInteger; stdcall; {$ELSE} LongInt; register; {$ENDIF}
 procedure snd_ResumeFile;
@@ -224,11 +224,13 @@ begin
       if length( oal_Sources ) > 63 Then break; // 64 хватит с головой :)
       SetLength( oal_Sources, length( oal_Sources ) + 1 );
       SetLength( oal_SrcPtrs, length( oal_SrcPtrs ) + 1 );
+      SetLength( oal_SrcState, length( oal_SrcState ) + 1 );
       alGenSources( 1, @oal_Sources[ length( oal_Sources ) - 1 ] );
       if oal_Sources[ length( oal_Sources ) - 1 ] = 0 Then
         begin
           SetLength( oal_Sources, length( oal_Sources ) - 1 );
           SetLength( oal_SrcPtrs, length( oal_SrcPtrs ) - 1 );
+          SetLength( oal_SrcState, length( oal_SrcState ) - 1 );
           break;
         end;
     end;
@@ -509,9 +511,14 @@ procedure snd_Stop;
   procedure Stop( const Sound : zglPSound; const ID : Integer );
   begin
     {$IFDEF USE_OPENAL}
-    alSourceStop( Sound.Source[ ID ] );
+    if Sound.Source[ ID ] <> 0 Then
+      begin
+        alSourceStop( Sound.Source[ ID ] );
+        alSourcei( Sound.Source[ ID ], AL_BUFFER, AL_NONE );
+      end;
     {$ELSE}
-    Sound.Source[ ID ].Stop;
+    if Assigned( Sound.Source[ ID ] ) Then
+      Sound.Source[ ID ].Stop;
     {$ENDIF}
   end;
 begin
@@ -546,7 +553,8 @@ procedure snd_SetVolume;
   procedure SetVolume( const Sound : zglPSound; const ID : Integer; const Volume : Single );
   begin
     {$IFDEF USE_OPENAL}
-    alSourcef( Sound.Source[ ID ], AL_GAIN, Volume );
+    if Sound.Source[ ID ] <> 0 Then
+      alSourcef( Sound.Source[ ID ], AL_GAIN, Volume );
     {$ELSE}
     if Assigned( Sound.Source[ ID ] ) Then
       Sound.Source[ ID ].SetVolume( dsu_CalcVolume( Volume ) );
@@ -604,7 +612,8 @@ procedure snd_SetFrequency;
   procedure SetFrequency( const Sound : zglPSound; const ID, Frequency : Integer );
   begin
     {$IFDEF USE_OPENAL}
-    alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Frequency );
+    if Sound.Source[ ID ] <> 0 Then
+      alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Frequency );
     {$ELSE}
     if Assigned( Sound.Source[ ID ] ) Then
       Sound.Source[ ID ].SetFrequency( Frequency );
@@ -656,7 +665,8 @@ procedure snd_SetFrequencyCoeff;
   procedure SetFrequency( const Sound : zglPSound; const ID, Frequency : Integer );
   begin
     {$IFDEF USE_OPENAL}
-    alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Frequency );
+    if Sound.Source[ ID ] <> 0 Then
+      alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Frequency );
     {$ELSE}
     if Assigned( Sound.Source[ ID ] ) Then
       Sound.Source[ ID ].SetFrequency( Frequency );
@@ -748,7 +758,7 @@ begin
 {$IFDEF USE_OPENAL}
   alSourceStop( sfSource );
   alSourceRewind( sfSource );
-  alSourcei( sfSource, AL_BUFFER, 0 );
+  alSourcei( sfSource, AL_BUFFER, AL_NONE );
 
   for i := 0 to sfBufCount - 1 do
     begin
