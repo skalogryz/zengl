@@ -196,23 +196,21 @@ begin
                 snd_ResumeFile;
             end;
         end else
-          begin
-            sndAutoPaused := TRUE;
-            {$IFDEF USE_OPENAL}
-            for i := 0 to length( oal_Sources ) - 1 do
-              begin
-                alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
-                if z = AL_PLAYING Then
-                  begin
-                    oal_SrcState[ i ] := AL_PLAYING;
+          if not sndAutoPaused Then
+            begin
+              sndAutoPaused := TRUE;
+              {$IFDEF USE_OPENAL}
+              for i := 0 to length( oal_Sources ) - 1 do
+                begin
+                  alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
+                  if z = AL_PLAYING Then
                     alSourcePause( oal_Sources[ i ] );
-                  end else
-                    oal_SrcState[ i ] := AL_NONE;
-              end;
-            {$ENDIF}
-            if Assigned( sfStream ) and ( sfStream.Played ) Then
-              snd_StopFile;
-          end;
+                  oal_SrcState[ i ] := z;
+                end;
+              {$ENDIF}
+              if Assigned( sfStream ) and ( sfStream.Played ) Then
+                snd_StopFile;
+            end;
 
       if not app_Pause Then
         begin
