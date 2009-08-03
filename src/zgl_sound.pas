@@ -265,7 +265,8 @@ begin
 
   if Assigned( sfStream ) Then
     begin
-      sfStream._Decoder.Close( sfStream );
+      if Assigned( sfStream._Decoder ) Then
+        sfStream._Decoder.Close( sfStream );
       if Assigned( sfStream.Buffer ) Then
         FreeMemory( sfStream.Buffer );
       FreeMemory( sfStream );
@@ -569,19 +570,15 @@ begin
     if ( not Assigned( Sound ) ) and ( ID = SND_ALL ) Then
       sndVolume := Volume;
 
-  {$IFDEF USE_OPENAL}
-  if ( ID = SND_STREAM ) and ( Assigned( sfStream ) ) Then
+  if ( ID = SND_STREAM ) and ( Assigned( sfStream._Decoder ) ) Then
     begin
+      {$IFDEF USE_OPENAL}
       alSourcef( sfSource, AL_GAIN, Volume );
-      exit;
-    end;
-  {$ELSE}
-  if ( ID = SND_STREAM ) and ( Assigned( sfStream ) ) Then
-    begin
+      {$ELSE}
       sfBuffer.SetVolume( dsu_CalcVolume( Volume ) );
+      {$ENDIF}
       exit;
     end;
-  {$ENDIF}
 
   if Assigned( Sound ) Then
     begin
@@ -622,19 +619,15 @@ procedure snd_SetFrequency;
 begin
   if not sndInitialized Then exit;
 
-  {$IFDEF USE_OPENAL}
-  if ( ID = SND_STREAM ) and ( Assigned( sfStream ) ) Then
+  if ( ID = SND_STREAM ) and ( Assigned( sfStream._Decoder ) ) Then
     begin
+      {$IFDEF USE_OPENAL}
       alSourcef( sfSource, AL_FREQUENCY, Frequency );
-      exit;
-    end;
-  {$ELSE}
-  if ( ID = SND_STREAM ) and ( Assigned( sfStream ) ) Then
-    begin
+      {$ELSE}
       sfBuffer.SetFrequency( Frequency );
+      {$ENDIF}
       exit;
     end;
-  {$ENDIF}
 
   if Assigned( Sound ) Then
     begin
@@ -675,19 +668,15 @@ procedure snd_SetFrequencyCoeff;
 begin
   if not sndInitialized Then exit;
 
-  {$IFDEF USE_OPENAL}
-  if ( ID = SND_STREAM ) and ( Assigned( sfStream ) ) Then
+  if ( ID = SND_STREAM ) and ( Assigned( sfStream._Decoder ) ) Then
     begin
+      {$IFDEF USE_OPENAL}
       alSourcef( sfSource, AL_FREQUENCY, Round( snd.Frequency * Coefficient ) );
-      exit;
-    end;
-  {$ELSE}
-  if ( ID = SND_STREAM ) and ( Assigned( sfStream ) ) Then
-    begin
+      {$ELSE}
       sfBuffer.SetFrequency( Round( snd.Frequency * Coefficient ) );
+      {$ENDIF}
       exit;
     end;
-  {$ENDIF}
 
   if Assigned( Sound ) Then
     begin
@@ -751,6 +740,7 @@ begin
   if ( not Assigned( sfStream._Decoder ) ) or
      ( not sfStream._Decoder.Open( sfStream, FileName ) ) Then
     begin
+      sfStream._Decoder := nil;
       log_Add( 'Cannot play: ' + FileName );
       exit;
     end;
