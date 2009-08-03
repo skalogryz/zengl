@@ -487,7 +487,7 @@ begin
       end;
     WM_SETCURSOR:
       begin
-        if ( not app_Focus ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not app_ShowCursor ) Then
+        if ( app_Focus ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not app_ShowCursor ) Then
           SetCursor( 0 )
         else
           SetCursor( LoadCursor( 0, IDC_ARROW ) );
