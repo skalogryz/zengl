@@ -63,11 +63,11 @@ begin
       Result := sqr( cx - sx ) + sqr( cy - sy ) < radius;
     end else
       if Angle <> 0 Then
-        Result := ( ( X + W + H / 2 >= ogl_CropX + cam2dGlobal.X ) and ( X - W - H / 2 <= ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
-                    ( Y + H + W / 2 >= ogl_CropY + cam2dGlobal.Y ) and ( Y - W - H / 2 <= ogl_CropH / scr_ResCY + cam2dGlobal.Y ) )
+        Result := ( ( X + W + H / 2 >= ogl_CropX + cam2dGlobal.X ) and ( X - W - H / 2 <= ogl_CropX + ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H + W / 2 >= ogl_CropY + cam2dGlobal.Y ) and ( Y - W - H / 2 <= ogl_CropY + ogl_CropH / scr_ResCY + cam2dGlobal.Y ) )
       else
-        Result := ( ( X + W >= ogl_CropX + cam2dGlobal.X ) and ( X <= ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
-                    ( Y + H >= ogl_CropY + cam2dGlobal.Y ) and ( Y <= ogl_CropH / scr_ResCY + cam2dGlobal.Y ) );
+        Result := ( ( X + W >= ogl_CropX + cam2dGlobal.X ) and ( X <= ogl_CropX + ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H >= ogl_CropY + cam2dGlobal.Y ) and ( Y <= ogl_CropY + ogl_CropH / scr_ResCY + cam2dGlobal.Y ) );
 end;
 
 procedure ssprite2d_Draw;

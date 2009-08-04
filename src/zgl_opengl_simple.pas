@@ -141,7 +141,6 @@ procedure scissor_End;
 begin
   if b2d_Started Then
     batch2d_Flush;
-  glDisable( GL_SCISSOR_TEST );
   if tSCount - 1 < 0 Then
     exit;
   DEC( tSCount );
@@ -150,6 +149,13 @@ begin
   ogl_CropW := tScissor[ tSCount ][ 2 ];
   ogl_CropH := tScissor[ tSCount ][ 3 ];
   SetLength( tScissor, tSCount );
+
+  if tSCount > 0 Then
+    begin
+      glEnable( GL_SCISSOR_TEST );
+      glScissor( ogl_CropX, wnd_Height - ogl_CropY - ogl_CropH, ogl_CropW, ogl_CropH );
+    end else
+      glDisable( GL_SCISSOR_TEST );
 end;
 
 end.
