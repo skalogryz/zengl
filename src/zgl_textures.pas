@@ -319,6 +319,7 @@ begin
   if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
     Result.Flags := Flags xor TEX_CALCULATE_ALPHA;
   if ( Result.Flags and TEX_RGB = 0 ) and ( Result.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+    tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
   FreeMemory( pData );

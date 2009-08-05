@@ -435,7 +435,7 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   Result := 0;
-  if not app_Work Then
+  if ( not app_Work ) and ( wnd_Handle = 0 ) Then
     begin
       Result := DefWindowProc( hWnd, Msg, wParam, lParam );
       exit;
