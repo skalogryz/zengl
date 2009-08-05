@@ -441,6 +441,7 @@ const
 var
   wglChoosePixelFormatARB: function(hdc: HDC; const piAttribIList: PGLint; const pfAttribFList: PGLfloat; nMaxFormats: GLuint; piFormats: PGLint; nNumFormats: PGLuint): BOOL; stdcall;
   wglSwapIntervalEXT: function(interval: GLint): BOOL; stdcall;
+  wglGetSwapIntervalEXT: function(): GLint; stdcall;
   // PBuffer
   wglCreatePbufferARB: function(hDC: HDC; iPixelFormat: GLint; iWidth: GLint; iHeight: GLint; const piAttribList: PGLint): THandle; stdcall;
   wglGetPbufferDCARB: function(hPbuffer: THandle): HDC; stdcall;

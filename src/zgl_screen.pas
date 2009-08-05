@@ -392,8 +392,20 @@ begin
   glXSwapBuffers( scr_Display, wnd_Handle );
 {$ENDIF}
 {$IFDEF WIN32}
-  if scr_VSync Then
-    glFinish;
+  if ogl_CanVSync Then
+    begin
+      sync := wglGetSwapIntervalEXT;
+      if scr_VSync Then
+        begin
+          if sync <> 1 Then
+            begin
+              wglSwapIntervalEXT( 1 );
+              glFinish;
+            end;
+          if sync <> 0 Then
+            wglSwapIntervalEXT( 0 );
+        end;
+    end;
 
   SwapBuffers( wnd_DC );
 {$ENDIF}
