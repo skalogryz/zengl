@@ -395,16 +395,13 @@ begin
   if ogl_CanVSync Then
     begin
       sync := wglGetSwapIntervalEXT;
-      if scr_VSync Then
+      if ( scr_VSync ) and ( sync <> 1 )Then
         begin
-          if sync <> 1 Then
-            begin
-              wglSwapIntervalEXT( 1 );
-              glFinish;
-            end;
+          wglSwapIntervalEXT( 1 );
+          glFinish;
+        end else
           if sync <> 0 Then
             wglSwapIntervalEXT( 0 );
-        end;
     end;
 
   SwapBuffers( wnd_DC );
