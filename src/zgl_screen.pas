@@ -604,10 +604,6 @@ end;
 procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
-{$IFDEF WIN32}
-  if ogl_CanVSync Then
-    wglSwapIntervalEXT( Byte( scr_VSync ) )
-{$ENDIF}
 {$IFDEF DARWIN}
   aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
 {$ENDIF}
