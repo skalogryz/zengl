@@ -446,8 +446,6 @@ begin
               glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
             end;
       end;
-
-  glBindTexture( GL_TEXTURE_2D, 0 );
 end;
 
 procedure tex_SetAnisotropy;

@@ -27,6 +27,7 @@ interface
 
 uses
   {$IFDEF LINUX_OR_DARWIN}
+  {$LINKLIB pthread}
   cthreads,
   {$ENDIF}
   {$IFDEF WIN32}
