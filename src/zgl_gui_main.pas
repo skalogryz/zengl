@@ -267,7 +267,10 @@ procedure gui_DelWidget;
 begin
   if Assigned( Widget.Prev ) Then
     if Assigned( Widget.Next ) Then // FIXME: хмм...
-      Widget.Prev.Next := Widget.Next;
+      Widget.Prev.Next := Widget.Next
+    else
+      Widget.Prev.Next := nil;
+
   if Assigned( Widget.Next ) Then
     Widget.Next.Prev := Widget.Prev;
 

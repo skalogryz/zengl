@@ -158,7 +158,7 @@ end;
 function file_Exists;
   {$IFDEF WIN32}
   var
-    FileHandle : DWORD;
+    FileHandle : zglTFile;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
