@@ -224,6 +224,7 @@ procedure text_DrawInRect;
     WordsArray : array of zglTTextWord;
     WordsCount : Integer;
     LineFeed   : Boolean;
+    NewFlags   : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   if ( Rect.W <= ogl_CropX ) or ( Rect.H <= ogl_CropY ) or
@@ -367,8 +368,12 @@ begin
             INC( WordsArray[ i ].Y, H );
         end;
 
+  NewFlags := 0;
+  if Flags and TEXT_FX_VCA > 0 Then
+    NewFlags := NewFlags or TEXT_FX_VCA;
+
   for i := 0 to WordsCount - 1 do
-    text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str );
+    text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str, NewFlags );
 
   SetLength( WordsArray, 0 );
   scissor_End;
