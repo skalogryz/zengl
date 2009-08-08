@@ -36,7 +36,7 @@
     </UL>
 
   <!--zgl_main.pas-->
-  <p><hr>Справка далеко не полная, и находится в стадии разработки. По мере "устаканивания" некоторых функций библиотеки, тут будет появляться их описание.<hr>
+  <p><hr>Справка на данный момент неполная и по мере "устаканивания" некоторых функций библиотеки, тут будет появляться их описание.<hr>
   <a name='zgl_main'><h2 style='color: #DD0000'>zgl_main.pas</h2>
   <b>Константы:</b>
   <UL type='disc'>
@@ -1002,6 +1002,28 @@
   <!--zgl_text.pas-->
   <p><hr>
   <a name='zgl_text'><h2 style='color: #DD0000'>zgl_text.pas</h2>
+  <b>Константы(для text_Draw и text_DrawEx):</b><br>
+    <UL type="disc">
+      <LI><b>TEXT_HALIGN_LEFT</b> - размещение текста после указанной X-координаты(по умолчанию)</LI>
+      <LI><b>TEXT_HALIGN_CENTER</b> - выравнивание по центру(горизонтально)</LI>
+      <LI><b>TEXT_HALIGN_RIGHT</b> - размещение текста до указанной X-координаты</LI>
+      <LI><b>TEXT_VALIGN_TOP</b> - размещение текста ниже указанной Y-координаты(по умолчанию)</LI>
+      <LI><b>TEXT_VALIGN_CENTER</b> - выравнивание по центру(вертикально)</LI>
+      <LI><b>TEXT_VALIGN_BOTTOM</b> - размещение текста выше указанной Y-координаты</LI>
+      <LI><b>TEXT_FX_VCA</b> - использовать цвета и альфу для каждой вершины символов, указанные с помощью <a href='#fx2d_SetVCA'>fx2d_SetVCA</a></LI>
+    </UL>
+  <b>Константы(для text_DrawInRect и text_DrawInRectEx):</b><br>
+    <UL type="disc">
+      <LI><b>TEXT_HALIGN_LEFT</b> - выравнивание по левому краю(по умолчанию)</LI>
+      <LI><b>TEXT_HALIGN_CENTER</b> - выравнивание по центру(горизонтально)</LI>
+      <LI><b>TEXT_HALIGN_RIGHT</b> - выравнивание по правому краю</LI>
+      <LI><b>TEXT_HALIGN_JUSTIFY</b> - выравнивание по ширине</LI>
+      <LI><b>TEXT_VALIGN_TOP</b> - размещение текста в верхней части прямоугольника(по умолчанию)</LI>
+      <LI><b>TEXT_VALIGN_CENTER</b> - выравнивание по центру(вертикально)</LI>
+      <LI><b>TEXT_VALIGN_BOTTOM</b> - размещение текста в нижней части прямоугольника</LI>
+      <LI><b>TEXT_FX_VCA</b> - использовать цвета и альфу для каждой вершины символов, указанные с помощью <a href='#fx2d_SetVCA'>fx2d_SetVCA</a></LI>
+    </UL>
+  <b>Функции:</b><br>
   <UL type='disc'>
     <!--text_Draw-->
     <LI><a name='text_Draw'>
