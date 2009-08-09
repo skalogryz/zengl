@@ -266,7 +266,7 @@ procedure gui_DelWidget;
     p : Pointer;
 begin
   if Assigned( Widget.Prev ) Then
-    if Assigned( Widget.Next ) Then // FIXME: хмм...
+    if Assigned( Widget.Next ) Then
       Widget.Prev.Next := Widget.Next
     else
       Widget.Prev.Next := nil;

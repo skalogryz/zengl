@@ -264,7 +264,7 @@ begin
             if ( j < l ) and ( Text[ j + 1 ] = #10 ) Then
               begin
                 INC( W );
-                if length( WordsArray[ i ].str ) > H - 1 Then
+                if length( WordsArray[ i ].str ) > H Then
                   font_GetCID( WordsArray[ i ].str, H, @H );
                 continue;
               end;
@@ -281,7 +281,7 @@ begin
             WordsArray[ i ].LF      := LineFeed;
             WordsArray[ i ].LFShift := W + 1;
             WordsArray[ i ].W       := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-            if length( WordsArray[ i ].str ) > H - 1 Then
+            if length( WordsArray[ i ].str ) > H Then
               begin
                 W := font_GetCID( WordsArray[ i ].str, H, @H );
                 while not Assigned( Font.CharDesc[ W ] ) do
