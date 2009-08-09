@@ -435,7 +435,7 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   Result := 0;
-  if ( not app_Work ) and ( wnd_Handle = 0 ) Then
+  if ( not app_Work ) and ( Msg <> WM_SETFOCUS ) Then
     begin
       Result := DefWindowProc( hWnd, Msg, wParam, lParam );
       exit;
