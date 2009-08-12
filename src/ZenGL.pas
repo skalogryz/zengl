@@ -64,6 +64,7 @@ uses
   zgl_gui_render,
 
   zgl_primitives_2d,
+  zgl_sengine_2d,
   zgl_sprite_2d,
 
   zgl_file,
@@ -206,6 +207,13 @@ exports
   pr2d_Rect                name prefix + 'pr2d_Rect',
   pr2d_Circle              name prefix + 'pr2d_Circle',
   pr2d_Ellipse             name prefix + 'pr2d_Ellipse',
+
+  // Sprite Engine 2D
+  sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
+  sengine2d_DelSprite      name prefix + 'sengine2d_DelSprite',
+  sengine2d_Set            name prefix + 'sengine2d_Set',
+  sengine2d_Draw           name prefix + 'sengine2d_Draw',
+  sengine2d_Proc           name prefix + 'sengine2d_Proc',
 
   // Sprite 2D
   ssprite2d_Draw           name prefix + 'ssprite2d_Draw',

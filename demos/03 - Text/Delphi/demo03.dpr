@@ -35,6 +35,7 @@ procedure Draw;
     r : zglTRect;
     s : AnsiString;
 begin
+  batch2d_Begin;
   text_Draw( fnt, 400, 25, 'Строка с выравниванием по центру', TEXT_HALIGN_CENTER );
   text_DrawEx( fnt, 400, 65, 2, 0, 'Масштабирование', 255, $FFFFFF, TEXT_HALIGN_CENTER );
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
@@ -74,6 +75,7 @@ begin
   // Выводим количество FPS в правом углу, используя text_GetWidth
   s := 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) );
   text_Draw( fnt, 800 - text_GetWidth( fnt, s ), 0, s );
+  batch2d_End;
 end;
 
 Begin

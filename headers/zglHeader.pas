@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.35               }
-{ date:    08.08.09             }
+{ version: 0.1.36               }
+{ date:    13.08.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -581,6 +581,42 @@ var
   pr2d_Ellipse : procedure( const X, Y, xRadius, yRadius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
 
 // Sprites 2D
+type
+  zglPSprite2D = ^zglTSprite2D;
+  zglTSprite2D = record
+    ID      : Integer;
+    Texture : zglPTexture;
+    Layer   : Integer;
+    X, Y    : Single;
+    W, H    : Single;
+    Angle   : Single;
+    Frame   : Single;
+    Alpha   : Integer;
+    Flags   : DWORD;
+    Data    : Pointer;
+
+    OnInit  : procedure( const Sprite : zglPSprite2D );
+    OnDraw  : procedure( const Sprite : zglPSprite2D );
+    OnProc  : procedure( const Sprite : zglPSprite2D );
+    OnFree  : procedure( const Sprite : zglPSprite2D );
+
+    Next, Prev : zglPSprite2D;
+  end;
+
+type
+  zglPSEngine2D = ^zglTSEngine2D;
+  zglTSEngine2D = record
+    Count : DWORD;
+    List  : array of zglPSprite2D;
+  end;
+
+var
+  sengine2d_AddSprite : function( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
+  sengine2d_DelSprite : procedure( const ID : Integer );
+  sengine2d_Set       : procedure( const SEngine : zglPSEngine2D );
+  sengine2d_Draw      : procedure;
+  sengine2d_Proc      : procedure;
+
   ssprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   asprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   csprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
@@ -1177,6 +1213,12 @@ begin
       pr2d_Rect := dlsym( zglLib, 'pr2d_Rect' );
       pr2d_Circle := dlsym( zglLib, 'pr2d_Circle' );
       pr2d_Ellipse := dlsym( zglLib, 'pr2d_Ellipse' );
+
+      sengine2d_AddSprite := dlsym( zglLib, 'sengine2d_AddSprite' );
+      sengine2d_DelSprite := dlsym( zglLib, 'sengine2d_DelSprite' );
+      sengine2d_Set := dlsym( zglLib, 'sengine2d_Set' );
+      sengine2d_Draw := dlsym( zglLib, 'sengine2d_Draw' );
+      sengine2d_Proc := dlsym( zglLib, 'sengine2d_Proc' );
 
       ssprite2d_Draw := dlsym( zglLib, 'ssprite2d_Draw' );
       asprite2d_Draw := dlsym( zglLib, 'asprite2d_Draw' );
