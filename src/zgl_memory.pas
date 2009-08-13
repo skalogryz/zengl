@@ -44,6 +44,11 @@ function  mem_Write( var Memory : zglTMemory; const buffer; const count : DWORD 
 procedure mem_SetSize( var Memory : zglTMemory; const Size : DWORD );
 procedure mem_Free( var Memory : zglTMemory );
 
+{$IFDEF ENDIAN_BIG}
+var
+  forceNoSwap : Boolean;
+{$ENDIF}
+
 implementation
 uses
   zgl_main,
@@ -84,6 +89,13 @@ end;
 
 function mem_Read;
 begin
+  {$IFDEF ENDIAN_BIG}
+  if ( count <=4 ) and ( not forceNoSwap ) Then
+    begin
+      Result := mem_ReadSwap( Memory, buffer, count );
+      exit;
+    end;
+  {$ENDIF}
   if count > 0 Then
     begin
       Result := Memory.Size - Memory.Position;
@@ -103,6 +115,13 @@ function mem_ReadSwap;
     i       : DWORD;
     pBuffer : array of Byte;
 begin
+  {$IFDEF ENDIAN_BIG}
+  if forceNoSwap Then
+    begin
+	  Result := mem_Read( Memory, buffer, count );
+	  exit;
+	end;
+  {$ENDIF}
   if count > 0 Then
     begin
       Result := Memory.Size - Memory.Position;

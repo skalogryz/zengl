@@ -598,7 +598,7 @@ begin
     begin
       c := fg_CharsUID[ i ];
       file_Write( F, c, 4 );
-      file_Write( F, Font.CharDesc[ c ].Page, 4 );
+      file_Write( F, Font.CharDesc[ c ].Page, 2 );
       file_Write( F, Font.CharDesc[ c ].Width, 1 );
       file_Write( F, Font.CharDesc[ c ].Height, 1 );
       file_Write( F, Font.CharDesc[ c ].ShiftX, 4 );

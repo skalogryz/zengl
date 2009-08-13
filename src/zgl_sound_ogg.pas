@@ -104,6 +104,11 @@ const
   libvorbis     = 'libvorbis.0.3.1.dylib';
   libvorbisfile = 'libvorbisfile.3.1.1.dylib';
 {$ENDIF}
+{$IFDEF ENDIAN_BIG}
+  BIG_ENDIAN = TRUE;
+{$ELSE}
+  BIG_ENDIAN = FALSE;
+{$ENDIF}
 
 {***********************************************************************}
 {                       POSIX TYPE DEFINITIONS                          }
@@ -459,7 +464,7 @@ begin
 
   BytesRead := 0;
   repeat
-    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
+    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, BIG_ENDIAN, 2, TRUE, nil );
 
     if Result = -3  Then break;
     BytesRead := BytesRead + Result;
@@ -501,7 +506,7 @@ procedure ogg_Load;
   begin
     BytesRead := 0;
     repeat
-      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
+      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, BIG_ENDIAN, 2, TRUE, nil );
 
       if Result = -3  Then break;
       BytesRead := BytesRead + Result;

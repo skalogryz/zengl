@@ -121,6 +121,9 @@ var
 procedure png_Load;
   label _exit;
 begin
+  {$IFDEF ENDIAN_BIG}
+  forceNoSwap := TRUE;
+  {$ENDIF}
   mem_Read( pngMem, pngSignature[ 0 ], 8 );
 
   if pngSignature <> PNG_SIGNATURE Then
@@ -183,6 +186,9 @@ _exit:
     pngHastRNS  := FALSE;
     pngHeaderOk := FALSE;
     pngRowUsed  := TRUE;
+    {$IFDEF ENDIAN_BIG}
+    forceNoSwap := FALSE;
+    {$ENDIF}
   end;
 end;
 
