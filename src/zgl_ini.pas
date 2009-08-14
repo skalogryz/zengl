@@ -388,8 +388,8 @@ procedure ini_CopySection;
 begin
   s1.Name := s2.Name;
   s1.Keys := s2.Keys;
-  SetLength( s1.Key, s1.Keys + 1 );
-  for i := 0 to s1.Keys do
+  SetLength( s1.Key, s1.Keys );
+  for i := 0 to s1.Keys - 1 do
     ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
 end;
 
