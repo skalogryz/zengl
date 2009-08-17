@@ -67,12 +67,20 @@ begin
       INC( fg_Font.Count.Chars );
     end;
   // Russian
+  fg_CharsUse[ 1025 ] := TRUE;
+  INC( fg_Font.Count.Chars );
+  fg_CharsUse[ 1105 ] := TRUE;
+  INC( fg_Font.Count.Chars );
   for i := 1040 to 1103 do
     begin
       fg_CharsUse[ i ] := TRUE;
       INC( fg_Font.Count.Chars );
     end;
   // Ukranian
+  fg_CharsUse[ 1028 ] := TRUE;
+  INC( fg_Font.Count.Chars );
+  fg_CharsUse[ 1108 ] := TRUE;
+  INC( fg_Font.Count.Chars );
   for i := 1030 to 1031 do
     begin
       fg_CharsUse[ i ] := TRUE;

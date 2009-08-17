@@ -104,13 +104,17 @@ begin
         begin
           lastPage := Font.CharDesc[ c ].Page;
           batch2d_Check( GL_QUADS, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
-        end;
-      glEnable( GL_BLEND );
-      glEnable( GL_TEXTURE_2D );
-      glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
-      glBegin( GL_QUADS );
-    end;
 
+          glEnable( GL_BLEND );
+          glEnable( GL_TEXTURE_2D );
+          glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
+          glBegin( GL_QUADS );
+        end else
+          begin
+            glEnable( GL_BLEND );
+            glEnable( GL_TEXTURE_2D );
+          end;
+    end;
   while i <= length( Text ) do
     begin
       if Text[ i ] = #10 Then

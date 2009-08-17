@@ -141,11 +141,11 @@ begin
     begin
       mem_Read( fntMem, c, 4 );
       zgl_GetMem( Pointer( Result.CharDesc[ c ] ), SizeOf( zglTCharDesc ) );
-    {$IFDEF ENDIAN_BIG}
+      {$IFDEF ENDIAN_BIG}
       forceNoSwap := TRUE;
       {$ENDIF}
       mem_Read( fntMem, Result.CharDesc[ c ].Page, 4 );
-    {$IFDEF ENDIAN_BIG}
+      {$IFDEF ENDIAN_BIG}
       forceNoSwap := FALSE;
       {$ENDIF}
       mem_Read( fntMem, Result.CharDesc[ c ].Width, 1 );
@@ -153,15 +153,15 @@ begin
       mem_Read( fntMem, Result.CharDesc[ c ].ShiftX, 4 );
       mem_Read( fntMem, Result.CharDesc[ c ].ShiftY, 4 );
       mem_Read( fntMem, Result.CharDesc[ c ].ShiftP, 4 );
-    {$IFDEF ENDIAN_BIG}
+      {$IFDEF ENDIAN_BIG}
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ].X, 4 );
-    mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ].Y, 4 );
+      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ].Y, 4 );
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 1 ].X, 4 );
-    mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 1 ].Y, 4 );
+      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 1 ].Y, 4 );
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 2 ].X, 4 );
-    mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 2 ].Y, 4 );
+      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 2 ].Y, 4 );
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 3 ].X, 4 );
-    mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
+      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
       {$ELSE}
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
       {$ENDIF}
@@ -283,7 +283,7 @@ begin
   if Assigned( Shift ) Then
     Shift^ := Pos + 1;
   case Byte( Text[ Pos ] ) of
-    0..127: Result := Byte( Text[ Pos ] );
+    0..191: Result := Byte( Text[ Pos ] );
     192..255: Result := Byte( Text[ Pos ] ) + 848;
   else
     Result := 0;

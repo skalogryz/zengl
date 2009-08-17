@@ -26,12 +26,21 @@ unit zgl_sengine_2d;
 interface
 
 uses
+  zgl_types,
   zgl_textures;
 
 type
   zglPSprite2D = ^zglTSprite2D;
+  zglPSEngine2D = ^zglTSEngine2D;
+
+  zglTSEngine2D = record
+    Count : DWORD;
+    List  : array of zglPSprite2D;
+  end;
+
   zglTSprite2D = record
     ID      : Integer;
+    Manager : zglPSEngine2D;
     Texture : zglPTexture;
     Layer   : Integer;
     X, Y    : Single;
@@ -46,15 +55,6 @@ type
     OnDraw  : procedure( const Sprite : zglPSprite2D );
     OnProc  : procedure( const Sprite : zglPSprite2D );
     OnFree  : procedure( const Sprite : zglPSprite2D );
-
-    Next, Prev : zglPSprite2D;
-  end;
-
-type
-  zglPSEngine2D = ^zglTSEngine2D;
-  zglTSEngine2D = record
-    Count : DWORD;
-    List  : array of zglPSprite2D;
   end;
 
 function  sengine2d_AddSprite( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
@@ -83,11 +83,12 @@ begin
   if sengine2d.Count + 1 > length( sengine2d.List ) Then
     SetLength( sengine2d.List, length( sengine2d.List ) + 16384 );
 
-  zgl_GetMem( new, SizeOf( zglTSprite2D ) );
+  zgl_GetMem( Pointer( new ), SizeOf( zglTSprite2D ) );
   sengine2d.List[ sengine2d.Count ] := new;
   INC( sengine2d.Count );
 
   new.ID      := sengine2d.Count - 1;
+  new.Manager := sengine2d;
   new.Texture := Texture;
   new.Layer   := Layer;
   new.X       := 0;

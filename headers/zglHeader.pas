@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.36               }
-{ date:    13.08.09             }
+{ date:    17.08.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -583,8 +583,16 @@ var
 // Sprites 2D
 type
   zglPSprite2D = ^zglTSprite2D;
+  zglPSEngine2D = ^zglTSEngine2D;
+
+  zglTSEngine2D = record
+    Count : DWORD;
+    List  : array of zglPSprite2D;
+  end;
+
   zglTSprite2D = record
     ID      : Integer;
+    Manager : zglPSEngine2D;
     Texture : zglPTexture;
     Layer   : Integer;
     X, Y    : Single;
@@ -599,15 +607,6 @@ type
     OnDraw  : procedure( const Sprite : zglPSprite2D );
     OnProc  : procedure( const Sprite : zglPSprite2D );
     OnFree  : procedure( const Sprite : zglPSprite2D );
-
-    Next, Prev : zglPSprite2D;
-  end;
-
-type
-  zglPSEngine2D = ^zglTSEngine2D;
-  zglTSEngine2D = record
-    Count : DWORD;
-    List  : array of zglPSprite2D;
   end;
 
 var
