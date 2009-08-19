@@ -120,36 +120,37 @@ end;
 
 procedure gui_Draw;
   var
-    Widget : zglPWidget;
+    i : Integer;
 begin
-  glEnable( GL_DEPTH_TEST );
-  Widget := managerGUI.First.Next;
-  while Widget <> nil do
+  i := 0;
+  while i < managerGUI.Main.childs do
     begin
-      gui_DrawWidget( Widget );
-      Widget := Widget.Next;
+      gui_DrawWidget( managerGUI.Main.child[ i ] );
+      if Assigned( managerGUI.Main.child[ i ] ) Then
+        INC( i );
     end;
-  glDisable( GL_DEPTH_TEST );
 end;
 
 procedure gui_Proc;
   var
-    Widget : zglPWidget;
-    Event  : zglPEvent;
-    p      : Pointer;
+    i     : Integer;
+    Event : zglPEvent;
+    p     : Pointer;
 begin
   INC( cursorAlpha );
   if cursorAlpha > 50 Then
     cursorAlpha := 0;
 
-  managerGUI.First.rect.W := wnd_Width;
-  managerGUI.First.rect.H := wnd_Height;
+  managerGUI.Main.rect.W := wnd_Width;
+  managerGUI.Main.rect.H := wnd_Height;
+  managerGUI.Main.client := managerGUI.Main.rect;
 
-  Widget := managerGUI.First.Next;
-  while Widget <> nil do
+  i := 0;
+  while i < managerGUI.Main.childs do
     begin
-      gui_ProcWidget( Widget );
-      Widget := Widget.Next;
+      gui_ProcWidget( managerGUI.Main.child[ i ] );
+      if Assigned( managerGUI.Main.child[ i ] ) Then
+        INC( i );
     end;
 
   Event := eventList.First.Next;
@@ -208,87 +209,60 @@ end;
 function gui_AddWidget;
   var
     i : Integer;
+    p : zglPWidget;
 begin
-  if Assigned ( Parent ) Then
-    begin
-      if not Assigned( Parent.child ) Then
-        zgl_GetMem( Pointer( Parent.child ), SizeOf( zglTWidget ) );
-      Result        := Parent.child;
-      Result._type  := WIDGET_UNKNOWN;
-      Result.parent := Parent;
-    end else
-      Result := @managerGUI.First;
+  if not Assigned( Parent ) Then
+    p := @managerGUI.Main
+  else
+    p := Parent;
 
-  while Assigned( Result.Next ) do
-    Result := Result.Next;
+  INC( p.childs );
+  SetLength( p.child, p.childs );
+  zgl_GetMem( Pointer( p.child[ p.childs - 1 ] ), SizeOf( zglTWidget ) );
 
-  zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTWidget ) );
-  Result.Next._type := _type;
-  managerGUI.Types[ _type - 1 ].FillDesc( Desc, Result.Next.desc );
-  Result.Next.data  := Data;
-  if Assigned( Parent ) Then
-    begin
-      Result.Next.parent := parent;
-      Result.Next.rect.X := Parent.Rect.X + X;
-      Result.Next.rect.Y := Parent.Rect.Y + Y;
-    end else
-      begin
-        Result.Next.parent := @managerGUI.First;
-        Result.Next.rect.X := X;
-        Result.Next.rect.Y := Y;
-      end;
-  Result.Next.rect.W  := W;
-  Result.Next.rect.H  := H;
+  Result        := p.child[ p.childs - 1 ];
+  Result._id    := p.childs - 1;
+  Result._type  := _type;
+  managerGUI.Types[ _type - 1 ].FillDesc( Desc, Result.desc );
+  Result.data   := Data;
+  Result.parent := p;
+  Result.childs := 0;
+  Result.rect.X := p.rect.X + X;
+  Result.rect.Y := p.rect.Y + Y;
+  Result.rect.W := W;
+  Result.rect.H := H;
+  Result.layer  := 0;
   if Focus Then
     begin
       gui_ProcCallback( nil, gui_ResetFocus, nil );
-      gui_AddEvent( EVENT_FOCUS_IN, Result.Next, nil );
+      gui_AddEvent( EVENT_FOCUS_IN, Result, nil );
     end;
-  Result.Next.focus   := Focus;
-  Result.Next.visible := Visible;
-  Result.Next.mousein := FALSE;
-  for i := managerGUI.Count.Types - 1 downto 0 do
-    if Result.Next._type = managerGUI.Types[ i ]._type Then
+  Result.focus   := Focus;
+  Result.visible := Visible;
+  Result.mousein := FALSE;
+  for i := length( managerGUI.Types ) - 1 downto 0 do
+    if Result._type = managerGUI.Types[ i ]._type Then
       begin
-        Result.Next.OnDraw := managerGUI.Types[ i ].OnDraw;
-        Result.Next.OnProc := managerGUI.Types[ i ].OnProc;
+        Result.OnDraw := managerGUI.Types[ i ].OnDraw;
+        Result.OnProc := managerGUI.Types[ i ].OnProc;
       end;
-
-  Result.Next.Prev   := Result;
-  Result.Next.Next   := nil;
-  Result             := Result.Next;
   gui_AddEvent( EVENT_CREATE, Result, nil );
-  INC( managerGUI.Count.Items );
 end;
 
 procedure gui_DelWidget;
   var
-    p : Pointer;
+    i, id : Integer;
 begin
-  if Assigned( Widget.Prev ) Then
-    if Assigned( Widget.Next ) Then
-      Widget.Prev.Next := Widget.Next
-    else
-      Widget.Prev.Next := nil;
+  while Widget.childs > 0 do
+    gui_DelWidget( Widget.child[ 0 ] );
 
-  if Assigned( Widget.Next ) Then
-    Widget.Next.Prev := Widget.Prev;
+  for i := Widget._id to Widget.parent.childs - 2 do
+    Widget.parent.child[ i ] := Widget.parent.child[ i + 1 ];
+  DEC( Widget.parent.childs );
+  SetLength( Widget.parent.child, Widget.parent.childs );
 
-  if Assigned( Widget.child ) Then
-    begin
-      p := Widget.child.Next;
-      while Assigned( p ) do
-        begin
-          gui_DelWidget( zglPWidget( p ) );
-          p := Widget.child.Next;
-        end;
-      gui_DelWidget( Widget.child );
-    end;
-
-  Freemem( Widget.desc );
-  Freemem( Widget );
-  DEC( managerGUI.Count.Items );
-
+  FreeMem( Widget.desc );
+  FreeMem( Widget );
   Widget := nil;
 end;
 

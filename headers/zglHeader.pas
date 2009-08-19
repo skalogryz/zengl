@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.36               }
-{ date:    17.08.09             }
+{ date:    19.08.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -502,6 +502,10 @@ type
 end;
 
 type
+  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
+  zglPPoints2D = ^zglTPoints2D;
+
+type
   zglPLine = ^zglTLine;
   zglTLine = record
     x0, y0 : Single;
@@ -594,13 +598,14 @@ type
     ID      : Integer;
     Manager : zglPSEngine2D;
     Texture : zglPTexture;
+    Destroy : Boolean;
     Layer   : Integer;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
     Frame   : Single;
     Alpha   : Integer;
-    Flags   : DWORD;
+    FxFlags : DWORD;
     Data    : Pointer;
 
     OnInit  : procedure( const Sprite : zglPSprite2D );
@@ -751,24 +756,26 @@ end;
 
   //Widget
   zglTWidget = record
-    _type      : Integer;
-    desc       : Pointer;
-    data       : Pointer;
-    rect       : zglTRect;
-    client     : zglTRect;
-    align      : DWORD;
-    focus      : Boolean;
-    visible    : Boolean;
-    mousein    : Boolean;
-    draged     : Boolean;
+    _id     : Integer;
+    _type   : Integer;
+    desc    : Pointer;
+    data    : Pointer;
+    rect    : zglTRect;
+    client  : zglTRect;
+    align   : DWORD;
+    layer   : Integer;
+    focus   : Boolean;
+    visible : Boolean;
+    mousein : Boolean;
+    draged  : Boolean;
 
-    OnDraw     : procedure( const Widget : zglPWidget );
-    OnProc     : procedure( const Event  : zglPEvent );
-    Events     : zglTEvents;
+    OnDraw  : procedure( const Widget : zglPWidget );
+    OnProc  : procedure( const Event  : zglPEvent );
+    Events  : zglTEvents;
 
-    parent     : zglPWidget;
-    child      : zglPWidget;
-    Next, Prev : zglPWidget;
+    parent  : zglPWidget;
+    childs  : Integer;
+    child   : array of zglPWidget;
 end;
 
   zglTWidgetType = record
@@ -782,11 +789,7 @@ end;
   //GUI Manager
   zglPGUIManager = ^zglTGUIManager;
   zglTGUIManager = record
-    Count : record
-              Items : DWORD;
-              Types : DWORD;
-            end;
-    First : zglTWidget;
+    Main  : zglTWidget;
     Types : array of zglTWidgetType;
 end;
 
@@ -987,6 +990,10 @@ var
   m_Distance  : function( const x1, y1, x2, y2 : Single ) : Single;
   m_FDistance : function( const x1, y1, x2, y2 : Single ) : Single;
   m_Angle     : function( const x1, y1, x2, y2 : Single ) : Single;
+
+  tess_Triangulate : procedure( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
+  tess_AddHole     : procedure( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
+  tess_GetData     : function( var TriPoints : zglPPoints2D ) : Integer;
 
 // COLLISION 2D
   col2d_PointInRect   : function( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
@@ -1259,6 +1266,10 @@ begin
       m_Distance := dlsym( zglLib, 'm_Distance' );
       m_FDistance := dlsym( zglLib, 'm_FDistance' );
       m_Angle := dlsym( zglLib, 'm_Angle' );
+
+      tess_Triangulate := dlsym( zglLib, 'tess_Triangulate' );
+      tess_AddHole := dlsym( zglLib, 'tess_AddHole' );
+      tess_GetData := dlsym( zglLib, 'tess_GetData' );
 
       col2d_PointInRect := dlsym( zglLib, 'col2d_PointInRect' );
       col2d_PointInCircle := dlsym( zglLib, 'col2d_PointInCircle' );

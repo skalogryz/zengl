@@ -1,4 +1,4 @@
-program demo03;
+program demo04;
 
 uses
   zgl_main,
@@ -179,7 +179,8 @@ begin
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
-  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+  if time > 255 Then
+    text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
   batch2d_End;
 end;
 

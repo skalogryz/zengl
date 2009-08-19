@@ -37,6 +37,10 @@ type
 end;
 
 type
+  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
+  zglPPoints2D = ^zglTPoints2D;
+
+type
   zglPLine = ^zglTLine;
   zglTLine = record
     x0, y0 : Single;
@@ -63,15 +67,34 @@ function  m_Distance( const x1, y1, x2, y2 : Single ) : Single;
 function  m_FDistance( const x1, y1, x2, y2 : Single ) : Single;
 function  m_Angle( const x1, y1, x2, y2 : Single ) : Single;
 
+procedure tess_Triangulate( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
+procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
+function  tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
+
 var
   CosTable : array[ 0..360 ] of Single;
   SinTable : array[ 0..360 ] of Single;
 
 implementation
+uses
+  zgl_main,
+  zgl_opengl_all,
+  zgl_log,
+  zgl_utils;
+
+var
+  tess        : Integer;
+  tessMode    : Integer;
+  tessHoles   : Boolean;
+  tessFinish  : Boolean;
+  tessCurrent : Integer;
+  tessVertex  : array[ 0..2 ] of zglTPoint2D;
+  tessVCount  : Integer;
+  tessVerts   : array of zglTPoint2D;
 
 function ArcTan2( const dx, dy : Single ) : Single;
 begin
-  Result := abs( ArcTan( dy / dx ) * ( 180 / 3.14159 ) );
+  Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
 end;
 
 procedure InitCosSinTables;
@@ -148,7 +171,127 @@ begin
         Result := ArcTan2( dx, dy )
 end;
 
+// GLU Triangulation
+{$IFDEF LINUX_OR_DARWIN}
+  {$DEFINE stdcall := cdecl}
+{$ENDIF}
+
+procedure tessBegin( Mode : Integer ); stdcall;
+begin
+  tessMode    := Mode;
+  tessCurrent := 0;
+end;
+
+procedure tessVertex2f( Vertex : zglPPoint2D ); stdcall;
+begin
+  if not Assigned( Vertex ) Then exit;
+
+  if tessVCount + 3 > length( tessVerts ) Then
+    SetLength( tessVerts, length( tessVerts ) + 65536 );
+
+  tessVertex[ tessCurrent ] := Vertex^;
+  INC( tessCurrent );
+  if tessCurrent <> 3 Then exit;
+
+  case tessMode of
+    GL_TRIANGLES:
+      begin
+        tessVerts[ tessVCount ] := tessVertex[ 0 ]; INC( tessVCount );
+        tessVerts[ tessVCount ] := tessVertex[ 1 ]; INC( tessVCount );
+        tessVerts[ tessVCount ] := tessVertex[ 2 ]; INC( tessVCount );
+
+        tessCurrent := 0;
+      end;
+    GL_TRIANGLE_STRIP:
+      begin
+        tessVerts[ tessVCount ] := tessVertex[ 1 ]; INC( tessVCount );
+        tessVerts[ tessVCount ] := tessVertex[ 2 ]; INC( tessVCount );
+        tessVerts[ tessVCount ] := tessVertex[ 0 ]; INC( tessVCount );
+
+        tessVertex[ 0 ] := tessVertex[ 1 ];
+        tessVertex[ 1 ] := tessVertex[ 2 ];
+        tessCurrent    := 2;
+      end;
+    GL_TRIANGLE_FAN:
+      begin
+        tessVerts[ tessVCount ] := tessVertex[ 0 ]; INC( tessVCount );
+        tessVerts[ tessVCount ] := tessVertex[ 1 ]; INC( tessVCount );
+        tessVerts[ tessVCount ] := tessVertex[ 2 ]; INC( tessVCount );
+
+        tessVertex[ 1 ] := tessVertex[ 2 ];
+        tessCurrent    := 2;
+      end;
+  end;
+end;
+
+procedure tess_Triangulate;
+  var
+    i : Integer;
+    v : array[ 0..2 ] of Double;
+begin
+  tessFinish  := FALSE;
+  tessHoles   := AddHoles;
+  tessVCount  := 0;
+  tessCurrent := 0;
+  v[ 2 ]      := 0;
+
+  gluTessBeginPolygon( tess, nil );
+  gluTessBeginContour( tess );
+  for i := iLo to iHi do
+    begin
+      v[ 0 ] := Contour[ i ].X;
+      v[ 1 ] := Contour[ i ].Y;
+      gluTessVertex( tess, @v[ 0 ], @Contour[ i ] );
+    end;
+  gluTessEndContour( tess );
+  if not AddHoles Then
+    gluTessEndPolygon( tess );
+end;
+
+procedure tess_AddHole;
+  var
+    i : Integer;
+    v : array[ 0..2 ] of Double;
+begin
+  if not tessHoles Then exit;
+  v[ 2 ] := 0;
+
+  gluTessBeginContour( tess );
+  for i := iLo to iHi do
+    begin
+      v[ 0 ] := Contour[ i ].X;
+      v[ 1 ] := Contour[ i ].Y;
+      gluTessVertex( tess, @v[ 0 ], @Contour[ i ] );
+    end;
+  gluTessEndContour( tess );
+  if LastHole Then
+    begin
+      tessFinish := TRUE;
+      tessHoles  := FALSE;
+      gluTessEndPolygon( tess );
+    end;
+end;
+
+function tess_GetData;
+begin
+  if not tessFinish Then
+    begin
+      tessFinish := TRUE;
+      gluTessEndPolygon( tess );
+    end;
+  FreeMemory( TriPoints );
+  zgl_GetMem( Pointer( TriPoints ), tessVCount * SizeOf( zglTPoint2D ) );
+  Move( tessVerts[ 0 ], TriPoints[ 0 ], tessVCount * SizeOf( zglTPoint2D ) );
+  Result := tessVCount;
+end;
+
 initialization
   InitCosSinTables;
+  tess := gluNewTess;
+  gluTessCallBack( tess, GLU_TESS_BEGIN,  @tessBegin    );
+  gluTessCallBack( tess, GLU_TESS_VERTEX, @tessVertex2f );
+
+finalization
+  gluDeleteTess( tess );
 
 end.

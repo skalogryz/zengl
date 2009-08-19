@@ -618,17 +618,17 @@ begin
 
       tex_GetData( Font.Pages[ i ], Data, size );
 
-      file_Open( F, FileName + '_' + u_IntToStr( i ) + '.tga', FOM_CREATE );
+      file_Open( F, FileName + '-page' + u_IntToStr( i ) + '.tga', FOM_CREATE );
       file_Write( F, TGA, SizeOf( zglTTGAHeader ) );
       file_Write( F, Data^, sqr( fg_PageSize ) * size );
       file_Close( F );
       FreeMemory( Data );
 
       {$IFDEF USE_PNG}
-      LoadImageFromFile( FileName + '_' + u_IntToStr( i ) + '.tga', Image );
+      LoadImageFromFile( FileName + '-page' + u_IntToStr( i ) + '.tga', Image );
       ConvertImage( Image, ifA8R8G8B8 );
-      SaveImageToFile( FileName + '_' + u_IntToStr( i ) + '.png', Image );
-      DeleteFile( FileName + '_' + u_IntToStr( i ) + '.tga' );
+      SaveImageToFile( FileName + '-page' + u_IntToStr( i ) + '.png', Image );
+      DeleteFile( FileName + '-page' + u_IntToStr( i ) + '.tga' );
       {$ENDIF}
     end;
 end;

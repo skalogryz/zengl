@@ -116,18 +116,21 @@ end;
 
 procedure gui_ProcCallback;
   var
+    i : Integer;
     w : zglPWidget;
 begin
-  if not Assigned( widget ) Then
-    w := managerGUI.First.Next
+  if Assigned( Widget ) Then
+    w := Widget
   else
-    w := widget;
-  while w <> nil do
+    w := managerGUI.Main.child[ 0 ];
+
+  i := w._id;
+  while i < w.parent.childs do
     begin
-      if Assigned( w.child ) Then
-        gui_ProcCallback( w.child, callback, data );
-      callback( w, data );
-      w := w.Next;
+      if w.childs > 0 Then
+        gui_ProcCallback( w.child[ 0 ], callback, data );
+      callback( w.parent.child[ i ], data );
+      INC( i );
     end;
 end;
 

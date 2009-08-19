@@ -141,20 +141,19 @@ end;
 
 procedure gui_DrawWidget;
   var
-    w : zglPWidget;
+    i : Integer;
 begin
   if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
 
   if Assigned( Widget.OnDraw ) Then Widget.OnDraw( Widget );
-  if Assigned( Widget.child ) Then
+  i := 0;
+  while i < Widget.childs do
     begin
-      w := Widget.child;
-      repeat
-        _clip( w.parent );
-        w := w.Next;
-        gui_DrawWidget( w );
-        scissor_End;
-      until not Assigned( w.Next );
+      _clip( Widget );
+      gui_DrawWidget( Widget.child[ i ] );
+      scissor_End;
+      if Assigned( Widget.child[ i ] ) Then
+        INC( i );
     end;
 end;
 
@@ -259,7 +258,7 @@ begin
 
       _clip( Widget, X + 2, Y + 2, W - subW + 1 - 4, H - 4 );
       if Assigned( Widget.child ) Then
-        iShift := zglTScrollBarDesc( Widget.child.Next.desc^ ).Position
+        iShift := zglTScrollBarDesc( Widget.child[ 0 ].desc^ ).Position
       else
         iShift := 0;
       ShiftY := ( ItemHeight - Font.MaxHeight ) div 2 + 2;

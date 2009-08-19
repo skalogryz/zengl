@@ -60,8 +60,8 @@ var
 
 function gui_ProcWidget;
   var
+    i     : Integer;
     Event : zglTEvent;
-    w     : zglPWidget;
     cproc : Boolean;
 begin
   if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
@@ -87,14 +87,13 @@ begin
 
   cproc  := FALSE;
   Result := FALSE;
-  if Assigned( Widget.child ) Then
+  i      := 0;
+  while i < Widget.childs do
     begin
-      w := Widget.child;
-      repeat
-        w := w.Next;
-        if gui_ProcWidget( w ) Then
-          cproc := TRUE;
-      until not Assigned( w.Next );
+      if gui_ProcWidget( Widget.child[ i ] ) Then
+        cproc := TRUE;
+      if Assigned( Widget.child[ i ] ) Then
+        INC( i );
     end;
   if cproc Then
     begin
@@ -295,10 +294,10 @@ begin
           if key_code = K_TAB Then
             begin
               gui_ProcCallback( nil, gui_ResetFocus, nil );
-              if Assigned( Widget.Next ) Then
+              if Widget._id + 1 < Widget.Parent.childs Then
                 begin
-                  gui_AddEvent( EVENT_FOCUS_IN, Widget.Next, nil );
-                  Widget.Next.focus := TRUE
+                  gui_AddEvent( EVENT_FOCUS_IN, Widget.Parent.child[ Widget._id + 1 ], nil );
+                  Widget.Parent.child[ Widget._id + 1 ].focus := TRUE
                 end;
             end;
           if Assigned( Widget.Events.OnKeyUp ) Then
@@ -371,10 +370,20 @@ procedure gui_ProcRadioButton;
 begin
   with Event^, zglTRadioButtonDesc( Widget.desc^ ) do
     case _type of
-      EVENT_MOUSE_UP:
+      EVENT_MOUSE_CLICK:
         begin
           if mouse_button = M_BLEFT Then
             begin
+              gui_ProcCallback( nil, gui_ResetChecked, @Group );
+              Checked := TRUE;
+            end;
+        end;
+      EVENT_KEY_UP:
+        begin
+          if key_code = K_SPACE Then
+            begin
+              if Assigned( Widget.Events.OnClick ) Then
+                Widget.Events.OnClick( Widget );
               gui_ProcCallback( nil, gui_ResetChecked, @Group );
               Checked := TRUE;
             end;
@@ -419,15 +428,15 @@ begin
         gui_AddWidget( WIDGET_SCROLLBAR, W - SCROLL_SIZE, 0, SCROLL_SIZE, H, FALSE, TRUE, nil, nil, Event.Widget );
       if ( List.Count <= iCount ) and Assigned( Event.Widget.child ) Then
         begin
-          gui_DelWidget( child.Next );
-          gui_DelWidget( child );
+          gui_DelWidget( child[ 0 ] );
+          SetLength( child, 0 );
         end;
     end;
 
   if Assigned( Event.Widget.child ) Then
     begin
-      zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).PageSize := iCount;
-      iShift := zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position;
+      zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).PageSize := iCount;
+      iShift := zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position;
     end else
       iShift := 0;
 
@@ -451,7 +460,7 @@ begin
           begin
             if Assigned( Event.Widget.child ) Then
               if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
-                gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.child.Next, @Event.mouse_wheel );
+                gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.child[ 0 ], @Event.mouse_wheel );
           end;
         EVENT_KEY_UP:
           begin
@@ -469,17 +478,17 @@ begin
         if Assigned( Event.Widget.child ) and ( Event._type <> EVENT_MOUSE_DOWN ) and ( Event._type <> EVENT_MOUSE_CLICK ) Then
           begin
             if ItemIndex < iShift Then
-              zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex;
+              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ItemIndex;
             if ItemIndex > iShift + iCount - 2 Then
-              zglTScrollBarDesc( Event.Widget.child.Next.desc^ ).Position := ItemIndex - iCount + 2;
+              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ItemIndex - iCount + 1;
           end;
       end;
   end;
 
   if Assigned( Event.Widget.child ) Then
-    with zglTScrollBarDesc( Event.Widget.child.Next.desc^ ) do
+    with zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ) do
       begin
-        Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount + 1;
+        Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
         Step := 1;
         if Position > Max Then
           Position := Max;

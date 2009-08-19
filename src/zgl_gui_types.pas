@@ -104,24 +104,26 @@ end;
 
   //Widget
   zglTWidget = record
-    _type      : Integer;
-    desc       : Pointer;
-    data       : Pointer;
-    rect       : zglTRect;
-    client     : zglTRect;
-    align      : DWORD;
-    focus      : Boolean;
-    visible    : Boolean;
-    mousein    : Boolean;
-    draged     : Boolean;
+    _id     : Integer;
+    _type   : Integer;
+    desc    : Pointer;
+    data    : Pointer;
+    rect    : zglTRect;
+    client  : zglTRect;
+    align   : DWORD;
+    layer   : Integer;
+    focus   : Boolean;
+    visible : Boolean;
+    mousein : Boolean;
+    draged  : Boolean;
 
-    OnDraw     : procedure( const Widget : zglPWidget );
-    OnProc     : procedure( const Event  : zglPEvent );
-    Events     : zglTEvents;
+    OnDraw  : procedure( const Widget : zglPWidget );
+    OnProc  : procedure( const Event  : zglPEvent );
+    Events  : zglTEvents;
 
-    parent     : zglPWidget;
-    child      : zglPWidget;
-    Next, Prev : zglPWidget;
+    parent  : zglPWidget;
+    childs  : Integer;
+    child   : array of zglPWidget;
 end;
 
   zglTWidgetType = record
@@ -135,11 +137,7 @@ end;
   //GUI Manager
   zglPGUIManager = ^zglTGUIManager;
   zglTGUIManager = record
-    Count : record
-              Items : DWORD;
-              Types : DWORD;
-            end;
-    First : zglTWidget;
+    Main  : zglTWidget;
     Types : array of zglTWidgetType;
 end;
 

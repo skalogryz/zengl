@@ -251,7 +251,7 @@ end;
 
 procedure bn_save_click;
 begin
-  fontgen_SaveFont( fg_Font, 'font' );
+  fontgen_SaveFont( fg_Font, fg_FontList.Items[ font_id ] + '-' + u_IntToStr( fg_FontSize ) + 'pt' );
 end;
 
 procedure bn_exit_click;

@@ -345,12 +345,11 @@ begin
     // GUI
     WIDGET_TYPE_ID:
       begin
-        if DWORD( UserData ) > managerGUI.Count.Types Then
+        if DWORD( UserData ) > length( managerGUI.Types ) Then
           begin
-            SetLength( managerGUI.Types, managerGUI.Count.Types + 1 );
-            managerGUI.Types[ managerGUI.Count.Types ]._type := DWORD( UserData );
-            widgetTLast := managerGUI.Count.Types;
-            INC( managerGUI.Count.Types );
+            SetLength( managerGUI.Types, length( managerGUI.Types ) + 1 );
+            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := DWORD( UserData );
+            widgetTLast := length( managerGUI.Types ) - 1;
           end else
             widgetTLast := DWORD( UserData );
       end;

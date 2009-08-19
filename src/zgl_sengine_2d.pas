@@ -42,13 +42,14 @@ type
     ID      : Integer;
     Manager : zglPSEngine2D;
     Texture : zglPTexture;
+    Destroy : Boolean;
     Layer   : Integer;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
     Frame   : Single;
     Alpha   : Integer;
-    Flags   : DWORD;
+    FxFlags : DWORD;
     Data    : Pointer;
 
     OnInit  : procedure( const Sprite : zglPSprite2D );
@@ -98,7 +99,7 @@ begin
   new.Angle   := 0;
   new.Frame   := 1;
   new.Alpha   := 255;
-  new.Flags   := FX_BLEND;
+  new.FxFlags := FX_BLEND;
   new.Data    := nil;
   new.OnInit  := OnInit;
   new.OnDraw  := OnDraw;
@@ -173,13 +174,22 @@ begin
         end;
     end;
 
-  for i := 0 to sengine2d.Count - 1 do
+  i := 0;
+  while i < sengine2d.Count do
     begin
       s := sengine2d.List[ i ];
       if Assigned( s.OnDraw ) Then
         s.OnDraw( s )
       else
-        asprite2d_Draw( s.Texture, s.X, s.Y, s.W, s.H, s.Angle, Round( s.Frame ), s.Alpha, s.Flags );
+        asprite2d_Draw( s.Texture, s.X, s.Y, s.W, s.H, s.Angle, Round( s.Frame ), s.Alpha, s.FxFlags );
+
+      if Assigned( s ) Then
+        begin
+          if s.Destroy Then
+            sengine2d_DelSprite( s.ID )
+          else
+            INC( i );
+        end;
     end;
 end;
 
@@ -188,12 +198,20 @@ procedure sengine2d_Proc;
     i : Integer;
     s : zglPSprite2D;
 begin
-  for i := 0 to sengine2d.Count - 1 do
+  i := 0;
+  while i < sengine2d.Count do
     begin
       s := sengine2d.List[ i ];
       if Assigned( s.OnProc ) Then
-        s.OnProc( s )
-      else;
+        s.OnProc( s );
+
+      if Assigned( s ) Then
+        begin
+          if s.Destroy Then
+            sengine2d_DelSprite( s.ID )
+          else
+            INC( i );
+        end;
     end;
 end;
 

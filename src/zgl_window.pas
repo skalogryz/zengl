@@ -79,7 +79,7 @@ var
   {$IFDEF DARWIN}
   wnd_Handle  : WindowRef;
   wnd_Attr    : WindowAttributes;
-  wnd_Events  : array[ 0..13 ] of EventTypeSpec;
+  wnd_Events  : array[ 0..14 ] of EventTypeSpec;
   wnd_MouseIn : Boolean;
   {$ENDIF}
 
@@ -289,7 +289,10 @@ begin
   wnd_Events[ 12 ].eventKind  := kEventMouseWheelMoved;
   wnd_Events[ 13 ].eventClass := kEventClassMouse;
   wnd_Events[ 13 ].eventKind  := kEventMouseDragged;
-  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 14, @wnd_Events[ 0 ], nil, nil );
+  // Command
+  wnd_Events[ 14 ].eventClass := kEventClassCommand;
+  wnd_Events[ 14 ].eventKind  := kEventProcessCommand;
+  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wnd_Events[ 0 ], nil, nil );
 
   wnd_Select;
 {$ENDIF}

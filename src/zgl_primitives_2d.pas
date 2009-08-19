@@ -25,7 +25,10 @@ unit zgl_primitives_2d;
 
 interface
 uses
-  zgl_types;
+  zgl_types,
+  zgl_fx,
+  zgl_textures,
+  zgl_math_2d;
 
 const
   PR2D_FILL   = $000001;
@@ -36,13 +39,12 @@ procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const A
 procedure pr2d_Rect( const X, Y, W, H : Single; const Color : DWORD; const Alpha : Byte = 255; const FX : DWORD = 0 );
 procedure pr2d_Circle( const X, Y, Radius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
 procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
+procedure pr2d_TriList( const Texture : zglPTexture; const TriList : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 implementation
 uses
   zgl_opengl_all,
-  zgl_render_2d,
-  zgl_math_2d,
-  zgl_fx;
+  zgl_render_2d;
 
 procedure pr2d_Pixel;
 begin
@@ -340,6 +342,60 @@ begin
             glDisable( GL_BLEND );
           end;
       end;
+end;
+
+procedure pr2d_TriList;
+  var
+    i    : Integer;
+    w, h : Single;
+begin
+  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+    begin
+      if FX and FX_BLEND > 0 Then
+        glEnable( GL_BLEND )
+      else
+        glEnable( GL_ALPHA_TEST );
+
+      if Assigned( Texture ) Then
+        begin
+          glEnable( GL_TEXTURE_2D );
+          glBindTexture( GL_TEXTURE_2D, Texture.ID );
+
+          if FX and FX2D_COLORSET > 0 Then
+            begin
+              glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
+              glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
+              glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
+            end else
+              glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        end;
+
+      glBegin( GL_TRIANGLES );
+    end;
+
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
+
+  if Assigned( Texture ) Then
+    begin
+      w := 1 / ( Texture.Width / Texture.U );
+      h := 1 / ( Texture.Height / Texture.V );
+      for i := iLo to iHi do
+        begin
+          glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
+          gl_Vertex2fv( @TriList[ i ] );
+        end;
+    end else
+      for i := iLo to iHi do
+        gl_Vertex2fv( @TriList[ i ] );
+
+  if not b2d_Started Then
+    begin
+      glEnd;
+
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_BLEND );
+      glDisable( GL_ALPHA_TEST );
+    end;
 end;
 
 end.

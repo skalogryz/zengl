@@ -19,7 +19,7 @@ win32: clean
 macos: clean
 	$(FPC_MAC)386 $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
 	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
-	lipo -create $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc -output $(OUTPUT)$(TARGETM)
+	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(OUTPUT)$(TARGETM)
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
 clean:

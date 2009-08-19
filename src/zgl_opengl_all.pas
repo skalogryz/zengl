@@ -148,6 +148,7 @@ const
   GL_LINES                          = $0001;
   GL_TRIANGLES                      = $0004;
   GL_TRIANGLE_STRIP                 = $0005;
+  GL_TRIANGLE_FAN                   = $0006;
   GL_QUADS                          = $0007;
 
   // Texture
@@ -257,6 +258,20 @@ const
   GL_WRITE_ONLY_ARB                 = $88B9;
   GL_STREAM_DRAW_ARB                = $88E0;
   GL_STATIC_DRAW_ARB                = $88E4;
+
+  // Triangulation
+  GLU_TESS_BEGIN                    = $18704;
+  GLU_TESS_VERTEX                   = $18705;
+  GLU_TESS_END                      = $18706;
+  GLU_TESS_ERROR                    = $18707;
+  GLU_TESS_EDGE_FLAG                = $18708;
+  GLU_TESS_COMBINE                  = $18709;
+  GLU_TESS_BEGIN_DATA               = $1870A;
+  GLU_TESS_VERTEX_DATA              = $1870B;
+  GLU_TESS_END_DATA                 = $1870C;
+  GLU_TESS_ERROR_DATA               = $1870D;
+  GLU_TESS_EDGE_FLAG_DATA           = $1870E;
+  GLU_TESS_COMBINE_DATA             = $1870F;
 
 type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
@@ -371,6 +386,17 @@ var
   glMapBufferARB : function (target :GLenum; access: GLenum) : PGLvoid; stdcall;
   glUnmapBufferARB : function (target :GLenum) :GLboolean; stdcall;
   glGetBufferParameterivARB:procedure(target:GLenum; pname:GLenum; params:PGLint); stdcall;
+
+  // Triangulation
+  procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
+  function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
+  function  gluNewTess: Integer; stdcall external libGLU;
+  procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
+  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
+  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external libGLU;
+  procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
+  procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
+  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
 
 {$IFDEF LINUX}
 type

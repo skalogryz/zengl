@@ -262,6 +262,7 @@ function app_ProcessMessages;
   {$IFDEF DARWIN}
     eClass  : UInt32;
     eKind   : UInt32;
+    command : HICommand;
     mPos    : HIPoint;
     mButton : EventMouseButton;
     mWheel  : Integer;
@@ -605,6 +606,16 @@ begin
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
 
   case eClass of
+    kEventClassCommand:
+      case eKind of
+        kEventProcessCommand:
+          begin
+            GetEventParameter( inEvent, kEventParamDirectObject, kEventParamHICommand, nil, SizeOf( HICommand ), nil, @command );
+            if command.commandID = kHICommandQuit Then
+              zgl_Exit;
+          end;
+      end;
+
     kEventClassWindow:
       case eKind of
         kEventWindowDrawContent:

@@ -92,7 +92,7 @@ Begin
   wnd_ShowCursor( TRUE );
 
   // Указываем первоначальные настройки
-  scr_SetOptions( 800, 600, 32, REFRESH_MAXIMUM, FALSE, FALSE );
+  scr_SetOptions( zgl_Get(DESKTOP_WIDTH), zgl_Get(DESKTOP_HEIGHT), 32, REFRESH_MAXIMUM, TRUE, FALSE );
 
   // Инициализируем ZenGL
   zgl_Init;
