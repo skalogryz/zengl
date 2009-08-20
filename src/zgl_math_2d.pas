@@ -37,8 +37,8 @@ type
 end;
 
 type
-  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
   zglPPoints2D = ^zglTPoints2D;
+  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
 
 type
   zglPLine = ^zglTLine;

@@ -2,12 +2,12 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.36               }
-{ date:    19.08.09             }
+{ date:    21.08.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
 { ICQ:  496-929-849             }
-{ JID:  dr.andru@jabber.kiev.ua }
+{ JID:  andru-kun@jabber.org    }
 { site: http://andru-kun.inf.ua }
 {-------------------------------}
 unit zglHeader;
@@ -502,8 +502,8 @@ type
 end;
 
 type
-  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
   zglPPoints2D = ^zglTPoints2D;
+  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
 
 type
   zglPLine = ^zglTLine;
@@ -583,6 +583,7 @@ var
   pr2d_Rect    : procedure( const X, Y, W, H : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = 0 );
   pr2d_Circle  : procedure( const X, Y, Radius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
   pr2d_Ellipse : procedure( const X, Y, xRadius, yRadius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
+  pr2d_TriList : procedure( const Texture : zglPTexture; const TriList : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 // Sprites 2D
 type
@@ -1219,6 +1220,7 @@ begin
       pr2d_Rect := dlsym( zglLib, 'pr2d_Rect' );
       pr2d_Circle := dlsym( zglLib, 'pr2d_Circle' );
       pr2d_Ellipse := dlsym( zglLib, 'pr2d_Ellipse' );
+      pr2d_TriList := dlsym( zglLib, 'pr2d_TriList' );
 
       sengine2d_AddSprite := dlsym( zglLib, 'sengine2d_AddSprite' );
       sengine2d_DelSprite := dlsym( zglLib, 'sengine2d_DelSprite' );

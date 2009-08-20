@@ -218,13 +218,17 @@ begin
           if currTimer <> nil Then
             for z := 0 to managerTimer.Count do
               begin
-                j := timer_GetTicks;
                 if currTimer^.Active then
                   begin
-                    if j > currTimer^.LastTick + currTimer^.Interval Then
+                    j := timer_GetTicks;
+                    while j >= currTimer^.LastTick + currTimer^.Interval do
                       begin
                         currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
                         currTimer^.OnTimer;
+                        if j < timer_GetTicks - currTimer^.Interval Then
+                          break
+                        else
+                          j := timer_GetTicks;
                       end;
                   end else currTimer^.LastTick := timer_GetTicks;
 

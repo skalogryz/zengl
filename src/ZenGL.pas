@@ -207,6 +207,7 @@ exports
   pr2d_Rect                name prefix + 'pr2d_Rect',
   pr2d_Circle              name prefix + 'pr2d_Circle',
   pr2d_Ellipse             name prefix + 'pr2d_Ellipse',
+  pr2d_TriList             name prefix + 'pr2d_TriList',
 
   // Sprite Engine 2D
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
