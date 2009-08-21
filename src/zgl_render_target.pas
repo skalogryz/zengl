@@ -291,8 +291,7 @@ begin
         PBufferdAttr[ 10 ] := AGL_DEPTH_SIZE;
         PBufferdAttr[ 11 ] := ogl_zDepth;
         PBufferdAttr[ 12 ] := AGL_DOUBLEBUFFER;
-        PBufferdAttr[ 13 ] := AGL_FULLSCREEN;
-        i := 14;
+        i := 13;
         if ogl_Stencil > 0 Then
           begin
             PBufferdAttr[ i     ] := AGL_STENCIL_SIZE;

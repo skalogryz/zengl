@@ -493,6 +493,8 @@ begin
 {$IFDEF DARWIN}
   SelectWindow( wnd_Handle );
   ShowWindow( wnd_Handle );
+  if wnd_FullScreen Then
+    wnd_SetPos( 0, 0 );
 {$ENDIF}
 end;
 

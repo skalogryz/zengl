@@ -25,9 +25,6 @@ unit zgl_opengl_all;
 {$IFDEF LINUX_OR_DARWIN}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
-{$IFDEF DARWIN}
-  {$LINKFRAMEWORK OpenGL}
-{$ENDIF}
 
 interface
 uses

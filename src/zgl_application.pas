@@ -92,6 +92,7 @@ uses
   zgl_screen,
   zgl_window,
   zgl_opengl,
+  zgl_opengl_all,
   zgl_log,
   zgl_keyboard,
   zgl_mouse,
@@ -174,7 +175,7 @@ begin
       OSProcess;
 
       CanKillTimers := FALSE;
-      {$IFDEF LINUX_OR_DARWIN}
+      {$IFDEF LINUX}
       // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
       if wnd_FullScreen Then
         begin
@@ -634,12 +635,15 @@ begin
             key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState;
+            if wnd_FullScreen Then
+              scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
           end;
         kEventWindowDeactivated:
           begin
-            if wnd_FullScreen Then exit;
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
+            if wnd_FullScreen Then
+              scr_Reset;
           end;
         kEventWindowCollapsed:
           begin

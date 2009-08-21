@@ -105,6 +105,8 @@ var
   scr_DesktopW : Integer;
   scr_DesktopH : Integer;
   scr_Settings : CFDictionaryRef;
+  scr_EraseClr : RGBColor;
+  scr_Restore  : MacOSAll.Ptr;
   {$ENDIF}
 
 implementation
@@ -360,7 +362,7 @@ begin
 {$ENDIF}
 {$IFDEF DARWIN}
   CGDisplaySwitchToMode( scr_Display, scr_Desktop );
-  CGDisplayRelease( scr_Display );
+  //CGDisplayRelease( scr_Display );
 {$ENDIF}
 end;
 
@@ -423,7 +425,10 @@ procedure scr_SetOptions;
     r : Integer;
   {$ENDIF}
   {$IFDEF DARWIN}
-    b : Integer;
+    b  : Integer;
+    dW : SInt16;
+    dH : SInt16;
+    nw : WindowRef;
   {$ENDIF}
 begin
   ogl_Width      := Width;
@@ -528,24 +533,31 @@ begin
       scr_Reset;
 {$ENDIF}
 {$IFDEF DARWIN}
-  if scr_Refresh = REFRESH_DEFAULT Then
-    scr_Refresh := REFRESH_MAXIMUM;
+  //CGDisplayCapture( scr_Display );
+  if scr_Refresh <> 0 Then
+    begin
+      scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display,
+                                                                    scr_BPP,
+                                                                    scr_Width, scr_Height,
+                                                                    scr_Refresh,
+                                                                    b );
+      scr_Refresh := b;
+    end;
+  if scr_Refresh = 0 Then
+    scr_Settings := CGDisplayBestModeForParameters( scr_Display, scr_BPP, scr_Width, scr_Height, b );
+
+  if b = 1 Then
+    CGDisplaySwitchToMode( scr_Display, scr_Settings )
+  else
+    begin
+      u_Warning( 'Cannot set fullscreen mode.' );
+      wnd_FullScreen := FALSE;
+    end;
 
   if wnd_FullScreen Then
-    begin
-      if Assigned( aglGetDrawable( ogl_Context ) ) Then
-        aglSetDrawable( ogl_Context, nil );
-      if aglSetFullScreen( ogl_Context, scr_Width, scr_Height, scr_Refresh, 0 ) = GL_FALSE Then
-        begin
-          u_Warning( 'Cannot set fullscreen mode.' );
-          wnd_FullScreen := FALSE;
-        end;
-    end else
-      begin
-        aglSetDrawable( ogl_Context, nil );
-        aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) );
-        scr_Reset;
-      end;
+    HideMenuBar
+  else
+    ShowMenuBar;
 {$ENDIF}
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
@@ -606,7 +618,8 @@ procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
 {$IFDEF DARWIN}
-  aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
+  if Assigned( ogl_Context ) Then
+    aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
 {$ENDIF}
 end;
 

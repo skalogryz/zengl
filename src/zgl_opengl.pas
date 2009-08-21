@@ -303,8 +303,7 @@ begin
     ogl_Attr[ 9  ] := AGL_DOUBLEBUFFER;
     ogl_Attr[ 10 ] := AGL_DEPTH_SIZE;
     ogl_Attr[ 11 ] := ogl_zDepth;
-    ogl_Attr[ 12 ] := AGL_FULLSCREEN;
-    i := 13;
+    i := 12;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := AGL_STENCIL_SIZE;
@@ -350,19 +349,11 @@ begin
       u_Error( 'Cannot create OpenGL context' );
       exit;
     end;
-  if wnd_FullScreen Then
+  if aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) ) = GL_FALSE Then
     begin
-      if aglSetFullScreen( ogl_Context, scr_Width, scr_Height, scr_Refresh, 0 ) = GL_FALSE Then
-        begin
-          u_Error( 'Cannot set FullScreen' );
-          exit;
-        end;
-    end else
-      if aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) ) = GL_FALSE Then
-        begin
-          u_Error( 'Cannot set Drawable' );
-          exit;
-        end;
+      u_Error( 'Cannot set Drawable' );
+      exit;
+    end;
   if aglSetCurrentContext( ogl_Context ) = GL_FALSE Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
