@@ -218,14 +218,13 @@ end;
 procedure sengine2d_Sort;
   var
     Lo, Hi, Mid : Integer;
-    List : array of zglPSprite2D;
-    T  : zglPSprite2D;
+    T : zglPSprite2D;
 begin
   Lo   := iLo;
   Hi   := iHi;
-  List := sengine2d.List;
-  Mid  := List[ ( Lo + Hi ) shr 1 ].Layer;
+  Mid  := sengine2d.List[ ( Lo + Hi ) shr 1 ].Layer;
 
+  with sengine2d^ do
   repeat
     while List[ Lo ].Layer < Mid do INC( Lo );
     while List[ Hi ].Layer > Mid do DEC( Hi );
@@ -246,14 +245,13 @@ end;
 procedure sengine2d_SortID;
   var
     Lo, Hi, Mid : Integer;
-    List : array of zglPSprite2D;
-    T  : zglPSprite2D;
+    T : zglPSprite2D;
 begin
   Lo   := iLo;
   Hi   := iHi;
-  List := sengine2d.List;
-  Mid  := List[ ( Lo + Hi ) shr 1 ].ID;
+  Mid  := sengine2d.List[ ( Lo + Hi ) shr 1 ].ID;
 
+  with sengine2d^ do
   repeat
     while List[ Lo ].ID < Mid do INC( Lo );
     while List[ Hi ].ID > Mid do DEC( Hi );
@@ -275,3 +273,4 @@ initialization
   sengine2d := @_sengine;
 
 end.
+
