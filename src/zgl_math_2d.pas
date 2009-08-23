@@ -30,6 +30,10 @@ const
   rad2deg = 57.29578049;
   deg2rad = 0.017453292;
 
+  ORIENTATION_LEFT  = -1;
+  ORIENTATION_RIGHT = 1;
+  ORIENTATION_ZERO  = 0;
+
 type
   zglPPoint2D = ^zglTPoint2D;
   zglTPoint2D = record
@@ -66,6 +70,7 @@ function  m_Sin( Angle : Integer ) : Single;
 function  m_Distance( const x1, y1, x2, y2 : Single ) : Single;
 function  m_FDistance( const x1, y1, x2, y2 : Single ) : Single;
 function  m_Angle( const x1, y1, x2, y2 : Single ) : Single;
+function  m_Orientation( const x, y, x1, y1, x2, y2 : Single ) : Integer;
 
 procedure tess_Triangulate( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
 procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
@@ -169,6 +174,21 @@ begin
         Result := 360 - ArcTan2( dx, dy )
       else                                { 1st quad }
         Result := ArcTan2( dx, dy )
+end;
+
+function m_Orientation;
+  var
+    Orientation : Single;
+begin
+  Orientation := ( x2 - x1 ) * ( y - y1 ) - ( x - x1 ) * ( y2 - y1 );
+
+  if Orientation > 0 Then
+    Result := ORIENTATION_RIGHT
+  else
+    if Orientation < 0 Then
+      Result := ORIENTATION_LEFT
+    else
+      Result := ORIENTATION_ZERO;
 end;
 
 // GLU Triangulation

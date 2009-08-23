@@ -261,6 +261,7 @@ exports
   m_Distance               name prefix + 'm_Distance',
   m_FDistance              name prefix + 'm_FDistance',
   m_Angle                  name prefix + 'm_Angle',
+  m_Orientation            name prefix + 'm_Orientation',
 
   tess_Triangulate         name prefix + 'tess_Triangulate',
   tess_AddHole             name prefix + 'tess_AddHole',
@@ -268,6 +269,7 @@ exports
 
   // Collision 2D
   col2d_PointInRect        name prefix + 'col2d_PointInRect',
+  col2d_PointInTriangle    name prefix + 'col2d_PointInTriangle',
   col2d_PointInCircle      name prefix + 'col2d_PointInCircle',
   col2d_Line               name prefix + 'col2d_Line',
   col2d_LineVsRect         name prefix + 'col2d_LineVsRect',

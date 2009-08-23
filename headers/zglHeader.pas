@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.36               }
-{ date:    21.08.09             }
+{ version: 0.1.37               }
+{ date:    23.08.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -986,19 +986,27 @@ var
   snd_ResumeFile        : procedure;
 
 // MATH
-  m_Cos       : function( Angle : Integer ) : Single;
-  m_Sin       : function( Angle : Integer ) : Single;
-  m_Distance  : function( const x1, y1, x2, y2 : Single ) : Single;
-  m_FDistance : function( const x1, y1, x2, y2 : Single ) : Single;
-  m_Angle     : function( const x1, y1, x2, y2 : Single ) : Single;
+const
+  ORIENTATION_LEFT  = -1;
+  ORIENTATION_RIGHT = 1;
+  ORIENTATION_ZERO  = 0;
+
+var
+  m_Cos         : function( Angle : Integer ) : Single;
+  m_Sin         : function( Angle : Integer ) : Single;
+  m_Distance    : function( const x1, y1, x2, y2 : Single ) : Single;
+  m_FDistance   : function( const x1, y1, x2, y2 : Single ) : Single;
+  m_Angle       : function( const x1, y1, x2, y2 : Single ) : Single;
+  m_Orientation : function( const x, y, x1, y1, x2, y2 : Single ) : Integer;
 
   tess_Triangulate : procedure( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
   tess_AddHole     : procedure( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
   tess_GetData     : function( var TriPoints : zglPPoints2D ) : Integer;
 
 // COLLISION 2D
-  col2d_PointInRect   : function( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
-  col2d_PointInCircle : function( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
+  col2d_PointInRect     : function( const X, Y : Single; const Rect : zglTRect ) : Boolean;
+  col2d_PointInTriangle : function( const X, Y : Single; const p1, p2, p3 : zglTPoint2D ) : Boolean;
+  col2d_PointInCircle   : function( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
   // line 2d
   col2d_Line           : function( const A, B : zglTLine; ColPoint : zglPPoint2D ) : Boolean;
   col2d_LineVsRect     : function( const A : zglTLine; const Rect : zglTRect; ColPoint : zglPPoint2D ) : Boolean;
@@ -1268,12 +1276,14 @@ begin
       m_Distance := dlsym( zglLib, 'm_Distance' );
       m_FDistance := dlsym( zglLib, 'm_FDistance' );
       m_Angle := dlsym( zglLib, 'm_Angle' );
+      m_Orientation := dlsym( zglLib, 'm_Orientation' );
 
       tess_Triangulate := dlsym( zglLib, 'tess_Triangulate' );
       tess_AddHole := dlsym( zglLib, 'tess_AddHole' );
       tess_GetData := dlsym( zglLib, 'tess_GetData' );
 
       col2d_PointInRect := dlsym( zglLib, 'col2d_PointInRect' );
+      col2d_PointInTriangle := dlsym( zglLib, 'col2d_PointInriangle' );
       col2d_PointInCircle := dlsym( zglLib, 'col2d_PointInCircle' );
       col2d_Line := dlsym( zglLib, 'col2d_Line' );
       col2d_LineVsRect := dlsym( zglLib, 'col2d_LineVsRect' );
