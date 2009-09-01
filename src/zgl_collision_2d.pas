@@ -19,6 +19,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
+// Некоторые функции здесь записаны весьма страшно и в лоб :)
 unit zgl_collision_2d;
 
 {$I zgl_config.cfg}
@@ -141,23 +142,54 @@ function col2d_LineVsRect;
   var
     L : zglTLine;
 begin
-  Result := col2d_PointInRect( A.x0, A.y0, Rect ) or col2d_PointInRect( A.x1, A.y1, Rect );
-  if not Result Then
+  if not Assigned( ColPoint ) Then
     begin
-      L.x0 := Rect.X;
-      L.y0 := Rect.Y;
-      L.x1 := Rect.X + Rect.W;
-      L.y1 := Rect.Y + Rect.H;
-      Result := col2d_Line( A, L, ColPoint );
+      Result := col2d_PointInRect( A.x0, A.y0, Rect ) or col2d_PointInRect( A.x1, A.y1, Rect );
       if not Result Then
         begin
           L.x0 := Rect.X;
-          L.y0 := Rect.Y + Rect.H;
+          L.y0 := Rect.Y;
           L.x1 := Rect.X + Rect.W;
-          L.y1 := Rect.Y;
+          L.y1 := Rect.Y + Rect.H;
           Result := col2d_Line( A, L, ColPoint );
+          if not Result Then
+            begin
+              L.x0 := Rect.X;
+              L.y0 := Rect.Y + Rect.H;
+              L.x1 := Rect.X + Rect.W;
+              L.y1 := Rect.Y;
+              Result := col2d_Line( A, L, ColPoint );
+            end;
         end;
-    end;
+    end else
+      begin
+        L.x0 := Rect.X;
+        L.y0 := Rect.Y;
+        L.x1 := Rect.X + Rect.W;
+        L.y1 := Rect.Y;
+        Result := col2d_Line( A, L, ColPoint );
+        if Result Then exit;
+
+        L.x0 := Rect.X + Rect.W;
+        L.y0 := Rect.Y;
+        L.x1 := Rect.X + Rect.W;
+        L.y1 := Rect.Y + Rect.H;
+        Result := col2d_Line( A, L, ColPoint );
+        if Result Then exit;
+
+        L.x0 := Rect.X + Rect.W;
+        L.y0 := Rect.Y + Rect.H;
+        L.x1 := Rect.X;
+        L.y1 := Rect.Y + Rect.H;
+        Result := col2d_Line( A, L, ColPoint );
+        if Result Then exit;
+
+        L.x0 := Rect.X;
+        L.y0 := Rect.Y;
+        L.x1 := Rect.X;
+        L.y1 := Rect.Y + Rect.H;
+        Result := col2d_Line( A, L, ColPoint );
+      end;
 end;
 
 function col2d_LineVsCircle;
