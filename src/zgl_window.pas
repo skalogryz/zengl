@@ -433,7 +433,7 @@ begin
 {$IFDEF WIN32}
   if wnd_Handle <> 0 Then
     if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, HWND_NOTOPMOST, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
+      SetWindowPos( wnd_Handle, HWND_BOTTOM, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
     else
       SetWindowPos( wnd_Handle, HWND_TOPMOST, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
 {$ENDIF}
