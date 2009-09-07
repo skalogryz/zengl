@@ -60,6 +60,7 @@ var
   ogl_CropY  : Integer;
   ogl_CropW  : Integer;
   ogl_CropH  : Integer;
+  ogl_CropR  : Integer;
 
   ogl_Extensions    : AnsiString;
   ogl_3DAccelerator : Boolean;

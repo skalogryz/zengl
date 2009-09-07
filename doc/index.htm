@@ -33,6 +33,7 @@
       <LI><a class='b' href='#zgl_sprite_2d'><b>zgl_sprite_2d.pas</b></a></LI>
       <LI><a class='b' href='#zgl_font'><b>zgl_font.pas</b></a></LI>
       <LI><a class='b' href='#zgl_text'><b>zgl_text.pas</b></a></LI>
+      <LI><a class='b' href='#zgl_sound'><b>zgl_sound.pas</b></a></LI>
     </UL>
 
   <!--zgl_main.pas-->
@@ -52,7 +53,7 @@
       <LI><b>SND_FORMAT_EXTENSION</b> - начинает регистрацию поддержки нового формата аудио-файла</LI>
       <LI><b>SND_FORMAT_FILE_LOADER</b> - регистрирует функцию загрузки аудио-файла из файла</LI>
       <LI><b>SND_FORMAT_MEM_LOADER</b> - регистрирует функцию загрузки аудио-файла из памяти</LI>
-      <LI><b>SND_FORMAT_STREAM</b> - регистрирует структуру zglTSoundStream, в которой указаны формат, функции декодинга потока и пр. параметры</LI>
+      <LI><b>SND_FORMAT_DECODER</b> - регистрирует структуру zglTSoundDecoder, в которой указаны формат, функции декодинга потока и пр.</LI>
       <!--LI><b>WIDGET_TYPE_ID</b> - начинает регистрацию нового типа виджета</LI>
       <LI><b>WIDGET_FILL_DESC</b> - регистрирует функцию, которая будет заполнять структуру описания виджета</LI>
       <LI><b>WIDGET_ONDRAW</b> - регистрирует функцию отрисовки виджета</LI>
@@ -177,6 +178,7 @@
     <!--scr_CorrectResolution-->
     <LI><a name='scr_CorrectResolution'>
     <div class='code'><b>procedure</b> scr_CorrectResolution( <b>const</b> Width, Height : WORD );</div>
+    Установить коррекцию пропорций изображения относительно разрешения <b>Width</b> на <b>Height</b>.
     </LI><br>
 
     <!--scr_SetVSync-->
@@ -955,6 +957,14 @@
     <div align='justify'>
     Рисует спрайт используя текстуру <b>Texture</b> в координатах <b>X</b>, <b>Y</b>, размерами <b>W</b>(ширина) и <b>H</b>(высота), градусом поворота <b>Angle</b> и альфой <b>Alpha</b>. <b>CutRect</b> указывает какую часть текстуры использовать.
     </div>
+    </LI><br>
+
+    <!--tiles2d_Draw-->
+    <LI><a name='tiles2d_Draw'>
+    <div class='code'><b>procedure</b> tiles2d_Draw( <b>const</b> Texture : zglPTexture; <b>const</b> X, Y : Single; <b>const</b> Tiles : zglTTiles2D; <b>const</b> Alpha : Byte = 255; <b>const</b> FX : DWORD = FX_BLEND );</div>
+    <div align='justify'>
+    Рисует в координатах <b>X</b>, <b>Y</b> сетку спрайтов с альфой <b>Alpha</b>. Структура <b>Tiles</b> содержит параметры указывающие количество "ячеек" по ширине и высоте, её размеры и используемый кадр в текстуре <b>Texture</b>.
+    </div>
     </LI>
   </UL>
   <div align='left'><a class='b' href='#index'>оглавление</a></div>
@@ -1065,6 +1075,111 @@
     <div class='code'><b>function</b> text_GetWidth( <b>const</b> Font : zglPFont; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Step : Single = 0.0 ) : Single;</div>
     <div align='justify'>
     Возвращает ширину в пикселах для текста <b>Text</b>, используя данные о шрифте <b>Font</b> и размер отступа между символами <b>Step</b>. Если в тексте содержатся символы переноса строки, то возвращается ширина наиболее длинной строки.
+    </div>
+    </LI>
+  </UL>
+  <div align='left'><a class='b' href='#index'>оглавление</a></div>
+  </p>
+
+  <!--zgl_sound.pas-->
+  <p><hr>
+  <a name='zgl_sound'><h2 style='color: #DD0000'>zgl_sound.pas</h2>
+  <UL type='disc'>
+    <!--snd_Init-->
+    <LI><a name='snd_Init'>
+    <div class='code'><b>function</b> snd_Init : Boolean;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_Free-->
+    <LI><a name='snd_Free'>
+    <div class='code'><b>procedure</b> snd_Free;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_Add-->
+    <LI><a name='snd_Add'>
+    <div class='code'><b>function</b> snd_Add( <b>const</b> SourceCount : Integer ) : zglPSound;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_Del-->
+    <LI><a name='snd_Del'>
+    <div class='code'><b>procedure</b> snd_Del( <b>var</b> Sound : zglPSound );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_LoadFromFile-->
+    <LI><a name='snd_LoadFromFile'>
+    <div class='code'><b>function</b> snd_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b>; <b>const</b> SourceCount : Integer = 8 ) : zglPSound;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_LoadFromMemory-->
+    <LI><a name='snd_LoadFromMemory'>
+    <div class='code'><b>function</b> snd_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>AnsiString</b>; <b>const</b> SourceCount : Integer = 8 ) : zglPSound;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_Play-->
+    <LI><a name='snd_Play'>
+    <div class='code'><b>function</b> snd_Play( <b>const</b> Sound : zglPSound; <b>const</b> Loop : Boolean = FALSE; <b>const</b> X : Single = 0; <b>const</b> Y : Single = 0; <b>const</b> Z : Single = 0 ) : Integer;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_Stop-->
+    <LI><a name='snd_Stop'>
+    <div class='code'><b>procedure</b> snd_Stop( <b>const</b> Sound : zglPSound; <b>const</b> Source : Integer );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_SetVolume-->
+    <LI><a name='snd_SetVolume'>
+    <div class='code'><b>procedure</b> snd_SetVolume( <b>const</b> Sound : zglPSound; <b>const</b> Volume : Single; <b>const</b> ID : Integer );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_SetFrequency-->
+    <LI><a name='snd_SetFrequency'>
+    <div class='code'><b>procedure</b> snd_SetFrequency( <b>const</b> Sound : zglPSound; <b>const</b> Frequency, ID : Integer );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_SetFrequencyCoeff-->
+    <LI><a name='snd_SetFrequencyCoeff'>
+    <div class='code'><b>procedure</b> snd_SetFrequencyCoeff( <b>const</b> Sound : zglPSound; <b>const</b> Coefficient : Single; <b>const</b> ID : Integer );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_PlayFile-->
+    <LI><a name='snd_PlayFile'>
+    <div class='code'><b>procedure</b> snd_PlayFile( <b>const</b> FileName : <b>AnsiString</b>; <b>const</b> Loop : Boolean = FALSE );</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_StopFile-->
+    <LI><a name='snd_StopFile'>
+    <div class='code'><b>procedure</b> snd_StopFile;</div>
+    <div align='justify'>
+    </div>
+    </LI><br>
+
+    <!--snd_ResumeFile-->
+    <LI><a name='snd_ResumeFile'>
+    <div class='code'><b>procedure</b> snd_ResumeFile;</div>
+    <div align='justify'>
     </div>
     </LI>
   </UL>

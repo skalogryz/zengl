@@ -220,6 +220,7 @@ exports
   ssprite2d_Draw           name prefix + 'ssprite2d_Draw',
   asprite2d_Draw           name prefix + 'asprite2d_Draw',
   csprite2d_Draw           name prefix + 'csprite2d_Draw',
+  tiles2d_Draw             name prefix + 'tiles2d_Draw',
 
   // Text
   font_Add                 name prefix + 'font_Add',

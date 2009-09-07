@@ -39,7 +39,7 @@ procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const A
 procedure pr2d_Rect( const X, Y, W, H : Single; const Color : DWORD; const Alpha : Byte = 255; const FX : DWORD = 0 );
 procedure pr2d_Circle( const X, Y, Radius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
 procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-procedure pr2d_TriList( const Texture : zglPTexture; const TriList : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 implementation
 uses
@@ -111,9 +111,9 @@ begin
     end;
 
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-  if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+  if FX and FX2D_VCA > 0 Then glColor4ubv( @FX2D_VCA1[ 0 ] );
   gl_Vertex2f( _x1, _y1 );
-  if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+  if FX and FX2D_VCA > 0 Then glColor4ubv( @FX2D_VCA2[ 0 ] );
   gl_Vertex2f( _x2, _y2 );
 
   if not b2d_Started Then
@@ -133,21 +133,41 @@ procedure pr2d_Rect;
 begin
  if FX and PR2D_FILL > 0 Then
    begin
-      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX_BLEND, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND, nil ) Then
         begin
           glEnable( GL_BLEND );
-          glBegin( GL_QUADS );
+          glBegin( GL_TRIANGLES );
         end;
 
-      glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-      gl_Vertex2f( X,     Y );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-      gl_Vertex2f( X + W, Y );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
-      gl_Vertex2f( X + W, Y + H );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
-      gl_Vertex2f( X,     Y + H );
+      if FX and FX2D_VCA > 0 Then
+        begin
+          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          gl_Vertex2f( X,     Y );
+
+          glColor4ubv( @FX2D_VCA2[ 0 ] );
+          gl_Vertex2f( X + W, Y );
+
+          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          gl_Vertex2f( X + W, Y + H );
+
+          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          gl_Vertex2f( X + W, Y + H );
+
+          glColor4ubv( @FX2D_VCA4[ 0 ] );
+          gl_Vertex2f( X,     Y + H );
+
+          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          gl_Vertex2f( X,     Y );
+        end else
+          begin
+            glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
+            gl_Vertex2f( X,     Y );
+            gl_Vertex2f( X + W, Y );
+            gl_Vertex2f( X + W, Y + H );
+            gl_Vertex2f( X + W, Y + H );
+            gl_Vertex2f( X,     Y + H );
+            gl_Vertex2f( X,     Y );
+          end;
 
       if not b2d_Started Then
         begin
@@ -162,23 +182,41 @@ begin
           glBegin( GL_LINES );
         end;
 
-      glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-      gl_Vertex2f( X + 0.5,     Y + 0.5 );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
-      gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+      if FX and FX2D_VCA > 0 Then
+        begin
+          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          gl_Vertex2f( X + 0.5,     Y + 0.5 );
 
-      gl_Vertex2f( X + W - 0.5, Y + 0.5 );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
-      gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+          glColor4ubv( @FX2D_VCA2[ 0 ] );
+          gl_Vertex2f( X + W - 0.5, Y + 0.5 );
 
-      gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
-      gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+          gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
 
-      gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
-      if FX and FX2D_VCA > 0 Then glColor4ub( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
-      gl_Vertex2f( X + 0.5,     Y + 0.5 );
+          gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+          glColor4ubv( @FX2D_VCA4[ 0 ] );
+          gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+
+          gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          gl_Vertex2f( X + 0.5,     Y + 0.5 );
+        end else
+          begin
+            glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
+            gl_Vertex2f( X + 0.5,     Y + 0.5 );
+
+            gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+
+            gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+            gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+
+            gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+            gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+
+            gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+            gl_Vertex2f( X + 0.5,     Y + 0.5 );
+          end;
 
       if not b2d_Started Then
         begin
@@ -377,13 +415,21 @@ begin
 
   if Assigned( Texture ) Then
     begin
-      w := 1 / ( Texture.Width / Texture.U );
-      h := 1 / ( Texture.Height / Texture.V );
-      for i := iLo to iHi do
+      if not Assigned( TexCoords ) Then
         begin
-          glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
-          gl_Vertex2fv( @TriList[ i ] );
-        end;
+          w := 1 / ( Texture.Width / Texture.U );
+          h := 1 / ( Texture.Height / Texture.V );
+          for i := iLo to iHi do
+            begin
+              glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
+              gl_Vertex2fv( @TriList[ i ] );
+            end;
+        end else
+          for i := iLo to iHi do
+            begin
+              glTexCoord2fv( @TexCoords[ i ] );
+              gl_Vertex2fv( @TriList[ i ] );
+            end;
     end else
       for i := iLo to iHi do
         gl_Vertex2fv( @TriList[ i ] );

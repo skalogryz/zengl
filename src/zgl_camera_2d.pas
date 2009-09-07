@@ -44,6 +44,11 @@ procedure cam2d_Vertex2f( X, Y : Single ); stdcall;
 procedure cam2d_Vertex2fv( v : Pointer ); stdcall;
 
 var
+  cam2dZoomX    : Single;
+  cam2dZoomY    : Single;
+  cam2dAngle    : Single;
+  cam2dCos      : Single;
+  cam2dSin      : Single;
   cam2dGlobal   : zglPCamera2D = nil;
   constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
 
@@ -70,7 +75,6 @@ end;
 
 procedure cam2d_Vertex2f;
   var
-    sa, ca : Single;
     Xa, Ya : Single;
 begin
   if cam2dGlobal.Zoom.X = 1 Then
@@ -85,10 +89,14 @@ begin
 
   if cam2dGlobal.Angle <> 0 Then
     begin
-      sa := Sin( cam2dGlobal.Angle * deg2rad );
-      ca := Cos( cam2dGlobal.Angle * deg2rad );
-      Xa := ogl_Width  / 2 + ( X - ogl_Width / 2 ) * ca - ( Y - ogl_Height / 2 ) * sa;
-      Ya := ogl_Height / 2 + ( X - ogl_Width / 2 ) * sa + ( Y - ogl_Height / 2 ) * ca;
+      if cam2dGlobal.Angle <> cam2dAngle Then
+        begin
+          cam2dAngle := cam2dGlobal.Angle;
+          cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
+          cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
+        end;
+      Xa := ogl_Width  / 2 + ( X - ogl_Width / 2 ) * cam2dCos - ( Y - ogl_Height / 2 ) * cam2dSin;
+      Ya := ogl_Height / 2 + ( X - ogl_Width / 2 ) * cam2dSin + ( Y - ogl_Height / 2 ) * cam2dCos;
       glVertex2f( Xa, Ya );
     end else
       glVertex2f( X, Y );
@@ -97,7 +105,6 @@ end;
 procedure cam2d_Vertex2fv;
   var
     v2  : array[ 0..1 ] of Single;
-    sa, ca : Single;
     v2a : array[ 0..1 ] of Single;
 begin
   if cam2dGlobal.Zoom.X = 1 Then
@@ -113,10 +120,14 @@ begin
 
   if cam2dGlobal.Angle <> 0 Then
     begin
-      sa := Sin( cam2dGlobal.Angle * deg2rad );
-      ca := Cos( cam2dGlobal.Angle * deg2rad );
-      v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * ca - ( v2[ 1 ] - ogl_Height / 2 ) * sa;
-      v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * sa + ( v2[ 1 ] - ogl_Height / 2 ) * ca;
+      if cam2dGlobal.Angle <> cam2dAngle Then
+        begin
+          cam2dAngle := cam2dGlobal.Angle;
+          cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
+          cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
+        end;
+      v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * cam2dCos - ( v2[ 1 ] - ogl_Height / 2 ) * cam2dSin;
+      v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * cam2dSin + ( v2[ 1 ] - ogl_Height / 2 ) * cam2dCos;
       glVertex2fv( @v2a[ 0 ] );
     end else
       glVertex2fv( @v2[ 0 ] );

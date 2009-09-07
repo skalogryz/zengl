@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.37               }
-{ date:    23.08.09             }
+{ date:    07.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -583,7 +583,7 @@ var
   pr2d_Rect    : procedure( const X, Y, W, H : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = 0 );
   pr2d_Circle  : procedure( const X, Y, Radius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
   pr2d_Ellipse : procedure( const X, Y, xRadius, yRadius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-  pr2d_TriList : procedure( const Texture : zglPTexture; const TriList : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  pr2d_TriList : procedure( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 // Sprites 2D
 type
@@ -615,6 +615,18 @@ type
     OnFree  : procedure( const Sprite : zglPSprite2D );
   end;
 
+type
+  zglPTiles2D = ^zglTTiles2D;
+  zglTTiles2D = record
+    Count : record
+      X, Y : Integer;
+            end;
+    Size  : record
+      W, H : Single;
+            end;
+    Tiles : array of array of Integer;
+  end;
+
 var
   sengine2d_AddSprite : function( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   sengine2d_DelSprite : procedure( const ID : Integer );
@@ -625,6 +637,7 @@ var
   ssprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   asprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   csprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  tiles2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Tiles : zglTTiles2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 // Text
 type
@@ -976,8 +989,8 @@ var
   snd_Del               : procedure( var Sound : zglPSound );
   snd_LoadFromFile      : function( const FileName : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
   snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
-  snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
-  snd_Stop              : procedure( const Sound : zglPSound; const Source : Integer );
+  snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
+  snd_Stop              : procedure( const Sound : zglPSound; const ID : Integer );
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
   snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
   snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
@@ -1239,6 +1252,7 @@ begin
       ssprite2d_Draw := dlsym( zglLib, 'ssprite2d_Draw' );
       asprite2d_Draw := dlsym( zglLib, 'asprite2d_Draw' );
       csprite2d_Draw := dlsym( zglLib, 'csprite2d_Draw' );
+      tiles2d_Draw := dlsym( zglLib, 'tiles2d_Draw' );
 
       font_Add := dlsym( zglLib, 'font_Add' );
       font_Del := dlsym( zglLib, 'font_Del' );

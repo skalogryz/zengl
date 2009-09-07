@@ -4,10 +4,10 @@ FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../../../headers/ -Fu../../../src/ -Fu../../../src/PasJPEG
 OUTPUT  = ../../bin/
 TMP     = ../../tmp/
-UNIT    = demo02.pas
-TARGET  = demo02
-TARGETW = demo02.exe
-TARGETM = demo02
+UNIT    = demo03.pas
+TARGET  = demo03
+TARGETW = demo03.exe
+TARGETM = demo03
 
 all: clean
 	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX

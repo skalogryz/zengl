@@ -122,8 +122,8 @@ procedure snd_Del( var Sound : zglPSound );
 function  snd_LoadFromFile( const FileName : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
 function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
 
-function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
-procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
+function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
+procedure snd_Stop( const Sound : zglPSound; const ID : Integer );
 procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const ID : Integer );
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );
 procedure snd_SetFrequencyCoeff( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
@@ -528,15 +528,15 @@ begin
 
   if Assigned( Sound ) Then
     begin
-      if Source = SND_ALL Then
+      if ID = SND_ALL Then
         begin
           for i := 0 to Sound.sCount - 1 do
             Stop( Sound, i );
         end else
-          if Source >= 0 Then
-            Stop( Sound, Source );
+          if ID >= 0 Then
+            Stop( Sound, ID );
     end else
-      if Source = SND_ALL Then
+      if ID = SND_ALL Then
         begin
           snd := managerSound.First.Next;
           for i := 0 to managerSound.Count.Items - 1 do

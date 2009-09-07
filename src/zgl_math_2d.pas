@@ -117,15 +117,21 @@ end;
 
 function m_Cos;
 begin
-  while Angle > 360 do Angle := Angle - 360;
-  while Angle < 0   do Angle := Angle + 360;
+  if Angle > 360 Then
+    DEC( Angle, ( Angle div 360 ) * 360 )
+  else
+    if Angle < 0 Then
+      INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
   Result := CosTable[ Angle ];
 end;
 
 function m_Sin;
 begin
-  while Angle > 360 do Angle := Angle - 360;
-  while Angle < 0   do Angle := Angle + 360;
+  if Angle > 360 Then
+    DEC( Angle, ( Angle div 360 ) * 360 )
+  else
+    if Angle < 0 Then
+      INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
   Result := SinTable[ Angle ];
 end;
 

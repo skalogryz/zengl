@@ -117,6 +117,7 @@ uses
   zgl_window,
   zgl_opengl,
   zgl_opengl_simple,
+  zgl_camera_2d,
   zgl_log,
   zgl_utils;
 
@@ -593,6 +594,10 @@ begin
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
   SetCurrentMode;
+
+  cam2dZoomX := cam2dGlobal.Zoom.X;
+  cam2dZoomY := cam2dGlobal.Zoom.Y;
+  ogl_CropR := Round( sqrt( sqr( ogl_CropW / cam2dZoomX ) + sqr( ogl_CropH / cam2dZoomY ) ) ) div 2;
 end;
 
 procedure scr_SetViewPort;

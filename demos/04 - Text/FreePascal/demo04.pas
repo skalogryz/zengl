@@ -1,10 +1,11 @@
-program demo03;
+program demo04;
 
 uses
   zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
+  zgl_keyboard,
   zgl_render_2d,
   zgl_fx,
   zgl_primitives_2d,
@@ -78,8 +79,16 @@ begin
   batch2d_End;
 end;
 
+procedure Proc;
+begin
+  if key_Press( K_ESCAPE ) Then zgl_Exit;
+  key_ClearState;
+end;
+
 Begin
   randomize;
+
+  timer_Add( @Proc, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
@@ -88,7 +97,7 @@ Begin
   // следует указать использования этой кодировки
   zgl_Enable( APP_USE_UTF8 );
 
-  wnd_SetCaption( '03 - Text' );
+  wnd_SetCaption( '04 - Text' );
 
   wnd_ShowCursor( TRUE );
 

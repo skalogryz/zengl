@@ -322,6 +322,7 @@ type
   procedure glDepthMask(flag: GLboolean); stdcall; external libGL;
   // Color
   procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGL;
+  procedure glColor4ubv(v: PGLubyte); stdcall; external libGL;
   procedure glColor4f(red, green, blue, alpha: GLfloat); stdcall; external libGL;
   // Alpha
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;

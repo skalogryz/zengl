@@ -1,13 +1,13 @@
 FPC     = fpc
-FPC_MAC = /usr/local/lib/fpc/2.2.2/ppc
+FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../../../headers/ -Fu../../../src/ -Fu../../../src/PasJPEG
 OUTPUT  = ../../bin/
 TMP     = ../../tmp/
-UNIT    = demo03.pas
-TARGET  = demo03
-TARGETW = demo03.exe
-TARGETM = demo03
+UNIT    = demo05.pas
+TARGET  = demo05
+TARGETW = demo05.exe
+TARGETM = demo05
 
 all: clean
 	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX

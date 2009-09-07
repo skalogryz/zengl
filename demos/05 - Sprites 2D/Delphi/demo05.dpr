@@ -1,10 +1,11 @@
-program demo04;
+program demo05;
 
 uses
   zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
+  zgl_keyboard,
   zgl_camera_2d,
   zgl_render_2d,
   zgl_fx,
@@ -210,6 +211,9 @@ begin
       if tux[ i ].Pos.X < -96 Then
         tux[ i ].Pos.X := 864;
     end;
+
+  if key_Press( K_ESCAPE ) Then zgl_Exit;
+  key_ClearState;
 end;
 
 Begin
@@ -220,7 +224,7 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  wnd_SetCaption( '04 - Sprites 2D' );
+  wnd_SetCaption( '05 - Sprites 2D' );
 
   wnd_ShowCursor( TRUE );
 

@@ -59,10 +59,10 @@ var
   FX2D_B : Byte = 255;
 
   // FX2D_VCA
-  FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 : Byte;
-  FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 : Byte;
-  FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 : Byte;
-  FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 : Byte;
+  FX2D_VCA1 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  FX2D_VCA2 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  FX2D_VCA3 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  FX2D_VCA4 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
 
   // FX2D_VCHANGE
   FX2D_VX1, FX2D_VX2, FX2D_VX3, FX2D_VX4 : Single;
@@ -109,25 +109,25 @@ end;
 
 procedure fx2d_SetVCA;
 begin
-  FX2D_VR1 :=   C1             shr 16;
-  FX2D_VG1 := ( C1 and $FF00 ) shr 8;
-  FX2D_VB1 :=   C1 and $FF;
-  FX2D_VA1 := A1;
+  FX2D_VCA1[ 0 ] :=   C1             shr 16;
+  FX2D_VCA1[ 1 ] := ( C1 and $FF00 ) shr 8;
+  FX2D_VCA1[ 2 ] :=   C1 and $FF;
+  FX2D_VCA1[ 3 ] := A1;
 
-  FX2D_VR2 :=   C2             shr 16;
-  FX2D_VG2 := ( C2 and $FF00 ) shr 8;
-  FX2D_VB2 :=   C2 and $FF;
-  FX2D_VA2 := A2;
+  FX2D_VCA2[ 0 ] :=   C2             shr 16;
+  FX2D_VCA2[ 1 ] := ( C2 and $FF00 ) shr 8;
+  FX2D_VCA2[ 2 ] :=   C2 and $FF;
+  FX2D_VCA2[ 3 ] := A2;
 
-  FX2D_VR3 :=   C3             shr 16;
-  FX2D_VG3 := ( C3 and $FF00 ) shr 8;
-  FX2D_VB3 :=   C3 and $FF;
-  FX2D_VA3 := A3;
+  FX2D_VCA3[ 0 ] :=   C3             shr 16;
+  FX2D_VCA3[ 1 ] := ( C3 and $FF00 ) shr 8;
+  FX2D_VCA3[ 2 ] :=   C3 and $FF;
+  FX2D_VCA3[ 3 ] := A3;
 
-  FX2D_VR4 :=   C4             shr 16;
-  FX2D_VG4 := ( C4 and $FF00 ) shr 8;
-  FX2D_VB4 :=   C4 and $FF;
-  FX2D_VA4 := A4;
+  FX2D_VCA4[ 0 ] :=   C4             shr 16;
+  FX2D_VCA4[ 1 ] := ( C4 and $FF00 ) shr 8;
+  FX2D_VCA4[ 2 ] :=   C4 and $FF;
+  FX2D_VCA4[ 3 ] := A4;
 end;
 
 procedure fx2d_SetVertexes;
