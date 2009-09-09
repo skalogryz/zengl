@@ -109,6 +109,7 @@ procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSi
 
 var
   managerTexture : zglTTextureManager;
+  zeroTexture    : zglPTexture;
 
 implementation
 uses
@@ -245,7 +246,9 @@ begin
   Result := nil;
   pData  := nil;
 
-  Result := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  if not Assigned( zeroTexture ) Then
+    zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  Result := zeroTexture;
 
   if not file_Exists( FileName ) Then
     begin
@@ -266,7 +269,6 @@ begin
       exit;
     end;
 
-  tex_Del( Result );
   Result         := tex_Add;
   Result.Width   := w;
   Result.Height  := h;
@@ -295,7 +297,9 @@ begin
   Result := nil;
   pData  := nil;
 
-  Result := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  if not Assigned( zeroTexture ) Then
+    zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  Result := zeroTexture;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
@@ -307,7 +311,6 @@ begin
       exit;
     end;
 
-  tex_Del( Result );
   Result         := tex_Add;
   Result.Width   := w;
   Result.Height  := h;
