@@ -32,6 +32,9 @@ procedure batch2d_End;
 procedure batch2d_Flush;
 function  batch2d_Check( const Mode, FX : DWORD; const Texture : zglPTexture ) : Boolean;
 
+function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
+function sprite2d_InScreenCamera( const X, Y, W, H, Angle : Single ) : Boolean;
+
 var
   b2d_Started  : Boolean;
   b2d_New      : Boolean;
@@ -41,10 +44,14 @@ var
   b2dcur_Blend : DWORD;
   b2dcur_Color : DWORD;
   b2dcur_Tex   : zglPTexture;
+  sprite2d_InScreen : function( const X, Y, W, H, Angle : Single ) : Boolean;
 
 implementation
 uses
-  zgl_fx;
+  zgl_screen,
+  zgl_opengl,
+  zgl_fx,
+  zgl_camera_2d;
 
 procedure batch2d_Begin;
 begin
@@ -99,5 +106,52 @@ begin
   Result := b2d_New;
   b2d_New := FALSE;
 end;
+
+function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
+  var
+    cx, cy, crad : Single;
+    sx, sy, srad : Single;
+begin
+  if Angle <> 0 Then
+    Result := ( ( X + W + H / 2 > ogl_CropX ) and ( X - W - H / 2 < ogl_CropX + ogl_CropW / scr_ResCX ) and
+                ( Y + H + W / 2 > ogl_CropY ) and ( Y - W - H / 2 < ogl_CropY + ogl_CropH / scr_ResCY ) )
+  else
+    Result := ( ( X + W > ogl_CropX ) and ( X < ogl_CropX + ogl_CropW / scr_ResCX ) and
+                ( Y + H > ogl_CropY ) and ( Y < ogl_CropY + ogl_CropH / scr_ResCY ) );
+end;
+
+function sprite2d_InScreenCamera( const X, Y, W, H, Angle : Single ) : Boolean;
+  var
+    cx, cy, crad : Single;
+    sx, sy, srad : Single;
+begin
+  if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) or ( cam2dGlobal.Angle <> 0 ) Then
+    begin
+      if ( cam2dZoomX <> cam2dGlobal.Zoom.X ) or ( cam2dZoomY <> cam2dGlobal.Zoom.Y ) Then
+        begin
+          cam2dZoomX := cam2dGlobal.Zoom.X;
+          cam2dZoomY := cam2dGlobal.Zoom.Y;
+          ogl_CropR  := Round( sqrt( sqr( ogl_CropW / cam2dZoomX ) + sqr( ogl_CropH / cam2dZoomY ) ) ) div 2;
+        end;
+      cx   := scr_AddCX / scr_ResCX + ogl_CropX + cam2dGlobal.X + ( ogl_CropW / scr_ResCX ) / 2;
+      cy   := scr_AddCY / scr_ResCY + ogl_CropY + cam2dGlobal.Y + ( ogl_CropH / scr_ResCY ) / 2;
+      crad := ogl_CropR;
+
+      sx   := X + W / 2;
+      sy   := Y + H / 2;
+      srad := ( W + H ) / 2;
+
+      Result := sqr( sx - cx ) + sqr( sy - cy ) < sqr( srad + crad );
+    end else
+      if Angle <> 0 Then
+        Result := ( ( X + W + H / 2 > ogl_CropX + cam2dGlobal.X ) and ( X - W - H / 2 < ogl_CropX + ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H + W / 2 > ogl_CropY + cam2dGlobal.Y ) and ( Y - W - H / 2 < ogl_CropY + ogl_CropH / scr_ResCY + cam2dGlobal.Y ) )
+      else
+        Result := ( ( X + W > ogl_CropX + cam2dGlobal.X ) and ( X < ogl_CropX + ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H > ogl_CropY + cam2dGlobal.Y ) and ( Y < ogl_CropY + ogl_CropH / scr_ResCY + cam2dGlobal.Y ) );
+end;
+
+initialization
+  sprite2d_InScreen := sprite2d_InScreenSimple;
 
 end.

@@ -56,7 +56,8 @@ implementation
 uses
   zgl_types,
   zgl_opengl,
-  zgl_opengl_all;
+  zgl_opengl_all,
+  zgl_render_2d;
 
 procedure cam2d_Set;
 begin
@@ -66,10 +67,12 @@ begin
       cam2dGlobal  := @constCamera2D;
       gl_Vertex2f  := @glVertex2f;
       gl_Vertex2fv := @glVertex2fv;
+      sprite2d_InScreen := sprite2d_InScreenSimple;
     end else
       begin
         gl_Vertex2f  := @cam2d_Vertex2f;
         gl_Vertex2fv := @cam2d_Vertex2fv;
+        sprite2d_InScreen := sprite2d_InScreenCamera;
       end;
 end;
 
