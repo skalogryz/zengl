@@ -114,7 +114,7 @@ procedure sengine2d_DelSprite;
   var
     i : Integer;
 begin
-  if ( ID < 0 ) or ( ID > sengine2d.Count - 1 ) Then exit;
+  if ( ID < 0 ) or ( ID > sengine2d.Count - 1 ) or ( sengine2d.Count = 0 ) Then exit;
 
   if Assigned( sengine2d.List[ ID ].OnFree ) Then
     sengine2d.List[ ID ].OnFree( sengine2d.List[ ID ] );

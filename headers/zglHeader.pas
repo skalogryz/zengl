@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.37               }
-{ date:    09.09.09             }
+{ version: 0.1.38               }
+{ date:    10.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -626,6 +626,18 @@ type
             end;
     Tiles : array of array of Integer;
   end;
+
+type
+  zglPGrid2D = ^zglTGrid2D;
+  zglTGrid2D = record
+    Cols : Integer;
+    Rows : Integer;
+    Grid : array of array of zglTPoint2D;
+  end;
+
+procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 var
   sengine2d_AddSprite : function( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
@@ -1253,6 +1265,9 @@ begin
       asprite2d_Draw := dlsym( zglLib, 'asprite2d_Draw' );
       csprite2d_Draw := dlsym( zglLib, 'csprite2d_Draw' );
       tiles2d_Draw := dlsym( zglLib, 'tiles2d_Draw' );
+      sgrid2d_Draw := dlsym( zglLib, 'sgrid2d_Draw' );
+      agrid2d_Draw := dlsym( zglLib, 'agrid2d_Draw' );
+      cgrid2d_Draw := dlsym( zglLib, 'cgrid2d_Draw' );
 
       font_Add := dlsym( zglLib, 'font_Add' );
       font_Del := dlsym( zglLib, 'font_Del' );

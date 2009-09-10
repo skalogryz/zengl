@@ -23,7 +23,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="40">
+    <Units Count="42">
       <Unit0>
         <Filename Value="ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -224,6 +224,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_window"/>
       </Unit39>
+      <Unit40>
+        <Filename Value="zgl_sengine_2d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_sengine_2d"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="zgl_grid_2d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_grid_2d"/>
+      </Unit41>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

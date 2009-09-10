@@ -66,6 +66,7 @@ uses
   zgl_primitives_2d,
   zgl_sengine_2d,
   zgl_sprite_2d,
+  zgl_grid_2d,
 
   zgl_file,
   zgl_memory,
@@ -221,6 +222,9 @@ exports
   asprite2d_Draw           name prefix + 'asprite2d_Draw',
   csprite2d_Draw           name prefix + 'csprite2d_Draw',
   tiles2d_Draw             name prefix + 'tiles2d_Draw',
+  sgrid2d_Draw             name prefix + 'sgrid2d_Draw',
+  agrid2d_Draw             name prefix + 'agrid2d_Draw',
+  cgrid2d_Draw             name prefix + 'cgrid2d_Draw',
 
   // Text
   font_Add                 name prefix + 'font_Add',
