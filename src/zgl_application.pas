@@ -608,7 +608,7 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          if wParam > 32 Then
+          if wParam >= 32 Then
             begin
               if app_Flags and APP_USE_UTF8 > 0 Then
                 key_InputText( AnsiToUtf8( Char( wParam ) ) )

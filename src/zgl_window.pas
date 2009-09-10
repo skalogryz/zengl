@@ -420,6 +420,10 @@ begin
 end;
 
 procedure wnd_SetPos;
+  {$IFDEF WIN32}
+  var
+    Mode : DWORD;
+  {$ENDIF}
 begin
   wnd_X := X;
   wnd_Y := Y;
@@ -431,11 +435,16 @@ begin
       XMoveWindow( scr_Display, wnd_Handle, 0, 0 );
 {$ENDIF}
 {$IFDEF WIN32}
+  if not app_Focus Then
+    Mode := HWND_BOTTOM
+  else
+    Mode := HWND_TOPMOST;
+
   if wnd_Handle <> 0 Then
     if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, HWND_BOTTOM, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
+      SetWindowPos( wnd_Handle, Mode, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
     else
-      SetWindowPos( wnd_Handle, HWND_TOPMOST, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
+      SetWindowPos( wnd_Handle, Mode, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then
