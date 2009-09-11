@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.38               }
-{ date:    10.09.09             }
+{ date:    11.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -128,13 +128,16 @@ const
   DEPTH_MASK            = $000008;
   STENCIL_BUFFER_CLEAR  = $000010;
   CORRECT_RESOLUTION    = $000020;
-  APP_USE_AUTOPAUSE     = $000040;
-  APP_USE_LOG           = $000080;
-  APP_USE_ENGLISH_INPUT = $000100;
-  APP_USE_UTF8          = $000200;
-  WND_USE_AUTOCENTER    = $000400;
-  SND_CAN_PLAY          = $000800;
-  CROP_INVISIBLE        = $001000;
+  CORRECT_WIDTH         = $000040;
+  CORRECT_HEIGHT        = $000080;
+  APP_USE_AUTOPAUSE     = $000100;
+  APP_USE_LOG           = $000200;
+  APP_USE_ENGLISH_INPUT = $000400;
+  APP_USE_UTF8          = $000800;
+  WND_USE_AUTOCENTER    = $001000;
+  SND_CAN_PLAY          = $002000;
+  SND_CAN_PLAY_FILE     = $004000;
+  CROP_INVISIBLE        = $008000;
 
 var
   zgl_Enable  : procedure( const What : DWORD );

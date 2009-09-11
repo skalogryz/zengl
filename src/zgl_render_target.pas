@@ -443,7 +443,7 @@ begin
           RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
             begin
               glEnable( GL_TEXTURE_2D );
-              tex_Filter( lRTarget.Surface, lRTarget.Flags );
+              tex_Filter( lRTarget.Surface, lRTarget.Surface.Flags );
               glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
 
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
