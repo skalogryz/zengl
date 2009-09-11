@@ -638,10 +638,6 @@ type
     Grid : array of array of zglTPoint2D;
   end;
 
-procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-
 var
   sengine2d_AddSprite : function( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   sengine2d_DelSprite : procedure( const ID : Integer );
@@ -653,6 +649,9 @@ var
   asprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   csprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
   tiles2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Tiles : zglTTiles2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  sgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  agrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  cgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 // Text
 type
