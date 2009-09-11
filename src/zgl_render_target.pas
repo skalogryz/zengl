@@ -270,6 +270,9 @@ begin
               ogl_CanPBuffer := FALSE;
               exit;
             end;
+        wglMakeCurrent( pPBuffer.DC, pPBuffer.RC );
+        gl_ResetState;
+        wglMakeCurrent( wnd_DC, ogl_Context );
       end;
     {$ENDIF}
     {$IFDEF DARWIN}

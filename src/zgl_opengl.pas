@@ -38,6 +38,7 @@ uses
 
 function  gl_Create : Boolean;
 procedure gl_Destroy;
+procedure gl_ResetState;
 procedure gl_LoadEx;
 
 var
@@ -370,7 +371,13 @@ begin
   log_Add( 'GL_RENDERER: ' + glGetString( GL_RENDERER ) );
 
   gl_LoadEx;
+  gl_ResetState;
 
+  Result := TRUE;
+end;
+
+procedure gl_ResetState;
+begin
   glHint( GL_LINE_SMOOTH_HINT,            GL_NICEST );
   glHint( GL_POLYGON_SMOOTH_HINT,         GL_NICEST );
   glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
@@ -391,8 +398,6 @@ begin
   glDisable( GL_DEPTH_TEST );
   glDisable( GL_TEXTURE_2D );
   glEnable ( GL_NORMALIZE );
-
-  Result := TRUE;
 end;
 
 procedure gl_Destroy;
