@@ -589,18 +589,19 @@ begin
         scr_ResCX := scr_ResCY;
       end;
 
-  ogl_Width  := round( wnd_Width / scr_ResCX );
-  ogl_Height := round( wnd_Height / scr_ResCY );
-  if app_Flags and CORRECT_WIDTH = 0 Then
-    begin
-      DEC( ogl_Width, scr_AddCX );
-      scr_AddCX := 0;
-    end;
   if app_Flags and CORRECT_HEIGHT = 0 Then
     begin
-      DEC( ogl_Height, scr_AddCY );
+      scr_ResCY := wnd_Height / Height;
       scr_AddCY := 0;
     end;
+  if app_Flags and CORRECT_WIDTH = 0 Then
+    begin
+      scr_ResCX := wnd_Width / Width;
+      scr_AddCX := 0;
+    end;
+
+  ogl_Width  := round( wnd_Width / scr_ResCX );
+  ogl_Height := round( wnd_Height / scr_ResCY );
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
   SetCurrentMode;
