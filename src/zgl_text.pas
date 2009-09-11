@@ -38,6 +38,7 @@ const
   TEXT_VALIGN_CENTER  = $000020;
   TEXT_VALIGN_BOTTOM  = $000040;
   TEXT_FX_VCA         = $000080;
+  TEXT_FX_LENGTH      = $000100;
 
 type
   zglTTextWord = record
@@ -53,6 +54,7 @@ procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const 
 procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : AnsiString; const Flags : DWORD = 0 );
 procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
 function  text_GetWidth( const Font : zglPFont; const Text : AnsiString; const Step : Single = 0.0 ) : Single;
+procedure textFx_SetLength( const Length : Integer );
 
 implementation
 uses
@@ -68,10 +70,11 @@ var
   textRGBA  : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
   textScale : Single = 1.0;
   textStep  : Single = 0.0;
+  textLength: Integer;
 
 procedure text_Draw;
   var
-    i, c : Integer;
+    i, c, s : Integer;
     CharDesc : zglPCharDesc;
     Quad     : array[ 0..3 ] of zglTPoint2D;
     sx : Single;
@@ -97,6 +100,7 @@ begin
 
   lastPage := -1;
   c := font_GetCID( Text, 1, @i );
+  s := 1;
   i := 1;
   if not b2d_Started Then
     begin
@@ -123,6 +127,9 @@ begin
           Y := Y + Font.MaxHeight;
         end;
       c := font_GetCID( Text, i, @i );
+      
+      if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then continue;
+      INC( s );
 
       CharDesc := Font.CharDesc[ c ];
       if not Assigned( CharDesc ) Then continue;
@@ -389,9 +396,22 @@ begin
   NewFlags := 0;
   if Flags and TEXT_FX_VCA > 0 Then
     NewFlags := NewFlags or TEXT_FX_VCA;
+  if Flags and TEXT_FX_LENGTH > 0 Then
+    NewFlags := NewFlags or TEXT_FX_LENGTH;
 
+  l := 0;
+  b := textLength;
   for i := 0 to WordsCount - 1 do
-    text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str, NewFlags );
+    begin
+      if Flags and TEXT_FX_LENGTH > 0 Then
+        begin
+          if ( i > 0 ) and ( WordsArray[ i ].Y <> WordsArray[ i - 1 ].Y ) Then INC( b );
+          textFx_SetLength( b - l );
+          if l > b Then continue;
+          l := l + u_Length( WordsArray[ i ].str );
+        end;
+      text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str, NewFlags );
+    end;
 
   SetLength( WordsArray, 0 );
   scissor_End;
@@ -437,6 +457,11 @@ begin
     end;
   if lResult > Result Then
     Result := lResult;
+end;
+
+procedure textFx_SetLength;
+begin
+  textLength := Length;
 end;
 
 end.
