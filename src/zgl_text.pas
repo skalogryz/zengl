@@ -405,10 +405,10 @@ begin
     begin
       if Flags and TEXT_FX_LENGTH > 0 Then
         begin
-          if ( i > 0 ) and ( WordsArray[ i ].Y <> WordsArray[ i - 1 ].Y ) Then INC( b );
+          LineFeed := ( i > 0 ) and ( i < WordsCount - 2 ) and ( WordsArray[ i ].Y <> WordsArray[ i - 1 ].Y );
           textFx_SetLength( b - l );
           if l > b Then continue;
-          l := l + u_Length( WordsArray[ i ].str );
+          l := l + u_Length( WordsArray[ i ].str ) - Byte( not LineFeed );
         end;
       text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str, NewFlags );
     end;
