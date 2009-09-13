@@ -248,7 +248,7 @@ begin
         PBufferiAttr[ 8  ] := WGL_STENCIL_BITS_ARB;
         PBufferiAttr[ 9  ] := ogl_Stencil;
         PBufferiAttr[ 10 ] := WGL_ALPHA_BITS_ARB;
-        PBufferiAttr[ 11 ] := 8;
+        PBufferiAttr[ 11 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
 
         wglChoosePixelFormatARB( wnd_DC, @PBufferiAttr[ 0 ], @PBufferfAttr[ 0 ], 64, @PixelFormat, @nPixelFormat );
 
@@ -394,6 +394,8 @@ begin
 end;
 
 procedure rtarget_Set;
+  var
+    Flags : DWORD;
 begin
   batch2d_Flush;
 
@@ -442,13 +444,15 @@ begin
         case lRTarget.rtType of
           RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
             begin
+              Flags := lRTarget.Surface.Flags;
+              tex_Filter( lRTarget.Surface, TEX_CLAMP or TEX_FILTER_NEAREST );
+
               glEnable( GL_TEXTURE_2D );
-              tex_Filter( lRTarget.Surface, lRTarget.Surface.Flags );
               glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
-
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
-
               glDisable( GL_TEXTURE_2D );
+
+              tex_Filter( lRTarget.Surface, Flags );
             end;
           RT_TYPE_FBO:
             begin
