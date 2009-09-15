@@ -479,7 +479,7 @@ begin
   log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( ogl_MaxAnisotropy ) );
 
   glBlendFuncSeparateEXT     := gl_GetProc( 'glBlendFuncSeparate' );
-  glBlendEquationEXT         := gl_GetProc( 'glBlendEquationEXT' );
+  glBlendEquationEXT         := gl_GetProc( 'glBlendEquation' );
   glBlendEquationSeparateEXT := gl_GetProc( 'glBlendEquationSeparate' );
   ogl_Separate := Assigned( glBlendFuncSeparateEXT ) and Assigned( glBlendEquationEXT ) and Assigned( glBlendEquationSeparateEXT );
   log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( ogl_Separate ) );
