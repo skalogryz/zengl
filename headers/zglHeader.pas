@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.38               }
-{ date:    11.09.09             }
+{ date:    15.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -577,8 +577,8 @@ var
 
 // Primitives 2D
 const
-  PR2D_FILL   = $000001;
-  PR2D_SMOOTH = $000002;
+  PR2D_FILL   = $010000;
+  PR2D_SMOOTH = $020000;
 
 var
   pr2d_Pixel   : procedure( const X, Y : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255 );

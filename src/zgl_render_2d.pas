@@ -44,6 +44,7 @@ var
   b2dcur_Blend : DWORD;
   b2dcur_Color : DWORD;
   b2dcur_Tex   : zglPTexture;
+  b2dcur_Smooth: Integer;
   sprite2d_InScreen : function( const X, Y, W, H, Angle : Single ) : Boolean;
 
 implementation
@@ -51,7 +52,8 @@ uses
   zgl_screen,
   zgl_opengl,
   zgl_fx,
-  zgl_camera_2d;
+  zgl_camera_2d,
+  zgl_primitives_2d;
 
 procedure batch2d_Begin;
 begin
@@ -82,6 +84,13 @@ begin
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_ALPHA_TEST );
       glDisable( GL_BLEND );
+
+      if b2dcur_Smooth > 0 Then
+        begin
+          b2dcur_Smooth := 0;
+          glDisable( GL_LINE_SMOOTH    );
+          glDisable( GL_POLYGON_SMOOTH );
+        end;
     end;
 end;
 
@@ -90,16 +99,18 @@ begin
   if ( Mode <> b2dcur_Mode ) or
      ( Texture <> b2dcur_Tex ) or
      ( FX and FX2D_COLORSET <> b2dcur_FX and FX2D_COLORSET ) or
-     ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) Then
+     ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
+     ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
     begin
       if not b2d_New Then
         batch2d_Flush;
       b2d_New := TRUE;
     end;
 
-  b2dcur_Mode := Mode;
-  b2dcur_Tex  := Texture;
-  b2dcur_FX   := FX;
+  b2dcur_Mode   := Mode;
+  b2dcur_Tex    := Texture;
+  b2dcur_FX     := FX;
+  b2dcur_Smooth := FX and PR2D_SMOOTH;
   if FX and FX_BLEND = 0 Then
     b2dcur_Blend := 0;
 
