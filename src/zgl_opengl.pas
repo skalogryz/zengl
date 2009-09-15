@@ -77,6 +77,7 @@ var
   ogl_MaxTexSize    : Integer;
   ogl_MaxAnisotropy : Integer;
   ogl_MaxTexLevels  : Integer;
+  ogl_Separate      : Boolean;
 
   {$IFDEF LINUX}
   ogl_CanVSync2  : Boolean;
@@ -393,6 +394,13 @@ begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 
+  if ogl_Separate Then
+    begin
+      glBlendEquationEXT( GL_FUNC_ADD_EXT );
+      glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+      glBlendEquationSeparateEXT( GL_FUNC_ADD_EXT, GL_FUNC_ADD_EXT );
+    end;
+
   glDisable( GL_BLEND );
   glDisable( GL_ALPHA_TEST );
   glDisable( GL_DEPTH_TEST );
@@ -470,6 +478,12 @@ begin
   ogl_Anisotropy := ogl_MaxAnisotropy;
   log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( ogl_MaxAnisotropy ) );
 
+  glBlendFuncSeparateEXT     := gl_GetProc( 'glBlendFuncSeparate' );
+  glBlendEquationEXT         := gl_GetProc( 'glBlendFuncSeparate' );
+  glBlendEquationSeparateEXT := gl_GetProc( 'glBlendEquationSeparate' );
+  ogl_Separate := Assigned( glBlendFuncSeparateEXT ) and Assigned( glBlendEquationEXT ) and Assigned( glBlendEquationSeparateEXT );
+  log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( ogl_Separate ) );
+
   {glGetIntegerv( GL_MAX_LIGHTS, @ogl_MaxLights );
   log_Add( 'GL_MAX_LIGHTS: ' + u_IntToStr( ogl_MaxLights ) );
   glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
@@ -502,21 +516,21 @@ begin
   log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( ogl_CanVBO ) );
 
   // FBO
-  glBindRenderbufferEXT := gl_GetProc( 'glBindRenderbufferEXT' );
+  glBindRenderbufferEXT := gl_GetProc( 'glBindRenderbuffer' );
   if Assigned( glBindRenderbufferEXT ) Then
     begin
       ogl_CanFBO                   := TRUE;
-      glIsRenderbufferEXT          := gl_GetProc( 'glIsRenderbufferEXT'          );
-      glDeleteRenderbuffersEXT     := gl_GetProc( 'glDeleteRenderbuffersEXT'     );
-      glGenRenderbuffersEXT        := gl_GetProc( 'glGenRenderbuffersEXT'        );
-      glRenderbufferStorageEXT     := gl_GetProc( 'glRenderbufferStorageEXT'     );
-      glIsFramebufferEXT           := gl_GetProc( 'glIsFramebufferEXT'           );
-      glBindFramebufferEXT         := gl_GetProc( 'glBindFramebufferEXT'         );
-      glDeleteFramebuffersEXT      := gl_GetProc( 'glDeleteFramebuffersEXT'      );
-      glGenFramebuffersEXT         := gl_GetProc( 'glGenFramebuffersEXT'         );
-      glCheckFramebufferStatusEXT  := gl_GetProc( 'glCheckFramebufferStatusEXT'  );
-      glFramebufferTexture2DEXT    := gl_GetProc( 'glFramebufferTexture2DEXT'    );
-      glFramebufferRenderbufferEXT := gl_GetProc( 'glFramebufferRenderbufferEXT' );
+      glIsRenderbufferEXT          := gl_GetProc( 'glIsRenderbuffer'          );
+      glDeleteRenderbuffersEXT     := gl_GetProc( 'glDeleteRenderbuffers'     );
+      glGenRenderbuffersEXT        := gl_GetProc( 'glGenRenderbuffers'        );
+      glRenderbufferStorageEXT     := gl_GetProc( 'glRenderbufferStorage'     );
+      glIsFramebufferEXT           := gl_GetProc( 'glIsFramebuffer'           );
+      glBindFramebufferEXT         := gl_GetProc( 'glBindFramebuffer'         );
+      glDeleteFramebuffersEXT      := gl_GetProc( 'glDeleteFramebuffers'      );
+      glGenFramebuffersEXT         := gl_GetProc( 'glGenFramebuffers'         );
+      glCheckFramebufferStatusEXT  := gl_GetProc( 'glCheckFramebufferStatus'  );
+      glFramebufferTexture2DEXT    := gl_GetProc( 'glFramebufferTexture2D'    );
+      glFramebufferRenderbufferEXT := gl_GetProc( 'glFramebufferRenderbuffer' );
     end else
       ogl_CanFBO := FALSE;
    log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( ogl_CanFBO ) );
@@ -547,7 +561,7 @@ begin
   log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
 {$ENDIF}
 
-  {glActiveStencilFaceEXT := wglGetProcAddress( 'glActiveStencilFaceEXT' );}
+  {glActiveStencilFaceEXT := wglGetProcAddress( 'glActiveStencilFace' );}
 
   // WaitVSync
 {$IFDEF LINUX}
@@ -566,11 +580,11 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WIN32}
-  wglGetSwapIntervalEXT := gl_GetProc( 'wglGetSwapIntervalEXT' );
+  wglGetSwapIntervalEXT := gl_GetProc( 'wglGetSwapInterval' );
   if Assigned( wglGetSwapIntervalEXT ) Then
     begin
       ogl_CanVSync := TRUE;
-      wglSwapIntervalEXT := gl_GetProc( 'wglSwapIntervalEXT' );
+      wglSwapIntervalEXT := gl_GetProc( 'wglSwapInterval' );
     end else
       ogl_CanVSync := FALSE;
 {$ENDIF}

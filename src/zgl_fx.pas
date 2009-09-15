@@ -73,10 +73,14 @@ var
 
 implementation
 uses
+  zgl_opengl,
   zgl_opengl_all,
   zgl_render_2d;
 
 procedure fx_SetBlendMode;
+  var
+    srcBlend : DWORD;
+    dstBlend : DWORD;
 begin
   if b2d_Started and ( Mode <> b2dcur_Blend ) Then
     begin
@@ -85,13 +89,41 @@ begin
     end;
   b2dcur_Blend := Mode;
   case Mode of
-    FX_BLEND_NORMAL : glBlendFunc( GL_SRC_ALPHA,           GL_ONE_MINUS_SRC_ALPHA );
-    FX_BLEND_ADD    : glBlendFunc( GL_SRC_ALPHA,           GL_ONE                 );
-    FX_BLEND_MULT   : glBlendFunc( GL_ZERO,                GL_SRC_COLOR           );
-    FX_BLEND_BLACK  : glBlendFunc( GL_SRC_COLOR,           GL_ONE_MINUS_SRC_COLOR );
-    FX_BLEND_WHITE  : glBlendFunc( GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR           );
-    FX_BLEND_MASK   : glBlendFunc( GL_ZERO,                GL_SRC_COLOR           );
+    FX_BLEND_NORMAL:
+      begin
+        srcBlend := GL_SRC_ALPHA;
+        dstBlend := GL_ONE_MINUS_SRC_ALPHA;
+      end;
+    FX_BLEND_ADD:
+      begin
+        srcBlend := GL_SRC_ALPHA;
+        dstBlend := GL_ONE;
+      end;
+    FX_BLEND_MULT:
+      begin
+        srcBlend := GL_ZERO;
+        dstBlend := GL_SRC_COLOR;
+      end;
+    FX_BLEND_BLACK:
+      begin
+        srcBlend := GL_SRC_COLOR;
+        dstBlend := GL_ONE_MINUS_SRC_COLOR;
+      end;
+    FX_BLEND_WHITE:
+      begin
+        srcBlend := GL_ONE_MINUS_SRC_COLOR;
+        dstBlend := GL_SRC_COLOR;
+      end;
+    FX_BLEND_MASK:
+      begin
+        srcBlend := GL_ZERO;
+        dstBlend := GL_SRC_COLOR;
+      end;
   end;
+  if ogl_Separate Then
+    glBlendFuncSeparateEXT( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
+  else
+    glBlendFunc( srcBlend, dstBlend );
 end;
 
 procedure fx2d_SetColorMix;

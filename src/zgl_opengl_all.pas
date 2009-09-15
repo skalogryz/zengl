@@ -117,6 +117,19 @@ const
   GL_ONE_MINUS_DST_COLOR            = $0307;
   GL_SRC_ALPHA_SATURATE             = $0308;
 
+  // blendOP
+  GL_FUNC_ADD_EXT                   = $8006;
+  GL_MIN_EXT                        = $8007;
+  GL_MAX_EXT                        = $8008;
+  GL_BLEND_EQUATION_EXT             = $8009;
+
+  GL_BLEND_DST_RGB_EXT              = $80C8;
+  GL_BLEND_SRC_RGB_EXT              = $80C9;
+  GL_BLEND_DST_ALPHA_EXT            = $80CA;
+  GL_BLEND_SRC_ALPHA_EXT            = $80CB;
+  GL_BLEND_EQUATION_RGB_EXT         = $8009;
+  GL_BLEND_EQUATION_ALPHA_EXT       = $883D;
+
   // Hint Mode
   GL_DONT_CARE                      = $1100;
   GL_FASTEST                        = $1101;
@@ -327,6 +340,10 @@ type
   // Alpha
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;
   procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;
+var
+  glBlendFuncSeparateEXT: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
+  glBlendEquationEXT: procedure(mode: GLenum); stdcall;
+  glBlendEquationSeparateEXT: procedure(modeRGB: GLenum; modeAlpha: GLenum); stdcall;
   // Matrix
   procedure glMatrixMode(mode: GLenum); stdcall; external libGL;
   procedure glLoadIdentity; stdcall; external libGL;
@@ -623,10 +640,14 @@ begin
   Result := wglGetProcAddress( Proc );
   if Result = nil Then
     Result := wglGetProcAddress( PAnsiChar( Proc + 'ARB' ) );
+  if Result = nil Then
+    Result := wglGetProcAddress( PAnsiChar( Proc + 'EXT' ) );
   {$ELSE}
   Result := dlsym( ogl_Library, Proc );
   if Result = nil Then
     Result := dlsym( ogl_Library, PAnsiChar( Proc + 'ARB' ) );
+  if Result = nil Then
+    Result := dlsym( ogl_Library, PAnsiChar( Proc + 'EXT' ) );
   {$ENDIF}
 end;
 
