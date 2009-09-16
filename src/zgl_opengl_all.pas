@@ -337,6 +337,7 @@ type
   procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGL;
   procedure glColor4ubv(v: PGLubyte); stdcall; external libGL;
   procedure glColor4f(red, green, blue, alpha: GLfloat); stdcall; external libGL;
+  procedure glColorMask(red, green, blue, alpha: GLboolean); stdcall; external libGL;
   // Alpha
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;
   procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;

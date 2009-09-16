@@ -485,6 +485,9 @@ type
     First : zglTRenderTarget;
 end;
 
+type
+  zglTRenderCallback = procedure( Data : Pointer );
+
 const
   RT_TYPE_SIMPLE  = 0;
   RT_TYPE_FBO     = 1;
@@ -493,9 +496,10 @@ const
   RT_CLEAR_SCREEN = $02;
 
 var
-  rtarget_Add : function( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
-  rtarget_Del : procedure( var Target : zglPRenderTarget );
-  rtarget_Set : procedure( const Target : zglPRenderTarget );
+  rtarget_Add    : function( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+  rtarget_Del    : procedure( var Target : zglPRenderTarget );
+  rtarget_Set    : procedure( const Target : zglPRenderTarget );
+  rtarget_DrawIn : procedure( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
 
 // 2D
 type
@@ -1237,6 +1241,7 @@ begin
       rtarget_Add := dlsym( zglLib, 'rtarget_Add' );
       rtarget_Del := dlsym( zglLib, 'rtarget_Del' );
       rtarget_Set := dlsym( zglLib, 'rtarget_Set' );
+      rtarget_DrawIn := dlsym( zglLib, 'rtarget_Set' );
 
       fx_SetBlendMode := dlsym( zglLib, 'fx_SetBlendMode' );
       fx2d_SetColorMix := dlsym( zglLib, 'fx2d_SetColorMix' );

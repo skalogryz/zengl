@@ -96,9 +96,13 @@ type
     First : zglTRenderTarget;
 end;
 
+type
+  zglTRenderCallback = procedure( Data : Pointer );
+
 function  rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
+procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
 
 var
   managerRTarget : zglTRenderTargetManager;
@@ -479,6 +483,34 @@ begin
         scr_SetViewPort;
         if ( lRTarget.rtType = RT_TYPE_SIMPLE ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
           glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
+      end;
+end;
+
+procedure rtarget_DrawIn;
+begin
+  if ogl_Separate Then
+    begin
+      rtarget_Set( Target );
+      RenderCallback( Data );
+      rtarget_Set( nil );
+    end else
+      begin
+        rtarget_Set( Target );
+
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE );
+        RenderCallback( Data );
+        batch2d_Flush;
+
+        glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+        glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE );
+        RenderCallback( Data );
+        batch2d_Flush;
+
+        rtarget_Set( nil );
+
+        glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
       end;
 end;
 

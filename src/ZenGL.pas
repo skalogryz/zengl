@@ -185,6 +185,7 @@ exports
   rtarget_Add              name prefix + 'rtarget_Add',
   rtarget_Del              name prefix + 'rtarget_Del',
   rtarget_Set              name prefix + 'rtarget_Set',
+  rtarget_DrawIn           name prefix + 'rtarget_DrawIn',
 
   // FX
   fx_SetBlendMode          name prefix + 'fx_SetBlendMode',
