@@ -109,6 +109,7 @@ var
 
 implementation
 uses
+  zgl_application,
   zgl_main,
   zgl_window,
   zgl_screen,
@@ -400,6 +401,7 @@ end;
 procedure rtarget_Set;
   var
     Flags : DWORD;
+    addX  : Integer;
 begin
   batch2d_Flush;
 
@@ -434,12 +436,14 @@ begin
           end;
       end;
       ogl_Mode := 1;
+      // O_o
+      addX := Byte( ( scr_AddCX > 0 ) and ( Target.rtType <> RT_TYPE_SIMPLE ) );
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
-        glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
+        glViewport( 0, 0, Target.Surface.Width + addX, Target.Surface.Height )
       else
         glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
-                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
+                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ) + addX, ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
 
       if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
