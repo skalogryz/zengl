@@ -1,7 +1,6 @@
-// Этот пример использует стандартный процедурный спрайтовый менеджер, который
-// сгодиться для решения простых задач или для любителей plain-style вроде меня :)
-// Этот же пример с использованием спрайтового менеджера на классах ищите в "06 - SEngine 2D(OOP)"
-program demo06;
+// Этот пример аналогичен предыдущему, за исключением того, что использует
+// спрайтовый менеджер на основе классов из директории extra
+program demo07;
 
 uses
   zgl_main,
@@ -15,74 +14,85 @@ uses
   zgl_textures_png, // Важный момент, обязательно один раз подключить модуль с поддержкой нужного формата данных
   zgl_textures_jpg,
   zgl_sprite_2d,
-  zgl_sengine_2d,
+  zgl_sengine_oop, // Этот модуль лежит в директории extra
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
   zgl_math_2d,
   zgl_utils;
 
+type
+  CMiku = class(zglCSprite2D)
+  protected
+    FSpeed : zglTPoint2D;
+  public
+    procedure OnInit( const _Texture : zglPTexture; const _Layer : Integer ); override;
+    procedure OnDraw; override;
+    procedure OnProc; override;
+    procedure OnFree; override;
+  end;
+
 var
   fntMain   : zglPFont;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
-  sengine2d : zglTSEngine2D;
+  sengine2d : zglCSEngine2D;
 
 // Miku
-procedure MikuInit( const Sprite : zglPSprite2D );
+procedure CMiku.OnInit;
 begin
-  Sprite.X     := 800 + random( 800 );
-  Sprite.Y     := random( 600 - 128 );
+  // Укажем свою текстуру и Layer для спрайта, заодно установятся стандартные
+  // параметры вроде ширины и высоты на основе данных о кадре в текстуре
+  inherited OnInit( texMiku, random( 10 ) );
+
+  X     := 800 + random( 800 );
+  Y     := random( 600 - 128 );
   // Задаем скорость движения
-  // В пользовательском параметре Data выделим память
-  // под структуру zglTPoint2D
-  zgl_GetMem( Sprite.Data, SizeOf( zglTPoint2D ) );
-  with zglTPoint2D( Sprite.Data^ ) do
-    begin
-      X := -random( 10 ) / 5 - 0.5;
-      Y := ( random( 10 ) - 5 ) / 5;
-    end;
+  FSpeed.X := -random( 10 ) / 5 - 0.5;
+  FSpeed.Y := ( random( 10 ) - 5 ) / 5;
 end;
 
-procedure MikuDraw( const Sprite : zglPSprite2D );
+procedure CMiku.OnDraw;
 begin
-  with Sprite^ do
-    asprite2d_Draw( Texture, X, Y, W, H, Angle, Round( Frame ), Alpha, FxFlags );
+  // Т.к. по сути эта процедура объявлена только для примера, то вызовем основной
+  // метод OnDraw класса zglCSprite2D
+  inherited;
 end;
 
-procedure MikuProc( const Sprite : zglPSprite2D );
+procedure CMiku.OnProc;
 begin
-  with Sprite^ do
-    begin
-      X := X + zglTPoint2D( Data^ ).X;
-      Y := Y + zglTPoint2D( Data^ ).Y;
-      Frame := Frame + ( abs( zglTPoint2D( Data^ ).X ) + abs( zglTPoint2D( Data^ ).Y ) ) / 25;
-      if Frame > 8 Then
-        Frame := 1;
-      // Если спрайт выходит за пределы по X, сразу же удаляем его
-      if X < -128 Then sengine2d_DelSprite( ID );
-      // Если спрайт выходит за пределы по Y, ставим его в очередь на удаление
-      if Y < -128 Then Destroy := TRUE;
-      if Y > 600  Then Destroy := TRUE;
-    end;
+  inherited;
+  X := X + FSpeed.X;
+  Y := Y + FSpeed.Y;
+  Frame := Frame + ( abs( FSpeed.X ) + abs( FSpeed.Y ) ) / 25;
+  if Frame > 8 Then
+    Frame := 1;
+  // Если спрайт выходит за пределы по X, сразу же удаляем его
+  if X < -128 Then sengine2d.DelSprite( ID );
+  // Если спрайт выходит за пределы по Y, ставим его в очередь на удаление
+  if Y < -128 Then Destroy := TRUE;
+  if Y > 600  Then Destroy := TRUE;
 end;
 
-procedure MikuFree( const Sprite : zglPSprite2D );
+procedure CMiku.OnFree;
 begin
-  FreeMemory( Sprite.Data );
+  inherited;
 end;
 
 // Добавить 100 спрайтов
 procedure AddMiku;
   var
-    i : Integer;
-    s : zglPSprite2D;
+    i, ID : Integer;
 begin
-  // При добавлении в менеджер спрайта, указывается текстура, Layer(положение по Z) и
-  // указатели на основные функции - Инициализация, Рендер, Обработка и Уничтожение
   for i := 1 to 100 do
-    sengine2d_AddSprite( texMiku, random( 10 ), @MikuInit, @MikuDraw, @MikuProc, @MikuFree );
+    begin
+      // Запрашиваем у спрайтового менеджера новое "место" под спрайт :)
+      ID := sengine2d.AddSprite;
+      // Создаем экземпляр спрайта CMiku. Аргументами конструктора являются
+      // сам менеджер и будещий ID для спрайта
+      sengine2d.List[ ID ]:= CMiku.Create( sengine2d, ID );
+    end;
 end;
 
 // Удалить 100 спрайтов
@@ -92,7 +102,7 @@ procedure DelMiku;
 begin
   // Удалим 100 спрайтов со случайным ID
   for i := 1 to 100 do
-    sengine2d_DelSprite( random( sengine2d.Count ) );
+    sengine2d.DelSprite( random( sengine2d.Count ) );
 end;
 
 procedure Init;
@@ -104,8 +114,8 @@ begin
   texMiku := tex_LoadFromFile( '../res/miku.png', $FF000000, TEX_DEFAULT_2D );
   tex_SetFrameSize( texMiku, 128, 128 );
 
-  // Устанавливаем текущим менеджером спрайтов свой
-  sengine2d_Set( @sengine2d );
+  // Создаем экземпляр zglCSEngine2D
+  sengine2d := zglCSEngine2D.Create;
   // Создадим 1000 спрайтов Miku-chan :)
   for i := 0 to 9 do
     AddMiku;
@@ -124,7 +134,7 @@ begin
 
   // Рисуем все спрайты находящиеся в текущем спрайтовом менеджере
   if time > 255 Then
-    sengine2d_Draw;
+    sengine2d.Draw;
 
   if time <= 255 Then
     ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, time )
@@ -152,8 +162,9 @@ begin
   INC( time, 2 );
 
   // Выполняем обработку всех спрайтов в текущем спрайтовом менеджере
-  sengine2d_Proc;
-  if key_Press( K_SPACE ) Then sengine2d_ClearAll;
+  sengine2d.Proc;
+  // По нажатию пробела очистить все спрайты
+  if key_Press( K_SPACE ) Then sengine2d.ClearAll;
   if key_Press( K_UP ) Then AddMiku;
   if key_Press( K_DOWN ) Then DelMiku;
   if key_Press( K_ESCAPE ) Then zgl_Exit;
@@ -169,7 +180,7 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  wnd_SetCaption( '06 - SEngine 2D' );
+  wnd_SetCaption( '07 - SEngine 2D(OOP)' );
 
   wnd_ShowCursor( TRUE );
 

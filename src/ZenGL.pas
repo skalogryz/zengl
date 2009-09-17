@@ -214,6 +214,7 @@ exports
   // Sprite Engine 2D
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
   sengine2d_DelSprite      name prefix + 'sengine2d_DelSprite',
+  sengine2d_ClearAll       name prefix + 'sengine2d_ClearAll',
   sengine2d_Set            name prefix + 'sengine2d_Set',
   sengine2d_Draw           name prefix + 'sengine2d_Draw',
   sengine2d_Proc           name prefix + 'sengine2d_Proc',

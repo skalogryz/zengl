@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.38               }
-{ date:    15.09.09             }
+{ date:    17.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -645,6 +645,7 @@ type
 var
   sengine2d_AddSprite : function( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   sengine2d_DelSprite : procedure( const ID : Integer );
+  sengine2d_ClearAll  : procedure;
   sengine2d_Set       : procedure( const SEngine : zglPSEngine2D );
   sengine2d_Draw      : procedure;
   sengine2d_Proc      : procedure;
@@ -1264,6 +1265,7 @@ begin
 
       sengine2d_AddSprite := dlsym( zglLib, 'sengine2d_AddSprite' );
       sengine2d_DelSprite := dlsym( zglLib, 'sengine2d_DelSprite' );
+      sengine2d_ClearAll := dlsym( zglLib, 'sengine2d_ClearAll' );
       sengine2d_Set := dlsym( zglLib, 'sengine2d_Set' );
       sengine2d_Draw := dlsym( zglLib, 'sengine2d_Draw' );
       sengine2d_Proc := dlsym( zglLib, 'sengine2d_Proc' );

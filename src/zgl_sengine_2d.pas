@@ -60,6 +60,7 @@ type
 
 function  sengine2d_AddSprite( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
 procedure sengine2d_DelSprite( const ID : Integer );
+procedure sengine2d_ClearAll;
 
 procedure sengine2d_Set( const SEngine : zglPSEngine2D );
 procedure sengine2d_Draw;
@@ -127,6 +128,22 @@ begin
     end;
 
   DEC( sengine2d.Count );
+end;
+
+procedure sengine2d_ClearAll;
+  var
+    i : Integer;
+    s : zglPSprite2D;
+begin
+  for i := 0 to sengine2d.Count - 1 do
+    begin
+      s := sengine2d.List[ i ];
+      if Assigned( s.OnFree ) Then
+        sengine2d.List[ i ].OnFree( s );
+      FreeMemory( s );
+    end;
+  SetLength( sengine2d.List, 0 );
+  sengine2d.Count := 0;
 end;
 
 procedure sengine2d_Set;
