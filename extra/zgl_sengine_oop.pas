@@ -21,11 +21,19 @@
 }
 unit zgl_sengine_oop;
 
+// Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
+{$DEFINE STATIC}
+
 interface
 
 uses
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
   zgl_types,
-  zgl_textures;
+  zgl_textures
+  {$ENDIF}
+  ;
 
 type
   zglCSprite2D  = class;
@@ -33,12 +41,15 @@ type
 
   zglCSEngine2D = class
   protected
+    FCount : DWORD;
+    FList  : array of zglCSprite2D;
+
     procedure SortByLayer( iLo, iHi : Integer );
     procedure SortByID( iLo, iHi : Integer );
-  public
-    Count : DWORD;
-    List  : array of zglCSprite2D;
 
+    function  GetSprite( ID : DWORD ) : zglCSprite2D;
+    procedure SetSprite( ID : DWORD; const Sprite : zglCSprite2D );
+  public
     function  AddSprite : Integer; overload;
     function  AddSprite( const Texture : zglPTexture; const Layer : Integer ) : zglCSprite2D; overload;
     procedure DelSprite( const ID : Integer );
@@ -46,6 +57,9 @@ type
 
     procedure Draw;
     procedure Proc;
+
+    property Count: DWORD read FCount;
+    property List[ID : DWORD]: zglCSprite2D read GetSprite write SetSprite;
   end;
 
   zglCSprite2D = class
@@ -73,17 +87,29 @@ type
   end;
 
 implementation
+{$IFDEF STATIC}
 uses
   zgl_main,
   zgl_fx,
   zgl_sprite_2d;
+{$ENDIF}
+
+function zglCSEngine2D.GetSprite;
+begin
+  Result := FList[ ID ];
+end;
+
+procedure zglCSEngine2D.SetSprite;
+begin
+  FList[ ID ] := Sprite;
+end;
 
 function zglCSEngine2D.AddSprite : Integer;
 begin
-  if Count + 1 > length( List ) Then
-    SetLength( List, length( List ) + 16384 );
-  Result := Count;
-  INC( Count );
+  if FCount + 1 > length( FList ) Then
+    SetLength( FList, FCount + 16384 );
+  Result := FCount;
+  INC( FCount );
 end;
 
 function zglCSEngine2D.AddSprite( const Texture : zglPTexture; const Layer : Integer ) : zglCSprite2D;
@@ -92,8 +118,8 @@ function zglCSEngine2D.AddSprite( const Texture : zglPTexture; const Layer : Int
 begin
   ID := AddSprite;
 
-  List[ ID ] := zglCSprite2D.Create( Self, ID );
-  Result := List[ ID ];
+  FList[ ID ] := zglCSprite2D.Create( Self, ID );
+  Result := FList[ ID ];
   Result.OnInit( Texture, Layer );
 end;
 
@@ -101,27 +127,27 @@ procedure zglCSEngine2D.DelSprite;
   var
     i : Integer;
 begin
-  if ( ID < 0 ) or ( ID > Count - 1 ) or ( Count = 0 ) Then exit;
+  if ( ID < 0 ) or ( ID > FCount - 1 ) or ( FCount = 0 ) Then exit;
 
-  List[ ID ].Free;
+  FList[ ID ].Free;
 
-  for i := ID to Count - 2 do
+  for i := ID to FCount - 2 do
     begin
-      List[ i ]    := List[ i + 1 ];
-      List[ i ].ID := i;
+      FList[ i ]    := FList[ i + 1 ];
+      FList[ i ].ID := i;
     end;
 
-  DEC( Count );
+  DEC( FCount );
 end;
 
 procedure zglCSEngine2D.ClearAll;
   var
     i : Integer;
 begin
-  for i := 0 to Count - 1 do
-    List[ i ].Free;
-  SetLength( List, 0 );
-  Count := 0;
+  for i := 0 to FCount - 1 do
+    FList[ i ].Free;
+  SetLength( FList, 0 );
+  FCount := 0;
 end;
 
 procedure zglCSEngine2D.Draw;
@@ -129,42 +155,42 @@ procedure zglCSEngine2D.Draw;
     i, a, b, l : Integer;
     s : zglCSprite2D;
 begin
-  if Count > 1 Then
+  if FCount > 1 Then
     begin
       l := 0;
-      for i := 0 to Count - 1 do
+      for i := 0 to FCount - 1 do
         begin
-          s := List[ i ];
+          s := FList[ i ];
           if s.Layer > l Then l := s.Layer;
           if s.Layer < l Then
             begin
-              SortByLayer( 0, Count - 1 );
+              SortByLayer( 0, FCount - 1 );
               // TODO: наверное сделать выбор вкл./выкл. устойчивой сортировки
-              l := List[ 0 ].Layer;
+              l := FList[ 0 ].Layer;
               a := 0;
-              for b := 0 to Count - 1 do
+              for b := 0 to FCount - 1 do
                 begin
-                  s := List[ b ];
+                  s := FList[ b ];
                   if ( l <> s.Layer ) Then
                     begin
                       SortByID( a, b - 1 );
                       a := b;
                       l := s.Layer;
                     end;
-                  if b = Count - 1 Then
+                  if b = FCount - 1 Then
                     SortByID( a, b );
                 end;
-              for a := 0 to Count - 1 do
-                List[ a ].ID := a;
+              for a := 0 to FCount - 1 do
+                FList[ a ].ID := a;
               break;
             end;
         end;
     end;
 
   i := 0;
-  while i < Count do
+  while i < FCount do
     begin
-      s := List[ i ];
+      s := FList[ i ];
       s.OnDraw;
 
       if s.Destroy Then
@@ -180,9 +206,9 @@ procedure zglCSEngine2D.Proc;
     s : zglCSprite2D;
 begin
   i := 0;
-  while i < Count do
+  while i < FCount do
     begin
-      s := List[ i ];
+      s := FList[ i ];
       s.OnProc;
 
       if s.Destroy Then
@@ -199,16 +225,16 @@ procedure zglCSEngine2D.SortByLayer;
 begin
   Lo   := iLo;
   Hi   := iHi;
-  Mid  := List[ ( Lo + Hi ) shr 1 ].Layer;
+  Mid  := FList[ ( Lo + Hi ) shr 1 ].Layer;
 
   repeat
-    while List[ Lo ].Layer < Mid do INC( Lo );
-    while List[ Hi ].Layer > Mid do DEC( Hi );
+    while FList[ Lo ].Layer < Mid do INC( Lo );
+    while FList[ Hi ].Layer > Mid do DEC( Hi );
     if Lo <= Hi then
       begin
-        T          := List[ Lo ];
-        List[ Lo ] := List[ Hi ];
-        List[ Hi ] := T;
+        T           := FList[ Lo ];
+        FList[ Lo ] := FList[ Hi ];
+        FList[ Hi ] := T;
         INC( Lo );
         DEC( Hi );
       end;
@@ -225,16 +251,16 @@ procedure zglCSEngine2D.SortByID;
 begin
   Lo   := iLo;
   Hi   := iHi;
-  Mid  := List[ ( Lo + Hi ) shr 1 ].ID;
+  Mid  := FList[ ( Lo + Hi ) shr 1 ].ID;
 
   repeat
-    while List[ Lo ].ID < Mid do INC( Lo );
-    while List[ Hi ].ID > Mid do DEC( Hi );
+    while FList[ Lo ].ID < Mid do INC( Lo );
+    while FList[ Hi ].ID > Mid do DEC( Hi );
     if Lo <= Hi then
       begin
-        T          := List[ Lo ];
-        List[ Lo ] := List[ Hi ];
-        List[ Hi ] := T;
+        T           := FList[ Lo ];
+        FList[ Lo ] := FList[ Hi ];
+        FList[ Hi ] := T;
         INC( Lo );
         DEC( Hi );
       end;
