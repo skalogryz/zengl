@@ -3,6 +3,7 @@
 program demo07;
 
 uses
+  zglSpriteEngine, // Этот модуль лежит в директории extra
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -14,7 +15,6 @@ uses
   zgl_textures_png, // Важный момент, обязательно один раз подключить модуль с поддержкой нужного формата данных
   zgl_textures_jpg,
   zgl_sprite_2d,
-  zgl_sengine_oop, // Этот модуль лежит в директории extra
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
