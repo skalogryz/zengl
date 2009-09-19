@@ -568,7 +568,7 @@
 
     <!--key_BeginReadText-->
     <LI><a name='key_BeginReadText'>
-    <div class='code'><b>procedure</b> key_BeginReadText( <b>const</b> Text : <b>AnsiString</b>; <b>const</b> MaxSymbols : WORD );</div>
+    <div class='code'><b>procedure</b> key_BeginReadText( <b>const</b> Text : <b>String</b>; <b>const</b> MaxSymbols : WORD );</div>
     <div align='justify'>
     Сбрасывает уже набранный пользователем текст(присваивая ему значение аргумента <b>Text</b>), и "начинает" считывание нового текста, ограничивая количество вводимых символ до <b>MaxSymbols</b>.
     </div>
@@ -576,7 +576,7 @@
 
     <!--key_EndReadText-->
     <LI><a name='key_EndReadText'>
-    <div class='code'><b>function</b> key_EndReadText( <b>var</b> Result : <b>AnsiString</b> );</div>
+    <div class='code'><b>function</b> key_EndReadText( <b>var</b> Result : <b>String</b> );</div>
     <div align='justify'>
     В <b>Result</b> сохраняется набранная пользователем строка текста.
     </div>
@@ -658,7 +658,7 @@
 
     <!--tex_LoadFromFile-->
     <LI><a name='tex_LoadFromFile'>
-    <div class='code'><b>function</b> tex_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
+    <div class='code'><b>function</b> tex_LoadFromFile( <b>const</b> FileName : <b>String</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
     <div align='justify'>
     Загружает из графического файла <b>FileName</b> данные, создает текстуру с указанным цветом прозрачности <b>TransparentColor</b>($FF000000 - использовать альфа-канал из файла) и флагами <b>Flags</b>. В качестве результат возвращает указатель на структуру zglTTexture.
     </div>
@@ -666,7 +666,7 @@
 
     <!--tex_LoadFromMemory-->
     <LI><a name='tex_LoadFromMemory'>
-    <div class='code'><b>function</b> tex_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>AnsiString</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
+    <div class='code'><b>function</b> tex_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>String</b>; <b>const</b> TransparentColor, Flags : DWORD ) : zglPTexture;</div>
     <div align='justify'>
     Загружает из памяти <b>Memory</b>(файл целиком загруженный в память) данные, создает текстуру с указанным цветом прозрачности <b>TransparentColor</b>($FF000000 - использовать альфа-канал из файла) и флагами <b>Flags</b>. В качестве результат возвращает указатель на структуру zglTTexture. <b>Extension</b> указывает на формат файла в памяти.
     </div>
@@ -723,7 +723,7 @@
     <UL type="disc">
       <LI><b>RT_TYPE_SIMPLE</b> - обычный, использует функцию glCopyTexSubImage2D</LI>
       <LI><b>RT_TYPE_FBO</b> - использует FBO</LI>
-      <LI><b>RT_TYPE_PBUFFER</b> - использует PBuffer(только для Windows)</LI>
+      <LI><b>RT_TYPE_PBUFFER</b> - использует PBuffer</LI>
     </UL>
   <LI>Константы режимов работы RenderTargets:</LI>
     <UL type="disc">
@@ -992,7 +992,7 @@
 
     <!--font_LoadFromFile-->
     <LI><a name='font_LoadFromFile'>
-    <div class='code'><b>function</b> font_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b> ) : zglPFont;</div>
+    <div class='code'><b>function</b> font_LoadFromFile( <b>const</b> FileName : <b>String</b> ) : zglPFont;</div>
     <div align='justify'>
     Загружает из файла <b>FileName</b> данные о шрифте, создает его и возвращает указатель.
     </div>
@@ -1040,7 +1040,7 @@
   <UL type='disc'>
     <!--text_Draw-->
     <LI><a name='text_Draw'>
-    <div class='code'><b>procedure</b> text_Draw( <b>const</b> Font : zglPFont; X, Y : Single; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Flags : DWORD = 0 );</div>
+    <div class='code'><b>procedure</b> text_Draw( <b>const</b> Font : zglPFont; X, Y : Single; <b>const</b> Text : <b>String</b>; <b>const</b> Flags : DWORD = 0 );</div>
     <div align='justify'>
     Вывести строку <b>Text</b> на экран в координатах <b>X</b>, <b>Y</b> используя шрифт <b>Font</b> и флаги <b>Flags</b>. В <b>Text</b> можно использовать LF символы(код - 10) для вывода нескольких строк текста.
     </div>
@@ -1048,7 +1048,7 @@
 
     <!--text_DrawEx-->
     <LI><a name='text_DrawEx'>
-    <div class='code'><b>procedure</b> text_DrawEx( <b>const</b> Font : zglPFont; X, Y, Scale, Step : Single; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Alpha : Byte = 255; <b>const</b> Color : DWORD = $FFFFFF; <b>const</b> Flags : DWORD = 0 );</div>
+    <div class='code'><b>procedure</b> text_DrawEx( <b>const</b> Font : zglPFont; X, Y, Scale, Step : Single; <b>const</b> Text : <b>String</b>; <b>const</b> Alpha : Byte = 255; <b>const</b> Color : DWORD = $FFFFFF; <b>const</b> Flags : DWORD = 0 );</div>
     <div align='justify'>
     Тоже самое что и <a href='#text_Draw'>text_Draw</a>, но с наличием дополнительных аргументов. <b>Scale</b> - коэффициент масштабирование отдельного символа, <b>Step</b> - дополнитльный отступ между символомаи. <b>Alpha</b> и <b>Color</b> отвечают за альфу и цвет соответственно.
     </div>
@@ -1056,7 +1056,7 @@
 
     <!--text_DrawInRect-->
     <LI><a name='text_DrawInRect'>
-    <div class='code'><b>procedure</b> text_DrawInRect( <b>const</b> Font : zglPFont; <b>const</b> Rect : zglTRect; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Flags : DWORD = 0 );</div>
+    <div class='code'><b>procedure</b> text_DrawInRect( <b>const</b> Font : zglPFont; <b>const</b> Rect : zglTRect; <b>const</b> Text : <b>String</b>; <b>const</b> Flags : DWORD = 0 );</div>
     <div align='justify'>
     Вывести текст <b>Text</b> внутри прямоугольника <b>Rect</b> используя шрифт <b>Font</b> и флаги <b>Flags</b>. В <b>Text</b> можно использовать LF символы(код - 10) для принудительного переноса текста.
     </div>
@@ -1064,7 +1064,7 @@
 
     <!--text_DrawInRectEx-->
     <LI><a name='text_DrawInRectEx'>
-    <div class='code'><b>procedure</b> text_DrawInRectEx( <b>const</b> Font : zglPFont; <b>const</b> Rect : zglTRect; <b>const</b> Scale, Step : Single; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Alpha : Byte = 0; <b>const</b> Color : DWORD = $FFFFFF; <b>const</b> Flags : DWORD = 0 );</div>
+    <div class='code'><b>procedure</b> text_DrawInRectEx( <b>const</b> Font : zglPFont; <b>const</b> Rect : zglTRect; <b>const</b> Scale, Step : Single; <b>const</b> Text : <b>String</b>; <b>const</b> Alpha : Byte = 0; <b>const</b> Color : DWORD = $FFFFFF; <b>const</b> Flags : DWORD = 0 );</div>
     <div align='justify'>
     Тоже самое что и <a href='#text_DrawInRect'>text_DrawInRect</a>, но с наличием дополнительных аргументов. <b>Scale</b> - коэффициент масштабирование отдельного символа, <b>Step</b> - дополнитльный отступ между символомаи. <b>Alpha</b> и <b>Color</b> отвечают за альфу и цвет соответственно.
     </div>
@@ -1072,7 +1072,7 @@
 
     <!--text_GetWidth-->
     <LI><a name='text_GetWidth'>
-    <div class='code'><b>function</b> text_GetWidth( <b>const</b> Font : zglPFont; <b>const</b> Text : <b>AnsiString</b>; <b>const</b> Step : Single = 0.0 ) : Single;</div>
+    <div class='code'><b>function</b> text_GetWidth( <b>const</b> Font : zglPFont; <b>const</b> Text : <b>String</b>; <b>const</b> Step : Single = 0.0 ) : Single;</div>
     <div align='justify'>
     Возвращает ширину в пикселах для текста <b>Text</b>, используя данные о шрифте <b>Font</b> и размер отступа между символами <b>Step</b>. Если в тексте содержатся символы переноса строки, то возвращается ширина наиболее длинной строки.
     </div>
@@ -1089,6 +1089,7 @@
     <LI><a name='snd_Init'>
     <div class='code'><b>function</b> snd_Init : Boolean;</div>
     <div align='justify'>
+    Инициализировать звуковую подсистему.
     </div>
     </LI><br>
 
@@ -1096,6 +1097,7 @@
     <LI><a name='snd_Free'>
     <div class='code'><b>procedure</b> snd_Free;</div>
     <div align='justify'>
+    Деинициализировать звуковую подсистему.
     </div>
     </LI><br>
 
@@ -1103,6 +1105,7 @@
     <LI><a name='snd_Add'>
     <div class='code'><b>function</b> snd_Add( <b>const</b> SourceCount : Integer ) : zglPSound;</div>
     <div align='justify'>
+    Выделяет память под структуру zglTSound в менеджере библиотеки и возвращает на нее указатель.
     </div>
     </LI><br>
 
@@ -1110,20 +1113,23 @@
     <LI><a name='snd_Del'>
     <div class='code'><b>procedure</b> snd_Del( <b>var</b> Sound : zglPSound );</div>
     <div align='justify'>
+    Очищает память от созданного сэмпла <b>Sound</b>. После успешной очистки в <b>Sound</b> заносится значение <b>nil</b>.
     </div>
     </LI><br>
 
     <!--snd_LoadFromFile-->
     <LI><a name='snd_LoadFromFile'>
-    <div class='code'><b>function</b> snd_LoadFromFile( <b>const</b> FileName : <b>AnsiString</b>; <b>const</b> SourceCount : Integer = 8 ) : zglPSound;</div>
+    <div class='code'><b>function</b> snd_LoadFromFile( <b>const</b> FileName : <b>String</b>; <b>const</b> SourceCount : Integer = 8 ) : zglPSound;</div>
     <div align='justify'>
+    Загрузить из файла <b>FileName</b> данные и создать на их основе сэмпл для проигрывания. Аргумент <b>SourceCount</b> указывает на максимальное количество каналов для данного сэмпла.
     </div>
     </LI><br>
 
     <!--snd_LoadFromMemory-->
     <LI><a name='snd_LoadFromMemory'>
-    <div class='code'><b>function</b> snd_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>AnsiString</b>; <b>const</b> SourceCount : Integer = 8 ) : zglPSound;</div>
+    <div class='code'><b>function</b> snd_LoadFromMemory( <b>const</b> Memory : zglTMemory; <b>const</b> Extension : <b>String</b>; <b>const</b> SourceCount : Integer = 8 ) : zglPSound;</div>
     <div align='justify'>
+    Загружает из памяти <b>Memory</b>(файл целиком загруженный в память) данные и создать на их основе сэмпл для проигрывания. Аргумент <b>SourceCount</b> указывает на максимальное количество одновременно проигрываемых сэмплов. <b>Extension</b> указывает на формат файла в памяти.
     </div>
     </LI><br>
 
@@ -1131,13 +1137,15 @@
     <LI><a name='snd_Play'>
     <div class='code'><b>function</b> snd_Play( <b>const</b> Sound : zglPSound; <b>const</b> Loop : Boolean = FALSE; <b>const</b> X : Single = 0; <b>const</b> Y : Single = 0; <b>const</b> Z : Single = 0 ) : Integer;</div>
     <div align='justify'>
+    Воспроизвести сэмпл <b>Sound</b> в позиции <b>X</b>, <b>Y</b>, <b>Z</b>. <b>Loop</b> указывает воспроизводить ли сэмпл бесконечно. В результате возвращается идентификатор, указывающий номер канала.
     </div>
     </LI><br>
 
     <!--snd_Stop-->
     <LI><a name='snd_Stop'>
-    <div class='code'><b>procedure</b> snd_Stop( <b>const</b> Sound : zglPSound; <b>const</b> Source : Integer );</div>
+    <div class='code'><b>procedure</b> snd_Stop( <b>const</b> Sound : zglPSound; <b>const</b> ID : Integer );</div>
     <div align='justify'>
+    Останавливает канал <b>ID</b> сэмпла <b>Sound</b>.
     </div>
     </LI><br>
 
@@ -1145,6 +1153,7 @@
     <LI><a name='snd_SetVolume'>
     <div class='code'><b>procedure</b> snd_SetVolume( <b>const</b> Sound : zglPSound; <b>const</b> Volume : Single; <b>const</b> ID : Integer );</div>
     <div align='justify'>
+    Устанавливает громкость <b>Volume</b>(от 0 до 1) каналу <b>ID</b> сэмпла <b>Sound</b>.
     </div>
     </LI><br>
 
@@ -1152,6 +1161,7 @@
     <LI><a name='snd_SetFrequency'>
     <div class='code'><b>procedure</b> snd_SetFrequency( <b>const</b> Sound : zglPSound; <b>const</b> Frequency, ID : Integer );</div>
     <div align='justify'>
+    Устанавливает частоту дискретизации <b>Frequency</b> каналу <b>ID</b> сэмпла <b>Sound</b>.
     </div>
     </LI><br>
 
@@ -1159,12 +1169,13 @@
     <LI><a name='snd_SetFrequencyCoeff'>
     <div class='code'><b>procedure</b> snd_SetFrequencyCoeff( <b>const</b> Sound : zglPSound; <b>const</b> Coefficient : Single; <b>const</b> ID : Integer );</div>
     <div align='justify'>
+    Устанавливает коэфициент дискретизации <b>Coefficient</b>(от 0 до 1) каналу <b>ID</b> сэмпла <b>Sound</b> относительно его оригинальной частоты.
     </div>
     </LI><br>
 
     <!--snd_PlayFile-->
     <LI><a name='snd_PlayFile'>
-    <div class='code'><b>procedure</b> snd_PlayFile( <b>const</b> FileName : <b>AnsiString</b>; <b>const</b> Loop : Boolean = FALSE );</div>
+    <div class='code'><b>procedure</b> snd_PlayFile( <b>const</b> FileName : <b>String</b>; <b>const</b> Loop : Boolean = FALSE );</div>
     <div align='justify'>
     </div>
     </LI><br>
