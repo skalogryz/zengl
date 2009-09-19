@@ -70,8 +70,8 @@ end;
 type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
-    Extension  : AnsiString;
-    FileLoader : procedure( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
+    Extension  : String;
+    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : WORD );
     MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 end;
 
@@ -91,8 +91,8 @@ procedure tex_Del( var Texture : zglPTexture );
 
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
-function  tex_LoadFromFile( const FileName : AnsiString; const TransparentColor, Flags : DWORD ) : zglPTexture;
-function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : AnsiString; const TransparentColor, Flags : DWORD ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
+function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
 function  tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
 
@@ -241,7 +241,7 @@ function tex_LoadFromFile;
     i      : Integer;
     pData  : Pointer;
     w, h   : WORD;
-    ext    : AnsiString;
+    ext    : String;
 begin
   Result := nil;
   pData  := nil;
