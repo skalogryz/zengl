@@ -88,15 +88,16 @@ function  font_Add : zglPFont;
 procedure font_Del( var Font : zglPFont );
 
 function font_Load : zglPFont;
-function font_LoadFromFile( const FileName : AnsiString ) : zglPFont;
+function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
-function font_GetUTF8ID( const Text : AnsiString; const Pos : Integer; const Shift : PInteger ) : DWORD;
-function font_GetCP1251ID( const Text : AnsiString; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetUTF32ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
 
 var
   managerFont : zglTFontManager;
-  font_GetCID : function( const Text : AnsiString; const Pos : Integer; const Shift : PInteger ) : DWORD;
+  font_GetCID : function( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
 
 implementation
 uses
@@ -290,6 +291,13 @@ begin
     if Assigned( Shift ) Then
       Shift^ := Pos + 1;
   end;
+end;
+
+function font_GetUTF32ID;
+begin
+  if Assigned( Shift ) Then
+    Shift^ := Pos + 1;
+  Result := Integer( Text[ Pos ] );
 end;
 
 function font_GetCP1251ID;

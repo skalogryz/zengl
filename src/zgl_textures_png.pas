@@ -76,7 +76,7 @@ type
   end;
 
 procedure png_Load( var pData : Pointer; var W, H : WORD );
-procedure png_LoadFromFile( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
+procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
 procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 
 procedure png_ReadIHDR( var pngData : Pointer );
@@ -563,7 +563,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION, PAnsiChar( 'png' ) );
+  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'png' ) );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @png_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @png_LoadFromMemory );
 

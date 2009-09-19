@@ -34,7 +34,7 @@ procedure Draw;
   var
     i : Integer;
     r : zglTRect;
-    s : AnsiString;
+    s : String;
 begin
   batch2d_Begin;
   text_Draw( fnt, 400, 25, 'Строка с выравниванием по центру', TEXT_HALIGN_CENTER );

@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.38               }
-{ date:    17.09.09             }
+{ version: 0.1.39               }
+{ date:    19.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -43,7 +43,7 @@ type
 type
   zglTStringList = record
     Count : Integer;
-    Items : array of AnsiString;
+    Items : array of String;
 end;
 
 type zglTFile = DWORD;
@@ -102,7 +102,7 @@ const
   APP_PAUSED      = 2;  // Boolean
   APP_DIRECTORY   = 3;  // PAnsiChar
   USR_HOMEDIR     = 4;  // PAnsiChar
-  LOG_FILENAME    = 5;  // PPAnsiChar, := Pointer( zgl_Get( LOG_FILENAME ) )
+  LOG_FILENAME    = 5;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
   ZGL_VERSION     = 6;  // DWORD
   SCR_ADD_X       = 7;  // DWORD
   SCR_ADD_Y       = 8;  // DWORD
@@ -351,8 +351,8 @@ var
   key_Up            : function( const KeyCode : Byte ) : Boolean;
   key_Press         : function( const KeyCode : Byte ) : Boolean;
   key_Last          : function( const KeyAction : Byte ) : Byte;
-  key_BeginReadText : procedure( const Text : AnsiString; const MaxSymbols : Integer = -1 );
-  key_EndReadText   : procedure( var Result : AnsiString );
+  key_BeginReadText : procedure( const Text : String; const MaxSymbols : Integer = -1 );
+  key_EndReadText   : procedure( var Result : String );
   key_ClearState    : procedure;
 
 // MOUSE
@@ -396,8 +396,8 @@ end;
 type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
-    Extension  : AnsiString;
-    FileLoader : procedure( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
+    Extension  : String;
+    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : WORD );
     MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 end;
 
@@ -441,8 +441,8 @@ var
   tex_Del            : procedure( var Texture : zglPTexture );
   tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
   tex_CreateZero     : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
-  tex_LoadFromFile   : function( const FileName : AnsiString; const TransparentColor, Flags : DWORD ) : zglPTexture;
-  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : AnsiString; const TransparentColor, Flags : DWORD ) : zglPTexture;
+  tex_LoadFromFile   : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
+  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
   tex_SetMask        : function( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
   tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
@@ -706,13 +706,13 @@ const
 var
   font_Add            : function : zglPFont;
   font_Del            : procedure( var Font : zglPFont );
-  font_LoadFromFile   : function( const FileName : AnsiString ) : zglPFont;
+  font_LoadFromFile   : function( const FileName : String ) : zglPFont;
   font_LoadFromMemory : function( const Memory : zglTMemory ) : zglPFont;
-  text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : AnsiString; const Flags : DWORD = 0 );
-  text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-  text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : AnsiString; const Flags : DWORD = 0 );
-  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-  text_GetWidth       : function( const Font : zglPFont; const Text : AnsiString; const Step : Single = 0.0 ) : Single;
+  text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
+  text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+  text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
+  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+  text_GetWidth       : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
 
 // GUI
 const
@@ -836,7 +836,7 @@ end;
       2: ( mouse_button : Byte );
       3: ( mouse_wheel  : Byte );
       4: ( key_code     : Byte );
-      5: ( key_char     : PAnsiChar );
+      5: ( key_char     : PChar );
 end;
 
   //Event list
@@ -848,7 +848,7 @@ end;
   zglPButtonDesc = ^zglTButtonDesc;
   zglTButtonDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 
     Pressed : Boolean;
 end;
@@ -856,7 +856,7 @@ end;
   zglPCheckBoxDesc = ^zglTCheckBoxDesc;
   zglTCheckBoxDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 
     Checked : Boolean;
 end;
@@ -864,7 +864,7 @@ end;
   zglPRadioButtonDesc = ^zglTRadioButtonDesc;
   zglTRadioButtonDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 
     Checked : Boolean;
     Group   : Integer;
@@ -873,13 +873,13 @@ end;
   zglPLabelDesc = ^zglTLabelDesc;
   zglTLabelDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 end;
 
   zglPEditBoxDesc = ^zglTEditBoxDesc;
   zglTEditBoxDesc = record
     Font : zglPFont;
-    Text : AnsiString;
+    Text : String;
 
     Max      : Integer;
     ReadOnly : Boolean;
@@ -908,7 +908,7 @@ end;
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
   zglTGroupBoxDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 end;
 
   zglPSpinDesc = ^zglTSpinDesc;
@@ -978,17 +978,17 @@ end;
 end;
 
   zglTSoundDecoder = record
-    Ext   : AnsiString;
-    Open  : function( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+    Ext   : String;
+    Open  : function( var Stream : zglPSoundStream; const FileName : String ) : Boolean;
     Read  : function( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
     Loop  : procedure( var Stream : zglPSoundStream );
     Close : procedure( var Stream : zglPSoundStream );
 end;
 
   zglTSoundFormat = record
-    Extension  : AnsiString;
+    Extension  : String;
     Decoder    : zglPSoundDecoder;
-    FileLoader : procedure( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : Integer );
+    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
     MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
 end;
 
@@ -1006,14 +1006,14 @@ var
   snd_Free              : procedure;
   snd_Add               : function( const SourceCount : Integer ) : zglPSound;
   snd_Del               : procedure( var Sound : zglPSound );
-  snd_LoadFromFile      : function( const FileName : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
-  snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromFile      : function( const FileName : String; const SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 8 ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const ID : Integer );
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
   snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
   snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
-  snd_PlayFile          : procedure( const FileName : AnsiString; const Loop : Boolean = FALSE );
+  snd_PlayFile          : procedure( const FileName : String; const Loop : Boolean = FALSE );
   snd_StopFile          : procedure;
   snd_ResumeFile        : procedure;
 
@@ -1067,8 +1067,8 @@ const
   FSM_END    = $03;
 
 var
-  file_Open         : procedure( const FileHandle : zglTFile; const FileName : AnsiString; const Mode : Byte );
-  file_Exists       : function( const FileName : AnsiString ) : Boolean;
+  file_Open         : procedure( const FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+  file_Exists       : function( const FileName : String ) : Boolean;
   file_Seek         : function( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
   file_GetPos       : function( const FileHandle : zglTFile ) : DWORD;
   file_Read         : function( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
@@ -1077,14 +1077,14 @@ var
   file_GetSize      : function( const FileHandle : zglTFile ) : DWORD;
   file_Flush        : procedure( const FileHandle : zglTFile );
   file_Close        : procedure( const FileHandle : zglTFile );
-  file_Find         : procedure( const Directory : AnsiString; var List : zglTFileList; const FindDir : Boolean = FALSE );
-  file_GetName      : procedure( const FileName : AnsiString; var Result : AnsiString );
-  file_GetExtension : procedure( const FileName : AnsiString; var Result : AnsiString );
-  file_SetPath      : procedure( const Path : AnsiString );
+  file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
+  file_GetName      : procedure( const FileName : String; var Result : String );
+  file_GetExtension : procedure( const FileName : String; var Result : String );
+  file_SetPath      : procedure( const Path : String );
 
 var
-  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : AnsiString );
-  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : AnsiString );
+  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
+  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : String );
   mem_Seek         : function( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
   mem_Read         : function( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
   mem_Write        : function( var Memory : zglTMemory; const buffer; const count : DWORD ) : DWORD;
@@ -1092,8 +1092,8 @@ var
   mem_Free         : procedure( var Memory : zglTMemory );
 
 // Utils
-function u_IntToStr( Value : Integer ) : AnsiString;
-function u_StrToInt( Value : AnsiString ) : Integer;
+function u_IntToStr( Value : Integer ) : String;
+function u_StrToInt( Value : String ) : Integer;
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 

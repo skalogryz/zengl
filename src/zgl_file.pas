@@ -55,9 +55,9 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : AnsiString; const Mode : Byte );
-function  file_MakeDir( const Directory : AnsiString ) : Boolean;
-function  file_Exists( const FileName : AnsiString ) : Boolean;
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+function  file_MakeDir( const Directory : String ) : Boolean;
+function  file_Exists( const FileName : String ) : Boolean;
 function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
 function  file_GetPos( const FileHandle : zglTFile ) : DWORD;
 function  file_Read( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
@@ -66,10 +66,10 @@ procedure file_Trunc( const FileHandle : zglTFile; const count : DWORD );
 function  file_GetSize( const FileHandle : zglTFile ) : DWORD;
 procedure file_Flush( const FileHandle : zglTFile );
 procedure file_Close( const FileHandle : zglTFile );
-procedure file_Find( const Directory : AnsiString; var List : zglTFileList; const FindDir : Boolean );
-procedure file_GetName( const FileName : AnsiString; var Result : AnsiString );
-procedure file_GetExtension( const FileName : AnsiString; var Result : AnsiString );
-procedure file_SetPath( const Path : AnsiString );
+procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
+procedure file_GetName( const FileName : String; var Result : String );
+procedure file_GetExtension( const FileName : String; var Result : String );
+procedure file_SetPath( const Path : String );
 
 {$IFDEF LINUX_OR_DARWIN}
 // "Домо оригато" разработчикам FreePascal, которые принципиально
@@ -123,7 +123,7 @@ function mkdir(pathname:Pchar; mode:mode_t):longint;cdecl;external 'libc' name '
 {$ENDIF}
 
 var
-  filePath : AnsiString;
+  filePath : String;
 
 implementation
 
@@ -138,9 +138,9 @@ begin
 {$ENDIF}
 {$IFDEF WIN32}
   case Mode of
-    FOM_CREATE: FileHandle := CreateFileA( PAnsiChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
-    FOM_OPENR:  FileHandle := CreateFileA( PAnsiChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
-    FOM_OPENRW: FileHandle := CreateFileA( PAnsiChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
+    FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
 {$ENDIF}
 end;
@@ -151,7 +151,7 @@ begin
   Result := mkdir( PChar( Directory ), MODE_MKDIR ) = 0;
 {$ENDIF}
 {$IFDEF WIN32}
-  Result := CreateDirectoryA( PAnsiChar( Directory ), nil );
+  Result := CreateDirectory( PChar( Directory ), nil );
 {$ENDIF}
 end;
 
@@ -295,7 +295,7 @@ procedure file_Find;
   {$IFDEF WIN32}
   var
     First : THandle;
-    FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATAA {$ENDIF};
+    FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
@@ -308,14 +308,14 @@ begin
       SetLength( List.Items, List.Count );
       for i := 0 to List.Count - 1 do
         begin
-          List.Items[ i ] := AnsiString( FList[ i ].d_name );
+          List.Items[ i ] := String( FList[ i ].d_name );
           Free( FList[ i ] );
         end;
       SetLength( FList, 0 );
     end;
 {$ENDIF}
 {$IFDEF WIN32}
-  First := FindFirstFileA( PAnsiChar( Directory ), FList );
+  First := FindFirstFile( PChar( Directory ), FList );
   repeat
     if FindDir Then
       begin
@@ -325,11 +325,11 @@ begin
     SetLength( List.Items, List.Count + 1 );
     List.Items[ List.Count ] := FList.cFileName;
     INC( List.Count );
-  until not FindNextFileA( First, FList );
+  until not FindNextFile( First, FList );
 {$ENDIF}
 end;
 
-procedure GetStr( const Str : AnsiString; var Result : AnsiString; const d : AnsiChar );
+procedure GetStr( const Str : String; var Result : String; const d : Char );
   var
     i, pos, l : Integer;
 begin
@@ -346,7 +346,7 @@ end;
 
 procedure file_GetName;
   var
-    tmp : AnsiString;
+    tmp : String;
 begin
   GetStr( FileName, Result, '/' );
   {$IFDEF WIN32}

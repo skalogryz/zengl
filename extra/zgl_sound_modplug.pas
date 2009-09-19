@@ -62,15 +62,15 @@ type
   end;
 
 procedure mp_Init;
-function  mp_DecoderOpen( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+function  mp_DecoderOpen( var Stream : zglPSoundStream; const FileName : String ) : Boolean;
 function  mp_DecoderRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
 procedure mp_DecoderLoop( var Stream : zglPSoundStream );
 procedure mp_DecoderClose( var Stream : zglPSoundStream );
 
 var
   Decoders : array[ 0..MAX_FORMATS - 1 ] of zglTSoundDecoder;
-  FORMATS  : array[ 0..MAX_FORMATS - 1 ] of AnsiString = ( 'MOD', 'IT',  'S3M', 'XM',  'IT',  '669', 'AMF', 'AMS', 'DBM', 'DMF', 'DSM', 'FAR',
-                                                           'MDL', 'MED', 'MTM', 'OKT', 'PTM', 'STM', 'ULT', 'UMX', 'MT2', 'PSM' );
+  FORMATS  : array[ 0..MAX_FORMATS - 1 ] of String = ( 'MOD', 'IT',  'S3M', 'XM',  'IT',  '669', 'AMF', 'AMS', 'DBM', 'DMF', 'DSM', 'FAR',
+                                                       'MDL', 'MED', 'MTM', 'OKT', 'PTM', 'STM', 'ULT', 'UMX', 'MT2', 'PSM' );
 
   mpLoad    : Boolean;
   mpInit    : Boolean;

@@ -306,13 +306,13 @@ type
   end;
 
 procedure ogg_Init;
-function  ogg_DecoderOpen( var Stream : zglPSoundStream; const FileName : AnsiString ) : Boolean;
+function  ogg_DecoderOpen( var Stream : zglPSoundStream; const FileName : String ) : Boolean;
 function  ogg_DecoderRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
 procedure ogg_DecoderLoop( var Stream : zglPSoundStream );
 procedure ogg_DecoderClose( var Stream : zglPSoundStream );
 
 procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
-procedure ogg_LoadFromFile( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
 procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
 
 function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
@@ -590,7 +590,7 @@ initialization
   oggDecoder.Read  := ogg_DecoderRead;
   oggDecoder.Loop  := ogg_DecoderLoop;
   oggDecoder.Close := ogg_DecoderClose;
-  zgl_Reg( SND_FORMAT_EXTENSION, PAnsiChar( 'OGG' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'OGG' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
   zgl_Reg( SND_FORMAT_DECODER,     @oggDecoder );

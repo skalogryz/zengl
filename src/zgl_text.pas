@@ -46,14 +46,14 @@ type
     ShiftX  : Integer;
     LF      : Boolean;
     LFShift : Integer;
-    str     : AnsiString;
+    str     : String;
 end;
 
-procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : AnsiString; const Flags : DWORD = 0 );
-procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : AnsiString; const Flags : DWORD = 0 );
-procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : AnsiString; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-function  text_GetWidth( const Font : zglPFont; const Text : AnsiString; const Step : Single = 0.0 ) : Single;
+procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
+procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
+procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+function  text_GetWidth( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
 procedure textFx_SetLength( const Length : Integer );
 
 implementation
@@ -127,7 +127,7 @@ begin
           Y := Y + Font.MaxHeight;
         end;
       c := font_GetCID( Text, i, @i );
-      
+
       if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then continue;
       INC( s );
 

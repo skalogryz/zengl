@@ -36,7 +36,7 @@ type
 type
   zglTStringList = record
     Count : Integer;
-    Items : array of AnsiString;
+    Items : array of String;
 end;
 
 implementation

@@ -36,7 +36,7 @@ function  log_Timing : AnsiString;
 var
   log      : zglTFile;
   logstart : LongWord;
-  logfile  : PAnsiChar = 'log.txt';
+  logfile  : PChar = 'log.txt';
 
 implementation
 uses

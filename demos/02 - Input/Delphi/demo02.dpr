@@ -18,7 +18,7 @@ uses
 var
   FullScreen : Boolean;
   fnt        : zglPFont;
-  something  : AnsiString;
+  something  : String;
   lineAlpha  : Byte;
 
 

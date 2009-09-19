@@ -35,8 +35,8 @@ type
     Position : DWORD;
 end;
 
-procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : AnsiString );
-procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : AnsiString );
+procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
+procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
 function  mem_Seek( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
 function  mem_Read( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
 function  mem_ReadSwap( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
@@ -118,9 +118,9 @@ begin
   {$IFDEF ENDIAN_BIG}
   if forceNoSwap Then
     begin
-	  Result := mem_Read( Memory, buffer, count );
-	  exit;
-	end;
+    Result := mem_Read( Memory, buffer, count );
+    exit;
+  end;
   {$ENDIF}
   if count > 0 Then
     begin

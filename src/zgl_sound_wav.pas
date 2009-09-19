@@ -57,7 +57,7 @@ type
  end;
 
 procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
-procedure wav_LoadFromFile( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
 procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
 
 implementation
@@ -138,7 +138,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( SND_FORMAT_EXTENSION, PAnsiChar( 'WAV' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'WAV' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @wav_LoadFromMemory );
 

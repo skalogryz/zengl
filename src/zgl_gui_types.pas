@@ -152,7 +152,7 @@ end;
       2: ( mouse_button : Byte );
       3: ( mouse_wheel  : Byte );
       4: ( key_code     : Byte );
-      5: ( key_char     : PAnsiChar );
+      5: ( key_char     : PChar );
 end;
 
   //Event list
@@ -164,7 +164,7 @@ end;
   zglPButtonDesc = ^zglTButtonDesc;
   zglTButtonDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 
     Pressed : Boolean;
 end;
@@ -172,7 +172,7 @@ end;
   zglPCheckBoxDesc = ^zglTCheckBoxDesc;
   zglTCheckBoxDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 
     Checked : Boolean;
 end;
@@ -180,7 +180,7 @@ end;
   zglPRadioButtonDesc = ^zglTRadioButtonDesc;
   zglTRadioButtonDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 
     Checked : Boolean;
     Group   : Integer;
@@ -189,13 +189,13 @@ end;
   zglPLabelDesc = ^zglTLabelDesc;
   zglTLabelDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 end;
 
   zglPEditBoxDesc = ^zglTEditBoxDesc;
   zglTEditBoxDesc = record
     Font : zglPFont;
-    Text : AnsiString;
+    Text : String;
 
     Max      : Integer;
     ReadOnly : Boolean;
@@ -224,7 +224,7 @@ end;
   zglPGroupBoxDesc = ^zglTGroupBoxDesc;
   zglTGroupBoxDesc = record
     Font    : zglPFont;
-    Caption : AnsiString;
+    Caption : String;
 end;
 
   zglPSpinDesc = ^zglTSpinDesc;

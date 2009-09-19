@@ -119,9 +119,6 @@ begin
 end;
 
 function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
-  var
-    cx, cy, crad : Single;
-    sx, sy, srad : Single;
 begin
   if Angle <> 0 Then
     Result := ( ( X + W + H / 2 > ogl_CropX ) and ( X - W - H / 2 < ogl_CropX + ogl_CropW / scr_ResCX ) and
