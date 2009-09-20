@@ -92,7 +92,7 @@ function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
 function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
-function font_GetUTF32ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetUTF16ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
 function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
 
 var
@@ -293,7 +293,7 @@ begin
   end;
 end;
 
-function font_GetUTF32ID;
+function font_GetUTF16ID;
 begin
   if Assigned( Shift ) Then
     Shift^ := Pos + 1;

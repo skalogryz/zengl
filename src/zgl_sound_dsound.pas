@@ -28,26 +28,29 @@ uses
   Windows;
 
 const
+  _FACDS                      = $878; { DirectSound's facility code }
+  MAKE_DSHRESULT_R            = (1 shl 31) or (_FACDS shl 16);
+
   DS_OK                       = $00000000;
   DSSCL_PRIORITY              = $00000002;
+  DSSCL_EXCLUSIVE             = $00000003;
 
   DSBCAPS_PRIMARYBUFFER       = $00000001;
   DSBCAPS_STATIC              = $00000002;
-
+  DSBCAPS_LOCHARDWARE         = $00000004;
+  DSBCAPS_LOCSOFTWARE         = $00000008;
   DSBCAPS_CTRLFREQUENCY       = $00000020;
   DSBCAPS_CTRLPAN             = $00000040;
   DSBCAPS_CTRLVOLUME          = $00000080;
+  DSBCAPS_CTRLPOSITIONNOTIFY  = $00000100;
   DSBCAPS_GETCURRENTPOSITION2 = $00010000;
-
-  DSFX_LOCHARDWARE            = $00000001;
-  DSFX_LOCSOFTWARE            = $00000002;
 
   DSBSTATUS_PLAYING           = $00000001;
   DSBSTATUS_BUFFERLOST        = $00000002;
 
   DSBPLAY_LOOPING             = $00000001;
 
-  DSERR_BUFFERLOST            = $88780000 + 150;
+  DSERR_BUFFERLOST            = MAKE_DSHRESULT_R or 150;
 
 type
   zglTBufferDesc = record
@@ -120,7 +123,7 @@ type
 function  InitDSound : Boolean;
 procedure FreeDSound;
 
-function  dsu_CreateBuffer( BufferSize : DWORD; Format : Pointer ) : IDirectSoundBuffer;
+procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; BufferSize : DWORD; Format : Pointer );
 procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; const DataSize : DWORD; const Pos : DWORD = 0 );
 function  dsu_CalcPos( const X, Y, Z : Single; var Volume : Single ) : Integer;
 function  dsu_CalcVolume( const Volume : Single ) : Integer;
@@ -153,21 +156,22 @@ begin
   dlclose( dsound_Library );
 end;
 
-function dsu_CreateBuffer;
+procedure dsu_CreateBuffer;
   var
     DSoundBD : TDSBufferDesc;
 begin
   FillChar( DSoundBD, SizeOf( TDSBUFFERDESC ), 0 );
   DSoundBD.dwSize  := SizeOf( TDSBUFFERDESC );
-  DSoundBD.dwFlags := DSBCAPS_STATIC        +
-                      DSBCAPS_CTRLPAN       +
-                      DSBCAPS_CTRLVOLUME    +
-                      DSBCAPS_CTRLFREQUENCY +
+  DSoundBD.dwFlags := DSBCAPS_LOCSOFTWARE        or
+                      DSBCAPS_CTRLPAN            or
+                      DSBCAPS_CTRLVOLUME         or
+                      DSBCAPS_CTRLFREQUENCY      or
+                      DSBCAPS_CTRLPOSITIONNOTIFY or
                       DSBCAPS_GETCURRENTPOSITION2;
   DSoundBD.dwBufferBytes := BufferSize;
   DSoundBD.lpwfxFormat   := Format;
 
-  ds_Device.CreateSoundBuffer( DSoundBD, Result, nil );
+  ds_Device.CreateSoundBuffer( DSoundBD, Buffer, nil );
 end;
 
 procedure dsu_FillData;

@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.39               }
-{ date:    19.09.09             }
+{ date:    20.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -979,10 +979,10 @@ end;
 
   zglTSoundDecoder = record
     Ext   : String;
-    Open  : function( var Stream : zglPSoundStream; const FileName : String ) : Boolean;
-    Read  : function( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-    Loop  : procedure( var Stream : zglPSoundStream );
-    Close : procedure( var Stream : zglPSoundStream );
+    Open  : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+    Read  : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+    Loop  : procedure( var Stream : zglTSoundStream );
+    Close : procedure( var Stream : zglTSoundStream );
 end;
 
   zglTSoundFormat = record
@@ -1013,9 +1013,9 @@ var
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
   snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
   snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
-  snd_PlayFile          : procedure( const FileName : String; const Loop : Boolean = FALSE );
-  snd_StopFile          : procedure;
-  snd_ResumeFile        : procedure;
+  snd_PlayFile          : function( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
+  snd_StopFile          : procedure( const ID : Integer );
+  snd_ResumeFile        : procedure( const ID : Integer );
 
 // MATH
 const

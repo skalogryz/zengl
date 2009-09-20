@@ -306,10 +306,10 @@ type
   end;
 
 procedure ogg_Init;
-function  ogg_DecoderOpen( var Stream : zglPSoundStream; const FileName : String ) : Boolean;
-function  ogg_DecoderRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-procedure ogg_DecoderLoop( var Stream : zglPSoundStream );
-procedure ogg_DecoderClose( var Stream : zglPSoundStream );
+function  ogg_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+function  ogg_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+procedure ogg_DecoderLoop( var Stream : zglTSoundStream );
+procedure ogg_DecoderClose( var Stream : zglTSoundStream );
 
 procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
 procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
@@ -325,7 +325,7 @@ function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
 function ov_open_callbacks(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
 function ov_info(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl; external;
 function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl; external;
-function ov_time_seek(var vf: OggVorbis_File; pos: cdouble): cint; cdecl; external;
+function ov_pcm_seek(var vf: OggVorbis_File; pos: cint64): cint; cdecl; external;
 {$ENDIF}
 
 var
@@ -346,7 +346,7 @@ var
   ov_open_callbacks : function(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl;
   ov_info           : function(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl;
   ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl;
-  ov_time_seek      : function(var vf: OggVorbis_File; pos: cdouble): cint; cdecl;
+  ov_pcm_seek       : function(var vf: OggVorbis_File; pos: cint64): cint; cdecl;
 {$ENDIF}
 
 implementation
@@ -414,7 +414,7 @@ begin
       ov_open_callbacks := dlsym( vorbisfile_Library, 'ov_open_callbacks' );
       ov_info           := dlsym( vorbisfile_Library, 'ov_info' );
       ov_read           := dlsym( vorbisfile_Library, 'ov_read' );
-      ov_time_seek      := dlsym( vorbisfile_Library, 'ov_time_seek' );
+      ov_pcm_seek       := dlsym( vorbisfile_Library, 'ov_pcm_seek' );
 
       log_Add( 'Ogg: Successful initialized'  );
       oggInit := TRUE;
@@ -452,7 +452,7 @@ begin
           zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
           Result := TRUE;
         end;
-      ov_time_seek( vf, 0 );
+        ov_pcm_seek( vf, 0 );
     end;
 end;
 
@@ -478,7 +478,7 @@ procedure ogg_DecoderLoop;
 begin
   if not oggInit Then exit;
 
-  ov_time_seek( zglTOggStream( Stream._Data^ ).vf, 0 );
+  ov_pcm_seek( zglTOggStream( Stream._Data^ ).vf, 0 );
 end;
 
 procedure ogg_DecoderClose;

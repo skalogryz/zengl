@@ -315,7 +315,7 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WIN32}
-  First := FindFirstFile( PChar( Directory ), FList );
+  First := FindFirstFile( PChar( Directory + '*' ), FList );
   repeat
     if FindDir Then
       begin

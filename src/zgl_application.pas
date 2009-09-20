@@ -193,8 +193,12 @@ begin
                 if oal_SrcState[ i ] = AL_PLAYING Then
                   alSourcePlay( oal_Sources[ i ] );
               {$ENDIF}
-              if Assigned( sfStream ) Then
-                snd_ResumeFile;
+              for i := 1 to SND_MAX do
+                if sfArray[ i ] Then
+                  begin
+                    sfArray[ i ] := FALSE;
+                    snd_ResumeFile( i );
+                  end;
             end;
         end else
           if not sndAutoPaused Then
@@ -209,8 +213,12 @@ begin
                   oal_SrcState[ i ] := z;
                 end;
               {$ENDIF}
-              if Assigned( sfStream ) and ( sfStream.Played ) Then
-                snd_StopFile;
+              for i := 1 to SND_MAX do
+                if sfArray[ i ] Then
+                  begin
+                    snd_StopFile( i );
+                    sfArray[ i ] := TRUE;
+                  end;
             end;
 
       if not app_Pause Then
