@@ -912,8 +912,8 @@ begin
 
   {$IFDEF USE_OPENAL}
   processed := 0;
-  {while processed < 1 do
-    alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );}
+  while processed < 1 do
+    alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );
   {$ENDIF}
   while app_Work and sfArray[ ID ] do
     begin

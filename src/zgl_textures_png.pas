@@ -88,7 +88,7 @@ procedure png_GetPixelInfo;
 
 procedure png_DecodeNonInterlaced( var pngData : Pointer );
 procedure png_FilterRow;
-function  png_DecodeIDAT( Buffer : Pointer; Count : Integer ) : Integer;
+function  png_DecodeIDAT( const Buffer : Pointer; const Count : Integer ) : Integer;
 
 implementation
 uses
@@ -435,19 +435,12 @@ procedure png_FilterRow;
 
   function PaethPredictor( a, b, c : Byte ) : Byte; {$IFDEF USE_INLINE} inline; {$ENDIF}
     var
-      pa, pb, pc : Integer;
+      p, pa, pb, pc : Integer;
   begin
-    pa := abs( b - c );
-    pb := abs( a - c );
-    {$IFDEF CPU32}
-    pc := abs( a + b - c * 2 );
-    {$ELSE}
-    // Феерично, не правда ли? :)
-    // А все из-за Internal Error'а в FreePascal...
-    pc := a + b - c * 2;
-    pc := abs( pc );
-    {$ENDIF}
-
+    p  := a + b - c;
+    pa := abs( p - a );
+    pb := abs( p - b );
+    pc := abs( p - c );
     if ( pa <= pb ) and ( pa <= pc ) Then
       Result := a
     else
@@ -487,7 +480,7 @@ begin
 
         for i := 1 to pngRowSize do
           Begin
-            if I - 1 >= pngOffset Then
+            if i - 1 >= pngOffset Then
               begin
                 Left      := pngRowBuffer[ pngRowUsed ][ i - pngOffset];
                 AboveLeft := pngRowBuffer[ not pngRowUsed ][ i - pngOffset];
