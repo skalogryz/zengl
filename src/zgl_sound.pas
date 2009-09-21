@@ -262,12 +262,12 @@ begin
     log_Add( 'DirectSound: Can''t SetCooperativeLevel' );
 
   log_Add( 'DirectSound: sound system initialized successful' );
+{$ENDIF}
 
-  {$IFDEF FPC}
+{$IFDEF FPC}
   InitCriticalSection( sfCS );
-  {$ELSE}
+{$ELSE}
   InitializeCriticalSection( sfCS );
-  {$ENDIF}
 {$ENDIF}
 
   sndInitialized := TRUE;
@@ -294,7 +294,7 @@ begin
   for i := 1 to SND_MAX do
     begin
       alDeleteSources( 1, @sfSource[ i ] );
-      alDeleteBuffers( sfBufCount, @sfBuffers[ i, 0 ] );
+      alDeleteBuffers( sfBufCount, @sfBuffers[ i ] );
     end;
   alDeleteSources( length( oal_Sources ), @oal_Sources[ 0 ] );
   SetLength( oal_Sources, 0 );
@@ -305,8 +305,7 @@ begin
   log_Add( 'OpenAL: close sound device' );
   alcCloseDevice( oal_Device );
   log_Add( 'OpenAL: sound system finalized successful' );
-  // FIXME: !!!
-  //FreeOpenAL;
+  FreeOpenAL;
 {$ELSE}
   for i := 1 to SND_MAX do
     sfBuffer[ i ]  := nil;
@@ -314,6 +313,11 @@ begin
 
   FreeDSound;
   log_Add( 'DirectSound: sound system finalized successful' );
+{$ENDIF}
+
+{$IFDEF FPC}
+  DoneCriticalsection( sfCS );
+{$ELSE}
   DeleteCriticalSection( sfCS );
 {$ENDIF}
 end;
@@ -454,7 +458,7 @@ end;
 
 function snd_Play;
   var
-    i, j      : Integer;
+    i, j : Integer;
     {$IFDEF USE_OPENAL}
     sourcePos : array[ 0..2 ] of Single;
     {$ELSE}
@@ -771,7 +775,6 @@ function snd_PlayFile;
     buffDesc : zglTBufferDesc;
     {$ENDIF}
 begin
-
   if ( not sndInitialized ) or
      ( not sndCanPlayFile ) Then exit;
 
@@ -814,6 +817,7 @@ begin
       log_Add( 'Cannot play: ' + FileName );
       exit;
     end;
+
 {$IFDEF USE_OPENAL}
   alSourceStop( sfSource[ Result ] );
   alSourceRewind( sfSource[ Result ] );
@@ -908,10 +912,10 @@ begin
 
   {$IFDEF USE_OPENAL}
   processed := 0;
-  while processed < 1 do
-    alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );
+  {while processed < 1 do
+    alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );}
   {$ENDIF}
-  while app_Work do
+  while app_Work and sfArray[ ID ] do
     begin
       if not sndInitialized Then break;
 
@@ -919,7 +923,7 @@ begin
       if ( not app_Work ) or ( not sfArray[ ID ] ) Then break;
       {$IFDEF USE_OPENAL}
       alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );
-      while ( app_Work ) and ( processed > 0 ) do
+      while app_Work and sfArray[ ID ] and ( processed > 0 ) do
         begin
           alSourceUnQueueBuffers( sfSource[ ID ], 1, @buffer );
 
@@ -979,12 +983,12 @@ begin
 end;
 
 procedure snd_ResumeFile;
-{$IFDEF USE_OPENAL}
   var
+    {$IFDEF USE_OPENAL}
     i    : Integer;
+    {$ENDIF}
     _End : Boolean;
     BytesRead : Integer;
-{$ENDIF}
 begin
   if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
      ( sfArray[ ID ] ) or
@@ -1007,6 +1011,11 @@ begin
   alSourcei( sfSource[ ID ], AL_LOOPING, AL_FALSE );
   alSourcePlay( sfSource[ ID ] );
 {$ELSE}
+  BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], sfStream[ ID ].Buffer, sfStream[ ID ].BufferSize, _End );
+  dsu_FillData( sfBuffer[ ID ], sfStream[ ID ].Buffer, BytesRead );
+
+  sfLastPos[ ID ] := 0;
+  sfBuffer[ ID ].SetCurrentPosition( 0 );
   sfBuffer[ ID ].Play( 0, 0, DSBPLAY_LOOPING );
 {$ENDIF}
 

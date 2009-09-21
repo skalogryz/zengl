@@ -43,6 +43,7 @@ const
   DSBCAPS_CTRLPAN             = $00000040;
   DSBCAPS_CTRLVOLUME          = $00000080;
   DSBCAPS_CTRLPOSITIONNOTIFY  = $00000100;
+  DSBCAPS_GLOBALFOCUS         = $00008000;
   DSBCAPS_GETCURRENTPOSITION2 = $00010000;
 
   DSBSTATUS_PLAYING           = $00000001;
@@ -167,6 +168,7 @@ begin
                       DSBCAPS_CTRLVOLUME         or
                       DSBCAPS_CTRLFREQUENCY      or
                       DSBCAPS_CTRLPOSITIONNOTIFY or
+                      DSBCAPS_GLOBALFOCUS        or
                       DSBCAPS_GETCURRENTPOSITION2;
   DSoundBD.dwBufferBytes := BufferSize;
   DSoundBD.lpwfxFormat   := Format;
