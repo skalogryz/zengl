@@ -68,7 +68,6 @@ var
   tgaMem     : zglTMemory;
   tgaHeader  : zglTTGAHeader;
   tgaData    : array of Byte;
-  tgaDataA   : array of Byte;
   tgaPalette : array of Byte;
 
 procedure tga_Load;
@@ -138,29 +137,25 @@ begin
 
   if tgaHeader.ImgSpec.Depth shr 3 = 3 Then
     begin
-      SetLength( tgaDataA, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+      zgl_GetMem( pData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
       for i := 0 to tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height - 1 do
         begin
-          tgaDataA[ i * 4 + 2 ] := tgaData[ i * 3 + 0 ];
-          tgaDataA[ i * 4 + 1 ] := tgaData[ i * 3 + 1 ];
-          tgaDataA[ i * 4 + 0 ] := tgaData[ i * 3 + 2 ];
-          tgaDataA[ i * 4 + 3 ] := 255;
+          PByte( Ptr( pData ) + i * 4 + 2 )^ := tgaData[ i * 3 + 0 ];
+          PByte( Ptr( pData ) + i * 4 + 1 )^ := tgaData[ i * 3 + 1 ];
+          PByte( Ptr( pData ) + i * 4 + 0 )^ := tgaData[ i * 3 + 2 ];
+          PByte( Ptr( pData ) + i * 4 + 3 )^ := 255;
         end;
-      zgl_GetMem( pData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
-      Move( Pointer( tgaDataA )^, pData^, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
     end else
       if tgaHeader.ImgSpec.Depth shr 3 = 4 Then
         begin
-          SetLength( tgaDataA, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+          zgl_GetMem( pData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
           for i := 0 to tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height - 1 do
             begin
-              tgaDataA[ i * 4 + 2 ] := tgaData[ i * 4 + 0 ];
-              tgaDataA[ i * 4 + 1 ] := tgaData[ i * 4 + 1 ];
-              tgaDataA[ i * 4 + 0 ] := tgaData[ i * 4 + 2 ];
-              tgaDataA[ i * 4 + 3 ] := tgaData[ i * 4 + 3 ];
+              PByte( Ptr( pData ) + i * 4 + 2 )^ := tgaData[ i * 4 + 0 ];
+              PByte( Ptr( pData ) + i * 4 + 1 )^ := tgaData[ i * 4 + 1 ];
+              PByte( Ptr( pData ) + i * 4 + 0 )^ := tgaData[ i * 4 + 2 ];
+              PByte( Ptr( pData ) + i * 4 + 3 )^ := tgaData[ i * 4 + 3 ];
             end;
-          zgl_GetMem( pData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
-          Move( Pointer( tgaDataA )^, pData^, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
         end else
           pData := nil;
   W := tgaHeader.ImgSpec.Width;
@@ -169,7 +164,6 @@ begin
 _exit:
   begin
     SetLength( tgaData, 0 );
-    SetLength( tgaDataA, 0 );
     SetLength( tgaPalette, 0 );
     mem_Free( tgaMem );
   end;
