@@ -386,15 +386,25 @@ procedure pr2d_TriList;
   var
     i    : Integer;
     w, h : Single;
+    Mode : DWORD;
 begin
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if FX and PR2D_FILL > 0 Then
+    Mode := GL_TRIANGLES
+  else
+    Mode := GL_LINES;
+  if ( not b2d_Started ) or batch2d_Check( Mode, FX, Texture ) Then
     begin
-      if FX and FX_BLEND > 0 Then
+      if FX and PR2D_SMOOTH > 0 Then
+        begin
+          glEnable( GL_LINE_SMOOTH    );
+          glEnable( GL_POLYGON_SMOOTH );
+        end;
+      if ( FX and FX_BLEND > 0 ) or ( Mode = GL_LINES ) Then
         glEnable( GL_BLEND )
       else
         glEnable( GL_ALPHA_TEST );
 
-      if Assigned( Texture ) Then
+      if Assigned( Texture ) and ( Mode = GL_TRIANGLES ) Then
         begin
           glEnable( GL_TEXTURE_2D );
           glBindTexture( GL_TEXTURE_2D, Texture.ID );
@@ -408,12 +418,12 @@ begin
               glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         end;
 
-      glBegin( GL_TRIANGLES );
+      glBegin( Mode );
     end;
 
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
-  if Assigned( Texture ) Then
+  if Assigned( Texture ) and ( Mode = GL_TRIANGLES ) Then
     begin
       if not Assigned( TexCoords ) Then
         begin
@@ -431,14 +441,40 @@ begin
               gl_Vertex2fv( @TriList[ i ] );
             end;
     end else
-      for i := iLo to iHi do
-        gl_Vertex2fv( @TriList[ i ] );
+      if Mode = GL_TRIANGLES Then
+        begin
+          for i := iLo to iHi do
+            gl_Vertex2fv( @TriList[ i ] );
+        end else
+          begin
+            i := iLo;
+            while i < iHi do
+              begin
+                gl_Vertex2fv( @TriList[ i ] );
+                gl_Vertex2fv( @TriList[ i + 1 ] );
+                INC( i );
+
+                gl_Vertex2fv( @TriList[ i ] );
+                gl_Vertex2fv( @TriList[ i + 1 ] );
+                INC( i );
+
+                gl_Vertex2fv( @TriList[ i ] );
+                gl_Vertex2fv( @TriList[ i - 2 ] );
+                INC( i );
+              end;
+          end;
 
   if not b2d_Started Then
     begin
       glEnd;
 
-      glDisable( GL_TEXTURE_2D );
+      if FX and PR2D_SMOOTH > 0 Then
+        begin
+          glDisable( GL_LINE_SMOOTH    );
+          glDisable( GL_POLYGON_SMOOTH );
+        end;
+      if Mode = GL_TRIANGLES Then
+        glDisable( GL_TEXTURE_2D );
       glDisable( GL_BLEND );
       glDisable( GL_ALPHA_TEST );
     end;
