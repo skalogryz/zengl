@@ -346,11 +346,15 @@ var
   glBlendEquationEXT: procedure(mode: GLenum); stdcall;
   glBlendEquationSeparateEXT: procedure(modeRGB: GLenum; modeAlpha: GLenum); stdcall;
   // Matrix
+  procedure glPushMatrix; stdcall; external libGL;
+  procedure glPopMatrix; stdcall; external libGL;
   procedure glMatrixMode(mode: GLenum); stdcall; external libGL;
   procedure glLoadIdentity; stdcall; external libGL;
   procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); stdcall; external libGLU;
   procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGL;
   procedure glMultMatrixf(const m: PGLfloat); stdcall; external libGL;
+  procedure glRotatef(angle, x, y, z: GLfloat); stdcall; external libGL;
+  procedure glScalef(x, y, z: GLfloat); stdcall; external libGL;
   procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGL;
   // Vertex
   procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
