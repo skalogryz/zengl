@@ -444,10 +444,7 @@ begin
     app_AutoPause := TRUE;
 
   if What and APP_USE_LOG > 0 Then
-    begin
-      app_Log := TRUE;
-      log_Init;
-    end;
+    app_Log := TRUE;
 
   if What and APP_USE_UTF8 > 0 Then
     begin
@@ -490,11 +487,7 @@ begin
     app_AutoPause := FALSE;
 
   if What and APP_USE_LOG > 0 Then
-    begin
-      app_Log := FALSE;
-      if log <> FILE_ERROR Then
-        log_Close;
-    end;
+    app_Log := FALSE;
 
   if What and APP_USE_UTF8 > 0 Then
     font_GetCID := font_GetCP1251ID;

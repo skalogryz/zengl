@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.39               }
-{ date:    20.09.09             }
+{ date:    22.09.09             }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -1067,7 +1067,7 @@ const
   FSM_END    = $03;
 
 var
-  file_Open         : procedure( const FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+  file_Open         : procedure( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
   file_Exists       : function( const FileName : String ) : Boolean;
   file_Seek         : function( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
   file_GetPos       : function( const FileHandle : zglTFile ) : DWORD;
@@ -1076,7 +1076,7 @@ var
   file_Trunc        : procedure( const FileHandle : zglTFile; const count : DWORD );
   file_GetSize      : function( const FileHandle : zglTFile ) : DWORD;
   file_Flush        : procedure( const FileHandle : zglTFile );
-  file_Close        : procedure( const FileHandle : zglTFile );
+  file_Close        : procedure( var FileHandle : zglTFile );
   file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
   file_GetName      : procedure( const FileName : String; var Result : String );
   file_GetExtension : procedure( const FileName : String; var Result : String );

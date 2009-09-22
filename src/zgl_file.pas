@@ -65,7 +65,7 @@ function  file_Write( const FileHandle : zglTFile; const buffer; const count : D
 procedure file_Trunc( const FileHandle : zglTFile; const count : DWORD );
 function  file_GetSize( const FileHandle : zglTFile ) : DWORD;
 procedure file_Flush( const FileHandle : zglTFile );
-procedure file_Close( const FileHandle : zglTFile );
+procedure file_Close( var FileHandle : zglTFile );
 procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
 procedure file_GetName( const FileName : String; var Result : String );
 procedure file_GetExtension( const FileName : String; var Result : String );
@@ -269,9 +269,11 @@ procedure file_Close;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   fclose( FileHandle );
+  FileHandle := nil;
 {$ENDIF}
 {$IFDEF WIN32}
   CloseHandle( FileHandle );
+  FileHandle := 0;
 {$ENDIF}
 end;
 
