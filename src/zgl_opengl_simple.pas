@@ -52,6 +52,7 @@ var
 
 procedure Set2DMode;
 begin
+  if cam2dApply Then cam2d_Apply( nil );
   if ogl_Mode <> 1 Then ogl_Mode := 2;
 
   glDisable( GL_DEPTH_TEST );
@@ -68,6 +69,7 @@ end;
 
 procedure Set3DMode;
 begin
+  if cam2dApply Then cam2d_Apply( nil );
   if ogl_Mode <> 1 Then ogl_Mode := 3;
   ogl_FOVY := FOVY;
 

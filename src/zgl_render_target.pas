@@ -453,14 +453,15 @@ begin
           RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
             begin
               Flags := lRTarget.Surface.Flags;
-              tex_Filter( lRTarget.Surface, TEX_CLAMP or TEX_FILTER_NEAREST );
 
               glEnable( GL_TEXTURE_2D );
-              glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
+              tex_Filter( lRTarget.Surface, TEX_CLAMP or TEX_FILTER_NEAREST );
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
               glDisable( GL_TEXTURE_2D );
 
+              glEnable( GL_TEXTURE_2D );
               tex_Filter( lRTarget.Surface, Flags );
+              glDisable( GL_TEXTURE_2D );
             end;
           RT_TYPE_FBO:
             begin

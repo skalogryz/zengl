@@ -93,6 +93,7 @@ uses
   zgl_window,
   zgl_opengl,
   zgl_opengl_all,
+  zgl_opengl_simple,
   zgl_log,
   zgl_keyboard,
   zgl_mouse,
@@ -140,6 +141,7 @@ end;
 
 procedure app_Draw;
 begin
+  SetCurrentMode;
   scr_Clear;
   app_PDraw;
   scr_Flush;
