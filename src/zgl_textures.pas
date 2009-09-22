@@ -219,7 +219,7 @@ function tex_CreateZero;
     i       : DWORD;
     pData   : Pointer;
 begin
-  zgl_GetMem( pData, Width * Height * 4 );
+  GetMem( pData, Width * Height * 4 );
   for i := 0 to Width * Height - 1 do
     Move( Color, Pointer( Ptr( pData ) + i * 4 )^, 4 );
 
@@ -362,7 +362,7 @@ begin
 
   tex_GetData( Texture, tData, tSize );
   tex_GetData( Mask, mData, mSize );
-  zgl_GetMem( pData, Texture.Width * Texture.Height * 4 );
+  GetMem( pData, Texture.Width * Texture.Height * 4 );
 
   for i := 0 to Texture.Width - 1 do
     for j := 0 to Texture.Height - 1 do
@@ -479,7 +479,7 @@ begin
   SetLength( Data, Width * Height * 4 );
   Move( pData^, Pointer( Data )^, Width * Height * 4 );
   FreeMem( pData );
-  zgl_GetMem( pData, w * h * 4 );
+  GetMem( pData, w * h * 4 );
 
   for i := 0 to Height - 1 do
     Move( Data[ i * Width * 4 ], PDWORD( Ptr( pData ) + i * w * 4 )^, Width * 4 );
@@ -530,24 +530,15 @@ end;
 
 procedure tex_CalcRGB;
   var
-    i, j : DWORD;
-    Data : array of Byte;
+    i : DWORD;
 begin
-  SetLength( Data, Width * Height * 4 );
-  Move( pData^, Pointer( Data )^, Width * Height * 4 );
-  FreeMem( pData );
-  zgl_GetMem( pData, Width * Height * 3 );
-  FillChar( pData^, Width * Height * 3, 0 );
-
-  for i := 0 to Height - 1 do
-    for j := 0 to Width - 1 do
-      begin
-        PByte( Ptr( pData ) + j * 3 + i * Width * 3 + 0 )^ := Data[ j * 4 + i * Width * 4 + 0 ];
-        PByte( Ptr( pData ) + j * 3 + i * Width * 3 + 1 )^ := Data[ j * 4 + i * Width * 4 + 1 ];
-        PByte( Ptr( pData ) + j * 3 + i * Width * 3 + 2 )^ := Data[ j * 4 + i * Width * 4 + 2 ];
-      end;
-
-  SetLength( Data, 0 );
+  for i := 0 to Width * Height - 1 do
+    begin
+      PByte( Ptr( pData ) + i * 3 + 0 )^ := PByte( Ptr( pData ) + i * 4 + 0 )^;
+      PByte( Ptr( pData ) + i * 3 + 1 )^ := PByte( Ptr( pData ) + i * 4 + 1 )^;
+      PByte( Ptr( pData ) + i * 3 + 2 )^ := PByte( Ptr( pData ) + i * 4 + 2 )^;
+    end;
+  ReallocMem( pData, Width * Height * 3 );
 end;
 
 procedure tex_CalcTransparent;
@@ -645,7 +636,7 @@ end;
 procedure tex_GetData;
 begin
   pSize := 3 + Byte( Texture.Flags and TEX_RGB = 0 );
-  zgl_GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * pSize );
+  GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * pSize );
 
   glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );

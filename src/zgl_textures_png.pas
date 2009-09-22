@@ -385,7 +385,6 @@ begin
       Color.G := Byte( Src^ );
       Color.B := Byte( Src^ ); INC( Src );
       Color.A := Byte( Src^ ); INC( Src );
-      if Color.A = 0 Then Cardinal( Color^ ) := 0;
       INC( Color );
     end;
 end;
@@ -414,14 +413,14 @@ begin
       exit;
     end;
 
-  for i := 1 to pngHeader.Height do
+  for i := pngHeader.Height downto 1 do
     begin
       png_DecodeIDAT( @pngRowBuffer[ pngRowUsed ][ 0 ], pngRowsize + 1 );
       if pngFail Then exit;
 
       png_FilterRow;
 
-      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( pngData ) + pngHeader.Height * pngHeader.Width * 4 - pngHeader.Width * 4 * i ) );
+      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( pngData ) + pngHeader.Width * 4 * ( i - 1 ) ) );
 
       pngRowUsed := not pngRowUsed;
     end;
