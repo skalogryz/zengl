@@ -572,7 +572,8 @@ type
 end;
 
 var
-  cam2d_Set : procedure( const Camera : zglPCamera2D );
+  cam2d_Set   : procedure( const Camera : zglPCamera2D );
+  cam2d_Apply : procedure( const Camera : zglPCamera2D );
 
 // Render 2D
   batch2d_Begin : procedure;
@@ -1251,6 +1252,7 @@ begin
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );
 
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );
+      cam2d_Apply := dlsym( zglLib, 'cam2d_Apply' );
 
       batch2d_Begin := dlsym( zglLib, 'batch2d_Begin' );
       batch2d_End := dlsym( zglLib, 'batch2d_End' );

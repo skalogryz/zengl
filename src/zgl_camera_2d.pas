@@ -39,11 +39,13 @@ type
 end;
 
 procedure cam2d_Set( const Camera : zglPCamera2D );
+procedure cam2d_Apply( const Camera : zglPCamera2D );
 
 procedure cam2d_Vertex2f( X, Y : Single ); stdcall;
 procedure cam2d_Vertex2fv( v : Pointer ); stdcall;
 
 var
+  cam2dApply    : Boolean;
   cam2dZoomX    : Single;
   cam2dZoomY    : Single;
   cam2dAngle    : Single;
@@ -74,6 +76,29 @@ begin
         gl_Vertex2fv := @cam2d_Vertex2fv;
         sprite2d_InScreen := sprite2d_InScreenCamera;
       end;
+end;
+
+procedure cam2d_Apply;
+begin
+  batch2d_Flush;
+
+  if cam2dApply Then
+    glPopMatrix;
+  cam2dApply  := TRUE;
+  cam2dGlobal := Camera;
+
+  glPushMatrix;
+  if ( Camera.Angle <> 0 ) or ( Camera.Zoom.X <> 0 ) or ( Camera.Zoom.Y <> 0 ) Then
+    begin
+      glTranslatef( ogl_Width / 2, ogl_Height / 2, 0 );
+      if ( Camera.Zoom.X <> 0 ) or ( Camera.Zoom.Y <> 0 ) Then
+        glScalef( Camera.Zoom.X, Camera.Zoom.Y, 1 );
+      if Camera.Angle <> 0 Then
+        glRotatef( Camera.Angle, 0, 0, 1 );
+      glTranslatef( -ogl_Width / 2, -ogl_Height / 2, 0 );
+    end;
+  if ( Camera.X <> 0 ) or ( Camera.Y <> 0 ) Then
+    glTranslatef( -Camera.X, -Camera.Y, 0 );
 end;
 
 procedure cam2d_Vertex2f;
