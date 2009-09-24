@@ -452,14 +452,10 @@ begin
               Flags := lRTarget.Surface.Flags;
 
               glEnable( GL_TEXTURE_2D );
-              tex_Filter( lRTarget.Surface, TEX_CLAMP or TEX_FILTER_NEAREST );
+              glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                    Round( lRTarget.Surface.Width / lRTarget.Surface.U ),
                                    Round( lRTarget.Surface.Height / lRTarget.Surface.V ) );
-              glDisable( GL_TEXTURE_2D );
-
-              glEnable( GL_TEXTURE_2D );
-              tex_Filter( lRTarget.Surface, Flags );
               glDisable( GL_TEXTURE_2D );
             end;
           RT_TYPE_FBO:
