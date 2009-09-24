@@ -401,7 +401,6 @@ end;
 procedure rtarget_Set;
   var
     Flags : DWORD;
-    addX  : Integer;
 begin
   batch2d_Flush;
 
@@ -436,14 +435,12 @@ begin
           end;
       end;
       ogl_Mode := 1;
-      // O_o
-      addX := Byte( ( scr_AddCX > 0 ) and ( Target.rtType <> RT_TYPE_SIMPLE ) );
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
-        glViewport( 0, 0, Target.Surface.Width + addX, Target.Surface.Height )
+        glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
       else
         glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
-                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ) + addX, ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
+                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
 
       if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
@@ -456,7 +453,9 @@ begin
 
               glEnable( GL_TEXTURE_2D );
               tex_Filter( lRTarget.Surface, TEX_CLAMP or TEX_FILTER_NEAREST );
-              glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
+              glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0,
+                                   Round( lRTarget.Surface.Width / lRTarget.Surface.U ),
+                                   Round( lRTarget.Surface.Height / lRTarget.Surface.V ) );
               glDisable( GL_TEXTURE_2D );
 
               glEnable( GL_TEXTURE_2D );
