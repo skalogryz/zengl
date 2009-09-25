@@ -41,10 +41,11 @@ uses
   zgl_main,
   zgl_window,
   zgl_screen,
+  zgl_opengl,
+  zgl_opengl_all,
   zgl_render_2d,
   zgl_camera_2d,
-  zgl_opengl,
-  zgl_opengl_all;
+  zgl_render_target;
 
 var
   tSCount  : Integer;
@@ -58,10 +59,14 @@ begin
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
-    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
-  else
-    glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
+  if ogl_Mode = 2 Then
+    begin
+      if app_Flags and CORRECT_RESOLUTION > 0 Then
+        glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
+      else
+        glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
+    end else
+      glOrtho( 0, rtWidth, rtHeight, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
   scr_SetViewPort;
