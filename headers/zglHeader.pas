@@ -944,8 +944,10 @@ var
 
 // Sound
 const
-  SND_ALL    = -2;
-  SND_STREAM = -3;
+  SND_ALL           = -2;
+  SND_STREAM        = -3;
+
+  SND_STATE_PLAYING = 1;
 
 type
   zglPSound        = ^zglTSound;
@@ -1014,6 +1016,7 @@ var
   snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
   snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
   snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
+  snd_Get               : function( const Sound : zglPSound; const ID, What : Integer ) : Integer;
   snd_PlayFile          : function( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
   snd_StopFile          : procedure( const ID : Integer );
   snd_ResumeFile        : procedure( const ID : Integer );
@@ -1307,6 +1310,7 @@ begin
       snd_SetVolume := dlsym( zglLib, 'snd_SetVolume' );
       snd_SetFrequency := dlsym( zglLib, 'snd_SetFrequency' );
       snd_SetFrequencyCoeff := dlsym( zglLib, 'snd_SetFrequencyCoeff' );
+      snd_Get := dlsym( zglLib, 'snd_Get' );
       snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
       snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
       snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );

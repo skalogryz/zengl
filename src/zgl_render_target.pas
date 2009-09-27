@@ -460,7 +460,7 @@ begin
       end;
       glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
 
-      if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) then
+      if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) Then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
     end else
       begin

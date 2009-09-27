@@ -43,10 +43,12 @@ uses
   zgl_memory;
 
 const
-  SND_ALL    = -2;
-  SND_STREAM = -3;
+  SND_ALL           = -2;
+  SND_STREAM        = -3;
 
-  SND_MAX    = 8;
+  SND_STATE_PLAYING = 1;
+
+  SND_MAX           = 8;
 
 type
   zglPSound        = ^zglTSound;
@@ -128,6 +130,7 @@ procedure snd_Stop( const Sound : zglPSound; const ID : Integer );
 procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const ID : Integer );
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );
 procedure snd_SetFrequencyCoeff( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
+function  snd_Get( const Sound : zglPSound; const ID, What : Integer ) : Integer;
 
 function  snd_GetStreamID : Integer;
 function  snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
@@ -146,7 +149,6 @@ var
   sndAutoPaused  : Boolean;
 
   sfCS     : TRTLCriticalSection;
-  sfLastID : DWORD;
   sfArray  : array[ 1..SND_MAX ] of Boolean;
   sfStream : array[ 1..SND_MAX ] of zglTSoundStream;
   sfVolume : Single = 1;
@@ -156,7 +158,7 @@ var
   sfSource   : array[ 1..SND_MAX ] of LongWord;
   sfBuffers  : array[ 1..SND_MAX, 0..3 ] of LongWord;
   {$ELSE}
-  sfBuffer  : array[ 1..SND_MAX ] of IDirectSoundBuffer;
+  sfSource  : array[ 1..SND_MAX ] of IDirectSoundBuffer;
   sfLastPos : array[ 1..SND_MAX ] of DWORD;
   {$ENDIF}
 
@@ -308,7 +310,7 @@ begin
   FreeOpenAL;
 {$ELSE}
   for i := 1 to SND_MAX do
-    sfBuffer[ i ]  := nil;
+    sfSource[ i ]  := nil;
   ds_Device := nil;
 
   FreeDSound;
@@ -602,7 +604,7 @@ begin
       {$IFDEF USE_OPENAL}
       alSourcef( sfSource[ DWORD( Sound ) ], AL_GAIN, Volume );
       {$ELSE}
-      sfBuffer[ DWORD( Sound ) ].SetVolume( dsu_CalcVolume( Volume ) );
+      sfSource[ DWORD( Sound ) ].SetVolume( dsu_CalcVolume( Volume ) );
       {$ENDIF}
       exit;
     end else
@@ -612,7 +614,7 @@ begin
             {$IFDEF USE_OPENAL}
             alSourcef( sfSource[ i ], AL_GAIN, Volume );
             {$ELSE}
-            sfBuffer[ i ].SetVolume( dsu_CalcVolume( Volume ) );
+            sfSource[ i ].SetVolume( dsu_CalcVolume( Volume ) );
             {$ENDIF}
 
   if Assigned( Sound ) Then
@@ -659,7 +661,7 @@ begin
       {$IFDEF USE_OPENAL}
       alSourcef( sfSource[ DWORD( Sound ) ], AL_FREQUENCY, Frequency );
       {$ELSE}
-      sfBuffer[ DWORD( Sound ) ].SetFrequency( Frequency );
+      sfSource[ DWORD( Sound ) ].SetFrequency( Frequency );
       {$ENDIF}
       exit;
     end else
@@ -669,7 +671,7 @@ begin
             {$IFDEF USE_OPENAL}
             alSourcef( sfSource[ i ], AL_FREQUENCY, Frequency );
             {$ELSE}
-            sfBuffer[ i ].SetFrequency( Frequency );
+            sfSource[ i ].SetFrequency( Frequency );
             {$ENDIF}
 
   if Assigned( Sound ) Then
@@ -716,7 +718,7 @@ begin
       {$IFDEF USE_OPENAL}
       alSourcef( sfSource[ DWORD( Sound ) ], AL_FREQUENCY, Round( sfStream[ DWORD( Sound ) ].Rate * Coefficient ) );
       {$ELSE}
-      sfBuffer[ DWORD( Sound ) ].SetFrequency( Round( sfStream[ DWORD( Sound ) ].Rate * Coefficient ) );
+      sfSource[ DWORD( Sound ) ].SetFrequency( Round( sfStream[ DWORD( Sound ) ].Rate * Coefficient ) );
       {$ENDIF}
       exit;
     end else
@@ -726,7 +728,7 @@ begin
             {$IFDEF USE_OPENAL}
             alSourcef( sfSource[ i ], AL_FREQUENCY, Round( sfStream[ i ].Rate * Coefficient ) );
             {$ELSE}
-            sfBuffer[ i ].SetFrequency( Round( sfStream[ i ].Rate * Coefficient ) );
+            sfSource[ i ].SetFrequency( Round( sfStream[ i ].Rate * Coefficient ) );
             {$ENDIF}
 
   if Assigned( Sound ) Then
@@ -749,6 +751,43 @@ begin
               snd := snd.Next;
             end;
         end;
+end;
+
+function snd_Get;
+  var
+    Status : {$IFDEF USE_OPENAL} LongInt {$ELSE} DWORD {$ENDIF};
+  function GetStatusPlaying( Source : {$IFDEF USE_OPENAL} DWORD {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
+  begin
+    {$IFDEF USE_OPENAL}
+    alGetSourcei( Source, AL_SOURCE_STATE, Status );
+    Result := Byte( Status = AL_PLAYING );
+    {$ELSE}
+    if not Assigned( Source ) Then
+      begin
+        Result := 0;
+        exit;
+      end;
+    Source.GetStatus( Status );
+    Result := Byte( Status and DSBSTATUS_PLAYING > 0 );
+    {$ENDIF}
+  end;
+begin
+  if ID = SND_STREAM Then
+    begin
+      case What of
+        SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ DWORD( Sound ) ] );
+      end;
+    end else
+      begin
+        if not Assigned( Sound ) Then
+          begin
+            Result := -1;
+            exit;
+          end;
+        case What of
+          SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Source[ ID ] );
+        end;
+      end;
 end;
 
 function snd_GetStreamID;
@@ -780,10 +819,7 @@ begin
 
   Result := snd_GetStreamID;
   if Result = -1 Then
-    begin
-      log_Add( 'Error: Too many streams!' );
-      exit;
-    end;
+    exit;
 
   if Assigned( sfStream[ Result ]._Decoder ) Then
     begin
@@ -847,16 +883,16 @@ begin
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );
     end;
-  if Assigned( sfBuffer[ Result ] ) Then sfBuffer[ Result ] := nil;
-  dsu_CreateBuffer( sfBuffer[ Result ], sfStream[ Result ].BufferSize, @buffDesc.FormatCode );
+  if Assigned( sfSource[ Result ] ) Then sfSource[ Result ] := nil;
+  dsu_CreateBuffer( sfSource[ Result ], sfStream[ Result ].BufferSize, @buffDesc.FormatCode );
   BytesRead := sfStream[ Result ]._Decoder.Read( sfStream[ Result ], sfStream[ Result ].Buffer, sfStream[ Result ].BufferSize, _End );
-  dsu_FillData( sfBuffer[ Result ], sfStream[ Result ].Buffer, BytesRead );
+  dsu_FillData( sfSource[ Result ], sfStream[ Result ].Buffer, BytesRead );
 
   sfLastPos[ Result ] := 0;
-  sfBuffer[ Result ].SetCurrentPosition( 0 );
-  sfBuffer[ Result ].Play( 0, 0, DSBPLAY_LOOPING );
-  sfBuffer[ Result ].SetVolume( dsu_CalcVolume( sfVolume ) );
-  sfBuffer[ Result ].SetFrequency( sfStream[ Result ].Rate );
+  sfSource[ Result ].SetCurrentPosition( 0 );
+  sfSource[ Result ].Play( 0, 0, DSBPLAY_LOOPING );
+  sfSource[ Result ].SetVolume( dsu_CalcVolume( sfVolume ) );
+  sfSource[ Result ].SetFrequency( sfStream[ Result ].Rate );
 {$ENDIF}
 
   sfArray[ Result ] := TRUE;
@@ -876,19 +912,19 @@ begin
 
   sfArray[ ID ] := FALSE;
 
-{$IFDEF USE_OPENAL}
-  alSourceStop( sfSource[ ID ] );
-  alSourceRewind( sfSource[ ID ] );
-  alSourcei( sfSource[ ID ], AL_BUFFER, 0 );
-{$ELSE}
-  sfBuffer[ ID ].Stop;
-{$ENDIF}
-
 {$IFDEF LINUX_OR_DARWIN}
   KillThread( Thread[ ID ] );
 {$ELSE}
   TerminateThread( ThreadID[ ID ], 0 );
   CloseHandle( Thread[ ID ] );
+{$ENDIF}
+
+{$IFDEF USE_OPENAL}
+  alSourceStop( sfSource[ ID ] );
+  alSourceRewind( sfSource[ ID ] );
+  alSourcei( sfSource[ ID ], AL_BUFFER, 0 );
+{$ELSE}
+  sfSource[ ID ].Stop;
 {$ENDIF}
 end;
 
@@ -908,7 +944,6 @@ function snd_ProcFile;
   {$ENDIF}
 begin
   ID := DWORD( data );
-  sfLastID := 0;
 
   {$IFDEF USE_OPENAL}
   processed := 0;
@@ -937,8 +972,8 @@ begin
         end;
       {$ELSE}
       EnterCriticalSection( sfCS );
-      while DWORD( sfBuffer[ ID ].GetCurrentPosition( @Position, @b1Size ) ) = DSERR_BUFFERLOST do
-        sfBuffer[ ID ].Restore;
+      while DWORD( sfSource[ ID ].GetCurrentPosition( @Position, @b1Size ) ) = DSERR_BUFFERLOST do
+        sfSource[ ID ].Restore;
       LeaveCriticalSection( sfCS );
 
       FillSize := ( sfStream[ ID ].BufferSize + Position - sfLastPos[ ID ] ) mod sfStream[ ID ].BufferSize;
@@ -948,14 +983,14 @@ begin
       b1Size := 0;
       b2Size := 0;
 
-      if sfBuffer[ ID ].Lock( sfLastPos[ ID ], FillSize, Block1, b1Size, Block2, b2Size, 0 ) <> DS_OK Then break;
+      if sfSource[ ID ].Lock( sfLastPos[ ID ], FillSize, Block1, b1Size, Block2, b2Size, 0 ) <> DS_OK Then break;
       sfLastPos[ ID ] := Position;
 
       sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block1, b1Size, _End );
       if ( b2Size <> 0 ) and ( not _End ) Then
         sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block2, b2Size, _End );
 
-      sfBuffer[ ID ].Unlock( Block1, b1Size, Block2, b2Size );
+      sfSource[ ID ].Unlock( Block1, b1Size, Block2, b2Size );
       {$ENDIF}
       if _End then
         begin
@@ -974,7 +1009,7 @@ begin
 {$IFDEF USE_OPENAL}
   alSourceQueueBuffers( sfSource[ ID ], 1, @buffer );
 {$ELSE}
-  sfBuffer[ ID ].Stop;
+  sfSource[ ID ].Stop;
 {$ENDIF}
 
 {$IFDEF LINUX_OR_DARWIN}
@@ -1012,15 +1047,14 @@ begin
   alSourcePlay( sfSource[ ID ] );
 {$ELSE}
   BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], sfStream[ ID ].Buffer, sfStream[ ID ].BufferSize, _End );
-  dsu_FillData( sfBuffer[ ID ], sfStream[ ID ].Buffer, BytesRead );
+  dsu_FillData( sfSource[ ID ], sfStream[ ID ].Buffer, BytesRead );
 
   sfLastPos[ ID ] := 0;
-  sfBuffer[ ID ].SetCurrentPosition( 0 );
-  sfBuffer[ ID ].Play( 0, 0, DSBPLAY_LOOPING );
+  sfSource[ ID ].SetCurrentPosition( 0 );
+  sfSource[ ID ].Play( 0, 0, DSBPLAY_LOOPING );
 {$ENDIF}
 
   sfArray[ ID ] := TRUE;
-  sfLastID      := ID;
 {$IFDEF LINUX_OR_DARWIN}
   Thread[ ID ] := BeginThread( @snd_ProcFile, Pointer( ID ) );
 {$ENDIF}
