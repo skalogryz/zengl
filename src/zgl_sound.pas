@@ -495,8 +495,8 @@ begin
   sourcePos[ 2 ] := Z;
 
   alSourcei ( Sound.Source[ Result ], AL_BUFFER,    Sound.Buffer );
-  alSourcefv( Sound.Source[ Result ], AL_POSITION,  @sourcePos );
-  alSourcefv( Sound.Source[ Result ], AL_VELOCITY,  @oal_Velocity );
+  alSourcefv( Sound.Source[ Result ], AL_POSITION,  @sourcePos[ 0 ] );
+  alSourcefv( Sound.Source[ Result ], AL_VELOCITY,  @oal_Velocity[ 0 ] );
   alSourcef ( Sound.Source[ Result ], AL_GAIN,      sndVolume );
   alSourcei ( Sound.Source[ Result ], AL_FREQUENCY, Sound.Frequency );
 
@@ -921,8 +921,6 @@ begin
 
 {$IFDEF USE_OPENAL}
   alSourceStop( sfSource[ ID ] );
-  alSourceRewind( sfSource[ ID ] );
-  alSourcei( sfSource[ ID ], AL_BUFFER, 0 );
 {$ELSE}
   sfSource[ ID ].Stop;
 {$ENDIF}
@@ -1018,39 +1016,14 @@ begin
 end;
 
 procedure snd_ResumeFile;
-  var
-    {$IFDEF USE_OPENAL}
-    i    : Integer;
-    {$ENDIF}
-    _End : Boolean;
-    BytesRead : Integer;
 begin
   if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
      ( sfArray[ ID ] ) or
      ( not sndInitialized ) Then exit;
 
 {$IFDEF USE_OPENAL}
-  alSourceStop( sfSource[ ID ] );
-  alSourceRewind( sfSource[ ID ] );
-  alSourcei( sfSource[ ID ], AL_BUFFER, 0 );
-
-  for i := 0 to sfBufCount - 1 do
-    begin
-      BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], sfStream[ ID ].Buffer, sfStream[ ID ].BufferSize, _End );
-      if BytesRead <= 0 Then break;
-
-      alBufferData( sfBuffers[ ID, i ], sfFormat[ sfStream[ ID ].Channels ], sfStream[ ID ].Buffer, BytesRead, sfStream[ ID ].Rate );
-      alSourceQueueBuffers( sfSource[ ID ], 1, @sfBuffers[ ID, i ] );
-    end;
-
-  alSourcei( sfSource[ ID ], AL_LOOPING, AL_FALSE );
   alSourcePlay( sfSource[ ID ] );
 {$ELSE}
-  BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], sfStream[ ID ].Buffer, sfStream[ ID ].BufferSize, _End );
-  dsu_FillData( sfSource[ ID ], sfStream[ ID ].Buffer, BytesRead );
-
-  sfLastPos[ ID ] := 0;
-  sfSource[ ID ].SetCurrentPosition( 0 );
   sfSource[ ID ].Play( 0, 0, DSBPLAY_LOOPING );
 {$ENDIF}
 

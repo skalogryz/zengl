@@ -1137,7 +1137,7 @@
     <LI><a name='snd_Play'>
     <div class='code'><b>function</b> snd_Play( <b>const</b> Sound : zglPSound; <b>const</b> Loop : Boolean = FALSE; <b>const</b> X : Single = 0; <b>const</b> Y : Single = 0; <b>const</b> Z : Single = 0 ) : Integer;</div>
     <div align='justify'>
-    Воспроизвести сэмпл <b>Sound</b> в позиции <b>X</b>, <b>Y</b>, <b>Z</b>. <b>Loop</b> указывает воспроизводить ли сэмпл бесконечно. В результате возвращается идентификатор, указывающий номер канала.
+    Воспроизвести сэмпл <b>Sound</b> в позиции <b>X</b>, <b>Y</b>, <b>Z</b>. <b>Loop</b> указывает воспроизводить ли сэмпл зацикленно. В результате возвращается идентификатор, указывающий номер канала.
     </div>
     </LI><br>
 
@@ -1175,22 +1175,25 @@
 
     <!--snd_PlayFile-->
     <LI><a name='snd_PlayFile'>
-    <div class='code'><b>procedure</b> snd_PlayFile( <b>const</b> FileName : <b>String</b>; <b>const</b> Loop : Boolean = FALSE );</div>
+    <div class='code'><b>function</b> snd_PlayFile( <b>const</b> FileName : <b>String</b>; <b>const</b> Loop : Boolean = FALSE ) : Integer;</div>
     <div align='justify'>
+    Воспроизводит аудио-файл <b>FileName</b> в отдельном потоке. <b>Loop</b> указывает воспроизводить ли зацикленно. В результате возвращает идентификатор.
     </div>
     </LI><br>
 
     <!--snd_StopFile-->
     <LI><a name='snd_StopFile'>
-    <div class='code'><b>procedure</b> snd_StopFile;</div>
+    <div class='code'><b>procedure</b> snd_StopFile( <b>const</b> ID : Integer );</div>
     <div align='justify'>
+    Останавливает воспроизведение аудио-файла с идентификатором <b>ID</b>.
     </div>
     </LI><br>
 
     <!--snd_ResumeFile-->
     <LI><a name='snd_ResumeFile'>
-    <div class='code'><b>procedure</b> snd_ResumeFile;</div>
+    <div class='code'><b>procedure</b> snd_ResumeFile( <b>const</b> ID : Integer );</div>
     <div align='justify'>
+    Восстанавливает воспроизведение аудио-файла с идентификатором <b>ID</b>.
     </div>
     </LI>
   </UL>
