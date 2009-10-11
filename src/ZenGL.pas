@@ -255,10 +255,12 @@ exports
   snd_LoadFromMemory       name prefix + 'snd_LoadFromMemory',
   snd_Play                 name prefix + 'snd_Play',
   snd_Stop                 name prefix + 'snd_Stop',
+  snd_SetPos               name prefix + 'snd_SetPos',
   snd_SetVolume            name prefix + 'snd_SetVolume',
   snd_SetFrequency         name prefix + 'snd_SetFrequency',
   snd_SetFrequencyCoeff    name prefix + 'snd_SetFrequencyCoeff',
   snd_PlayFile             name prefix + 'snd_PlayFile',
+  snd_PauseFile            name prefix + 'snd_PauseFile',
   snd_StopFile             name prefix + 'snd_StopFile',
   snd_ResumeFile           name prefix + 'snd_ResumeFile',
 

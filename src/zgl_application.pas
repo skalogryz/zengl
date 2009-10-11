@@ -175,6 +175,7 @@ begin
   while app_Work do
     begin
       OSProcess;
+      snd_MainLoop;
 
       CanKillTimers := FALSE;
       {$IFDEF LINUX}
@@ -185,43 +186,6 @@ begin
           app_Pause := FALSE;
         end;
       {$ENDIF}
-      if app_Focus Then
-        begin
-          if sndAutoPaused Then
-            begin
-              sndAutoPaused := FALSE;
-              {$IFDEF USE_OPENAL}
-              for i := 0 to length( oal_Sources ) - 1 do
-                if oal_SrcState[ i ] = AL_PLAYING Then
-                  alSourcePlay( oal_Sources[ i ] );
-              {$ENDIF}
-              for i := 1 to SND_MAX do
-                if sfArray[ i ] Then
-                  begin
-                    sfArray[ i ] := FALSE;
-                    snd_ResumeFile( i );
-                  end;
-            end;
-        end else
-          if not sndAutoPaused Then
-            begin
-              sndAutoPaused := TRUE;
-              {$IFDEF USE_OPENAL}
-              for i := 0 to length( oal_Sources ) - 1 do
-                begin
-                  alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
-                  if z = AL_PLAYING Then
-                    alSourcePause( oal_Sources[ i ] );
-                  oal_SrcState[ i ] := z;
-                end;
-              {$ENDIF}
-              for i := 1 to SND_MAX do
-                if sfArray[ i ] Then
-                  begin
-                    snd_StopFile( i );
-                    sfArray[ i ] := TRUE;
-                  end;
-            end;
 
       if not app_Pause Then
         begin

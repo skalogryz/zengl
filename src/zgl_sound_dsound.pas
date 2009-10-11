@@ -168,7 +168,7 @@ begin
                       DSBCAPS_CTRLVOLUME         or
                       DSBCAPS_CTRLFREQUENCY      or
                       DSBCAPS_CTRLPOSITIONNOTIFY or
-                      DSBCAPS_GLOBALFOCUS        or
+                      //DSBCAPS_GLOBALFOCUS        or
                       DSBCAPS_GETCURRENTPOSITION2;
   DSoundBD.dwBufferBytes := BufferSize;
   DSoundBD.lpwfxFormat   := Format;

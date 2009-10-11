@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.39               }
-{ date:    22.09.09             }
+{ date:    2009.10.11           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -948,6 +948,9 @@ const
   SND_STREAM        = -3;
 
   SND_STATE_PLAYING = 1;
+  SND_STATE_PLAYING = 1;
+  SND_STATE_PERCENT = 2;
+  SND_STATE_TIME    = 3;
 
 type
   zglPSound        = ^zglTSound;
@@ -963,6 +966,7 @@ type
 
     Data         : Pointer;
     Size         : Integer;
+    Length       : Double;
     Frequency    : Integer;
 
     Prev, Next   : zglPSound;
@@ -972,12 +976,19 @@ end;
     _Data      : Pointer;
     _File      : zglTFile;
     _Decoder   : zglPSoundDecoder;
-    Rate       : DWORD;
-    Channels   : DWORD;
+    _Played    : Boolean;
+    _Paused    : Boolean;
+    _Complete  : Double;
+    _LastTime  : Double;
+
     Buffer     : Pointer;
     BufferSize : DWORD;
+
+    Frequency  : DWORD;
+    Channels   : DWORD;
+    Length     : Double;
+
     Loop       : Boolean;
-    Played     : Boolean;
 end;
 
   zglTSoundDecoder = record
@@ -1013,11 +1024,13 @@ var
   snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 8 ) : zglPSound;
   snd_Play              : function( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
   snd_Stop              : procedure( const Sound : zglPSound; const ID : Integer );
-  snd_SetVolume         : procedure( const Sound : zglPSound; const Volume : Single; const ID : Integer );
-  snd_SetFrequency      : procedure( const Sound : zglPSound; const Frequency, ID : Integer );
-  snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const Coefficient : Single; const ID : Integer );
+  snd_SetPos            : procedure( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
+  snd_SetVolume         : procedure( const Sound : zglPSound; const ID : Integer; const Volume : Single );
+  snd_SetFrequency      : procedure( const Sound : zglPSound; const ID, Frequency : Integer );
+  snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const ID : Integer; const Coefficient : Single );
   snd_Get               : function( const Sound : zglPSound; const ID, What : Integer ) : Integer;
   snd_PlayFile          : function( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
+  snd_PauseFile         : procedure( const ID : Integer );
   snd_StopFile          : procedure( const ID : Integer );
   snd_ResumeFile        : procedure( const ID : Integer );
 
@@ -1307,11 +1320,13 @@ begin
       snd_LoadFromMemory := dlsym( zglLib, 'snd_LoadFromMemory' );
       snd_Play := dlsym( zglLib, 'snd_Play' );
       snd_Stop := dlsym( zglLib, 'snd_Stop' );
+      snd_SetPos := dlsym( zglLib, 'snd_SetPos' );
       snd_SetVolume := dlsym( zglLib, 'snd_SetVolume' );
       snd_SetFrequency := dlsym( zglLib, 'snd_SetFrequency' );
       snd_SetFrequencyCoeff := dlsym( zglLib, 'snd_SetFrequencyCoeff' );
       snd_Get := dlsym( zglLib, 'snd_Get' );
       snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
+      snd_PauseFile := dlsym( zglLib, 'snd_PauseFile' );
       snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
       snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );
 
