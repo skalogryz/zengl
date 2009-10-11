@@ -1149,9 +1149,17 @@
     </div>
     </LI><br>
 
+    <!--snd_SetPos-->
+    <LI><a name='snd_SetVolume'>
+    <div class='code'><b>procedure</b> snd_SetPos( <b>const</b> Sound : zglPSound; <b>const</b> ID : Integer; <b>const</b> X, Y, Z : Single );</div>
+    <div align='justify'>
+    Устанавливает канал <b>ID</b> сэмпла <b>Sound</b> в позиции <b>X</b>, <b>Y</b>, <b>Z</b>.
+    </div>
+    </LI><br>
+
     <!--snd_SetVolume-->
     <LI><a name='snd_SetVolume'>
-    <div class='code'><b>procedure</b> snd_SetVolume( <b>const</b> Sound : zglPSound; <b>const</b> Volume : Single; <b>const</b> ID : Integer );</div>
+    <div class='code'><b>procedure</b> snd_SetVolume( <b>const</b> Sound : zglPSound; <b>const</b> ID : Integer; <b>const</b> Volume : Single );</div>
     <div align='justify'>
     Устанавливает громкость <b>Volume</b>(от 0 до 1) каналу <b>ID</b> сэмпла <b>Sound</b>.
     </div>
@@ -1159,7 +1167,7 @@
 
     <!--snd_SetFrequency-->
     <LI><a name='snd_SetFrequency'>
-    <div class='code'><b>procedure</b> snd_SetFrequency( <b>const</b> Sound : zglPSound; <b>const</b> Frequency, ID : Integer );</div>
+    <div class='code'><b>procedure</b> snd_SetFrequency( <b>const</b> Sound : zglPSound; <b>const</b> ID, Frequency : Integer );</div>
     <div align='justify'>
     Устанавливает частоту дискретизации <b>Frequency</b> каналу <b>ID</b> сэмпла <b>Sound</b>.
     </div>
@@ -1167,7 +1175,7 @@
 
     <!--snd_SetFrequencyCoeff-->
     <LI><a name='snd_SetFrequencyCoeff'>
-    <div class='code'><b>procedure</b> snd_SetFrequencyCoeff( <b>const</b> Sound : zglPSound; <b>const</b> Coefficient : Single; <b>const</b> ID : Integer );</div>
+    <div class='code'><b>procedure</b> snd_SetFrequencyCoeff( <b>const</b> Sound : zglPSound; <b>const</b> ID : Integer; <b>const</b> Coefficient : Single );</div>
     <div align='justify'>
     Устанавливает коэфициент дискретизации <b>Coefficient</b>(от 0 до 1) каналу <b>ID</b> сэмпла <b>Sound</b> относительно его оригинальной частоты.
     </div>
@@ -1178,6 +1186,14 @@
     <div class='code'><b>function</b> snd_PlayFile( <b>const</b> FileName : <b>String</b>; <b>const</b> Loop : Boolean = FALSE ) : Integer;</div>
     <div align='justify'>
     Воспроизводит аудио-файл <b>FileName</b> в отдельном потоке. <b>Loop</b> указывает воспроизводить ли зацикленно. В результате возвращает идентификатор.
+    </div>
+    </LI><br>
+
+    <!--snd_PauseFile-->
+    <LI><a name='snd_StopFile'>
+    <div class='code'><b>procedure</b> snd_PauseFile( <b>const</b> ID : Integer );</div>
+    <div align='justify'>
+    Приостанавливает воспроизведение аудио-файла с идентификатором <b>ID</b>. Продолжить воспроизведение возможно посредством функции <a href='#snd_ResumeFile'>snd_ResumeFile</a>.
     </div>
     </LI><br>
 
@@ -1193,7 +1209,7 @@
     <LI><a name='snd_ResumeFile'>
     <div class='code'><b>procedure</b> snd_ResumeFile( <b>const</b> ID : Integer );</div>
     <div align='justify'>
-    Восстанавливает воспроизведение аудио-файла с идентификатором <b>ID</b>.
+    Восстанавливает воспроизведение аудио-файла с идентификатором <b>ID</b>, который был приостановлен функцией <a href='#snd_PauseFile'>snd_PauseFile</a>.
     </div>
     </LI>
   </UL>
