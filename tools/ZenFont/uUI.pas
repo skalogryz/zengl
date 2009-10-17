@@ -17,6 +17,7 @@ procedure regen;
 procedure lb_fonts_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure sn_fsize_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure sn_tsize_change( Widget : zglPWidget; const Value, Change : Integer );
+procedure sn_cpage_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure cb_aa_click( Widget : zglPWidget );
 procedure cb_bold_click( Widget : zglPWidget );
 procedure cb_italic_click( Widget : zglPWidget );
@@ -32,6 +33,8 @@ var
   eb_fsize  : zglPWidget;
   sn_tsize  : zglPWidget;
   eb_tsize  : zglPWidget;
+  sn_cpage  : zglPWidget;
+  eb_cpage  : zglPWidget;
   cb_aa     : zglPWidget;
   cb_italic : zglPWidget;
   cb_bold   : zglPWidget;
@@ -158,6 +161,32 @@ begin
   wlabel.Caption := 'Page Size: ';
   gui_AddWidget( WIDGET_LABEL, 10, 280+ ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
 
+
+  i := Round( text_GetWidth( ui_font, 'Current Page: ' ) );
+  // EditBox CurrentPage
+  FillChar( editbox, SizeOf( editbox ), 0 );
+  editbox.Font     := ui_font;
+  editbox.Text     := '1';
+  editbox.Max      := 1;
+  editbox.ReadOnly := TRUE;
+  eb_cpage         := gui_AddWidget( WIDGET_EDITBOX, i + 10, 315, 250 - i - 20 - 12, 24, TRUE, TRUE, @editbox, nil, gb_tools );
+
+  // Spin CurrentPage
+  FillChar( spin, SizeOf( spin ), 0 );
+  spin.Value    := 1;
+  spin.Max      := 100;
+  spin.Min      := 1;
+  spin.UPressed := FALSE;
+  spin.DPressed := FALSE;
+  sn_cpage      := gui_AddWidget( WIDGET_SPIN, i + ( 250 - i - 20 - 12 ) + 10, 315, 12, 24, FALSE, TRUE, @spin, nil, gb_tools );
+  sn_cpage.Events.OnChange := @sn_cpage_change;
+
+  FillChar( wlabel, SizeOf( wlabel ), 0 );
+  wlabel.Font    := ui_font;
+  wlabel.Caption := 'Current Page: ';
+  gui_AddWidget( WIDGET_LABEL, 10, 315 + ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
+
+
   // Button Save
   FillChar( button, SizeOf( button ), 0 );
   button.Font    := ui_font;
@@ -229,6 +258,13 @@ begin
   zglTEditBoxDesc( eb_tsize.desc^ ).Text := u_IntToStr( desc.Value );
   fg_PageSize := desc.Value;
   regen;
+end;
+
+procedure sn_cpage_change;
+begin
+  if zglPSpinDesc( Widget.desc ).Value > fg_Font.Count.Pages Then
+    zglPSpinDesc( Widget.desc ).Value := fg_Font.Count.Pages;
+  zglTEditBoxDesc( eb_cpage.desc^ ).Text := u_IntToStr( zglPSpinDesc( Widget.desc ).Value );
 end;
 
 procedure cb_aa_click;

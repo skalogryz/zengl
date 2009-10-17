@@ -19,10 +19,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
-unit zgl_sound_modplug;
+unit zglModPlug;
+
+// Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
+{$DEFINE STATIC}
 
 interface
 uses
+  {$IFNDEF STATIC}
+  zglHeader,
+  {$ELSE}
   zgl_types,
   zgl_application,
   zgl_main,
@@ -30,7 +36,9 @@ uses
   zgl_log,
   zgl_file,
   zgl_memory,
-  zgl_utils;
+  zgl_utils
+  {$ENDIF}
+  ;
 
 const
 {$IFDEF WIN32}
@@ -62,10 +70,10 @@ type
   end;
 
 procedure mp_Init;
-function  mp_DecoderOpen( var Stream : zglPSoundStream; const FileName : String ) : Boolean;
-function  mp_DecoderRead( var Stream : zglPSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
-procedure mp_DecoderLoop( var Stream : zglPSoundStream );
-procedure mp_DecoderClose( var Stream : zglPSoundStream );
+function  mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+function  mp_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+procedure mp_DecoderLoop( var Stream : zglTSoundStream );
+procedure mp_DecoderClose( var Stream : zglTSoundStream );
 
 var
   Decoders : array[ 0..MAX_FORMATS - 1 ] of zglTSoundDecoder;
@@ -76,10 +84,11 @@ var
   mpInit    : Boolean;
   mpLibrary : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
 
-  ModPlug_Load   : function(data: pointer; size: longint): PModPlugFile; cdecl;
-  ModPlug_Unload : procedure(_file: PModPlugFile); cdecl;
-  ModPlug_Read   : function(_file: PModPlugFile; buffer: pointer; size: longint): longint; cdecl;
-  ModPlug_Seek   : procedure(_file: PModPlugFile; millisecond: longint); cdecl;
+  ModPlug_Load      : function(data: pointer; size: longint): PModPlugFile; cdecl;
+  ModPlug_Unload    : procedure(_file: PModPlugFile); cdecl;
+  ModPlug_Read      : function(_file: PModPlugFile; buffer: pointer; size: longint): longint; cdecl;
+  ModPlug_Seek      : procedure(_file: PModPlugFile; millisecond: longint); cdecl;
+  ModPlug_GetLength : function(_file: PModPlugFile): longint; cdecl;
 
 implementation
 
@@ -97,10 +106,11 @@ begin
 
   if mpLibrary <> LIB_ERROR Then
     begin
-      ModPlug_Load        := dlsym( mpLibrary, 'ModPlug_Load' );
-      ModPlug_Unload      := dlsym( mpLibrary, 'ModPlug_Unload' );
-      ModPlug_Read        := dlsym( mpLibrary, 'ModPlug_Read' );
-      ModPlug_Seek        := dlsym( mpLibrary, 'ModPlug_Seek' );
+      ModPlug_Load      := dlsym( mpLibrary, 'ModPlug_Load' );
+      ModPlug_Unload    := dlsym( mpLibrary, 'ModPlug_Unload' );
+      ModPlug_Read      := dlsym( mpLibrary, 'ModPlug_Read' );
+      ModPlug_Seek      := dlsym( mpLibrary, 'ModPlug_Seek' );
+      ModPlug_GetLength := dlsym( mpLibrary, 'ModPlug_GetLength' );
 
       log_Add( 'ModPlug: Successful initialized'  );
       mpInit := TRUE;
@@ -128,8 +138,9 @@ begin
     begin
       Result := TRUE;
 
-      Stream.Rate       := 44100;
+      Stream.Frequency  := 44100;
       Stream.Channels   := 2;
+      Stream.Length     := ModPlug_GetLength( PModPlugFile( Stream._Data ) );
       Stream.BufferSize := 64 * 1024;
       zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
     end else
@@ -156,6 +167,7 @@ begin
   if not mpInit Then exit;
 
   ModPlug_Unload( PModPlugFile( Stream._Data ) );
+  Stream._Data := nil;
 end;
 
 var

@@ -285,6 +285,7 @@ procedure ini_ReadKeyStr;
     s, k : AnsiString;
     i, j : Integer;
 begin
+  Result := '';
   s := Section;
   k := Key;
 
@@ -297,6 +298,7 @@ function ini_ReadKeyInt;
     s, k : AnsiString;
     i, j : Integer;
 begin
+  Result := 0;
   s := AnsiString( Section );
   k := AnsiString( Key );
 
@@ -309,6 +311,7 @@ function ini_ReadKeyBool;
     s, k : AnsiString;
     i, j : Integer;
 begin
+  Result := FALSE;
   s := AnsiString( Section );
   k := AnsiString( Key );
 

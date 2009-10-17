@@ -367,7 +367,7 @@ end;
 
 procedure wnd_SetCaption;
 begin
-  wnd_Caption := NewCaption;
+  wnd_Caption := NewCaption + #0;
 {$IFDEF LINUX}
   if wnd_Handle <> 0 Then
     begin

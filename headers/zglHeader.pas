@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.39               }
-{ date:    2009.10.11           }
+{ date:    2009.10.17           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -947,7 +947,6 @@ const
   SND_ALL           = -2;
   SND_STREAM        = -3;
 
-  SND_STATE_PLAYING = 1;
   SND_STATE_PLAYING = 1;
   SND_STATE_PERCENT = 2;
   SND_STATE_TIME    = 3;

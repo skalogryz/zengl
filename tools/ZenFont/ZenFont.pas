@@ -67,30 +67,22 @@ begin
       INC( fg_Font.Count.Chars );
     end;
   // Russian
-  fg_CharsUse[ 1025 ] := TRUE;
-  INC( fg_Font.Count.Chars );
-  fg_CharsUse[ 1105 ] := TRUE;
-  INC( fg_Font.Count.Chars );
+  fg_CharsUse[ 1025 ] := TRUE; // Ё
+  fg_CharsUse[ 1105 ] := TRUE; // ё
+  INC( fg_Font.Count.Chars, 2 );
   for i := 1040 to 1103 do
     begin
       fg_CharsUse[ i ] := TRUE;
       INC( fg_Font.Count.Chars );
     end;
   // Ukranian
-  fg_CharsUse[ 1028 ] := TRUE;
-  INC( fg_Font.Count.Chars );
-  fg_CharsUse[ 1108 ] := TRUE;
-  INC( fg_Font.Count.Chars );
-  for i := 1030 to 1031 do
-    begin
-      fg_CharsUse[ i ] := TRUE;
-      INC( fg_Font.Count.Chars );
-    end;
-  for i := 1110 to 1111 do
-    begin
-      fg_CharsUse[ i ] := TRUE;
-      INC( fg_Font.Count.Chars );
-    end;
+  fg_CharsUse[ 1028 ] := TRUE; // Є
+  fg_CharsUse[ 1108 ] := TRUE; // є
+  fg_CharsUse[ 1030 ] := TRUE; // І
+  fg_CharsUse[ 1110 ] := TRUE; // і
+  fg_CharsUse[ 1031 ] := TRUE; // Ї
+  fg_CharsUse[ 1111 ] := TRUE; // ї
+  INC( fg_Font.Count.Chars, 6 );
 
   fontgen_BuildFont( fg_font, fg_FontList.Items[ 0 ] );
 end;
@@ -111,7 +103,7 @@ begin
   pr2d_Rect( 0, 0, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL );
   text_Draw( ui_font, 0, 600 - ui_font.MaxHeight, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
   if Assigned( fg_Font.Pages ) Then
-    ssprite2d_Draw( fg_Font.Pages[ 0 ], 0, 0, fg_PageSize, fg_PageSize, 0 );
+    ssprite2d_Draw( fg_Font.Pages[ zglPSpinDesc( sn_cpage.desc ).Value - 1 ], 0, 0, fg_PageSize, fg_PageSize, 0 );
 
   gui_Draw;
 end;
