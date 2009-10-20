@@ -199,6 +199,8 @@ end;
 {$IFDEF WIN32}
 procedure zgl_InitToHandle;
 begin
+  if not Assigned( font_GetCID ) Then
+    font_GetCID := font_GetCP1251ID;
   zgl_GetSysDir;
   log_Init;
 
