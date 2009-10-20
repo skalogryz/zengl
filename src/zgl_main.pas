@@ -34,7 +34,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.1.39';
+  cs_ZenGL = 'ZenGL 0.1.40';
 
   // zgl_Reg
   SYS_LOAD               = $000001;
@@ -423,8 +423,15 @@ end;
 
 procedure zgl_GetMem;
 begin
-  GetMem( Mem, Size );
-  FillChar( Mem^, Size, 0 );
+  if Size > 0 Then
+    begin
+      GetMem( Mem, Size );
+      FillChar( Mem^, Size, 0 );
+    end else
+      begin
+        FreeMem( Mem );
+        Mem := nil;
+      end;
 end;
 
 procedure zgl_Enable;
