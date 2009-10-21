@@ -271,6 +271,11 @@ begin
     if Text[ i ] = #10 Then
       INC( WordsCount );
   WordsCount := WordsCount + u_Words( Text );
+  if WordsCount = 0 Then
+    begin
+      scissor_End;
+      exit;
+    end;
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
