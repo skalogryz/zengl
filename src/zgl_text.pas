@@ -132,7 +132,7 @@ begin
 
       if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then
         begin
-          if s > 0 Then
+          if s > 1 Then
             begin
               if Assigned( textLCoord ) Then
                 begin
@@ -426,7 +426,7 @@ begin
       if Flags and TEXT_FX_LENGTH > 0 Then
         begin
           LineFeed := ( i > 0 ) and ( i < WordsCount - 2 ) and ( WordsArray[ i ].Y <> WordsArray[ i - 1 ].Y );
-          textFx_SetLength( b - l );
+          textFx_SetLength( b - l, textLCoord, textLCharDesc );
           if l > b Then continue;
           l := l + u_Length( WordsArray[ i ].str ) - Byte( not LineFeed );
         end;
