@@ -54,7 +54,7 @@ procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const 
 procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
 procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
 function  text_GetWidth( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
-procedure textFx_SetLength( const Length : Integer );
+procedure textFx_SetLength( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 
 implementation
 uses
@@ -67,10 +67,12 @@ uses
   zgl_utils;
 
 var
-  textRGBA  : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
-  textScale : Single = 1.0;
-  textStep  : Single = 0.0;
-  textLength: Integer;
+  textRGBA      : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  textScale     : Single = 1.0;
+  textStep      : Single = 0.0;
+  textLength    : Integer;
+  textLCoord    : zglPPoint2D;
+  textLCharDesc : zglPCharDesc;
 
 procedure text_Draw;
   var
@@ -128,7 +130,20 @@ begin
         end;
       c := font_GetCID( Text, i, @i );
 
-      if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then continue;
+      if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then
+        begin
+          if s > 0 Then
+            begin
+              if Assigned( textLCoord ) Then
+                begin
+                  textLCoord.X := Quad[ 0 ].X + Font.Padding[ 0 ] * textScale;
+                  textLCoord.Y := Quad[ 0 ].Y + Font.Padding[ 1 ] * textScale;
+                end;
+              if Assigned( textLCharDesc ) Then
+                textLCharDesc^ := CharDesc^;
+            end;
+          break;
+        end;
       INC( s );
 
       CharDesc := Font.CharDesc[ c ];
@@ -466,7 +481,9 @@ end;
 
 procedure textFx_SetLength;
 begin
-  textLength := Length;
+  textLength    := Length;
+  textLCoord    := LastCoord;
+  textLCharDesc := LastCharDesc;
 end;
 
 end.

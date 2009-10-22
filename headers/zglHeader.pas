@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.39               }
-{ date:    2009.10.17           }
+{ version: 0.1.40               }
+{ date:    2009.10.22           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -714,6 +714,7 @@ var
   text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
   text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
   text_GetWidth       : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
+  textFx_SetLength    : procedure( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 
 // GUI
 const
@@ -1304,6 +1305,7 @@ begin
       text_DrawInRect := dlsym( zglLib, 'text_DrawInRect' );
       text_DrawInRectEx := dlsym( zglLib, 'text_DrawInRectEx' );
       text_GetWidth := dlsym( zglLib, 'text_GetWidth' );
+      textFx_SetLength := dlsym( zglLib, 'textFx_SetLength' );
 
       gui_Init := dlsym( zglLib, 'gui_Init' );
       gui_Draw := dlsym( zglLib, 'gui_Draw' );

@@ -239,6 +239,7 @@ exports
   text_DrawInRect          name prefix + 'text_DrawInRect',
   text_DrawInRectEx        name prefix + 'text_DrawInRectEx',
   text_GetWidth            name prefix + 'text_GetWidth',
+  textFx_SetLength         name prefix + 'textFx_SetLength',
 
   gui_Init                 name prefix + 'gui_Init',
   gui_Draw                 name prefix + 'gui_Draw',
