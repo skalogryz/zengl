@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.40               }
-{ date:    2009.10.22           }
+{ date:    2009.10.25           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -948,35 +948,47 @@ const
   SND_ALL           = -2;
   SND_STREAM        = -3;
 
-  SND_STATE_PLAYING = 1;
-  SND_STATE_PERCENT = 2;
-  SND_STATE_TIME    = 3;
+  SND_STATE_PLAYING  = 1;
+  SND_STATE_PERCENT  = 2;
+  SND_STATE_TIME     = 3;
+  SND_INFO_LENGTH    = 4;
 
 type
+  zglPSoundChannel = ^zglTSoundChannel;
   zglPSound        = ^zglTSound;
   zglPSoundStream  = ^zglTSoundStream;
   zglPSoundDecoder = ^zglTSoundDecoder;
   zglPSoundFormat  = ^zglTSoundFormat;
   zglPSoundManager = ^zglTSoundManager;
 
+  zglTSoundChannel = record
+    Source     : DWORD;
+
+    Frequency  : Integer;
+    Volume     : Single;
+    Position   : record
+      X, Y, Z : Single;
+                 end;
+  end;
+
   zglTSound = record
-    Buffer       : DWORD;
-    sCount       : DWORD;
-    Source       : array of DWORD;
+    Buffer     : DWORD;
+    sCount     : DWORD;
+    Channel    : array of zglTSoundChannel;
 
-    Data         : Pointer;
-    Size         : Integer;
-    Length       : Double;
-    Frequency    : Integer;
+    Data       : Pointer;
+    Size       : Integer;
+    Length     : Double;
+    Frequency  : Integer;
 
-    Prev, Next   : zglPSound;
-end;
+    Prev, Next : zglPSound;
+  end;
 
   zglTSoundStream = record
     _Data      : Pointer;
     _File      : zglTFile;
     _Decoder   : zglPSoundDecoder;
-    _Played    : Boolean;
+    _Playing   : Boolean;
     _Paused    : Boolean;
     _Complete  : Double;
     _LastTime  : Double;
@@ -989,7 +1001,7 @@ end;
     Length     : Double;
 
     Loop       : Boolean;
-end;
+  end;
 
   zglTSoundDecoder = record
     Ext   : String;
@@ -997,14 +1009,14 @@ end;
     Read  : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
     Loop  : procedure( var Stream : zglTSoundStream );
     Close : procedure( var Stream : zglTSoundStream );
-end;
+  end;
 
   zglTSoundFormat = record
     Extension  : String;
     Decoder    : zglPSoundDecoder;
     FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
     MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
-end;
+  end;
 
   zglTSoundManager = record
     Count   : record
@@ -1013,7 +1025,7 @@ end;
               end;
     First   : zglTSound;
     Formats : array of zglTSoundFormat;
-end;
+  end;
 
 var
   snd_Init              : function : Boolean;

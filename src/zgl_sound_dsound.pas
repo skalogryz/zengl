@@ -201,15 +201,12 @@ begin
   else
     angle := ( ds_Plane[ 0 ] * ( X - ds_Position[ 0 ] ) +
                ds_Plane[ 1 ] * ( Y - ds_Position[ 1 ] ) +
-               ds_Plane[ 2 ] * ( Z - ds_Position[ 2 ] ) ) / dist;
-  Result := Trunc( 10000 * angle * 0.1 );
+               ds_Plane[ 2 ] * ( Z - ds_Position[ 2 ] ) ) * dist;
+  Result := Trunc( 10000 * angle );
   if Result < -10000 Then Result := -10000;
   if Result > 10000  Then Result := 10000;
 
-  if dist = 0 Then
-    Volume := sndVolume
-  else
-    Volume := sndVolume / dist;
+  Volume := 1 - dist / 100;
   if Volume < 0 Then Volume := 0;
 end;
 

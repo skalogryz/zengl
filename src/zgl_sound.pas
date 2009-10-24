@@ -45,6 +45,7 @@ uses
 const
   SND_ALL           = -2;
   SND_STREAM        = -3;
+  SND_ERROR         = {$IFDEF USE_OPENAL} 0 {$ELSE} nil {$ENDIF};
 
   SND_STATE_PLAYING = 1;
   SND_STATE_PERCENT = 2;
@@ -60,11 +61,23 @@ type
   zglPSoundFormat  = ^zglTSoundFormat;
   zglPSoundManager = ^zglTSoundManager;
 
-{$IFDEF USE_OPENAL}
+  zglTSoundChannel = record
+    {$IFDEF USE_OPENAL}
+    Source     : DWORD;
+    {$ELSE}
+    Source     : IDirectSoundBuffer;
+    {$ENDIF}
+    Frequency  : Integer;
+    Volume     : Single;
+    Position   : record
+      X, Y, Z : Single;
+                 end;
+  end;
+
   zglTSound = record
     Buffer     : DWORD;
     sCount     : DWORD;
-    Source     : array of DWORD;
+    Channel    : array of zglTSoundChannel;
 
     Data       : Pointer;
     Size       : Integer;
@@ -72,27 +85,13 @@ type
     Frequency  : Integer;
 
     Prev, Next : zglPSound;
-end;
-{$ELSE}
-  zglTSound = record
-    Buffer     : DWORD; // unused
-    sCount     : DWORD;
-    Source     : array of IDirectSoundBuffer;
-
-    Data       : Pointer;
-    Size       : Integer;
-    Length     : Double;
-    Frequency  : Integer;
-
-    Prev, Next : zglPSound;
-end;
-{$ENDIF}
+  end;
 
   zglTSoundStream = record
     _Data      : Pointer;
     _File      : zglTFile;
     _Decoder   : zglPSoundDecoder;
-    _Played    : Boolean;
+    _Playing   : Boolean;
     _Paused    : Boolean;
     _Complete  : Double;
     _LastTime  : Double;
@@ -105,7 +104,7 @@ end;
     Length     : Double;
 
     Loop       : Boolean;
-end;
+  end;
 
   zglTSoundDecoder = record
     Ext   : String;
@@ -113,14 +112,14 @@ end;
     Read  : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
     Loop  : procedure( var Stream : zglTSoundStream );
     Close : procedure( var Stream : zglTSoundStream );
-end;
+  end;
 
   zglTSoundFormat = record
     Extension  : String;
     Decoder    : zglPSoundDecoder;
     FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
     MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
-end;
+  end;
 
   zglTSoundManager = record
     Count   : record
@@ -129,7 +128,7 @@ end;
               end;
     First   : zglTSound;
     Formats : array of zglTSoundFormat;
-end;
+  end;
 
 procedure snd_MainLoop;
 function  snd_Init : Boolean;
@@ -164,10 +163,12 @@ var
   sndCanPlayFile : Boolean = TRUE;
   sndAutoPaused  : Boolean;
 
-  sfCS     : TRTLCriticalSection;
-  sfCanUse : array[ 1..SND_MAX ] of Integer;
-  sfStream : array[ 1..SND_MAX ] of zglTSoundStream;
-  sfVolume : Single = 1;
+  sfCS        : TRTLCriticalSection;
+  sfCanUse    : array[ 1..SND_MAX ] of Integer;
+  sfStream    : array[ 1..SND_MAX ] of zglTSoundStream;
+  sfVolume    : Single = 1;
+  sfVolumes   : array[ 1..SND_MAX ] of Single;
+  sfPositions : array[ 1..SND_MAX, 0..2 ] of Single;
   {$IFDEF USE_OPENAL}
   sfFormat   : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
   sfBufCount : Integer = 4;
@@ -249,7 +250,7 @@ begin
           {$ELSE}
           {$ENDIF}
           for i := 1 to SND_MAX do
-            if sfStream[ i ]._Played and ( not sfStream[ i ]._Paused ) Then
+            if sfStream[ i ]._Playing and ( not sfStream[ i ]._Paused ) Then
               begin
                 sfStream[ i ]._Paused := TRUE;
                 snd_ResumeFile( i );
@@ -270,7 +271,7 @@ begin
           {$ELSE}
           {$ENDIF}
           for i := 1 to SND_MAX do
-            if sfStream[ i ]._Played and ( not sfStream[ i ]._Paused ) Then
+            if sfStream[ i ]._Playing and ( not sfStream[ i ]._Paused ) Then
               begin
                 snd_PauseFile( i );
                 sfStream[ i ]._Paused := FALSE;
@@ -445,16 +446,13 @@ begin
   Result.Next.Next := nil;
   Result           := Result.Next;
 
-{$IFDEF USE_OPENAL}
+  Result.sCount := SourceCount;
+  SetLength( Result.Channel, SourceCount );
+  {$IFDEF USE_OPENAL}
   alGenBuffers( 1, @Result.Buffer );
-  Result.sCount := SourceCount;
-  SetLength( Result.Source, SourceCount );
   for i := 0 to SourceCount - 1 do
-    Result.Source[ i ] := 0;
-{$ELSE}
-  Result.sCount := SourceCount;
-  SetLength( Result.Source, SourceCount );
-{$ENDIF}
+    Result.Channel[ i ].Source := 0;
+  {$ENDIF}
 
   INC( managerSound.Count.Items );
 end;
@@ -470,9 +468,9 @@ begin
 {$ELSE}
   FreeMemory( Sound.Data );
   for i := 0 to Sound.sCount - 1 do
-    Sound.Source[ i ] := nil;
+    Sound.Channel[ i ].Source := nil;
 {$ENDIF}
-  SetLength( Sound.Source, 0 );
+  SetLength( Sound.Channel, 0 );
 
   if Assigned( Sound.Prev ) Then
     Sound.Prev.Next := Sound.Next;
@@ -520,10 +518,10 @@ begin
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
   FreeMemory( Result.Data );
 {$ELSE}
-  dsu_CreateBuffer( Result.Source[ 0 ], Result.Size, Pointer( f ) );
-  dsu_FillData( Result.Source[ 0 ], Result.Data, Result.Size );
+  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
+  dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
   for i := 1 to Result.sCount - 1 do
-    ds_Device.DuplicateSoundBuffer( Result.Source[ 0 ], Result.Source[ i ] );
+    ds_Device.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
 {$ENDIF}
 
   log_Add( 'Successful loading of sound: ' + FileName );
@@ -553,19 +551,17 @@ begin
 {$IFDEF USE_OPENAL}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
 {$ELSE}
-  dsu_CreateBuffer( Result.Source[ 0 ], Result.Size, Pointer( f ) );
-  dsu_FillData( Result.Source[ 0 ], Result.Data, Result.Size );
+  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
+  dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
   for i := 1 to Result.sCount - 1 do
-    ds_Device.DuplicateSoundBuffer( Result.Source[ 0 ], Result.Source[ i ] );
+    ds_Device.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
 {$ENDIF}
 end;
 
 function snd_Play;
   var
     i, j : Integer;
-    {$IFDEF USE_OPENAL}
-    sourcePos : array[ 0..2 ] of Single;
-    {$ELSE}
+    {$IFNDEF USE_OPENAL}
     DSERROR : HRESULT;
     Status  : DWORD;
     Vol     : Single;
@@ -580,10 +576,10 @@ begin
 {$IFDEF USE_OPENAL}
   for i := 0 to Sound.sCount - 1 do
     begin
-      if Sound.Source[ i ] = 0 Then
-        Sound.Source[ i ] := oal_Getsource( @Sound.Source[ i ] );
+      if Sound.Channel[ i ].Source = 0 Then
+        Sound.Channel[ i ].Source := oal_Getsource( @Sound.Channel[ i ].Source );
 
-      alGetSourcei( Sound.Source[ i ], AL_SOURCE_STATE, j );
+      alGetSourcei( Sound.Channel[ i ].Source, AL_SOURCE_STATE, j );
       if j <> AL_PLAYING Then
          begin
            Result := i;
@@ -592,36 +588,37 @@ begin
     end;
   if Result = -1 Then exit;
 
-  sourcePos[ 0 ] := X;
-  sourcePos[ 1 ] := Y;
-  sourcePos[ 2 ] := Z;
+  Sound.Channel[ Result ].Position.X := X;
+  Sound.Channel[ Result ].Position.Y := Y;
+  Sound.Channel[ Result ].Position.Z := Z;
+  Sound.Channel[ Result ].Volume     := sndVolume;
 
-  alSourcei ( Sound.Source[ Result ], AL_BUFFER,    Sound.Buffer );
-  alSourcefv( Sound.Source[ Result ], AL_POSITION,  @sourcePos[ 0 ] );
-  alSourcefv( Sound.Source[ Result ], AL_VELOCITY,  @oal_Velocity[ 0 ] );
-  alSourcef ( Sound.Source[ Result ], AL_GAIN,      sndVolume );
-  alSourcei ( Sound.Source[ Result ], AL_FREQUENCY, Sound.Frequency );
+  alSourcei ( Sound.Channel[ Result ].Source, AL_BUFFER,    Sound.Buffer );
+  alSourcefv( Sound.Channel[ Result ].Source, AL_POSITION,  @Sound.Channel[ Result ].Position );
+  alSourcefv( Sound.Channel[ Result ].Source, AL_VELOCITY,  @oal_Velocity[ 0 ] );
+  alSourcef ( Sound.Channel[ Result ].Source, AL_GAIN,      sndVolume );
+  alSourcei ( Sound.Channel[ Result ].Source, AL_FREQUENCY, Sound.Frequency );
 
   if Loop Then
-    alSourcei( Sound.Source[ Result ], AL_LOOPING, AL_TRUE )
+    alSourcei( Sound.Channel[ Result ].Source, AL_LOOPING, AL_TRUE )
   else
-    alSourcei( Sound.Source[ Result ], AL_LOOPING, AL_FALSE );
+    alSourcei( Sound.Channel[ Result ].Source, AL_LOOPING, AL_FALSE );
 
-  alSourcePlay( Sound.Source[ Result ] );
+  alSourcePlay( Sound.Channel[ Result ].Source );
 {$ELSE}
   for i := 0 to Sound.sCount - 1 do
     begin
-      DSERROR := Sound.Source[ i ].GetStatus( Status );
+      DSERROR := Sound.Channel[ i ].Source.GetStatus( Status );
       if DSERROR <> DS_OK Then Status := 0;
       if ( Status and DSBSTATUS_PLAYING ) = 0 Then
         begin
           if ( Status and DSBSTATUS_BUFFERLOST ) <> 0 Then
             begin
-              Sound.Source[ i ].Restore;
+              Sound.Channel[ i ].Source.Restore;
               if i = 0 Then
-                dsu_FillData( Sound.Source[ i ], Sound.Data, Sound.Size )
+                dsu_FillData( Sound.Channel[ i ].Source, Sound.Data, Sound.Size )
               else
-                ds_Device.DuplicateSoundBuffer( Sound.Source[ 0 ], Sound.Source[ i ] );
+                ds_Device.DuplicateSoundBuffer( Sound.Channel[ 0 ].Source, Sound.Channel[ i ].Source );
             end;
           Result := i;
           break;
@@ -629,10 +626,15 @@ begin
     end;
   if Result = -1 Then exit;
 
-  Sound.Source[ Result ].SetPan      ( dsu_CalcPos( X, Y, Z, Vol )                 );
-  Sound.Source[ Result ].SetVolume   ( dsu_CalcVolume( Vol )                       );
-  Sound.Source[ Result ].SetFrequency( Sound.Frequency                             );
-  Sound.Source[ Result ].Play        ( 0, 0, DSBPLAY_LOOPING * Byte( Loop = TRUE ) );
+  Sound.Channel[ Result ].Position.X := X;
+  Sound.Channel[ Result ].Position.Y := Y;
+  Sound.Channel[ Result ].Position.Z := Z;
+  Sound.Channel[ Result ].Volume     := sndVolume;
+
+  Sound.Channel[ Result ].Source.SetPan( dsu_CalcPos( X, Y, Z, Vol ) );
+  Sound.Channel[ Result ].Source.SetVolume( dsu_CalcVolume( Vol * sndVolume ) );
+  Sound.Channel[ Result ].Source.SetFrequency( Sound.Frequency );
+  Sound.Channel[ Result ].Source.Play( 0, 0, DSBPLAY_LOOPING * Byte( Loop = TRUE ) );
 {$ENDIF}
 end;
 
@@ -642,16 +644,15 @@ procedure snd_Stop;
     snd : zglPSound;
   procedure Stop( const Sound : zglPSound; const ID : Integer );
   begin
-    {$IFDEF USE_OPENAL}
-    if Sound.Source[ ID ] <> 0 Then
+    if Sound.Channel[ ID ].Source <> SND_ERROR Then
       begin
-        alSourceStop( Sound.Source[ ID ] );
-        alSourcei( Sound.Source[ ID ], AL_BUFFER, AL_NONE );
+        {$IFDEF USE_OPENAL}
+        alSourceStop( Sound.Channel[ ID ].Source );
+        alSourcei( Sound.Channel[ ID ].Source, AL_BUFFER, AL_NONE );
+        {$ELSE}
+        Sound.Channel[ ID ].Source.Stop;
+        {$ENDIF}
       end;
-    {$ELSE}
-    if Assigned( Sound.Source[ ID ] ) Then
-      Sound.Source[ ID ].Stop;
-    {$ENDIF}
   end;
 begin
   if not sndInitialized Then exit;
@@ -682,50 +683,63 @@ procedure snd_SetPos;
   var
     i, j : Integer;
     snd  : zglPSound;
-    pos  : array[ 0..2 ] of Single;
+    {$IFNDEF USE_OPENAL}
+    Vol  : Single;
+    {$ENDIF}
   procedure SetPos( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
   begin
-    {$IFDEF USE_OPENAL}
-    if Sound.Source[ ID ] <> 0 Then
-      alSourcefv( Sound.Source[ ID ], AL_POSITION, @pos[ 0 ] );
-    {$ELSE}
-    if Assigned( Sound.Source[ ID ] ) Then
+    Sound.Channel[ ID ].Position.X := X;
+    Sound.Channel[ ID ].Position.Y := Y;
+    Sound.Channel[ ID ].Position.Z := Z;
+
+    if Sound.Channel[ ID ].Source <> SND_ERROR Then
       begin
-        Sound.Source[ ID ].SetPan   ( dsu_CalcPos( X, Y, Z, pos[ 0 ] ) );
-        Sound.Source[ ID ].SetVolume( dsu_CalcVolume( pos[ 0 ] ) );
+        {$IFDEF USE_OPENAL}
+        alSourcefv( Sound.Channel[ ID ].Source, AL_POSITION, @Sound.Channel[ ID ].Position );
+        {$ELSE}
+        Sound.Channel[ ID ].Source.SetPan   ( dsu_CalcPos( X, Y, Z, Vol ) );
+        Sound.Channel[ ID ].Source.SetVolume( dsu_CalcVolume( Vol * Sound.Channel[ ID ].Volume ) );
+        {$ENDIF}
       end;
-    {$ENDIF}
   end;
 begin
   if not sndInitialized Then exit;
 
-  {$IFDEF USE_OPENAL}
-  pos[ 0 ] := X;
-  pos[ 1 ] := Y;
-  pos[ 2 ] := Z;
-  {$ENDIF}
-
-  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Played ) Then
+  if ( ID = SND_STREAM ) Then
     begin
-      {$IFDEF USE_OPENAL}
-      alSourcefv( DWORD( Sound ), AL_POSITION, @pos[ 0 ] );
-      {$ELSE}
-      sfSource[ DWORD( Sound ) ].SetPan   ( dsu_CalcPos( X, Y, Z, pos[ 0 ] ) );
-      sfSource[ DWORD( Sound ) ].SetVolume( dsu_CalcVolume( pos[ 0 ] ) );
-      {$ENDIF}
+      if ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Playing ) Then
+        begin
+          sfPositions[ DWORD( Sound ), 0 ] := X;
+          sfPositions[ DWORD( Sound ), 1 ] := Y;
+          sfPositions[ DWORD( Sound ), 2 ] := Z;
+
+          {$IFDEF USE_OPENAL}
+          alSourcefv( DWORD( Sound ), AL_POSITION, @sfPositions[ DWORD( Sound ), 0 ] );
+          {$ELSE}
+          sfSource[ DWORD( Sound ) ].SetPan( dsu_CalcPos( sfPositions[ DWORD( Sound ), 0 ],
+                                                          sfPositions[ DWORD( Sound ), 1 ],
+                                                          sfPositions[ DWORD( Sound ), 2 ], Vol ) );
+          sfSource[ DWORD( Sound ) ].SetVolume( dsu_CalcVolume( Vol * sfVolumes[ DWORD( Sound ) ] ) );
+          {$ENDIF}
+        end else
+          for i := 1 to SND_MAX do
+            if sfStream[ DWORD( Sound ) ]._Playing Then
+              begin
+                sfPositions[ i, 0 ] := X;
+                sfPositions[ i, 1 ] := Y;
+                sfPositions[ i, 2 ] := Z;
+
+                {$IFDEF USE_OPENAL}
+                alSourcefv( sfSource[ i ], AL_POSITION, @sfPositions[ i, 0 ] );
+                {$ELSE}
+                sfSource[ i ].SetPan( dsu_CalcPos( sfPositions[ i, 0 ],
+                                                   sfPositions[ i, 1 ],
+                                                   sfPositions[ i, 2 ], Vol ) );
+                sfSource[ i ].SetVolume( dsu_CalcVolume( Vol * sfVolumes[ i ] ) );
+                {$ENDIF}
+              end;
       exit;
-    end else
-      if ID = SND_STREAM Then
-        for i := 1 to SND_MAX do
-          if sfStream[ DWORD( Sound ) ]._Played Then
-            begin
-              {$IFDEF USE_OPENAL}
-              alSourcefv( sfSource[ i ], AL_POSITION, @pos[ 0 ] );
-              {$ELSE}
-              sfSource[ i ].SetPan   ( dsu_CalcPos( X, Y, Z, pos[ 0 ] ) );
-              sfSource[ i ].SetVolume( dsu_CalcVolume( pos[ 0 ] ) );
-              {$ENDIF}
-            end;
+    end;
 
   if Assigned( Sound ) Then
     begin
@@ -753,15 +767,24 @@ procedure snd_SetVolume;
   var
     i, j : Integer;
     snd  : zglPSound;
+    {$IFNDEF USE_OPENAL}
+    Vol  : Single;
+    {$ENDIF}
   procedure SetVolume( const Sound : zglPSound; const ID : Integer; const Volume : Single );
   begin
-    {$IFDEF USE_OPENAL}
-    if Sound.Source[ ID ] <> 0 Then
-      alSourcef( Sound.Source[ ID ], AL_GAIN, Volume );
-    {$ELSE}
-    if Assigned( Sound.Source[ ID ] ) Then
-      Sound.Source[ ID ].SetVolume( dsu_CalcVolume( Volume ) );
-    {$ENDIF}
+    Sound.Channel[ ID ].Volume := Volume;
+
+    if Sound.Channel[ ID ].Source <> SND_ERROR Then
+      begin
+        {$IFDEF USE_OPENAL}
+        alSourcef( Sound.Channel[ ID ].Source, AL_GAIN, Sound.Channel[ ID ].Volume );
+        {$ELSE}
+        Sound.Channel[ ID ].Source.SetPan( dsu_CalcPos( Sound.Channel[ ID ].Position.X,
+                                                        Sound.Channel[ ID ].Position.Y,
+                                                        Sound.Channel[ ID ].Position.Z, Vol ) );
+        Sound.Channel[ ID ].Source.SetVolume( dsu_CalcVolume( Vol * Sound.Channel[ ID ].Volume ) );
+        {$ENDIF}
+      end;
   end;
 begin
   if not sndInitialized Then exit;
@@ -772,23 +795,37 @@ begin
     if ( not Assigned( Sound ) ) and ( ID = SND_ALL ) Then
       sndVolume := Volume;
 
-  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Played ) Then
+  if ( ID = SND_STREAM ) Then
     begin
-      {$IFDEF USE_OPENAL}
-      alSourcef( sfSource[ DWORD( Sound ) ], AL_GAIN, Volume );
-      {$ELSE}
-      sfSource[ DWORD( Sound ) ].SetVolume( dsu_CalcVolume( Volume ) );
-      {$ENDIF}
+      if ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Playing ) Then
+        begin
+          sfVolumes[ DWORD( Sound ) ] := Volume;
+
+          {$IFDEF USE_OPENAL}
+          alSourcef( sfSource[ DWORD( Sound ) ], AL_GAIN, Volume );
+          {$ELSE}
+          sfSource[ DWORD( Sound ) ].SetPan( dsu_CalcPos( sfPositions[ DWORD( Sound ), 0 ],
+                                                          sfPositions[ DWORD( Sound ), 1 ],
+                                                          sfPositions[ DWORD( Sound ), 2 ], Vol ) );
+          sfSource[ DWORD( Sound ) ].SetVolume( dsu_CalcVolume( Vol * sfVolumes[ DWORD( Sound ) ] ) );
+          {$ENDIF}
+        end else
+          for i := 1 to SND_MAX do
+            if sfStream[ DWORD( Sound ) ]._Playing Then
+              begin
+                sfVolumes[ i ] := Volume;
+
+                {$IFDEF USE_OPENAL}
+                alSourcef( sfSource[ i ], AL_GAIN, Volume );
+                {$ELSE}
+                sfSource[ i ].SetPan( dsu_CalcPos( sfPositions[ i, 0 ],
+                                                   sfPositions[ i, 1 ],
+                                                   sfPositions[ i, 2 ], Vol ) );
+                sfSource[ i ].SetVolume( dsu_CalcVolume( Vol * sfVolumes[ i ] ) );
+                {$ENDIF}
+              end;
       exit;
-    end else
-      if ID = SND_STREAM Then
-        for i := 1 to SND_MAX do
-          if sfStream[ i ]._Played Then
-            {$IFDEF USE_OPENAL}
-            alSourcef( sfSource[ i ], AL_GAIN, Volume );
-            {$ELSE}
-            sfSource[ i ].SetVolume( dsu_CalcVolume( Volume ) );
-            {$ENDIF}
+    end;
 
   if Assigned( Sound ) Then
     begin
@@ -818,18 +855,19 @@ procedure snd_SetFrequency;
     snd  : zglPSound;
   procedure SetFrequency( const Sound : zglPSound; const ID, Frequency : Integer );
   begin
-    {$IFDEF USE_OPENAL}
-    if Sound.Source[ ID ] <> 0 Then
-      alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Frequency );
-    {$ELSE}
-    if Assigned( Sound.Source[ ID ] ) Then
-      Sound.Source[ ID ].SetFrequency( Frequency );
-    {$ENDIF}
+    Sound.Channel[ ID ].Frequency := Frequency;
+
+    if Sound.Channel[ ID ].Source <> SND_ERROR Then
+      {$IFDEF USE_OPENAL}
+      alSourcei( Sound.Channel[ ID ].Source, AL_FREQUENCY, Sound.Channel[ ID ].Frequency );
+      {$ELSE}
+      Sound.Channel[ ID ].Source.SetFrequency( Sound.Channel[ ID ].Frequency );
+      {$ENDIF}
   end;
 begin
   if not sndInitialized Then exit;
 
-  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Played ) Then
+  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Playing ) Then
     begin
       {$IFDEF USE_OPENAL}
       alSourcef( sfSource[ DWORD( Sound ) ], AL_FREQUENCY, Frequency );
@@ -840,7 +878,7 @@ begin
     end else
       if ID = SND_STREAM Then
         for i := 1 to SND_MAX do
-          if sfStream[ i ]._Played Then
+          if sfStream[ i ]._Playing Then
             {$IFDEF USE_OPENAL}
             alSourcef( sfSource[ i ], AL_FREQUENCY, Frequency );
             {$ELSE}
@@ -875,18 +913,19 @@ procedure snd_SetFrequencyCoeff;
     snd  : zglPSound;
   procedure SetFrequency( const Sound : zglPSound; const ID, Frequency : Integer );
   begin
-    {$IFDEF USE_OPENAL}
-    if Sound.Source[ ID ] <> 0 Then
-      alSourcei( Sound.Source[ ID ], AL_FREQUENCY, Frequency );
-    {$ELSE}
-    if Assigned( Sound.Source[ ID ] ) Then
-      Sound.Source[ ID ].SetFrequency( Frequency );
-    {$ENDIF}
+    Sound.Channel[ ID ].Frequency := Frequency;
+
+    if Sound.Channel[ ID ].Source <> SND_ERROR Then
+      {$IFDEF USE_OPENAL}
+      alSourcei( Sound.Channel[ ID ].Source, AL_FREQUENCY, Sound.Channel[ ID ].Frequency );
+      {$ELSE}
+      Sound.Channel[ ID ].Source.SetFrequency( Sound.Channel[ ID ].Frequency );
+      {$ENDIF}
   end;
 begin
   if not sndInitialized Then exit;
 
-  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Played ) Then
+  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ DWORD( Sound ) ]._Playing ) Then
     begin
       {$IFDEF USE_OPENAL}
       alSourcef( sfSource[ DWORD( Sound ) ], AL_FREQUENCY, Round( sfStream[ DWORD( Sound ) ].Frequency * Coefficient ) );
@@ -897,7 +936,7 @@ begin
     end else
       if ID = SND_STREAM Then
         for i := 1 to SND_MAX do
-          if sfStream[ i ]._Played Then
+          if sfStream[ i ]._Playing Then
             {$IFDEF USE_OPENAL}
             alSourcef( sfSource[ i ], AL_FREQUENCY, Round( sfStream[ i ].Frequency * Coefficient ) );
             {$ELSE}
@@ -944,7 +983,7 @@ begin
             exit;
           end;
         case What of
-          SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Source[ ID ] );
+          SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
           SND_INFO_LENGTH: Result := Round( Sound.Length );
         end;
       end;
@@ -955,7 +994,7 @@ function snd_GetStreamID;
     i : Integer;
 begin
   for i := 1 to SND_MAX do
-    if ( not sfStream[ i ]._Played ) and ( sfCanUse[ i ] = 100 ) Then
+    if ( not sfStream[ i ]._Playing ) and ( sfCanUse[ i ] = 100 ) Then
       begin
         Result := i;
         exit;
@@ -1058,7 +1097,7 @@ begin
   sfSource[ Result ].SetFrequency( sfStream[ Result ].Frequency );
 {$ENDIF}
 
-  sfStream[ Result ]._Played   := TRUE;
+  sfStream[ Result ]._Playing  := TRUE;
   sfStream[ Result ]._Paused   := FALSE;
   sfStream[ Result ]._Complete := 0;
   sfStream[ Result ]._LastTime := timer_GetTicks;
@@ -1073,7 +1112,7 @@ end;
 procedure snd_PauseFile;
 begin
   if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
-     ( not sfStream[ ID ]._Played ) or
+     ( not sfStream[ ID ]._Playing ) or
      ( sfStream[ ID ]._Paused ) or
      ( not sndInitialized ) Then exit;
 
@@ -1092,10 +1131,10 @@ end;
 procedure snd_StopFile;
 begin
   if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
-     ( not sfStream[ ID ]._Played ) or
+     ( not sfStream[ ID ]._Playing ) or
      ( not sndInitialized ) Then exit;
 
-  sfStream[ ID ]._Played := FALSE;
+  sfStream[ ID ]._Playing := FALSE;
 {$IFDEF USE_OPENAL}
   alSourceStop( sfSource[ ID ] );
 {$ELSE}
@@ -1106,7 +1145,7 @@ end;
 procedure snd_ResumeFile;
 begin
   if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
-     ( not sfStream[ ID ]._Played ) or
+     ( not sfStream[ ID ]._Playing ) or
      ( not sfStream[ ID ]._Paused ) or
      ( not sndInitialized ) Then exit;
 
@@ -1141,18 +1180,18 @@ begin
 
   {$IFDEF USE_OPENAL}
   processed := 0;
-  while ( processed < 1 ) and sfStream[ ID ]._Played do
+  while ( processed < 1 ) and sfStream[ ID ]._Playing do
     alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );
   {$ENDIF}
-  while app_Work and sfStream[ ID ]._Played do
+  while app_Work and sfStream[ ID ]._Playing do
     begin
       if not sndInitialized Then break;
 
       u_Sleep( 100 );
-      if ( not app_Work ) or ( not sfStream[ ID ]._Played ) Then break;
+      if ( not app_Work ) or ( not sfStream[ ID ]._Playing ) Then break;
       {$IFDEF USE_OPENAL}
       alGetSourcei( sfSource[ ID ], AL_BUFFERS_PROCESSED, processed );
-      while app_Work and ( processed > 0 ) and sfStream[ ID ]._Played do
+      while app_Work and ( processed > 0 ) and sfStream[ ID ]._Playing do
         begin
           alSourceUnQueueBuffers( sfSource[ ID ], 1, @buffer );
 
@@ -1209,7 +1248,7 @@ begin
                   end;
                 if sfStream[ ID ]._Complete > sfStream[ ID ].Length Then
                   sfStream[ ID ]._Complete := sfStream[ ID ].Length;
-                sfStream[ ID ]._Played := FALSE;
+                sfStream[ ID ]._Playing := FALSE;
               end;
         end;
     end;
