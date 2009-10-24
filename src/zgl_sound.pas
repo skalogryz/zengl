@@ -295,8 +295,8 @@ begin
   log_Add( 'OpenAL: Default device is "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
 
   {$IFDEF WIN32}
-  oal_Device := alcOpenDevice( 'Generic Software' );
-  if not Assigned( oal_Device ) Then
+  //oal_Device := alcOpenDevice( 'Generic Software' );
+  //if not Assigned( oal_Device ) Then
   {$ENDIF}
     oal_Device := alcOpenDevice( nil );
   if not Assigned( oal_Device ) Then
