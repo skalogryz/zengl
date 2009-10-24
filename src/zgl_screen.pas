@@ -446,7 +446,7 @@ begin
   if not app_Initialized Then exit;
   scr_SetVSync( scr_VSync );
 
-  if ( Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
+  if Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
   if wnd_FullScreen Then
     begin

@@ -177,7 +177,7 @@ begin
   if not scr_Create Then exit;
 
   app_Initialized := TRUE;
-  if ( wnd_Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
+  if wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
   {$IFDEF LINUX}
   if ( wnd_FullScreen ) and ( ( wnd_Width <> zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height <> zgl_Get( DESKTOP_HEIGHT ) ) ) Then
