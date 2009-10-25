@@ -481,7 +481,8 @@ begin
   glBlendFuncSeparateEXT     := gl_GetProc( 'glBlendFuncSeparate' );
   glBlendEquationEXT         := gl_GetProc( 'glBlendEquation' );
   glBlendEquationSeparateEXT := gl_GetProc( 'glBlendEquationSeparate' );
-  ogl_Separate := Assigned( glBlendFuncSeparateEXT ) and Assigned( glBlendEquationEXT ) and Assigned( glBlendEquationSeparateEXT );
+  ogl_Separate := Assigned( glBlendFuncSeparateEXT ) and Assigned( glBlendEquationEXT ) and Assigned( glBlendEquationSeparateEXT ) and
+                  gl_IsSupported( 'GL_EXT_blend_func_separate', ogl_Extensions );;
   log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( ogl_Separate ) );
 
   {glGetIntegerv( GL_MAX_LIGHTS, @ogl_MaxLights );
