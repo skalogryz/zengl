@@ -64,6 +64,9 @@ type
     radius : Single;
 end;
 
+function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
 function  m_Sin( Angle : Integer ) : Single;
@@ -83,9 +86,7 @@ var
 implementation
 uses
   zgl_main,
-  zgl_opengl_all,
-  zgl_log,
-  zgl_utils;
+  zgl_opengl_all;
 
 var
   tess        : Integer;
@@ -100,6 +101,16 @@ var
 function ArcTan2( const dx, dy : Single ) : Single;
 begin
   Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
+end;
+
+function min;
+begin
+  if a > b Then Result := b else Result := a;
+end;
+
+function max;
+begin
+  if a > b Then Result := a else Result := b;
 end;
 
 procedure InitCosSinTables;
