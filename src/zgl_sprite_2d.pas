@@ -68,6 +68,8 @@ procedure ssprite2d_Draw;
     y1, y2 : Single;
     cX, cY : Single;
     c, s   : Single;
+    mX, mY : Single;
+    mW, mH : Single;
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -79,7 +81,18 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H, Angle ) ) Then Exit;
+  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+    if FX and FX2D_VCHANGE = 0 Then
+      begin
+        if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
+      end else
+        begin
+          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
+          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
+          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
+          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
+        end;
 
   // Текстурные координаты
   if FX and FX2D_FLIPX > 0 Then FU := Texture^.U else FU := 0;
@@ -233,6 +246,8 @@ procedure asprite2d_Draw;
     y1, y2 : Single;
     cX, cY : Single;
     c, s   : Single;
+    mX, mY : Single;
+    mW, mH : Single;
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -244,7 +259,18 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H, Angle ) ) Then Exit;
+  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+    if FX and FX2D_VCHANGE = 0 Then
+      begin
+        if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
+      end else
+        begin
+          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
+          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
+          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
+          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
+        end;
 
   // Текстурные координаты
   SU := Texture.U / Texture.FramesX;
@@ -410,6 +436,8 @@ procedure csprite2d_Draw;
     y1, y2 : Single;
     cX, cY : Single;
     c, s   : Single;
+    mX, mY : Single;
+    mW, mH : Single;
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -421,7 +449,18 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) and ( not sprite2d_InScreen( X, Y, W, H, Angle ) ) Then Exit;
+  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+    if FX and FX2D_VCHANGE = 0 Then
+      begin
+        if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
+      end else
+        begin
+          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
+          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
+          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
+          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
+        end;
 
   // Текстурные координаты
   // бред, ога :)
