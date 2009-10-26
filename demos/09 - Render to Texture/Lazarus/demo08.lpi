@@ -6,7 +6,7 @@
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
-      <Title Value="demo08"/>
+      <Title Value="demo09"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -25,16 +25,16 @@
     </RunParams>
     <Units Count="1">
       <Unit0>
-        <Filename Value="../FreePascal/demo08.pas"/>
+        <Filename Value="../FreePascal/demo09.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="demo08"/>
+        <UnitName Value="demo09"/>
       </Unit0>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
     <Target>
-      <Filename Value="../../bin/demo08"/>
+      <Filename Value="../../bin/demo09"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
