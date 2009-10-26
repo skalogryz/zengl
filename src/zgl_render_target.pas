@@ -106,8 +106,6 @@ procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback 
 
 var
   managerRTarget : zglTRenderTargetManager;
-  rtWidth  : Integer;
-  rtHeight : Integer;
 
 implementation
 uses
@@ -439,26 +437,10 @@ begin
       ogl_Mode := 1;
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
-        begin
-          if app_Flags and CORRECT_RESOLUTION > 0 Then
-            begin
-              rtWidth  := scr_ResW;
-              rtHeight := scr_ResH;
-            end else
-              begin
-                rtWidth  := ogl_Width;
-                rtHeight := ogl_Height;
-              end;
-        end else
-          begin
-            rtWidth  := Target.Surface.Width;
-            rtHeight := Target.Surface.Height;
-          end;
-      case lMode of
-        2: Set2DMode;
-        3: Set3DMode;
-      end;
-      glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
+        glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
+      else
+        glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
+                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
 
       if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) Then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
