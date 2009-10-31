@@ -118,7 +118,7 @@ begin
   b2d_New := FALSE;
 end;
 
-function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
+function sprite2d_InScreenSimple;
 begin
   if Angle <> 0 Then
     Result := ( ( X + W + H / 2 > ogl_CropX ) and ( X - W - H / 2 < ogl_CropX + ogl_CropW / scr_ResCX ) and
@@ -128,7 +128,7 @@ begin
                 ( Y + H > ogl_CropY ) and ( Y < ogl_CropY + ogl_CropH / scr_ResCY ) );
 end;
 
-function sprite2d_InScreenCamera( const X, Y, W, H, Angle : Single ) : Boolean;
+function sprite2d_InScreenCamera;
   var
     cx, cy, crad : Single;
     sx, sy, srad : Single;

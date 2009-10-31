@@ -63,7 +63,6 @@ procedure sgrid2d_Draw;
 begin
   if not Assigned( Texture ) Then exit;
 
-  // Текстурные координаты
   if FX and FX2D_FLIPX > 0 Then
     begin
       iU  := ( Grid.Cols - 1 );
@@ -114,7 +113,6 @@ begin
   begin
     for j := 0 to Grid.Rows - 2 do
       begin
-        // Позиция/Трансформация
         Quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
         Quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
         Quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
