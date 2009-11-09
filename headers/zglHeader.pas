@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.40               }
-{ date:    2009.10.25           }
+{ date:    2009.11.09           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -534,6 +534,7 @@ end;
 
 // FX
 const
+  FX_BLEND        = $100000;
   FX_BLEND_NORMAL = $00;
   FX_BLEND_ADD    = $01;
   FX_BLEND_MULT   = $02;
@@ -541,23 +542,24 @@ const
   FX_BLEND_WHITE  = $04;
   FX_BLEND_MASK   = $05;
 
+  FX_COLOR        = $200000;
+  FX_COLOR_MIX    = $00;
+  FX_COLOR_SET    = $01;
+
 var
   fx_SetBlendMode : procedure( const Mode : Byte );
+  fx_SetColorMode : procedure( const Mode : Byte );
 
 // FX 2D
 const
   FX2D_FLIPX    = $000001;
   FX2D_FLIPY    = $000002;
-  FX2D_COLORMIX = $000004;
-  FX2D_COLORSET = $000008;
-  FX2D_VCA      = $000010;
-  FX2D_VCHANGE  = $000020;
-  FX2D_SCALE    = $000040;
-
-  FX_BLEND      = $100000;
+  FX2D_VCA      = $000004;
+  FX2D_VCHANGE  = $000008;
+  FX2D_SCALE    = $000010;
 
 var
-  fx2d_SetColorMix : procedure( const Color : DWORD );
+  fx2d_SetColor    : procedure( const Color : DWORD );
   fx2d_SetVCA      : procedure( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
   fx2d_SetVertexes : procedure( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
   fx2d_SetScale    : procedure( const scaleX, scaleY : Single );
@@ -768,6 +770,8 @@ const
   EVENT_KEY_UP      = 15;
   EVENT_KEY_CHAR    = 16;
 
+  EVENT_DRAW_MODAL  = 17;
+
 type
   zglPEvent  = ^zglTEvent;
   zglPWidget = ^zglTWidget;
@@ -800,6 +804,7 @@ end;
     align   : DWORD;
     layer   : Integer;
     focus   : Boolean;
+    modal   : Boolean;
     visible : Boolean;
     mousein : Boolean;
     draged  : Boolean;
@@ -1274,7 +1279,8 @@ begin
       rtarget_DrawIn := dlsym( zglLib, 'rtarget_Set' );
 
       fx_SetBlendMode := dlsym( zglLib, 'fx_SetBlendMode' );
-      fx2d_SetColorMix := dlsym( zglLib, 'fx2d_SetColorMix' );
+      fx_SetColorMode := dlsym( zglLib, 'fx_SetColorMode' );
+      fx2d_SetColor := dlsym( zglLib, 'fx2d_SetColor' );
       fx2d_SetVCA := dlsym( zglLib, 'fx2d_SetVCA' );
       fx2d_SetVertexes := dlsym( zglLib, 'fx2d_SetVertexes' );
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );

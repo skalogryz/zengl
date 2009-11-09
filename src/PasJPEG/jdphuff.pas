@@ -769,6 +769,9 @@ var
 var
   nb, look : int; {register}
 begin
+  num_newnz := 0;
+  block := nil;
+
   entropy := phuff_entropy_ptr (cinfo^.entropy);
   Se := cinfo^.Se;
   p1 := 1 shl cinfo^.Al;        { 1 in the bit position being coded }

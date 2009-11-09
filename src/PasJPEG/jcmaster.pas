@@ -295,7 +295,7 @@ begin
   { Now verify that everything got sent. }
   if (cinfo^.progressive_mode) then
   begin
-{$ifdef C_PROGRESSIVE_SUPPORTED
+{$ifdef C_PROGRESSIVE_SUPPORTED}
     { For progressive mode, we only check that at least some DC data
       got sent for each component; the spec does not require that all bits
       of all coefficients be transmitted.  Would it be wiser to enforce
@@ -400,7 +400,7 @@ begin
     { For noninterleaved scans, it is convenient to define last_row_height
       as the number of block rows present in the last iMCU row. }
 
-    tmp := int (compptr^.height_in_blocks mod compptr^.v_samp_factor);
+    tmp := int (compptr^.height_in_blocks) mod compptr^.v_samp_factor;
     if (tmp = 0) then
       tmp := compptr^.v_samp_factor;
     compptr^.last_row_height := tmp;
@@ -438,11 +438,11 @@ begin
       compptr^.MCU_blocks := compptr^.MCU_width * compptr^.MCU_height;
       compptr^.MCU_sample_width := compptr^.MCU_width * DCTSIZE;
       { Figure number of non-dummy blocks in last MCU column & row }
-      tmp := int (compptr^.width_in_blocks mod compptr^.MCU_width);
+      tmp := int (compptr^.width_in_blocks) mod compptr^.MCU_width;
       if (tmp = 0) then
         tmp := compptr^.MCU_width;
       compptr^.last_col_width := tmp;
-      tmp := int (compptr^.height_in_blocks mod compptr^.MCU_height);
+      tmp := int (compptr^.height_in_blocks) mod compptr^.MCU_height;
       if (tmp = 0) then
         tmp := compptr^.MCU_height;
       compptr^.last_row_height := tmp;
@@ -480,7 +480,7 @@ end;
   required. }
 
 {METHODDEF}
-procedure prepare_for_pass (cinfo : j_compress_ptr); far;
+procedure prepare_for_pass (cinfo : j_compress_ptr);
 var
   master : my_master_ptr;
 var
@@ -591,7 +591,7 @@ end;
   In multi-pass processing, this routine is not used. }
 
 {METHODDEF}
-procedure pass_startup (cinfo : j_compress_ptr); far;
+procedure pass_startup (cinfo : j_compress_ptr);
 begin
   cinfo^.master^.call_pass_startup := FALSE; { reset flag so call only once }
 
@@ -603,7 +603,7 @@ end;
 { Finish up at end of pass. }
 
 {METHODDEF}
-procedure finish_pass_master (cinfo : j_compress_ptr); far;
+procedure finish_pass_master (cinfo : j_compress_ptr);
 var
   master : my_master_ptr;
 begin

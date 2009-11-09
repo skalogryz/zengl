@@ -85,38 +85,39 @@ const
 {METHODDEF}
 function encode_mcu_DC_first (cinfo : j_compress_ptr;
                               const MCU_data: array of JBLOCKROW) : boolean;
-                              far; forward;
+                               forward;
 {METHODDEF}
 function encode_mcu_AC_first (cinfo : j_compress_ptr;
                               const MCU_data: array of JBLOCKROW) : boolean;
-                              far; forward;
+                               forward;
 {METHODDEF}
 function encode_mcu_DC_refine (cinfo : j_compress_ptr;
                               const MCU_data: array of JBLOCKROW) : boolean;
-                              far; forward;
+                               forward;
 {METHODDEF}
 function encode_mcu_AC_refine (cinfo : j_compress_ptr;
                               const MCU_data: array of JBLOCKROW) : boolean;
-                              far; forward;
+                               forward;
 
 {METHODDEF}
-procedure finish_pass_phuff (cinfo : j_compress_ptr); far; forward;
+procedure finish_pass_phuff (cinfo : j_compress_ptr);  forward;
 
 {METHODDEF}
-procedure finish_pass_gather_phuff (cinfo : j_compress_ptr); far; forward;
+procedure finish_pass_gather_phuff (cinfo : j_compress_ptr);  forward;
 
 
 { Initialize for a Huffman-compressed scan using progressive JPEG. }
 
 {METHODDEF}
 procedure start_pass_phuff (cinfo : j_compress_ptr;
-                            gather_statistics : boolean); far;
+                            gather_statistics : boolean);
 var
   entropy : phuff_entropy_ptr;
   is_DC_band : boolean;
   ci, tbl : int;
   compptr : jpeg_component_info_ptr;
 begin
+  tbl := 0;
   entropy := phuff_entropy_ptr (cinfo^.entropy);
 
   entropy^.cinfo := cinfo;
@@ -894,6 +895,7 @@ var
   htblptr : ^JHUFF_TBL_PTR;
   did : array[0..NUM_HUFF_TBLS-1] of boolean;
 begin
+  tbl := 0;
   entropy := phuff_entropy_ptr (cinfo^.entropy);
 
   { Flush out buffered data (all we care about is counting the EOB symbol) }

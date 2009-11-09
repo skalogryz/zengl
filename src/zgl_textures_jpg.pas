@@ -1,4 +1,4 @@
-{
+﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.inf.ua
@@ -26,7 +26,7 @@ unit zgl_textures_jpg;
 interface
 
 uses
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF USE_PASJPEG}
   jmorecfg,
   jpeglib,
   jerror,
@@ -35,14 +35,13 @@ uses
   jdapistd,
   jdmarker,
   jdmaster,
-  {$ENDIF}
-  {$IFDEF WIN32}
+  {$ELSE}
   Windows,
   {$ENDIF}
 
   zgl_memory;
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF USE_PASJPEG}
 const
   INPUT_BUF_SIZE = 4096;
 
@@ -63,8 +62,7 @@ type
     sWidth    : JDIMENSION; // Scanline width
     Grayscale : Boolean;
 end;
-{$ENDIF}
-{$IFDEF WIN32}
+{$ELSE}
 type
   OLE_HANDLE = LongWord;
   OLE_XPOS_HIMETRIC  = Longint;
@@ -175,16 +173,15 @@ uses
 
 var
   jpgMem     : zglTMemory;
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF USE_PASJPEG}
   jpgDecoder : zglPJPGDecoder;
   jpgCInfo   : jpeg_decompress_struct;
   jpgData    : zglTJPGData;
-  {$ENDIF}
-  {$IFDEF WIN32}
+  {$ELSE}
   jpgData    : zglTJPGData;
   {$ENDIF}
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF USE_PASJPEG}
 procedure jpeg_output_message( cinfo : j_common_ptr ); register;
   var
     str : String;
@@ -249,17 +246,16 @@ end;
 
 procedure jpg_Load;
   label _exit;
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF USE_PASJPEG}
   var
     jerr : jpeg_error_mgr;
-  {$ENDIF}
-  {$IFDEF WIN32}
+  {$ELSE}
   var
     m : Pointer;
     g : HGLOBAL;
   {$ENDIF}
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF USE_PASJPEG}
   jpgCInfo.err := jpeg_error( jerr );
   jpeg_create_decompress( @jpgCInfo );
 
@@ -315,8 +311,7 @@ begin
       jpeg_read_scanlines( @jpgCInfo, jpgData.buffer, 1 );
       jpg_FillData;
     end;
-{$ENDIF}
-{$IFDEF WIN32}
+{$ELSE}
   g := 0;
   try
     g := GlobalAlloc( GMEM_FIXED, jpgMem.Size );
@@ -337,12 +332,11 @@ begin
 
 _exit:
   begin
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF USE_PASJPEG}
     SetLength( jpgData.Data, 0 );
     jpeg_finish_decompress ( @jpgCInfo );
     jpeg_destroy_decompress( @jpgCInfo );
-  {$ENDIF}
-  {$IFDEF WIN32}
+  {$ELSE}
     SetLength( jpgData.Data, 0 );
     jpgData.Buffer := nil;
     jpgData.Stream := nil;
@@ -367,12 +361,11 @@ begin
 end;
 
 procedure jpg_FillData;
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF USE_PASJPEG}
   var
     i, j  : JDIMENSION;
     color : JSAMPLE_PTR;
-  {$ENDIF}
-  {$IFDEF WIN32}
+  {$ELSE}
   var
     bi   : BITMAPINFO;
     bmp  : HBITMAP;
@@ -383,16 +376,16 @@ procedure jpg_FillData;
     t    : Byte;
   {$ENDIF}
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF USE_PASJPEG}
   color := JSAMPLE_PTR( jpgData.Buffer[ 0 ] );
   if not jpgData.Grayscale Then
     begin
      for i := 0 to jpgData.Width - 1 do
         begin
           j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
-          jpgData.Data[ j + 0 ] := PByte( color + i * 3 + 0 )^;
-          jpgData.Data[ j + 1 ] := PByte( color + i * 3 + 1 )^;
-          jpgData.Data[ j + 2 ] := PByte( color + i * 3 + 2 )^;
+          jpgData.Data[ j + 0 ] := PByte( Ptr( color ) + i * 3 + 0 )^;
+          jpgData.Data[ j + 1 ] := PByte( Ptr( color ) + i * 3 + 1 )^;
+          jpgData.Data[ j + 2 ] := PByte( Ptr( color ) + i * 3 + 2 )^;
           jpgData.Data[ j + 3 ] := 255;
         end;
     end else
@@ -408,8 +401,7 @@ begin
             INC( color );
           end;
       end;
-{$ENDIF}
-{$IFDEF WIN32}
+{$ELSE}
   DC := CreateCompatibleDC( GetDC( 0 ) );
   jpgData.Buffer.get_Width ( W );
   jpgData.Buffer.get_Height( H );

@@ -70,14 +70,14 @@ type
 { Forward declarations }
 {METHODDEF}
 function compress_data(cinfo : j_compress_ptr;
-                       input_buf : JSAMPIMAGE) : boolean; far; forward;
-{$ifdef FULL_COEF_BUFFER_SUPPORTED
+                       input_buf : JSAMPIMAGE) : boolean;  forward;
+{$ifdef FULL_COEF_BUFFER_SUPPORTED}
 {METHODDEF}
 function compress_first_pass(cinfo : j_compress_ptr;
-                             input_buf : JSAMPIMAGE) : boolean;  far; forward;
+                             input_buf : JSAMPIMAGE) : boolean;   forward;
 {METHODDEF}
 function compress_output(cinfo : j_compress_ptr;
-                         input_buf : JSAMPIMAGE) : boolean;  far; forward;
+                         input_buf : JSAMPIMAGE) : boolean;   forward;
 {$endif}
 
 
@@ -113,7 +113,7 @@ end;
 
 {METHODDEF}
 procedure start_pass_coef (cinfo : j_compress_ptr;
-                           pass_mode : J_BUF_MODE); far;
+                           pass_mode : J_BUF_MODE);
 var
   coef : my_coef_ptr;
 begin
@@ -196,7 +196,7 @@ begin
           blockcnt := compptr^.MCU_width
         else
           blockcnt := compptr^.last_col_width;
-        xpos := MCU_col_num * compptr^.MCU_sample_width;
+        xpos := MCU_col_num * JDIMENSION(compptr^.MCU_sample_width);
         ypos := yoffset * DCTSIZE;      { ypos = (yoffset+yindex) * DCTSIZE }
         for yindex := 0 to pred(compptr^.MCU_height) do
         begin
@@ -298,7 +298,7 @@ begin
     { Align the virtual buffer for this component. }
     buffer := cinfo^.mem^.access_virt_barray
       (j_common_ptr(cinfo), coef^.whole_image[ci],
-       coef^.iMCU_row_num * compptr^.v_samp_factor,
+       coef^.iMCU_row_num * JDIMENSION(compptr^.v_samp_factor),
        JDIMENSION (compptr^.v_samp_factor), TRUE);
     { Count non-dummy DCT block rows in this iMCU row. }
     if (coef^.iMCU_row_num < last_iMCU_row) then
@@ -306,14 +306,14 @@ begin
     else
     begin
       { NB: can't use last_row_height here, since may not be set! }
-      block_rows := int (compptr^.height_in_blocks mod compptr^.v_samp_factor);
+      block_rows := int (compptr^.height_in_blocks) mod compptr^.v_samp_factor;
       if (block_rows = 0) then
         block_rows := compptr^.v_samp_factor;
     end;
     blocks_across := compptr^.width_in_blocks;
     h_samp_factor := compptr^.h_samp_factor;
     { Count number of dummy blocks to be added at the right margin. }
-    ndummy := int (blocks_across mod h_samp_factor);
+    ndummy := int (blocks_across) mod h_samp_factor;
     if (ndummy > 0) then
       ndummy := h_samp_factor - ndummy;
     { Perform DCT for all non-dummy blocks in this iMCU row.  Each call
@@ -353,7 +353,7 @@ begin
     if (coef^.iMCU_row_num = last_iMCU_row) then
     begin
       Inc(blocks_across, ndummy);       { include lower right corner }
-      MCUs_across := blocks_across div h_samp_factor;
+      MCUs_across := blocks_across div JDIMENSION(h_samp_factor);
       for block_row := block_rows to pred(compptr^.v_samp_factor) do
       begin
         thisblockrow := buffer^[block_row];
@@ -414,7 +414,7 @@ begin
     compptr := cinfo^.cur_comp_info[ci];
     buffer[ci] := cinfo^.mem^.access_virt_barray (
        j_common_ptr(cinfo), coef^.whole_image[compptr^.component_index],
-       coef^.iMCU_row_num * compptr^.v_samp_factor,
+       coef^.iMCU_row_num * JDIMENSION(compptr^.v_samp_factor),
        JDIMENSION (compptr^.v_samp_factor), FALSE);
   end;
 
@@ -428,7 +428,7 @@ begin
       for ci := 0 to pred(cinfo^.comps_in_scan) do
       begin
         compptr := cinfo^.cur_comp_info[ci];
-        start_col := MCU_col_num * compptr^.MCU_width;
+        start_col := MCU_col_num * JDIMENSION(compptr^.MCU_width);
         for yindex := 0 to pred(compptr^.MCU_height) do
         begin
           buffer_ptr := JBLOCKROW(@ buffer[ci]^[yindex+yoffset]^[start_col]);

@@ -122,7 +122,7 @@ begin
 
       upsample^.methods[ci] (cinfo, compptr,
         JSAMPARRAY(@ input_buf^[ci]^
-           [in_row_group_ctr * upsample^.rowgroup_height[ci]]),
+           [LongInt(in_row_group_ctr) * upsample^.rowgroup_height[ci]]),
         upsample^.color_buf[ci]);
 
       Inc(compptr);

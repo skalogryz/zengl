@@ -124,18 +124,18 @@ begin
   else
     w := managerGUI.Main.child[ 0 ];
 
-  i := w._id;
-  while i < w.parent.childs do
+  callback( w, data );
+  i := 0;
+  while i < w.childs do
     begin
-      if w.childs > 0 Then
-        gui_ProcCallback( w.child[ 0 ], callback, data );
-      callback( w.parent.child[ i ], data );
+      gui_ProcCallback( w.child[ i ], callback, data );
       INC( i );
     end;
 end;
 
 procedure gui_ResetFocus;
 begin
+  if widget = data Then exit;
   if widget.Focus Then
     gui_AddEvent( EVENT_FOCUS_OUT, widget, nil );
   widget.Focus := FALSE;

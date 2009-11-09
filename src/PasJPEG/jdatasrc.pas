@@ -53,7 +53,7 @@ const
   before any data is actually read. }
 
 {METHODDEF}
-procedure init_source (cinfo : j_decompress_ptr); far;
+procedure init_source (cinfo : j_decompress_ptr);
 var
   src : my_src_ptr;
 begin
@@ -98,7 +98,7 @@ end;
   the front of the buffer rather than discarding it. }
 
 {METHODDEF}
-function fill_input_buffer (cinfo : j_decompress_ptr) : boolean; far;
+function fill_input_buffer (cinfo : j_decompress_ptr) : boolean;
 var
   src : my_src_ptr;
   nbytes : size_t;
@@ -137,7 +137,7 @@ end;
 
 {METHODDEF}
 procedure skip_input_data (cinfo : j_decompress_ptr;
-                           num_bytes : long); far;
+                           num_bytes : long);
 var
   src : my_src_ptr;
 begin
@@ -177,7 +177,7 @@ end;
   for error exit. }
 
 {METHODDEF}
-procedure term_source (cinfo : j_decompress_ptr); far;
+procedure term_source (cinfo : j_decompress_ptr);
 begin
   { no work necessary here }
 end;

@@ -81,6 +81,8 @@ const
   EVENT_KEY_UP      = 15;
   EVENT_KEY_CHAR    = 16;
 
+  EVENT_DRAW_MODAL  = 17;
+
 type
   zglPEvent  = ^zglTEvent;
   zglPWidget = ^zglTWidget;
@@ -113,6 +115,7 @@ end;
     align   : DWORD;
     layer   : Integer;
     focus   : Boolean;
+    modal   : Boolean;
     visible : Boolean;
     mousein : Boolean;
     draged  : Boolean;

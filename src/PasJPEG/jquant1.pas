@@ -790,7 +790,7 @@ begin
       if (cquantize^.on_odd_row) then
       begin
         { work right to left in this row }
-        Inc(input_ptr, (width-1) * nc); { so point to rightmost pixel }
+        Inc(input_ptr, (width-1) * JDIMENSION(nc)); { so point to rightmost pixel }
         Inc(output_ptr, width-1);
         dir := -1;
         dirnc := -nc;

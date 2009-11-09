@@ -120,7 +120,9 @@ end;
 
 procedure gui_Draw;
   var
-    i : Integer;
+    i     : Integer;
+    Event : zglPEvent;
+    p     : Pointer;
 begin
   i := 0;
   while i < managerGUI.Main.childs do
@@ -128,6 +130,23 @@ begin
       gui_DrawWidget( managerGUI.Main.child[ i ] );
       if Assigned( managerGUI.Main.child[ i ] ) Then
         INC( i );
+    end;
+
+  Event := eventList.First.Next;
+  while Event <> nil do
+    begin
+      if Event._type = EVENT_DRAW_MODAL Then
+        begin
+          Event.Widget.modal := FALSE;
+          gui_DrawWidget( Event.Widget );
+          Event.Widget.modal := TRUE;
+        end;
+      Event := Event.Next;
+    end;
+  while eventList.Count > 0 do
+    begin
+      p := eventList.First.Next;
+      gui_DelEvent( zglPEvent( p ) );
     end;
 end;
 
@@ -240,7 +259,7 @@ begin
   Result.focus   := Focus;
   Result.visible := Visible;
   Result.mousein := FALSE;
-  for i := length( managerGUI.Types ) - 1 downto 0 do
+  for i := High( managerGUI.Types ) downto 0 do
     if Result._type = managerGUI.Types[ i ]._type Then
       begin
         Result.OnDraw := managerGUI.Types[ i ].OnDraw;

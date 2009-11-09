@@ -703,7 +703,7 @@ begin
   begin
     if (sptr^.mem_buffer = NIL) then
     begin { if not realized yet }
-      minheights := (long(sptr^.rows_in_array) - long(1)) div sptr^.maxaccess + long(1);
+      minheights := (long(sptr^.rows_in_array) - long(1)) div LongInt(sptr^.maxaccess) + long(1);
       if (minheights <= max_minheights) then
       begin
         { This buffer fits in memory }
@@ -712,7 +712,7 @@ begin
       else
       begin
         { It doesn't fit in memory, create backing store. }
-        sptr^.rows_in_mem := JDIMENSION (max_minheights * sptr^.maxaccess);
+        sptr^.rows_in_mem := JDIMENSION(max_minheights) * sptr^.maxaccess;
         jpeg_open_backing_store(cinfo,
                                 @sptr^.b_s_info,
                                 long(sptr^.rows_in_array) *
@@ -735,7 +735,7 @@ begin
   begin
     if (bptr^.mem_buffer = NIL) then
     begin { if not realized yet }
-      minheights := (long(bptr^.rows_in_array) - long(1)) div bptr^.maxaccess + long(1);
+      minheights := (long(bptr^.rows_in_array) - long(1)) div LongInt(bptr^.maxaccess) + long(1);
       if (minheights <= max_minheights) then
       begin
         { This buffer fits in memory }
@@ -744,7 +744,7 @@ begin
       else
       begin
         { It doesn't fit in memory, create backing store. }
-        bptr^.rows_in_mem := JDIMENSION (max_minheights * bptr^.maxaccess);
+        bptr^.rows_in_mem := JDIMENSION (max_minheights) * bptr^.maxaccess;
         jpeg_open_backing_store(cinfo,
                                 @bptr^.b_s_info,
                                 long(bptr^.rows_in_array) *
@@ -774,7 +774,7 @@ var
 begin
 
   bytesperrow := long(ptr^.samplesperrow * SIZEOF(JSAMPLE));
-  file_offset := ptr^.cur_start_row * bytesperrow;
+  file_offset := LongInt(ptr^.cur_start_row) * bytesperrow;
   { Loop to read or write each allocation chunk in mem_buffer }
   i := 0;
   while i < long(ptr^.rows_in_mem) do
@@ -783,8 +783,8 @@ begin
     { One chunk, but check for short chunk at end of buffer }
     {rows := MIN(long(ptr^.rowsperchunk), long(ptr^.rows_in_mem - i));}
     rows := long(ptr^.rowsperchunk);
-    if rows > long(ptr^.rows_in_mem - i) then
-      rows := long(ptr^.rows_in_mem - i);
+    if rows > long(ptr^.rows_in_mem) - i then
+      rows := long(ptr^.rows_in_mem) - i;
     { Transfer no more than is currently defined }
     thisrow := long (ptr^.cur_start_row) + i;
     {rows := MIN(rows, long(ptr^.first_undef_row) - thisrow);}
@@ -823,7 +823,7 @@ var
   bytesperrow, file_offset, byte_count, rows, thisrow, i : long;
 begin
   bytesperrow := long (ptr^.blocksperrow) * SIZEOF(JBLOCK);
-  file_offset := ptr^.cur_start_row * bytesperrow;
+  file_offset := LongInt(ptr^.cur_start_row) * bytesperrow;
   { Loop to read or write each allocation chunk in mem_buffer }
   i := 0;
   while (i < long(ptr^.rows_in_mem)) do
@@ -831,17 +831,17 @@ begin
     { One chunk, but check for short chunk at end of buffer }
     {rows := MIN(long(ptr^.rowsperchunk), long(ptr^.rows_in_mem - i));}
     rows := long(ptr^.rowsperchunk);
-    if rows >long(ptr^.rows_in_mem - i) then
-      rows := long(ptr^.rows_in_mem - i);
+    if rows > long(ptr^.rows_in_mem) - i then
+      rows := long(ptr^.rows_in_mem) - i;
     { Transfer no more than is currently defined }
     thisrow := long (ptr^.cur_start_row) + i;
     {rows := MIN(rows, long(ptr^.first_undef_row - thisrow));}
-    if rows > long(ptr^.first_undef_row - thisrow) then
-      rows := long(ptr^.first_undef_row - thisrow);
+    if rows > long(ptr^.first_undef_row) - thisrow then
+      rows := long(ptr^.first_undef_row) - thisrow;
     { Transfer no more than fits in file }
     {rows := MIN(rows, long (ptr^.rows_in_array - thisrow));}
-    if (rows > long (ptr^.rows_in_array - thisrow)) then
-      rows := long (ptr^.rows_in_array - thisrow);
+    if (rows > long (ptr^.rows_in_array) - thisrow) then
+      rows := long (ptr^.rows_in_array) - thisrow;
 
     if (rows <= 0) then         { this chunk might be past end of file! }
       break;

@@ -68,7 +68,7 @@ begin
   b2dcur_Mode  := 0;
   b2dcur_FX    := 0;
   b2dcur_Blend := 0;
-  b2dcur_Color := $FFFFFF;
+  b2dcur_Color := 0;
   b2dcur_Tex   := nil;
   b2d_Started  := FALSE;
 end;
@@ -98,7 +98,6 @@ function batch2d_Check;
 begin
   if ( Mode <> b2dcur_Mode ) or
      ( Texture <> b2dcur_Tex ) or
-     ( FX and FX2D_COLORSET <> b2dcur_FX and FX2D_COLORSET ) or
      ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
      ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
     begin

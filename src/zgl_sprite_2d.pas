@@ -164,18 +164,10 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      if FX and FX2D_COLORSET > 0 Then
-        begin
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
-          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
-          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
-        end else
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
       glBegin( GL_TRIANGLES );
     end;
 
-  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
+  if FX and FX_COLOR > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
@@ -354,18 +346,10 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      if FX and FX2D_COLORSET > 0 Then
-        begin
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
-          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
-          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
-        end else
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
       glBegin( GL_TRIANGLES );
     end;
 
-  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
+  if FX and FX_COLOR > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
@@ -540,18 +524,10 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      if FX and FX2D_COLORSET > 0 Then
-        begin
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
-          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
-          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
-        end else
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
       glBegin( GL_TRIANGLES );
     end;
 
-  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
+  if FX and FX_COLOR > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
@@ -678,18 +654,10 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      if FX and FX2D_COLORSET > 0 Then
-        begin
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
-          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
-          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
-        end else
-          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
       glBegin( GL_TRIANGLES );
     end;
 
-  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
+  if FX and FX_COLOR > 0 Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );

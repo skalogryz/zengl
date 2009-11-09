@@ -226,7 +226,7 @@ begin
 
         output_ptr := JSAMPARRAY(@ output_buf^[compptr^.component_index]^
                                    [yoffset * compptr^.DCT_scaled_size]);
-        start_col := MCU_col_num * compptr^.MCU_sample_width;
+				start_col := LongInt(MCU_col_num) * compptr^.MCU_sample_width;
         for yindex := 0 to pred(compptr^.MCU_height) do
         begin
           if (cinfo^.input_iMCU_row < last_iMCU_row) or
@@ -299,7 +299,7 @@ begin
     compptr := cinfo^.cur_comp_info[ci];
     buffer[ci] := cinfo^.mem^.access_virt_barray
       (j_common_ptr (cinfo), coef^.whole_image[compptr^.component_index],
-       cinfo^.input_iMCU_row * compptr^.v_samp_factor,
+       LongInt(cinfo^.input_iMCU_row) * compptr^.v_samp_factor,
        JDIMENSION (compptr^.v_samp_factor), TRUE);
     { Note: entropy decoder expects buffer to be zeroed,
       but this is handled automatically by the memory manager
@@ -317,7 +317,7 @@ begin
       for ci := 0 to pred(cinfo^.comps_in_scan) do
       begin
         compptr := cinfo^.cur_comp_info[ci];
-        start_col := MCU_col_num * compptr^.MCU_width;
+        start_col := LongInt(MCU_col_num) * compptr^.MCU_width;
         for yindex := 0 to pred(compptr^.MCU_height) do
         begin
           buffer_ptr := JBLOCKROW(@ buffer[ci]^[yindex+yoffset]^[start_col]);
@@ -383,7 +383,7 @@ begin
   { Force some input to be done if we are getting ahead of the input. }
   while (cinfo^.input_scan_number < cinfo^.output_scan_number) or
          ((cinfo^.input_scan_number = cinfo^.output_scan_number) and
-          (cinfo^.input_iMCU_row <= cinfo^.output_iMCU_row)) do
+         (LongInt(cinfo^.input_iMCU_row) <= cinfo^.output_iMCU_row)) do
   begin
     if (cinfo^.inputctl^.consume_input(cinfo) = JPEG_SUSPENDED) then
     begin
@@ -405,12 +405,12 @@ begin
        cinfo^.output_iMCU_row * compptr^.v_samp_factor,
        JDIMENSION (compptr^.v_samp_factor), FALSE);
     { Count non-dummy DCT block rows in this iMCU row. }
-    if (cinfo^.output_iMCU_row < last_iMCU_row) then
+    if (cinfo^.output_iMCU_row < LongInt(last_iMCU_row)) then
       block_rows := compptr^.v_samp_factor
     else
     begin
       { NB: can't use last_row_height here; it is input-side-dependent! }
-      block_rows := int(compptr^.height_in_blocks mod compptr^.v_samp_factor);
+      block_rows := int(LongInt(compptr^.height_in_blocks) mod compptr^.v_samp_factor);
       if (block_rows = 0) then
         block_rows := compptr^.v_samp_factor;
     end;
@@ -434,7 +434,7 @@ begin
   end;
 
   Inc(cinfo^.output_iMCU_row);
-  if (cinfo^.output_iMCU_row < cinfo^.total_iMCU_rows) then
+  if (cinfo^.output_iMCU_row < LongInt(cinfo^.total_iMCU_rows)) then
   begin
     decompress_data := JPEG_ROW_COMPLETED;
     exit;
@@ -582,7 +582,7 @@ begin
         delta := 1
       else
         delta := 0;
-      if (cinfo^.input_iMCU_row > cinfo^.output_iMCU_row+delta) then
+      if (LongInt(cinfo^.input_iMCU_row) > cinfo^.output_iMCU_row+LongInt(delta)) then
         break;
     end;
     if (cinfo^.inputctl^.consume_input(cinfo) = JPEG_SUSPENDED) then
@@ -600,7 +600,7 @@ begin
     if (not compptr^.component_needed) then
       continue;
     { Count non-dummy DCT block rows in this iMCU row. }
-    if (cinfo^.output_iMCU_row < last_iMCU_row) then
+    if (cinfo^.output_iMCU_row < LongInt(last_iMCU_row)) then
     begin
       block_rows := compptr^.v_samp_factor;
       access_rows := block_rows * 2; { this and next iMCU row }
@@ -609,7 +609,7 @@ begin
     else
     begin
       { NB: can't use last_row_height here; it is input-side-dependent! }
-      block_rows := int (compptr^.height_in_blocks mod compptr^.v_samp_factor);
+      block_rows := int (compptr^.height_in_blocks) mod compptr^.v_samp_factor;
       if (block_rows = 0) then
         block_rows := compptr^.v_samp_factor;
       access_rows := block_rows; { this iMCU row only }
@@ -804,7 +804,7 @@ begin
   end;
 
   Inc(cinfo^.output_iMCU_row);
-  if (cinfo^.output_iMCU_row < cinfo^.total_iMCU_rows) then
+  if (cinfo^.output_iMCU_row < LongInt(cinfo^.total_iMCU_rows)) then
   begin
     decompress_smooth_data := JPEG_ROW_COMPLETED;
     exit;

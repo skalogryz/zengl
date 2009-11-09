@@ -116,6 +116,7 @@ uses
   zgl_main,
   zgl_screen,
   zgl_opengl,
+  zgl_render_2d,
   zgl_file,
   zgl_log,
   zgl_utils;
@@ -635,6 +636,12 @@ end;
 
 procedure tex_GetData;
 begin
+  if b2d_Started Then
+    begin
+      batch2d_Flush;
+      b2d_New := TRUE;
+    end;
+
   pSize := 3 + Byte( Texture.Flags and TEX_RGB = 0 );
   GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * pSize );
 

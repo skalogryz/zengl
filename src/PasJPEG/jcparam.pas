@@ -105,7 +105,7 @@ begin
 
   for i := 0 to pred(DCTSIZE2) do
   begin
-    temp := (long(basic_table[i] * scale_factor) + long(50)) div long(100);
+    temp := (long(basic_table[i]) * scale_factor + long(50)) div long(100);
     { limit the values to the valid range }
     if (temp <= long(0)) then
       temp := long(1);
@@ -242,6 +242,7 @@ begin
 end;
 
 
+{$J+}
 {LOCAL}
 procedure std_huff_tables (cinfo : j_compress_ptr);
 { Set up the standard Huffman tables (cf. JPEG standard section K.3) }

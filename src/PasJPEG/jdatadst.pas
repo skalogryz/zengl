@@ -51,7 +51,7 @@ const
   before any data is actually written. }
 
 {METHODDEF}
-procedure init_destination (cinfo : j_compress_ptr); far;
+procedure init_destination (cinfo : j_compress_ptr);
 var
   dest : my_dest_ptr;
 begin
@@ -89,7 +89,7 @@ end;
   write it out when emptying the buffer externally. }
 
 {METHODDEF}
-function empty_output_buffer (cinfo : j_compress_ptr) : boolean; far;
+function empty_output_buffer (cinfo : j_compress_ptr) : boolean;
 var
   dest : my_dest_ptr;
 begin
@@ -114,7 +114,7 @@ end;
   for error exit. }
 
 {METHODDEF}
-procedure term_destination (cinfo : j_compress_ptr); far;
+procedure term_destination (cinfo : j_compress_ptr);
 var
   dest : my_dest_ptr;
   datacount : size_t;

@@ -123,6 +123,13 @@
     В зависимости от значения аргумента <b>What</b> возвращает определенные данные. В некоторых случаях возвращаемые данные являются указателем, т.е. Ptr(в зависимости от платформы объявляется как DWORD или QWORD) стоит расценивать как Pointer.<br>
     </div><br>
 
+    <!--zgl_GetMem-->
+    <LI><a name='zgl_GetMem'>
+    <div class='code'><b>procedure</b> zgl_GetMem( <b>var</b> Mem : Pointer; <b>const</b> Size : DWORD );</div>
+    <div align='justify'>
+    Выделяет память на стороне библиотеки(если используется so, dll или dylib) размером <b>Size</b> и возвращает указатель в <b>Mem</b>. Если <b>Size</b> равен нулю - выполнится очистка <b>Mem</b> и возврат nil.<br>
+    </div><br>
+
     <!--zgl_Enable-->
     <LI><a name='zgl_Enable'>
     <div class='code'><b>procedure</b> zgl_Enable( <b>const</b> What : DWORD );</div>
@@ -774,16 +781,20 @@
       <LI><b>FX_BLEND_WHITE</b> - чем светлее участок изображения тем он прозрачнее</LI>
       <LI><b>FX_BLEND_MASK</b> - </LI>
     </UL>
+  <LI>Константы для установки режима смешивания цвета(<a href='#fx_SetColorMode'>fx_SetColorMode</a>):</LI>
+    <UL type="disc">
+      <LI><b>FX_COLOR_MIX</b> - обычный режим</LI>
+      <LI><b>FX_COLOR_SET</b> - замещающий режим</LI>
+    </UL>
   <LI>Константы для вывода спрайтов(<a href='#ssprite2d_Draw'>ssprite2d_Draw</a>, <a href='#asprite2d_Draw'>asprite2d_Draw</a> и <a href='#csprite2d_Draw'>csprite2d_Draw</a>):</LI>
     <UL type="disc">
       <LI><b>FX2D_FLIPX</b> - отразить текстуру по горизонтали</LI>
       <LI><b>FX2D_FLIPY</b> - отразить текстуру по вертикали</LI>
-      <LI><b>FX2D_COLORMIX</b> - использовать смешивание цвета(<a href='#fx2d_SetColorMix'>fx2d_SetColorMix</a>)</LI>
-      <LI><b>FX2D_COLORSET</b> - использовать "заливку" цветом(<a href='#fx2d_SetColorMix'>fx2d_SetColorMix</a>). От FX2D_COLORMIX отличается тем, что цвет текстуры будет полностью заменен указанным цветом, а не смешиваться</LI>
       <LI><b>FX2D_VCA</b> - использовать для вершин спрайта установленные значения цвета и альфы(<a href='#fx2d_SetVCA'>fx2d_SetVCA</a>). Действует также с <a href='#pr2d_Rect'>pr2d_Rect</a> и <a href='#pr2d_Line'>pr2d_Line</a></LI>
       <LI><b>FX2D_VCHANGE</b> - добавить к координатам вершин смещения установленные функцией <a href='#fx2d_SetVertexes'>fx2d_SetVertexes</a>. Действует также с <a href='#pr2d_Rect'>pr2d_Rect</a> и <a href='#pr2d_Line'>pr2d_Line</a></LI>
       <LI><b>FX2D_SCALE</b> - использовать масштабирование по горизонтали и вертикали, установленное функцией <a href='#fx2d_SetScale'>fx2d_SetScale</a></LI>
       <LI><b>FX_BLEND</b> - использовать блендинг</LI>
+      <LI><b>FX_COLOR</b> - использовать смешивания цвета, указанного посредством <a href='#fx2d_SetColor'>fx2d_SetColor</a></LI>
     </UL>
   </UL>
   <b>Функции:</b><br>
@@ -793,15 +804,22 @@
     <div class='code'><b>procedure</b> fx_SetBlendMode( <b>const</b> Mode : Byte );</div>
     <div align='justify'>
     Устанавливает режим блендинга <b>Mode</b>. Возможные константы перечислены выше.
-
     </div>
     </LI><br>
 
-    <!--fx2d_SetColorMix-->
-    <LI><a name='fx2d_SetColorMix'>
-    <div class='code'><b>procedure</b> fx2d_SetColorMix( <b>const</b> Color : DWORD );</div>
+    <!--fx_SetColorMode-->
+    <LI><a name='fx_SetBlendMode'>
+    <div class='code'><b>procedure</b> fx_SetColorMode( <b>const</b> Mode : Byte );</div>
     <div align='justify'>
-    Устанавливает цвет <b>Color</b> для смешивания. Используется с флагом FX2D_COLORMIX.
+    Устанавливает режим смешивания цвета <b>Mode</b>. Возможные константы перечислены выше.
+    </div>
+    </LI><br>
+
+    <!--fx2d_SetColor-->
+    <LI><a name='fx2d_SetColor'>
+    <div class='code'><b>procedure</b> fx2d_SetColor( <b>const</b> Color : DWORD );</div>
+    <div align='justify'>
+    Устанавливает цвет <b>Color</b>. Используется с флагом FX_COLOR.
     </div>
     </LI><br>
 
@@ -871,7 +889,15 @@
     <LI><a name='cam2d_Set'>
     <div class='code'><b>procedure</b> cam2d_Set( <b>const</b> Camera : zglPCamera2D );</div>
     <div align='justify'>
-    Устанавливает текущую камеру используя указатель <b>Camera</b>.
+    Устанавливает текущую камеру используя указатель <b>Camera</b>. Если передать в качестве аргумента <b>nil</b>, действие камеры будет "отключено".
+    </div>
+    </LI><br>
+
+    <!--cam2d_Apply-->
+    <LI><a name='cam2d_Apply'>
+    <div class='code'><b>procedure</b> cam2d_Apply( <b>const</b> Camera : zglPCamera2D );</div>
+    <div align='justify'>
+    Немедленно применить все трансформации указанные в камере <b>Camera</b>. Если передать в качестве аргумента <b>nil</b>, состояние будет сброшено в обычное. От <a href='#cam2d_Set'>cam2d_Set</a> отличается тем, что в основе положены операции с матрицами, что порядком быстрее, но любые изменения в параметрах камеры вступят в силу только после очередного вызова этой функции.
     </div>
     </LI>
   </UL>

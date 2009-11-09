@@ -2445,7 +2445,6 @@ var
   action : int;
 begin
   marker := cinfo^.unread_marker;
-  action := 1;     { never used }
   { Always put up a warning. }
   WARNMS2(j_common_ptr(cinfo), JWRN_MUST_RESYNC, marker, desired);
 

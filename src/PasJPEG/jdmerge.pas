@@ -489,7 +489,7 @@ begin
   upsample^.pub.start_pass := start_pass_merged_upsample;
   upsample^.pub.need_context_rows := FALSE;
 
-  upsample^.out_row_width := cinfo^.output_width * cinfo^.out_color_components;
+  upsample^.out_row_width := cinfo^.output_width * JDIMENSION(cinfo^.out_color_components);
 
   if (cinfo^.max_v_samp_factor = 2) then
   begin

@@ -35,19 +35,22 @@ const
   FX_BLEND_WHITE  = $04;
   FX_BLEND_MASK   = $05;
 
-  FX2D_FLIPX    = $000001;
-  FX2D_FLIPY    = $000002;
-  FX2D_COLORMIX = $000004;
-  FX2D_COLORSET = $000008;
-  FX2D_VCA      = $000010;
-  FX2D_VCHANGE  = $000020;
-  FX2D_SCALE    = $000040;
+  FX_COLOR_MIX    = $00;
+  FX_COLOR_SET    = $01;
 
-  FX_BLEND      = $100000;
+  FX2D_FLIPX      = $000001;
+  FX2D_FLIPY      = $000002;
+  FX2D_VCA        = $000004;
+  FX2D_VCHANGE    = $000008;
+  FX2D_SCALE      = $000010;
+
+  FX_BLEND        = $100000;
+  FX_COLOR        = $200000;
 
 procedure fx_SetBlendMode( const Mode : Byte );
+procedure fx_SetColorMode( const Mode : Byte );
 
-procedure fx2d_SetColorMix( const Color : DWORD );
+procedure fx2d_SetColor( const Color : DWORD );
 procedure fx2d_SetVCA( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
 procedure fx2d_SetVertexes( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
 procedure fx2d_SetScale( const scaleX, scaleY : Single );
@@ -126,14 +129,30 @@ begin
     glBlendFunc( srcBlend, dstBlend );
 end;
 
-procedure fx2d_SetColorMix;
+procedure fx_SetColorMode;
 begin
-  if b2d_Started and ( Color <> b2dcur_Color ) Then
+  if b2d_Started and ( Mode <> b2dcur_Color ) Then
     begin
       batch2d_Flush;
       b2d_New := TRUE;
     end;
-  b2dcur_Color := Color;
+  b2dcur_Color := Mode;
+  case Mode of
+    FX_COLOR_MIX:
+      begin
+        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+      end;
+    FX_COLOR_SET:
+      begin
+        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
+        glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
+        glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
+      end;
+  end;
+end;
+
+procedure fx2d_SetColor;
+begin
   FX2D_R :=   Color             shr 16;
   FX2D_G := ( Color and $FF00 ) shr 8;
   FX2D_B :=   Color and $FF;

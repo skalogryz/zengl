@@ -320,7 +320,7 @@ begin
 {$ifdef QUANT_2PASS_SUPPORTED}
       post^.whole_image := cinfo^.mem^.request_virt_sarray
         (j_common_ptr(cinfo), JPOOL_IMAGE, FALSE,
-         cinfo^.output_width * cinfo^.out_color_components,
+         LongInt(cinfo^.output_width) * cinfo^.out_color_components,
          JDIMENSION (jround_up( long(cinfo^.output_height),
                                 long(post^.strip_height)) ),
          post^.strip_height);
@@ -333,7 +333,7 @@ begin
       { One-pass color quantization: just make a strip buffer. }
       post^.buffer := cinfo^.mem^.alloc_sarray
         (j_common_ptr (cinfo), JPOOL_IMAGE,
-         cinfo^.output_width * cinfo^.out_color_components,
+         LongInt(cinfo^.output_width) * cinfo^.out_color_components,
          post^.strip_height);
     end;
   end;

@@ -62,7 +62,7 @@ type
 const
   INPUT_BUF_SIZE = 4096;
 
-procedure init_source(cinfo : j_decompress_ptr); far;
+procedure init_source(cinfo : j_decompress_ptr);
 var
   src : my_src_ptr;
 begin
@@ -70,7 +70,7 @@ begin
   src^.start_of_file := TRUE;
 end;
 
-function fill_input_buffer(cinfo : j_decompress_ptr) : boolean; far;
+function fill_input_buffer(cinfo : j_decompress_ptr) : boolean;
 var
   src : my_src_ptr;
   nbytes : size_t;
@@ -93,7 +93,7 @@ begin
 end;
 
 procedure skip_input_data(cinfo : j_decompress_ptr;
-                      num_bytes : long); far;
+                      num_bytes : long);
 var
   src : my_src_ptr;
 begin
@@ -110,7 +110,7 @@ begin
   end;
 end;
 
-procedure term_source(cinfo : j_decompress_ptr); far;
+procedure term_source(cinfo : j_decompress_ptr);
 begin
   { no work necessary here }
 end;
@@ -157,7 +157,7 @@ type
 const
   OUTPUT_BUF_SIZE = 4096;
 
-procedure init_destination(cinfo : j_compress_ptr); far;
+procedure init_destination(cinfo : j_compress_ptr);
 var
   dest : my_dest_ptr;
 begin
@@ -169,7 +169,7 @@ begin
   dest^.pub.free_in_buffer := OUTPUT_BUF_SIZE;
 end;
 
-function empty_output_buffer(cinfo : j_compress_ptr) : boolean; far;
+function empty_output_buffer(cinfo : j_compress_ptr) : boolean;
 var
   dest : my_dest_ptr;
 begin
@@ -183,7 +183,7 @@ begin
   empty_output_buffer := TRUE;
 end;
 
-procedure term_destination(cinfo : j_compress_ptr); far;
+procedure term_destination(cinfo : j_compress_ptr);
 var
   dest : my_dest_ptr;
   datacount : size_t;
@@ -781,7 +781,7 @@ type
     total_extra_passes : INT;
   end;
 
-procedure progress_monitor(cinfo: j_common_ptr); far;
+procedure progress_monitor(cinfo: j_common_ptr);
 var
   progress : my_progress_ptr;
   total_passes : INT;
@@ -843,7 +843,7 @@ type
     pub: jpeg_error_mgr;
   end;
 
-procedure error_exit (cinfo : j_common_ptr); far;
+procedure error_exit (cinfo : j_common_ptr);
 var
   buffer : string;
 begin
@@ -851,7 +851,7 @@ begin
   raise EJPEG.Create(buffer);
 end;
 
-procedure emit_message (cinfo : j_common_ptr; msg_level : int); far;
+procedure emit_message (cinfo : j_common_ptr; msg_level : int);
 var
   err : jpeg_error_mgr_ptr;
 begin
@@ -870,7 +870,7 @@ begin
       err^.output_message (cinfo);
 end;
 
-procedure output_message (cinfo : j_common_ptr); far;
+procedure output_message (cinfo : j_common_ptr);
 var
   buffer : string;
 begin
@@ -879,13 +879,13 @@ begin
   ShowMessage(buffer);
 end;
 
-procedure format_message (cinfo : j_common_ptr; var buffer : string); far;
+procedure format_message (cinfo : j_common_ptr; var buffer : string);
 begin
   buffer :=
     'JPEG ERROR -- #' + IntToStr(cinfo^.err^.msg_code);
 end;
 
-procedure reset_error_mgr (cinfo : j_common_ptr); far;
+procedure reset_error_mgr (cinfo : j_common_ptr);
 begin
   cinfo^.err^.num_warnings := 0;
   {trace_level is not reset since it is an application-supplied parameter}

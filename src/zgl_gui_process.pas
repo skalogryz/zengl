@@ -269,7 +269,7 @@ begin
         end;
       EVENT_MOUSE_CLICK:
         begin
-          gui_ProcCallback( nil, gui_ResetFocus, nil );
+          gui_ProcCallback( nil, gui_ResetFocus, Widget );
           if not Widget.focus Then
             begin
               gui_AddEvent( EVENT_FOCUS_IN, Widget, nil );
@@ -417,16 +417,19 @@ end;
 
 procedure gui_ProcListBox;
   var
-    li     : Integer;
+    li, ih : Integer;
     iShift : Integer;
     iCount : Integer;
+    iDiff  : Integer;
 begin
   iCount := gui_GetListItemsPerPage( Event.Widget );
+  ih     := zglTListBoxDesc( Event.Widget.desc^ ).ItemHeight;
+  iDiff  := iCount * ih - Round( Event.Widget.client.H );
   with zglTListBoxDesc( Event.Widget.desc^ ), Event.Widget^, Event.Widget.rect do
     begin
-      if ( List.Count > iCount ) and ( not Assigned( child ) ) Then
+      if ( List.Count * ItemHeight > H ) and ( not Assigned( child ) ) Then
         gui_AddWidget( WIDGET_SCROLLBAR, W - SCROLL_SIZE, 0, SCROLL_SIZE, H, FALSE, TRUE, nil, nil, Event.Widget );
-      if ( List.Count <= iCount ) and Assigned( Event.Widget.child ) Then
+      if ( List.Count < iCount ) and Assigned( Event.Widget.child ) Then
         begin
           gui_DelWidget( child[ 0 ] );
           SetLength( child, 0 );
@@ -434,11 +437,9 @@ begin
     end;
 
   if Assigned( Event.Widget.child ) Then
-    begin
-      zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).PageSize := iCount;
-      iShift := zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position;
-    end else
-      iShift := 0;
+    iShift := zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position div ih
+  else
+    iShift := 0;
 
   with Event^, zglTListBoxDesc( Widget.desc^ ) do
     begin
@@ -447,7 +448,7 @@ begin
         EVENT_MOUSE_CLICK:
           begin
             if mouse_button = M_BLEFT Then
-              li := ( Round( mouse_Y - Widget.rect.Y - 4 ) div ItemHeight ) + iShift;
+              li := ( Round( mouse_Y - Widget.rect.Y - 4 + iDiff ) div ItemHeight ) + iShift;
             if ( mouse_X > Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 ) and Assigned( Event.Widget.child ) Then
               li := -1;
           end;
@@ -478,9 +479,9 @@ begin
         if Assigned( Event.Widget.child ) and ( Event._type <> EVENT_MOUSE_DOWN ) and ( Event._type <> EVENT_MOUSE_CLICK ) Then
           begin
             if ItemIndex < iShift Then
-              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ItemIndex;
+              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ItemIndex * ih;
             if ItemIndex > iShift + iCount - 2 Then
-              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ItemIndex - iCount + 1;
+              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ( ItemIndex - iCount + 1 ) * ih + iDiff;
           end;
       end;
   end;
@@ -488,8 +489,9 @@ begin
   if Assigned( Event.Widget.child ) Then
     with zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ) do
       begin
-        Max  := zglTListBoxDesc( Event.Widget.desc^ ).List.Count - iCount;
-        Step := 1;
+        Max      := zglTListBoxDesc( Event.Widget.desc^ ).List.Count * ih - Round( Event.Widget.client.H );
+        PageSize := iCount * ih;
+        Step     := ih;
         if Position > Max Then
           Position := Max;
       end;
@@ -505,7 +507,10 @@ begin
         EVENT_MOUSE_CLICK:
           begin
             if ( mouse_button = M_BLEFT ) and ( mouse_X > X + W - H + 2 ) Then
-              DropedDown := not DropedDown;
+              begin
+                Widget.modal := not Widget.modal;
+                DropedDown   := not DropedDown;
+              end;
           end;
       end;
     end;
@@ -581,7 +586,7 @@ end;
 
 procedure gui_ProcScrollBar;
   var
-    r      : zglTRect;
+    r : zglTRect;
 begin
   with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
     case _type of

@@ -165,7 +165,7 @@ begin
     { For noninterleaved scans, it is convenient to define last_row_height
       as the number of block rows present in the last iMCU row. }
 
-    tmp := int (compptr^.height_in_blocks mod compptr^.v_samp_factor);
+    tmp := int (LongInt(compptr^.height_in_blocks) mod compptr^.v_samp_factor);
     if (tmp = 0) then
       tmp := compptr^.v_samp_factor;
     compptr^.last_row_height := tmp;
@@ -202,17 +202,17 @@ begin
       compptr^.MCU_blocks := compptr^.MCU_width * compptr^.MCU_height;
       compptr^.MCU_sample_width := compptr^.MCU_width * compptr^.DCT_scaled_size;
       { Figure number of non-dummy blocks in last MCU column & row }
-      tmp := int (compptr^.width_in_blocks mod compptr^.MCU_width);
+      tmp := int (LongInt(compptr^.width_in_blocks) mod compptr^.MCU_width);
       if (tmp = 0) then
         tmp := compptr^.MCU_width;
       compptr^.last_col_width := tmp;
-      tmp := int (compptr^.height_in_blocks mod compptr^.MCU_height);
+      tmp := int (LongInt(compptr^.height_in_blocks) mod compptr^.MCU_height);
       if (tmp = 0) then
         tmp := compptr^.MCU_height;
       compptr^.last_row_height := tmp;
       { Prepare array describing MCU composition }
       mcublks := compptr^.MCU_blocks;
-      if (cinfo^.blocks_in_MCU + mcublks > D_MAX_BLOCKS_IN_MCU) then
+      if (LongInt(cinfo^.blocks_in_MCU) + mcublks > D_MAX_BLOCKS_IN_MCU) then
         ERREXIT(j_common_ptr(cinfo), JERR_BAD_MCU_SIZE);
       while (mcublks > 0) do
       begin

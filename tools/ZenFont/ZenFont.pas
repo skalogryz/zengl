@@ -46,7 +46,7 @@ procedure Init;
 begin
   wnd_ShowCursor( TRUE );
 
-  scr_SetOptions( 800, 600, 32, 0, FALSE, FALSE );
+  scr_SetOptions( 800, 600, 32, 0, FALSE, TRUE );
   wnd_SetCaption( 'ZenFont' );
 
   fontgen_Init;
@@ -101,7 +101,7 @@ procedure Draw;
 begin
   pr2d_Rect( 0, 0, 800, 600, $505050, 255, PR2D_FILL );
   pr2d_Rect( 0, 0, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL );
-  text_Draw( ui_font, 0, 600 - ui_font.MaxHeight, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+
   if Assigned( fg_Font.Pages ) Then
     ssprite2d_Draw( fg_Font.Pages[ zglPSpinDesc( sn_cpage.desc ).Value - 1 ], 0, 0, fg_PageSize, fg_PageSize, 0 );
 

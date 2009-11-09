@@ -84,7 +84,7 @@ type
 { Initialize for a downsampling pass. }
 
 {METHODDEF}
-procedure start_pass_downsample (cinfo : j_compress_ptr); far;
+procedure start_pass_downsample (cinfo : j_compress_ptr);
 begin
   { no work for now }
 end;
@@ -132,7 +132,7 @@ procedure sep_downsample (cinfo : j_compress_ptr;
                           input_buf : JSAMPIMAGE;
                           in_row_index : JDIMENSION;
                           output_buf : JSAMPIMAGE;
-                          out_row_group_index : JDIMENSION); far;
+                          out_row_group_index : JDIMENSION);
 var
   downsample : my_downsample_ptr;
   ci : int;
@@ -146,7 +146,7 @@ begin
   begin
     in_ptr := JSAMPARRAY(@ input_buf^[ci]^[in_row_index]);
     out_ptr := JSAMPARRAY(@ output_buf^[ci]^
-                     [out_row_group_index * compptr^.v_samp_factor]);
+                     [out_row_group_index * JDIMENSION(compptr^.v_samp_factor)]);
     downsample^.methods[ci] (cinfo, compptr, in_ptr, out_ptr);
     Inc(compptr);
   end;
@@ -162,7 +162,7 @@ end;
 procedure int_downsample (cinfo : j_compress_ptr;
                           compptr : jpeg_component_info_ptr;
                           input_data : JSAMPARRAY;
-                          output_data : JSAMPARRAY); far;
+                          output_data : JSAMPARRAY);
 var
   inrow, outrow, h_expand, v_expand, numpix, numpix2, h, v : int;
   outcol, outcol_h :  JDIMENSION;       { outcol_h = outcol*h_expand }
@@ -183,7 +183,7 @@ begin
     efficient. }
 
   expand_right_edge(input_data, cinfo^.max_v_samp_factor,
-                    cinfo^.image_width, output_cols * h_expand);
+                    cinfo^.image_width, output_cols * JDIMENSION(h_expand));
 
   inrow := 0;
   for outrow := 0 to pred(compptr^.v_samp_factor) do
@@ -219,7 +219,7 @@ end;
 procedure fullsize_downsample (cinfo : j_compress_ptr;
                                compptr : jpeg_component_info_ptr;
                                input_data : JSAMPARRAY;
-                               output_data : JSAMPARRAY); far;
+                               output_data : JSAMPARRAY);
 begin
   { Copy the data }
   jcopy_sample_rows(input_data, 0, output_data, 0,
@@ -244,7 +244,7 @@ end;
 procedure h2v1_downsample (cinfo : j_compress_ptr;
                            compptr : jpeg_component_info_ptr;
                            input_data : JSAMPARRAY;
-                           output_data : JSAMPARRAY); far;
+                           output_data : JSAMPARRAY);
 var
   outrow : int;
   outcol : JDIMENSION;
@@ -286,7 +286,7 @@ end;
 procedure h2v2_downsample (cinfo : j_compress_ptr;
                            compptr : jpeg_component_info_ptr;
                            input_data : JSAMPARRAY;
-                           output_data : JSAMPARRAY); far;
+                           output_data : JSAMPARRAY);
 var
   inrow, outrow : int;
   outcol : JDIMENSION;
@@ -336,7 +336,7 @@ end;
 procedure h2v2_smooth_downsample (cinfo : j_compress_ptr;
                                   compptr : jpeg_component_info_ptr;
                                   input_data : JSAMPARRAY;
-                                  output_data : JSAMPARRAY); far;
+                                  output_data : JSAMPARRAY);
 var
   inrow, outrow : int;
   colctr : JDIMENSION;
@@ -470,7 +470,7 @@ end;
 procedure fullsize_smooth_downsample (cinfo : j_compress_ptr;
                                       compptr : jpeg_component_info_ptr;
                                       input_data : JSAMPARRAY;
-                                      output_data : JSAMPARRAY); far;
+                                      output_data : JSAMPARRAY);
 var
   outrow : int;
   colctr : JDIMENSION;

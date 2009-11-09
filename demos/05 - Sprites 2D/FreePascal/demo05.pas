@@ -123,9 +123,9 @@ begin
             pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain.MaxHeight + 4, t, fntMain.MaxHeight, $000000, 200, PR2D_FILL );
             pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain.MaxHeight + 4, t, fntMain.MaxHeight, $FFFFFF );
             text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - fntMain.MaxHeight + 8, 0.75, 0, 'I''m so red...' );
-            // Рисуем красного пингвина используя fx2d-функцию и флаг FX2D_COLORMIX
-            fx2d_SetColorMix( $FF0000 );
-            asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 255, FX_BLEND or FX2D_COLORMIX );
+            // Рисуем красного пингвина используя fx2d-функцию и флаг FX_COLOR
+            fx2d_SetColor( $FF0000 );
+            asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 255, FX_BLEND or FX_COLOR );
           end else
             if i = 7 Then
               begin
@@ -133,9 +133,12 @@ begin
                 pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain.MaxHeight + 4, t, fntMain.MaxHeight, $000000, 200, PR2D_FILL );
                 pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain.MaxHeight + 4, t, fntMain.MaxHeight, $FFFFFF );
                 text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - fntMain.MaxHeight + 8, 0.75, 0, '???', 255, $FFFFFF, TEXT_HALIGN_CENTER );
-                // Рисуем пингвина приведение используя флаг FX2D_COLORSET :)
-                fx2d_SetColorMix( $FFFFFF );
-                asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 155, FX_BLEND or FX2D_COLORSET );
+                // Рисуем пингвина приведение используя флаг FX_COLOR установив режим в FX_COLOR_SET :)
+                fx_SetColorMode( FX_COLOR_SET );
+                fx2d_SetColor( $FFFFFF );
+                asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 155, FX_BLEND or FX_COLOR );
+                // Возвращаем обычный режим
+                fx_SetColorMode( FX_COLOR_MIX );
               end else
                 asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2 );
 
