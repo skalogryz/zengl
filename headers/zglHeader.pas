@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.40               }
-{ date:    2009.11.09           }
+{ date:    2009.11.14           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -82,6 +82,7 @@ const
   SYS_DRAW               = $000002;
   SYS_UPDATE             = $000003;
   SYS_EXIT               = $000004;
+  SYS_ACTIVATE           = $000005;
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
@@ -371,6 +372,7 @@ var
   mouse_Down       : function( const Button : Byte ) : Boolean;
   mouse_Up         : function( const Button : Byte ) : Boolean;
   mouse_Click      : function( const Button : Byte ) : Boolean;
+  mouse_DblClick   : function( const Button : Byte ) : Boolean;
   mouse_Wheel      : function( const Axis : Byte ) : Boolean;
   mouse_ClearState : procedure;
   mouse_Lock       : procedure;
@@ -1248,6 +1250,7 @@ begin
       mouse_Down := dlsym( zglLib, 'mouse_Down' );
       mouse_Up := dlsym( zglLib, 'mouse_Up' );
       mouse_Click := dlsym( zglLib, 'mouse_Click' );
+      mouse_DblClick := dlsym( zglLib, 'mouse_DblClick' );
       mouse_Wheel := dlsym( zglLib, 'mouse_Wheel' );
       mouse_ClearState := dlsym( zglLib, 'mouse_ClearState' );
       mouse_Lock := dlsym( zglLib, 'mouse_Lock' );
