@@ -39,6 +39,7 @@ uses
 
 procedure zero;
 procedure zerou( dt : Double );
+procedure zeroa( activate : Boolean );
 
 procedure app_MainLoop;
 {$IFDEF LINUX}
@@ -66,10 +67,11 @@ var
   app_UsrHomeDir   : AnsiString;
 
   // call-back
-  app_PLoad   : procedure = zero;
-  app_PDraw   : procedure = zero;
-  app_PExit   : procedure = zero;
-  app_PUpdate : procedure( dt : Double ) = zerou;
+  app_PLoad     : procedure = zero;
+  app_PDraw     : procedure = zero;
+  app_PExit     : procedure = zero;
+  app_PUpdate   : procedure( dt : Double ) = zerou;
+  app_PActivate : procedure( activate : Boolean ) = zeroa;
 
   {$IFDEF LINUX}
   app_Cursor : TCursor = None;
@@ -108,6 +110,9 @@ procedure zero;
 begin
 end;
 procedure zerou;
+begin
+end;
+procedure zeroa;
 begin
 end;
 
@@ -274,6 +279,7 @@ begin
           begin
             app_Focus := TRUE;
             app_Pause := FALSE;
+            app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -283,6 +289,7 @@ begin
           begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
+            app_PActivate( FALSE );
           end;
 
         MotionNotify:
@@ -455,6 +462,7 @@ begin
         if app_Focus Then
           begin
             app_Pause := FALSE;
+            app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -464,6 +472,7 @@ begin
           end else
             begin
               if app_AutoPause Then app_Pause := TRUE;
+              app_PActivate( FALSE );
               if app_Work and ( wnd_FullScreen ) and ( not wnd_First ) Then
                 begin
                   scr_Reset;
@@ -498,6 +507,8 @@ begin
             mouseClick[ M_BLEFT ] := TRUE;
             mouseCanClick[ M_BLEFT ] := FALSE;
           end;
+        if Msg = WM_LBUTTONDBLCLK Then
+          mouseDblClick[ M_BLEFT ] := TRUE;
       end;
     WM_MBUTTONDOWN, WM_MBUTTONDBLCLK:
       begin
@@ -507,6 +518,8 @@ begin
             mouseClick[ M_BMIDLE ] := TRUE;
             mouseCanClick[ M_BMIDLE ] := FALSE;
           end;
+        if Msg = WM_MBUTTONDBLCLK Then
+          mouseDblClick[ M_BMIDLE ] := TRUE;
       end;
     WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
       begin
@@ -516,6 +529,8 @@ begin
             mouseClick[ M_BRIGHT ] := TRUE;
             mouseCanClick[ M_BRIGHT ] := FALSE;
           end;
+        if Msg = WM_RBUTTONDBLCLK Then
+          mouseDblClick[ M_BRIGHT ] := TRUE;
       end;
     WM_LBUTTONUP:
       begin
@@ -622,6 +637,7 @@ begin
           begin
             app_Focus := TRUE;
             app_Pause := FALSE;
+            app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -633,6 +649,7 @@ begin
           begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
+            app_PActivate( FALSE );
             if wnd_FullScreen Then
               scr_Reset;
           end;

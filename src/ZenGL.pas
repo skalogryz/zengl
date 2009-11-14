@@ -143,6 +143,7 @@ exports
   mouse_Down               name prefix + 'mouse_Down',
   mouse_Up                 name prefix + 'mouse_Up',
   mouse_Click              name prefix + 'mouse_Click',
+  mouse_DblClick           name prefix + 'mouse_DblClick',
   mouse_Wheel              name prefix + 'mouse_Wheel',
   mouse_ClearState         name prefix + 'mouse_ClearState',
   mouse_Lock               name prefix + 'mouse_Lock',

@@ -41,6 +41,7 @@ const
   SYS_DRAW               = $000002;
   SYS_UPDATE             = $000003;
   SYS_EXIT               = $000004;
+  SYS_ACTIVATE           = $000005;
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
@@ -310,6 +311,11 @@ begin
       begin
         app_PExit := UserData;
         if not Assigned( UserData ) Then app_PExit := zero;
+      end;
+    SYS_ACTIVATE:
+      begin
+        app_PActivate := UserData;
+        if not Assigned( UserData ) Then app_PActivate := zeroa;
       end;
     // Textures
     TEX_FORMAT_EXTENSION:

@@ -50,6 +50,7 @@ function mouse_DY : Integer;
 function mouse_Down( const Button : Byte ) : Boolean;
 function mouse_Up( const Button : Byte ) : Boolean;
 function mouse_Click( const Button : Byte ) : Boolean;
+function mouse_DblClick( const Button : Byte ) : Boolean;
 function mouse_Wheel( const Axis : Byte ) : Boolean;
 procedure mouse_ClearState;
 procedure mouse_Lock;
@@ -60,6 +61,7 @@ var
   mouseDown     : array[ 0..2 ] of Boolean;
   mouseUp       : array[ 0..2 ] of Boolean;
   mouseClick    : array[ 0..2 ] of Boolean;
+  mouseDblClick : array[ 0..2 ] of Boolean;
   mouseCanClick : array[ 0..2 ] of Boolean;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
@@ -127,6 +129,11 @@ begin
   Result := mouseClick[ Button ];
 end;
 
+function mouse_DblClick;
+begin
+  Result := mouseDblClick[ Button ];
+end;
+
 function mouse_Wheel;
 begin
   Result := mouseWheel[ Axis ];
@@ -134,20 +141,11 @@ end;
 
 procedure mouse_ClearState;
 begin
-  mouseUp[ M_BLEFT  ] := FALSE;
-  mouseUp[ M_BMIDLE ] := FALSE;
-  mouseUp[ M_BRIGHT ] := FALSE;
-
-  mouseClick[ M_BLEFT  ] := FALSE;
-  mouseClick[ M_BMIDLE ] := FALSE;
-  mouseClick[ M_BRIGHT ] := FALSE;
-
-  mouseCanClick[ M_BLEFT  ] := TRUE;
-  mouseCanClick[ M_BMIDLE ] := TRUE;
-  mouseCanClick[ M_BRIGHT ] := TRUE;
-
-  mouseWheel[ M_WUP   ] := FALSE;
-  mouseWheel[ M_WDOWN ] := FALSE;
+  FillChar( mouseUp[ 0 ], 3, 0 );
+  FillChar( mouseClick[ 0 ], 3, 0 );
+  FillChar( mouseDblClick[ 0 ], 3, 0 );
+  FillChar( mouseCanClick[ 0 ], 3, 1 );
+  FillChar( mouseWheel[ 0 ], 2, 0 );
 end;
 
 procedure mouse_Lock;
