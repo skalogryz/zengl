@@ -307,5 +307,10 @@ begin
   Result := CP1251_TO_UTF8[ Byte( Text[ Pos ] ) ];
 end;
 
+initialization
+  if SizeOf( Char ) = 1 Then
+    font_GetCID := font_GetCP1251ID
+  else
+    font_GetCID := font_GetUTF16ID;
 
 end.

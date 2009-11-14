@@ -69,6 +69,7 @@ var
   mouseLock     : Boolean;
   {$IFDEF WIN32}
   cursorpos : TPoint;
+  getcurpos : Boolean;
   {$ENDIF}
 
 implementation
@@ -82,7 +83,11 @@ begin
   Result := mouseX;
 {$ENDIF}
 {$IFDEF WIN32}
-  GetCursorPos( cursorpos );
+  if getcurpos Then
+    begin
+      getcurpos := FALSE;
+      GetCursorPos( cursorpos );
+    end;
   if wnd_FullScreen Then
     Result := cursorpos.X
   else
@@ -97,7 +102,11 @@ begin
   Result := mouseY;
 {$ENDIF}
 {$IFDEF WIN32}
-  GetCursorPos( cursorpos );
+  if getcurpos Then
+    begin
+      getcurpos := FALSE;
+      GetCursorPos( cursorpos );
+    end;
   if wnd_FullScreen Then
     Result := cursorpos.Y
   else

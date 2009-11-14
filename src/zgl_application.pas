@@ -138,6 +138,7 @@ begin
       TranslateMessage( Mess );
       DispatchMessage( Mess );
     end;
+  getcurpos := TRUE;
 {$ENDIF}
 {$IFDEF DARWIN}
   while GetNextEvent( everyEvent, Event ) do;

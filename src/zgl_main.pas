@@ -168,8 +168,6 @@ end;
 
 procedure zgl_Init;
 begin
-  if not Assigned( font_GetCID ) Then
-    font_GetCID := font_GetCP1251ID;
   zgl_GetSysDir;
   log_Init;
 
@@ -200,8 +198,6 @@ end;
 {$IFDEF WIN32}
 procedure zgl_InitToHandle;
 begin
-  if not Assigned( font_GetCID ) Then
-    font_GetCID := font_GetCP1251ID;
   zgl_GetSysDir;
   log_Init;
 
@@ -513,9 +509,5 @@ begin
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := FALSE;
 end;
-
-initialization
-  if SizeOf( Char ) = 2 Then
-    font_GetCID := font_GetUTF16ID;
 
 end.
