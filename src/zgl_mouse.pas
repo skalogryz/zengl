@@ -61,8 +61,10 @@ var
   mouseDown     : array[ 0..2 ] of Boolean;
   mouseUp       : array[ 0..2 ] of Boolean;
   mouseClick    : array[ 0..2 ] of Boolean;
-  mouseDblClick : array[ 0..2 ] of Boolean;
   mouseCanClick : array[ 0..2 ] of Boolean;
+  mouseDblClick : array[ 0..2 ] of Boolean;
+  mouseDblCTime : array[ 0..2 ] of Double;
+  mouseDblCInt  : Integer = 250;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
   {$IFDEF WIN32}

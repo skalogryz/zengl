@@ -309,11 +309,14 @@ begin
             case Event.xbutton.button of
               1: // Left
                 begin
-                  mouseDown[ M_BLEFT ]  := TRUE;
+                  mouseDown[ M_BLEFT ] := TRUE;
                   if mouseCanClick[ M_BLEFT ] Then
                     begin
                       mouseClick[ M_BLEFT ] := TRUE;
                       mouseCanClick[ M_BLEFT ] := FALSE;
+                      if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+                        mouseDblClick[ M_BLEFT ] := TRUE;
+                      mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
                     end;
                 end;
               2: // Midle
@@ -323,6 +326,9 @@ begin
                     begin
                       mouseClick[ M_BMIDLE ] := TRUE;
                       mouseCanClick[ M_BMIDLE ] := FALSE;
+                      if timer_GetTicks - mouseDblCTime[ M_BMIDLE ] < mouseDblCInt Then
+                        mouseDblClick[ M_BMIDLE ] := TRUE;
+                      mouseDblCTime[ M_BMIDLE ] := timer_GetTicks;
                     end;
                 end;
               3: // Right
@@ -332,6 +338,9 @@ begin
                     begin
                       mouseClick[ M_BRIGHT ] := TRUE;
                       mouseCanClick[ M_BRIGHT ] := FALSE;
+                      if timer_GetTicks - mouseDblCTime[ M_BRIGHT ] < mouseDblCInt Then
+                        mouseDblClick[ M_BRIGHT ] := TRUE;
+                      mouseDblCTime[ M_BRIGHT ] := timer_GetTicks;
                     end;
                 end;
             end;
