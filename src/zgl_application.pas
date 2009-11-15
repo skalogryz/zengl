@@ -138,7 +138,6 @@ begin
       TranslateMessage( Mess );
       DispatchMessage( Mess );
     end;
-  getcurpos := TRUE;
 {$ENDIF}
 {$IFDEF DARWIN}
   while GetNextEvent( everyEvent, Event ) do;
@@ -806,6 +805,9 @@ begin
                     begin
                       mouseClick[ M_BLEFT ] := TRUE;
                       mouseCanClick[ M_BLEFT ] := FALSE;
+                      if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+                        mouseDblClick[ M_BLEFT ] := TRUE;
+                      mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
                     end;
                 end;
               kEventMouseButtonTertiary: // Midle
@@ -815,6 +817,9 @@ begin
                     begin
                       mouseClick[ M_BMIDLE ] := TRUE;
                       mouseCanClick[ M_BMIDLE ] := FALSE;
+                      if timer_GetTicks - mouseDblCTime[ M_BMIDLE ] < mouseDblCInt Then
+                        mouseDblClick[ M_BMIDLE ] := TRUE;
+                      mouseDblCTime[ M_BMIDLE ] := timer_GetTicks;
                     end;
                 end;
               kEventMouseButtonSecondary: // Right
@@ -824,6 +829,9 @@ begin
                     begin
                       mouseClick[ M_BRIGHT ] := TRUE;
                       mouseCanClick[ M_BRIGHT ] := FALSE;
+                      if timer_GetTicks - mouseDblCTime[ M_BRIGHT ] < mouseDblCInt Then
+                        mouseDblClick[ M_BRIGHT ] := TRUE;
+                      mouseDblCTime[ M_BRIGHT ] := timer_GetTicks;
                     end;
                 end;
             end;

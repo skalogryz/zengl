@@ -152,6 +152,7 @@ end;
 
 procedure mouse_ClearState;
 begin
+  getcurpos := TRUE;
   FillChar( mouseUp[ 0 ], 3, 0 );
   FillChar( mouseClick[ 0 ], 3, 0 );
   FillChar( mouseDblClick[ 0 ], 3, 0 );

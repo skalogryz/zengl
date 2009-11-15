@@ -47,6 +47,7 @@
       <LI><b>SYS_DRAW</b> - регистрирует функцию, что будет вызываться каждую итерацию главного цикла</LI>
       <LI><b>SYS_UPDATE</b> - регистрирует функцию, что будет вызываться каждую итерацию главного цикла и возвращать разницу времени между последним вызовом(dt)</LI>
       <LI><b>SYS_EXIT</b> - регистрирует функцию, которая будет вызвана после завершения работы библиотеки и очистки всех ресурсов</LI>
+      <LI><b>SYS_ACTIVATE</b> - регистрирует функцию, которая будет вызвана при потере или получении окном фокуса</LI>
       <LI><b>TEX_FORMAT_EXTENSION</b> - начинает регистрацию поддержки нового графического формата</LI>
       <LI><b>TEX_FORMAT_FILE_LOADER</b> - регистрирует функцию загрузки граф. формата из файла</LI>
       <LI><b>TEX_FORMAT_MEM_LOADER</b> - регистрирует функцию загрузки граф. формата из памяти</LI>
@@ -507,6 +508,14 @@
     <div class='code'><b>function</b> mouse_Click( <b>const</b> Button : Byte ) : Boolean;</div>
     <div align='justify'>
     Возвращает True, если была нажата кнопка Button после последнего вызова mouse_ClearState.
+    </div>
+    </LI><br>
+
+    <!--mouse_DblClick-->
+    <LI><a name='mouse_DblClick'>
+    <div class='code'><b>function</b> mouse_DblClick( <b>const</b> Button : Byte ) : Boolean;</div>
+    <div align='justify'>
+    Возвращает True, если был выполнен двойной клик кнопкой Button.
     </div>
     </LI><br>
 
