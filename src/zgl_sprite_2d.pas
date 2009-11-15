@@ -639,13 +639,13 @@ begin
   if tX >= 0 Then
     INC( aI, Round( ( cam2dGlobal.X - tX ) / i ) - 1 )
   else
-    INC( aI, Round( cam2dGlobal.X / i ) );
-  INC( bI, Round( ( cam2dGlobal.X ) / i ) + Byte( tX < 0 ) );
+    INC( aI, Round( cam2dGlobal.X / i ) - 1 );
+  INC( bI, Round( ( cam2dGlobal.X ) / i ) + 1 );
   if tY >= 0 Then
     INC( aJ, Round( ( cam2dGlobal.Y - tY ) / j ) - 1 )
   else
-    INC( aJ, Round( cam2dGlobal.Y / j ) );
-  INC( bJ, Round( cam2dGlobal.Y / j ) + Byte( tY < 0 ) );
+    INC( aJ, Round( cam2dGlobal.Y / j ) - 1 );
+  INC( bJ, Round( cam2dGlobal.Y / j ) + 1 );
   if aI < 0 Then aI := 0;
   if aJ < 0 Then aJ := 0;
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;
