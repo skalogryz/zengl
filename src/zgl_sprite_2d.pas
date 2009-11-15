@@ -603,7 +603,7 @@ begin
   if tX < 0 Then
     begin
       aI := Round( -tX ) div i;
-      bI := ogl_CropW div i + aI;
+      bI := Round( ogl_CropW / scr_ResCX ) div i + aI;
     end else
       begin
         aI := 0;
@@ -613,7 +613,7 @@ begin
   if tY < 0 Then
     begin
       aJ := Round( -tY ) div j;
-      bJ := ogl_CropH div j + aJ;
+      bJ := Round( ogl_CropH / scr_ResCY ) div j + aJ;
     end else
       begin
         aJ := 0;
@@ -636,10 +636,16 @@ begin
       DEC( aJ, tJ );
       INC( bJ, tJ );
     end;
-  INC( aI, Round( cam2dGlobal.X / i ) );
-  INC( bI, Round( cam2dGlobal.X / i ) );
-  INC( aJ, Round( cam2dGlobal.Y / j ) );
-  INC( bJ, Round( cam2dGlobal.Y / j ) );
+  if tX >= 0 Then
+    INC( aI, Round( ( cam2dGlobal.X - tX ) / i ) - 1 )
+  else
+    INC( aI, Round( cam2dGlobal.X / i ) );
+  INC( bI, Round( ( cam2dGlobal.X ) / i ) + Byte( tX < 0 ) );
+  if tY >= 0 Then
+    INC( aJ, Round( ( cam2dGlobal.Y - tY ) / j ) - 1 )
+  else
+    INC( aJ, Round( cam2dGlobal.Y / j ) );
+  INC( bJ, Round( cam2dGlobal.Y / j ) + Byte( tY < 0 ) );
   if aI < 0 Then aI := 0;
   if aJ < 0 Then aJ := 0;
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;
