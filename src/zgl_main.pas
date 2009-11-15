@@ -117,8 +117,12 @@ uses
   zgl_textures,
   zgl_render_target,
   zgl_font,
+  {$IFDEF USE_GUI}
   zgl_gui_main,
+  {$ENDIF}
+  {$IFDEF USE_SOUND}
   zgl_sound,
+  {$ENDIF}
   zgl_utils;
 
 procedure zgl_GetSysDir;
@@ -255,6 +259,7 @@ begin
       font_Del( zglPFont( p ) );
     end;
 
+  {$IFDEF USE_SOUND}
   log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
   while managerSound.Count.Items > 1 do
     begin
@@ -265,6 +270,7 @@ begin
   for i := 1 to SND_MAX do
     snd_StopFile( i );
   snd_Free;
+  {$ENDIF}
 
   if app_WorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
@@ -329,6 +335,7 @@ begin
         INC( managerTexture.Count.Formats );
       end;
     // Sound
+    {$IFDEF USE_SOUND}
     SND_FORMAT_EXTENSION:
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
@@ -350,7 +357,9 @@ begin
           if managerSound.Formats[ i ].Extension = zglPSoundDecoder( UserData ).Ext Then
             managerSound.Formats[ i ].Decoder := UserData;
       end;
+    {$ENDIF}
     // GUI
+    {$IFDEF USE_GUI}
     WIDGET_TYPE_ID:
       begin
         if DWORD( UserData ) > length( managerGUI.Types ) Then
@@ -373,6 +382,7 @@ begin
       begin
         managerGUI.Types[ widgetTLast ].OnProc := UserData;
       end;
+    {$ENDIF}
   end;
 end;
 
@@ -420,8 +430,12 @@ begin
     MANAGER_TEXTURE: Result := Ptr( @managerTexture );
     MANAGER_FONT:    Result := Ptr( @managerFont );
     MANAGER_RTARGET: Result := Ptr( @managerRTarget );
+    {$IFDEF USE_SOUND}
     MANAGER_SOUND:   Result := Ptr( @managerSound );
+    {$ENDIF}
+    {$IFDEF USE_GUI}
     MANAGER_GUI:     Result := Ptr( @managerGUI );
+    {$ENDIF}
   end;
 end;
 
@@ -466,11 +480,13 @@ begin
           font_GetCID := font_GetUTF16ID;
     end;
 
+  {$IFDEF USE_SOUND}
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := TRUE;
 
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := TRUE;
+  {$ENDIF}
 end;
 
 procedure zgl_Disable;
@@ -503,11 +519,13 @@ begin
   if What and APP_USE_UTF8 > 0 Then
     font_GetCID := font_GetCP1251ID;
 
+  {$IFDEF USE_SOUND}
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := FALSE;
 
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := FALSE;
+  {$ENDIF}
 end;
 
 end.

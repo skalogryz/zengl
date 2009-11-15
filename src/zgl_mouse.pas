@@ -152,7 +152,9 @@ end;
 
 procedure mouse_ClearState;
 begin
+  {$IFDEF WIN32}
   getcurpos := TRUE;
+  {$ENDIF}
   FillChar( mouseUp[ 0 ], 3, 0 );
   FillChar( mouseClick[ 0 ], 3, 0 );
   FillChar( mouseDblClick[ 0 ], 3, 0 );
