@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.40               }
-{ date:    2009.11.14           }
+{ date:    2009.11.17           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -1116,6 +1116,7 @@ var
   file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
   file_GetName      : procedure( const FileName : String; var Result : String );
   file_GetExtension : procedure( const FileName : String; var Result : String );
+  file_GetDirectory : procedure( const FileName : String; var Result : String );
   file_SetPath      : procedure( const Path : String );
 
 var
@@ -1392,6 +1393,7 @@ begin
       file_Find := dlsym( zglLib, 'file_Find' );
       file_GetName := dlsym( zglLib, 'file_GetName' );
       file_GetExtension := dlsym( zglLib, 'file_GetExtension' );
+      file_GetDirectory := dlsym( zglLib, 'file_GetDirectory' );
       file_SetPath := dlsym( zglLib, 'file_SetPath' );
 
       mem_LoadFromFile := dlsym( zglLib, 'mem_LoadFromFile' );

@@ -308,7 +308,6 @@ begin
       if DropedDown Then
         begin
           th := DropDownCount * ItemHeight + 4;
-          glTranslatef( 0, 0, 0.1 );
           pr2d_Rect( X, Y + H, W, th, COLOR_EDIT, 255, PR2D_FILL );
           pr2d_Rect( X, Y + H, W, th, COLOR_WIDGET, 255, 0 );
           pr2d_Rect( X + 1, Y + H, W - 2, th - 1, $000000, 255, 0 );
@@ -320,21 +319,18 @@ begin
               ty := Round( Y + H + ( i{ - iShift} ) * ItemHeight + ShiftY );
               if ( ty >= Y - ItemHeight ) and ( ty <= Y + H + th ) Then
                 text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
-              //if Widget.mousein Then
+
+              r.X := X;
+              r.Y := ty - 1;
+              r.W := W;
+              r.H := ItemHeight + 1;
+              if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
                 begin
-                  r.X := X;
-                  r.Y := ty - 1;
-                  r.W := W;
-                  r.H := ItemHeight + 1;
-                  if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
-                    begin
-                      pr2d_Rect( X + 2, ty - 2, W - 4, ItemHeight, COLOR_SELECT, 55, PR2D_FILL );
-                      pr2d_Rect( X + 2, ty - 2, W - 4, ItemHeight, COLOR_SELECT, 155 );
-                    end;
+                  pr2d_Rect( X + 2, ty - 2, W - 4, ItemHeight, COLOR_SELECT, 55, PR2D_FILL );
+                  pr2d_Rect( X + 2, ty - 2, W - 4, ItemHeight, COLOR_SELECT, 155 );
                 end;
-            end;
+             end;
           scissor_End;
-          glTranslatef( 0, 0, -0.1 );
         end;
     end;
 end;
