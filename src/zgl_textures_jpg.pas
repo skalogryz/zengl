@@ -1,4 +1,4 @@
-﻿{
+{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.inf.ua
