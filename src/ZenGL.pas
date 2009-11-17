@@ -317,9 +317,11 @@ exports
   file_GetSize             name prefix + 'file_GetSize',
   file_Flush               name prefix + 'file_Flush',
   file_Close               name prefix + 'file_Close',
+  file_Find                name prefix + 'file_Find',
   file_GetName             name prefix + 'file_GetName',
   file_GetExtension        name prefix + 'file_GetExtension',
-  file_Find                name prefix + 'file_Find',
+  file_GetDirectory        name prefix + 'file_GetDirectory',
+  file_SetPath             name prefix + 'file_SetPath',
 
   mem_LoadFromFile         name prefix + 'mem_LoadFromFile',
   mem_SaveToFile           name prefix + 'mem_SaveToFile',

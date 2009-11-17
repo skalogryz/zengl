@@ -102,7 +102,8 @@ var
 implementation
 uses
   zgl_main,
-  zgl_log;
+  zgl_log,
+  zgl_utils;
 
 var
   fntMem : zglTMemory;
@@ -185,6 +186,11 @@ begin
 end;
 
 function font_LoadFromFile;
+  var
+    i, j : Integer;
+    dir  : String;
+    name : String;
+    tmp  : String;
 begin
   Result := nil;
   if not file_Exists( FileName ) Then
@@ -201,6 +207,20 @@ begin
       exit;
     end else
       Result := font_Load;
+
+  file_GetDirectory( FileName, dir );
+  file_GetName( FileName, name );
+  for i := 0 to Result.Count.Pages - 1 do
+    for j := managerTexture.Count.Formats - 1 downto 0 do
+      begin
+        tmp := dir + name + '-page' + u_IntToStr( i ) + '.' + u_StrDown( managerTexture.Formats[ j ].Extension );
+        writeln(tmp);
+        if file_Exists( tmp ) Then
+          begin
+            Result.Pages[ i ] := tex_LoadFromFile( tmp, $FF000000, TEX_DEFAULT_2D );
+            break;
+          end;
+      end;
 end;
 
 function font_LoadFromMemory;
