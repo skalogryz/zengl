@@ -214,7 +214,6 @@ begin
     for j := managerTexture.Count.Formats - 1 downto 0 do
       begin
         tmp := dir + name + '-page' + u_IntToStr( i ) + '.' + u_StrDown( managerTexture.Formats[ j ].Extension );
-        writeln(tmp);
         if file_Exists( tmp ) Then
           begin
             Result.Pages[ i ] := tex_LoadFromFile( tmp, $FF000000, TEX_DEFAULT_2D );
