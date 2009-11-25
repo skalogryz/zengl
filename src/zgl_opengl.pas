@@ -567,11 +567,13 @@ begin
 
   // WaitVSync
 {$IFDEF LINUX}
-  glXGetVideoSyncSGI  := gl_GetProc( 'glXGetVideoSyncSGI' );
-  if Assigned( glXGetVideoSyncSGI ) Then
+  // Только с VideoSync на NVIDIA при вертикальной синхронизации проц
+  // не сжирается на 100%...
+  if gl_IsSupported( 'NVIDIA', glGetString( GL_VENDOR ) ) Then
     begin
-      ogl_CanVSync        := TRUE;
+      glXGetVideoSyncSGI  := gl_GetProc( 'glXGetVideoSyncSGI' );
       glXWaitVideoSyncSGI := gl_GetProc( 'glXWaitVideoSyncSGI' );
+      ogl_CanVSync        := Assigned( glXGetVideoSyncSGI ) and Assigned( glXWaitVideoSyncSGI );
     end else
       ogl_CanVSync := FALSE;
   if not ogl_CanVSync Then

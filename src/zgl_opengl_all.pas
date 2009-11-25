@@ -457,6 +457,8 @@ const
   procedure glXWaitX; cdecl; external libGL;
 
 var
+  glXGetProcAddressARB: function(name: PChar): Pointer; cdecl;
+
   glXSwapIntervalSGI: function( interval: Integer): Integer; cdecl;
   glXGetVideoSyncSGI: function(var counter: LongWord): Integer; cdecl;
   glXWaitVideoSyncSGI: function(divisor, remainder: Integer; var count: LongWord): Integer; cdecl;
@@ -590,6 +592,9 @@ begin
   {$ENDIF}
 
   ogl_Library := dlopen( libGL {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  {$IFDEF LINUX}
+  glXGetProcAddressARB := gl_GetProc( 'glXGetProcAddress' );
+  {$ENDIF}
 
   Result := ogl_Library <> LIB_ERROR;
 end;
@@ -653,6 +658,11 @@ begin
     Result := dlsym( ogl_Library, PAnsiChar( Proc + 'ARB' ) );
   if Result = nil Then
     Result := dlsym( ogl_Library, PAnsiChar( Proc + 'EXT' ) );
+
+  {$IFDEF LINUX}
+  if ( Result = nil ) and Assigned( glXGetProcAddressARB ) Then
+    Result := glXGetProcAddressARB( Proc );
+  {$ENDIF}
   {$ENDIF}
 end;
 
