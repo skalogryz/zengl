@@ -416,6 +416,14 @@
     </div>
     </LI><br>
 
+    <!--ini_ReadKeyFloat-->
+    <LI><a name='ini_ReadKeyFloat'>
+    <div class='code'><b>function</b> ini_ReadKeyFloat( <b>const</b> Section, Key : <b>AnsiString</b> ) : Single;</div>
+    <div align='justify'>
+    Считать числовое значение с плавающей запятой ключа <b>Key</b> из секции <b>Section</b>.
+    </div>
+    </LI><br>
+
     <!--ini_ReadKeyBool-->
     <LI><a name='ini_ReadKeyBool'>
     <div class='code'><b>function</b> ini_ReadKeyBool( <b>const</b> Section, Key : <b>AnsiString</b> ) : Boolean;</div>
@@ -437,6 +445,14 @@
     <div class='code'><b>function</b> ini_WriteKeyInt( <b>const</b> Section, Key : <b>AnsiString</b>; <b>const</b> Value : Integer ) : Boolean;</div>
     <div align='justify'>
     Присвоить ключу <b>Key</b> из секции <b>Section</b> числовое значение <b>Value</b>. Функция возвратит True если ключ был найден.
+    </div>
+    </LI><br>
+
+    <!--ini_WriteKeyFloat-->
+    <LI><a name='ini_WriteKeyFloat'>
+    <div class='code'><b>function</b> ini_WriteKeyFloat( <b>const</b> Section, Key : <b>AnsiString</b>; <b>const</b> Value : Single; <b>const</b> Digits : Integer = 2 ) : Boolean;</div>
+    <div align='justify'>
+    Присвоить ключу <b>Key</b> из секции <b>Section</b> числовое значение <b>Value</b> с плавающей запятой. <b>Digits</b> отвечает за количество цифр после запятой. Функция возвратит True если ключ был найден.
     </div>
     </LI><br>
 

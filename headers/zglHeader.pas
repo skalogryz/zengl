@@ -184,20 +184,21 @@ var
   scissor_End   : procedure;
 
 // INI
-  ini_LoadFromFile : procedure( const FileName : AnsiString );
-  ini_SaveToFile   : procedure( const FileName : AnsiString );
-  ini_Add          : procedure( const Section, Key : AnsiString );
-  ini_Del          : procedure( const Section, Key : AnsiString );
-  ini_Clear        : procedure( const Section : AnsiString );
-  ini_IsSection    : function( const Section : AnsiString ) : Boolean;
-  ini_IsKey        : function( const Section, Key : AnsiString ) : Boolean;
-  ini_ReadKeyStr   : procedure( const Section, Key : AnsiString; var Result : AnsiString );
-  ini_ReadKeyInt   : function( const Section, Key : AnsiString ) : Integer;
-  ini_ReadKeyFloat : function( const Section, Key : AnsiString ) : Single;
-  ini_ReadKeyBool  : function( const Section, Key : AnsiString ) : Boolean;
-  ini_WriteKeyStr  : function( const Section, Key, Value : AnsiString ) : Boolean;
-  ini_WriteKeyInt  : function( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
-  ini_WriteKeyBool : function( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
+  ini_LoadFromFile  : procedure( const FileName : AnsiString );
+  ini_SaveToFile    : procedure( const FileName : AnsiString );
+  ini_Add           : procedure( const Section, Key : AnsiString );
+  ini_Del           : procedure( const Section, Key : AnsiString );
+  ini_Clear         : procedure( const Section : AnsiString );
+  ini_IsSection     : function( const Section : AnsiString ) : Boolean;
+  ini_IsKey         : function( const Section, Key : AnsiString ) : Boolean;
+  ini_ReadKeyStr    : procedure( const Section, Key : AnsiString; var Result : AnsiString );
+  ini_ReadKeyInt    : function( const Section, Key : AnsiString ) : Integer;
+  ini_ReadKeyFloat  : function( const Section, Key : AnsiString ) : Single;
+  ini_ReadKeyBool   : function( const Section, Key : AnsiString ) : Boolean;
+  ini_WriteKeyStr   : function( const Section, Key, Value : AnsiString ) : Boolean;
+  ini_WriteKeyInt   : function( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
+  ini_WriteKeyFloat : function( const Section, Key : AnsiString; const Value : Single; const Digits : Integer = 2 ) : Boolean;
+  ini_WriteKeyBool  : function( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
 
 // TIMERS
 type
@@ -1132,6 +1133,7 @@ var
 // Utils
 function u_IntToStr( const Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
+function u_FloatToStr( const Value : Single; const Digits : Integer = 2 ) : String;
 function u_StrToFloat( const Value : String ) : Single;
 function u_BoolToStr( const Value : Boolean ) : String;
 function u_StrToBool( const Value : String ) : Boolean;
@@ -1291,6 +1293,7 @@ begin
       ini_ReadKeyBool := dlsym( zglLib, 'ini_ReadKeyBool' );
       ini_WriteKeyStr := dlsym( zglLib, 'ini_WriteKeyStr' );
       ini_WriteKeyInt := dlsym( zglLib, 'ini_WriteKeyInt' );
+      ini_WriteKeyFloat := dlsym( zglLib, 'ini_WriteKeyFloat' );
       ini_WriteKeyBool := dlsym( zglLib, 'ini_WriteKeyBool' );
 
       timer_Add := dlsym( zglLib, 'timer_Add' );

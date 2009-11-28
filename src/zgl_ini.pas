@@ -64,6 +64,7 @@ function  ini_ReadKeyFloat( const Section, Key : AnsiString ) : Single;
 function  ini_ReadKeyBool( const Section, Key : AnsiString ) : Boolean;
 function  ini_WriteKeyStr( const Section, Key, Value : AnsiString ) : Boolean;
 function  ini_WriteKeyInt( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
+function  ini_WriteKeyFloat( const Section, Key : AnsiString; const Value : Single; const Digits : Integer = 2 ) : Boolean;
 function  ini_WriteKeyBool( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
 
 procedure ini_CopyKey( var k1, k2 : zglTINIKey );
@@ -369,6 +370,26 @@ begin
       begin
         ini_Add( Section, Key );
         ini_WriteKeyInt( Section, Key, Value );
+        Result := FALSE;
+      end;
+end;
+
+function ini_WriteKeyFloat;
+  var
+    s, k : AnsiString;
+    i, j : Integer;
+begin
+  s := Section;
+  k := Key;
+
+  if ini_GetID( s, k, i, j ) Then
+    begin
+      iniRec.Section[ i ].Key[ j ].Value := u_FloatToStr( Value, Digits );
+      Result := TRUE;
+    end else
+      begin
+        ini_Add( Section, Key );
+        ini_WriteKeyFloat( Section, Key, Value, Digits );
         Result := FALSE;
       end;
 end;

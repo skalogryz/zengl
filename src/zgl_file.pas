@@ -124,7 +124,7 @@ function mkdir(pathname:Pchar; mode:mode_t):longint;cdecl;external 'libc' name '
 {$ENDIF}
 
 var
-  filePath : String;
+  filePath : String = '';
 
 implementation
 
