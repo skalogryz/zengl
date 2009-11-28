@@ -128,6 +128,7 @@ exports
   ini_IsKey                name prefix + 'ini_IsKey',
   ini_ReadKeyStr           name prefix + 'ini_ReadKeyStr',
   ini_ReadKeyInt           name prefix + 'ini_ReadKeyInt',
+  ini_ReadKeyFloat         name prefix + 'ini_ReadKeyFloat',
   ini_ReadKeyBool          name prefix + 'ini_ReadKeyBool',
   ini_WriteKeyStr          name prefix + 'ini_WriteKeyStr',
   ini_WriteKeyInt          name prefix + 'ini_WriteKeyInt',

@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.1.40               }
-{ date:    2009.11.17           }
+{ version: 0.1.41               }
+{ date:    2009.11.28           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -193,6 +193,7 @@ var
   ini_IsKey        : function( const Section, Key : AnsiString ) : Boolean;
   ini_ReadKeyStr   : procedure( const Section, Key : AnsiString; var Result : AnsiString );
   ini_ReadKeyInt   : function( const Section, Key : AnsiString ) : Integer;
+  ini_ReadKeyFloat : function( const Section, Key : AnsiString ) : Single;
   ini_ReadKeyBool  : function( const Section, Key : AnsiString ) : Boolean;
   ini_WriteKeyStr  : function( const Section, Key, Value : AnsiString ) : Boolean;
   ini_WriteKeyInt  : function( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
@@ -1129,8 +1130,14 @@ var
   mem_Free         : procedure( var Memory : zglTMemory );
 
 // Utils
-function u_IntToStr( Value : Integer ) : String;
-function u_StrToInt( Value : String ) : Integer;
+function u_IntToStr( const Value : Integer ) : String;
+function u_StrToInt( const Value : String ) : Integer;
+function u_StrToFloat( const Value : String ) : Single;
+function u_BoolToStr( const Value : Boolean ) : String;
+function u_StrToBool( const Value : String ) : Boolean;
+// Только для английских символов попадающих в диапазон 0..127
+function u_StrUp( const str : String ) : String;
+function u_StrDown( const str : String ) : String;
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
@@ -1170,6 +1177,60 @@ function u_StrToInt;
     E : Integer;
 begin
   Val( String( Value ), Result, E );
+end;
+
+function u_StrToFloat;
+  var
+    E : Integer;
+begin
+  Val( String( Value ), Result, E );
+  if E <> 0 Then
+    Result := 0;
+end;
+
+function u_BoolToStr;
+begin
+  if Value Then
+    Result := 'TRUE'
+  else
+    Result := 'FALSE';
+end;
+
+function u_StrToBool;
+begin
+  if Value = '1' Then
+    Result := TRUE
+  else
+    if u_StrUp( Value ) = 'TRUE' Then
+      Result := TRUE
+    else
+      Result := FALSE;
+end;
+
+function u_StrUp;
+  var
+    i, l : Integer;
+begin
+  l := length( Str );
+  SetLength( Result, l );
+  for i := 1 to l do
+    if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
+      Result[ i ] := Char( Byte( Str[ i ] ) - 32 )
+    else
+      Result[ i ] := Str[ i ];
+end;
+
+function u_StrDown;
+  var
+    i, l : Integer;
+begin
+  l := length( Str );
+  SetLength( Result, l );
+  for i := 1 to l do
+    if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
+      Result[ i ] := Char( Byte( Str[ i ] ) + 32 )
+    else
+      Result[ i ] := Str[ i ];
 end;
 
 procedure zglFree;
@@ -1226,6 +1287,7 @@ begin
       ini_IsKey := dlsym( zglLib, 'ini_IsKey' );
       ini_ReadKeyStr := dlsym( zglLib, 'ini_ReadKeyStr' );
       ini_ReadKeyInt := dlsym( zglLib, 'ini_ReadKeyInt' );
+      ini_ReadKeyFloat := dlsym( zglLib, 'ini_ReadKeyFloat' );
       ini_ReadKeyBool := dlsym( zglLib, 'ini_ReadKeyBool' );
       ini_WriteKeyStr := dlsym( zglLib, 'ini_WriteKeyStr' );
       ini_WriteKeyInt := dlsym( zglLib, 'ini_WriteKeyInt' );

@@ -60,6 +60,7 @@ function  ini_IsSection( const Section : AnsiString ) : Boolean;
 function  ini_IsKey( const Section, Key : AnsiString ) : Boolean;
 procedure ini_ReadKeyStr( const Section, Key : AnsiString; var Result : AnsiString );
 function  ini_ReadKeyInt( const Section, Key : AnsiString ) : Integer;
+function  ini_ReadKeyFloat( const Section, Key : AnsiString ) : Single;
 function  ini_ReadKeyBool( const Section, Key : AnsiString ) : Boolean;
 function  ini_WriteKeyStr( const Section, Key, Value : AnsiString ) : Boolean;
 function  ini_WriteKeyInt( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
@@ -304,6 +305,19 @@ begin
 
   if ini_GetID( s, k, i, j ) Then
     Result := u_StrToInt( iniRec.Section[ i ].Key[ j ].Value );
+end;
+
+function ini_ReadKeyFloat;
+  var
+    s, k : AnsiString;
+    i, j : Integer;
+begin
+  Result := 0;
+  s := Section;
+  k := Key;
+
+  if ini_GetID( s, k, i, j ) Then
+    Result := u_StrToFloat( iniRec.Section[ i ].Key[ j ].Value );
 end;
 
 function ini_ReadKeyBool;

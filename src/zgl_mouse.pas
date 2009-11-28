@@ -127,7 +127,16 @@ end;
 
 function mouse_Down;
 begin
+  {$IFDEF LINUX_OR_DARWIN}
   Result := mouseDown[ Button ];
+  {$ENDIF}
+  {$IFDEF WIN32}
+  case Button of
+    M_BLEFT:  Result := GetAsyncKeyState( VK_LBUTTON ) <> 0;
+    M_BMIDLE: Result := GetAsyncKeyState( VK_MBUTTON ) <> 0;
+    M_BRIGHT: Result := GetAsyncKeyState( VK_RBUTTON ) <> 0;
+  end;
+  {$ENDIF}
 end;
 
 function mouse_Up;
