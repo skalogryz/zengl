@@ -445,6 +445,10 @@ const
   GLX_PBUFFER_HEIGHT     = $8040;
   GLX_PBUFFER_WIDTH      = $8041;
   GLX_PRESERVED_CONTENTS = $801B;
+  GLX_DRAWABLE_TYPE      = $8010;
+  GLX_RENDER_TYPE        = $8011;
+  GLX_WINDOW_BIT         = $00000001;
+  GLX_PBUFFER_BIT        = $00000004;
 
   function  glXChooseVisual(dpy: PDisplay; screen: Integer; attribList: PInteger): PXVisualInfo; cdecl; external libGL;
   function  glXCreateContext(dpy: PDisplay; vis: PXVisualInfo; shareList: GLXContext; direct: Boolean): GLXContext; cdecl; external libGL;
@@ -463,6 +467,7 @@ var
   glXGetVideoSyncSGI: function(var counter: LongWord): Integer; cdecl;
   glXWaitVideoSyncSGI: function(divisor, remainder: Integer; var count: LongWord): Integer; cdecl;
 
+  glXChooseFBConfig: function(dpy: PDisplay; screen: Integer; attribList: PInteger; nitems: PInteger): GLXFBConfig; cdecl;
   glXGetFBConfigs: function(dpy: PDisplay; screen: Integer; nelements: PInteger): GLXFBConfig; cdecl;
   glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
   glXCreatePbuffer: function(dpy: PDisplay; config: Integer; attribList: PInteger): GLXPBuffer; cdecl;

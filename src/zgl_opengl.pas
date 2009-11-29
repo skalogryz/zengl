@@ -539,6 +539,7 @@ begin
 
   // PBUFFER
 {$IFDEF LINUX}
+  glXChooseFBConfig        := gl_GetProc( 'glXChooseFBConfig' );
   glXGetFBConfigs          := gl_GetProc( 'glXGetFBConfigs' );
   glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfig' );
   glXCreatePbuffer         := gl_GetProc( 'glXCreatePbuffer' );

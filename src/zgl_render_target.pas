@@ -57,6 +57,7 @@ type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
     Handle  : Integer;
+    Context : GLXContext;
     PBuffer : GLXPBuffer;
 end;
 {$ENDIF}
@@ -115,6 +116,7 @@ uses
   zgl_screen,
   zgl_opengl_simple,
   zgl_render_2d,
+  zgl_sprite_2d,
   zgl_log;
 
 var
@@ -131,6 +133,7 @@ function rtarget_Add;
     fbconfig     : GLXFBConfig;
     visualinfo   : PXVisualInfo;
     PBufferiAttr : array[ 0..8 ] of Integer;
+    FBConfigAttr : array[ 0..15 ] of Integer;
 {$ENDIF}
 {$IFDEF WIN32}
     PBufferiAttr : array[ 0..15 ] of Integer;
@@ -203,6 +206,18 @@ begin
         zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
         pPBuffer := Result.Next.Handle;
 
+        FBConfigAttr[ 0 ]  := GLX_DOUBLEBUFFER;
+        FBConfigAttr[ 1 ]  := GL_FALSE;
+        FBConfigAttr[ 2 ]  := GLX_ALPHA_SIZE;
+        FBConfigAttr[ 3 ]  := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        FBConfigAttr[ 4 ]  := GLX_DEPTH_SIZE;
+        FBConfigAttr[ 5 ]  := ogl_zDepth;
+        FBConfigAttr[ 6 ]  := GLX_RENDER_TYPE;
+        FBConfigAttr[ 7 ]  := GL_TRUE; //GLX_RGBA_BIT,
+        FBConfigAttr[ 8 ]  := GLX_DRAWABLE_TYPE;
+        FBConfigAttr[ 9 ]  := GLX_PBUFFER_BIT or GLX_WINDOW_BIT;
+        FBConfigAttr[ 10 ] := None;
+
         PBufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
         PBufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
         PBufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
@@ -211,18 +226,14 @@ begin
         PBufferiAttr[ 5 ] := GL_TRUE;
         PBufferiAttr[ 6 ] := None;
 
-        fbconfig := glXGetFBConfigs( scr_Display, scr_Default, @n );
-        for i := 0 to n - 1 do
+        fbconfig := glXChooseFBConfig( scr_Display, scr_Default, @FBConfigAttr[ 0 ], @n );
+        if not Assigned( fbconfig ) Then
           begin
-            visualinfo := glXGetVisualFromFBConfig( scr_Display, PInteger( fbconfig + i * 4 )^ );
-            if visualinfo.visualid = ogl_VisualInfo.visualid Then
-              begin
-                pPBuffer.Handle := PInteger( fbconfig + i * 4 )^;
-                break;
-              end;
-          end;
-        XFree( fbconfig );
-        XFree( visualinfo );
+            log_Add( 'PBuffer: glXChooseFBConfig - failed' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end else
+            pPBuffer.Handle := PInteger( fbconfig )^;
 
         pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @PBufferiAttr[ 0 ] );
         if pPBuffer.PBuffer = 0 Then
@@ -231,6 +242,26 @@ begin
             ogl_CanPBuffer := FALSE;
             exit;
           end;
+
+        visualinfo := glXGetVisualFromFBConfig( scr_Display, pPBuffer.Handle );
+        if not Assigned( visualinfo ) Then
+          begin
+            log_Add( 'PBuffer: glXGetVisualFromFBConfig - failed' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end;
+
+        pPBuffer.Context := glXCreateContext( scr_Display, visualinfo, ogl_Context, TRUE );
+
+        XFree( fbconfig );
+        XFree( visualinfo );
+
+        glXMakeCurrent( scr_Display, pPBuffer.PBuffer, pPBuffer.Context );
+        gl_ResetState;
+        Set2DMode;
+        glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
+        ssprite2d_Draw( Surface, 0, 0, ogl_Width, ogl_Height, 0, 255 );
+        glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
       end;
     {$ENDIF}
     {$IFDEF WIN32}
@@ -277,6 +308,9 @@ begin
             end;
         wglMakeCurrent( pPBuffer.DC, pPBuffer.RC );
         gl_ResetState;
+        Set2DMode;
+        glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
+        ssprite2d_Draw( Surface, 0, 0, ogl_Width, ogl_Height, 0, 255 );
         wglMakeCurrent( wnd_DC, ogl_Context );
       end;
     {$ENDIF}
@@ -421,7 +455,7 @@ begin
         RT_TYPE_PBUFFER:
           begin
             {$IFDEF LINUX}
-            glXMakeCurrent( scr_Display, zglPPBuffer( Target.Handle ).PBuffer, ogl_Context );
+            glXMakeCurrent( scr_Display, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
             {$ENDIF}
             {$IFDEF WIN32}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
