@@ -260,7 +260,7 @@ begin
         gl_ResetState;
         Set2DMode;
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
-        ssprite2d_Draw( Surface, 0, 0, ogl_Width, ogl_Height, 0, 255 );
+        ssprite2d_Draw( Surface, 0, ogl_Height - Surface.Height, ogl_Width - ( ogl_Width - Surface.Width ), ogl_Height - ( ogl_Height - Surface.Height ), 0, 255 );
         glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
       end;
     {$ENDIF}
@@ -310,7 +310,7 @@ begin
         gl_ResetState;
         Set2DMode;
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
-        ssprite2d_Draw( Surface, 0, 0, ogl_Width, ogl_Height, 0, 255 );
+        ssprite2d_Draw( Surface, 0, ogl_Height - Surface.Height, ogl_Width - ( ogl_Width - Surface.Width ), ogl_Height - ( ogl_Height - Surface.Height ), 0, 255 );
         wglMakeCurrent( wnd_DC, ogl_Context );
       end;
     {$ENDIF}
