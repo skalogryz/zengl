@@ -73,14 +73,14 @@ function  ini_GetID( S, K : AnsiString; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;
 procedure ini_Free;
 
+var
+  iniRec : zglTINI;
+  iniMem : zglTMemory;
+
 implementation
 uses
   zgl_file,
   zgl_utils;
-
-var
-  iniRec : zglTINI;
-  iniMem : zglTMemory;
 
 function DelSpaces( str : AnsiString ) : AnsiString;
   var
@@ -438,18 +438,18 @@ function ini_GetID;
 begin
   idS := -1;
   idK := -1;
+  S2  := u_StrUp( s );
   Result := FALSE;
   for i := 0 to iniRec.Sections - 1 do
     begin
       S1 := u_StrUp( iniRec.Section[ i ].Name );
-      S2 := u_StrUp( s );
       if S1 = S2 Then
         begin
           idS := i;
+          S2  := u_StrUp( k );
           for j := 0 to iniRec.Section[ i ].Keys - 1 do
             begin
               S1 := u_StrUp( iniRec.Section[ i ].Key[ j ].Name );
-              S2 := u_StrUp( k );
               if S1 = S2 Then
                 begin
                   idK := j;
@@ -457,6 +457,7 @@ begin
                   exit;
                 end;
             end;
+          exit;
         end;
     end;
 end;
