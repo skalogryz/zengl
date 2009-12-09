@@ -231,8 +231,11 @@ begin
           app_dt := timer_GetTicks;
           continue;
         end;
+
+      j := timer_GetTicks;
       app_PUpdate( timer_GetTicks - app_dt );
-      app_dt := timer_GetTicks;
+      app_dt := j;
+
       app_Draw;
     end;
 end;
