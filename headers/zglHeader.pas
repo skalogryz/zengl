@@ -1181,6 +1181,11 @@ begin
   Val( String( Value ), Result, E );
 end;
 
+function u_FloatToStr;
+begin
+  Str( Value:0:Digits, Result );
+end;
+
 function u_StrToFloat;
   var
     E : Integer;

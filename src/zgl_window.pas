@@ -128,8 +128,8 @@ begin
     begin
       wnd_X := 0;
       wnd_Y := 0;
-      wnd_Attr.override_redirect := True;
-    end else wnd_Attr.override_redirect := False;
+      wnd_Attr.override_redirect := 1;
+    end else wnd_Attr.override_redirect := 0;
   wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
 
   wnd_Handle := XCreateWindow( scr_Display,
