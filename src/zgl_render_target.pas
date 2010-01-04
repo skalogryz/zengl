@@ -459,7 +459,6 @@ begin
             {$ENDIF}
             {$IFDEF WIN32}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
-            SetCurrentMode;
             {$ENDIF}
             {$IFDEF DARWIN}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );

@@ -418,13 +418,12 @@ end;
 procedure gui_ProcListBox;
   var
     li, ih : Integer;
+    shift  : Integer;
     iShift : Integer;
     iCount : Integer;
-    iDiff  : Integer;
 begin
   iCount := gui_GetListItemsPerPage( Event.Widget );
   ih     := zglTListBoxDesc( Event.Widget.desc^ ).ItemHeight;
-  iDiff  := iCount * ih - Round( Event.Widget.client.H );
   with zglTListBoxDesc( Event.Widget.desc^ ), Event.Widget^, Event.Widget.rect do
     begin
       if ( List.Count * ItemHeight > H ) and ( not Assigned( child ) ) Then
@@ -436,8 +435,9 @@ begin
         end;
     end;
 
+  shift := zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position;
   if Assigned( Event.Widget.child ) Then
-    iShift := zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position div ih
+    iShift := shift div ih
   else
     iShift := 0;
 
@@ -448,7 +448,7 @@ begin
         EVENT_MOUSE_CLICK:
           begin
             if mouse_button = M_BLEFT Then
-              li := ( Round( mouse_Y - Widget.rect.Y - 4 + iDiff ) div ItemHeight ) + iShift;
+              li := Round( mouse_Y - Widget.rect.Y + shift - 4 ) div ItemHeight;
             if ( mouse_X > Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 ) and Assigned( Event.Widget.child ) Then
               li := -1;
           end;
@@ -481,7 +481,7 @@ begin
             if ItemIndex < iShift Then
               zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ItemIndex * ih;
             if ItemIndex > iShift + iCount - 2 Then
-              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ( ItemIndex - iCount + 1 ) * ih + iDiff;
+              zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position := ( ItemIndex - iCount + 1 ) * ih;
           end;
       end;
   end;
