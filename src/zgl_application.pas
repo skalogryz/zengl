@@ -501,8 +501,14 @@ begin
       end;
     WM_MOVING:
       begin
+        if app_AutoPause Then app_Pause := TRUE;
         wnd_X := PRect( lParam ).Left;
         wnd_Y := PRect( lParam ).Top;
+      end;
+    WM_MOVE:
+      begin
+        app_Pause := FALSE;
+        app_PActivate( FALSE );
       end;
     WM_SETCURSOR:
       begin
