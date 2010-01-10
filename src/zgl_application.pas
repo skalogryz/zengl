@@ -258,10 +258,12 @@ function app_ProcessMessages;
     where   : Point;
     SCAKey  : DWORD;
   {$ENDIF}
+  {$IFDEF LINUX_OR_DARWIN}
     i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of AnsiChar;
     str : AnsiString;
+  {$ENDIF}
     Key : DWORD;
 begin
 {$IFDEF LINUX}

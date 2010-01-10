@@ -369,8 +369,6 @@ begin
 end;
 
 procedure file_GetDirectory;
-  var
-    tmp : String;
 begin
   GetStr( FileName, Result, '/', TRUE );
   {$IFDEF WIN32}

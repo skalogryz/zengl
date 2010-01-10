@@ -125,7 +125,6 @@ var
 
 function rtarget_Add;
   var
-    i        : Integer;
     pFBO     : zglPFBO;
     pPBuffer : zglPPBuffer;
 {$IFDEF LINUX}
@@ -142,6 +141,7 @@ function rtarget_Add;
     nPixelFormat : DWORD;
 {$ENDIF}
 {$IFDEF DARWIN}
+    i            : Integer;
     PBufferdAttr : array[ 0..31 ] of DWORD;
 {$ENDIF}
 begin
@@ -433,8 +433,6 @@ begin
 end;
 
 procedure rtarget_Set;
-  var
-    Flags : DWORD;
 begin
   batch2d_Flush;
 
@@ -482,8 +480,6 @@ begin
         case lRTarget.rtType of
           RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
             begin
-              Flags := lRTarget.Surface.Flags;
-
               glEnable( GL_TEXTURE_2D );
               glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
               glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0,

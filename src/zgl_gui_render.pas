@@ -285,9 +285,9 @@ end;
 
 procedure gui_DrawComboBox;
   var
-    i, ShiftY  : Integer;
-    tw, ty, th : Single;
-    r          : zglTRect;
+    i, ShiftY : Integer;
+    ty, th    : Single;
+    r         : zglTRect;
 begin
   with zglTComboBoxDesc( Widget.desc^ ), Widget^, Widget.rect do
     begin

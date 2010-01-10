@@ -100,6 +100,8 @@ begin
     if Flags and TEXT_VALIGN_BOTTOM > 0 Then
       Y := Y - Font.MaxHeight * textScale;
 
+  FillChar( Quad[ 0 ], SizeOf( Quad[ 0 ] ) * 3, 0 );
+  CharDesc := nil;
   lastPage := -1;
   c := font_GetCID( Text, 1, @i );
   s := 1;

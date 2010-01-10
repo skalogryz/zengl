@@ -329,7 +329,9 @@ end;
 initialization
   if SizeOf( Char ) = 1 Then
     font_GetCID := font_GetCP1251ID
+  {$IFNDEF FPC}
   else
     font_GetCID := font_GetUTF16ID;
+  {$ENDIF}
 
 end.

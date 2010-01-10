@@ -203,7 +203,7 @@ end;
 procedure ini_Clear;
   var
     s : AnsiString;
-    i, ns, nk : Integer;
+    ns, nk : Integer;
 begin
   s := Section;
 

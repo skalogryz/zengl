@@ -518,6 +518,7 @@ begin
   if not oggLoad Then ogg_Init;
   if not oggInit Then exit;
 
+  FillChar( _vc, SizeOf( _vc ), 0 );
   if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
     begin
       _vi       := ov_info( _vf, -1 );

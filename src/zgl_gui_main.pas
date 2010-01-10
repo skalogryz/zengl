@@ -270,7 +270,7 @@ end;
 
 procedure gui_DelWidget;
   var
-    i, id : Integer;
+    i : Integer;
 begin
   while Widget.childs > 0 do
     gui_DelWidget( Widget.child[ 0 ] );
