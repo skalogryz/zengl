@@ -1261,13 +1261,13 @@ begin
         end;
     end;
   if not app_Work Then
-    {$IFDEF LINUX_OR_DARWIN} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
+    {$IFDEF FPC} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
 
 {$IFNDEF USE_OPENAL}
   sfSource[ ID ].Stop;
 {$ENDIF}
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF FPC}
   EndThread( 0 );
 {$ENDIF}
 end;
