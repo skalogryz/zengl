@@ -66,6 +66,11 @@
       </Options>
     </Linking>
     <Other>
+      <Verbosity>
+        <ShowNotes Value="False"/>
+        <ShowHints Value="False"/>
+        <ShowGenInfo Value="False"/>
+      </Verbosity>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
