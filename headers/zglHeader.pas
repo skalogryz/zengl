@@ -6,8 +6,8 @@
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
+{ JID:  dr.andru@gmail.com      }
 { ICQ:  496-929-849             }
-{ JID:  andru-kun@jabber.org    }
 { site: http://andru-kun.inf.ua }
 {-------------------------------}
 unit zglHeader;

@@ -117,8 +117,8 @@ type
   zglTSoundFormat = record
     Extension  : String;
     Decoder    : zglPSoundDecoder;
-    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
-    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
+    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
+    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
   end;
 
   zglTSoundManager = record
@@ -1261,13 +1261,13 @@ begin
         end;
     end;
   if not app_Work Then
-    {$IFDEF FPC} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
+    {$IFDEF LINUX_OR_DARWIN} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
 
 {$IFNDEF USE_OPENAL}
   sfSource[ ID ].Stop;
 {$ENDIF}
 
-{$IFDEF FPC}
+{$IFDEF LINUX_OR_DARWIN}
   EndThread( 0 );
 {$ENDIF}
 end;
