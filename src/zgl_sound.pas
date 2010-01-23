@@ -80,9 +80,9 @@ type
     Channel    : array of zglTSoundChannel;
 
     Data       : Pointer;
-    Size       : Integer;
+    Size       : DWORD;
     Length     : Double;
-    Frequency  : Integer;
+    Frequency  : DWORD;
 
     Prev, Next : zglPSound;
   end;
@@ -491,7 +491,7 @@ end;
 function snd_LoadFromFile;
   var
     i   : Integer;
-    f   : Integer;
+    f   : DWORD;
     ext : String;
 begin
   Result := nil;
@@ -535,7 +535,7 @@ end;
 function snd_LoadFromMemory;
   var
     i : Integer;
-    f : Integer;
+    f : DWORD;
 begin
   Result := nil;
 
