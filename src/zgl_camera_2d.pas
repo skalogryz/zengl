@@ -57,6 +57,7 @@ var
 implementation
 uses
   zgl_types,
+  zgl_screen,
   zgl_opengl,
   zgl_opengl_all,
   zgl_render_2d;
@@ -93,12 +94,12 @@ begin
       glPushMatrix;
       if ( Camera.Angle <> 0 ) or ( Camera.Zoom.X <> 0 ) or ( Camera.Zoom.Y <> 0 ) Then
         begin
-          glTranslatef( ogl_Width / 2, ogl_Height / 2, 0 );
+          glTranslatef( ogl_Width / 2 - scr_AddCX / scr_ResCX, ogl_Height / 2 - scr_AddCY / scr_ResCY, 0 );
           if ( Camera.Zoom.X <> 0 ) or ( Camera.Zoom.Y <> 0 ) Then
             glScalef( Camera.Zoom.X, Camera.Zoom.Y, 1 );
           if Camera.Angle <> 0 Then
             glRotatef( Camera.Angle, 0, 0, 1 );
-          glTranslatef( -ogl_Width / 2, -ogl_Height / 2, 0 );
+          glTranslatef( -ogl_Width / 2 - scr_AddCX / scr_ResCX, -ogl_Height / 2 + scr_AddCY / scr_ResCY, 0 );
         end;
       if ( Camera.X <> 0 ) or ( Camera.Y <> 0 ) Then
         glTranslatef( -Camera.X, -Camera.Y, 0 );
@@ -119,12 +120,12 @@ begin
   if cam2dGlobal.Zoom.X = 1 Then
     X := X - cam2dGlobal.X
   else
-    X := ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width / 2 ) - ( ogl_Width / 2 ) * cam2dGlobal.Zoom.X );
+    X := ( X - cam2dGlobal.X - ogl_Width / 2 + scr_AddCX / scr_ResCX ) * cam2dGlobal.Zoom.X + ogl_Width / 2 - scr_AddCX / scr_ResCX;
 
   if cam2dGlobal.Zoom.Y = 1 Then
     Y := Y - cam2dGlobal.Y
   else
-    Y := ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y );
+    Y := ( Y - cam2dGlobal.Y - ogl_Height / 2 + scr_AddCY / scr_ResCY ) * cam2dGlobal.Zoom.Y + ogl_Height / 2 - scr_AddCY / scr_ResCY;
 
   if cam2dGlobal.Angle <> 0 Then
     begin
@@ -149,12 +150,12 @@ begin
   if cam2dGlobal.Zoom.X = 1 Then
     v2[ 0 ] := PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X
   else
-    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width / 2 ) - ( ogl_Width / 2 ) * cam2dGlobal.Zoom.X );
+    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X - ogl_Width / 2 + scr_AddCX / scr_ResCX ) * cam2dGlobal.Zoom.X + ogl_Width / 2 - scr_AddCX / scr_ResCX;
 
   if cam2dGlobal.Zoom.Y = 1 Then
     v2[ 1 ] := PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y
   else
-    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y );
+    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y - ogl_Height / 2 + scr_AddCY / scr_ResCY ) * cam2dGlobal.Zoom.Y + ogl_Height / 2 - scr_AddCY / scr_ResCY;
 
   if cam2dGlobal.Angle <> 0 Then
     begin

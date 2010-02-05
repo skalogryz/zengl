@@ -140,8 +140,8 @@ begin
           cam2dZoomY := cam2dGlobal.Zoom.Y;
           ogl_CropR  := Round( sqrt( sqr( ogl_CropW / cam2dZoomX ) + sqr( ogl_CropH / cam2dZoomY ) ) ) div 2;
         end;
-      cx   := scr_AddCX / scr_ResCX + ogl_CropX + cam2dGlobal.X + ( ogl_CropW / scr_ResCX ) / 2;
-      cy   := scr_AddCY / scr_ResCY + ogl_CropY + cam2dGlobal.Y + ( ogl_CropH / scr_ResCY ) / 2;
+      cx   := ogl_CropX + cam2dGlobal.X + ( ogl_CropW / scr_ResCX ) / 2;
+      cy   := ogl_CropY + cam2dGlobal.Y + ( ogl_CropH / scr_ResCY ) / 2;
       crad := ogl_CropR;
 
       sx   := X + W / 2;
