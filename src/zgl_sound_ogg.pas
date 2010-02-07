@@ -95,9 +95,9 @@ const
   libvorbisfile = 'libvorbisfile.so';
 {$ENDIF}
 {$IFDEF WIN32}
-  libogg        = 'ogg.dll';
-  libvorbis     = 'vorbis.dll';
-  libvorbisfile = 'vorbisfile.dll';
+  libogg        = 'libogg.dll';
+  libvorbis     = 'libvorbis.dll';
+  libvorbisfile = 'libvorbisfile.dll';
 {$ENDIF}
 {$IFDEF DARWIN}
   libogg        = 'libogg.0.5.3.dylib';

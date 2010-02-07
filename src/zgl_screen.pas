@@ -608,7 +608,9 @@ begin
 
   cam2dZoomX := cam2dGlobal.Zoom.X;
   cam2dZoomY := cam2dGlobal.Zoom.Y;
-  ogl_CropR := Round( sqrt( sqr( ogl_CropW / cam2dZoomX ) + sqr( ogl_CropH / cam2dZoomY ) ) ) div 2;
+  cam2dSX    := Round( -ogl_Width / 2 + scr_AddCX / scr_ResCX );
+  cam2dSY    := Round( -ogl_Height / 2 + scr_AddCY / scr_ResCY );
+  ogl_CropR  := Round( sqrt( sqr( ogl_CropW / scr_ResCX / cam2dZoomX ) + sqr( ogl_CropH / scr_ResCY / cam2dZoomY ) ) ) div 2;
 end;
 
 procedure scr_SetViewPort;

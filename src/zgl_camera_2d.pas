@@ -53,6 +53,8 @@ var
   cam2dSin      : Single;
   cam2dGlobal   : zglPCamera2D = nil;
   constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
+  cam2dSX       : Integer = 0;
+  cam2dSY       : Integer = 0;
 
 implementation
 uses
@@ -92,14 +94,14 @@ begin
       cam2dGlobal := Camera;
 
       glPushMatrix;
-      if ( Camera.Angle <> 0 ) or ( Camera.Zoom.X <> 0 ) or ( Camera.Zoom.Y <> 0 ) Then
+      if ( Camera.Angle <> 0 ) or ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
         begin
           glTranslatef( ogl_Width / 2 - scr_AddCX / scr_ResCX, ogl_Height / 2 - scr_AddCY / scr_ResCY, 0 );
-          if ( Camera.Zoom.X <> 0 ) or ( Camera.Zoom.Y <> 0 ) Then
+          if ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
             glScalef( Camera.Zoom.X, Camera.Zoom.Y, 1 );
           if Camera.Angle <> 0 Then
             glRotatef( Camera.Angle, 0, 0, 1 );
-          glTranslatef( -ogl_Width / 2 - scr_AddCX / scr_ResCX, -ogl_Height / 2 + scr_AddCY / scr_ResCY, 0 );
+          glTranslatef( -ogl_Width / 2 + scr_AddCX / scr_ResCX, -ogl_Height / 2 + scr_AddCY / scr_ResCY, 0 );
         end;
       if ( Camera.X <> 0 ) or ( Camera.Y <> 0 ) Then
         glTranslatef( -Camera.X, -Camera.Y, 0 );
@@ -120,12 +122,12 @@ begin
   if cam2dGlobal.Zoom.X = 1 Then
     X := X - cam2dGlobal.X
   else
-    X := ( X - cam2dGlobal.X - ogl_Width / 2 + scr_AddCX / scr_ResCX ) * cam2dGlobal.Zoom.X + ogl_Width / 2 - scr_AddCX / scr_ResCX;
+    X := ( X - cam2dGlobal.X + cam2dSX ) * cam2dGlobal.Zoom.X - cam2dSX;
 
   if cam2dGlobal.Zoom.Y = 1 Then
     Y := Y - cam2dGlobal.Y
   else
-    Y := ( Y - cam2dGlobal.Y - ogl_Height / 2 + scr_AddCY / scr_ResCY ) * cam2dGlobal.Zoom.Y + ogl_Height / 2 - scr_AddCY / scr_ResCY;
+    Y := ( Y - cam2dGlobal.Y + cam2dSY ) * cam2dGlobal.Zoom.Y - cam2dSY;
 
   if cam2dGlobal.Angle <> 0 Then
     begin
@@ -135,8 +137,8 @@ begin
           cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
           cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
         end;
-      Xa := ogl_Width  / 2 + ( X - ogl_Width / 2 ) * cam2dCos - ( Y - ogl_Height / 2 ) * cam2dSin;
-      Ya := ogl_Height / 2 + ( X - ogl_Width / 2 ) * cam2dSin + ( Y - ogl_Height / 2 ) * cam2dCos;
+      Xa := ogl_Width  / 2 + ( X + cam2dSX ) * cam2dCos - ( Y + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
+      Ya := ogl_Height / 2 + ( X + cam2dSX ) * cam2dSin + ( Y + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
       glVertex2f( Xa, Ya );
     end else
       glVertex2f( X, Y );
@@ -150,12 +152,12 @@ begin
   if cam2dGlobal.Zoom.X = 1 Then
     v2[ 0 ] := PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X
   else
-    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X - ogl_Width / 2 + scr_AddCX / scr_ResCX ) * cam2dGlobal.Zoom.X + ogl_Width / 2 - scr_AddCX / scr_ResCX;
+    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X + cam2dSX ) * cam2dGlobal.Zoom.X - cam2dSX;
 
   if cam2dGlobal.Zoom.Y = 1 Then
     v2[ 1 ] := PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y
   else
-    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y - ogl_Height / 2 + scr_AddCY / scr_ResCY ) * cam2dGlobal.Zoom.Y + ogl_Height / 2 - scr_AddCY / scr_ResCY;
+    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y + cam2dSY ) * cam2dGlobal.Zoom.Y - cam2dSY;
 
   if cam2dGlobal.Angle <> 0 Then
     begin
@@ -165,8 +167,8 @@ begin
           cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
           cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
         end;
-      v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * cam2dCos - ( v2[ 1 ] - ogl_Height / 2 ) * cam2dSin;
-      v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] - ogl_Width / 2 ) * cam2dSin + ( v2[ 1 ] - ogl_Height / 2 ) * cam2dCos;
+      v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] + cam2dSX ) * cam2dCos - ( v2[ 1 ] + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
+      v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] + cam2dSX ) * cam2dSin + ( v2[ 1 ] + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
       glVertex2fv( @v2a[ 0 ] );
     end else
       glVertex2fv( @v2[ 0 ] );
