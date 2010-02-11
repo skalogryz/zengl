@@ -580,11 +580,11 @@ begin
   if scr_ResCX < scr_ResCY Then
     begin
       scr_AddCX := 0;
-      scr_AddCY := round( wnd_Height - Height * scr_ResCX ) div 2;
+      scr_AddCY := Round( ( wnd_Height - Height * scr_ResCX ) / 2 );
       scr_ResCY := scr_ResCX;
     end else
       begin
-        scr_AddCX := round( wnd_Width - Width * scr_ResCY ) div 2;
+        scr_AddCX := Round( ( wnd_Width - Width * scr_ResCY ) / 2 );
         scr_AddCY := 0;
         scr_ResCX := scr_ResCY;
       end;
