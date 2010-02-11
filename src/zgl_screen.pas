@@ -600,8 +600,8 @@ begin
       scr_AddCX := 0;
     end;
 
-  ogl_Width  := round( wnd_Width / scr_ResCX );
-  ogl_Height := round( wnd_Height / scr_ResCY );
+  ogl_Width  := Round( wnd_Width / scr_ResCX );
+  ogl_Height := Round( wnd_Height / scr_ResCY );
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
   SetCurrentMode;

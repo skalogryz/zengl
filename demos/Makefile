@@ -1,0 +1,10 @@
+all:
+	make -C "01 - Initialization/FreePascal/"
+	make -C "02 - Input/FreePascal/"
+	make -C "03 - Primitives 2D/FreePascal/"
+	make -C "04 - Text/FreePascal/"
+	make -C "05 - Sprites 2D/FreePascal/"
+	make -C "06 - SEngine 2D/FreePascal/"
+	make -C "07 - SEngine 2D(OOP)/FreePascal/"
+	make -C "08 - Sound/FreePascal/"
+	make -C "09 - Render to Texture/FreePascal/"
