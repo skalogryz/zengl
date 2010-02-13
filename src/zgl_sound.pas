@@ -975,7 +975,7 @@ function snd_Get;
 begin
   if not sndInitialized Then exit;
 
-  if Assigned( sfStream[ DWORD( Sound ) ]._Decoder ) and ( ID = SND_STREAM ) Then
+  if ( ID = SND_STREAM ) and Assigned( sfStream[ DWORD( Sound ) ]._Decoder ) Then
     begin
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ DWORD( Sound ) ] );
