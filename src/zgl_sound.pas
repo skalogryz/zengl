@@ -163,7 +163,9 @@ var
   sndCanPlayFile : Boolean = TRUE;
   sndAutoPaused  : Boolean;
 
+  {$IFNDEF USE_OPENAL}
   sfCS        : TRTLCriticalSection;
+  {$ENDIF}
   sfCanUse    : array[ 1..SND_MAX ] of Integer;
   sfStream    : array[ 1..SND_MAX ] of zglTSoundStream;
   sfVolume    : Single = 1;
@@ -335,21 +337,19 @@ begin
       alGenBuffers( sfBufCount, @sfBuffers[ i ] );
     end;
 
-  while TRUE do
+  i := 64;
+  SetLength( oal_Sources, i );
+  alGenSources( i, @oal_Sources[ 0 ] );
+  while alcGetError( nil ) <> AL_NO_ERROR do
     begin
-      if length( oal_Sources ) > 63 Then break; // 64 хватит с головой :)
-      SetLength( oal_Sources, length( oal_Sources ) + 1 );
-      SetLength( oal_SrcPtrs, length( oal_SrcPtrs ) + 1 );
-      SetLength( oal_SrcState, length( oal_SrcState ) + 1 );
-      alGenSources( 1, @oal_Sources[ length( oal_Sources ) - 1 ] );
-      if oal_Sources[ length( oal_Sources ) - 1 ] = 0 Then
-        begin
-          SetLength( oal_Sources, length( oal_Sources ) - 1 );
-          SetLength( oal_SrcPtrs, length( oal_SrcPtrs ) - 1 );
-          SetLength( oal_SrcState, length( oal_SrcState ) - 1 );
-          break;
-        end;
+      DEC( i, 8 );
+      if ( i = 0 ) Then break;
+      SetLength( oal_Sources, i );
+      alGenSources( i, @oal_Sources[ 0 ] );
     end;
+  SetLength( oal_SrcPtrs, i );
+  SetLength( oal_SrcState, i );
+
   log_Add( 'OpenAL: generate ' + u_IntToStr( length( oal_Sources ) ) + ' source' );
 {$ELSE}
   log_Add( 'DirectSound: load DSound.dll' );
@@ -372,10 +372,8 @@ begin
   for i := 1 to SND_MAX do
     sfCanUse[ i ] := 100;
 
-{$IFDEF FPC}
-  InitCriticalSection( sfCS );
-{$ELSE}
-  InitializeCriticalSection( sfCS );
+{$IFNDEF USE_OPENAL}
+  Windows.InitializeCriticalSection( sfCS );
 {$ENDIF}
 
   sndInitialized := TRUE;
@@ -407,6 +405,7 @@ begin
   alDeleteSources( length( oal_Sources ), @oal_Sources[ 0 ] );
   SetLength( oal_Sources, 0 );
   SetLength( oal_SrcPtrs, 0 );
+  SetLength( oal_SrcState, 0 );
 
   log_Add( 'OpenAL: destroy current sound context' );
   alcDestroyContext( oal_Context );
@@ -423,10 +422,8 @@ begin
   log_Add( 'DirectSound: sound system finalized successful' );
 {$ENDIF}
 
-{$IFDEF FPC}
-  DoneCriticalsection( sfCS );
-{$ELSE}
-  DeleteCriticalSection( sfCS );
+{$IFNDEF USE_OPENAL}
+  Windows.DeleteCriticalSection( sfCS );
 {$ENDIF}
 end;
 
@@ -454,7 +451,7 @@ begin
   {$IFDEF USE_OPENAL}
   alGenBuffers( 1, @Result.Buffer );
   for i := 0 to SourceCount - 1 do
-    Result.Channel[ i ].Source := 0;
+    FillChar( Result.Channel[ i ], SizeOf( zglTSoundChannel ), 0 );
   {$ENDIF}
 
   INC( managerSound.Count.Items );
@@ -550,11 +547,13 @@ begin
   if not Assigned( Result.Data ) Then
     begin
       log_Add( 'Cannot load sound: From Memory' );
+      snd_Del( Result );
       exit;
     end;
 
 {$IFDEF USE_OPENAL}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
+  FreeMemory( Result.Data );
 {$ELSE}
   dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
@@ -974,7 +973,9 @@ end;
 
 function snd_Get;
 begin
-  if ID = SND_STREAM Then
+  if not sndInitialized Then exit;
+
+  if Assigned( sfStream[ DWORD( Sound ) ].Decoder ) and ( ID = SND_STREAM ) Then
     begin
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ DWORD( Sound ) ] );
@@ -1215,10 +1216,10 @@ begin
       while sfStream[ ID ]._Paused do u_Sleep( 10 );
       {$ENDIF}
       {$ELSE}
-      EnterCriticalSection( sfCS );
+      Windows.EnterCriticalSection( sfCS );
       while DWORD( sfSource[ ID ].GetCurrentPosition( @Position, @b1Size ) ) = DSERR_BUFFERLOST do
         sfSource[ ID ].Restore;
-      LeaveCriticalSection( sfCS );
+      Windows.LeaveCriticalSection( sfCS );
 
       FillSize := ( sfStream[ ID ].BufferSize + Position - sfLastPos[ ID ] ) mod sfStream[ ID ].BufferSize;
 
