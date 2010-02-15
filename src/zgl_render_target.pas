@@ -215,30 +215,49 @@ begin
         FBConfigAttr[ 6 ]  := GLX_RENDER_TYPE;
         FBConfigAttr[ 7 ]  := GL_TRUE; //GLX_RGBA_BIT,
         FBConfigAttr[ 8 ]  := GLX_DRAWABLE_TYPE;
-        FBConfigAttr[ 9 ]  := GLX_PBUFFER_BIT or GLX_WINDOW_BIT;
+        FBConfigAttr[ 9 ]  := GLX_PBUFFER_BIT;
         FBConfigAttr[ 10 ] := None;
-
-        PBufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
-        PBufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
-        PBufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
-        PBufferiAttr[ 3 ] := Round( Surface.Height / Surface.V );
-        PBufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
-        PBufferiAttr[ 5 ] := GL_TRUE;
-        PBufferiAttr[ 6 ] := None;
 
         fbconfig := glXChooseFBConfig( scr_Display, scr_Default, @FBConfigAttr[ 0 ], @n );
         if not Assigned( fbconfig ) Then
           begin
-            log_Add( 'PBuffer: glXChooseFBConfig - failed' );
+            log_Add( 'PBuffer: failed to choose GLXFBConfig' );
             ogl_CanPBuffer := FALSE;
             exit;
           end else
             pPBuffer.Handle := PInteger( fbconfig )^;
 
-        pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @PBufferiAttr[ 0 ] );
+        case ogl_PBufferMode of
+          1:
+            begin
+              PBufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
+              PBufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
+              PBufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
+              PBufferiAttr[ 3 ] := Round( Surface.Height / Surface.V );
+              PBufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
+              PBufferiAttr[ 5 ] := GL_TRUE;
+              PBufferiAttr[ 6 ] := GLX_LARGEST_PBUFFER;
+              PBufferiAttr[ 7 ] := GL_TRUE;
+              PBufferiAttr[ 8 ] := None;
+
+              pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @PBufferiAttr[ 0 ] );
+            end;
+          2:
+            begin
+              PBufferiAttr[ 0 ] := GLX_PRESERVED_CONTENTS;
+              PBufferiAttr[ 1 ] := GL_TRUE;
+              PBufferiAttr[ 2 ] := GLX_LARGEST_PBUFFER;
+              PBufferiAttr[ 3 ] := GL_TRUE;
+              PBufferiAttr[ 4 ] := None;
+
+              pPBuffer.PBuffer := glXCreateGLXPbufferSGIX( scr_Display, pPBuffer.Handle, Surface.Width, Surface.Height, @PBufferiAttr[ 0 ] );
+            end;
+        end;
+
+        XFree( fbconfig );
         if pPBuffer.PBuffer = 0 Then
           begin
-            log_Add( 'PBuffer: glXCreatePbuffer - failed' );
+            log_Add( 'PBuffer: failed to create GLXPBuffer' );
             ogl_CanPBuffer := FALSE;
             exit;
           end;
@@ -246,15 +265,19 @@ begin
         visualinfo := glXGetVisualFromFBConfig( scr_Display, pPBuffer.Handle );
         if not Assigned( visualinfo ) Then
           begin
-            log_Add( 'PBuffer: glXGetVisualFromFBConfig - failed' );
+            log_Add( 'PBuffer: failed to choose Visual' );
             ogl_CanPBuffer := FALSE;
             exit;
           end;
 
         pPBuffer.Context := glXCreateContext( scr_Display, visualinfo, ogl_Context, TRUE );
-
-        XFree( fbconfig );
         XFree( visualinfo );
+        if pPBuffer.Context = nil Then
+          begin
+            log_Add( 'PBuffer: failed to create GLXContext' );
+            ogl_CanPBuffer := FALSE;
+            exit;
+          end;
 
         glXMakeCurrent( scr_Display, pPBuffer.PBuffer, pPBuffer.Context );
         gl_ResetState;
@@ -402,7 +425,10 @@ begin
     RT_TYPE_PBUFFER:
       begin
         {$IFDEF LINUX}
-        glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+        case ogl_PBufferMode of
+          1: glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+          2: glXDestroyGLXPbufferSGIX( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+        end;
         {$ENDIF}
         {$IFDEF WIN32}
         if zglPPBuffer( Target.Handle ).RC <> 0 Then

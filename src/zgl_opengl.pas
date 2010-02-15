@@ -490,20 +490,6 @@ begin
                   gl_IsSupported( 'GL_EXT_blend_equation_separate', ogl_Extensions );
   log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( ogl_Separate ) );
 
-  {glGetIntegerv( GL_MAX_LIGHTS, @ogl_MaxLights );
-  log_Add( 'GL_MAX_LIGHTS: ' + u_IntToStr( ogl_MaxLights ) );
-  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
-  glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE );}
-
-  {for i := 0 to ogl_MaxLights do
-    begin
-      glLightfv( GL_LIGHT0 + i, GL_AMBIENT,  @matAMBIENT );
-      glLightfv( GL_LIGHT0 + i, GL_DIFFUSE,  @matDIFFUSE );
-      glLightfv( GL_LIGHT0 + i, GL_SPECULAR, @matSPECULAR );
-      glLightfv( GL_LIGHT0 + i, GL_EMISSION, @matEMISSION );
-      glLightf ( GL_LIGHT0 + i, GL_SHININESS, matSHININESS );
-    end;}
-
   // VBO
   glBindBufferARB := gl_GetProc( 'glBindBuffer' );
   if Assigned( glBindBufferARB ) Then
@@ -543,14 +529,37 @@ begin
 
   // PBUFFER
 {$IFDEF LINUX}
+  oglx_Extensions := glXQueryServerString( scr_Display, scr_Default, GLX_EXTENSIONS );
   glXQueryVersion( scr_Display, i, j );
-  glXChooseFBConfig        := gl_GetProc( 'glXChooseFBConfig' );
-  glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfig' );
-  glXCreatePbuffer         := gl_GetProc( 'glXCreatePbuffer' );
-  glXDestroyPbuffer        := gl_GetProc( 'glXDestroyPbuffer' );
-  ogl_CanPBuffer           := Assigned( glXChooseFBConfig ) and Assigned( glXGetVisualFromFBConfig ) and
-                              Assigned( glXCreatePbuffer ) and Assigned( glXDestroyPbuffer ) and ( i * 10 + j >= 13 );
-  log_Add( 'GLX_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+  if ( i * 10 + j >= 13 ) Then
+    ogl_PBufferMode := 1
+  else
+    if gl_IsSupported( 'GLX_SGIX_fbconfig', oglx_Extensions ) and gl_IsSupported( 'GLX_SGIX_pbuffer', oglx_Extensions ) Then
+        ogl_PBufferMode := 2
+    else
+      ogl_PBufferMode := 0;
+  ogl_CanPBuffer := ogl_PbufferMode <> 0;
+  if ogl_PBufferMode = 2 Then
+    log_Add( 'GLX_SGIX_PBUFFER: TRUE' )
+  else
+    log_Add( 'GLX_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+
+  case ogl_PBufferMode of
+    1:
+      begin
+        glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfig' );
+        glXChooseFBConfig        := gl_GetProc( 'glXChooseFBConfig' );
+        glXCreatePbuffer         := gl_GetProc( 'glXCreatePbuffer' );
+        glXDestroyPbuffer        := gl_GetProc( 'glXDestroyPbuffer' );
+      end;
+    2:
+      begin
+        glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfigSGIX' );
+        glXChooseFBConfig        := gl_GetProc( 'glXChooseFBConfigSGIX' );
+        glXCreateGLXPbufferSGIX  := gl_GetProc( 'glXCreateGLXPbufferSGIX' );
+        glXDestroyGLXPbufferSGIX := gl_GetProc( 'glXDestroyGLXPbufferSGIX' );
+      end;
+  end;
 {$ENDIF}
 {$IFDEF WIN32}
   wglCreatePbufferARB := gl_GetProc( 'wglCreatePbuffer' );
@@ -568,8 +577,6 @@ begin
   ogl_CanPBuffer := Assigned( aglCreatePBuffer );
   log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
 {$ENDIF}
-
-  {glActiveStencilFaceEXT := wglGetProcAddress( 'glActiveStencilFace' );}
 
   // WaitVSync
 {$IFDEF LINUX}
