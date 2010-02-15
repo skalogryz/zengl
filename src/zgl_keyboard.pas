@@ -514,11 +514,11 @@ begin
     $79 : Result := K_PAGEDOWN;
 
     $3B: Result := K_CTRL_L;
-    //$3B: Result := K_CTRL_R;
+    // $3B: Result := K_CTRL_R;
     $3A: Result := K_ALT_L;
-    //$3A: Result := K_ALT_R;
+    // $3A: Result := K_ALT_R;
     $38: Result := K_SHIFT_L;
-    //$38: Result := K_SHIFT_R;
+    // $38: Result := K_SHIFT_R;
     //: Result := K_SUPER_L;
     //: Result := K_SUPER_R;
     //: Result := K_APP_MENU;
