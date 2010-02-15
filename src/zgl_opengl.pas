@@ -435,6 +435,10 @@ begin
 end;
 
 procedure gl_LoadEx;
+  {$IFDEF LINUX}
+  var
+    i, j : Integer;
+  {$ENDIF}
 begin
   if ogl_LoadEx Then
     exit
@@ -539,12 +543,13 @@ begin
 
   // PBUFFER
 {$IFDEF LINUX}
+  glXQueryVersion( scr_Display, i, j );
   glXChooseFBConfig        := gl_GetProc( 'glXChooseFBConfig' );
-  glXGetFBConfigs          := gl_GetProc( 'glXGetFBConfigs' );
   glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfig' );
   glXCreatePbuffer         := gl_GetProc( 'glXCreatePbuffer' );
   glXDestroyPbuffer        := gl_GetProc( 'glXDestroyPbuffer' );
-  ogl_CanPBuffer           := Assigned( glXGetFBConfigs ) and Assigned( glXCreatePbuffer );
+  ogl_CanPBuffer           := Assigned( glXChooseFBConfig ) and Assigned( glXGetVisualFromFBConfig ) and
+                              Assigned( glXCreatePbuffer ) and Assigned( glXDestroyPbuffer ) and ( i * 10 + j >= 13 );
   log_Add( 'GLX_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
 {$ENDIF}
 {$IFDEF WIN32}

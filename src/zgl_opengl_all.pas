@@ -456,6 +456,7 @@ const
   function  glXMakeCurrent(dpy: PDisplay; drawable: GLXDrawable; ctx: GLXContext): Boolean; cdecl; external libGL;
   procedure glXSwapBuffers(dpy: PDisplay; drawable: GLXDrawable); cdecl; external libGL;
   function  glXQueryExtension(dpy: PDisplay; var errorb, event: Integer): Boolean; cdecl; external libGL;
+  function  glXQueryVersion(dpy: PDisplay; var major, minor: Integer): Boolean; cdecl; external libGL;
   function  glXIsDirect(dpy: PDisplay; ctx: GLXContext): Boolean; cdecl; external libGL;
   procedure glXWaitGL; cdecl; external libGL;
   procedure glXWaitX; cdecl; external libGL;
@@ -468,7 +469,6 @@ var
   glXWaitVideoSyncSGI: function(divisor, remainder: Integer; var count: LongWord): Integer; cdecl;
 
   glXChooseFBConfig: function(dpy: PDisplay; screen: Integer; attribList: PInteger; nitems: PInteger): GLXFBConfig; cdecl;
-  glXGetFBConfigs: function(dpy: PDisplay; screen: Integer; nelements: PInteger): GLXFBConfig; cdecl;
   glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
   glXCreatePbuffer: function(dpy: PDisplay; config: Integer; attribList: PInteger): GLXPBuffer; cdecl;
   glXDestroyPbuffer: procedure(dpy: PDisplay; pbuf: GLXPBuffer); cdecl;
