@@ -254,7 +254,6 @@ begin
             end;
         end;
 
-        XFree( fbconfig );
         if pPBuffer.PBuffer = 0 Then
           begin
             log_Add( 'PBuffer: failed to create GLXPBuffer' );
@@ -271,6 +270,7 @@ begin
           end;
 
         pPBuffer.Context := glXCreateContext( scr_Display, visualinfo, ogl_Context, TRUE );
+        XFree( fbconfig );
         XFree( visualinfo );
         if pPBuffer.Context = nil Then
           begin
