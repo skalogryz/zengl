@@ -275,13 +275,10 @@ begin
 
   SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
 
-  X := Round( Rect.X );
-  Y := Round( Rect.Y );
+  X := Round( Rect.X ) + 1;
+  Y := Round( Rect.Y ) + 1;
   W := Round( Rect.W );
   H := Round( Rect.H );
-  scissor_Begin( X, Y, W, H );
-  X := X + 1;
-  Y := Y + 1;
 
   WordsCount := 0;
   for i := 1 to length( Text ) do
@@ -436,7 +433,6 @@ begin
     end;
 
   SetLength( WordsArray, 0 );
-  scissor_End;
 end;
 
 procedure text_DrawInRectEx;
