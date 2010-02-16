@@ -80,10 +80,12 @@ var
   ogl_Separate      : Boolean;
 
   {$IFDEF LINUX}
-  ogl_CanVSync2  : Boolean;
-  ogl_Context    : GLXContext;
-  ogl_VisualInfo : PXVisualInfo;
-  ogl_Attr       : array[ 0..31 ] of Integer;
+  oglx_Extensions : AnsiString;
+  ogl_CanVSync2   : Boolean;
+  ogl_PBufferMode : Integer;
+  ogl_Context     : GLXContext;
+  ogl_VisualInfo  : PXVisualInfo;
+  ogl_Attr        : array[ 0..31 ] of Integer;
   {$ENDIF}
   {$IFDEF WIN32}
   ogl_Context : HGLRC;
