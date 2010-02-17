@@ -153,10 +153,9 @@ begin
   if ogl_Context <> 0 Then
     wglDeleteContext( ogl_Context );
 
-  FillChar( PixelFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
-
   if ogl_Format = 0 Then
     begin
+      FillChar( PixelFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
       with PixelFormatDesc do
         begin
           nSize        := SizeOf( TPIXELFORMATDESCRIPTOR );
@@ -165,7 +164,7 @@ begin
           iPixelType   := PFD_TYPE_RGBA;
           cColorBits   := scr_BPP;
           cAlphaBits   := 8;
-          cDepthBits   := ogl_zDepth;
+          cDepthBits   := 24;
           cStencilBits := ogl_Stencil;
           iLayerType   := PFD_MAIN_PLANE;
         end;
