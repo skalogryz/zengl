@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.1.41               }
-{ date:    2009.11.28           }
+{ date:    2010.02.18           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -78,11 +78,13 @@ var
   zgl_Exit         : procedure;
 
 const
-  SYS_LOAD               = $000001;
-  SYS_DRAW               = $000002;
-  SYS_UPDATE             = $000003;
-  SYS_EXIT               = $000004;
-  SYS_ACTIVATE           = $000005;
+  SYS_APP_INIT           = $000001;
+  SYS_APP_LOOP           = $000002;
+  SYS_LOAD               = $000003;
+  SYS_DRAW               = $000004;
+  SYS_UPDATE             = $000005;
+  SYS_EXIT               = $000006;
+  SYS_ACTIVATE           = $000007;
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;

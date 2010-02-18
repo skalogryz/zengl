@@ -41,7 +41,9 @@ procedure zero;
 procedure zerou( dt : Double );
 procedure zeroa( activate : Boolean );
 
+procedure app_Init;
 procedure app_MainLoop;
+procedure app_ProcessOS;
 {$IFDEF LINUX}
 function app_ProcessMessages : DWORD;
 {$ENDIF}
@@ -67,6 +69,8 @@ var
   app_UsrHomeDir   : AnsiString;
 
   // call-back
+  app_PInit     : procedure = app_Init;
+  app_PLoop     : procedure = app_MainLoop;
   app_PLoad     : procedure = zero;
   app_PDraw     : procedure = zero;
   app_PExit     : procedure = zero;
@@ -105,17 +109,88 @@ uses
   {$ENDIF}
   zgl_utils;
 
-procedure zero;
+procedure zero;  begin end;
+procedure zerou; begin end;
+procedure zeroa; begin end;
+
+procedure app_Draw;
 begin
-end;
-procedure zerou;
-begin
-end;
-procedure zeroa;
-begin
+  SetCurrentMode;
+  scr_Clear;
+  app_PDraw;
+  scr_Flush;
+  if not app_Pause Then
+    INC( app_FPSCount );
 end;
 
-procedure OSProcess;
+procedure app_CalcFPS;
+begin
+  app_FPS      := app_FPSCount;
+  app_FPSAll   := app_FPSAll + app_FPSCount;
+  app_FPSCount := 0;
+  INC( app_WorkTime );
+end;
+
+procedure app_Init;
+  {$IFDEF WIN32}
+  var
+    SysInfo : _SYSTEM_INFO;
+  {$ENDIF}
+begin
+  {$IFDEF WIN32}
+  // Багнутое MS-поделко требует патча :)
+  // Вешаем все на одно ядро
+  GetSystemInfo( SysInfo );
+  SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
+  {$ENDIF}
+
+  scr_Clear;
+  app_PLoad;
+  scr_Flush;
+
+  app_dt := timer_GetTicks;
+  timer_Reset;
+  timer_Add( @app_CalcFPS, 1000 );
+end;
+
+procedure app_MainLoop;
+  var
+    t : Double;
+begin
+  while app_Work do
+    begin
+      app_ProcessOS;
+      {$IFDEF USE_SOUND}
+      snd_MainLoop;
+      {$ENDIF}
+
+      {$IFDEF LINUX}
+      // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
+      if wnd_FullScreen Then
+        begin
+          app_Focus := TRUE;
+          app_Pause := FALSE;
+        end;
+      {$ENDIF}
+
+      if app_Pause Then
+        begin
+          timer_Reset;
+          app_dt := timer_GetTicks;
+          u_Sleep( 10 );
+          continue;
+        end else
+          timer_MainLoop;
+
+      t := timer_GetTicks;
+      app_PUpdate( timer_GetTicks - app_dt );
+      app_dt := t;
+
+      app_Draw;
+    end;
+end;
+
+procedure app_ProcessOS;
   {$IFDEF WIN32}
   var
     Mess : tagMsg;
@@ -141,103 +216,6 @@ begin
 {$IFDEF DARWIN}
   while GetNextEvent( everyEvent, Event ) do;
 {$ENDIF}
-end;
-
-procedure app_Draw;
-begin
-  SetCurrentMode;
-  scr_Clear;
-  app_PDraw;
-  scr_Flush;
-  if not app_Pause Then
-    INC( app_FPSCount );
-end;
-
-procedure app_MainLoop;
-  var
-    i, z : Integer;
-    j    : Double;
-    currTimer : zglPTimer;
-    {$IFDEF WIN32}
-    SysInfo : _SYSTEM_INFO;
-    {$ENDIF}
-begin
-  {$IFDEF WIN32}
-  // Багнутое MS-поделко требует патча :)
-  // Вешаем все на одно ядро
-  GetSystemInfo( SysInfo );
-  SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
-  {$ENDIF}
-
-  scr_Clear;
-  app_PLoad;
-  scr_Flush;
-
-  app_dt := timer_GetTicks;
-  timer_Reset;
-  timer_Add( @app_CalcFPS, 1000 );
-  while app_Work do
-    begin
-      OSProcess;
-      {$IFDEF USE_SOUND}
-      snd_MainLoop;
-      {$ENDIF}
-
-      CanKillTimers := FALSE;
-      {$IFDEF LINUX}
-      // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
-      if wnd_FullScreen Then
-        begin
-          app_Focus := TRUE;
-          app_Pause := FALSE;
-        end;
-      {$ENDIF}
-
-      if not app_Pause Then
-        begin
-          currTimer := @managerTimer.First;
-          if currTimer <> nil Then
-            for z := 0 to managerTimer.Count do
-              begin
-                if currTimer^.Active then
-                  begin
-                    j := timer_GetTicks;
-                    while j >= currTimer^.LastTick + currTimer^.Interval do
-                      begin
-                        currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
-                        currTimer^.OnTimer;
-                        if j < timer_GetTicks - currTimer^.Interval Then
-                          break
-                        else
-                          j := timer_GetTicks;
-                      end;
-                  end else currTimer^.LastTick := timer_GetTicks;
-
-                currTimer := currTimer^.Next;
-              end;
-        end else
-          begin
-            timer_Reset;
-            u_Sleep( 10 );
-          end;
-
-      CanKillTimers := TRUE;
-      for i := 1 to TimersToKill do
-        timer_Del( aTimersToKill[ i ] );
-      TimersToKill  := 0;
-
-      if app_Pause Then
-        begin
-          app_dt := timer_GetTicks;
-          continue;
-        end;
-
-      j := timer_GetTicks;
-      app_PUpdate( timer_GetTicks - app_dt );
-      app_dt := j;
-
-      app_Draw;
-    end;
 end;
 
 function app_ProcessMessages;
@@ -879,14 +857,6 @@ begin
       end;
   end;
 {$ENDIF}
-end;
-
-procedure app_CalcFPS;
-begin
-  app_FPS      := app_FPSCount;
-  app_FPSAll   := app_FPSAll + app_FPSCount;
-  app_FPSCount := 0;
-  INC( app_WorkTime );
 end;
 
 initialization

@@ -57,6 +57,7 @@ end;
 function  timer_Add( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
 procedure timer_Del( var Timer : zglPTimer );
 
+procedure timer_MainLoop;
 function  timer_GetTicks : Double;
 procedure timer_Reset;
 
@@ -116,6 +117,41 @@ begin
   DEC( managerTimer.Count );
 
   Timer := nil;
+end;
+
+procedure timer_MainLoop;
+  var
+    i     : Integer;
+    t     : Double;
+    timer : zglPTimer;
+begin
+  CanKillTimers := FALSE;
+
+  timer := @managerTimer.First;
+  if timer <> nil Then
+    for i := 0 to managerTimer.Count do
+      begin
+        if timer^.Active then
+          begin
+            t := timer_GetTicks;
+            while t >= timer^.LastTick + timer^.Interval do
+              begin
+                timer^.LastTick := timer^.LastTick + timer^.Interval;
+                timer^.OnTimer;
+                if t < timer_GetTicks - timer^.Interval Then
+                  break
+                else
+                  t := timer_GetTicks;
+              end;
+          end else timer^.LastTick := timer_GetTicks;
+
+        timer := timer^.Next;
+      end;
+
+  CanKillTimers := TRUE;
+  for i := 1 to TimersToKill do
+    timer_Del( aTimersToKill[ i ] );
+  TimersToKill  := 0;
 end;
 
 function timer_GetTicks;
