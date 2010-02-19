@@ -356,7 +356,7 @@ procedure file_GetName;
 begin
   GetStr( FileName, Result, '/', FALSE );
   {$IFDEF WIN32}
-  if Result = '' Then
+  if Result = FileName Then
     GetStr( FileName, Result, '\', FALSE );
   {$ENDIF}
   GetStr( Result, tmp, '.', FALSE );
