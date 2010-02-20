@@ -21,6 +21,7 @@ procedure sn_cpage_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure cb_aa_click( Widget : zglPWidget );
 procedure cb_bold_click( Widget : zglPWidget );
 procedure cb_italic_click( Widget : zglPWidget );
+procedure cb_pack_click( Widget : zglPWidget );
 procedure bn_save_click( Widget : zglPWidget );
 procedure bn_exit_click( Widget : zglPWidget );
 
@@ -38,6 +39,7 @@ var
   cb_aa     : zglPWidget;
   cb_italic : zglPWidget;
   cb_bold   : zglPWidget;
+  cb_pack   : zglPWidget;
   bn_save   : zglPWidget;
   bn_exit   : zglPWidget;
 
@@ -111,6 +113,15 @@ begin
   checkbox.Checked := fg_FontItalic;
   cb_italic        := gui_AddWidget( WIDGET_CHECKBOX, 10, 220, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
   cb_italic.Events.OnClick := @cb_italic_click;
+
+  // CheckBox Pack
+  i := Round( text_GetWidth( ui_font, 'Pack' ) );
+  FillChar( checkbox, SizeOf( checkbox ), 0 );
+  checkbox.Font    := ui_font;
+  checkbox.Caption := 'Pack';
+  checkbox.Checked := fg_FontPack;
+  cb_italic        := gui_AddWidget( WIDGET_CHECKBOX, 250 - i - 32, 220, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
+  cb_italic.Events.OnClick := @cb_pack_click;
 
   i := Round( text_GetWidth( ui_font, 'Font Size: ' ) );
   // EditBox FontSize
@@ -282,6 +293,12 @@ end;
 procedure cb_italic_click;
 begin
   fg_FontItalic := zglTCheckBoxDesc( Widget.desc^ ).Checked;
+  regen;
+end;
+
+procedure cb_pack_click;
+begin
+  fg_FontPack := zglTCheckBoxDesc( Widget.desc^ ).Checked;
   regen;
 end;
 

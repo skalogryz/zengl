@@ -44,11 +44,6 @@ procedure Init;
   var
     i : Integer;
 begin
-  wnd_ShowCursor( TRUE );
-
-  scr_SetOptions( 800, 600, 32, 0, FALSE, TRUE );
-  wnd_SetCaption( 'ZenFont' );
-
   fontgen_Init;
   gui_Init;
   ui_Init;
@@ -114,6 +109,10 @@ begin
   zgl_Reg( SYS_DRAW, @Draw );
 
   zgl_Disable( APP_USE_LOG );
+
+  scr_SetOptions( 800, 600, 32, 0, FALSE, TRUE );
+  wnd_SetCaption( 'ZenFont' );
+  wnd_ShowCursor( TRUE );
 
   zgl_Init;
 end.
