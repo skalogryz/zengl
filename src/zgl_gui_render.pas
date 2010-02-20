@@ -92,7 +92,7 @@ begin
   color := COLOR_DARK;
   if pressed Then color := COLOR_LIGHT;
   pr2d_Line( x + 1, y + h - 2, x + w - 1, y + h - 2, color, 255, 0 );
-  pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h, color, 255, 0 );
+  pr2d_Line( x + w - 2, y + 1, x + w - 2, y + h - 1, color, 255, 0 );
   if pressed Then
     pr2d_Rect( X, Y, W, H, COLOR_SELECT, 25, PR2D_FILL );
 end;

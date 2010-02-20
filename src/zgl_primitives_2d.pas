@@ -65,39 +65,7 @@ begin
 end;
 
 procedure pr2d_Line;
-  var
-    _x1, _y1 : Single;
-    _x2, _y2 : Single;
 begin
-  if X1 < X2 Then
-    begin
-      _x1 := X1 + 0.5;
-      _x2 := X2 - 0.5;
-    end else
-      if X1 > X2 Then
-        begin
-          _x1 := X1 - 0.5;
-          _x2 := X2 + 0.5;
-        end else
-          begin
-            _x1 := X1 + 0.5;
-            _x2 := X2 + 0.5;
-          end;
-  if Y1 < Y2 Then
-    begin
-      _y1 := Y1 + 0.5;
-      _y2 := Y2 - 0.5;
-    end else
-      if Y1 > Y2 Then
-        begin
-          _y1 := Y1 - 0.5;
-          _y2 := Y2 + 0.5;
-        end else
-          begin
-            _y1 := Y1 + 0.5;
-            _y2 := Y2 + 0.5;
-          end;
-
   if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
@@ -110,11 +78,18 @@ begin
       glBegin( GL_LINES );
     end;
 
-  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-  if FX and FX2D_VCA > 0 Then glColor4ubv( @FX2D_VCA1[ 0 ] );
-  gl_Vertex2f( _x1, _y1 );
-  if FX and FX2D_VCA > 0 Then glColor4ubv( @FX2D_VCA2[ 0 ] );
-  gl_Vertex2f( _x2, _y2 );
+  if FX and FX2D_VCA > 0 Then
+    begin
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      gl_Vertex2f( X1 + 0.5, Y1 + 0.5 );
+      glColor4ubv( @FX2D_VCA2[ 0 ] );
+      gl_Vertex2f( Y2 + 0.5, Y2 + 0.5 );
+    end else
+      begin
+        glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
+        gl_Vertex2f( X1 + 0.5, Y1 + 0.5 );
+        gl_Vertex2f( X2 + 0.5, Y2 + 0.5 );
+      end;
 
   if not b2d_Started Then
     begin
@@ -205,7 +180,6 @@ begin
           begin
             glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
             gl_Vertex2f( X + 0.5,     Y + 0.5 );
-
             gl_Vertex2f( X + W - 0.5, Y + 0.5 );
 
             gl_Vertex2f( X + W - 0.5, Y + 0.5 );
