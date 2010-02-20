@@ -227,8 +227,8 @@ begin
             exit;
           end;
 
-        zgl_GetMem( node.child[ 0 ], SizeOf( zglTSymbolNode ) );
-        zgl_GetMem( node.child[ 1 ], SizeOf( zglTSymbolNode ) );
+        zgl_GetMem( Pointer( node.child[ 0 ] ), SizeOf( zglTSymbolNode ) );
+        zgl_GetMem( Pointer( node.child[ 1 ] ), SizeOf( zglTSymbolNode ) );
         node.leaf := FALSE;
 
         c1 := node.child[ 0 ];
@@ -269,7 +269,7 @@ begin
               c2.rect.H := node.rect.H - r.H;
             end;
 
-        Result := fontgen_InsertSymbol( node.child[ 0 ], r, ID );
+        Result := fontgen_InsertSymbol( Pointer( node.child[ 0 ] ), r, ID );
       end;
 end;
 
@@ -678,7 +678,7 @@ begin
               fg_FontNodes[ Font.Count.Pages - 1 ].rect.H := fg_PageSize;
             end else
               begin
-                fontgen_PutChar( pData, Round( sn.rect.X + fg_FontPadding[ 0 ] + fg_FontPadding[ 2 ] ), Round( sn.rect.Y + fg_FontPadding[ 1 ] + fg_FontPadding[ 3 ] ), i );
+                fontgen_PutChar( pData, Round( sn.rect.X + fg_FontPadding[ 0 ] ), Round( sn.rect.Y + fg_FontPadding[ 1 ] ), i );
                 SetLength( fg_CharsImage[ i ], 0 );
 
                 zgl_GetMem( Pointer( Font.CharDesc[ CharUID ] ), SizeOf( zglTCharDesc ) );
@@ -689,14 +689,14 @@ begin
                 Font.CharDesc[ CharUID ].ShiftY := Round( fg_CharsSize[ i ].Y );
                 Font.CharDesc[ CharUID ].ShiftP := fg_CharsP[ i ];
 
-                Font.CharDesc[ CharUID ].TexCoords[ 0 ].X := ( sn.rect.X + fg_FontPadding[ 0 ] ) * u;
-                Font.CharDesc[ CharUID ].TexCoords[ 0 ].Y := 1 - ( sn.rect.Y + fg_FontPadding[ 1 ] ) * v;
-                Font.CharDesc[ CharUID ].TexCoords[ 1 ].X := ( sn.rect.X + sn.rect.W + fg_FontPadding[ 2 ] ) * u;
-                Font.CharDesc[ CharUID ].TexCoords[ 1 ].Y := 1 - ( sn.rect.Y + fg_FontPadding[ 1 ] ) * v;
-                Font.CharDesc[ CharUID ].TexCoords[ 2 ].X := ( sn.rect.X + sn.rect.W + fg_FontPadding[ 2 ] ) * u;
-                Font.CharDesc[ CharUID ].TexCoords[ 2 ].Y := 1 - ( sn.rect.Y + sn.rect.H + fg_FontPadding[ 3 ] ) * v;
-                Font.CharDesc[ CharUID ].TexCoords[ 3 ].X := ( sn.rect.X + fg_FontPadding[ 0 ] ) * u;
-                Font.CharDesc[ CharUID ].TexCoords[ 3 ].Y := 1 - ( sn.rect.Y + sn.rect.H + fg_FontPadding[ 3 ] ) * v;
+                Font.CharDesc[ CharUID ].TexCoords[ 0 ].X := ( sn.rect.X ) * u;
+                Font.CharDesc[ CharUID ].TexCoords[ 0 ].Y := 1 - ( sn.rect.Y ) * v;
+                Font.CharDesc[ CharUID ].TexCoords[ 1 ].X := ( sn.rect.X + sn.rect.W ) * u;
+                Font.CharDesc[ CharUID ].TexCoords[ 1 ].Y := 1 - ( sn.rect.Y ) * v;
+                Font.CharDesc[ CharUID ].TexCoords[ 2 ].X := ( sn.rect.X + sn.rect.W ) * u;
+                Font.CharDesc[ CharUID ].TexCoords[ 2 ].Y := 1 - ( sn.rect.Y + sn.rect.H ) * v;
+                Font.CharDesc[ CharUID ].TexCoords[ 3 ].X := ( sn.rect.X ) * u;
+                Font.CharDesc[ CharUID ].TexCoords[ 3 ].Y := 1 - ( sn.rect.Y + sn.rect.H ) * v;
 
                 Font.MaxHeight := Round( Max( Font.MaxHeight, fg_CharsSize[ i ].H ) );
                 Font.MaxShiftY := Round( Max( Font.MaxShiftY, Font.CharDesc[ CharUID ].ShiftY ) );
