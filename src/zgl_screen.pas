@@ -163,7 +163,11 @@ begin
 
   scr_Default := DefaultScreen( scr_Display );
 
+  {$IF FPC_FULlVERSION >= 20400}
   if XF86VidModeQueryExtension( scr_Display, @i, @j ) = 0 Then
+  {$ELSE}
+  if not XF86VidModeQueryExtension( scr_Display, @i, @j ) Then
+  {$IFEND}
     begin
       u_Error( 'XF86VidMode Extension not found' );
       exit;

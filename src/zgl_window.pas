@@ -128,8 +128,13 @@ begin
     begin
       wnd_X := 0;
       wnd_Y := 0;
+  {$IF FPC_FULlVERSION >= 20400}
       wnd_Attr.override_redirect := 1;
     end else wnd_Attr.override_redirect := 0;
+  {$ELSE}
+      wnd_Attr.override_redirect := TRUE;
+    end else wnd_Attr.override_redirect := FALSE;
+  {$IFEND}
   wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
 
   wnd_Handle := XCreateWindow( scr_Display,
