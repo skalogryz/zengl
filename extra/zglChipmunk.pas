@@ -5031,8 +5031,8 @@ procedure filterArbiterByCallback(space: PcpSpace);
     arb         : PcpArbiter;
     temp, a, b  : PcpShape;
     normal_coef : cpFloat;
-    ids         : array[ 0..1 ] of DWORD;
-    hash        : DWORD;
+    ids         : array[ 0..1 ] of LongWord;
+    hash        : LongWord;
     pairFunc    : PcpCollPairFunc;
 begin
   arbiters := space.arbiters;
