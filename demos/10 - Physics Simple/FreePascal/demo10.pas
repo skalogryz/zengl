@@ -101,9 +101,12 @@ begin
 
   e := 1;
   u := 0.9;
-  // Создадим статичное "тело" с бесконечными размерами(по сути прямую)
+  // Создадим статичное "тело"
   staticBody := cpBodyNew( INFINITY, INFINITY );
-  // Добавим три прямых для ограничения мира
+  // Добавим три отрезка для ограничения мира
+  // первый параметр - указатель на созданное тело
+  // два последующих - координаты точек отрезка
+  // последний - толщина отрезка
   ground := cpSegmentShapeNew( staticBody, cpv( 5, 0 ), cpv( 5, 590 ), 1 );
   ground.e := e;
   ground.u := u;
@@ -113,6 +116,20 @@ begin
   ground.u := u;
   cpSpaceAddStaticShape( space, ground );
   ground := cpSegmentShapeNew( staticBody, cpv( 0, 590 ), cpv( 800, 590 ), 1 );
+  ground.e := e;
+  ground.u := u;
+  cpSpaceAddStaticShape( space, ground );
+  // Добавим треугольник
+  staticBody := cpBodyNew( INFINITY, INFINITY );
+  ground := cpSegmentShapeNew( staticBody, cpv( 400, 300 ), cpv( 200, 350 ), 1 );
+  ground.e := e;
+  ground.u := u;
+  cpSpaceAddStaticShape( space, ground );
+  ground := cpSegmentShapeNew( staticBody, cpv( 200, 350 ), cpv( 700, 350 ), 1 );
+  ground.e := e;
+  ground.u := u;
+  cpSpaceAddStaticShape( space, ground );
+  ground := cpSegmentShapeNew( staticBody, cpv( 700, 350 ), cpv( 400, 300 ), 1 );
   ground.e := e;
   ground.u := u;
   cpSpaceAddStaticShape( space, ground );
@@ -135,7 +152,7 @@ end;
 procedure Proc;
 begin
   if mouse_Click( M_BLEFT ) Then
-    cpAddBox( mouse_X - 10, mouse_Y - 10, 32, 32, 1, 0.5, 0.9 );
+    cpAddBox( mouse_X - 10, mouse_Y - 10, 48, 32, 1, 0.5, 0.5 );
   if mouse_Click( M_BRIGHT ) Then
     cpAddBall( mouse_X, mouse_Y, 16, 1, 0.5, 0.9 );
   if key_Press( K_ESCAPE ) Then zgl_Exit;
