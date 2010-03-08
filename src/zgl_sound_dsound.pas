@@ -21,12 +21,11 @@
 }
 unit zgl_sound_dsound;
 
-{$IFDEF FPC}
-  {$IF FPC_FULlVERSION = 20400}
-  DIRECTSOUND_DOES_NOT_WORK_CORRECTLY_WITH_FPC_2_4_0
-  {$IFEND}
-{$ENDIF}
 {$I zgl_config.cfg}
+
+{$IFDEF FPC_VERSION_BAD}
+  DIRECTSOUND_DOES_NOT_WORK_CORRECTLY_WITH_FPC_2_4_0
+{$ENDIF}
 
 interface
 uses

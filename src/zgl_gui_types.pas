@@ -40,8 +40,9 @@ const
   WIDGET_LISTBOX     = 6;
   WIDGET_COMBOBOX    = 7;
   WIDGET_GROUPBOX    = 8;
-  WIDGET_SPIN        = 9;
-  WIDGET_SCROLLBAR   = 10;
+  WIDGET_SCROLLBOX   = 9;
+  WIDGET_SPIN        = 10;
+  WIDGET_SCROLLBAR   = 11;
 
   // ScrollBar
   SCROLLBAR_VERTICAL   = 0;
@@ -89,6 +90,7 @@ type
 
   //Events
   zglTEvents = record
+    OnCreate     : procedure( Widget : zglPWidget );
     OnFocus      : procedure( Widget : zglPWidget; const Focus : Boolean );
     OnStartDrag  : procedure( Widget : zglPWidget );
     OnDrag       : procedure( Widget : zglPWidget; const X, Y : Single );
@@ -106,27 +108,30 @@ end;
 
   //Widget
   zglTWidget = record
-    _id     : Integer;
-    _type   : Integer;
-    desc    : Pointer;
-    data    : Pointer;
-    rect    : zglTRect;
-    client  : zglTRect;
-    align   : DWORD;
-    layer   : Integer;
-    focus   : Boolean;
-    modal   : Boolean;
-    visible : Boolean;
-    mousein : Boolean;
-    draged  : Boolean;
+    _id      : Integer;
+    _type    : Integer;
+    desc     : Pointer;
+    data     : Pointer;
+    rect     : zglTRect;
+    rectEx   : zglTRect;
+    client   : zglTRect;
+    align    : DWORD;
+    layer    : Integer;
+    focus    : Boolean;
+    modal    : Boolean;
+    visible  : Boolean;
+    mousein  : Boolean;
+    draged   : Boolean;
 
-    OnDraw  : procedure( const Widget : zglPWidget );
-    OnProc  : procedure( const Event  : zglPEvent );
-    Events  : zglTEvents;
+    OnDraw   : procedure( const Widget : zglPWidget );
+    OnProc   : procedure( const Event  : zglPEvent );
+    Events   : zglTEvents;
 
-    parent  : zglPWidget;
-    childs  : Integer;
-    child   : array of zglPWidget;
+    parent   : zglPWidget;
+    children : Integer;
+    child    : array of zglPWidget;
+    parts    : Integer;
+    part     : array of zglPWidget;
 end;
 
   zglTWidgetType = record
@@ -147,6 +152,7 @@ end;
   //Event
   zglTEvent = record
     _type      : Integer;
+    sender     : zglPWidget;
     widget     : zglPWidget;
     Next, Prev : zglPEvent;
     case byte of
@@ -230,6 +236,10 @@ end;
     Caption : String;
 end;
 
+  zglPScrollBoxDesc = ^zglTScrollBoxDesc;
+  zglTScrollBoxDesc = record
+end;
+
   zglPSpinDesc = ^zglTSpinDesc;
   zglTSpinDesc = record
     Value    : Integer;
@@ -261,6 +271,7 @@ procedure gui_FillEditBoxDesc    ( Src : Pointer; var Desc : Pointer );
 procedure gui_FillListBoxDesc    ( Src : Pointer; var Desc : Pointer );
 procedure gui_FillComboBoxDesc   ( Src : Pointer; var Desc : Pointer );
 procedure gui_FillGroupBoxDesc   ( Src : Pointer; var Desc : Pointer );
+procedure gui_FillScrollBoxDesc  ( Src : Pointer; var Desc : Pointer );
 procedure gui_FillSpinDesc       ( Src : Pointer; var Desc : Pointer );
 procedure gui_FillScrollBarDesc  ( Src : Pointer; var Desc : Pointer );
 
@@ -387,6 +398,16 @@ begin
     begin
       Font    := zglTGroupBoxDesc( Src^ ).Font;
       Caption := zglTGroupBoxDesc( Src^ ).Caption;
+    end;
+end;
+
+procedure gui_FillScrollBoxDesc;
+begin
+  zgl_GetMem( Desc, SizeOf( zglTScrollBoxDesc ) );
+
+  if Assigned( Src ) Then
+  with zglTScrollBoxDesc( Desc^ ) do
+    begin
     end;
 end;
 

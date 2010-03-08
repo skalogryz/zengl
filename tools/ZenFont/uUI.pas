@@ -14,9 +14,9 @@ procedure ui_Init;
 
 procedure regen;
 
-procedure lb_fonts_change( Widget : zglPWidget; const Value, Change : Integer );
+procedure cmb_fonts_change( Widget : zglPWidget; const Value, Change : Integer );
+procedure cmb_tsize_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure sn_fsize_change( Widget : zglPWidget; const Value, Change : Integer );
-procedure sn_tsize_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure sn_cpage_change( Widget : zglPWidget; const Value, Change : Integer );
 procedure cb_aa_click( Widget : zglPWidget );
 procedure cb_bold_click( Widget : zglPWidget );
@@ -29,7 +29,7 @@ var
   ui_font : zglPFont;
 
   gb_tools  : zglPWidget;
-  lb_fonts  : zglPWidget;
+  cmb_fonts : zglPWidget;
   sn_fsize  : zglPWidget;
   eb_fsize  : zglPWidget;
   sn_tsize  : zglPWidget;
@@ -49,14 +49,14 @@ implementation
 
 procedure ui_Init;
   var
-    i : Integer;
+    i        : Integer;
     wlabel   : zglTLabelDesc;
     editbox  : zglTEditBoxDesc;
     groupbox : zglTGroupBoxDesc;
-    listbox  : zglTListBoxDesc;
     spin     : zglTSpinDesc;
     checkbox : zglTCheckBoxDesc;
     button   : zglTButtonDesc;
+    combobox : zglTComboBoxDesc;
 begin
   ui_font := font_Add;
   // English
@@ -79,23 +79,24 @@ begin
   groupbox.Caption := '';
   gb_tools         := gui_AddWidget( WIDGET_GROUPBOX, 800 - 250, 0, 250, 600, FALSE, TRUE, @groupbox, nil, nil );
 
-  // Font List
-  FillChar( listbox, SizeOf( listbox ), 0 );
-  listbox.Font       := ui_font;
-  listbox.List.Count := fg_FontList.Count;
-  SetLength( listbox.List.Items, listbox.List.Count );
-  for i := 0 to listbox.List.Count - 1 do
-    listbox.List.Items[ i ] := fg_FontList.Items[ i ];
-  listbox.ItemIndex  := 0;
-  lb_fonts           := gui_AddWidget( WIDGET_LISTBOX, 10, 10, 230, 150, FALSE, TRUE, @listbox, nil, gb_tools );
-  lb_fonts.Events.OnChange:= @lb_fonts_change;
+  // Font ComboBox
+  FillChar( combobox, SizeOf( combobox ), 0 );
+  combobox.Font := ui_font;
+  combobox.List.Count := fg_FontList.Count;
+  SetLength( combobox.List.Items, combobox.List.Count );
+  for i := 0 to combobox.List.Count - 1 do
+    combobox.List.Items[ i ] := fg_FontList.Items[ i ];
+  combobox.DropDownCount := 8;
+  combobox.ItemIndex     := 0;
+  cmb_fonts := gui_AddWidget( WIDGET_COMBOBOX, 10, 10, 230, ui_font.MaxHeight + 6, FALSE, TRUE, @combobox, nil, gb_tools );
+  cmb_fonts.Events.OnChange:= @cmb_fonts_change;
 
   // CheckBox Antialias
   FillChar( checkbox, SizeOf( checkbox ), 0 );
   checkbox.Font    := ui_font;
   checkbox.Caption := 'Antialiasing';
   checkbox.Checked := fg_FontAA;
-  cb_aa            := gui_AddWidget( WIDGET_CHECKBOX, 10, 170, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
+  cb_aa            := gui_AddWidget( WIDGET_CHECKBOX, 10, 40, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
   cb_aa.Events.OnClick := @cb_aa_click;
 
   // CheckBox Bold
@@ -103,7 +104,7 @@ begin
   checkbox.Font    := ui_font;
   checkbox.Caption := 'Bold';
   checkbox.Checked := fg_FontBold;
-  cb_bold          := gui_AddWidget( WIDGET_CHECKBOX, 10, 195, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
+  cb_bold          := gui_AddWidget( WIDGET_CHECKBOX, 10, 65, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
   cb_bold.Events.OnClick := @cb_bold_click;
 
   // CheckBox Italic
@@ -111,7 +112,7 @@ begin
   checkbox.Font    := ui_font;
   checkbox.Caption := 'Italic';
   checkbox.Checked := fg_FontItalic;
-  cb_italic        := gui_AddWidget( WIDGET_CHECKBOX, 10, 220, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
+  cb_italic        := gui_AddWidget( WIDGET_CHECKBOX, 10, 90, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
   cb_italic.Events.OnClick := @cb_italic_click;
 
   // CheckBox Pack
@@ -120,8 +121,30 @@ begin
   checkbox.Font    := ui_font;
   checkbox.Caption := 'Pack';
   checkbox.Checked := fg_FontPack;
-  cb_italic        := gui_AddWidget( WIDGET_CHECKBOX, 250 - i - 32, 220, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
+  cb_italic        := gui_AddWidget( WIDGET_CHECKBOX, 250 - i - 32, 90, 15, 15, FALSE, TRUE, @checkbox, nil, gb_tools );
   cb_italic.Events.OnClick := @cb_pack_click;
+
+  i := Round( text_GetWidth( ui_font, 'Page Size: ' ) );
+  // ComboBox TextureSize
+  FillChar( combobox, SizeOf( combobox ), 0 );
+  combobox.Font := ui_font;
+  combobox.List.Count := 5;
+  SetLength( combobox.List.Items, combobox.List.Count );
+  combobox.List.Items[ 0 ] := '128';
+  combobox.List.Items[ 1 ] := '256';
+  combobox.List.Items[ 2 ] := '512';
+  combobox.List.Items[ 3 ] := '1024';
+  combobox.List.Items[ 4 ] := '2048';
+  combobox.DropDownCount := 5;
+  combobox.ItemIndex     := 2;
+  cmb_fonts := gui_AddWidget( WIDGET_COMBOBOX, i + 10, 115, 250 - i - 20, ui_font.MaxHeight + 6, FALSE, TRUE, @combobox, nil, gb_tools );
+  cmb_fonts.Events.OnChange:= @cmb_tsize_change;
+
+  FillChar( wlabel, SizeOf( wlabel ), 0 );
+  wlabel.Font    := ui_font;
+  wlabel.Caption := 'Page Size: ';
+  gui_AddWidget( WIDGET_LABEL, 10, 115 + ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
+
 
   i := Round( text_GetWidth( ui_font, 'Font Size: ' ) );
   // EditBox FontSize
@@ -130,7 +153,7 @@ begin
   editbox.Text     := u_IntToStr( fg_FontSize );
   editbox.Max      := 1;
   editbox.ReadOnly := TRUE;
-  eb_fsize         := gui_AddWidget( WIDGET_EDITBOX, i + 10, 245, 250 - i - 20 - 12, 24, TRUE, TRUE, @editbox, nil, gb_tools );
+  eb_fsize         := gui_AddWidget( WIDGET_EDITBOX, i + 10, 150, 250 - i - 20 - 12, 24, TRUE, TRUE, @editbox, nil, gb_tools );
 
   // Spin FintSize
   FillChar( spin, SizeOf( spin ), 0 );
@@ -139,38 +162,13 @@ begin
   spin.Min      := 8;
   spin.UPressed := FALSE;
   spin.DPressed := FALSE;
-  sn_fsize      := gui_AddWidget( WIDGET_SPIN, i + ( 250 - i - 20 - 12 ) + 10, 245, 12, 24, FALSE, TRUE, @spin, nil, gb_tools );
+  sn_fsize      := gui_AddWidget( WIDGET_SPIN, i + ( 250 - i - 20 - 12 ) + 10, 150, 12, 24, FALSE, TRUE, @spin, nil, gb_tools );
   sn_fsize.Events.OnChange := @sn_fsize_change;
 
   FillChar( wlabel, SizeOf( wlabel ), 0 );
   wlabel.Font    := ui_font;
   wlabel.Caption := 'Font Size: ';
-  gui_AddWidget( WIDGET_LABEL, 10, 245 + ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
-
-
-  i := Round( text_GetWidth( ui_font, 'Page Size: ' ) );
-  // EditBox TextureSize
-  FillChar( editbox, SizeOf( editbox ), 0 );
-  editbox.Font     := ui_font;
-  editbox.Text     := u_IntToStr( fg_PageSize );
-  editbox.Max      := 3;
-  editbox.ReadOnly := TRUE;
-  eb_tsize         := gui_AddWidget( WIDGET_EDITBOX, i + 10, 280, 250 - i - 20 - 12, 24, TRUE, TRUE, @editbox, nil, gb_tools );
-
-  // Spin TextureSize
-  FillChar( spin, SizeOf( spin ), 0 );
-  spin.Value    := fg_PageSize;
-  spin.Max      := 4096;
-  spin.Min      := 128;
-  spin.UPressed := FALSE;
-  spin.DPressed := FALSE;
-  sn_tsize      := gui_AddWidget( WIDGET_SPIN, i + ( 250 - i - 20 - 12 ) + 10, 280, 12, 24, FALSE, TRUE, @spin, nil, gb_tools );
-  sn_tsize.Events.OnChange := @sn_tsize_change;
-
-  FillChar( wlabel, SizeOf( wlabel ), 0 );
-  wlabel.Font    := ui_font;
-  wlabel.Caption := 'Page Size: ';
-  gui_AddWidget( WIDGET_LABEL, 10, 280+ ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
+  gui_AddWidget( WIDGET_LABEL, 10, 150 + ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
 
 
   i := Round( text_GetWidth( ui_font, 'Current Page: ' ) );
@@ -180,7 +178,7 @@ begin
   editbox.Text     := '1';
   editbox.Max      := 1;
   editbox.ReadOnly := TRUE;
-  eb_cpage         := gui_AddWidget( WIDGET_EDITBOX, i + 10, 315, 250 - i - 20 - 12, 24, TRUE, TRUE, @editbox, nil, gb_tools );
+  eb_cpage         := gui_AddWidget( WIDGET_EDITBOX, i + 10, 185, 250 - i - 20 - 12, 24, TRUE, TRUE, @editbox, nil, gb_tools );
 
   // Spin CurrentPage
   FillChar( spin, SizeOf( spin ), 0 );
@@ -189,13 +187,13 @@ begin
   spin.Min      := 1;
   spin.UPressed := FALSE;
   spin.DPressed := FALSE;
-  sn_cpage      := gui_AddWidget( WIDGET_SPIN, i + ( 250 - i - 20 - 12 ) + 10, 315, 12, 24, FALSE, TRUE, @spin, nil, gb_tools );
+  sn_cpage      := gui_AddWidget( WIDGET_SPIN, i + ( 250 - i - 20 - 12 ) + 10, 185, 12, 24, FALSE, TRUE, @spin, nil, gb_tools );
   sn_cpage.Events.OnChange := @sn_cpage_change;
 
   FillChar( wlabel, SizeOf( wlabel ), 0 );
   wlabel.Font    := ui_font;
   wlabel.Caption := 'Current Page: ';
-  gui_AddWidget( WIDGET_LABEL, 10, 315 + ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
+  gui_AddWidget( WIDGET_LABEL, 10, 185 + ( 24 - ui_font.MaxHeight ) div 2, 110, 24, TRUE, TRUE, @wlabel, nil, gb_tools );
 
 
   // Button Save
@@ -220,9 +218,15 @@ begin
   fontgen_BuildFont( fg_Font, fg_FontList.Items[ font_id ] );
 end;
 
-procedure lb_fonts_change;
+procedure cmb_fonts_change;
 begin
-  font_id := zglTListBoxDesc( lb_fonts.desc^ ).ItemIndex + Change;
+  font_id := Value;
+  regen;
+end;
+
+procedure cmb_tsize_change;
+begin
+  fg_PageSize := u_StrToInt( zglTComboBoxDesc( Widget.desc^ ).List.Items[ Value ] );
   regen;
 end;
 
@@ -230,44 +234,6 @@ procedure sn_fsize_change;
 begin
   zglTEditBoxDesc( eb_fsize.desc^ ).Text := u_IntToStr( Value );
   fg_FontSize := Value;
-  regen;
-end;
-
-procedure sn_tsize_change;
-  var
-    desc : zglPSpinDesc;
-begin
-  desc := Widget.desc;
-  if Change > 0 Then
-    begin
-      if Value > 4096 Then desc.Value := 4096
-      else
-      if Value > 2048 Then desc.Value := 4096
-      else
-      if Value > 1024 Then desc.Value := 2048
-      else
-      if Value > 512 Then desc.Value := 1024
-      else
-      if Value > 256 Then desc.Value := 512
-      else
-      if Value > 128 Then desc.Value := 256;
-    end else
-      begin
-        if Value < 128 Then desc.Value := 128
-        else
-        if Value < 256 Then desc.Value := 128
-        else
-        if Value < 512 Then desc.Value := 256
-        else
-        if Value < 1024 Then desc.Value := 512
-        else
-        if Value < 2048 Then desc.Value := 1024
-        else
-        if Value < 4096 Then desc.Value := 2048;
-      end;
-
-  zglTEditBoxDesc( eb_tsize.desc^ ).Text := u_IntToStr( desc.Value );
-  fg_PageSize := desc.Value;
   regen;
 end;
 

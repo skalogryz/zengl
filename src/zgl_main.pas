@@ -34,7 +34,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.1.41';
+  cs_ZenGL = 'ZenGL 0.2.0b';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;

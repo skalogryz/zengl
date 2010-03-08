@@ -27,17 +27,17 @@ uses
   zgl_gui_types,
   zgl_math_2d;
 
-procedure _clip( const widget : zglPWidget ); overload;
+procedure _clip( const widget : zglPWidget; const FullSize : Boolean = FALSE ); overload;
 procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
 
 procedure gui_AlignWidget( widget : zglPWidget );
 procedure gui_UpdateClient( widget : zglPWidget );
 
-type zglProcWidgetsCallback = procedure( widget : zglPWidget; const data : Pointer );
+type zglProcWidgetsCallback = procedure( widget, sender : zglPWidget; const data : Pointer );
 
-procedure gui_ProcCallback( widget : zglPWidget; callback : zglProcWidgetsCallback; const data : Pointer );
-procedure gui_ResetFocus( widget : zglPWidget; const data : Pointer );
-procedure gui_ResetChecked( widget : zglPWidget; const data : Pointer );
+procedure gui_ProcCallback( widget, sender : zglPWidget; callback : zglProcWidgetsCallback; const data : Pointer );
+procedure gui_ResetFocus( widget, sender : zglPWidget; const data : Pointer );
+procedure gui_ResetChecked( widget, sender : zglPWidget; const data : Pointer );
 
 function gui_GetListItemsPerPage( Widget : zglPWidget ) : Integer;
 function gui_GetScrollRect( Widget : zglPWidget ) : zglTRect;
@@ -53,11 +53,14 @@ uses
   zgl_mouse,
   zgl_collision_2d;
 
-procedure _clip( const widget : zglPWidget ); overload;
+procedure _clip( const widget : zglPWidget; const FullSize : Boolean = FALSE ); overload;
   var
     clip : zglTRect;
 begin
-  clip := col2d_ClipRect( widget.rect, widget.parent.client );
+  if FullSize Then
+    clip := col2d_ClipRect( widget.rectEx, widget.parent.client )
+  else
+    clip := col2d_ClipRect( widget.rect, widget.parent.client );
   scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
 end;
 
@@ -122,23 +125,33 @@ begin
   if Assigned( Widget ) Then
     w := Widget
   else
-    w := managerGUI.Main.child[ 0 ];
+    w := @managerGUI.Main;
 
-  callback( w, data );
   i := 0;
-  while i < w.childs do
+  while i < w.parts do
     begin
-      gui_ProcCallback( w.child[ i ], callback, data );
-      INC( i );
+      gui_ProcCallback( w.part[ i ], sender, callback, data );
+      if Assigned( w.part[ i ] ) Then INC( i );
     end;
+
+  i := 0;
+  while i < w.children do
+    begin
+      gui_ProcCallback( w.child[ i ], sender, callback, data );
+      if Assigned( w.child[ i ] ) Then INC( i );
+    end;
+
+  callback( w, sender, data );
 end;
 
 procedure gui_ResetFocus;
 begin
   if widget = data Then exit;
   if widget.Focus Then
-    gui_AddEvent( EVENT_FOCUS_OUT, widget, nil );
-  widget.Focus := FALSE;
+    begin
+      gui_AddEvent( EVENT_FOCUS_OUT, widget, sender, nil );
+      widget.Focus := FALSE;
+    end;
 end;
 
 procedure gui_ResetChecked;
@@ -180,7 +193,10 @@ end;
 
 function gui_GetListItemsPerPage;
 begin
-  Result := Round( ( Widget.rect.H - 3 * 2 ) / ( zglTListBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
+  case Widget._type of
+    WIDGET_LISTBOX: Result := Round( ( Widget.rect.H - 3 * 2 ) / ( zglTListBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
+    WIDGET_COMBOBOX: Result := Round( ( Widget.rectEx.H - 3 * 2 ) / ( zglTComboBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
+  end;
 end;
 
 procedure gui_ScrollChange;

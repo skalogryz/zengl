@@ -52,6 +52,7 @@ procedure gui_DrawEditBox    ( const Widget : zglPWidget );
 procedure gui_DrawListBox    ( const Widget : zglPWidget );
 procedure gui_DrawComboBox   ( const Widget : zglPWidget );
 procedure gui_DrawGroupBox   ( const Widget : zglPWidget );
+procedure gui_DrawScrollBox  ( const Widget : zglPWidget );
 procedure gui_DrawSpin       ( const Widget : zglPWidget );
 procedure gui_DrawScrollBar  ( const Widget : zglPWidget );
 
@@ -146,19 +147,34 @@ begin
   if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
   if Widget.modal Then
     begin
-      gui_AddEvent( EVENT_DRAW_MODAL, Widget, nil );
+      gui_AddEvent( EVENT_DRAW_MODAL, Widget, nil, nil );
       exit;
     end;
 
   if Assigned( Widget.OnDraw ) Then Widget.OnDraw( Widget );
-  i := 0;
-  while i < Widget.childs do
+
+  if Widget.parts > 0 Then
     begin
-      _clip( Widget );
-      gui_DrawWidget( Widget.child[ i ] );
+      i := 0;
+      _clip( Widget, TRUE );
+      while i < Widget.parts do
+        begin
+          gui_DrawWidget( Widget.part[ i ] );
+          if Assigned( Widget.part[ i ] ) Then INC( i );
+        end;
       scissor_End;
-      if Assigned( Widget.child[ i ] ) Then
-        INC( i );
+    end;
+
+  if Widget.children > 0 Then
+    begin
+      i := 0;
+      _clip( Widget );
+      while i < Widget.children do
+        begin
+          gui_DrawWidget( Widget.child[ i ] );
+          if Assigned( Widget.child[ i ] ) Then INC( i );
+        end;
+      scissor_End;
     end;
 end;
 
@@ -254,7 +270,7 @@ procedure gui_DrawListBox;
 begin
   with zglTListBoxDesc( Widget.desc^ ), Widget.rect do
     begin
-      subW := ( SCROLL_SIZE + 1 ) * Byte( Assigned( Widget.child ) );
+      subW := ( SCROLL_SIZE + 1 ) * Byte( Widget.part[ 0 ].visible );
       pr2d_Rect( X, Y, W - subW, H, COLOR_EDIT, 255, PR2D_FILL );
       pr2d_Rect( X, Y, W - subW, H, COLOR_WIDGET, 255, 0 );
       pr2d_Rect( X + 1, Y + 1, W - 2 - subW, H - 2, $000000, 255, 0 );
@@ -262,8 +278,8 @@ begin
         pr2d_Rect( X, Y, W - subW, H, COLOR_SELECT, 155 );
 
       _clip( Widget, X + 2, Y + 2, W - subW + 1 - 4, H - 4 );
-      if Assigned( Widget.child ) Then
-        iShift := zglTScrollBarDesc( Widget.child[ 0 ].desc^ ).Position
+      if Widget.part[ 0 ].visible Then
+        iShift := zglTScrollBarDesc( Widget.part[ 0 ].desc^ ).Position
       else
         iShift := 0;
       ShiftY := ( ItemHeight - Font.MaxHeight ) div 2 + 2;
@@ -285,9 +301,11 @@ end;
 
 procedure gui_DrawComboBox;
   var
-    i, ShiftY : Integer;
-    ty, th    : Single;
-    r         : zglTRect;
+    i, tw  : Integer;
+    ShiftY : Integer;
+    iShift : Integer;
+    ty, th : Single;
+    r      : zglTRect;
 begin
   with zglTComboBoxDesc( Widget.desc^ ), Widget^, Widget.rect do
     begin
@@ -303,31 +321,44 @@ begin
         text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, th, List.Items[ ItemIndex ] );
       scissor_End;
 
-      _scroll_draw( X + W - H + 2, Y + 2, H - 4, H - 4, SCROLL_DOWN, mousein and ( mouse_X > X + W - H + 2 ) and mouse_Down( M_BLEFT ) );
+      _scroll_draw( X + W - H + 2, Y + 2, H - 4, H - 4, SCROLL_DOWN, mousein and ( mouse_X > X + W - H + 2 ) and ( mouse_Y < Y + H ) and mouse_Down( M_BLEFT ) );
 
       if DropedDown Then
         begin
-          th := DropDownCount * ItemHeight + 4;
+          if List.Count > DropDownCount Then
+            th := DropDownCount * ItemHeight + 4
+          else
+            th := List.Count * ItemHeight + 4;
           pr2d_Rect( X, Y + H, W, th, COLOR_EDIT, 255, PR2D_FILL );
           pr2d_Rect( X, Y + H, W, th, COLOR_WIDGET, 255, 0 );
           pr2d_Rect( X + 1, Y + H, W - 2, th - 1, $000000, 255, 0 );
 
           ShiftY := ( ItemHeight - Font.MaxHeight ) div 2 + 2;
-          scissor_Begin( Round( X + 2 ), Round( Y + H ), Round( W - 4 ), Round( th - 3 ) );
+          if Widget.part[ 0 ].visible Then
+            begin
+              iShift := zglTScrollBarDesc( Widget.part[ 0 ].desc^ ).Position;
+              tw     := Round( H - 4 );
+            end else
+              begin
+                tw     := 0;
+                iShift := 0;
+              end;
+
+          scissor_Begin( Round( X + 2 ), Round( Y + H ), Round( W - 4 - tw ), Round( th - 2 ) );
           for i := 0 to List.Count - 1 do
             begin
-              ty := Round( Y + H + ( i{ - iShift} ) * ItemHeight + ShiftY );
+              ty := Round( Y + H + i * ItemHeight - iShift + ShiftY );
               if ( ty >= Y - ItemHeight ) and ( ty <= Y + H + th ) Then
                 text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, ty, List.Items[ i ] );
 
               r.X := X;
               r.Y := ty - 1;
-              r.W := W;
+              r.W := W - tw;
               r.H := ItemHeight + 1;
               if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
                 begin
-                  pr2d_Rect( X + 2, ty - 2, W - 4, ItemHeight, COLOR_SELECT, 55, PR2D_FILL );
-                  pr2d_Rect( X + 2, ty - 2, W - 4, ItemHeight, COLOR_SELECT, 155 );
+                  pr2d_Rect( X + 2, ty - 2, W - 4 - tw, ItemHeight, COLOR_SELECT, 55, PR2D_FILL );
+                  pr2d_Rect( X + 2, ty - 2, W - 4 - tw, ItemHeight, COLOR_SELECT, 155 );
                 end;
              end;
           scissor_End;
@@ -350,6 +381,10 @@ begin
 
       text_Draw( Font, X + Font.CharDesc[ Byte( ' ' ) ].ShiftP, Y - th, Caption );
     end;
+end;
+
+procedure gui_DrawScrollBox;
+begin
 end;
 
 procedure gui_DrawSpin;
