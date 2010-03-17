@@ -662,7 +662,7 @@ begin
   if Result = nil Then
     Result := wglGetProcAddress( PAnsiChar( Proc + 'EXT' ) );
   {$ELSE}
-  Result := dlsym( ogl_Library, Proc );
+  Result := dlsym( ogl_Library, PAnsiChar( Proc ) );
   if Result = nil Then
     Result := dlsym( ogl_Library, PAnsiChar( Proc + 'ARB' ) );
   if Result = nil Then
@@ -670,7 +670,7 @@ begin
 
   {$IFDEF LINUX}
   if ( Result = nil ) and Assigned( glXGetProcAddressARB ) Then
-    Result := glXGetProcAddressARB( Proc );
+    Result := glXGetProcAddressARB( PAnsiChar( Proc ) );
   {$ENDIF}
   {$ENDIF}
 end;
