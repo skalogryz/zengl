@@ -45,7 +45,7 @@ begin
         begin
           for i := 0 to numVerts - 2 do
             pr2d_Line( tverts[ i ].x, tverts[ i ].y, tverts[ i + 1 ].x, tverts[ i + 1 ].y, PDWORD( data )^, 255, PR2D_SMOOTH );
-          pr2d_Line( tverts[ i + 1 ].x, tverts[ i + 1 ].y, tverts[ 0 ].x, tverts[ 0 ].y, PDWORD( data )^, 255, PR2D_SMOOTH );
+          pr2d_Line( tverts[ numVerts - 1 ].x, tverts[ numVerts - 1 ].y, tverts[ 0 ].x, tverts[ 0 ].y, PDWORD( data )^, 255, PR2D_SMOOTH );
         end;
   end;
 end;
