@@ -48,7 +48,7 @@ procedure FreeGL;
 function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
-function gl_GetProc( const Proc : PAnsiChar ) : Pointer;
+function gl_GetProc( const Proc : AnsiString ) : Pointer;
 function gl_IsSupported( const Extension : AnsiString; const searchIn: AnsiString ) : Boolean;
 
 var
@@ -656,7 +656,7 @@ end;
 function gl_GetProc;
 begin
   {$IFDEF WIN32}
-  Result := wglGetProcAddress( Proc );
+  Result := wglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := wglGetProcAddress( PAnsiChar( Proc + 'ARB' ) );
   if Result = nil Then
