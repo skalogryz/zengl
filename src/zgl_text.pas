@@ -43,9 +43,6 @@ const
 type
   zglTTextWord = record
     X, Y, W : Integer;
-    ShiftX  : Integer;
-    LF      : Boolean;
-    LFShift : Integer;
     str     : String;
 end;
 
@@ -73,6 +70,7 @@ var
   textLength    : Integer;
   textLCoord    : zglPPoint2D;
   textLCharDesc : zglPCharDesc;
+  textWords     : array of zglTTextWord;
 
 procedure text_Draw;
   var
@@ -256,160 +254,149 @@ begin
   textStep      := 0;
 end;
 
-// TODO:
-// - Переписать весь этот говнокод
 procedure text_DrawInRect;
   var
-    i, j, b, l : Integer;
-    X, Y, W, H : Integer;
+    X, Y, sX   : Integer;
+    b, i, imax : Integer;
+    c, lc      : DWORD;
+    curWord, j : Integer;
+    newLine    : Integer;
+    lineWidth  : Integer;
     SpaceShift : Integer;
-    WordsArray : array of zglTTextWord;
     WordsCount : Integer;
-    LineFeed   : Boolean;
+    LinesCount : Integer;
     NewFlags   : Integer;
+    startWord  : Boolean;
+    newWord    : Boolean;
+    lineEnd    : Boolean;
+    lineFeed   : Boolean;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
-  if ( Rect.W <= ogl_CropX ) or ( Rect.H <= ogl_CropY ) or
-     ( Rect.X + Rect.W <= ogl_CropX ) or ( Rect.Y + Rect.H <= ogl_CropY ) or
-     ( Rect.X > ogl_CropW ) or ( Rect.Y > ogl_CropH ) Then exit;
 
-  SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
-
-  X := Round( Rect.X ) + 1;
-  Y := Round( Rect.Y ) + 1;
-  W := Round( Rect.W );
-  H := Round( Rect.H );
-
+  i          := 1;
+  b          := 1;
+  c          := 32;
+  curWord    := 0;
+  newLine    := 0;
+  lineWidth  := 0;
   WordsCount := 0;
-  for i := 1 to length( Text ) do
-    if Text[ i ] = #10 Then
-      INC( WordsCount );
-  WordsCount := WordsCount + u_Words( Text );
-  if WordsCount = 0 Then
+  LinesCount := 0;
+  startWord  := FALSE;
+  newWord    := FALSE;
+  lineEnd    := FALSE;
+  lineFeed   := FALSE;
+  X          := Round( Rect.X ) + 1;
+  Y          := Round( Rect.Y ) + 1 - Round( Font.MaxHeight * textScale );
+  SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
+  while i <= length( Text ) do
     begin
-      scissor_End;
-      exit;
-    end;
-  SetLength( WordsArray, WordsCount + 1 );
-  WordsArray[ WordsCount ].str := ' ';
-  WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
+      lc   := c;
+      j    := i;
+      c    := font_GetCID( Text, i, @i );
+      imax := Integer( i > length( Text ) );
 
-  LineFeed := FALSE;
-  l := length( Text );
-  b := 1;
-  W := 0;
-  H := 1;
-  for i := 0 to WordsCount - 1 do
-    for j := b to l do
-      begin
-        LineFeed := Text[ j ] = #10;
-        if ( ( Text[ j ] = ' ' ) and ( j <> 1 ) ) or ( j = l ) or LineFeed Then
-          begin
-            if ( j < l ) and ( Text[ j + 1 ] = #10 ) Then
-              begin
-                INC( W );
-                if length( WordsArray[ i ].str ) > H Then
-                  font_GetCID( WordsArray[ i ].str, H, @H );
-                continue;
-              end;
-            if ( j > 1 ) and ( ( Text[ j - 1 ] = ' ' ) and ( j <> l ) ) Then
-              begin
-                INC( H );
-                continue;
-              end;
-            if ( b = 1 ) and ( WordsCount > 1 ) Then
-              WordsArray[ i ].str := Copy( Text, b, j - b )
-            else
-              WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + 1 * Byte( not LineFeed ) - W );
-            font_GetCID( WordsArray[ i ].str, H, @H );
-            WordsArray[ i ].LF      := LineFeed;
-            WordsArray[ i ].LFShift := W + 1;
-            WordsArray[ i ].W       := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-            if length( WordsArray[ i ].str ) > H Then
-              begin
-                W := font_GetCID( WordsArray[ i ].str, H, @H );
-                while not Assigned( Font.CharDesc[ W ] ) do
-                  W := font_GetCID( WordsArray[ i ].str, H, @H );
-                WordsArray[ i ].ShiftX := Font.CharDesc[ W ].ShiftX;
-              end;
-            if LineFeed Then
-              b := j + 2
-            else
-              b := j + 1;
-            LineFeed := FALSE;
-            W := 0;
-            H := 1;
-            break;
-          end;
-      end;
-  WordsArray[ WordsCount - 1 ].LF := TRUE;
-  WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
-
-  l := 0;
-  if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
-    INC( WordsCount );
-  for i := 0 to WordsCount - 1 do
-    begin
-      WordsArray[ i ].X := X;
-      WordsArray[ i ].Y := Y;
-      X := X + WordsArray[ i ].W - SpaceShift;
-      if i > 0 Then
-        LineFeed := WordsArray[ i - 1 ].LF;
-      if ( ( X + SpaceShift >= Rect.X + Rect.W - 1 ) and ( i - l > 0 ) ) or LineFeed Then
+      if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then
         begin
-          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed );
-          if i > 0 Then
-            Y := Y + Round( Font.MaxHeight * textScale ) * WordsArray[ i - 1 ].LFShift;
-          WordsArray[ i ].X := X;
-          WordsArray[ i ].Y := Y;
-          X := X + WordsArray[ i ].W - SpaceShift;
+          b := j - 1 * Integer( curWord > 0 ) + Integer( lc = 10 );
+          while lineEnd and ( Text[ b ] = ' ' ) do INC( b );
+          startWord := TRUE;
+          lineEnd   := FALSE;
+          continue;
+        end;
 
-          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) and ( not LineFeed ) Then
+      if ( c = 32 ) and ( startWord ) and ( lc <> 10 ) and ( lc <> 32 ) Then
+        begin
+          newWord   := TRUE;
+          startWord := FALSE;
+        end;
+
+      if ( ( c = 10 ) and ( lc <> 10 ) and ( lc <> 32 ) ) or ( imax > 0 ) Then
+        begin
+          newWord   := TRUE;
+          startWord := FALSE;
+          lineFeed  := TRUE;
+        end else
+          if c = 10 Then
             begin
-              W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
-              while W > ( i - 1 ) - l do
+              startWord := FALSE;
+              lineFeed  := TRUE;
+            end;
+
+      if newWord Then
+        begin
+          textWords[ curWord ].str := Copy( Text, b, i - b - ( 1 - imax ) );
+          textWords[ curWord ].W   := Round( text_GetWidth( Font, textWords[ curWord ].str, textStep ) * textScale );
+          lineWidth                := lineWidth + textWords[ curWord ].W;
+
+          newWord := FALSE;
+          INC( curWord );
+          INC( WordsCount );
+          if ( lineWidth > Rect.W - 2 ) and ( curWord - newLine > 1 ) Then
+            begin
+              lineEnd := TRUE;
+              i := b;
+              while Text[ i ] = ' ' do INC( i );
+              DEC( curWord );
+              DEC( WordsCount );
+            end;
+          if WordsCount > High( textWords ) Then
+            SetLength( textWords, length( textWords ) + 1024 );
+        end;
+
+      if lineFeed or lineEnd Then
+        begin
+          Y := Y + Round( Font.MaxHeight * textScale );
+          textWords[ newLine ].X := X;
+          textWords[ newLine ].Y := Y;
+          for j := newLine + 1 to curWord - 1 do
+            begin
+              textWords[ j ].X := textWords[ j - 1 ].X + textWords[ j - 1 ].W;
+              textWords[ j ].Y := textWords[ newLine ].Y;
+            end;
+
+          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( curWord - newLine > 1 ) and ( c <> 10 ) and ( imax = 0 ) Then
+            begin
+              sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+              while sX > ( curWord - 1 ) - newLine do
                 begin
-                  for b := l + 1 to i - 1 do
-                    INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
-                  W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+                  for j := newLine + 1 to curWord - 1 do
+                    INC( textWords[ j ].X, 1 + ( j - ( newLine + 1 ) ) );
+                  sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
                 end;
-              WordsArray[ i - 1 ].X := WordsArray[ i - 1 ].X + W;
+              textWords[ curWord - 1 ].X := textWords[ curWord - 1 ].X + sX;
             end else
               if Flags and TEXT_HALIGN_CENTER > 0 Then
                 begin
-                  W := ( Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift ) ) div 2;
-                  if i = WordsCount - 1 Then
-                    begin
-                      for b := l to i - 1 do
-                        INC( WordsArray[ b ].X, W - SpaceShift div 2 );
-                    end else
-                      for b := l to i - 1 do
-                        INC( WordsArray[ b ].X, W );
+                  sX := ( Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W ) ) div 2;
+                  for j := newLine to curWord do
+                    textWords[ j ].X := textWords[ j ].X + sX;
                 end else
                   if Flags and TEXT_HALIGN_RIGHT > 0 Then
                     begin
-                      W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift * Byte( not WordsArray[ i - 1 ].LF ) );
-                      for b := l to i - 1 do
-                        INC( WordsArray[ b ].X, W );
+                      sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+                      for j := newLine to curWord do
+                        textWords[ j ].X := textWords[ j ].X + sX;
                     end;
-          LineFeed := FALSE;
-          l := i;
+
+          newLine   := curWord;
+          lineWidth := 0;
+          lineFeed  := FALSE;
+          INC( LinesCount );
+          if ( LinesCount + 1 ) * Font.MaxHeight > Rect.H Then break;
         end;
     end;
-  if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
-    DEC( WordsCount );
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
     begin
-      H := ( Round( Rect.Y + Rect.H - 1 ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
+      Y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
       for i := 0 to WordsCount - 1 do
-        INC( WordsArray[ i ].Y, H );
+        textWords[ i ].Y := textWords[ i ].Y + Y;
     end else
       if Flags and TEXT_VALIGN_BOTTOM > 0 Then
         begin
-          H := Round( Rect.Y + Rect.H - 1 ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight );
+          Y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ WordsCount - 1 ].Y + Font.MaxHeight ) );
           for i := 0 to WordsCount - 1 do
-            INC( WordsArray[ i ].Y, H );
+            textWords[ i ].Y := textWords[ i ].Y + Y;
         end;
 
   NewFlags := 0;
@@ -418,21 +405,18 @@ begin
   if Flags and TEXT_FX_LENGTH > 0 Then
     NewFlags := NewFlags or TEXT_FX_LENGTH;
 
-  l := 0;
+  j := 0;
   b := textLength;
   for i := 0 to WordsCount - 1 do
     begin
       if Flags and TEXT_FX_LENGTH > 0 Then
         begin
-          LineFeed := ( i > 0 ) and ( i < WordsCount - 2 ) and ( WordsArray[ i ].Y <> WordsArray[ i - 1 ].Y );
-          textFx_SetLength( b - l, textLCoord, textLCharDesc );
-          if l > b Then continue;
-          l := l + u_Length( WordsArray[ i ].str ) - Byte( not LineFeed );
+          textFx_SetLength( b - j, textLCoord, textLCharDesc );
+          if j > b Then continue;
+          j := j + u_Length( textWords[ i ].str );
         end;
-      text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str, NewFlags );
+      text_Draw( Font, textWords[ i ].X, textWords[ i ].Y, textWords[ i ].str, NewFlags );
     end;
-
-  SetLength( WordsArray, 0 );
 end;
 
 procedure text_DrawInRectEx;
@@ -483,5 +467,11 @@ begin
   textLCoord    := LastCoord;
   textLCharDesc := LastCharDesc;
 end;
+
+initialization
+  SetLength( textWords, 1024 );
+
+finalization
+  SetLength( textWords, 0 );
 
 end.

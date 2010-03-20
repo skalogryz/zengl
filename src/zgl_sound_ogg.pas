@@ -26,9 +26,21 @@ unit zgl_sound_ogg;
 {$IFDEF FPC}
   {$IFDEF USE_OGG_STATIC}
     {$IFDEF LINUX}
-      {$LINKLIB libogg.a}
-      {$LINKLIB libvorbis.a}
-      {$LINKLIB libvorbisfile.a}
+      {$IFDEF USE_OGG_FROM_SYSTEM}
+        {$LINKLIB libogg.a}
+        {$LINKLIB libvorbis.a}
+        {$LINKLIB libvorbisfile.a}
+      {$ELSE}
+        {$IFDEF cpui386}
+          {$LINKLIB libogg_linux_x86/libogg.a}
+          {$LINKLIB libogg_linux_x86/libvorbis.a}
+          {$LINKLIB libogg_linux_x86/libvorbisfile.a}
+        {$ELSE}
+          {$LINKLIB libogg_linux_x86_64/libogg.a}
+          {$LINKLIB libogg_linux_x86_64/libvorbis.a}
+          {$LINKLIB libogg_linux_x86_64/libvorbisfile.a}
+        {$ENDIF}
+      {$ENDIF}
     {$ENDIF}
     {$IFDEF WIN32}
       {$L libogg_win32/bitwise}
