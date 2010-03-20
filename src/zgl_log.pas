@@ -46,6 +46,9 @@ uses
   zgl_utils;
 
 procedure log_Init;
+  var
+    i  : Integer;
+    es : String;
 begin
   if ( app_Flags and APP_USE_LOG = 0 ) Then exit;
   if log <> FILE_ERROR Then exit;
@@ -53,9 +56,12 @@ begin
   logstart := Round( timer_GetTicks );
 
   file_Open( log, logfile, FOM_CREATE );
-  log_Add( '################', FALSE );
-  log_Add( '# ' + cs_ZenGL + ' #', FALSE );
-  log_Add( '################', FALSE );
+  // crazy code :)
+  for i := 0 to length( cs_ZenGL ) + 7 do
+    es := es + '=';
+  log_Add( es, FALSE );
+  log_Add( '=== ' + cs_ZenGL + ' ===', FALSE );
+  log_Add( es, FALSE );
   log_Add( 'Begin' );
 end;
 
