@@ -112,6 +112,7 @@ begin
 
         if wavHeader.FormatCode = WAV_IMA_ADPCM Then log_Add( 'Unsupported wav format - IMA ADPCM' );
         if wavHeader.FormatCode = WAV_MP3 Then       log_Add( 'Unsupported wav format - MP3' );
+        wavHeader.FormatCode := 1; // на всякий случай, а то расплодилось убогих wav-редакторов...
       end else
         begin
           mem_Read( wavMemory, skip, 4 );
