@@ -117,11 +117,17 @@ end;
 
 function mouse_DX;
 begin
+  {$IFDEF WIN32}
+  getcurpos := TRUE;
+  {$ENDIF}
   Result := mouse_X() - wnd_Width div 2;
 end;
 
 function mouse_DY;
 begin
+  {$IFDEF WIN32}
+  getcurpos := TRUE;
+  {$ENDIF}
   Result := mouse_Y() - wnd_Height div 2;
 end;
 
@@ -181,7 +187,10 @@ begin
   XWarpPointer( scr_display, None, wnd_Handle, 0, 0, 0, 0, wnd_Width div 2, wnd_Height div 2 );
 {$ENDIF}
 {$IFDEF WIN32}
-  SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
+  if wnd_FullScreen Then
+    SetCursorPos( wnd_Width div 2, wnd_Height div 2 )
+  else
+    SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
 {$ENDIF}
 {$IFDEF DARWIN}
   Point.X := wnd_X + wnd_Width / 2;
