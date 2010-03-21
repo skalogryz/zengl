@@ -29,7 +29,7 @@ const
 {$IFDEF LINUX}
   libopenal = 'libopenal.so';
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   libopenal = 'openal32.dll';
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -85,7 +85,7 @@ type
 end;
 
 var
-  oal_Library : {$IFDEF WIN32} LongWord {$ELSE} Pointer {$ENDIF};
+  oal_Library : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
 
   alcGetString           : function(device: PALCdevice; param: LongInt): PAnsiChar; cdecl;
   alcGetError            : function(device: PALCdevice): LongInt; cdecl;

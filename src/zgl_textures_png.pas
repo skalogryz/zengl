@@ -75,9 +75,9 @@ type
     R, G, B, A : Byte;
   end;
 
-procedure png_Load( var pData : Pointer; var W, H : WORD );
-procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
-procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
+procedure png_Load( var pData : Pointer; var W, H : Word );
+procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : Word );
+procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
 
 procedure png_ReadIHDR( var pngData : Pointer );
 procedure png_ReadPLTE;
@@ -112,11 +112,11 @@ var
   pngZData        : Pointer;
 
   pngRowUsed      : Boolean = TRUE;
-  pngRowSize      : DWORD;
+  pngRowSize      : LongWord;
   pngRowBuffer    : array[ Boolean ] of PByteArray;
-  pngOffset       : DWORD;
+  pngOffset       : LongWord;
 
-  pngIDATEnd      : DWORD;
+  pngIDATEnd      : LongWord;
 
 procedure png_Load;
   label _exit;

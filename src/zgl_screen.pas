@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, XLib, XUtil, xf86vmode, UnixType,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -49,8 +49,8 @@ procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
-procedure scr_SetOptions( const Width, Height, BPP, Refresh : WORD; const FullScreen, VSync : Boolean );
-procedure scr_CorrectResolution( const Width, Height : WORD );
+procedure scr_SetOptions( const Width, Height, BPP, Refresh : Word; const FullScreen, VSync : Boolean );
+procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( const VSync : Boolean );
 procedure scr_SetFSAA( const FSAA : Byte );
@@ -61,7 +61,7 @@ function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
 {$ENDIF}
 
 type
-  zglPResolitionList = ^zglTResolutionList;
+  zglPResolutionList = ^zglTResolutionList;
   zglTResolutionList = record
     Count  : Integer;
     Width  : array of Integer;
@@ -93,10 +93,10 @@ var
   scr_Default   : cint;
   scr_Settings  : TXF86VidModeModeInfo;
   scr_Desktop   : TXF86VidModeModeInfo;
-  scr_ModeCount : DWORD;
+  scr_ModeCount : LongWord;
   scr_ModeList  : PPXF86VidModeModeInfo;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   scr_Settings : DEVMODE;
   scr_Desktop  : DEVMODE;
   {$ENDIF}
@@ -121,7 +121,7 @@ uses
   zgl_log,
   zgl_utils;
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 function GetDisplayColors : Integer;
   var
     tHDC: hdc;
@@ -175,7 +175,7 @@ begin
   XF86VidModeGetAllModeLines( scr_Display, scr_Default, @scr_ModeCount, @scr_ModeList );
   XF86VidModeGetModeLine( scr_Display, scr_Default, @scr_Desktop.dotclock, PXF86VidModeModeLine( Pointer( @scr_Desktop ) + SizeOf( scr_Desktop.dotclock ) ) );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   with scr_Desktop do
     begin
       dmSize             := SizeOf( DEVMODE );
@@ -279,7 +279,7 @@ begin
 
   wnd_Root := RootWindow( scr_Display, ogl_VisualInfo.screen );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   scr_Init;
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -296,7 +296,7 @@ procedure scr_GetResList;
   {$IFDEF LINUX}
     tmp_Settings : TXF86VidModeModeInfo;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
     tmp_Settings : DEVMODE;
   {$ENDIF}
   function Already( Width, Height : Integer ) : Boolean;
@@ -322,7 +322,7 @@ begin
         end;
     end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   i := 0;
   while EnumDisplaySettings( nil, i, tmp_Settings ) <> FALSE do
     begin
@@ -346,7 +346,7 @@ begin
   XFree( scr_ModeList );
   glXWaitX;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   scr_Reset;
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -363,7 +363,7 @@ begin
   XUngrabPointer( scr_Display, CurrentTime );
   glXWaitX;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -399,7 +399,7 @@ begin
 
   glXSwapBuffers( scr_Display, wnd_Handle );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if ogl_CanVSync Then
     begin
       sync := wglGetSwapIntervalEXT;
@@ -426,7 +426,7 @@ procedure scr_SetOptions;
   {$IFDEF LINUX}
     modeToSet : Integer;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
     i : Integer;
     r : Integer;
   {$ENDIF}
@@ -464,7 +464,7 @@ begin
         {$IFDEF LINUX}
         scr_BPP := BPP;
         {$ENDIF}
-        {$IFDEF WIN32}
+        {$IFDEF WINDOWS}
         scr_BPP     := GetDisplayColors;
         scr_Refresh := GetDisplayRefresh;
         {$ENDIF}
@@ -493,7 +493,7 @@ begin
         XMapWindow( scr_Display, wnd_Handle );
       end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if wnd_FullScreen Then
     begin
       i := 0;

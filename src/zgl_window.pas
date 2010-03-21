@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, XLib, XUtil
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -60,18 +60,18 @@ var
   wnd_Class       : TXClassHint;
   wnd_Attr        : TXSetWindowAttributes;
   wnd_Title       : TXTextProperty;
-  wnd_ValueMask   : DWORD;
+  wnd_ValueMask   : LongWord;
   wnd_DestroyAtom : TAtom;
   wnd_Protocols   : TAtom;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   wnd_First     : Boolean = TRUE; // Microsoft Sucks! :)
   wnd_Handle    : HWND;
   wnd_DC        : HDC;
   wnd_INST      : HINST;
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
-  wnd_Style     : DWORD;
+  wnd_Style     : LongWord;
   wnd_CpnSize   : Integer;
   wnd_BrdSizeX  : Integer;
   wnd_BrdSizeY  : Integer;
@@ -186,7 +186,7 @@ begin
         XUngrabPointer( scr_Display, CurrentTime );
       end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   wnd_CpnSize  := GetSystemMetrics( SM_CYCAPTION  );
   wnd_BrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
   wnd_BrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
@@ -309,7 +309,7 @@ begin
 {$IFDEF LINUX}
   XDestroyWindow( scr_Display, wnd_Handle );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if ( wnd_DC > 0 ) and ( ReleaseDC( wnd_Handle, wnd_DC ) = 0 ) Then
     begin
       u_Error( 'Cannot release device context' );
@@ -334,7 +334,7 @@ begin
 end;
 
 procedure wnd_Update;
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   var
     FullScreen : Boolean;
 {$ENDIF}
@@ -345,7 +345,7 @@ begin
   glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
   wnd_ShowCursor( app_ShowCursor );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if app_Focus Then
     FullScreen := wnd_FullScreen
   else
@@ -383,7 +383,7 @@ begin
       XSetWMName( scr_Display, wnd_Handle, @wnd_Title );
     end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if wnd_Handle <> 0 Then
     SetWindowText( wnd_Handle, PChar( wnd_Caption ) );
 {$ENDIF}
@@ -404,7 +404,7 @@ begin
   if wnd_Handle <> 0 Then
     XResizeWindow( scr_Display, wnd_Handle, Width, Height );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if not app_InitToHandle Then
     wnd_SetPos( wnd_X, wnd_Y );
 {$ENDIF}
@@ -425,9 +425,9 @@ begin
 end;
 
 procedure wnd_SetPos;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
-    Mode : DWORD;
+    Mode : LongWord;
   {$ENDIF}
 begin
   wnd_X := X;
@@ -439,7 +439,7 @@ begin
     else
       XMoveWindow( scr_Display, wnd_Handle, 0, 0 );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if not app_Focus Then
     Mode := HWND_BOTTOM
   else
@@ -485,7 +485,7 @@ begin
         XDefineCursor( scr_Display, wnd_Handle, app_Cursor );
       end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 begin
   app_ShowCursor := Show;
 {$ENDIF}
@@ -501,7 +501,7 @@ begin
   XMapWindow( scr_Display, wnd_Handle );
   glXWaitX;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   BringWindowToTop( wnd_Handle );
 {$ENDIF}
 {$IFDEF DARWIN}

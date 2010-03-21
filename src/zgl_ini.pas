@@ -39,7 +39,7 @@ type
   zglPINISection = ^zglTINISection;
   zglTINISection = record
     Name : AnsiString;
-    Keys : DWORD;
+    Keys : LongWord;
     Key  : array of zglTINIKey;
 end;
 
@@ -47,7 +47,7 @@ type
   zglPINI = ^zglTINI;
   zglTINI = record
     FileName : AnsiString;
-    Sections : DWORD;
+    Sections : LongWord;
     Section  : array of zglTINISection;
 end;
 

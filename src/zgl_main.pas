@@ -25,7 +25,7 @@ unit zgl_main;
 
 interface
 uses
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -94,17 +94,17 @@ const
   CROP_INVISIBLE        = $008000;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-{$IFDEF WIN32}
-procedure zgl_InitToHandle( const Handle : DWORD; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+{$IFDEF WINDOWS}
+procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 {$ENDIF}
 procedure zgl_Destroy;
 procedure zgl_Exit;
-procedure zgl_Reg( const What : DWORD; const UserData : Pointer );
-function  zgl_Get( const What : DWORD ) : Ptr;
+procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
+function  zgl_Get( const What : LongWord ) : Ptr;
 procedure zgl_GetSysDir;
-procedure zgl_GetMem( var Mem : Pointer; const Size : DWORD );
-procedure zgl_Enable( const What : DWORD );
-procedure zgl_Disable( const What : DWORD );
+procedure zgl_GetMem( var Mem : Pointer; const Size : LongWord );
+procedure zgl_Enable( const What : LongWord );
+procedure zgl_Disable( const What : LongWord );
 
 implementation
 uses
@@ -134,7 +134,7 @@ begin
 
   app_UsrHomeDir := getenv( 'HOME' ) + '/';
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 var
   FL, FP : PAnsiChar;
   S      : AnsiString;
@@ -202,7 +202,7 @@ begin
   zgl_Destroy;
 end;
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 procedure zgl_InitToHandle;
 begin
   zgl_GetSysDir;
@@ -376,13 +376,13 @@ begin
     {$IFDEF USE_GUI}
     WIDGET_TYPE_ID:
       begin
-        if DWORD( UserData ) > length( managerGUI.Types ) Then
+        if LongWord( UserData ) > length( managerGUI.Types ) Then
           begin
             SetLength( managerGUI.Types, length( managerGUI.Types ) + 1 );
-            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := DWORD( UserData );
+            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := LongWord( UserData );
             widgetTLast := length( managerGUI.Types ) - 1;
           end else
-            widgetTLast := DWORD( UserData );
+            widgetTLast := LongWord( UserData );
       end;
     WIDGET_FILL_DESC:
       begin
@@ -421,7 +421,7 @@ begin
     {$IFDEF LINUX}
       Result := scr_Desktop.hdisplay;
     {$ENDIF}
-    {$IFDEF WIN32}
+    {$IFDEF WINDOWS}
       Result := scr_Desktop.dmPelsWidth;
     {$ENDIF}
     {$IFDEF DARWIN}
@@ -431,7 +431,7 @@ begin
     {$IFDEF LINUX}
       Result := scr_Desktop.vdisplay;
     {$ENDIF}
-    {$IFDEF WIN32}
+    {$IFDEF WINDOWS}
       Result := scr_Desktop.dmPelsHeight;
     {$ENDIF}
     {$IFDEF DARWIN}

@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   Unix
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -40,7 +40,7 @@ type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Active     : Boolean;
-    Interval   : DWORD;
+    Interval   : LongWord;
     LastTick   : Double;
     OnTimer    : procedure;
 
@@ -50,11 +50,11 @@ end;
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTTimer;
 end;
 
-function  timer_Add( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
+function  timer_Add( const OnTimer : Pointer; const Interval : LongWord ) : zglPTimer;
 procedure timer_Del( var Timer : zglPTimer );
 
 procedure timer_MainLoop;
@@ -64,12 +64,12 @@ procedure timer_Reset;
 var
   managerTimer  : zglTTimerManager;
   CanKillTimers : Boolean = TRUE;
-  TimersToKill  : WORD = 0;
+  TimersToKill  : Word = 0;
   aTimersToKill : array[ 0..1023 ] of zglPTimer;
   {$IFDEF LINUX}
   t_tmr     : TimeVal;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Frequency : int64;
   Freq      : Single;
   {$ENDIF}
@@ -155,7 +155,7 @@ begin
 end;
 
 function timer_GetTicks;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
     T : int64;
   {$ENDIF}
@@ -171,7 +171,7 @@ begin
   Result := t_tmr.tv_sec * 1000 + t_tmr.tv_usec / 1000 - t_start;
   {$Q+}
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   QueryPerformanceCounter( T );
   Result := 1000 * T * Freq - t_start;
 {$ENDIF}
@@ -195,7 +195,7 @@ begin
 end;
 
 initialization
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   QueryPerformanceFrequency( Frequency );
   Freq := 1 / Frequency;
 {$ENDIF}

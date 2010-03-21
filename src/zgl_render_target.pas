@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, XLib, XUtil,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -48,8 +48,8 @@ const
 type
   zglPFBO = ^zglTFBO;
   zglTFBO = record
-    FrameBuffer  : DWORD;
-    RenderBuffer : DWORD;
+    FrameBuffer  : LongWord;
+    RenderBuffer : LongWord;
 end;
 
 {$IFDEF LINUX}
@@ -61,7 +61,7 @@ type
     PBuffer : GLXPBuffer;
 end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
@@ -93,7 +93,7 @@ end;
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTRenderTarget;
 end;
 
@@ -134,15 +134,15 @@ function rtarget_Add;
     PBufferiAttr : array[ 0..8 ] of Integer;
     FBConfigAttr : array[ 0..15 ] of Integer;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
     PBufferiAttr : array[ 0..15 ] of Integer;
     PBufferfAttr : array[ 0..15 ] of Single;
     PixelFormat  : array[ 0..63 ] of Integer;
-    nPixelFormat : DWORD;
+    nPixelFormat : LongWord;
 {$ENDIF}
 {$IFDEF DARWIN}
     i            : Integer;
-    PBufferdAttr : array[ 0..31 ] of DWORD;
+    PBufferdAttr : array[ 0..31 ] of LongWord;
 {$ENDIF}
 begin
   Result := @managerRTarget.First;
@@ -287,7 +287,7 @@ begin
         glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
       end;
     {$ENDIF}
-    {$IFDEF WIN32}
+    {$IFDEF WINDOWS}
     RT_TYPE_PBUFFER:
       begin
         zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
@@ -430,7 +430,7 @@ begin
           2: glXDestroyGLXPbufferSGIX( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
         end;
         {$ENDIF}
-        {$IFDEF WIN32}
+        {$IFDEF WINDOWS}
         if zglPPBuffer( Target.Handle ).RC <> 0 Then
           wglDeleteContext( zglPPBuffer( Target.Handle ).RC );
         if zglPPBuffer( Target.Handle ).DC <> 0 Then
@@ -481,7 +481,7 @@ begin
             {$IFDEF LINUX}
             glXMakeCurrent( scr_Display, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
             {$ENDIF}
-            {$IFDEF WIN32}
+            {$IFDEF WINDOWS}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
             {$ENDIF}
             {$IFDEF DARWIN}
@@ -525,7 +525,7 @@ begin
             {$IFDEF LINUX}
             glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
             {$ENDIF}
-            {$IFDEF WIN32}
+            {$IFDEF WINDOWS}
             wglMakeCurrent( wnd_DC, ogl_Context );
             {$ENDIF}
             {$IFDEF DARWIN}

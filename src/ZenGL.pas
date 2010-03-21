@@ -45,7 +45,6 @@ uses
   zgl_textures_png,
   zgl_textures_tga,
 
-  zgl_texture_atlas,
   zgl_render_target,
 
   {$IFDEF USE_SOUND}

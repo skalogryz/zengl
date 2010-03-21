@@ -61,8 +61,8 @@ type
   zglTBufferDesc = record
     FormatCode       : Word;
     ChannelNumber    : Word;
-    SampleRate       : DWORD;
-    BytesPerSecond   : DWORD;
+    SampleRate       : LongWord;
+    BytesPerSecond   : LongWord;
     BytesPerSample   : Word;
     BitsPerSample    : Word;
     cbSize           : Word;
@@ -73,10 +73,10 @@ type
   IDirectSound       = interface;
 
   TDSBUFFERDESC = packed record
-    dwSize          : DWORD;
-    dwFlags         : DWORD;
-    dwBufferBytes   : DWORD;
-    dwReserved      : DWORD;
+    dwSize          : LongWord;
+    dwFlags         : LongWord;
+    dwBufferBytes   : LongWord;
+    dwReserved      : LongWord;
     lpwfxFormat     : Pointer;
     guid3DAlgorithm : TGUID;
   end;
@@ -89,10 +89,10 @@ type
     function GetCaps(lpDSCaps: Pointer) : HResult; stdcall;
     function DuplicateSoundBuffer(lpDsbOriginal: IDirectSoundBuffer;
         out lpDsbDuplicate: IDirectSoundBuffer) : HResult; stdcall;
-    function SetCooperativeLevel(hwnd: HWND; dwLevel: DWORD) : HResult; stdcall;
+    function SetCooperativeLevel(hwnd: HWND; dwLevel: LongWord) : HResult; stdcall;
     function Compact: HResult; stdcall;
-    function GetSpeakerConfig(var lpdwSpeakerConfig: DWORD) : HResult; stdcall;
-    function SetSpeakerConfig(dwSpeakerConfig: DWORD) : HResult; stdcall;
+    function GetSpeakerConfig(var lpdwSpeakerConfig: LongWord) : HResult; stdcall;
+    function SetSpeakerConfig(dwSpeakerConfig: LongWord) : HResult; stdcall;
     function Initialize(lpGuid: PGUID) : HResult; stdcall;
   end;
 
@@ -100,36 +100,36 @@ type
     ['{279AFA85-4981-11CE-A521-0020AF0BE560}']
     function GetCaps(lpDSCaps: Pointer) : HResult; stdcall;
     function GetCurrentPosition
-        (lpdwPlayPosition, lpdwReadPosition : PDWORD) : HResult; stdcall;
-    function GetFormat(lpwfxFormat: Pointer; dwSizeAllocated: DWORD;
-        lpdwSizeWritten: PDWORD) : HResult; stdcall;
+        (lpdwPlayPosition, lpdwReadPosition : PLongWord) : HResult; stdcall;
+    function GetFormat(lpwfxFormat: Pointer; dwSizeAllocated: LongWord;
+        lpdwSizeWritten: PLongWord) : HResult; stdcall;
     function GetVolume(var lplVolume: integer) : HResult; stdcall;
     function GetPan(var lplPan: integer) : HResult; stdcall;
-    function GetFrequency(var lpdwFrequency: DWORD) : HResult; stdcall;
-    function GetStatus(var lpdwStatus: DWORD) : HResult; stdcall;
+    function GetFrequency(var lpdwFrequency: LongWord) : HResult; stdcall;
+    function GetStatus(var lpdwStatus: LongWord) : HResult; stdcall;
     function Initialize(lpDirectSound: IDirectSound;
         const lpcDSBufferDesc: TDSBufferDesc) : HResult; stdcall;
-    function Lock(dwWriteCursor, dwWriteBytes: DWORD;
-        var lplpvAudioPtr1: Pointer; var lpdwAudioBytes1: DWORD;
-        var lplpvAudioPtr2: Pointer; var lpdwAudioBytes2: DWORD;
-        dwFlags: DWORD) : HResult; stdcall;
-    function Play(dwReserved1,dwReserved2,dwFlags: DWORD) : HResult; stdcall;
-    function SetCurrentPosition(dwPosition: DWORD) : HResult; stdcall;
+    function Lock(dwWriteCursor, dwWriteBytes: LongWord;
+        var lplpvAudioPtr1: Pointer; var lpdwAudioBytes1: LongWord;
+        var lplpvAudioPtr2: Pointer; var lpdwAudioBytes2: LongWord;
+        dwFlags: LongWord) : HResult; stdcall;
+    function Play(dwReserved1,dwReserved2,dwFlags: LongWord) : HResult; stdcall;
+    function SetCurrentPosition(dwPosition: LongWord) : HResult; stdcall;
     function SetFormat(lpcfxFormat: Pointer) : HResult; stdcall;
     function SetVolume(lVolume: integer) : HResult; stdcall;
     function SetPan(lPan: integer) : HResult; stdcall;
-    function SetFrequency(dwFrequency: DWORD) : HResult; stdcall;
+    function SetFrequency(dwFrequency: LongWord) : HResult; stdcall;
     function Stop: HResult; stdcall;
-    function Unlock(lpvAudioPtr1: Pointer; dwAudioBytes1: DWORD;
-        lpvAudioPtr2: Pointer; dwAudioBytes2: DWORD) : HResult; stdcall;
+    function Unlock(lpvAudioPtr1: Pointer; dwAudioBytes1: LongWord;
+        lpvAudioPtr2: Pointer; dwAudioBytes2: LongWord) : HResult; stdcall;
     function Restore: HResult; stdcall;
   end;
 
 function  InitDSound : Boolean;
 procedure FreeDSound;
 
-procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; BufferSize : DWORD; Format : Pointer );
-procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; const DataSize : DWORD; const Pos : DWORD = 0 );
+procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; const BufferSize : LongWord; const Format : Pointer );
+procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; const DataSize : LongWord; const Pos : LongWord = 0 );
 function  dsu_CalcPos( const X, Y, Z : Single; var Volume : Single ) : Integer;
 function  dsu_CalcVolume( const Volume : Single ) : Integer;
 
@@ -144,7 +144,6 @@ var
 
 implementation
 uses
-  zgl_types,
   zgl_sound,
   zgl_log,
   zgl_utils;
@@ -163,32 +162,30 @@ end;
 
 procedure dsu_CreateBuffer;
   var
-    DSoundBD : TDSBufferDesc;
+    bufferDesc : TDSBufferDesc;
 begin
-  FillChar( DSoundBD, SizeOf( TDSBUFFERDESC ), 0 );
-  DSoundBD.dwSize  := SizeOf( TDSBUFFERDESC );
-  DSoundBD.dwFlags := DSBCAPS_LOCSOFTWARE        or
-                      DSBCAPS_CTRLPAN            or
-                      DSBCAPS_CTRLVOLUME         or
-                      DSBCAPS_CTRLFREQUENCY      or
-                      DSBCAPS_CTRLPOSITIONNOTIFY or
-                      //DSBCAPS_GLOBALFOCUS        or
-                      DSBCAPS_GETCURRENTPOSITION2;
-  DSoundBD.dwBufferBytes := BufferSize;
-  DSoundBD.lpwfxFormat   := Format;
+  FillChar( bufferDesc, SizeOf( TDSBUFFERDESC ), 0 );
+  with bufferDesc do
+    begin
+      dwSize  := SizeOf( TDSBUFFERDESC );
+      dwFlags := DSBCAPS_LOCSOFTWARE or DSBCAPS_CTRLPAN or DSBCAPS_CTRLVOLUME or DSBCAPS_CTRLFREQUENCY or DSBCAPS_CTRLPOSITIONNOTIFY or
+                 DSBCAPS_GETCURRENTPOSITION2;
+      dwBufferBytes := BufferSize;
+      lpwfxFormat   := Format;
+    end;
 
-  ds_Device.CreateSoundBuffer( DSoundBD, Buffer, nil );
+  ds_Device.CreateSoundBuffer( bufferDesc, Buffer, nil );
 end;
 
 procedure dsu_FillData;
   var
-    Block1, Block2 : Pointer;
-    b1Size, b2Size : DWORD;
+    block1, block2 : Pointer;
+    b1Size, b2Size : LongWord;
 begin
-  Buffer.Lock( Pos, DataSize, Block1, b1Size, Block2, b2Size, 0 );
-  Move( Data^, Block1^, b1Size );
-  if b2Size <> 0 Then Move( Pointer( Ptr( Data ) + b1Size )^, Block2^, b2Size );
-  Buffer.Unlock( Block1, b1Size, Block2, b2Size );
+  Buffer.Lock( Pos, DataSize, block1, b1Size, block2, b2Size, 0 );
+  Move( Data^, block1^, b1Size );
+  if b2Size <> 0 Then Move( Pointer( Ptr( Data ) + b1Size )^, block2^, b2Size );
+  Buffer.Unlock( block1, b1Size, block2, b2Size );
 end;
 
 function dsu_CalcPos;
@@ -203,9 +200,7 @@ begin
   if dist = 0 then
     angle := 0
   else
-    angle := ( ds_Plane[ 0 ] * ( X - ds_Position[ 0 ] ) +
-               ds_Plane[ 1 ] * ( Y - ds_Position[ 1 ] ) +
-               ds_Plane[ 2 ] * ( Z - ds_Position[ 2 ] ) ) * dist;
+    angle := ( ds_Plane[ 0 ] * ( X - ds_Position[ 0 ] ) + ds_Plane[ 1 ] * ( Y - ds_Position[ 1 ] ) + ds_Plane[ 2 ] * ( Z - ds_Position[ 2 ] ) ) * dist;
   Result := Trunc( 10000 * angle );
   if Result < -10000 Then Result := -10000;
   if Result > 10000  Then Result := 10000;
@@ -216,10 +211,10 @@ end;
 
 function dsu_CalcVolume;
 begin
-  if volume = 0 Then
+  if Volume = 0 Then
     Result := -10000
   else
-    Result := - Round( 1000 * ln( 1 / volume ) );
+    Result := - Round( 1000 * ln( 1 / Volume ) );
 end;
 
 end.

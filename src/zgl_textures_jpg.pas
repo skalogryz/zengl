@@ -57,8 +57,8 @@ type
   zglTJPGData = record
     Buffer    : JSAMPARRAY;
     Data      : array of Byte;
-    Width     : WORD;
-    Height    : WORD;
+    Width     : Word;
+    Height    : Word;
     sWidth    : JDIMENSION; // Scanline width
     Grayscale : Boolean;
 end;
@@ -155,14 +155,14 @@ type
     Buffer    : IPicture;
     Stream    : IStream;
     Data      : array of Byte;
-    Width     : WORD;
-    Height    : WORD;
+    Width     : Word;
+    Height    : Word;
 end;
 {$ENDIF}
 
-procedure jpg_Load( var pData : Pointer; var W, H : WORD );
-procedure jpg_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
-procedure jpg_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
+procedure jpg_Load( var pData : Pointer; var W, H : Word );
+procedure jpg_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : Word );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
 procedure jpg_FillData;
 
 implementation

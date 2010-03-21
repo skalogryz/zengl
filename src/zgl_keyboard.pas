@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, Xlib, keysym
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -174,14 +174,14 @@ function scancode_to_utf8( const ScanCode : Byte ) : Byte;
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
 function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 function winkey_to_scancode( WinKey : Integer ) : Byte;
 {$ENDIF}
 {$IFDEF DARWIN}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
 {$ENDIF}
-function  SCA( KeyCode : DWORD ) : DWORD;
-procedure DoKeyPress( KeyCode : DWORD );
+function  SCA( KeyCode : LongWord ) : LongWord;
+procedure DoKeyPress( KeyCode : LongWord );
 
 {$IFDEF DARWIN}
 type
@@ -466,7 +466,7 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 function winkey_to_scancode;
 begin
   case WinKey of

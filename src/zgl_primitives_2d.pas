@@ -34,12 +34,12 @@ const
   PR2D_FILL   = $010000;
   PR2D_SMOOTH = $020000;
 
-procedure pr2d_Pixel( const X, Y : Single; const Color : DWORD; const Alpha : Byte = 255 );
-procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const Alpha : Byte = 255; const FX : DWORD = 0 );
-procedure pr2d_Rect( const X, Y, W, H : Single; const Color : DWORD; const Alpha : Byte = 255; const FX : DWORD = 0 );
-procedure pr2d_Circle( const X, Y, Radius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+procedure pr2d_Pixel( const X, Y : Single; const Color : LongWord; const Alpha : Byte = 255 );
+procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : LongWord; const Alpha : Byte = 255; const FX : LongWord = 0 );
+procedure pr2d_Rect( const X, Y, W, H : Single; const Color : LongWord; const Alpha : Byte = 255; const FX : LongWord = 0 );
+procedure pr2d_Circle( const X, Y, Radius : Single; const Color : LongWord; const Alpha : Byte = 255; const Quality : Word = 32; const FX : LongWord = 0 );
+procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : LongWord; const Alpha : Byte = 255; const Quality : Word = 32; const FX : LongWord = 0 );
+procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
 
 implementation
 uses
@@ -360,7 +360,7 @@ procedure pr2d_TriList;
   var
     i    : Integer;
     w, h : Single;
-    Mode : DWORD;
+    Mode : LongWord;
 begin
   if FX and PR2D_FILL > 0 Then
     Mode := GL_TRIANGLES

@@ -30,7 +30,7 @@ uses
 procedure batch2d_Begin;
 procedure batch2d_End;
 procedure batch2d_Flush;
-function  batch2d_Check( const Mode, FX : DWORD; const Texture : zglPTexture ) : Boolean;
+function  batch2d_Check( const Mode, FX : LongWord; const Texture : zglPTexture ) : Boolean;
 
 function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
 function sprite2d_InScreenCamera( const X, Y, W, H, Angle : Single ) : Boolean;
@@ -39,10 +39,10 @@ var
   b2d_Started  : Boolean;
   b2d_New      : Boolean;
   b2d_Batches  : Integer;
-  b2dcur_Mode  : DWORD;
-  b2dcur_FX    : DWORD;
-  b2dcur_Blend : DWORD;
-  b2dcur_Color : DWORD;
+  b2dcur_Mode  : LongWord;
+  b2dcur_FX    : LongWord;
+  b2dcur_Blend : LongWord;
+  b2dcur_Color : LongWord;
   b2dcur_Tex   : zglPTexture;
   b2dcur_Smooth: Integer;
   sprite2d_InScreen : function( const X, Y, W, H, Angle : Single ) : Boolean;

@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, XLib
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -67,7 +67,7 @@ var
   mouseDblCInt  : Integer = 250;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   cursorpos : TPoint;
   getcurpos : Boolean;
   {$ENDIF}
@@ -82,7 +82,7 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := mouseX;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if getcurpos Then
     begin
       getcurpos := FALSE;
@@ -101,7 +101,7 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := mouseY;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if getcurpos Then
     begin
       getcurpos := FALSE;
@@ -117,7 +117,7 @@ end;
 
 function mouse_DX;
 begin
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   getcurpos := TRUE;
   {$ENDIF}
   Result := mouse_X() - wnd_Width div 2;
@@ -125,7 +125,7 @@ end;
 
 function mouse_DY;
 begin
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   getcurpos := TRUE;
   {$ENDIF}
   Result := mouse_Y() - wnd_Height div 2;
@@ -136,7 +136,7 @@ begin
   {$IFDEF LINUX_OR_DARWIN}
   Result := mouseDown[ Button ];
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   case Button of
     M_BLEFT:  Result := GetAsyncKeyState( VK_LBUTTON ) <> 0;
     M_BMIDLE: Result := GetAsyncKeyState( VK_MBUTTON ) <> 0;
@@ -167,7 +167,7 @@ end;
 
 procedure mouse_ClearState;
 begin
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   getcurpos := TRUE;
   {$ENDIF}
   FillChar( mouseUp[ 0 ], 3, 0 );
@@ -186,7 +186,7 @@ begin
 {$IFDEF LINUX}
   XWarpPointer( scr_display, None, wnd_Handle, 0, 0, 0, 0, wnd_Width div 2, wnd_Height div 2 );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if wnd_FullScreen Then
     SetCursorPos( wnd_Width div 2, wnd_Height div 2 )
   else

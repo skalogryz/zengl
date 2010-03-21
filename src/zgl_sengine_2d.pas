@@ -26,7 +26,6 @@ unit zgl_sengine_2d;
 interface
 
 uses
-  zgl_types,
   zgl_textures;
 
 type
@@ -34,7 +33,7 @@ type
   zglPSEngine2D = ^zglTSEngine2D;
 
   zglTSEngine2D = record
-    Count : DWORD;
+    Count : LongWord;
     List  : array of zglPSprite2D;
   end;
 
@@ -49,7 +48,7 @@ type
     Angle   : Single;
     Frame   : Single;
     Alpha   : Integer;
-    FxFlags : DWORD;
+    FxFlags : LongWord;
     Data    : Pointer;
 
     OnInit  : procedure( const Sprite : zglPSprite2D );
@@ -234,56 +233,56 @@ end;
 
 procedure sengine2d_Sort;
   var
-    Lo, Hi, Mid : Integer;
-    T : zglPSprite2D;
+    lo, hi, mid : Integer;
+    t : zglPSprite2D;
 begin
-  Lo   := iLo;
-  Hi   := iHi;
-  Mid  := sengine2d.List[ ( Lo + Hi ) shr 1 ].Layer;
+  lo   := iLo;
+  hi   := iHi;
+  mid  := sengine2d.List[ ( lo + hi ) shr 1 ].Layer;
 
   with sengine2d^ do
   repeat
-    while List[ Lo ].Layer < Mid do INC( Lo );
-    while List[ Hi ].Layer > Mid do DEC( Hi );
-    if Lo <= Hi then
+    while List[ lo ].Layer < mid do INC( lo );
+    while List[ hi ].Layer > mid do DEC( hi );
+    if lo <= hi then
       begin
-        T          := List[ Lo ];
-        List[ Lo ] := List[ Hi ];
-        List[ Hi ] := T;
-        INC( Lo );
-        DEC( Hi );
+        t          := List[ lo ];
+        List[ lo ] := List[ hi ];
+        List[ hi ] := t;
+        INC( lo );
+        DEC( hi );
       end;
-  until Lo > Hi;
+  until lo > hi;
 
-  if Hi > iLo Then sengine2d_Sort( iLo, Hi );
-  if Lo < iHi Then sengine2d_Sort( Lo, iHi );
+  if hi > iLo Then sengine2d_Sort( iLo, hi );
+  if lo < iHi Then sengine2d_Sort( lo, iHi );
 end;
 
 procedure sengine2d_SortID;
   var
-    Lo, Hi, Mid : Integer;
-    T : zglPSprite2D;
+    lo, hi, mid : Integer;
+    t : zglPSprite2D;
 begin
-  Lo   := iLo;
-  Hi   := iHi;
-  Mid  := sengine2d.List[ ( Lo + Hi ) shr 1 ].ID;
+  lo   := iLo;
+  hi   := iHi;
+  mid  := sengine2d.List[ ( lo + hi ) shr 1 ].ID;
 
   with sengine2d^ do
   repeat
-    while List[ Lo ].ID < Mid do INC( Lo );
-    while List[ Hi ].ID > Mid do DEC( Hi );
-    if Lo <= Hi then
+    while List[ lo ].ID < mid do INC( lo );
+    while List[ hi ].ID > mid do DEC( hi );
+    if lo <= hi then
       begin
-        T          := List[ Lo ];
-        List[ Lo ] := List[ Hi ];
-        List[ Hi ] := T;
-        INC( Lo );
-        DEC( Hi );
+        t          := List[ lo ];
+        List[ lo ] := List[ hi ];
+        List[ hi ] := t;
+        INC( lo );
+        DEC( hi );
       end;
-  until Lo > Hi;
+  until lo > hi;
 
-  if Hi > iLo Then sengine2d_SortID( iLo, Hi );
-  if Lo < iHi Then sengine2d_SortID( Lo, iHi );
+  if hi > iLo Then sengine2d_SortID( iLo, hi );
+  if lo < iHi Then sengine2d_SortID( lo, iHi );
 end;
 
 initialization

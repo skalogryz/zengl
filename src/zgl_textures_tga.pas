@@ -50,9 +50,9 @@ type
     end;
 end;
 
-procedure tga_Load( var pData : Pointer; var W, H : WORD );
-procedure tga_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
-procedure tga_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
+procedure tga_Load( var pData : Pointer; var W, H : Word );
+procedure tga_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : Word );
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
 
 procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
 procedure tga_FlipHorizontally( var Data : Pointer; w, h, pixelSize : Integer );
@@ -73,7 +73,7 @@ var
 procedure tga_Load;
   label _exit;
   var
-    i         : DWORD;
+    i         : LongWord;
     n, base   : Integer;
     pixelSize : Integer;
     entry     : Byte;

@@ -31,17 +31,17 @@ type
   zglPMemory = ^zglTMemory;
   zglTMemory = record
     Memory   : Pointer;
-    Size     : DWORD;
-    Position : DWORD;
+    Size     : LongWord;
+    Position : LongWord;
 end;
 
 procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
 procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
-function  mem_Seek( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
-function  mem_Read( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
-function  mem_ReadSwap( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
-function  mem_Write( var Memory : zglTMemory; const buffer; const count : DWORD ) : DWORD;
-procedure mem_SetSize( var Memory : zglTMemory; const Size : DWORD );
+function  mem_Seek( var Memory : zglTMemory; const Offset, Mode : LongWord ) : LongWord;
+function  mem_Read( var Memory : zglTMemory; var buffer; const count : LongWord ) : LongWord;
+function  mem_ReadSwap( var Memory : zglTMemory; var buffer; const count : LongWord ) : LongWord;
+function  mem_Write( var Memory : zglTMemory; const buffer; const count : LongWord ) : LongWord;
+procedure mem_SetSize( var Memory : zglTMemory; const Size : LongWord );
 procedure mem_Free( var Memory : zglTMemory );
 
 {$IFDEF ENDIAN_BIG}
@@ -112,7 +112,7 @@ end;
 
 function mem_ReadSwap;
   var
-    i       : DWORD;
+    i       : LongWord;
     pBuffer : array of Byte;
 begin
   {$IFDEF ENDIAN_BIG}

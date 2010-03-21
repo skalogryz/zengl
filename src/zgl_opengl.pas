@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, XUtil,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -51,9 +51,9 @@ var
   ogl_zNear      : Single = 0.1;
   ogl_zFar       : Single = 100;
   ogl_MTexActive : array[ 0..8 ] of Boolean;
-  ogl_MTexture   : array[ 0..8 ] of DWORD;
+  ogl_MTexture   : array[ 0..8 ] of LongWord;
 
-  ogl_Mode : WORD = 3; // 2D/3D Modes
+  ogl_Mode : Word = 3; // 2D/3D Modes
 
   ogl_Width  : Integer;
   ogl_Height : Integer;
@@ -87,18 +87,18 @@ var
   ogl_VisualInfo  : PXVisualInfo;
   ogl_Attr        : array[ 0..31 ] of Integer;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   ogl_Context : HGLRC;
   ogl_fAttr   : array[ 0..1  ] of Single = ( 0, 0 );
   ogl_iAttr   : array[ 0..31 ] of Integer;
   ogl_Format  : Integer;
-  ogl_Formats : DWORD;
+  ogl_Formats : LongWord;
   {$ENDIF}
   {$IFDEF DARWIN}
   ogl_Device   : GDHandle;
   ogl_Context  : TAGLContext;
   ogl_Format   : TAGLPixelFormat;
-  ogl_Attr     : array[ 0..31 ] of DWORD;
+  ogl_Attr     : array[ 0..31 ] of LongWord;
   {$ENDIF}
 
 implementation
@@ -110,13 +110,11 @@ uses
   zgl_utils;
 
 function gl_Create;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
+    i               : Integer;
     PixelFormat     : Integer;
     PixelFormatDesc : TPixelFormatDescriptor;
-
-    ga, gf : LongWord;
-    i      : LongWord;
   {$ENDIF}
   {$IFDEF DARWIN}
   var
@@ -149,7 +147,7 @@ begin
       exit;
     end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if ogl_Context <> 0 Then
     wglDeleteContext( ogl_Context );
 
@@ -192,13 +190,6 @@ begin
       exit;
     end;
   if not wnd_First Then log_Add( 'Make Current OpenGL Context' );
-
-  gf := PixelFormatDesc.dwFlags and PFD_GENERIC_FORMAT;
-  ga := PixelFormatDesc.dwFlags and PFD_GENERIC_ACCELERATED;
-
-  ogl_3DAccelerator := gf and ( not ga ) = 0;
-  if not ogl_3DAccelerator Then
-    u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
 
   if ogl_Format = 0 Then
   {$IFDEF USE_WINEHACK}
@@ -418,7 +409,7 @@ begin
   glXDestroyContext( scr_Display, ogl_Context );
   glXWaitGL;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if not wglMakeCurrent( wnd_DC, 0 ) Then
     u_Error( 'Cannot release current OpenGL context' );
 
@@ -562,7 +553,7 @@ begin
       end;
   end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   wglCreatePbufferARB := gl_GetProc( 'wglCreatePbuffer' );
   if Assigned( wglCreatePbufferARB ) and Assigned( wglChoosePixelFormatARB ) Then
     begin
@@ -597,7 +588,7 @@ begin
       ogl_CanVSync2 := ogl_CanVSync;
     end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   wglGetSwapIntervalEXT := gl_GetProc( 'wglGetSwapInterval' );
   if Assigned( wglGetSwapIntervalEXT ) Then
     begin

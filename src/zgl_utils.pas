@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX_OR_DARWIN}
   Unix,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -65,7 +65,7 @@ procedure u_Warning( const errStr : String );
 
 function u_GetPOT( const v : Integer ) : Integer;
 
-procedure u_Sleep( const msec : DWORD );
+procedure u_Sleep( const msec : LongWord );
 
 {$IFDEF LINUX_OR_DARWIN}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -76,7 +76,7 @@ function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeou
 function getenv(_para1:Pchar):Pchar;cdecl;external 'libc' name 'getenv';
 {$ENDIF}
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
@@ -263,7 +263,7 @@ begin
 {$IFDEF LINUX}
   WriteLn( 'ERROR: ' + errStr );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   MessageBox( 0, PChar( errStr ), 'ERROR!', MB_OK or MB_ICONERROR );
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -282,7 +282,7 @@ begin
 {$IFDEF LINUX}
   WriteLn( 'WARNING: ' + errStr );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   MessageBox( 0, PChar( errStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -314,7 +314,7 @@ begin
   tv.tv_usec := ( msec mod 1000 ) * 1000;
   select( 0, nil, nil, nil, tv );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   Sleep( msec );
 {$ENDIF}
 end;

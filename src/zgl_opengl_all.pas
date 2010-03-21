@@ -34,7 +34,7 @@ uses
   {$IFDEF LINUX}
   X, XLib, XUtil
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -62,7 +62,7 @@ const
   libGL  = 'libGL.so.1';
   libGLU = 'libGLU.so.1';
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   libGL  = 'opengl32.dll';
   libGLU = 'glu32.dll';
   {$ENDIF}
@@ -477,7 +477,7 @@ var
   glXCreateGLXPbufferSGIX: function(dpy: PDisplay; config: Integer; width, height: LongWord; attribList: PInteger): GLXPBuffer; cdecl;
   glXDestroyGLXPbufferSGIX: procedure(dpy: PDisplay; pbuf: GLXPBuffer); cdecl;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 const
   // Pixel Format
   WGL_DRAW_TO_WINDOW_ARB    = $2001;
@@ -567,7 +567,7 @@ var
 {$ENDIF}
 
 var
-  ogl_Library : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  ogl_Library : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
   {$IFDEF DARWIN}
   agl_Library : Pointer;
   {$ENDIF}
@@ -655,7 +655,7 @@ end;
 
 function gl_GetProc;
 begin
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Result := wglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := wglGetProcAddress( PAnsiChar( Proc + 'ARB' ) );

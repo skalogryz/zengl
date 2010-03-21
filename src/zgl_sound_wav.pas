@@ -50,15 +50,15 @@ type
     FormatHeaderSize : Integer;
     FormatCode       : Word;
     ChannelNumber    : Word;
-    SampleRate       : DWORD;
-    BytesPerSecond   : DWORD;
+    SampleRate       : LongWord;
+    BytesPerSecond   : LongWord;
     BytesPerSample   : Word;
     BitsPerSample    : Word;
  end;
 
-procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
-procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
-procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 
 implementation
 uses
@@ -96,7 +96,7 @@ begin
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
     end;
-  format := Ptr( @WavHeader.FormatCode );
+  Format := Ptr( @WavHeader.FormatCode );
 {$ENDIF}
 
   mem_Seek( wavMemory, ( 8 - 44 ) + 12 + 4 + wavHeader.FormatHeaderSize + 4, FSM_CUR );
@@ -112,7 +112,7 @@ begin
 
         if wavHeader.FormatCode = WAV_IMA_ADPCM Then log_Add( 'Unsupported wav format - IMA ADPCM' );
         if wavHeader.FormatCode = WAV_MP3 Then       log_Add( 'Unsupported wav format - MP3' );
-        wavHeader.FormatCode := 1; // на всякий случай, а то расплодилось убогих wav-редакторов...
+        wavHeader.FormatCode := WAV_STANDARD; // на всякий случай, а то расплодилось убогих wav-редакторов...
       end else
         begin
           mem_Read( wavMemory, skip, 4 );
@@ -131,7 +131,7 @@ end;
 
 procedure wav_LoadFromMemory;
 begin
-  wavMemory.Size     := Memory.Size;
+  wavMemory.Size := Memory.Size;
   zgl_GetMem( wavMemory.Memory, Memory.Size );
   wavMemory.Position := Memory.Position;
   Move( Memory.Memory^, wavMemory.Memory^, Memory.Size );

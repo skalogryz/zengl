@@ -57,12 +57,12 @@ const
 type
   zglPTexture = ^zglTTexture;
   zglTTexture = record
-    ID            : DWORD;
-    Width, Height : WORD;
+    ID            : LongWord;
+    Width, Height : Word;
     U, V          : Single;
-    FramesX       : WORD;
-    FramesY       : WORD;
-    Flags         : DWORD;
+    FramesX       : Word;
+    FramesY       : Word;
+    Flags         : LongWord;
 
     Prev, Next    : zglPTexture;
 end;
@@ -71,16 +71,16 @@ type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
     Extension  : String;
-    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : WORD );
-    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
+    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : Word );
+    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
 end;
 
 type
   zglPTextureManager = ^zglTTextureManager;
   zglTTextureManager = record
     Count   : record
-                Items   : DWORD;
-                Formats : DWORD;
+                Items   : LongWord;
+                Formats : LongWord;
               end;
     First   : zglTTexture;
     Formats : array of zglTTextureFormat;
@@ -90,20 +90,20 @@ function  tex_Add : zglPTexture;
 procedure tex_Del( var Texture : zglPTexture );
 
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
-function  tex_CreateZero( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
-function  tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
-function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
-procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
+function  tex_CreateZero( const Width, Height : Word; const Color, Flags : LongWord ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
+function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
+procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 function  tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
 
-procedure tex_Filter( Texture : zglPTexture; const Flags : DWORD );
+procedure tex_Filter( Texture : zglPTexture; const Flags : LongWord );
 procedure tex_SetAnisotropy( const Level : Byte );
 
-procedure tex_CalcPOT( var pData : Pointer; var Width, Height : WORD; var U, V : Single );
-procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : WORD );
-procedure tex_CalcInvert( var pData : Pointer; const Width, Height : WORD );
-procedure tex_CalcRGB( var pData : Pointer; const Width, Height : WORD );
-procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : DWORD; const Width, Height : WORD );
+procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single );
+procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : Word );
+procedure tex_CalcInvert( var pData : Pointer; const Width, Height : Word );
+procedure tex_CalcRGB( var pData : Pointer; const Width, Height : Word );
+procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : LongWord; const Width, Height : Word );
 
 procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
 
@@ -151,7 +151,7 @@ end;
 
 procedure tex_Create;
   var
-    format, iformat, cformat : DWORD;
+    format, iformat, cformat : LongWord;
 begin
   if Texture.Flags and TEX_GRAYSCALE > 0 Then
     tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
@@ -217,7 +217,7 @@ end;
 
 function tex_CreateZero;
   var
-    i       : DWORD;
+    i       : LongWord;
     pData   : Pointer;
 begin
   GetMem( pData, Width * Height * 4 );
@@ -241,7 +241,7 @@ function tex_LoadFromFile;
   var
     i      : Integer;
     pData  : Pointer;
-    w, h   : WORD;
+    w, h   : Word;
     ext    : String;
 begin
   Result := nil;
@@ -293,7 +293,7 @@ function tex_LoadFromMemory;
   var
     i      : Integer;
     pData  : Pointer;
-    w, h   : WORD;
+    w, h   : Word;
 begin
   Result := nil;
   pData  := nil;
@@ -462,8 +462,8 @@ end;
 
 procedure tex_CalcPOT;
   var
-    i, j : DWORD;
-    w, h : WORD;
+    i, j : LongWord;
+    w, h : Word;
     Data : array of Byte;
 begin
   w := u_GetPOT( Width );
@@ -483,13 +483,13 @@ begin
   GetMem( pData, w * h * 4 );
 
   for i := 0 to Height - 1 do
-    Move( Data[ i * Width * 4 ], PDWORD( Ptr( pData ) + i * w * 4 )^, Width * 4 );
+    Move( Data[ i * Width * 4 ], PLongWord( Ptr( pData ) + i * w * 4 )^, Width * 4 );
 
   for i := Height to h - 1 do
     Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * 4 )^, PByte( Ptr( pData ) + i * w * 4 )^, Width * 4 );
   for i := 0 to h - 1 do
     for j := Width to w - 1 do
-      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
+      PLongWord( Ptr( pData ) + j * 4 + i * w * 4 )^ := PLongWord( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
 
   Width  := w;
   Height := h;
@@ -531,7 +531,7 @@ end;
 
 procedure tex_CalcRGB;
   var
-    i : DWORD;
+    i : LongWord;
 begin
   for i := 0 to Width * Height - 1 do
     begin
