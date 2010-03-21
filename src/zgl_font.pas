@@ -34,7 +34,7 @@ uses
 const
   ZGL_FONT_INFO = 'ZGL_FONT_INFO';
 
-  CP1251_TO_UTF8 : array[ 0..255 ] of WORD =
+  CP1251_TO_UTF8 : array[ 0..255 ] of Word =
   ( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,
     33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,
     63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,
@@ -51,7 +51,7 @@ const
 type
   zglPCharDesc = ^zglTCharDesc;
   zglTCharDesc = record
-    Page      : WORD;
+    Page      : Word;
     Width     : Byte;
     Height    : Byte;
     ShiftX    : Integer;
@@ -64,8 +64,8 @@ type
   zglPFont = ^zglTFont;
   zglTFont = record
     Count      : record
-      Pages : WORD;
-      Chars : WORD;
+      Pages : Word;
+      Chars : Word;
                  end;
 
     Pages      : array of zglPTexture;
@@ -74,13 +74,13 @@ type
     MaxShiftY  : Integer;
     Padding    : array[ 0..3 ] of Byte;
 
-    Prev, Next : zglPFont;
+    prev, next : zglPFont;
 end;
 
 type
   zglPFontManager = ^zglTFontManager;
   zglTFontManager = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTFont;
 end;
 
@@ -91,13 +91,13 @@ function font_Load : zglPFont;
 function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
-function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
-function font_GetUTF16ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
-function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+function font_GetUTF16ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
 
 var
   managerFont : zglTFontManager;
-  font_GetCID : function( const Text : String; const Pos : Integer; const Shift : PInteger ) : DWORD;
+  font_GetCID : function( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
 
 implementation
 uses
@@ -112,13 +112,13 @@ var
 function font_Add;
 begin
   Result := @managerFont.First;
-  while Assigned( Result.Next ) do
-    Result := Result.Next;
+  while Assigned( Result.next ) do
+    Result := Result.next;
 
-  zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTFont ) );
-  Result.Next.Prev     := Result;
-  Result.Next.Next     := nil;
-  Result := Result.Next;
+  zgl_GetMem( Pointer( Result.next ), SizeOf( zglTFont ) );
+  Result.next.prev := Result;
+  Result.next.next := nil;
+  Result           := Result.next;
   INC( managerFont.Count );
 end;
 
@@ -131,22 +131,22 @@ begin
   for i := 0 to 65535 do
     if Assigned( Font.CharDesc[ i ] ) Then
       FreeMemory( Font.CharDesc[ i ] );
-  if Assigned( Font.Prev ) Then
-    Font.Prev.Next := Font.Next;
-  if Assigned( Font.Next ) Then
-    Font.Next.Prev := Font.Prev;
+  if Assigned( Font.prev ) Then
+    Font.prev.next := Font.next;
+  if Assigned( Font.next ) Then
+    Font.next.prev := Font.prev;
   FreeMemory( Font );
-  DEC( managerFont.Count );
-
   Font := nil;
+
+  DEC( managerFont.Count );
 end;
 
 function font_Load;
   var
     i : Integer;
-    c : DWORD;
+    c : LongWord;
 begin
-  Result := font_Add;
+  Result := font_Add();
   mem_Read( fntMem, Result.Count.Pages,  2 );
   mem_Read( fntMem, Result.Count.Chars,  2 );
   mem_Read( fntMem, Result.MaxHeight,    4 );
@@ -195,7 +195,7 @@ begin
   Result := nil;
   if not file_Exists( FileName ) Then
     begin
-      log_Add( 'Cannot read ' + FileName );
+      log_Add( 'Cannot read "' + FileName + '"' );
       exit;
     end;
 
@@ -206,7 +206,7 @@ begin
       log_Add( FileName + ' - it''s not a ZenGL font info file' );
       exit;
     end else
-      Result := font_Load;
+      Result := font_Load();
 
   file_GetDirectory( FileName, dir );
   file_GetName( FileName, name );
@@ -225,7 +225,7 @@ end;
 function font_LoadFromMemory;
 begin
   Result := nil;
-  fntMem.Size     := Memory.Size;
+  fntMem.Size := Memory.Size;
   zgl_GetMem( fntMem.Memory, Memory.Size );
   fntMem.Position := Memory.Position;
   Move( Memory.Memory^, fntMem.Memory^, Memory.Size );
@@ -236,7 +236,7 @@ begin
       log_Add( 'Unable to determinate ZenGL font info: From Memory' );
       exit;
     end else
-      Result := font_Load;
+      Result := font_Load();
 end;
 
 function font_GetUTF8ID;
@@ -251,26 +251,21 @@ begin
 
     192..223:
       begin
-        Result := ( Byte( Text[ Pos ] ) - 192 ) * 64 +
-                  ( Byte( Text[ Pos + 1 ] ) - 128 );
+        Result := ( Byte( Text[ Pos ] ) - 192 ) * 64 + ( Byte( Text[ Pos + 1 ] ) - 128 );
         if Assigned( Shift ) Then
           Shift^ := Pos + 2;
       end;
 
     224..239:
       begin
-        Result := ( Byte( Text[ Pos ] ) - 224 ) * 4096 +
-                  ( Byte( Text[ Pos + 1 ] ) - 128 ) * 64 +
-                  ( Byte( Text[ Pos + 2 ] ) - 128 );
+        Result := ( Byte( Text[ Pos ] ) - 224 ) * 4096 + ( Byte( Text[ Pos + 1 ] ) - 128 ) * 64 + ( Byte( Text[ Pos + 2 ] ) - 128 );
         if Assigned( Shift ) Then
           Shift^ := Pos + 3;
       end;
 
     240..247:
       begin
-        Result := ( Byte( Text[ Pos ] ) - 240 ) * 262144 +
-                  ( Byte( Text[ Pos + 1 ] ) - 128 ) * 4096 +
-                  ( Byte( Text[ Pos + 2 ] ) - 128 ) * 64 +
+        Result := ( Byte( Text[ Pos ] ) - 240 ) * 262144 + ( Byte( Text[ Pos + 1 ] ) - 128 ) * 4096 + ( Byte( Text[ Pos + 2 ] ) - 128 ) * 64 +
                   ( Byte( Text[ Pos + 3 ] ) - 128 );
         if Assigned( Shift ) Then
           Shift^ := Pos + 4;
@@ -278,23 +273,16 @@ begin
 
     248..251:
       begin
-        Result := ( Byte( Text[ Pos ] ) - 248 ) * 16777216 +
-                  ( Byte( Text[ Pos + 1 ] ) - 128 ) * 262144 +
-                  ( Byte( Text[ Pos + 2 ] ) - 128 ) * 4096 +
-                  ( Byte( Text[ Pos + 3 ] ) - 128) * 64 +
-                  ( Byte( Text[ Pos + 4 ] ) - 128 );
+        Result := ( Byte( Text[ Pos ] ) - 248 ) * 16777216 + ( Byte( Text[ Pos + 1 ] ) - 128 ) * 262144 + ( Byte( Text[ Pos + 2 ] ) - 128 ) * 4096 +
+                  ( Byte( Text[ Pos + 3 ] ) - 128) * 64 + ( Byte( Text[ Pos + 4 ] ) - 128 );
         if Assigned( Shift ) Then
           Shift^ := Pos + 5;
       end;
 
     252..253:
       begin
-        Result := ( Byte( Text[ Pos ] ) - 252 ) * 1073741824 +
-                  ( Byte( Text[ Pos + 1 ] ) - 128 ) * 16777216 +
-                  ( Byte( Text[ Pos + 2 ] ) - 128 ) * 262144 +
-                  ( Byte( Text[ Pos + 3 ] ) - 128 ) * 4096 +
-                  ( Byte( Text[ Pos + 4 ] ) - 128 ) * 64 +
-                  ( Byte( Text[ Pos + 5 ] ) - 128 );
+        Result := ( Byte( Text[ Pos ] ) - 252 ) * 1073741824 + ( Byte( Text[ Pos + 1 ] ) - 128 ) * 16777216 + ( Byte( Text[ Pos + 2 ] ) - 128 ) * 262144 +
+                  ( Byte( Text[ Pos + 3 ] ) - 128 ) * 4096 + ( Byte( Text[ Pos + 4 ] ) - 128 ) * 64 + ( Byte( Text[ Pos + 5 ] ) - 128 );
         if Assigned( Shift ) Then
           Shift^ := Pos + 6;
       end;

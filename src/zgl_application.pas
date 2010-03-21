@@ -28,7 +28,7 @@ uses
   {$IFDEF LINUX}
   X, XLib,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   Messages,
   {$ENDIF}
@@ -45,9 +45,9 @@ procedure app_Init;
 procedure app_MainLoop;
 procedure app_ProcessOS;
 {$IFDEF LINUX}
-function app_ProcessMessages : DWORD;
+function app_ProcessMessages : LongWord;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -59,7 +59,7 @@ var
   app_Initialized  : Boolean;
   app_GetSysDirs   : Boolean;
   app_Work         : Boolean;
-  app_WorkTime     : DWORD;
+  app_WorkTime     : LongWord;
   app_Pause        : Boolean;
   app_AutoPause    : Boolean = TRUE;
   app_Focus        : Boolean = TRUE;
@@ -86,11 +86,11 @@ var
 
   app_dt : Double;
 
-  app_FPS      : DWORD;
-  app_FPSCount : DWORD;
-  app_FPSAll   : DWORD;
+  app_FPS      : LongWord;
+  app_FPSCount : LongWord;
+  app_FPSAll   : LongWord;
 
-  app_Flags : DWORD;
+  app_Flags : LongWord;
 
 implementation
 uses
@@ -132,24 +132,24 @@ begin
 end;
 
 procedure app_Init;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
-    SysInfo : _SYSTEM_INFO;
+    sysInfo : _SYSTEM_INFO;
   {$ENDIF}
 begin
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   // Багнутое MS-поделко требует патча :)
   // Вешаем все на одно ядро
-  GetSystemInfo( SysInfo );
-  SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
+  GetSystemInfo( sysInfo );
+  SetProcessAffinityMask( GetCurrentProcess(), sysInfo.dwActiveProcessorMask );
   {$ENDIF}
 
-  scr_Clear;
-  app_PLoad;
-  scr_Flush;
+  scr_Clear();
+  app_PLoad();
+  scr_Flush();
 
-  app_dt := timer_GetTicks;
-  timer_Reset;
+  app_dt := timer_GetTicks();
+  timer_Reset();
   timer_Add( @app_CalcFPS, 1000 );
 end;
 
@@ -159,9 +159,9 @@ procedure app_MainLoop;
 begin
   while app_Work do
     begin
-      app_ProcessOS;
+      app_ProcessOS();
       {$IFDEF USE_SOUND}
-      snd_MainLoop;
+      snd_MainLoop();
       {$ENDIF}
 
       {$IFDEF LINUX}
@@ -175,55 +175,53 @@ begin
 
       if app_Pause Then
         begin
-          timer_Reset;
-          app_dt := timer_GetTicks;
+          timer_Reset();
+          app_dt := timer_GetTicks();
           u_Sleep( 10 );
           continue;
         end else
-          timer_MainLoop;
+          timer_MainLoop();
 
-      t := timer_GetTicks;
-      app_PUpdate( timer_GetTicks - app_dt );
+      t := timer_GetTicks();
+      app_PUpdate( timer_GetTicks() - app_dt );
       app_dt := t;
 
-      app_Draw;
+      app_Draw();
     end;
 end;
 
 procedure app_ProcessOS;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
-    Mess : tagMsg;
+    m : tagMsg;
   {$ENDIF}
   {$IFDEF DARWIN}
   var
-    Event    : EventRecord;
-    Window   : WindowRef;
-    PartCode : WindowPartCode;
+    event : EventRecord;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  app_ProcessMessages;
+  app_ProcessMessages();
   keysRepeat := 0;
 {$ENDIF}
-{$IFDEF WIN32}
-  while PeekMessage( Mess, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
+{$IFDEF WINDOWS}
+  while PeekMessage( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
-      TranslateMessage( Mess );
-      DispatchMessage( Mess );
+      TranslateMessage( m );
+      DispatchMessage( m );
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  while GetNextEvent( everyEvent, Event ) do;
+  while GetNextEvent( everyEvent, event ) do;
 {$ENDIF}
 end;
 
 function app_ProcessMessages;
   var
   {$IFDEF LINUX}
-    Event  : TXEvent;
-    Keysym : TKeySym;
-    Status : TStatus;
+    event  : TXEvent;
+    keysym : TKeySym;
+    status : TStatus;
   {$ENDIF}
   {$IFDEF DARWIN}
     eClass  : UInt32;
@@ -234,7 +232,7 @@ function app_ProcessMessages;
     mWheel  : Integer;
     bounds  : HIRect;
     where   : Point;
-    SCAKey  : DWORD;
+    SCAKey  : LongWord;
   {$ENDIF}
   {$IFDEF LINUX_OR_DARWIN}
     i   : Integer;
@@ -242,32 +240,30 @@ function app_ProcessMessages;
     c   : array[ 0..5 ] of AnsiChar;
     str : AnsiString;
   {$ENDIF}
-    Key : DWORD;
+    key : LongWord;
 begin
 {$IFDEF LINUX}
   Result := 0;
   while XPending( scr_Display ) <> 0 do
     begin
-      XNextEvent( scr_Display, @Event );
+      XNextEvent( scr_Display, @event );
 
-      case Event._type of
+      case event._type of
         ClientMessage:
-          if ( Event.xclient.message_type = wnd_Protocols ) and ( Event.xclient.data.l[ 0 ] = wnd_DestroyAtom ) Then app_Work := FALSE;
+          if ( event.xclient.message_type = wnd_Protocols ) and ( event.xclient.data.l[ 0 ] = wnd_DestroyAtom ) Then app_Work := FALSE;
 
         Expose:
           if app_Work Then
-            begin
-              app_Draw;
-            end;
+            app_Draw();
         FocusIn:
           begin
             app_Focus := TRUE;
             app_Pause := FALSE;
             app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
-            key_ClearState;
+            key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
-            mouse_ClearState;
+            mouse_ClearState();
           end;
         FocusOut:
           begin
@@ -280,17 +276,17 @@ begin
           begin
             if not mouseLock Then
               begin
-                mouseX := Event.xmotion.X;
-                mouseY := Event.xmotion.Y;
+                mouseX := event.xmotion.X;
+                mouseY := event.xmotion.Y;
               end else
                 begin
-                  mouseX := Event.xmotion.X - wnd_Width  div 2;
-                  mouseY := Event.xmotion.Y - wnd_Height div 2;
+                  mouseX := event.xmotion.X - wnd_Width  div 2;
+                  mouseY := event.xmotion.Y - wnd_Height div 2;
                 end;
           end;
         ButtonPress:
           begin
-            case Event.xbutton.button of
+            case event.xbutton.button of
               1: // Left
                 begin
                   mouseDown[ M_BLEFT ] := TRUE;
@@ -310,9 +306,9 @@ begin
                     begin
                       mouseClick[ M_BMIDLE ] := TRUE;
                       mouseCanClick[ M_BMIDLE ] := FALSE;
-                      if timer_GetTicks - mouseDblCTime[ M_BMIDLE ] < mouseDblCInt Then
+                      if timer_GetTicks() - mouseDblCTime[ M_BMIDLE ] < mouseDblCInt Then
                         mouseDblClick[ M_BMIDLE ] := TRUE;
-                      mouseDblCTime[ M_BMIDLE ] := timer_GetTicks;
+                      mouseDblCTime[ M_BMIDLE ] := timer_GetTicks();
                     end;
                 end;
               3: // Right
@@ -322,32 +318,32 @@ begin
                     begin
                       mouseClick[ M_BRIGHT ] := TRUE;
                       mouseCanClick[ M_BRIGHT ] := FALSE;
-                      if timer_GetTicks - mouseDblCTime[ M_BRIGHT ] < mouseDblCInt Then
+                      if timer_GetTicks() - mouseDblCTime[ M_BRIGHT ] < mouseDblCInt Then
                         mouseDblClick[ M_BRIGHT ] := TRUE;
-                      mouseDblCTime[ M_BRIGHT ] := timer_GetTicks;
+                      mouseDblCTime[ M_BRIGHT ] := timer_GetTicks();
                     end;
                 end;
             end;
           end;
         ButtonRelease:
           begin
-            case Event.xbutton.button of
+            case event.xbutton.button of
               1: // Left
                 begin
-                  mouseDown[ M_BLEFT ]  := FALSE;
-                  mouseUp  [ M_BLEFT ]  := TRUE;
+                  mouseDown[ M_BLEFT ]     := FALSE;
+                  mouseUp  [ M_BLEFT ]     := TRUE;
                   mouseCanClick[ M_BLEFT ] := TRUE;
                 end;
               2: // Midle
                 begin
-                  mouseDown[ M_BMIDLE ] := FALSE;
-                  mouseUp  [ M_BMIDLE ] := TRUE;
+                  mouseDown[ M_BMIDLE ]     := FALSE;
+                  mouseUp  [ M_BMIDLE ]     := TRUE;
                   mouseCanClick[ M_BMIDLE ] := TRUE;
                 end;
               3: // Right
                 begin
-                  mouseDown[ M_BRIGHT ] := FALSE;
-                  mouseUp  [ M_BRIGHT ] := TRUE;
+                  mouseDown[ M_BRIGHT ]     := FALSE;
+                  mouseUp  [ M_BRIGHT ]     := TRUE;
                   mouseCanClick[ M_BRIGHT ] := TRUE;
                 end;
               4: // Up Wheel
@@ -364,18 +360,18 @@ begin
         KeyPress:
           begin
             INC( keysRepeat );
-            Key := xkey_to_scancode( XLookupKeysym( @Event.xkey, 0 ), Event.xkey.keycode );
-            keysDown[ Key ] := TRUE;
-            keysUp  [ Key ] := FALSE;
-            keysLast[ KA_DOWN ] := Key;
-            DoKeyPress( Key );
+            key := xkey_to_scancode( XLookupKeysym( @event.xkey, 0 ), event.xkey.keycode );
+            keysDown[ key ]     := TRUE;
+            keysUp  [ key ]     := FALSE;
+            keysLast[ KA_DOWN ] := key;
+            doKeyPress( key );
 
-            Key := SCA( Key );
-            keysDown[ Key ] := TRUE;
-            keysUp  [ Key ] := FALSE;
-            DoKeyPress( Key );
+            key := SCA( key );
+            keysDown[ key ] := TRUE;
+            keysUp  [ key ] := FALSE;
+            doKeyPress( key );
 
-            case Key of
+            case key of
               K_SYSRQ, K_PAUSE,
               K_ESCAPE, K_ENTER, K_KP_ENTER,
               K_UP, K_DOWN, K_LEFT, K_RIGHT,
@@ -390,7 +386,7 @@ begin
               K_BACKSPACE: u_Backspace( keysText );
               K_TAB:       key_InputText( '  ' );
             else
-              len := Xutf8LookupString( app_XIC, @Event, @c[ 0 ], 6, @Keysym, @Status );
+              len := Xutf8LookupString( app_XIC, @event, @c[ 0 ], 6, @keysym, @status );
               str := '';
               for i := 0 to len - 1 do
                 str := str + c[ i ];
@@ -401,19 +397,19 @@ begin
         KeyRelease:
           begin
             INC( keysRepeat );
-            Key := xkey_to_scancode( XLookupKeysym( @Event.xkey, 0 ), Event.xkey.keycode );
-            keysDown[ Key ]  := FALSE;
-            keysUp  [ Key ]  := TRUE;
-            keysLast[ KA_UP ] := Key;
+            key := xkey_to_scancode( XLookupKeysym( @event.xkey, 0 ), event.xkey.keycode );
+            keysDown[ key ]   := FALSE;
+            keysUp  [ key ]   := TRUE;
+            keysLast[ KA_UP ] := key;
 
-            Key := SCA( Key );
-            keysDown[ Key ] := FALSE;
-            keysUp  [ Key ] := TRUE;
+            key := SCA( key );
+            keysDown[ key ] := FALSE;
+            keysUp  [ key ] := TRUE;
           end;
       end
     end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   Result := 0;
   if ( not app_Work ) and ( Msg <> WM_ACTIVATE ) Then
     begin
@@ -426,7 +422,7 @@ begin
 
     WM_PAINT:
       begin
-        app_Draw;
+        app_Draw();
         ValidateRect( wnd_Handle, nil );
       end;
     WM_DISPLAYCHANGE:
@@ -438,11 +434,11 @@ begin
           end;
         if not wnd_FullScreen Then
           begin
-            scr_Init;
+            scr_Init();
             scr_Width  := scr_Desktop.dmPelsWidth;
             scr_Height := scr_Desktop.dmPelsHeight;
             scr_BPP    := scr_Desktop.dmBitsPerPel;
-            wnd_Update;
+            wnd_Update();
           end else
             begin
               scr_Width  := wnd_Width;
@@ -457,9 +453,9 @@ begin
             app_Pause := FALSE;
             app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
-            key_ClearState;
+            key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
-            mouse_ClearState;
+            mouse_ClearState();
             if ( wnd_FullScreen ) and ( not wnd_First ) Then
               scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
           end else
@@ -468,8 +464,8 @@ begin
               app_PActivate( FALSE );
               if app_Work and ( wnd_FullScreen ) and ( not wnd_First ) Then
                 begin
-                  scr_Reset;
-                  wnd_Update;
+                  scr_Reset();
+                  wnd_Update();
                 end;
             end;
        end;
@@ -494,10 +490,10 @@ begin
 
     WM_LBUTTONDOWN, WM_LBUTTONDBLCLK:
       begin
-        mouseDown[ M_BLEFT ]  := TRUE;
+        mouseDown[ M_BLEFT ] := TRUE;
         if mouseCanClick[ M_BLEFT ] Then
           begin
-            mouseClick[ M_BLEFT ] := TRUE;
+            mouseClick[ M_BLEFT ]    := TRUE;
             mouseCanClick[ M_BLEFT ] := FALSE;
           end;
         if Msg = WM_LBUTTONDBLCLK Then
@@ -508,7 +504,7 @@ begin
         mouseDown[ M_BMIDLE ] := TRUE;
         if mouseCanClick[ M_BMIDLE ] Then
           begin
-            mouseClick[ M_BMIDLE ] := TRUE;
+            mouseClick[ M_BMIDLE ]    := TRUE;
             mouseCanClick[ M_BMIDLE ] := FALSE;
           end;
         if Msg = WM_MBUTTONDBLCLK Then
@@ -519,7 +515,7 @@ begin
         mouseDown[ M_BRIGHT ] := TRUE;
         if mouseCanClick[ M_BRIGHT ] Then
           begin
-            mouseClick[ M_BRIGHT ] := TRUE;
+            mouseClick[ M_BRIGHT ]    := TRUE;
             mouseCanClick[ M_BRIGHT ] := FALSE;
           end;
         if Msg = WM_RBUTTONDBLCLK Then
@@ -527,20 +523,20 @@ begin
       end;
     WM_LBUTTONUP:
       begin
-        mouseDown[ M_BLEFT ]  := FALSE;
-        mouseUp  [ M_BLEFT ]  := TRUE;
+        mouseDown[ M_BLEFT ]     := FALSE;
+        mouseUp  [ M_BLEFT ]     := TRUE;
         mouseCanClick[ M_BLEFT ] := TRUE;
       end;
     WM_MBUTTONUP:
       begin
-        mouseDown[ M_BMIDLE ] := FALSE;
-        mouseUp  [ M_BMIDLE ] := TRUE;
+        mouseDown[ M_BMIDLE ]     := FALSE;
+        mouseUp  [ M_BMIDLE ]     := TRUE;
         mouseCanClick[ M_BMIDLE ] := TRUE;
       end;
     WM_RBUTTONUP:
       begin
-        mouseDown[ M_BRIGHT ] := FALSE;
-        mouseUp  [ M_BRIGHT ] := TRUE;
+        mouseDown[ M_BRIGHT ]     := FALSE;
+        mouseUp  [ M_BRIGHT ]     := TRUE;
         mouseCanClick[ M_BRIGHT ] := TRUE;
       end;
     WM_MOUSEWHEEL:
@@ -558,31 +554,30 @@ begin
 
     WM_KEYDOWN, WM_SYSKEYDOWN:
       begin
-        Key := winkey_to_scancode( wParam );
-        keysDown[ Key ] := TRUE;
-        keysUp  [ Key ] := FALSE;
-        keysLast[ KA_DOWN ] := Key;
-        DoKeyPress( Key );
+        key := winkey_to_scancode( wParam );
+        keysDown[ key ]     := TRUE;
+        keysUp  [ key ]     := FALSE;
+        keysLast[ KA_DOWN ] := key;
+        doKeyPress( key );
 
-        Key := SCA( Key );
-        keysDown[ Key ] := TRUE;
-        keysUp  [ Key ] := FALSE;
-        DoKeyPress( Key );
+        key := SCA( key );
+        keysDown[ key ] := TRUE;
+        keysUp  [ key ] := FALSE;
+        doKeyPress( key );
 
-        if Msg = WM_SYSKEYDOWN Then
-          if Key = K_F4 Then
-            app_Work := FALSE;
+        if ( Msg = WM_SYSKEYDOWN ) and ( key = K_F4 ) Then
+          app_Work := FALSE;
       end;
     WM_KEYUP, WM_SYSKEYUP:
       begin
-        Key := winkey_to_scancode( wParam );
-        keysDown[ Key ] := FALSE;
-        keysUp  [ Key ] := TRUE;
-        keysLast[ KA_UP ] := Key;
+        key := winkey_to_scancode( wParam );
+        keysDown[ key ]   := FALSE;
+        keysUp  [ key ]   := TRUE;
+        keysLast[ KA_UP ] := key;
 
-        Key := SCA( Key );
-        keysDown[ Key ] := FALSE;
-        keysUp  [ Key ] := TRUE;
+        key := SCA( key );
+        keysDown[ key ] := FALSE;
+        keysUp  [ key ] := TRUE;
       end;
     WM_CHAR:
       begin
@@ -606,7 +601,6 @@ begin
 {$IFDEF DARWIN}
   eClass := GetEventClass( inEvent );
   eKind  := GetEventKind( inEvent );
-
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
 
   case eClass of
@@ -616,7 +610,7 @@ begin
           begin
             GetEventParameter( inEvent, kEventParamDirectObject, kEventParamHICommand, nil, SizeOf( HICommand ), nil, @command );
             if command.commandID = kHICommandQuit Then
-              zgl_Exit;
+              zgl_Exit();
           end;
       end;
 
@@ -624,7 +618,7 @@ begin
       case eKind of
         kEventWindowDrawContent:
           begin
-            app_Draw;
+            app_Draw();
           end;
         kEventWindowActivated:
           begin
@@ -632,9 +626,9 @@ begin
             app_Pause := FALSE;
             app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
-            key_ClearState;
+            key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
-            mouse_ClearState;
+            mouse_ClearState();
             if wnd_FullScreen Then
               scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
           end;
@@ -644,7 +638,7 @@ begin
             if app_AutoPause Then app_Pause := TRUE;
             app_PActivate( FALSE );
             if wnd_FullScreen Then
-              scr_Reset;
+              scr_Reset();
           end;
         kEventWindowCollapsed:
           begin
@@ -683,7 +677,7 @@ begin
                 if SCAKey and Modifier[ i ].bit > 0 Then
                   begin
                     if not keysDown[ Modifier[ i ].key ] Then
-                      DoKeyPress( Modifier[ i ].key );
+                      doKeyPress( Modifier[ i ].key );
                     keysDown[ Modifier[ i ].key ] := TRUE;
                     keysUp  [ Modifier[ i ].key ] := FALSE;
                     keysLast[ KA_DOWN ]           := Modifier[ i ].key;
@@ -699,20 +693,20 @@ begin
             end;
           kEventRawKeyDown, kEventRawKeyRepeat:
             begin
-              Key := mackey_to_scancode( Key );
-              keysDown[ Key ] := TRUE;
-              keysUp  [ Key ] := FALSE;
-              keysLast[ KA_DOWN ] := Key;
+              key := mackey_to_scancode( key );
+              keysDown[ key ]     := TRUE;
+              keysUp  [ key ]     := FALSE;
+              keysLast[ KA_DOWN ] := key;
               if eKind <> kEventRawKeyRepeat Then
-                DoKeyPress( Key );
+                doKeyPress( key );
 
-              Key := SCA( Key );
-              keysDown[ Key ] := TRUE;
-              keysUp  [ Key ] := FALSE;
+              key := SCA( key );
+              keysDown[ key ] := TRUE;
+              keysUp  [ key ] := FALSE;
               if eKind <> kEventRawKeyRepeat Then
-                DoKeyPress( Key );
+                doKeyPress( key );
 
-              case Key of
+              case key of
                 K_SYSRQ, K_PAUSE,
                 K_ESCAPE, K_ENTER, K_KP_ENTER,
                 K_UP, K_DOWN, K_LEFT, K_RIGHT,
@@ -737,14 +731,14 @@ begin
             end;
           kEventRawKeyUp:
             begin
-              Key := mackey_to_scancode( Key );
-              keysDown[ Key ] := FALSE;
-              keysUp  [ Key ] := TRUE;
-              keysLast[ KA_UP ] := Key;
+              key := mackey_to_scancode( key );
+              keysDown[ key ]   := FALSE;
+              keysUp  [ key ]   := TRUE;
+              keysLast[ KA_UP ] := key;
 
-              Key := SCA( Key );
-              keysDown[ Key ] := FALSE;
-              keysUp  [ Key ] := TRUE;
+              key := SCA( key );
+              keysDown[ key ] := FALSE;
+              keysUp  [ key ] := TRUE;
             end;
         end;
       end;
@@ -765,8 +759,7 @@ begin
                   mouseY := Round( mPos.Y - wnd_Height / 2 );
                 end;
 
-            wnd_MouseIn := ( mPos.X > wnd_X ) and ( mPos.X < wnd_X + wnd_Width ) and
-                           ( mPos.Y > wnd_Y ) and ( mPos.Y < wnd_Y + wnd_Height );
+            wnd_MouseIn := ( mPos.X > wnd_X ) and ( mPos.X < wnd_X + wnd_Width ) and ( mPos.Y > wnd_Y ) and ( mPos.Y < wnd_Y + wnd_Height );
             if wnd_MouseIn Then
               begin
                 if ( not app_ShowCursor ) and ( CGCursorIsVisible = 1 ) Then
@@ -784,14 +777,14 @@ begin
             case mButton of
               kEventMouseButtonPrimary: // Left
                 begin
-                  mouseDown[ M_BLEFT ]  := TRUE;
+                  mouseDown[ M_BLEFT ] := TRUE;
                   if mouseCanClick[ M_BLEFT ] Then
                     begin
                       mouseClick[ M_BLEFT ] := TRUE;
                       mouseCanClick[ M_BLEFT ] := FALSE;
-                      if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+                      if timer_GetTicks() - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
                         mouseDblClick[ M_BLEFT ] := TRUE;
-                      mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+                      mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
                     end;
                 end;
               kEventMouseButtonTertiary: // Midle
@@ -801,9 +794,9 @@ begin
                     begin
                       mouseClick[ M_BMIDLE ] := TRUE;
                       mouseCanClick[ M_BMIDLE ] := FALSE;
-                      if timer_GetTicks - mouseDblCTime[ M_BMIDLE ] < mouseDblCInt Then
+                      if timer_GetTicks() - mouseDblCTime[ M_BMIDLE ] < mouseDblCInt Then
                         mouseDblClick[ M_BMIDLE ] := TRUE;
-                      mouseDblCTime[ M_BMIDLE ] := timer_GetTicks;
+                      mouseDblCTime[ M_BMIDLE ] := timer_GetTicks();
                     end;
                 end;
               kEventMouseButtonSecondary: // Right
@@ -813,9 +806,9 @@ begin
                     begin
                       mouseClick[ M_BRIGHT ] := TRUE;
                       mouseCanClick[ M_BRIGHT ] := FALSE;
-                      if timer_GetTicks - mouseDblCTime[ M_BRIGHT ] < mouseDblCInt Then
+                      if timer_GetTicks() - mouseDblCTime[ M_BRIGHT ] < mouseDblCInt Then
                         mouseDblClick[ M_BRIGHT ] := TRUE;
-                      mouseDblCTime[ M_BRIGHT ] := timer_GetTicks;
+                      mouseDblCTime[ M_BRIGHT ] := timer_GetTicks();
                     end;
                 end;
             end;
@@ -827,20 +820,20 @@ begin
             case mButton of
               kEventMouseButtonPrimary: // Left
                 begin
-                  mouseDown[ M_BLEFT ]  := FALSE;
-                  mouseUp  [ M_BLEFT ]  := TRUE;
+                  mouseDown[ M_BLEFT ]     := FALSE;
+                  mouseUp  [ M_BLEFT ]     := TRUE;
                   mouseCanClick[ M_BLEFT ] := TRUE;
                 end;
               kEventMouseButtonTertiary: // Midle
                 begin
-                  mouseDown[ M_BMIDLE ] := FALSE;
-                  mouseUp  [ M_BMIDLE ] := TRUE;
+                  mouseDown[ M_BMIDLE ]     := FALSE;
+                  mouseUp  [ M_BMIDLE ]     := TRUE;
                   mouseCanClick[ M_BMIDLE ] := TRUE;
                 end;
               kEventMouseButtonSecondary: // Right
                 begin
-                  mouseDown[ M_BRIGHT ] := FALSE;
-                  mouseUp  [ M_BRIGHT ] := TRUE;
+                  mouseDown[ M_BRIGHT ]     := FALSE;
+                  mouseUp  [ M_BRIGHT ]     := TRUE;
                   mouseCanClick[ M_BRIGHT ] := TRUE;
                 end;
             end;

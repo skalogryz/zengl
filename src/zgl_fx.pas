@@ -24,8 +24,6 @@ unit zgl_fx;
 {$I zgl_config.cfg}
 
 interface
-uses
-  zgl_types;
 
 const
   FX_BLEND_NORMAL = $00;
@@ -50,8 +48,8 @@ const
 procedure fx_SetBlendMode( const Mode : Byte );
 procedure fx_SetColorMode( const Mode : Byte );
 
-procedure fx2d_SetColor( const Color : DWORD );
-procedure fx2d_SetVCA( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
+procedure fx2d_SetColor( const Color : LongWord );
+procedure fx2d_SetVCA( const c1, c2, c3, c4 : LongWord; const a1, a2, a3, a4 : Byte );
 procedure fx2d_SetVertexes( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
 procedure fx2d_SetScale( const scaleX, scaleY : Single );
 
@@ -82,12 +80,12 @@ uses
 
 procedure fx_SetBlendMode;
   var
-    srcBlend : DWORD;
-    dstBlend : DWORD;
+    srcBlend : LongWord;
+    dstBlend : LongWord;
 begin
   if b2d_Started and ( Mode <> b2dcur_Blend ) Then
     begin
-      batch2d_Flush;
+      batch2d_Flush();
       b2d_New := TRUE;
     end;
   b2dcur_Blend := Mode;
@@ -133,7 +131,7 @@ procedure fx_SetColorMode;
 begin
   if b2d_Started and ( Mode <> b2dcur_Color ) Then
     begin
-      batch2d_Flush;
+      batch2d_Flush();
       b2d_New := TRUE;
     end;
   b2dcur_Color := Mode;

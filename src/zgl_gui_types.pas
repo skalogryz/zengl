@@ -110,18 +110,21 @@ end;
   zglTWidget = record
     _id      : Integer;
     _type    : Integer;
-    desc     : Pointer;
-    data     : Pointer;
-    rect     : zglTRect;
-    rectEx   : zglTRect;
-    client   : zglTRect;
-    align    : DWORD;
-    layer    : Integer;
-    focus    : Boolean;
-    modal    : Boolean;
-    visible  : Boolean;
-    mousein  : Boolean;
-    draged   : Boolean;
+
+    Desc     : Pointer;
+    Data     : Pointer;
+    Rect     : zglTRect;
+    RectEx   : zglTRect;
+    Client   : zglTRect;
+
+    Align    : LongWord;
+    Layer    : Integer;
+
+    Visible  : Boolean;
+    Focus    : Boolean;
+    Modal    : Boolean;
+    MouseIn  : Boolean;
+    Draged   : Boolean;
 
     OnDraw   : procedure( const Widget : zglPWidget );
     OnProc   : procedure( const Event  : zglPEvent );
@@ -152,9 +155,11 @@ end;
   //Event
   zglTEvent = record
     _type      : Integer;
-    sender     : zglPWidget;
-    widget     : zglPWidget;
-    Next, Prev : zglPEvent;
+
+    Sender     : zglPWidget;
+    Widget     : zglPWidget;
+
+    next, prev : zglPEvent;
     case byte of
       0: ( drag_pos     : zglTPoint2D );
       1: ( mouse_pos    : zglTPoint2D );
@@ -166,7 +171,7 @@ end;
 
   //Event list
   zglTEventList = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTEvent;
 end;
 
@@ -174,7 +179,6 @@ end;
   zglTButtonDesc = record
     Font    : zglPFont;
     Caption : String;
-
     Pressed : Boolean;
 end;
 
@@ -182,7 +186,6 @@ end;
   zglTCheckBoxDesc = record
     Font    : zglPFont;
     Caption : String;
-
     Checked : Boolean;
 end;
 
@@ -190,7 +193,6 @@ end;
   zglTRadioButtonDesc = record
     Font    : zglPFont;
     Caption : String;
-
     Checked : Boolean;
     Group   : Integer;
 end;
@@ -203,9 +205,8 @@ end;
 
   zglPEditBoxDesc = ^zglTEditBoxDesc;
   zglTEditBoxDesc = record
-    Font : zglPFont;
-    Text : String;
-
+    Font     : zglPFont;
+    Text     : String;
     Max      : Integer;
     ReadOnly : Boolean;
 end;
@@ -226,7 +227,6 @@ end;
     ItemIndex     : Integer;
     ItemHeight    : Integer;
     DropDownCount : Integer;
-
     DropedDown    : Boolean;
 end;
 
@@ -246,8 +246,8 @@ end;
     Max      : Integer;
     Min      : Integer;
 
-    UPressed : Boolean;
-    DPressed : Boolean;
+    uPressed : Boolean;
+    dPressed : Boolean;
 end;
 
   zglPScrollBarDesc = ^zglTScrollBarDesc;
@@ -258,22 +258,22 @@ end;
     PageSize : Integer;
     Max      : Integer;
 
-    UPressed : Boolean;
-    DPressed : Boolean;
-    SDraged  : Boolean;
+    uPressed : Boolean;
+    dPressed : Boolean;
+    sDraged  : Boolean;
 end;
 
-procedure gui_FillButtonDesc     ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillCheckBoxDesc   ( Src : Pointer; var Desc : Pointer );
+procedure gui_FillButtonDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillCheckBoxDesc( Src : Pointer; var Desc : Pointer );
 procedure gui_FillRadioButtonDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillLabelDesc      ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillEditBoxDesc    ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillListBoxDesc    ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillComboBoxDesc   ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillGroupBoxDesc   ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillScrollBoxDesc  ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillSpinDesc       ( Src : Pointer; var Desc : Pointer );
-procedure gui_FillScrollBarDesc  ( Src : Pointer; var Desc : Pointer );
+procedure gui_FillLabelDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillEditBoxDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillListBoxDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillComboBoxDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillGroupBoxDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillScrollBoxDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillSpinDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillScrollBarDesc( Src : Pointer; var Desc : Pointer );
 
 implementation
 uses
@@ -284,12 +284,12 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTButtonDesc ) );
 
   if Assigned( Src ) Then
-  with zglTButtonDesc( Desc^ ) do
-    begin
-      Font    := zglTButtonDesc( Src^ ).Font;
-      Caption := zglTButtonDesc( Src^ ).Caption;
-      Pressed := zglTButtonDesc( Src^ ).Pressed;
-    end;
+    with zglTButtonDesc( Desc^ ) do
+      begin
+        Font    := zglTButtonDesc( Src^ ).Font;
+        Caption := zglTButtonDesc( Src^ ).Caption;
+        Pressed := zglTButtonDesc( Src^ ).Pressed;
+      end;
 end;
 
 procedure gui_FillCheckBoxDesc;
@@ -297,12 +297,12 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTCheckBoxDesc ) );
 
   if Assigned( Src ) Then
-  with zglTCheckBoxDesc( Desc^ ) do
-    begin
-      Font    := zglTCheckBoxDesc( Src^ ).Font;
-      Caption := zglTCheckBoxDesc( Src^ ).Caption;
-      Checked := zglTCheckBoxDesc( Src^ ).Checked;
-    end;
+    with zglTCheckBoxDesc( Desc^ ) do
+      begin
+        Font    := zglTCheckBoxDesc( Src^ ).Font;
+        Caption := zglTCheckBoxDesc( Src^ ).Caption;
+        Checked := zglTCheckBoxDesc( Src^ ).Checked;
+      end;
 end;
 
 procedure gui_FillRadioButtonDesc;
@@ -310,13 +310,13 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTRadioButtonDesc ) );
 
   if Assigned( Src ) Then
-  with zglTRadioButtonDesc( Desc^ ) do
-    begin
-      Font    := zglTRadioButtonDesc( Src^ ).Font;
-      Caption := zglTRadioButtonDesc( Src^ ).Caption;
-      Checked := zglTRadioButtonDesc( Src^ ).Checked;
-      Group   := zglTRadioButtonDesc( Src^ ).Group;
-    end;
+    with zglTRadioButtonDesc( Desc^ ) do
+      begin
+        Font    := zglTRadioButtonDesc( Src^ ).Font;
+        Caption := zglTRadioButtonDesc( Src^ ).Caption;
+        Checked := zglTRadioButtonDesc( Src^ ).Checked;
+        Group   := zglTRadioButtonDesc( Src^ ).Group;
+      end;
 end;
 
 procedure gui_FillLabelDesc;
@@ -324,11 +324,11 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTLabelDesc ) );
 
   if Assigned( Src ) Then
-  with zglTLabelDesc( Desc^ ) do
-    begin
-      Font    := zglTLabelDesc( Src^ ).Font;
-      Caption := zglTLabelDesc( Src^ ).Caption;
-    end;
+    with zglTLabelDesc( Desc^ ) do
+      begin
+        Font    := zglTLabelDesc( Src^ ).Font;
+        Caption := zglTLabelDesc( Src^ ).Caption;
+      end;
 end;
 
 procedure gui_FillEditBoxDesc;
@@ -336,13 +336,13 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTEditBoxDesc ) );
 
   if Assigned( Src ) Then
-  with zglTEditBoxDesc( Desc^ ) do
-    begin
-      Font     := zglTEditBoxDesc( Src^ ).Font;
-      Text     := zglTEditBoxDesc( Src^ ).Text;
-      Max      := zglTEditBoxDesc( Src^ ).Max;
-      ReadOnly := zglTEditBoxDesc( Src^ ).ReadOnly;
-    end;
+    with zglTEditBoxDesc( Desc^ ) do
+      begin
+        Font     := zglTEditBoxDesc( Src^ ).Font;
+        Text     := zglTEditBoxDesc( Src^ ).Text;
+        Max      := zglTEditBoxDesc( Src^ ).Max;
+        ReadOnly := zglTEditBoxDesc( Src^ ).ReadOnly;
+      end;
 end;
 
 procedure gui_FillListBoxDesc;
@@ -352,19 +352,19 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTListBoxDesc ) );
 
   if Assigned( Src ) Then
-  with zglTListBoxDesc( Desc^ ) do
-    begin
-      Font       := zglTListBoxDesc( Src^ ).Font;
-      SelectMode := zglTListBoxDesc( Src^ ).SelectMode;
-      ItemIndex  := zglTListBoxDesc( Src^ ).ItemIndex;
-      ItemHeight := zglTListBoxDesc( Src^ ).ItemHeight;
-      if ItemHeight = 0 Then
-        ItemHeight := Font.MaxHeight + 4;
-      List.Count := zglTListBoxDesc( Src^ ).List.Count;
-      SetLength( List.Items, List.Count );
-      for i := 0 to List.Count - 1 do
-        List.Items[ i ] := zglTListBoxDesc( Src^ ).List.Items[ i ];
-    end;
+    with zglTListBoxDesc( Desc^ ) do
+      begin
+        Font       := zglTListBoxDesc( Src^ ).Font;
+        SelectMode := zglTListBoxDesc( Src^ ).SelectMode;
+        ItemIndex  := zglTListBoxDesc( Src^ ).ItemIndex;
+        ItemHeight := zglTListBoxDesc( Src^ ).ItemHeight;
+        if ItemHeight = 0 Then
+          ItemHeight := Font.MaxHeight + 4;
+        List.Count := zglTListBoxDesc( Src^ ).List.Count;
+        SetLength( List.Items, List.Count );
+        for i := 0 to List.Count - 1 do
+          List.Items[ i ] := zglTListBoxDesc( Src^ ).List.Items[ i ];
+      end;
 end;
 
 procedure gui_FillComboBoxDesc;
@@ -374,19 +374,19 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTComboBoxDesc ) );
 
   if Assigned( Src ) Then
-  with zglTComboBoxDesc( Desc^ ) do
-    begin
-      Font          := zglTComboBoxDesc( Src^ ).Font;
-      ItemIndex     := zglTComboBoxDesc( Src^ ).ItemIndex;
-      ItemHeight    := zglTComboBoxDesc( Src^ ).ItemHeight;
-      if ItemHeight = 0 Then
-        ItemHeight := Font.MaxHeight + 4;
-      DropDownCount := zglTComboBoxDesc( Src^ ).DropDownCount;
-      List.Count := zglTListBoxDesc( Src^ ).List.Count;
-      SetLength( List.Items, List.Count );
-      for i := 0 to List.Count - 1 do
-        List.Items[ i ] := zglTComboBoxDesc( Src^ ).List.Items[ i ];
-    end;
+    with zglTComboBoxDesc( Desc^ ) do
+      begin
+        Font       := zglTComboBoxDesc( Src^ ).Font;
+        ItemIndex  := zglTComboBoxDesc( Src^ ).ItemIndex;
+        ItemHeight := zglTComboBoxDesc( Src^ ).ItemHeight;
+        if ItemHeight = 0 Then
+          ItemHeight := Font.MaxHeight + 4;
+        DropDownCount := zglTComboBoxDesc( Src^ ).DropDownCount;
+        List.Count := zglTListBoxDesc( Src^ ).List.Count;
+        SetLength( List.Items, List.Count );
+        for i := 0 to List.Count - 1 do
+          List.Items[ i ] := zglTComboBoxDesc( Src^ ).List.Items[ i ];
+      end;
 end;
 
 procedure gui_FillGroupBoxDesc;
@@ -394,11 +394,11 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTGroupBoxDesc ) );
 
   if Assigned( Src ) Then
-  with zglTGroupBoxDesc( Desc^ ) do
-    begin
-      Font    := zglTGroupBoxDesc( Src^ ).Font;
-      Caption := zglTGroupBoxDesc( Src^ ).Caption;
-    end;
+    with zglTGroupBoxDesc( Desc^ ) do
+      begin
+        Font    := zglTGroupBoxDesc( Src^ ).Font;
+        Caption := zglTGroupBoxDesc( Src^ ).Caption;
+      end;
 end;
 
 procedure gui_FillScrollBoxDesc;
@@ -406,9 +406,9 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTScrollBoxDesc ) );
 
   if Assigned( Src ) Then
-  with zglTScrollBoxDesc( Desc^ ) do
-    begin
-    end;
+    with zglTScrollBoxDesc( Desc^ ) do
+      begin
+      end;
 end;
 
 procedure gui_FillSpinDesc;
@@ -416,14 +416,12 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTSpinDesc ) );
 
   if Assigned( Src ) Then
-  with zglTSpinDesc( Desc^ ) do
-    begin
-      Value    := zglTSpinDesc( Src^ ).Value;
-      Max      := zglTSpinDesc( Src^ ).Max;
-      Min      := zglTSpinDesc( Src^ ).Min;
-      UPressed := zglTSpinDesc( Src^ ).UPressed;
-      DPressed := zglTSpinDesc( Src^ ).DPressed;
-    end;
+    with zglTSpinDesc( Desc^ ) do
+      begin
+        Value    := zglTSpinDesc( Src^ ).Value;
+        Max      := zglTSpinDesc( Src^ ).Max;
+        Min      := zglTSpinDesc( Src^ ).Min;
+      end;
 end;
 
 procedure gui_FillScrollBarDesc;
@@ -431,17 +429,14 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTScrollBarDesc ) );
 
   if Assigned( Src ) Then
-  with zglTScrollBarDesc( Desc^ ) do
-    begin
-      Kind     := zglTScrollBarDesc( Src^ ).Kind;
-      Step     := zglTScrollBarDesc( Src^ ).Step;
-      Position := zglTScrollBarDesc( Src^ ).Position;
-      PageSize := zglTScrollBarDesc( Src^ ).PageSize;
-      Max      := zglTScrollBarDesc( Src^ ).Max;
-      UPressed := zglTScrollBarDesc( Src^ ).UPressed;
-      DPressed := zglTScrollBarDesc( Src^ ).DPressed;
-      SDraged  := zglTScrollBarDesc( Src^ ).SDraged;
-    end;
+    with zglTScrollBarDesc( Desc^ ) do
+      begin
+        Kind     := zglTScrollBarDesc( Src^ ).Kind;
+        Step     := zglTScrollBarDesc( Src^ ).Step;
+        Position := zglTScrollBarDesc( Src^ ).Position;
+        PageSize := zglTScrollBarDesc( Src^ ).PageSize;
+        Max      := zglTScrollBarDesc( Src^ ).Max;
+      end;
 end;
 
 end.

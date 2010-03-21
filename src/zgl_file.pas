@@ -29,7 +29,7 @@ uses
   {$IFDEF LINUX_OR_DARWIN}
   baseunix,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   zgl_types;
@@ -38,7 +38,7 @@ uses
 type PFILE = Pointer;
 type zglTFile = PFILE;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 type zglTFile = THandle;
 {$ENDIF}
 
@@ -58,12 +58,12 @@ const
 procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
 function  file_MakeDir( const Directory : String ) : Boolean;
 function  file_Exists( const FileName : String ) : Boolean;
-function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
-function  file_GetPos( const FileHandle : zglTFile ) : DWORD;
-function  file_Read( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
-function  file_Write( const FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
-procedure file_Trunc( const FileHandle : zglTFile; const count : DWORD );
-function  file_GetSize( const FileHandle : zglTFile ) : DWORD;
+function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
+function  file_GetPos( const FileHandle : zglTFile ) : LongWord;
+function  file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
+function  file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
+procedure file_Trunc( const FileHandle : zglTFile; const Bytes : LongWord );
+function  file_GetSize( const FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( const FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
 procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
@@ -95,9 +95,9 @@ const
 type
   Pdirent = ^dirent;
   dirent  = record
-    d_ino    : DWORD;
+    d_ino    : LongWord;
     d_off    : LongInt;
-    d_reclen : WORD;
+    d_reclen : Word;
     d_type   : Byte;
     d_name   : array[ 0..255 ] of AnsiChar;
   end;
@@ -123,10 +123,10 @@ function free( ptr : Pointer ):longint;cdecl;external 'libc' name 'free';
 function mkdir(pathname:Pchar; mode:mode_t):longint;cdecl;external 'libc' name 'mkdir';
 {$ENDIF}
 
+implementation
+
 var
   filePath : String = '';
-
-implementation
 
 procedure file_Open;
 begin
@@ -137,7 +137,7 @@ begin
     FOM_OPENRW: FileHandle := fopen( PChar( filePath + FileName ), 'r+' );
   end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   case Mode of
     FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
     FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
@@ -151,25 +151,25 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := mkdir( PChar( Directory ), MODE_MKDIR ) = 0;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   Result := CreateDirectory( PChar( Directory ), nil );
 {$ENDIF}
 end;
 
 function file_Exists;
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
-    FileHandle : zglTFile;
+    fileHandle : zglTFile;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := not Boolean( access( PChar( filePath + FileName ), F_OK ) );
 {$ENDIF}
-{$IFDEF WIN32}
-  file_Open( FileHandle, filePath + FileName, FOM_OPENR );
-  Result := FileHandle <> INVALID_HANDLE_VALUE;
+{$IFDEF WINDOWS}
+  file_Open( fileHandle, filePath + FileName, FOM_OPENR );
+  Result := fileHandle <> INVALID_HANDLE_VALUE;
   if Result Then
-    file_Close( FileHandle );
+    file_Close( fileHandle );
 {$ENDIF}
 end;
 
@@ -182,7 +182,7 @@ begin
     FSM_END: Result := fseek( FileHandle, Offset, SEEK_END );
   end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   case Mode of
     FSM_SET: Result := SetFilePointer( FileHandle, Offset, nil, FILE_BEGIN );
     FSM_CUR: Result := SetFilePointer( FileHandle, Offset, nil, FILE_CURRENT );
@@ -196,7 +196,7 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := ftell( FileHandle );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   Result := SetFilePointer( FileHandle, 0, nil, FILE_CURRENT );
 {$ENDIF}
 end;
@@ -205,14 +205,14 @@ function file_Read;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := ftell( FileHandle );
-  if Result + count > file_GetSize( FileHandle ) Then
+  if Result + Bytes > file_GetSize( FileHandle ) Then
     Result := file_GetSize( FileHandle ) - Result
   else
-    Result := count;
-  fread( @buffer, count, 1, FileHandle );
+    Result := Bytes;
+  fread( @Buffer, Bytes, 1, FileHandle );
 {$ENDIF}
-{$IFDEF WIN32}
-  ReadFile( FileHandle, buffer, count, Result, nil );
+{$IFDEF WINDOWS}
+  ReadFile( FileHandle, Buffer, Bytes, Result, nil );
 {$ENDIF}
 end;
 
@@ -220,28 +220,28 @@ function file_Write;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := ftell( FileHandle );
-  if Result + count > file_GetSize( FileHandle ) Then
+  if Result + Bytes > file_GetSize( FileHandle ) Then
     Result := file_GetSize( FileHandle ) - Result
   else
-    Result := count;
-  fwrite( @buffer, count, 1, FileHandle );
+    Result := Bytes;
+  fwrite( @Buffer, Bytes, 1, FileHandle );
 {$ENDIF}
-{$IFDEF WIN32}
-  WriteFile( FileHandle, buffer, count, Result, nil );
+{$IFDEF WINDOWS}
+  WriteFile( FileHandle, Buffer, Bytes, Result, nil );
 {$ENDIF}
 end;
 
 procedure file_Trunc;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  ftruncate( DWORD( FileHandle ), count );
+  ftruncate( LongWord( FileHandle ), Bytes );
 {$ENDIF}
 end;
 
 function file_GetSize;
   {$IFDEF LINUX_OR_DARWIN}
   var
-    tmp : DWORD;
+    tmp : LongWord;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
@@ -251,7 +251,7 @@ begin
   Result := ftell( FileHandle );
   fseek( FileHandle, tmp, SEEK_SET );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   Result := GetFileSize( FileHandle, nil );
 {$ENDIF}
 end;
@@ -261,7 +261,7 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   fflush( FileHandle );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   FlushFileBuffers( FileHandle );
 {$ENDIF}
 end;
@@ -272,18 +272,18 @@ begin
   fclose( FileHandle );
   FileHandle := nil;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   CloseHandle( FileHandle );
   FileHandle := 0;
 {$ENDIF}
 end;
 
 {$IFDEF LINUX_OR_DARWIN}
-function filter_file(const p1: PDirEnt): Integer; cdecl;
+function filter_file( const p1 : Pdirent ) : Integer; cdecl;
 begin
   Result := Byte( p1.d_type = 8 );
 end;
-function filter_dir(const p1: PDirEnt): Integer; cdecl;
+function filter_dir( const p1 : Pdirent ) : Integer; cdecl;
 begin
   Result := Byte( p1.d_type = 4 );
 end;
@@ -292,10 +292,10 @@ end;
 procedure file_Find;
   {$IFDEF LINUX_OR_DARWIN}
   var
-    FList : array of Pdirent;
     i     : Integer;
+    FList : array of Pdirent;
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   var
     First : THandle;
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
@@ -317,7 +317,7 @@ begin
       SetLength( FList, 0 );
     end;
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   First := FindFirstFile( PChar( Directory + '*' ), FList );
   repeat
     if FindDir Then
@@ -355,7 +355,7 @@ procedure file_GetName;
     tmp : String;
 begin
   GetStr( FileName, Result, '/', FALSE );
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   if Result = FileName Then
     GetStr( FileName, Result, '\', FALSE );
   {$ENDIF}
@@ -371,7 +371,7 @@ end;
 procedure file_GetDirectory;
 begin
   GetStr( FileName, Result, '/', TRUE );
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   if Result = '' Then
     GetStr( FileName, Result, '\', TRUE );
   {$ENDIF}

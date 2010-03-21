@@ -45,6 +45,7 @@ uses
   zgl_textures_png,
   zgl_textures_tga,
 
+  zgl_texture_atlas,
   zgl_render_target,
 
   {$IFDEF USE_SOUND}
@@ -92,7 +93,7 @@ const
 exports
   // Main
   zgl_Init                 name prefix + 'zgl_Init',
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   zgl_InitToHandle,
   {$ENDIF}
   zgl_Exit                 name prefix + 'zgl_Exit',
@@ -338,7 +339,4 @@ exports
   ;
 
 begin
-  {$IFDEF WIN32}
-  wnd_INST := hInstance;
-  {$ENDIF}
 end.

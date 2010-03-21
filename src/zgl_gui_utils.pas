@@ -27,17 +27,17 @@ uses
   zgl_gui_types,
   zgl_math_2d;
 
-procedure _clip( const widget : zglPWidget; const FullSize : Boolean = FALSE ); overload;
-procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
+procedure _clip( const Widget : zglPWidget; const FullSize : Boolean = FALSE ); overload;
+procedure _clip( const Widget : zglPWidget; const X, Y, W, H : Single ); overload;
 
-procedure gui_AlignWidget( widget : zglPWidget );
-procedure gui_UpdateClient( widget : zglPWidget );
+procedure gui_AlignWidget( Widget : zglPWidget );
+procedure gui_UpdateClient( Widget : zglPWidget );
 
-type zglProcWidgetsCallback = procedure( widget, sender : zglPWidget; const data : Pointer );
+type zglProcWidgetsCallback = procedure( Widget, Sender : zglPWidget; const Data : Pointer );
 
-procedure gui_ProcCallback( widget, sender : zglPWidget; callback : zglProcWidgetsCallback; const data : Pointer );
-procedure gui_ResetFocus( widget, sender : zglPWidget; const data : Pointer );
-procedure gui_ResetChecked( widget, sender : zglPWidget; const data : Pointer );
+procedure gui_ProcCallback( Widget, Sender : zglPWidget; Callback : zglProcWidgetsCallback; const Data : Pointer );
+procedure gui_ResetFocus( Widget, Sender : zglPWidget; const Data : Pointer );
+procedure gui_ResetChecked( Widget, Sender : zglPWidget; const Data : Pointer );
 
 function gui_GetListItemsPerPage( Widget : zglPWidget ) : Integer;
 function gui_GetScrollRect( Widget : zglPWidget ) : zglTRect;
@@ -53,18 +53,18 @@ uses
   zgl_mouse,
   zgl_collision_2d;
 
-procedure _clip( const widget : zglPWidget; const FullSize : Boolean = FALSE ); overload;
+procedure _clip( const Widget : zglPWidget; const FullSize : Boolean = FALSE ); overload;
   var
     clip : zglTRect;
 begin
   if FullSize Then
-    clip := col2d_ClipRect( widget.rectEx, widget.parent.client )
+    clip := col2d_ClipRect( Widget.RectEx, Widget.parent.Client )
   else
-    clip := col2d_ClipRect( widget.rect, widget.parent.client );
+    clip := col2d_ClipRect( Widget.Rect, Widget.parent.Client );
   scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
 end;
 
-procedure _clip( const widget : zglPWidget; const X, Y, W, H : Single ); overload;
+procedure _clip( const Widget : zglPWidget; const X, Y, W, H : Single ); overload;
   var
     clip : zglTRect;
 begin
@@ -72,49 +72,49 @@ begin
   clip.Y := Y;
   clip.W := W;
   clip.H := H;
-  clip := col2d_ClipRect( clip, widget.parent.client );
+  clip := col2d_ClipRect( clip, Widget.parent.Client );
   scissor_Begin( Round( clip.X ), Round( clip.Y ), Round( clip.W ), Round( clip.H ) );
 end;
 
 procedure gui_AlignWidget;
 begin
-  with widget^ do
+  with Widget^ do
     case align of
       ALIGN_NONE:;
-      ALIGN_CLIENT: rect := parent.client;
+      ALIGN_CLIENT: Rect := parent.Client;
       ALIGN_LEFT:
         begin
-          rect.X := parent.client.X;
-          rect.Y := parent.client.Y;
-          rect.H := parent.client.H;
+          Rect.X := parent.Client.X;
+          Rect.Y := parent.Client.Y;
+          Rect.H := parent.Client.H;
         end;
       ALIGN_RIGHT:
         begin
-          rect.X := parent.client.X + parent.client.W - rect.W;
-          rect.Y := parent.client.Y;
-          rect.H := parent.client.H;
+          Rect.X := parent.Client.X + parent.Client.W - Rect.W;
+          Rect.Y := parent.Client.Y;
+          Rect.H := parent.Client.H;
         end;
       ALIGN_TOP:
         begin
-          rect.X := parent.client.X;
-          rect.Y := parent.client.Y;
-          rect.W := parent.client.W;
+          Rect.X := parent.Client.X;
+          Rect.Y := parent.Client.Y;
+          Rect.W := parent.Client.W;
         end;
       ALIGN_BOTTOM:
         begin
-          rect.X := parent.client.X;
-          rect.Y := parent.client.Y + parent.client.H - rect.H;
-          rect.W := parent.client.W;
+          Rect.X := parent.Client.X;
+          Rect.Y := parent.Client.Y + parent.Client.H - Rect.H;
+          Rect.W := parent.Client.W;
         end;
     end;
 end;
 
 procedure gui_UpdateClient;
 begin
-  widget.client.X := widget.rect.X + 2;
-  widget.client.Y := widget.rect.Y + 2;
-  widget.client.W := widget.rect.W - 4;
-  widget.client.H := widget.rect.H - 4;
+  Widget.Client.X := Widget.Rect.X + 2;
+  Widget.Client.Y := Widget.Rect.Y + 2;
+  Widget.Client.W := Widget.Rect.W - 4;
+  Widget.Client.H := Widget.Rect.H - 4;
 end;
 
 procedure gui_ProcCallback;
@@ -130,40 +130,40 @@ begin
   i := 0;
   while i < w.parts do
     begin
-      gui_ProcCallback( w.part[ i ], sender, callback, data );
+      gui_ProcCallback( w.part[ i ], Sender, Callback, Data );
       if Assigned( w.part[ i ] ) Then INC( i );
     end;
 
   i := 0;
   while i < w.children do
     begin
-      gui_ProcCallback( w.child[ i ], sender, callback, data );
+      gui_ProcCallback( w.child[ i ], Sender, Callback, data );
       if Assigned( w.child[ i ] ) Then INC( i );
     end;
 
-  callback( w, sender, data );
+  Callback( w, Sender, Data );
 end;
 
 procedure gui_ResetFocus;
 begin
-  if widget = data Then exit;
-  if widget.Focus Then
+  if Widget = Data Then exit;
+  if Widget.Focus Then
     begin
-      gui_AddEvent( EVENT_FOCUS_OUT, widget, sender, nil );
-      widget.Focus := FALSE;
+      gui_AddEvent( EVENT_FOCUS_OUT, Widget, Sender, nil );
+      Widget.Focus := FALSE;
     end;
 end;
 
 procedure gui_ResetChecked;
 begin
-  if widget._type = WIDGET_RADIOBUTTON Then
-    if zglTRadioButtonDesc( widget.desc^ ).Group = PInteger( data )^ Then
-      zglTRadioButtonDesc( widget.desc^ ).Checked := FALSE;
+  if Widget._type = WIDGET_RADIOBUTTON Then
+    if zglTRadioButtonDesc( Widget.Desc^ ).Group = PInteger( Data )^ Then
+      zglTRadioButtonDesc( Widget.Desc^ ).Checked := FALSE;
 end;
 
 function gui_GetScrollRect;
 begin
-  with Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
+  with Widget.Rect, zglTScrollBarDesc( Widget.Desc^ ) do
     if Kind = SCROLLBAR_VERTICAL Then
       begin
         Result.W := SCROLL_SIZE;
@@ -194,8 +194,8 @@ end;
 function gui_GetListItemsPerPage;
 begin
   case Widget._type of
-    WIDGET_LISTBOX: Result := Round( ( Widget.rect.H - 3 * 2 ) / ( zglTListBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
-    WIDGET_COMBOBOX: Result := Round( ( Widget.rectEx.H - 3 * 2 ) / ( zglTComboBoxDesc( Widget.desc^ ).Font.MaxHeight + 3 ) );
+    WIDGET_LISTBOX: Result := Round( ( Widget.Rect.H - 3 * 2 ) / ( zglTListBoxDesc( Widget.Desc^ ).Font.MaxHeight + 3 ) );
+    WIDGET_COMBOBOX: Result := Round( ( Widget.RectEx.H - 3 * 2 ) / ( zglTComboBoxDesc( Widget.Desc^ ).Font.MaxHeight + 3 ) );
   end;
 end;
 
@@ -203,7 +203,7 @@ procedure gui_ScrollChange;
   var
     ch : Integer;
 begin
-  with zglTScrollBarDesc( Widget.desc^ ) do
+  with zglTScrollBarDesc( Widget.Desc^ ) do
     begin
       ch := Change;
       if Position + ch < 0 Then
@@ -225,12 +225,12 @@ begin
   with zglTScrollBarDesc( Widget.desc^ ) do
     if Kind = SCROLLBAR_VERTICAL Then
       begin
-        P := Trunc( ( Max / ( Widget.rect.H - SCROLL_SIZE * 2 - r.H ) ) * ( Y - Widget.rect.Y - SCROLL_SIZE ) );
+        P := Trunc( ( Max / ( Widget.Rect.H - SCROLL_SIZE * 2 - r.H ) ) * ( Y - Widget.Rect.Y - SCROLL_SIZE ) );
         if P - Position <> 0 Then
           gui_ScrollChange( Widget, P - Position );
       end else
         begin
-          P := Round( ( Max / ( Widget.rect.W - SCROLL_SIZE * 2 - r.W ) ) * ( X - Widget.rect.X - SCROLL_SIZE ) );
+          P := Round( ( Max / ( Widget.Rect.W - SCROLL_SIZE * 2 - r.W ) ) * ( X - Widget.Rect.X - SCROLL_SIZE ) );
           if P - Position <> 0 Then
             gui_ScrollChange( Widget, P - Position );
         end;

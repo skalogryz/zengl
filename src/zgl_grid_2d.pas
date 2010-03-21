@@ -26,9 +26,8 @@ unit zgl_grid_2d;
 interface
 
 uses
-  zgl_types,
-  zgl_textures,
   zgl_fx,
+  zgl_textures,
   zgl_math_2d;
 
 type
@@ -39,9 +38,9 @@ type
     Grid : array of array of zglTPoint2D;
   end;
 
-procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
 
 implementation
 uses
@@ -55,7 +54,7 @@ uses
 
 procedure sgrid2d_Draw;
   var
-    Quad : array[ 0..3 ] of zglTPoint2D;
+    quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
 
     u, v : Single;
@@ -102,45 +101,45 @@ begin
     glColor4ub( 255, 255, 255, Alpha );
 
   for i := 0 to Grid.Cols - 2 do
-  begin
-    for j := 0 to Grid.Rows - 2 do
-      begin
-        Quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
-        Quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
-        Quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
-        Quad[ 1 ].Y := Y + Grid.Grid[ i + 1, j ].Y;
-        Quad[ 2 ].X := X + Grid.Grid[ i + 1, j + 1 ].X;
-        Quad[ 2 ].Y := Y + Grid.Grid[ i + 1, j + 1 ].Y;
-        Quad[ 3 ].X := X + Grid.Grid[ i, j + 1 ].X;
-        Quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
+    begin
+      for j := 0 to Grid.Rows - 2 do
+        begin
+          quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
+          quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
+          quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
+          quad[ 1 ].Y := Y + Grid.Grid[ i + 1, j ].Y;
+          quad[ 2 ].X := X + Grid.Grid[ i + 1, j + 1 ].X;
+          quad[ 2 ].Y := Y + Grid.Grid[ i + 1, j + 1 ].Y;
+          quad[ 3 ].X := X + Grid.Grid[ i, j + 1 ].X;
+          quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
 
-        glTexCoord2f( iU * u, Texture^.V - jV * v );
-        gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2f( iU * u, Texture^.V - jV * v );
+          gl_Vertex2fv( @quad[ 0 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u, Texture^.V - jV * v );
-        gl_Vertex2fv( @Quad[ 1 ] );
+          glTexCoord2f( ( iU + iiU ) * u, Texture^.V - jV * v );
+          gl_Vertex2fv( @quad[ 1 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
-        gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
+          gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
-        gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
+          gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( iU * u, Texture^.V - ( jV + ijV ) * v );
-        gl_Vertex2fv( @Quad[ 3 ] );
+          glTexCoord2f( iU * u, Texture^.V - ( jV + ijV ) * v );
+          gl_Vertex2fv( @quad[ 3 ] );
 
-        glTexCoord2f( iU * u, Texture^.V - jV * v );
-        gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2f( iU * u, Texture^.V - jV * v );
+          gl_Vertex2fv( @quad[ 0 ] );
 
-        INC( jV, ijV );
-      end;
-    INC( iU, iiU );
-    DEC( jV, ijV * ( Grid.Rows - 1 ) );
+          INC( jV, ijV );
+        end;
+      INC( iU, iiU );
+      DEC( jV, ijV * ( Grid.Rows - 1 ) );
   end;
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_BLEND );
@@ -150,7 +149,7 @@ end;
 
 procedure agrid2d_Draw;
   var
-    Quad : array[ 0..3 ] of zglTPoint2D;
+    quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
 
     tX, tY, u, v : Single;
@@ -204,45 +203,45 @@ begin
     glColor4ub( 255, 255, 255, Alpha );
 
   for i := 0 to Grid.Cols - 2 do
-  begin
-    for j := 0 to Grid.Rows - 2 do
-      begin
-        Quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
-        Quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
-        Quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
-        Quad[ 1 ].Y := Y + Grid.Grid[ i + 1, j ].Y;
-        Quad[ 2 ].X := X + Grid.Grid[ i + 1, j + 1 ].X;
-        Quad[ 2 ].Y := Y + Grid.Grid[ i + 1, j + 1 ].Y;
-        Quad[ 3 ].X := X + Grid.Grid[ i, j + 1 ].X;
-        Quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
+    begin
+      for j := 0 to Grid.Rows - 2 do
+        begin
+          quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
+          quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
+          quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
+          quad[ 1 ].Y := Y + Grid.Grid[ i + 1, j ].Y;
+          quad[ 2 ].X := X + Grid.Grid[ i + 1, j + 1 ].X;
+          quad[ 2 ].Y := Y + Grid.Grid[ i + 1, j + 1 ].Y;
+          quad[ 3 ].X := X + Grid.Grid[ i, j + 1 ].X;
+          quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
 
-        glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-        gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
+          gl_Vertex2fv( @quad[ 0 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - jV * v - tY );
-        gl_Vertex2fv( @Quad[ 1 ] );
+          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - jV * v - tY );
+          gl_Vertex2fv( @quad[ 1 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-        gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
+          gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-        gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
+          gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-        gl_Vertex2fv( @Quad[ 3 ] );
+          glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
+          gl_Vertex2fv( @quad[ 3 ] );
 
-        glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-        gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
+          gl_Vertex2fv( @quad[ 0 ] );
 
-        INC( jV, ijV );
-      end;
-    INC( iU, iiU );
-    DEC( jV, ijV * ( Grid.Rows - 1 ) );
-  end;
+          INC( jV, ijV );
+        end;
+      INC( iU, iiU );
+      DEC( jV, ijV * ( Grid.Rows - 1 ) );
+    end;
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_BLEND );
@@ -252,7 +251,7 @@ end;
 
 procedure cgrid2d_Draw;
   var
-    Quad : array[ 0..3 ] of zglTPoint2D;
+    quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
 
     tX, tY, u, v : Single;
@@ -304,45 +303,45 @@ begin
     glColor4ub( 255, 255, 255, Alpha );
 
   for i := 0 to Grid.Cols - 2 do
-  begin
-    for j := 0 to Grid.Rows - 2 do
-      begin
-        Quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
-        Quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
-        Quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
-        Quad[ 1 ].Y := Y + Grid.Grid[ i + 1, j ].Y;
-        Quad[ 2 ].X := X + Grid.Grid[ i + 1, j + 1 ].X;
-        Quad[ 2 ].Y := Y + Grid.Grid[ i + 1, j + 1 ].Y;
-        Quad[ 3 ].X := X + Grid.Grid[ i, j + 1 ].X;
-        Quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
+    begin
+      for j := 0 to Grid.Rows - 2 do
+        begin
+          quad[ 0 ].X := X + Grid.Grid[ i, j ].X;
+          quad[ 0 ].Y := Y + Grid.Grid[ i, j ].Y;
+          quad[ 1 ].X := X + Grid.Grid[ i + 1, j ].X;
+          quad[ 1 ].Y := Y + Grid.Grid[ i + 1, j ].Y;
+          quad[ 2 ].X := X + Grid.Grid[ i + 1, j + 1 ].X;
+          quad[ 2 ].Y := Y + Grid.Grid[ i + 1, j + 1 ].Y;
+          quad[ 3 ].X := X + Grid.Grid[ i, j + 1 ].X;
+          quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
 
-        glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-        gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
+          gl_Vertex2fv( @quad[ 0 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - jV * v - tY );
-        gl_Vertex2fv( @Quad[ 1 ] );
+          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - jV * v - tY );
+          gl_Vertex2fv( @quad[ 1 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-        gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
+          gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-        gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
+          gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-        gl_Vertex2fv( @Quad[ 3 ] );
+          glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
+          gl_Vertex2fv( @quad[ 3 ] );
 
-        glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-        gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
+          gl_Vertex2fv( @quad[ 0 ] );
 
-        INC( jV, ijV );
-      end;
-    INC( iU, iiU );
-    DEC( jV, ijV * ( Grid.Rows - 1 ) );
-  end;
+          INC( jV, ijV );
+        end;
+      INC( iU, iiU );
+      DEC( jV, ijV * ( Grid.Rows - 1 ) );
+    end;
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_BLEND );

@@ -29,18 +29,18 @@ uses
 
 function gui_ProcWidget( const Widget : zglPWidget ) : Boolean;
 
-procedure gui_ProcEvents     ( const Event : zglPEvent );
-procedure gui_ProcButton     ( const Event : zglPEvent );
-procedure gui_ProcCheckBox   ( const Event : zglPEvent );
+procedure gui_ProcEvents( const Event : zglPEvent );
+procedure gui_ProcButton( const Event : zglPEvent );
+procedure gui_ProcCheckBox( const Event : zglPEvent );
 procedure gui_ProcRadioButton( const Event : zglPEvent );
-procedure gui_ProcLabel      ( const Event : zglPEvent );
-procedure gui_ProcEditBox    ( const Event : zglPEvent );
-procedure gui_ProcListBox    ( const Event : zglPEvent );
-procedure gui_ProcComboBox   ( const Event : zglPEvent );
-procedure gui_ProcGroupBox   ( const Event : zglPEvent );
-procedure gui_ProcScrollBox  ( const Event : zglPEvent );
-procedure gui_ProcSpin       ( const Event : zglPEvent );
-procedure gui_ProcScrollBar  ( const Event : zglPEvent );
+procedure gui_ProcLabel( const Event : zglPEvent );
+procedure gui_ProcEditBox( const Event : zglPEvent );
+procedure gui_ProcListBox( const Event : zglPEvent );
+procedure gui_ProcComboBox( const Event : zglPEvent );
+procedure gui_ProcGroupBox( const Event : zglPEvent );
+procedure gui_ProcScrollBox( const Event : zglPEvent );
+procedure gui_ProcSpin( const Event : zglPEvent );
+procedure gui_ProcScrollBar( const Event : zglPEvent );
 
 implementation
 uses
@@ -63,10 +63,10 @@ var
 function gui_ProcWidget;
   var
     i     : Integer;
-    Event : zglTEvent;
+    event : zglTEvent;
 begin
   Result := FALSE;
-  if ( not Assigned( Widget ) ) or ( not Widget.visible ) Then exit;
+  if ( not Assigned( Widget ) ) or ( not Widget.Visible ) Then exit;
 
   gui_AlignWidget( Widget );
   gui_UpdateClient( Widget );
@@ -76,17 +76,17 @@ begin
       dragBegin     := FALSE;
       dragMove      := FALSE;
       dragWidget    := nil;
-      Widget.draged := FALSE;
-      Event.drag_pos.X := mouse_X - mouseShiftX;
-      Event.drag_pos.Y := mouse_Y - mouseShiftY;
-      gui_AddEvent( EVENT_DRAG_END, Widget, nil, @Event.drag_pos );
+      Widget.Draged := FALSE;
+      event.drag_pos.X := mouse_X - mouseShiftX;
+      event.drag_pos.Y := mouse_Y - mouseShiftY;
+      gui_AddEvent( EVENT_DRAG_END, Widget, nil, @event.drag_pos );
     end;
-  if Widget.draged Then
+  if Widget.Draged Then
     begin
       Result           := TRUE;
-      Event.drag_pos.X := mouse_X - mouseShiftX;
-      Event.drag_pos.Y := mouse_Y - mouseShiftY;
-      gui_AddEvent( EVENT_DRAG_MOVE, Widget, nil, @Event.drag_pos );
+      event.drag_pos.X := mouse_X - mouseShiftX;
+      event.drag_pos.Y := mouse_Y - mouseShiftY;
+      gui_AddEvent( EVENT_DRAG_MOVE, Widget, nil, @event.drag_pos );
     end;
 
   i := 0;
@@ -112,26 +112,26 @@ begin
       if Assigned( Widget.child[ i ] ) Then INC( i );
     end;
 
-  if ( col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) or col2d_PointInRect( mouse_X, mouse_Y, Widget.rectEx ) ) and
-     ( col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.rect ) or col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.rectEx ) ) Then
+  if ( col2d_PointInRect( mouse_X, mouse_Y, Widget.Rect ) or col2d_PointInRect( mouse_X, mouse_Y, Widget.RectEx ) ) and
+     ( col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.Rect ) or col2d_PointInRect( mouse_X, mouse_Y, Widget.parent.RectEx ) ) Then
     begin
       Result := TRUE;
 
-      Event.mouse_pos.X := Widget.rect.X - mouse_X;
-      Event.mouse_pos.Y := Widget.rect.Y - mouse_Y;
-      gui_AddEvent( EVENT_MOUSE_MOVE, Widget, nil, @Event.mouse_pos );
+      event.mouse_pos.X := Widget.Rect.X - mouse_X;
+      event.mouse_pos.Y := Widget.Rect.Y - mouse_Y;
+      gui_AddEvent( EVENT_MOUSE_MOVE, Widget, nil, @event.mouse_pos );
 
-      if not Widget.mousein Then
+      if not Widget.MouseIn Then
         begin
-          Widget.mousein := TRUE;
+          Widget.MouseIn := TRUE;
           gui_AddEvent( EVENT_MOUSE_ENTER, Widget, nil, nil );
         end;
 
       if dragBegin Then
-        if ( ( mouseShiftX <> mouse_X - Round( Widget.rect.X ) ) or
-             ( mouseShiftY <> mouse_Y - Round( Widget.rect.Y ) ) ) and ( not Widget.draged ) Then
+        if ( ( mouseShiftX <> mouse_X - Round( Widget.Rect.X ) ) or
+             ( mouseShiftY <> mouse_Y - Round( Widget.Rect.Y ) ) ) and ( not Widget.Draged ) Then
           begin
-            Widget.draged := TRUE;
+            Widget.Draged := TRUE;
             dragMove      := TRUE;
             if Assigned( Widget.Events.OnStartDrag ) Then
               Widget.Events.OnStartDrag( Widget );
@@ -143,94 +143,94 @@ begin
         begin
           if not dragBegin Then
             begin
-              mouseShiftX := mouse_X - Round( Widget.rect.X );
-              mouseShiftY := mouse_Y - Round( Widget.rect.Y );
+              mouseShiftX := mouse_X - Round( Widget.Rect.X );
+              mouseShiftY := mouse_Y - Round( Widget.Rect.Y );
               dragBegin   := TRUE;
               dragWidget  := Widget;
             end;
 
           Event.mouse_button := M_BLEFT;
-          gui_AddEvent( EVENT_MOUSE_CLICK, Widget, nil, @Event.mouse_button );
+          gui_AddEvent( EVENT_MOUSE_CLICK, Widget, nil, @event.mouse_button );
         end;
       if mouse_Click( M_BRIGHT ) Then
         begin
-          Event.mouse_button := M_BRIGHT;
-          gui_AddEvent( EVENT_MOUSE_CLICK, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BRIGHT;
+          gui_AddEvent( EVENT_MOUSE_CLICK, Widget, nil, @event.mouse_button );
         end;
       if mouse_Click( M_BMIDLE ) Then
         begin
-          Event.mouse_button := M_BMIDLE;
-          gui_AddEvent( EVENT_MOUSE_CLICK, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BMIDLE;
+          gui_AddEvent( EVENT_MOUSE_CLICK, Widget, nil, @event.mouse_button );
         end;
 
       if mouse_Down( M_BLEFT ) Then
         begin
           INC( mouseTimeDown );
-          Event.mouse_button := M_BLEFT;
-          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BLEFT;
+          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, nil, @event.mouse_button );
         end;
       if mouse_Down( M_BRIGHT ) Then
         begin
           INC( mouseTimeDown );
-          Event.mouse_button := M_BRIGHT;
-          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BRIGHT;
+          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, nil, @event.mouse_button );
         end;
       if mouse_Down( M_BMIDLE ) Then
         begin
           INC( mouseTimeDown );
-          Event.mouse_button := M_BMIDLE;
-          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BMIDLE;
+          gui_AddEvent( EVENT_MOUSE_DOWN, Widget, nil, @event.mouse_button );
         end;
 
       if mouse_Up( M_BLEFT ) Then
         begin
           mouseTimeDown := 0;
-          Event.mouse_button := M_BLEFT;
-          gui_AddEvent( EVENT_MOUSE_UP, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BLEFT;
+          gui_AddEvent( EVENT_MOUSE_UP, Widget, nil, @event.mouse_button );
         end;
       if mouse_Up( M_BRIGHT ) Then
         begin
           mouseTimeDown := 0;
-          Event.mouse_button := M_BRIGHT;
-          gui_AddEvent( EVENT_MOUSE_UP, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BRIGHT;
+          gui_AddEvent( EVENT_MOUSE_UP, Widget, nil, @event.mouse_button );
         end;
       if mouse_Up( M_BMIDLE ) Then
         begin
           mouseTimeDown := 0;
-          Event.mouse_button := M_BMIDLE;
-          gui_AddEvent( EVENT_MOUSE_UP, Widget, nil, @Event.mouse_button );
+          event.mouse_button := M_BMIDLE;
+          gui_AddEvent( EVENT_MOUSE_UP, Widget, nil, @event.mouse_button );
         end;
 
       if mouse_Wheel( M_WUP ) Then
         begin
-          Event.mouse_wheel := M_WUP;
-          gui_AddEvent( EVENT_MOUSE_WHEEL, Widget, nil, @Event.mouse_wheel );
+          event.mouse_wheel := M_WUP;
+          gui_AddEvent( EVENT_MOUSE_WHEEL, Widget, nil, @event.mouse_wheel );
         end;
       if mouse_Wheel( M_WDOWN ) Then
         begin
-          Event.mouse_wheel := M_WDOWN;
-          gui_AddEvent( EVENT_MOUSE_WHEEL, Widget, nil, @Event.mouse_wheel );
+          event.mouse_wheel := M_WDOWN;
+          gui_AddEvent( EVENT_MOUSE_WHEEL, Widget, nil, @event.mouse_wheel );
         end;
     end else
       begin
-        if Widget.mousein Then
+        if Widget.MouseIn Then
           gui_AddEvent( EVENT_MOUSE_LEAVE, Widget, nil, nil );
-        Widget.mousein := FALSE;
+        Widget.MouseIn := FALSE;
       end;
 
-  if Widget.focus Then
+  if Widget.Focus Then
     begin
       if key_Last( KA_DOWN ) <> 0 Then
         begin
           Result := TRUE;
-          Event.key_code := key_Last( KA_DOWN );
-          gui_AddEvent( EVENT_KEY_DOWN, Widget, nil, @Event.key_code );
+          event.key_code := key_Last( KA_DOWN );
+          gui_AddEvent( EVENT_KEY_DOWN, Widget, nil, @event.key_code );
         end;
       if key_Last( KA_UP ) <> 0 Then
         begin
           Result := TRUE;
-          Event.key_code := key_Last( KA_UP );
-          gui_AddEvent( EVENT_KEY_UP, Widget, nil, @Event.key_code );
+          event.key_code := key_Last( KA_UP );
+          gui_AddEvent( EVENT_KEY_UP, Widget, nil, @event.key_code );
         end;
     end;
 end;
@@ -291,7 +291,7 @@ begin
           if not Widget.focus Then
             begin
               gui_AddEvent( EVENT_FOCUS_IN, Widget, nil, nil );
-              Widget.focus := TRUE;
+              Widget.Focus := TRUE;
             end;
 
           if Assigned( Widget.Events.OnClick ) and ( Widget._type <> WIDGET_BUTTON ) Then
@@ -312,10 +312,10 @@ begin
           if key_code = K_TAB Then
             begin
               gui_ProcCallback( nil, Widget, gui_ResetFocus, nil );
-              if Widget._id + 1 < Widget.Parent.children Then
+              if Widget._id + 1 < Widget.parent.children Then
                 begin
-                  gui_AddEvent( EVENT_FOCUS_IN, Widget.Parent.child[ Widget._id + 1 ], nil, nil );
-                  Widget.Parent.child[ Widget._id + 1 ].focus := TRUE
+                  gui_AddEvent( EVENT_FOCUS_IN, Widget.parent.child[ Widget._id + 1 ], nil, nil );
+                  Widget.parent.child[ Widget._id + 1 ].Focus := TRUE
                 end;
             end;
           if Assigned( Widget.Events.OnKeyUp ) Then
@@ -326,7 +326,7 @@ end;
 
 procedure gui_ProcButton;
 begin
-  with Event^, zglTButtonDesc( Widget.desc^ ) do
+  with Event^, zglTButtonDesc( Widget.Desc^ ) do
     case _type of
       EVENT_MOUSE_CLICK:
         begin
@@ -364,7 +364,7 @@ end;
 
 procedure gui_ProcCheckBox;
 begin
-  with Event^, zglTCheckBoxDesc( Widget.desc^ ) do
+  with Event^, zglTCheckBoxDesc( Widget.Desc^ ) do
     case _type of
       EVENT_MOUSE_CLICK:
         begin
@@ -386,7 +386,7 @@ end;
 
 procedure gui_ProcRadioButton;
 begin
-  with Event^, zglTRadioButtonDesc( Widget.desc^ ) do
+  with Event^, zglTRadioButtonDesc( Widget.Desc^ ) do
     case _type of
       EVENT_MOUSE_CLICK:
         begin
@@ -417,7 +417,7 @@ end;
 
 procedure gui_ProcEditBox;
 begin
-  with Event^, zglTEditBoxDesc( Widget.desc^ ) do
+  with Event^, zglTEditBoxDesc( Widget.Desc^ ) do
     case _type of
       EVENT_FOCUS_IN:
         begin
@@ -438,23 +438,23 @@ procedure gui_ProcListBox;
     li     : Integer;
     iShift : Integer;
     iCount : Integer;
-    Scroll : zglPScrollBarDesc;
+    scroll : zglPScrollBarDesc;
 begin
-  with Event^, zglTListBoxDesc( Widget.desc^ ) do
+  with Event^, zglTListBoxDesc( Widget.Desc^ ) do
     begin
       li := -1;
       case _type of
         EVENT_CREATE:
           begin
-            gui_AddWidget( WIDGET_SCROLLBAR, Widget.rect.W - SCROLL_SIZE, 0, SCROLL_SIZE, Widget.rect.H, FALSE, TRUE, nil, nil, Widget, TRUE );
+            gui_AddWidget( WIDGET_SCROLLBAR, Widget.Rect.W - SCROLL_SIZE, 0, SCROLL_SIZE, Widget.Rect.H, FALSE, TRUE, nil, nil, Widget, TRUE );
           end;
         EVENT_MOUSE_CLICK:
           begin
             if mouse_button = M_BLEFT Then
               begin
-                Scroll := Widget.part[ 0 ].desc;
-                if not Widget.part[ 0 ].visible Then Scroll.Position := 0;
-                li := Round( mouse_Y - Widget.rect.Y - 4 + Scroll.Position ) div ItemHeight;
+                scroll := Widget.part[ 0 ].Desc;
+                if not Widget.part[ 0 ].Visible Then scroll.Position := 0;
+                li := Round( mouse_Y - Widget.Rect.Y - 4 + scroll.Position ) div ItemHeight;
               end;
           end;
         EVENT_MOUSE_DOWN:
@@ -464,7 +464,7 @@ begin
           end;
         EVENT_MOUSE_WHEEL:
           begin
-            if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
+            if mouse_X < Widget.Rect.X + Widget.Rect.W - SCROLL_SIZE - 2 Then
               gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.part[ 0 ], Widget, @Event.mouse_wheel );
           end;
         EVENT_KEY_UP:
@@ -485,25 +485,25 @@ begin
       iCount := gui_GetListItemsPerPage( Widget );
       if List.Count > iCount Then
         begin
-          Widget.part[ 0 ].visible := TRUE;
-          Scroll := Widget.part[ 0 ].desc;
-          iShift := Scroll.Position div ItemHeight;
+          Widget.part[ 0 ].Visible := TRUE;
+          scroll := Widget.part[ 0 ].Desc;
+          iShift := scroll.Position div ItemHeight;
 
           if ( li < List.Count ) and ( li <> -1 ) and ( Event._type <> EVENT_MOUSE_DOWN ) and ( Event._type <> EVENT_MOUSE_CLICK ) Then
             begin
               if ItemIndex < iShift Then
-                Scroll.Position := ItemIndex * ItemHeight;
+                scroll.Position := ItemIndex * ItemHeight;
               if ItemIndex > iShift + iCount - 2 Then
-                Scroll.Position := ( ItemIndex - iCount + 1 ) * ItemHeight;
+                scroll.Position := ( ItemIndex - iCount + 1 ) * ItemHeight;
             end;
 
-          Scroll.Max      := List.Count * ItemHeight - Round( Widget.client.H );
-          Scroll.PageSize := iCount * ItemHeight;
-          Scroll.Step     := ItemHeight;
-          if Scroll.Position > Scroll.Max Then
-            Scroll.Position := Scroll.Max;
+          scroll.Max      := List.Count * ItemHeight - Round( Widget.Client.H );
+          scroll.PageSize := iCount * ItemHeight;
+          scroll.Step     := ItemHeight;
+          if scroll.Position > scroll.Max Then
+            scroll.Position := scroll.Max;
         end else
-          Widget.part[ 0 ].visible := FALSE;
+          Widget.part[ 0 ].Visible := FALSE;
     end;
   gui_ProcEvents( Event );
 end;
@@ -513,9 +513,9 @@ procedure gui_ProcComboBox;
     li     : Integer;
     iShift : Integer;
     iCount : Integer;
-    Scroll : zglPScrollBarDesc;
+    scroll : zglPScrollBarDesc;
 begin
-  with Event^, zglTComboBoxDesc( Widget.desc^ ), Widget.rect do
+  with Event^, zglTComboBoxDesc( Widget.Desc^ ), Widget.Rect do
     begin
       li := -1;
       case _type of
@@ -525,37 +525,37 @@ begin
           end;
         EVENT_FOCUS_OUT:
           begin
-            if sender <> Widget.part[ 0 ] Then
+            if Sender <> Widget.part[ 0 ] Then
               begin
-                Widget.modal := FALSE;
+                Widget.Modal := FALSE;
                 DropedDown   := FALSE;
               end else
-                Widget.focus := TRUE;
+                Widget.Focus := TRUE;
           end;
         EVENT_MOUSE_CLICK:
           begin
-            if DropedDown and col2d_PointInRect( mouse_X, mouse_Y, Widget.rectEx ) Then
+            if DropedDown and col2d_PointInRect( mouse_X, mouse_Y, Widget.RectEx ) Then
               begin
-                Scroll := Widget.part[ 0 ].desc;
-                if not Widget.part[ 0 ].visible Then Scroll.Position := 0;
-                li := Round( mouse_Y - Widget.rect.Y - H - 4 + Scroll.Position ) div ItemHeight;
-                if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
+                scroll := Widget.part[ 0 ].Desc;
+                if not Widget.part[ 0 ].Visible Then scroll.Position := 0;
+                li := Round( mouse_Y - Widget.Rect.Y - H - 4 + scroll.Position ) div ItemHeight;
+                if mouse_X < Widget.Rect.X + Widget.Rect.W - SCROLL_SIZE - 2 Then
                   begin
-                    Widget.modal    := FALSE;
+                    Widget.Modal    := FALSE;
                     DropedDown      := FALSE;
-                    Scroll.Position := li * ItemHeight;
+                    scroll.Position := li * ItemHeight;
                   end;
               end;
 
-            if col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) Then
+            if col2d_PointInRect( mouse_X, mouse_Y, Widget.Rect ) Then
               begin
-                Widget.modal := not Widget.modal;
+                Widget.Modal := not Widget.Modal;
                 DropedDown   := not DropedDown;
               end;
           end;
         EVENT_MOUSE_WHEEL:
           begin
-            if Widget.focus and ( not DropedDown ) and col2d_PointInRect( mouse_X, mouse_Y, Widget.rect ) Then
+            if Widget.Focus and ( not DropedDown ) and col2d_PointInRect( mouse_X, mouse_Y, Widget.Rect ) Then
               begin
                 li := ItemIndex;
                 case Event.mouse_wheel of
@@ -564,12 +564,12 @@ begin
                 end;
               end;
 
-            if mouse_X < Widget.rect.X + Widget.rect.W - SCROLL_SIZE - 2 Then
+            if mouse_X < Widget.Rect.X + Widget.Rect.W - SCROLL_SIZE - 2 Then
               gui_AddEvent( EVENT_MOUSE_WHEEL, Widget.part[ 0 ], Widget, @Event.mouse_wheel );
           end;
         EVENT_KEY_UP:
           begin
-            if Widget.focus Then
+            if Widget.Focus Then
               begin
                 li := ItemIndex;
                 if key_code = K_UP   Then DEC( li );
@@ -580,12 +580,12 @@ begin
 
       if DropedDown Then
         begin
-          Widget.rectEx.X := X;
-          Widget.rectEx.Y := Y + H;
-          Widget.rectEx.W := W;
-          Widget.rectEx.H := DropDownCount * ItemHeight + 4;
+          Widget.RectEx.X := X;
+          Widget.RectEx.Y := Y + H;
+          Widget.RectEx.W := W;
+          Widget.RectEx.H := DropDownCount * ItemHeight + 4;
         end else
-          Widget.rectEx := Widget.rect;
+          Widget.RectEx := Widget.Rect;
 
       if ( li < List.Count ) and ( li <> -1 ) Then
         begin
@@ -597,25 +597,25 @@ begin
       iCount := gui_GetListItemsPerPage( Widget );
       if ( DropedDown ) and ( List.Count > iCount ) Then
         begin
-          Widget.part[ 0 ].visible := TRUE;
-          Scroll := Widget.part[ 0 ].desc;
-          iShift := Scroll.Position div ItemHeight;
+          Widget.part[ 0 ].Visible := TRUE;
+          scroll := Widget.part[ 0 ].Desc;
+          iShift := scroll.Position div ItemHeight;
 
           if ( li < List.Count ) and ( li <> -1 ) and ( Event._type <> EVENT_MOUSE_DOWN ) and ( Event._type <> EVENT_MOUSE_CLICK ) Then
             begin
               if ItemIndex < iShift Then
-                Scroll.Position := ItemIndex * ItemHeight;
+                scroll.Position := ItemIndex * ItemHeight;
               if ItemIndex > iShift + iCount - 2 Then
-                Scroll.Position := ( ItemIndex - iCount + 1 ) * ItemHeight;
+                scroll.Position := ( ItemIndex - iCount + 1 ) * ItemHeight;
             end;
 
-          Scroll.Max      := ( List.Count - DropDownCount ) * ItemHeight;
-          Scroll.PageSize := iCount * ItemHeight;
-          Scroll.Step     := ItemHeight;
-          if Scroll.Position > Scroll.Max Then
-            Scroll.Position := Scroll.Max;
+          scroll.Max      := ( List.Count - DropDownCount ) * ItemHeight;
+          scroll.PageSize := iCount * ItemHeight;
+          scroll.Step     := ItemHeight;
+          if scroll.Position > scroll.Max Then
+            scroll.Position := scroll.Max;
         end else
-          Widget.part[ 0 ].visible := FALSE;
+          Widget.part[ 0 ].Visible := FALSE;
     end;
   gui_ProcEvents( Event );
 end;
@@ -632,12 +632,12 @@ end;
 
 procedure gui_ProcSpin;
 begin
-  with Event^, Widget.rect, zglTSpinDesc( Widget.desc^ ) do
+  with Event^, Widget.Rect, zglTSpinDesc( Widget.Desc^ ) do
     case _type of
       EVENT_MOUSE_MOVE:
         begin
-          if mouse_Y < Y + H / 2 Then DPressed := FALSE;
-          if mouse_Y > Y + H / 2 Then UPressed := FALSE;
+          if mouse_Y < Y + H / 2 Then dPressed := FALSE;
+          if mouse_Y > Y + H / 2 Then uPressed := FALSE;
         end;
       EVENT_MOUSE_DOWN:
         begin
@@ -653,7 +653,7 @@ begin
             begin
               if mouse_Y < Y + H / 2 Then
                 begin
-                  UPressed := TRUE;
+                  uPressed := TRUE;
                   if Value < Max Then
                     begin
                       INC( Value );
@@ -663,7 +663,7 @@ begin
                 end;
               if mouse_Y > Y + H / 2 Then
                 begin
-                  DPressed := TRUE;
+                  dPressed := TRUE;
                   if Value > Min Then
                     begin
                       DEC( Value );
@@ -678,15 +678,15 @@ begin
           if mouse_button = M_BLEFT Then
             begin
               if mouse_Y < Y + H / 2 Then
-                UPressed := FALSE;
+                uPressed := FALSE;
               if mouse_Y > Y + H / 2 Then
-                DPressed := FALSE;
+                dPressed := FALSE;
             end;
         end;
       EVENT_MOUSE_LEAVE:
         begin
-          UPressed := FALSE;
-          DPressed := FALSE;
+          uPressed := FALSE;
+          dPressed := FALSE;
         end;
     end;
   gui_ProcEvents( Event );
@@ -696,7 +696,7 @@ procedure gui_ProcScrollBar;
   var
     r : zglTRect;
 begin
-  with Event^, Widget.rect, zglTScrollBarDesc( Widget.desc^ ) do
+  with Event^, Widget.Rect, zglTScrollBarDesc( Widget.Desc^ ) do
     case _type of
       EVENT_CREATE:
         begin
@@ -710,16 +710,16 @@ begin
           r := gui_GetScrollRect( Widget );
           if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
             begin
-              SDraged := TRUE;
+              sDraged := TRUE;
               if Kind = SCROLLBAR_VERTICAL Then
-                mouseShiftY := mouse_Y - Round( Widget.rect.Y + ( r.Y - Widget.rect.Y ) )
+                mouseShiftY := mouse_Y - Round( Y + ( r.Y - Y ) )
               else
-                mouseShiftX := mouse_X - Round( Widget.rect.X + ( r.X - Widget.rect.X ) );
+                mouseShiftX := mouse_X - Round( X + ( r.X - X ) );
             end;
         end;
       EVENT_DRAG_MOVE:
         begin
-          if SDraged Then
+          if sDraged Then
             begin
               r := gui_GetScrollRect( Widget );
               if Kind = SCROLLBAR_VERTICAL Then
@@ -730,24 +730,24 @@ begin
         end;
       EVENT_DRAG_END:
         begin
-          SDraged := FALSE;
+          sDraged := FALSE;
         end;
       EVENT_MOUSE_MOVE:
         begin
           if Kind = SCROLLBAR_VERTICAL Then
             begin
-              if mouse_Y > Y + SCROLL_SIZE     Then UPressed := FALSE;
-              if mouse_Y < Y + H - SCROLL_SIZE Then DPressed := FALSE;
+              if mouse_Y > Y + SCROLL_SIZE     Then uPressed := FALSE;
+              if mouse_Y < Y + H - SCROLL_SIZE Then dPressed := FALSE;
             end else
               begin
-                if mouse_X > X + SCROLL_SIZE     Then UPressed := FALSE;
-                if mouse_X < X + W - SCROLL_SIZE Then DPressed := FALSE;
+                if mouse_X > X + SCROLL_SIZE     Then uPressed := FALSE;
+                if mouse_X < X + W - SCROLL_SIZE Then dPressed := FALSE;
               end;
         end;
       EVENT_MOUSE_LEAVE:
         begin
-          UPressed := FALSE;
-          DPressed := FALSE;
+          uPressed := FALSE;
+          dPressed := FALSE;
         end;
       EVENT_MOUSE_DOWN:
         begin
@@ -761,28 +761,28 @@ begin
         begin
           if mouse_button = M_BLEFT Then
             begin
-              UPressed := FALSE;
-              DPressed := FALSE;
+              uPressed := FALSE;
+              dPressed := FALSE;
             end;
         end;
       EVENT_MOUSE_CLICK:
         begin
           r := gui_GetScrollRect( Widget );
-          if ( mouse_button = M_BLEFT ) and ( not SDraged ) Then
+          if ( mouse_button = M_BLEFT ) and ( not sDraged ) Then
             begin
               if Kind = SCROLLBAR_VERTICAL Then
                 begin
-                  if mouse_Y < Y + SCROLL_SIZE     Then UPressed := TRUE;
-                  if mouse_Y > Y + H - SCROLL_SIZE Then DPressed := TRUE;
+                  if mouse_Y < Y + SCROLL_SIZE     Then uPressed := TRUE;
+                  if mouse_Y > Y + H - SCROLL_SIZE Then dPressed := TRUE;
                 end else
                   begin
-                    if mouse_X < X + SCROLL_SIZE     Then UPressed := TRUE;
-                    if mouse_X > X + W - SCROLL_SIZE Then DPressed := TRUE;
+                    if mouse_X < X + SCROLL_SIZE     Then uPressed := TRUE;
+                    if mouse_X > X + W - SCROLL_SIZE Then dPressed := TRUE;
                   end;
-              if UPressed Then
+              if uPressed Then
                 gui_ScrollChange( Widget, -Step );
 
-              if DPressed Then
+              if dPressed Then
                 gui_ScrollChange( Widget, Step );
 
               if not col2d_PointInRect( mouse_X, mouse_Y, r ) Then

@@ -25,7 +25,6 @@ unit zgl_gui_main;
 
 interface
 uses
-  zgl_types,
   zgl_gui_types;
 
 procedure gui_Init;
@@ -41,8 +40,7 @@ procedure gui_DelWidget( var Widget : zglPWidget );
 var
   eventList   : zglTEventList;
   managerGUI  : zglTGUIManager;
-  widgetTLast : DWORD;
-
+  widgetTLast : LongWord;
   cursorAlpha : Integer;
 
 implementation
@@ -57,7 +55,7 @@ uses
 
 procedure gui_Init;
 begin
-  managerGUI.Main.visible := TRUE;
+  managerGUI.Main.Visible := TRUE;
   managerGUI.Main.parent  := @managerGUI.Main;
   managerGUI.Main.OnProc  := @gui_ProcEvents;
 
@@ -131,8 +129,8 @@ end;
 procedure gui_Draw;
   var
     i     : Integer;
-    Event : zglPEvent;
-    ToDel : zglPEvent;
+    event : zglPEvent;
+    toDel : zglPEvent;
 begin
   i := 0;
   while i < managerGUI.Main.children do
@@ -142,48 +140,48 @@ begin
         INC( i );
     end;
 
-  ToDel := nil;
-  Event := eventList.First.Next;
-  while Event <> nil do
+  toDel := nil;
+  event := eventList.First.next;
+  while event <> nil do
     begin
-      if Event._type = EVENT_DRAW_MODAL Then
+      if event._type = EVENT_DRAW_MODAL Then
         begin
-          Event.Widget.modal := FALSE;
-          gui_DrawWidget( Event.Widget );
-          Event.Widget.modal := TRUE;
-          ToDel := Event;
+          event.Widget.Modal := FALSE;
+          gui_DrawWidget( event.Widget );
+          event.Widget.Modal := TRUE;
+          toDel := event;
         end;
-      Event := Event.Next;
-      if Assigned( ToDel ) Then
-        gui_DelEvent( ToDel );
+      event := event.next;
+      if Assigned( toDel ) Then
+        gui_DelEvent( toDel );
     end;
 end;
 
 procedure gui_Proc;
   var
-    Event : zglPEvent;
+    event : zglPEvent;
     p     : Pointer;
 begin
   INC( cursorAlpha );
   if cursorAlpha > 50 Then
     cursorAlpha := 0;
 
-  managerGUI.Main.rect.W := wnd_Width;
-  managerGUI.Main.rect.H := wnd_Height;
-  managerGUI.Main.client := managerGUI.Main.rect;
+  managerGUI.Main.Rect.W := wnd_Width;
+  managerGUI.Main.Rect.H := wnd_Height;
+  managerGUI.Main.Client := managerGUI.Main.Rect;
 
   gui_ProcWidget( @managerGUI.Main );
 
-  Event := eventList.First.Next;
-  while Event <> nil do
+  event := eventList.First.next;
+  while event <> nil do
     begin
-      if Assigned( Event.Widget.OnProc ) Then
-        Event.Widget.OnProc( Event );
-      Event := Event.Next;
+      if Assigned( event.Widget.OnProc ) Then
+        event.Widget.OnProc( event );
+      event := event.Next;
     end;
   while eventList.Count > 0 do
     begin
-      p := eventList.First.Next;
+      p := eventList.First.next;
       gui_DelEvent( zglPEvent( p ) );
     end;
 end;
@@ -193,39 +191,39 @@ procedure gui_AddEvent;
     newEvent : zglPEvent;
 begin
   newEvent := @eventList.First;
-  while Assigned( newEvent.Next ) do
-    newEvent := newEvent.Next;
+  while Assigned( newEvent.next ) do
+    newEvent := newEvent.next;
 
-  zgl_GetMem( Pointer( newEvent.Next ), SizeOf( zglTEvent ) );
+  zgl_GetMem( Pointer( newEvent.next ), SizeOf( zglTEvent ) );
   case _type of
-    EVENT_DRAG_MOVE: Move( EventData^, newEvent.Next.drag_pos, SizeOf( zglTPoint2D ) );
-    EVENT_MOUSE_MOVE: Move( EventData^, newEvent.Next.mouse_pos, SizeOf( zglTPoint2D ) );
+    EVENT_DRAG_MOVE: Move( EventData^, newEvent.next.drag_pos, SizeOf( zglTPoint2D ) );
+    EVENT_MOUSE_MOVE: Move( EventData^, newEvent.next.mouse_pos, SizeOf( zglTPoint2D ) );
     EVENT_MOUSE_DOWN,
     EVENT_MOUSE_UP,
-    EVENT_MOUSE_CLICK: Move( EventData^, newEvent.Next.mouse_button, 1 );
-    EVENT_MOUSE_WHEEL: Move( EventData^, newEvent.Next.mouse_wheel, 1 );
+    EVENT_MOUSE_CLICK: Move( EventData^, newEvent.next.mouse_button, 1 );
+    EVENT_MOUSE_WHEEL: Move( EventData^, newEvent.next.mouse_wheel, 1 );
 
     EVENT_KEY_DOWN,
-    EVENT_KEY_UP    : Move( EventData^, newEvent.Next.key_code, 1 );
+    EVENT_KEY_UP    : Move( EventData^, newEvent.next.key_code, 1 );
   end;
-  newEvent.Next._type  := _type;
-  newEvent.Next.Widget := Widget;
-  newEvent.Next.Sender := Sender;
-  newEvent.Next.Prev   := newEvent;
-  newEvent             := newEvent.Next;
+  newEvent.next._type  := _type;
+  newEvent.next.Widget := Widget;
+  newEvent.next.Sender := Sender;
+  newEvent.next.Prev   := newEvent;
+  newEvent             := newEvent.next;
   INC( eventList.Count );
 end;
 
 procedure gui_DelEvent;
 begin
-  if Assigned( Event.Prev ) Then
-    Event.Prev.Next := Event.Next;
-  if Assigned( Event.Next ) Then
-    Event.Next.Prev := Event.Prev;
+  if Assigned( Event.prev ) Then
+    Event.prev.next := Event.next;
+  if Assigned( Event.next ) Then
+    Event.next.prev := Event.prev;
   FreeMem( Event );
-  DEC( eventList.Count );
-
   Event := nil;
+
+  DEC( eventList.Count );
 end;
 
 function gui_AddWidget;
@@ -256,20 +254,20 @@ begin
       end;
 
   Result._type  := _type;
-  managerGUI.Types[ _type - 1 ].FillDesc( Desc, Result.desc );
-  Result.data   := Data;
+  managerGUI.Types[ _type - 1 ].FillDesc( Desc, Result.Desc );
+  Result.Data   := Data;
   Result.parent := p;
-  Result.rect.X := p.rect.X + X;
-  Result.rect.Y := p.rect.Y + Y;
-  Result.rect.W := W;
-  Result.rect.H := H;
+  Result.Rect.X := p.rect.X + X;
+  Result.Rect.Y := p.rect.Y + Y;
+  Result.Rect.W := W;
+  Result.Rect.H := H;
   if Focus Then
     begin
       gui_ProcCallback( nil, nil, gui_ResetFocus, nil );
       gui_AddEvent( EVENT_FOCUS_IN, Result, nil, nil );
     end;
-  Result.focus   := Focus;
-  Result.visible := Visible;
+  Result.Visible := Visible;
+  Result.Focus   := Focus;
   for i := High( managerGUI.Types ) downto 0 do
     if Result._type = managerGUI.Types[ i ]._type Then
       begin
@@ -281,8 +279,8 @@ begin
   gui_UpdateClient( Result );
 
   e._type  := EVENT_CREATE;
-  e.sender := nil;
-  e.widget := Result;
+  e.Sender := nil;
+  e.Widget := Result;
   if Assigned( Result.OnProc ) Then
     Result.OnProc( @e );
 end;
@@ -315,7 +313,7 @@ begin
       SetLength( Widget.parent.part, Widget.parent.parts );
     end;
 
-  FreeMem( Widget.desc );
+  FreeMem( Widget.Desc );
   FreeMem( Widget );
   Widget := nil;
 end;
