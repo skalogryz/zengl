@@ -35,8 +35,8 @@ function  log_Timing : AnsiString;
 
 var
   log      : zglTFile;
-  logstart : LongWord;
-  logfile  : PChar = 'log.txt';
+  logStart : LongWord;
+  logFile  : PChar = 'log.txt';
 
 implementation
 uses
@@ -53,9 +53,9 @@ begin
   if ( app_Flags and APP_USE_LOG = 0 ) Then exit;
   if log <> FILE_ERROR Then exit;
   app_Log := TRUE;
-  logstart := Round( timer_GetTicks );
+  logStart := Round( timer_GetTicks() );
 
-  file_Open( log, logfile, FOM_CREATE );
+  file_Open( log, logFile, FOM_CREATE );
   // crazy code :)
   for i := 0 to length( cs_ZenGL ) + 7 do
     es := es + '=';
@@ -99,18 +99,18 @@ end;
 
 function log_Timing;
   var
-    V : LongWord;
+    v : LongWord;
 begin
-  V := Round( timer_GetTicks ) - logstart;
+  v := Round( timer_GetTicks() ) - logstart;
   case V of
-    0..9:               Result := '[0000000' + u_IntToStr( V ) + 'ms] ';
-    10..99:             Result := '[000000'  + u_IntToStr( V ) + 'ms] ';
-    100..999:           Result := '[00000'   + u_IntToStr( V ) + 'ms] ';
-    1000..9999:         Result := '[0000'    + u_IntToStr( V ) + 'ms] ';
-    10000..99999:       Result := '[000'     + u_IntToStr( V ) + 'ms] ';
-    100000..999999:     Result := '[00'      + u_IntToStr( V ) + 'ms] ';
-    1000000..9999999:   Result := '[0'       + u_IntToStr( V ) + 'ms] ';
-    10000000..99999999: Result := '['        + u_IntToStr( V ) + 'ms] ';
+    0..9:               Result := '[0000000' + u_IntToStr( v ) + 'ms] ';
+    10..99:             Result := '[000000'  + u_IntToStr( v ) + 'ms] ';
+    100..999:           Result := '[00000'   + u_IntToStr( v ) + 'ms] ';
+    1000..9999:         Result := '[0000'    + u_IntToStr( v ) + 'ms] ';
+    10000..99999:       Result := '[000'     + u_IntToStr( v ) + 'ms] ';
+    100000..999999:     Result := '[00'      + u_IntToStr( v ) + 'ms] ';
+    1000000..9999999:   Result := '[0'       + u_IntToStr( v ) + 'ms] ';
+    10000000..99999999: Result := '['        + u_IntToStr( v ) + 'ms] ';
   end;
 end;
 

@@ -136,19 +136,19 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
 var
-  FL, FP : PAnsiChar;
-  S      : AnsiString;
+  fl, fp : PAnsiChar;
+  s      : AnsiString;
   t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
 begin
   wnd_INST := GetModuleHandle( nil );
-  GetMem( FL, 65535 );
-  GetMem( FP, 65535 );
-  GetModuleFileNameA( wnd_INST, FL, 65535 );
-  GetFullPathNameA( FL, 65535, FP, FL );
-  S := copy( AnsiString( FP ), 1, length( FP ) - length( FL ) );
-  app_WorkDir := PAnsiChar( S );
-  FL := nil;
-  FP := nil;
+  GetMem( fl, 65535 );
+  GetMem( fp, 65535 );
+  GetModuleFileNameA( wnd_INST, fl, 65535 );
+  GetFullPathNameA( fl, 65535, fp, fl );
+  s := copy( AnsiString( fp ), 1, length( fp ) - length( fl ) );
+  app_WorkDir := PAnsiChar( s );
+  fl := nil;
+  fp := nil;
 
   GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
   app_UsrHomeDir := t;
@@ -161,7 +161,7 @@ var
   appCFString : CFStringRef;
   appPath     : array[ 0..8191 ] of AnsiChar;
 begin
-  appBundle   := CFBundleGetMainBundle;
+  appBundle   := CFBundleGetMainBundle();
   appCFURLRef := CFBundleCopyBundleURL( appBundle );
   appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
@@ -174,12 +174,12 @@ end;
 
 procedure zgl_Init;
 begin
-  zgl_GetSysDir;
-  log_Init;
+  zgl_GetSysDir();
+  log_Init();
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
-  if not scr_Create Then exit;
+  if not scr_Create() Then exit;
 
   app_Initialized := TRUE;
   if wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) Then
@@ -190,41 +190,41 @@ begin
   {$ENDIF}
 
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
-  if not gl_Create Then exit;
+  if not gl_Create() Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
 
-  Set2DMode;
+  Set2DMode();
   wnd_ShowCursor( app_ShowCursor );
 
-  app_PInit;
-  app_PLoop;
-  zgl_Destroy;
+  app_PInit();
+  app_PLoop();
+  zgl_Destroy();
 end;
 
 {$IFDEF WINDOWS}
 procedure zgl_InitToHandle;
 begin
-  zgl_GetSysDir;
-  log_Init;
+  zgl_GetSysDir();
+  log_Init();
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
 
-  if not scr_Create Then exit;
+  if not scr_Create() Then exit;
   app_InitToHandle := TRUE;
   wnd_Handle := Handle;
   wnd_DC := GetDC( wnd_Handle );
-  if not gl_Create Then exit;
+  if not gl_Create() Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
 
-  Set2DMode;
+  Set2DMode();
   wnd_ShowCursor( app_ShowCursor );
 
-  app_PInit;
-  app_PLoop;
-  zgl_Destroy;
+  app_PInit();
+  app_PLoop();
+  zgl_Destroy();
 end;
 {$ENDIF}
 
@@ -233,33 +233,33 @@ procedure zgl_Destroy;
     i : Integer;
     p : Pointer;
 begin
-  scr_Destroy;
+  scr_Destroy();
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 1 do
     begin
-      p := managerTimer.First.Next;
+      p := managerTimer.First.next;
       timer_Del( zglPTimer( p ) );
     end;
 
   log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 1 do
     begin
-      p := managerRTarget.First.Next;
+      p := managerRTarget.First.next;
       rtarget_Del( zglPRenderTarget( p ) );
     end;
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 1 do
     begin
-      p := managerTexture.First.Next;
+      p := managerTexture.First.next;
       tex_Del( zglPTexture( p ) );
     end;
 
   log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
   while managerFont.Count > 1 do
     begin
-      p := managerFont.First.Next;
+      p := managerFont.First.next;
       font_Del( zglPFont( p ) );
     end;
 
@@ -267,7 +267,7 @@ begin
   log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
   while managerSound.Count.Items > 1 do
     begin
-      p := managerSound.First.Next;
+      p := managerSound.First.next;
       snd_Del( zglPSound( p ) );
     end;
 
@@ -279,12 +279,12 @@ begin
   if app_WorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
-  gl_Destroy;
-  if not app_InitToHandle Then wnd_Destroy;
+  gl_Destroy();
+  if not app_InitToHandle Then wnd_Destroy();
 
-  app_PExit;
+  app_PExit();
   log_Add( 'End' );
-  log_Close;
+  log_Close();
 end;
 
 procedure zgl_Exit;
@@ -403,10 +403,10 @@ end;
 function zgl_Get;
 begin
   if ( What = APP_DIRECTORY ) or ( What = USR_HOMEDIR ) Then
-    if not app_GetSysDirs Then zgl_GetSysDir;
+    if not app_GetSysDirs Then zgl_GetSysDir();
 
   if ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) Then
-    if not scr_Initialized Then scr_Init;
+    if not scr_Initialized Then scr_Init();
 
   case What of
     SYS_FPS: Result := app_FPS;

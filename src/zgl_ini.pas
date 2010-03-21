@@ -25,7 +25,6 @@ unit zgl_ini;
 
 interface
 uses
-  zgl_types,
   zgl_memory;
 
 type
@@ -82,7 +81,7 @@ uses
   zgl_file,
   zgl_utils;
 
-function DelSpaces( str : AnsiString ) : AnsiString;
+function delSpaces( str : AnsiString ) : AnsiString;
   var
     i, b, e : Integer;
 begin
@@ -104,7 +103,7 @@ begin
     Result := Result + str[ i ];
 end;
 
-procedure AddData( str : AnsiString );
+procedure addData( const str : AnsiString );
   var
     i, j, s, k, len : Integer;
 begin
@@ -120,7 +119,7 @@ begin
       SetLength( iniRec.Section, iniRec.Sections );
       for i := 2 to len - 1 do
         iniRec.Section[ s ].Name := iniRec.Section[ s ].Name + str[ i ];
-      iniRec.Section[ s ].Name := DelSpaces( iniRec.Section[ s ].Name );
+      iniRec.Section[ s ].Name := delSpaces( iniRec.Section[ s ].Name );
     end else
       begin
         s := iniRec.Sections - 1;
@@ -136,11 +135,11 @@ begin
               j := i;
               break;
             end;
-        iniRec.Section[ s ].Key[ k ].Name := DelSpaces( iniRec.Section[ s ].Key[ k ].Name );
+        iniRec.Section[ s ].Key[ k ].Name := delSpaces( iniRec.Section[ s ].Key[ k ].Name );
 
         for i := j + 1 to len do
           iniRec.Section[ s ].Key[ k ].Value := iniRec.Section[ s ].Key[ k ].Value + str[ i ];
-        iniRec.Section[ s ].Key[ k ].Value := DelSpaces( iniRec.Section[ s ].Key[ k ].Value );
+        iniRec.Section[ s ].Key[ k ].Value := delSpaces( iniRec.Section[ s ].Key[ k ].Value );
       end;
 end;
 
@@ -257,29 +256,29 @@ end;
 
 procedure ini_SaveToFile;
   var
-    F    : zglTFile;
+    f    : zglTFile;
     i, j : Integer;
     s    : AnsiString;
 begin
-  file_Open( F, FileName, FOM_CREATE );
+  file_Open( f, FileName, FOM_CREATE );
   for i := 0 to iniRec.Sections - 1 do
     begin
       s := '[ ' + iniRec.Section[ i ].Name + ' ]' + #13#10;
-      file_Write( F, s[ 1 ], length( s ) );
+      file_Write( f, s[ 1 ], length( s ) );
       for j := 0 to iniRec.Section[ i ].Keys - 1 do
         begin
           s := iniRec.Section[ i ].Key[ j ].Name + ' = ';
-          file_Write( F, s[ 1 ], length( s ) );
+          file_Write( f, s[ 1 ], length( s ) );
           s := iniRec.Section[ i ].Key[ j ].Value + #13#10;
-          file_Write( F, s[ 1 ], length( s ) );
+          file_Write( f, s[ 1 ], length( s ) );
         end;
       if i = iniRec.Sections - 1 Then break;
         begin
           s := #13#10;
-          file_Write( F, s[ 1 ], 1 );
+          file_Write( f, s[ 1 ], 1 );
         end;
     end;
-  file_Close( F );
+  file_Close( f );
 end;
 
 procedure ini_ReadKeyStr;
@@ -433,24 +432,24 @@ end;
 
 function ini_GetID;
   var
-    S1, S2 : AnsiString;
+    s1, s2 : AnsiString;
     i, j   : Integer;
 begin
   idS := -1;
   idK := -1;
-  S2  := u_StrUp( s );
+  s2  := u_StrUp( s );
   Result := FALSE;
   for i := 0 to iniRec.Sections - 1 do
     begin
-      S1 := u_StrUp( iniRec.Section[ i ].Name );
-      if S1 = S2 Then
+      s1 := u_StrUp( iniRec.Section[ i ].Name );
+      if s1 = s2 Then
         begin
           idS := i;
-          S2  := u_StrUp( k );
+          s2  := u_StrUp( k );
           for j := 0 to iniRec.Section[ i ].Keys - 1 do
             begin
-              S1 := u_StrUp( iniRec.Section[ i ].Key[ j ].Name );
-              if S1 = S2 Then
+              s1 := u_StrUp( iniRec.Section[ i ].Key[ j ].Name );
+              if s1 = s2 Then
                 begin
                   idK := j;
                   Result := TRUE;
@@ -476,11 +475,11 @@ begin
         s := s + c
       else
         begin
-          AddData( s );
+          addData( s );
           s := '';
         end;
     end;
-  AddData( s );
+  addData( s );
 end;
 
 procedure ini_Free;

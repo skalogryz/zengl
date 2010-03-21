@@ -57,14 +57,14 @@ begin
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
+  glLoadIdentity();
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     glOrtho( 0, Round( ogl_Width - scr_AddCX * 2 / scr_ResCX ), Round( ogl_Height - scr_AddCY * 2 / scr_ResCY ), 0, -1, 1 )
   else
     glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity;
-  scr_SetViewPort;
+  glLoadIdentity();
+  scr_SetViewPort();
 end;
 
 procedure Set3DMode;
@@ -77,17 +77,17 @@ begin
 
   glEnable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
+  glLoadIdentity();
   gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
   glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity;
-  scr_SetViewPort;
+  glLoadIdentity();
+  scr_SetViewPort();
 end;
 
 procedure SetCurrentMode;
 begin
   if ogl_Mode = 2 Then
-    Set2DMode
+    Set2DMode()
   else
     Set3DMode( ogl_FOVY );
 end;
@@ -106,7 +106,7 @@ end;
 procedure scissor_Begin;
 begin
   if b2d_Started Then
-    batch2d_Flush;
+    batch2d_Flush();
   if ( Width < 0 ) or ( Height < 0 ) Then
     exit;
   if cam2DGlobal <> @constCamera2D Then
@@ -142,7 +142,7 @@ end;
 procedure scissor_End;
 begin
   if b2d_Started Then
-    batch2d_Flush;
+    batch2d_Flush();
   if tSCount - 1 < 0 Then
     exit;
   DEC( tSCount );

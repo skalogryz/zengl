@@ -25,7 +25,6 @@ unit zgl_primitives_2d;
 
 interface
 uses
-  zgl_types,
   zgl_fx,
   zgl_textures,
   zgl_math_2d;
@@ -59,7 +58,7 @@ begin
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
       glDisable( GL_BLEND );
     end;
 end;
@@ -93,7 +92,7 @@ begin
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
 
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -146,7 +145,7 @@ begin
 
       if not b2d_Started Then
         begin
-          glEnd;
+          glEnd();
           glDisable( GL_BLEND );
         end;
    end else
@@ -194,7 +193,7 @@ begin
 
       if not b2d_Started Then
         begin
-          glEnd;
+          glEnd();
           glDisable( GL_BLEND );
         end;
     end;
@@ -227,13 +226,13 @@ begin
       glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + Radius * CosTable[ Round( i * k ) ], Y + Radius * SinTable[ Round( i * k ) ] );
-          gl_Vertex2f( X + Radius * CosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ Round( ( i + 1 ) * k ) ] );
+          gl_Vertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
+          gl_Vertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
         end;
 
       if not b2d_Started Then
         begin
-          glEnd;
+          glEnd();
 
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -260,13 +259,13 @@ begin
         for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + Radius * CosTable[ Round( i * k ) ], Y + Radius * SinTable[ Round( i * k ) ] );
-            gl_Vertex2f( X + Radius * CosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * SinTable[ Round( ( i + 1 ) * k ) ] );
+            gl_Vertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
+            gl_Vertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
           end;
 
         if not b2d_Started Then
           begin
-            glEnd;
+            glEnd();
 
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -305,13 +304,13 @@ begin
       glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + yRadius * SinTable[ Round( i * k ) ] );
-          gl_Vertex2f( X + xRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
+          gl_Vertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
+          gl_Vertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
         end;
 
       if not b2d_Started Then
         begin
-          glEnd;
+          glEnd();
 
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -338,13 +337,13 @@ begin
         for i := 0 to Quality - 1 do
           begin
             gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + xRadius * CosTable[ Round( i * k ) ], Y + yRadius * SinTable[ Round( i * k ) ] );
-            gl_Vertex2f( X + xRadius * CosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * SinTable[ Round( ( i + 1 ) * k ) ] );
+            gl_Vertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
+            gl_Vertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
           end;
 
         if not b2d_Started Then
           begin
-            glEnd;
+            glEnd();
 
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -360,36 +359,36 @@ procedure pr2d_TriList;
   var
     i    : Integer;
     w, h : Single;
-    Mode : LongWord;
+    mode : LongWord;
 begin
   if FX and PR2D_FILL > 0 Then
-    Mode := GL_TRIANGLES
+    mode := GL_TRIANGLES
   else
-    Mode := GL_LINES;
-  if ( not b2d_Started ) or batch2d_Check( Mode, FX, Texture ) Then
+    mode := GL_LINES;
+  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
           glEnable( GL_LINE_SMOOTH    );
           glEnable( GL_POLYGON_SMOOTH );
         end;
-      if ( FX and FX_BLEND > 0 ) or ( Mode = GL_LINES ) Then
+      if ( FX and FX_BLEND > 0 ) or ( mode = GL_LINES ) Then
         glEnable( GL_BLEND )
       else
         glEnable( GL_ALPHA_TEST );
 
-      if Assigned( Texture ) and ( Mode = GL_TRIANGLES ) Then
+      if Assigned( Texture ) and ( mode = GL_TRIANGLES ) Then
         begin
           glEnable( GL_TEXTURE_2D );
           glBindTexture( GL_TEXTURE_2D, Texture.ID );
         end;
 
-      glBegin( Mode );
+      glBegin( mode );
     end;
 
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
-  if Assigned( Texture ) and ( Mode = GL_TRIANGLES ) Then
+  if Assigned( Texture ) and ( mode = GL_TRIANGLES ) Then
     begin
       if not Assigned( TexCoords ) Then
         begin
@@ -432,14 +431,14 @@ begin
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
 
       if FX and PR2D_SMOOTH > 0 Then
         begin
           glDisable( GL_LINE_SMOOTH    );
           glDisable( GL_POLYGON_SMOOTH );
         end;
-      if Mode = GL_TRIANGLES Then
+      if mode = GL_TRIANGLES Then
         glDisable( GL_TEXTURE_2D );
       glDisable( GL_BLEND );
       glDisable( GL_ALPHA_TEST );

@@ -113,8 +113,8 @@ function gl_Create;
   {$IFDEF WINDOWS}
   var
     i               : Integer;
-    PixelFormat     : Integer;
-    PixelFormatDesc : TPixelFormatDescriptor;
+    pixelFormat     : Integer;
+    pixelFormatDesc : TPixelFormatDescriptor;
   {$ENDIF}
   {$IFDEF DARWIN}
   var
@@ -123,7 +123,7 @@ function gl_Create;
 begin
   Result := FALSE;
 
-  if not InitGL Then
+  if not InitGL() Then
     begin
       log_Add( 'Cannot load GL library' );
       exit;
@@ -153,8 +153,8 @@ begin
 
   if ogl_Format = 0 Then
     begin
-      FillChar( PixelFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
-      with PixelFormatDesc do
+      FillChar( pixelFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
+      with pixelFormatDesc do
         begin
           nSize        := SizeOf( TPIXELFORMATDESCRIPTOR );
           nVersion     := 1;
@@ -166,11 +166,11 @@ begin
           cStencilBits := ogl_Stencil;
           iLayerType   := PFD_MAIN_PLANE;
         end;
-      PixelFormat := ChoosePixelFormat( wnd_DC, @PixelFormatDesc );
+      pixelFormat := ChoosePixelFormat( wnd_DC, @pixelFormatDesc );
     end else
-      PixelFormat := ogl_Format;
+      pixelFormat := ogl_Format;
 
-  if not SetPixelFormat( wnd_DC, PixelFormat, @PixelFormatDesc ) Then
+  if not SetPixelFormat( wnd_DC, pixelFormat, @pixelFormatDesc ) Then
     begin
       u_Error( 'Cannot set pixel format' );
       exit;
@@ -200,11 +200,11 @@ begin
   if ( not Assigned( wglChoosePixelFormatARB ) ) and ( ogl_Format = 0 ) Then
     begin
       wnd_First := FALSE;
-      ogl_Format := PixelFormat;
-      gl_Destroy;
-      wnd_Destroy;
+      ogl_Format := pixelFormat;
+      gl_Destroy();
+      wnd_Destroy();
       wnd_Create( wnd_Width, wnd_Height );
-      Result := gl_Create;
+      Result := gl_Create();
       exit;
     end;
   if ( ogl_Format = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not app_InitToHandle ) Then
@@ -263,22 +263,22 @@ begin
       if ogl_Format <> 0 Then
         begin
           wnd_First := FALSE;
-          gl_Destroy;
-          wnd_Destroy;
+          gl_Destroy();
+          wnd_Destroy();
           wnd_Create( wnd_Width, wnd_Height );
-          Result := gl_Create;
+          Result := gl_Create();
           exit;
         end;
     end;
 
-  if PixelFormat = 0 Then
+  if pixelFormat = 0 Then
     begin
       u_Error( 'Cannot choose pixel format' );
       exit;
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  if not InitAGL Then
+  if not InitAGL() Then
     begin
       log_Add( 'Cannot load AGL library' );
       exit;
@@ -363,8 +363,8 @@ begin
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
   log_Add( 'GL_RENDERER: ' + glGetString( GL_RENDERER ) );
 
-  gl_LoadEx;
-  gl_ResetState;
+  gl_LoadEx();
+  gl_ResetState();
 
   Result := TRUE;
 end;
@@ -407,7 +407,7 @@ begin
     u_Error( 'Cannot release current OpenGL context');
 
   glXDestroyContext( scr_Display, ogl_Context );
-  glXWaitGL;
+  glXWaitGL();
 {$ENDIF}
 {$IFDEF WINDOWS}
   if not wglMakeCurrent( wnd_DC, 0 ) Then
@@ -420,10 +420,10 @@ begin
     u_Error( 'Cannot release current OpenGL context' );
 
   aglDestroyContext( ogl_Context );
-  FreeAGL;
+  FreeAGL();
 {$ENDIF}
 
-  FreeGL;
+  FreeGL();
 end;
 
 procedure gl_LoadEx;
@@ -608,4 +608,3 @@ begin
 end;
 
 end.
-

@@ -38,9 +38,9 @@ end;
 procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
 procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
 function  mem_Seek( var Memory : zglTMemory; const Offset, Mode : LongWord ) : LongWord;
-function  mem_Read( var Memory : zglTMemory; var buffer; const count : LongWord ) : LongWord;
-function  mem_ReadSwap( var Memory : zglTMemory; var buffer; const count : LongWord ) : LongWord;
-function  mem_Write( var Memory : zglTMemory; const buffer; const count : LongWord ) : LongWord;
+function  mem_Read( var Memory : zglTMemory; var Buffer; const Bytes : LongWord ) : LongWord;
+function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; const Bytes : LongWord ) : LongWord;
+function  mem_Write( var Memory : zglTMemory; const Buffer; const Bytes : LongWord ) : LongWord;
 procedure mem_SetSize( var Memory : zglTMemory; const Size : LongWord );
 procedure mem_Free( var Memory : zglTMemory );
 
@@ -56,25 +56,25 @@ uses
 
 procedure mem_LoadFromFile;
   var
-    F : zglTFile;
+    f : zglTFile;
 begin
   if not file_Exists( FileName ) Then exit;
 
-  file_Open( F, FileName, FOM_OPENR );
-  Memory.Size     := file_GetSize( F );
+  file_Open( f, FileName, FOM_OPENR );
+  Memory.Size     := file_GetSize( f );
   Memory.Position := 0;
   zgl_GetMem( Memory.Memory, Memory.Size );
-  file_Read( F, Memory.Memory^, Memory.Size );
-  file_Close( F );
+  file_Read( f, Memory.Memory^, Memory.Size );
+  file_Close( f );
 end;
 
 procedure mem_SaveToFile;
   var
-    F : zglTFile;
+    f : zglTFile;
 begin
-  file_Open( F, FileName, FOM_CREATE );
-  file_Write( F, Memory.Memory^, Memory.Size );
-  file_Close( F );
+  file_Open( f, FileName, FOM_CREATE );
+  file_Write( f, Memory.Memory^, Memory.Size );
+  file_Close( f );
 end;
 
 function mem_Seek;
@@ -90,19 +90,19 @@ end;
 function mem_Read;
 begin
   {$IFDEF ENDIAN_BIG}
-  if ( count <=4 ) and ( not forceNoSwap ) Then
+  if ( Bytes <=4 ) and ( not forceNoSwap ) Then
     begin
-      Result := mem_ReadSwap( Memory, buffer, count );
+      Result := mem_ReadSwap( Memory, Buffer, Bytes );
       exit;
     end;
   {$ENDIF}
-  if count > 0 Then
+  if Bytes > 0 Then
     begin
       Result := Memory.Size - Memory.Position;
       if Result > 0 Then
         begin
-          if Result > count Then Result := count;
-          Move( Pointer( Ptr( Memory.Memory ) + Memory.Position )^, buffer, Result );
+          if Result > Bytes Then Result := Bytes;
+          Move( Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Buffer, Result );
           INC( Memory.Position, Result );
           exit;
         end;
@@ -112,30 +112,30 @@ end;
 
 function mem_ReadSwap;
   var
-    i       : LongWord;
-    pBuffer : array of Byte;
+    i     : LongWord;
+    pData : array of Byte;
 begin
   {$IFDEF ENDIAN_BIG}
   if forceNoSwap Then
     begin
-    Result := mem_Read( Memory, buffer, count );
+    Result := mem_Read( Memory, Buffer, Bytes );
     exit;
   end;
   {$ENDIF}
-  if count > 0 Then
+  if Bytes > 0 Then
     begin
       Result := Memory.Size - Memory.Position;
       if Result > 0 Then
         begin
-          if Result > count Then Result := count;
-          SetLength( pBuffer, Result );
+          if Result > Bytes Then Result := Bytes;
+          SetLength( pData, Result );
           for i := 0 to Result - 1 do
             begin
-              pbuffer[ Result - i - 1 ] := PByte( Ptr( Memory.Memory ) + Memory.Position )^;
+              pData[ Result - i - 1 ] := PByte( Ptr( Memory.Memory ) + Memory.Position )^;
               INC( Memory.Position );
             end;
-          Move( pBuffer[ 0 ], buffer, Result );
-          SetLength( pBuffer, 0 );
+          Move( pData[ 0 ], Buffer, Result );
+          SetLength( pData, 0 );
           exit;
         end;
     end;
@@ -144,16 +144,16 @@ end;
 
 function mem_Write;
 begin
-  if count = 0 Then
+  if Bytes = 0 Then
     begin
       Result := 0;
       exit;
     end;
-  if Memory.Position + Count > Memory.Size Then
-    mem_SetSize( Memory, Memory.Position + Count );
-  Move( buffer, Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Count );
-  INC( Memory.Position, Count );
-  Result := Count;
+  if Memory.Position + Bytes > Memory.Size Then
+    mem_SetSize( Memory, Memory.Position + Bytes );
+  Move( Buffer, Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Bytes );
+  INC( Memory.Position, Bytes );
+  Result := Bytes;
 end;
 
 procedure mem_SetSize;

@@ -49,7 +49,7 @@ function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
 function gl_GetProc( const Proc : AnsiString ) : Pointer;
-function gl_IsSupported( const Extension : AnsiString; const searchIn: AnsiString ) : Boolean;
+function gl_IsSupported( const Extension : AnsiString; const SearchIn: AnsiString ) : Boolean;
 
 var
   gl_TexCoord2f  : procedure( U, V : Single ); stdcall;
@@ -593,11 +593,7 @@ begin
     SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
     {$IFEND}
   {$ELSE}
-    { according to bug 7570, this is necessary on all x86 platforms,
-      maybe we've to fix the sse control word as well }
-    {$IFDEF x86}
     Set8087CW($133F);
-    {$ENDIF x86}
   {$ENDIF}
 
   ogl_Library := dlopen( libGL {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
@@ -677,13 +673,12 @@ end;
 
 function gl_IsSupported;
   var
-    ExtPos: Integer;
+    extPos: Integer;
 begin
-  ExtPos := Pos( Extension, searchIn );
-  Result := ExtPos > 0;
+  extPos := Pos( Extension, SearchIn );
+  Result := extPos > 0;
   if Result Then
-    Result := ( ( ExtPos + Length( Extension ) - 1 ) = Length( searchIn ) ) or
-                ( searchIn[ ExtPos + Length( Extension ) ] = ' ' );
+    Result := ( ( extPos + Length( Extension ) - 1 ) = Length( SearchIn ) ) or ( SearchIn[ extPos + Length( Extension ) ] = ' ' );
 end;
 
 end.
