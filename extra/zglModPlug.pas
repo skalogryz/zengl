@@ -71,7 +71,7 @@ type
 
 procedure mp_Init;
 function  mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-function  mp_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+function  mp_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : DWORD; var _End : Boolean ) : DWORD;
 procedure mp_DecoderLoop( var Stream : zglTSoundStream );
 procedure mp_DecoderClose( var Stream : zglTSoundStream );
 
@@ -131,16 +131,16 @@ begin
   if not mpInit Then exit;
 
   mem_LoadFromFile( mem, FileName );
-  PModPlugFile( Stream._Data ) := ModPlug_Load( mem.Memory, mem.Size );
+  PModPlugFile( Stream._data ) := ModPlug_Load( mem.Memory, mem.Size );
   mem_Free( mem );
 
-  if Assigned( Stream._Data ) Then
+  if Assigned( Stream._data ) Then
     begin
       Result := TRUE;
 
       Stream.Frequency  := 44100;
       Stream.Channels   := 2;
-      Stream.Length     := ModPlug_GetLength( PModPlugFile( Stream._Data ) );
+      Stream.Length     := ModPlug_GetLength( PModPlugFile( Stream._data ) );
       Stream.BufferSize := 64 * 1024;
       zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
     end else
@@ -151,7 +151,7 @@ function mp_DecoderRead;
 begin
   if not mpInit Then exit;
 
-  Result := ModPlug_Read( PModPlugFile( Stream._Data ), Buffer, Count );
+  Result := ModPlug_Read( PModPlugFile( Stream._data ), Buffer, Bytes );
   _End := Result = 0;
 end;
 
@@ -159,15 +159,15 @@ procedure mp_DecoderLoop;
 begin
   if not mpInit Then exit;
 
-  ModPlug_Seek( PModPlugFile( Stream._Data ), 0 );
+  ModPlug_Seek( PModPlugFile( Stream._data ), 0 );
 end;
 
 procedure mp_DecoderClose;
 begin
   if not mpInit Then exit;
 
-  ModPlug_Unload( PModPlugFile( Stream._Data ) );
-  Stream._Data := nil;
+  ModPlug_Unload( PModPlugFile( Stream._data ) );
+  Stream._data := nil;
 end;
 
 var

@@ -30,7 +30,6 @@ uses
   {$IFNDEF STATIC}
   zglHeader
   {$ELSE}
-  zgl_types,
   zgl_textures
   {$ENDIF}
   ;
@@ -41,14 +40,14 @@ type
 
   zglCSEngine2D = class
   protected
-    FCount : DWORD;
+    FCount : LongWord;
     FList  : array of zglCSprite2D;
 
     procedure SortByLayer( iLo, iHi : Integer );
     procedure SortByID( iLo, iHi : Integer );
 
-    function  GetSprite( ID : DWORD ) : zglCSprite2D;
-    procedure SetSprite( ID : DWORD; const Sprite : zglCSprite2D );
+    function  GetSprite( ID : LongWord ) : zglCSprite2D;
+    procedure SetSprite( ID : LongWord; const Sprite : zglCSprite2D );
   public
     function  AddSprite : Integer; overload;
     function  AddSprite( const Texture : zglPTexture; const Layer : Integer ) : zglCSprite2D; overload;
@@ -58,8 +57,8 @@ type
     procedure Draw;
     procedure Proc;
 
-    property Count: DWORD read FCount;
-    property List[ID : DWORD]: zglCSprite2D read GetSprite write SetSprite;
+    property Count: LongWord read FCount;
+    property List[ID : LongWord]: zglCSprite2D read GetSprite write SetSprite;
   end;
 
   zglCSprite2D = class
@@ -75,7 +74,7 @@ type
     Angle   : Single;
     Frame   : Single;
     Alpha   : Integer;
-    FxFlags : DWORD;
+    FxFlags : LongWord;
 
     constructor Create( const _Manager : zglCSEngine2D; const _ID : Integer );
     destructor  Free;
@@ -114,12 +113,12 @@ end;
 
 function zglCSEngine2D.AddSprite( const Texture : zglPTexture; const Layer : Integer ) : zglCSprite2D;
   var
-    ID : Integer;
+    id : Integer;
 begin
-  ID := AddSprite;
+  id := AddSprite();
 
-  FList[ ID ] := zglCSprite2D.Create( Self, ID );
-  Result := FList[ ID ];
+  FList[ id ] := zglCSprite2D.Create( Self, id );
+  Result := FList[ id ];
   Result.OnInit( Texture, Layer );
 end;
 
@@ -191,7 +190,7 @@ begin
   while i < FCount do
     begin
       s := FList[ i ];
-      s.OnDraw;
+      s.OnDraw();
 
       if s.Destroy Then
         DelSprite( s.ID )
@@ -209,7 +208,7 @@ begin
   while i < FCount do
     begin
       s := FList[ i ];
-      s.OnProc;
+      s.OnProc();
 
       if s.Destroy Then
         DelSprite( s.ID )
@@ -220,54 +219,54 @@ end;
 
 procedure zglCSEngine2D.SortByLayer;
   var
-    Lo, Hi, Mid : Integer;
-    T : zglCSprite2D;
+    lo, hi, mid : Integer;
+    t : zglCSprite2D;
 begin
-  Lo   := iLo;
-  Hi   := iHi;
-  Mid  := FList[ ( Lo + Hi ) shr 1 ].Layer;
+  lo   := iLo;
+  hi   := iHi;
+  mid  := FList[ ( lo + hi ) shr 1 ].Layer;
 
   repeat
-    while FList[ Lo ].Layer < Mid do INC( Lo );
-    while FList[ Hi ].Layer > Mid do DEC( Hi );
-    if Lo <= Hi then
+    while FList[ lo ].Layer < mid do INC( lo );
+    while FList[ hi ].Layer > mid do DEC( hi );
+    if lo <= hi then
       begin
-        T           := FList[ Lo ];
-        FList[ Lo ] := FList[ Hi ];
-        FList[ Hi ] := T;
-        INC( Lo );
-        DEC( Hi );
+        t           := FList[ lo ];
+        FList[ lo ] := FList[ hi ];
+        FList[ hi ] := t;
+        INC( lo );
+        DEC( hi );
       end;
-  until Lo > Hi;
+  until lo > hi;
 
-  if Hi > iLo Then SortByLayer( iLo, Hi );
-  if Lo < iHi Then SortByLayer( Lo, iHi );
+  if hi > iLo Then SortByLayer( iLo, hi );
+  if lo < iHi Then SortByLayer( lo, iHi );
 end;
 
 procedure zglCSEngine2D.SortByID;
   var
-    Lo, Hi, Mid : Integer;
-    T : zglCSprite2D;
+    lo, hi, mid : Integer;
+    t : zglCSprite2D;
 begin
-  Lo   := iLo;
-  Hi   := iHi;
-  Mid  := FList[ ( Lo + Hi ) shr 1 ].ID;
+  lo   := iLo;
+  hi   := iHi;
+  mid  := FList[ ( ho + li ) shr 1 ].ID;
 
   repeat
-    while FList[ Lo ].ID < Mid do INC( Lo );
-    while FList[ Hi ].ID > Mid do DEC( Hi );
+    while FList[ lo ].ID < mid do INC( lo );
+    while FList[ hi ].ID > mid do DEC( hi );
     if Lo <= Hi then
       begin
-        T           := FList[ Lo ];
-        FList[ Lo ] := FList[ Hi ];
-        FList[ Hi ] := T;
-        INC( Lo );
-        DEC( Hi );
+        t           := FList[ lo ];
+        FList[ lo ] := FList[ hi ];
+        FList[ hi ] := t;
+        INC( lo );
+        DEC( hi );
       end;
-  until Lo > Hi;
+  until lo > hi;
 
-  if Hi > iLo Then SortByID( iLo, Hi );
-  if Lo < iHi Then SortByID( Lo, iHi );
+  if hi > iLo Then SortByID( iLo, hi );
+  if lo < iHi Then SortByID( lo, iHi );
 end;
 
 constructor zglCSprite2D.Create;
