@@ -82,12 +82,12 @@ end;
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
-    rtType     : Byte;
+    _type      : Byte;
     Handle     : Pointer;
     Surface    : zglPTexture;
     Flags      : Byte;
 
-    Prev, Next : zglPRenderTarget;
+    prev, next : zglPRenderTarget;
 end;
 
 type
@@ -100,7 +100,7 @@ end;
 type
   zglTRenderCallback = procedure( Data : Pointer );
 
-function  rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function  rtarget_Add( _type : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
 procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
@@ -131,44 +131,44 @@ function rtarget_Add;
     n            : Integer;
     fbconfig     : GLXFBConfig;
     visualinfo   : PXVisualInfo;
-    PBufferiAttr : array[ 0..8 ] of Integer;
-    FBConfigAttr : array[ 0..15 ] of Integer;
+    pbufferiAttr : array[ 0..8 ] of Integer;
+    fbconfigAttr : array[ 0..15 ] of Integer;
 {$ENDIF}
 {$IFDEF WINDOWS}
-    PBufferiAttr : array[ 0..15 ] of Integer;
-    PBufferfAttr : array[ 0..15 ] of Single;
-    PixelFormat  : array[ 0..63 ] of Integer;
+    pbufferiAttr : array[ 0..15 ] of Integer;
+    pbufferfAttr : array[ 0..15 ] of Single;
+    pixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : LongWord;
 {$ENDIF}
 {$IFDEF DARWIN}
     i            : Integer;
-    PBufferdAttr : array[ 0..31 ] of LongWord;
+    pbufferdAttr : array[ 0..31 ] of LongWord;
 {$ENDIF}
 begin
   Result := @managerRTarget.First;
-  while Assigned( Result.Next ) do
-    Result := Result.Next;
+  while Assigned( Result.next ) do
+    Result := Result.next;
 
-  zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
+  zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
 
-  if ( not ogl_CanFBO ) and ( rtType = RT_TYPE_FBO ) Then
+  if ( not ogl_CanFBO ) and ( _type = RT_TYPE_FBO ) Then
     if ogl_CanPBuffer Then
-      rtType := RT_TYPE_PBUFFER
+      _type := RT_TYPE_PBUFFER
     else
-      rtType := RT_TYPE_SIMPLE;
+      _type := RT_TYPE_SIMPLE;
 
-  if ( not ogl_CanPBuffer ) and ( rtType = RT_TYPE_PBUFFER ) Then
+  if ( not ogl_CanPBuffer ) and ( _type = RT_TYPE_PBUFFER ) Then
     if ogl_CanFBO Then
-      rtType := RT_TYPE_FBO
+      _type := RT_TYPE_FBO
     else
-      rtType := RT_TYPE_SIMPLE;
+      _type := RT_TYPE_SIMPLE;
 
-  case rtType of
-    RT_TYPE_SIMPLE: Result.Next.Handle := nil;
+  case _type of
+    RT_TYPE_SIMPLE: Result.next.Handle := nil;
     RT_TYPE_FBO:
       begin
-        zgl_GetMem( Result.Next.Handle, SizeOf( zglTFBO ) );
-        pFBO := Result.Next.Handle;
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
+        pFBO := Result.next.Handle;
 
         glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
@@ -203,22 +203,22 @@ begin
     {$IFDEF LINUX}
     RT_TYPE_PBUFFER:
       begin
-        zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
-        pPBuffer := Result.Next.Handle;
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
+        pPBuffer := Result.next.Handle;
 
-        FBConfigAttr[ 0 ]  := GLX_DOUBLEBUFFER;
-        FBConfigAttr[ 1 ]  := GL_FALSE;
-        FBConfigAttr[ 2 ]  := GLX_ALPHA_SIZE;
-        FBConfigAttr[ 3 ]  := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
-        FBConfigAttr[ 4 ]  := GLX_DEPTH_SIZE;
-        FBConfigAttr[ 5 ]  := ogl_zDepth;
-        FBConfigAttr[ 6 ]  := GLX_RENDER_TYPE;
-        FBConfigAttr[ 7 ]  := GL_TRUE; //GLX_RGBA_BIT,
-        FBConfigAttr[ 8 ]  := GLX_DRAWABLE_TYPE;
-        FBConfigAttr[ 9 ]  := GLX_PBUFFER_BIT;
-        FBConfigAttr[ 10 ] := None;
+        fbconfigAttr[ 0 ]  := GLX_DOUBLEBUFFER;
+        fbconfigAttr[ 1 ]  := GL_FALSE;
+        fbconfigAttr[ 2 ]  := GLX_ALPHA_SIZE;
+        fbconfigAttr[ 3 ]  := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        fbconfigAttr[ 4 ]  := GLX_DEPTH_SIZE;
+        fbconfigAttr[ 5 ]  := ogl_zDepth;
+        fbconfigAttr[ 6 ]  := GLX_RENDER_TYPE;
+        fbconfigAttr[ 7 ]  := GL_TRUE; //GLX_RGBA_BIT,
+        fbconfigAttr[ 8 ]  := GLX_DRAWABLE_TYPE;
+        fbconfigAttr[ 9 ]  := GLX_PBUFFER_BIT;
+        fbconfigAttr[ 10 ] := None;
 
-        fbconfig := glXChooseFBConfig( scr_Display, scr_Default, @FBConfigAttr[ 0 ], @n );
+        fbconfig := glXChooseFBConfig( scr_Display, scr_Default, @fbconfigAttr[ 0 ], @n );
         if not Assigned( fbconfig ) Then
           begin
             log_Add( 'PBuffer: failed to choose GLXFBConfig' );
@@ -230,27 +230,27 @@ begin
         case ogl_PBufferMode of
           1:
             begin
-              PBufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
-              PBufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
-              PBufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
-              PBufferiAttr[ 3 ] := Round( Surface.Height / Surface.V );
-              PBufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
-              PBufferiAttr[ 5 ] := GL_TRUE;
-              PBufferiAttr[ 6 ] := GLX_LARGEST_PBUFFER;
-              PBufferiAttr[ 7 ] := GL_TRUE;
-              PBufferiAttr[ 8 ] := None;
+              pbufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
+              pbufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
+              pbufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
+              pbufferiAttr[ 3 ] := Round( Surface.Height / Surface.V );
+              pbufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
+              pbufferiAttr[ 5 ] := GL_TRUE;
+              pbufferiAttr[ 6 ] := GLX_LARGEST_PBUFFER;
+              pbufferiAttr[ 7 ] := GL_TRUE;
+              pbufferiAttr[ 8 ] := None;
 
-              pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @PBufferiAttr[ 0 ] );
+              pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @pbufferiAttr[ 0 ] );
             end;
           2:
             begin
-              PBufferiAttr[ 0 ] := GLX_PRESERVED_CONTENTS;
-              PBufferiAttr[ 1 ] := GL_TRUE;
-              PBufferiAttr[ 2 ] := GLX_LARGEST_PBUFFER;
-              PBufferiAttr[ 3 ] := GL_TRUE;
-              PBufferiAttr[ 4 ] := None;
+              pbufferiAttr[ 0 ] := GLX_PRESERVED_CONTENTS;
+              pbufferiAttr[ 1 ] := GL_TRUE;
+              pbufferiAttr[ 2 ] := GLX_LARGEST_PBUFFER;
+              pbufferiAttr[ 3 ] := GL_TRUE;
+              pbufferiAttr[ 4 ] := None;
 
-              pPBuffer.PBuffer := glXCreateGLXPbufferSGIX( scr_Display, pPBuffer.Handle, Surface.Width, Surface.Height, @PBufferiAttr[ 0 ] );
+              pPBuffer.PBuffer := glXCreateGLXPbufferSGIX( scr_Display, pPBuffer.Handle, Surface.Width, Surface.Height, @pbufferiAttr[ 0 ] );
             end;
         end;
 
@@ -280,8 +280,8 @@ begin
           end;
 
         glXMakeCurrent( scr_Display, pPBuffer.PBuffer, pPBuffer.Context );
-        gl_ResetState;
-        Set2DMode;
+        gl_ResetState();
+        Set2DMode();
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
         ssprite2d_Draw( Surface, 0, ogl_Height - Surface.Height, ogl_Width - ( ogl_Width - Surface.Width ), ogl_Height - ( ogl_Height - Surface.Height ), 0, 255 );
         glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
@@ -290,26 +290,25 @@ begin
     {$IFDEF WINDOWS}
     RT_TYPE_PBUFFER:
       begin
-        zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
-        pPBuffer := Result.Next.Handle;
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
+        pPBuffer := Result.next.Handle;
 
-        FillChar( PBufferiAttr[ 0 ], 16 * 4, 0 );
-        FillChar( PBufferfAttr[ 0 ], 16 * 4, 0 );
+        FillChar( pbufferiAttr[ 0 ], 16 * 4, 0 );
+        FillChar( pbufferfAttr[ 0 ], 16 * 4, 0 );
+        pbufferiAttr[ 0  ] := WGL_DRAW_TO_PBUFFER_ARB;
+        pbufferiAttr[ 1  ] := GL_TRUE;
+        pbufferiAttr[ 2  ] := WGL_DOUBLE_BUFFER_ARB;
+        pbufferiAttr[ 3  ] := GL_FALSE;
+        pbufferiAttr[ 4  ] := WGL_COLOR_BITS_ARB;
+        pbufferiAttr[ 5  ] := scr_BPP;
+        pbufferiAttr[ 6  ] := WGL_DEPTH_BITS_ARB;
+        pbufferiAttr[ 7  ] := ogl_zDepth;
+        pbufferiAttr[ 8  ] := WGL_STENCIL_BITS_ARB;
+        pbufferiAttr[ 9  ] := ogl_Stencil;
+        pbufferiAttr[ 10 ] := WGL_ALPHA_BITS_ARB;
+        pbufferiAttr[ 11 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
 
-        PBufferiAttr[ 0  ] := WGL_DRAW_TO_PBUFFER_ARB;
-        PBufferiAttr[ 1  ] := GL_TRUE;
-        PBufferiAttr[ 2  ] := WGL_DOUBLE_BUFFER_ARB;
-        PBufferiAttr[ 3  ] := GL_FALSE;
-        PBufferiAttr[ 4  ] := WGL_COLOR_BITS_ARB;
-        PBufferiAttr[ 5  ] := scr_BPP;
-        PBufferiAttr[ 6  ] := WGL_DEPTH_BITS_ARB;
-        PBufferiAttr[ 7  ] := ogl_zDepth;
-        PBufferiAttr[ 8  ] := WGL_STENCIL_BITS_ARB;
-        PBufferiAttr[ 9  ] := ogl_Stencil;
-        PBufferiAttr[ 10 ] := WGL_ALPHA_BITS_ARB;
-        PBufferiAttr[ 11 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
-
-        wglChoosePixelFormatARB( wnd_DC, @PBufferiAttr[ 0 ], @PBufferfAttr[ 0 ], 64, @PixelFormat, @nPixelFormat );
+        wglChoosePixelFormatARB( wnd_DC, @pbufferiAttr[ 0 ], @pbufferfAttr[ 0 ], 64, @pixelFormat, @nPixelFormat );
 
         pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, PixelFormat[ 0 ], Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), nil );
         if pPBuffer.Handle <> 0 Then
@@ -330,8 +329,8 @@ begin
               exit;
             end;
         wglMakeCurrent( pPBuffer.DC, pPBuffer.RC );
-        gl_ResetState;
-        Set2DMode;
+        gl_ResetState();
+        Set2DMode();
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
         ssprite2d_Draw( Surface, 0, ogl_Height - Surface.Height, ogl_Width - ( ogl_Width - Surface.Width ), ogl_Height - ( ogl_Height - Surface.Height ), 0, 255 );
         wglMakeCurrent( wnd_DC, ogl_Context );
@@ -340,41 +339,41 @@ begin
     {$IFDEF DARWIN}
     RT_TYPE_PBUFFER:
       begin
-        zgl_GetMem( Result.Next.Handle, SizeOf( zglTPBuffer ) );
-        pPBuffer := Result.Next.Handle;
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
+        pPBuffer := Result.next.Handle;
 
-        PBufferdAttr[ 0  ] := AGL_RGBA;
-        PBufferdAttr[ 1  ] := GL_TRUE;
-        PBufferdAttr[ 2  ] := AGL_RED_SIZE;
-        PBufferdAttr[ 3  ] := 8;
-        PBufferdAttr[ 4  ] := AGL_GREEN_SIZE;
-        PBufferdAttr[ 5  ] := 8;
-        PBufferdAttr[ 6  ] := AGL_BLUE_SIZE;
-        PBufferdAttr[ 7  ] := 8;
-        PBufferdAttr[ 8  ] := AGL_ALPHA_SIZE;
-        PBufferdAttr[ 9  ] := 8;
-        PBufferdAttr[ 10 ] := AGL_DEPTH_SIZE;
-        PBufferdAttr[ 11 ] := ogl_zDepth;
-        PBufferdAttr[ 12 ] := AGL_DOUBLEBUFFER;
+        pbufferdAttr[ 0  ] := AGL_RGBA;
+        pbufferdAttr[ 1  ] := GL_TRUE;
+        pbufferdAttr[ 2  ] := AGL_RED_SIZE;
+        pbufferdAttr[ 3  ] := 8;
+        pbufferdAttr[ 4  ] := AGL_GREEN_SIZE;
+        pbufferdAttr[ 5  ] := 8;
+        pbufferdAttr[ 6  ] := AGL_BLUE_SIZE;
+        pbufferdAttr[ 7  ] := 8;
+        pbufferdAttr[ 8  ] := AGL_ALPHA_SIZE;
+        pbufferdAttr[ 9  ] := 8;
+        pbufferdAttr[ 10 ] := AGL_DEPTH_SIZE;
+        pbufferdAttr[ 11 ] := ogl_zDepth;
+        pbufferdAttr[ 12 ] := AGL_DOUBLEBUFFER;
         i := 13;
         if ogl_Stencil > 0 Then
           begin
-            PBufferdAttr[ i     ] := AGL_STENCIL_SIZE;
-            PBufferdAttr[ i + 1 ] := ogl_Stencil;
+            pbufferdAttr[ i     ] := AGL_STENCIL_SIZE;
+            pbufferdAttr[ i + 1 ] := ogl_Stencil;
             INC( i, 2 );
           end;
         if ogl_FSAA > 0 Then
           begin
-            PBufferdAttr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
-            PBufferdAttr[ i + 1 ] := 1;
-            PBufferdAttr[ i + 2 ] := AGL_SAMPLES_ARB;
-            PBufferdAttr[ i + 3 ] := ogl_FSAA;
+            pbufferdAttr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
+            pbufferdAttr[ i + 1 ] := 1;
+            pbufferdAttr[ i + 2 ] := AGL_SAMPLES_ARB;
+            pbufferdAttr[ i + 3 ] := ogl_FSAA;
             INC( i, 4 );
           end;
-        PBufferdAttr[ i ] := AGL_NONE;
+        pbufferdAttr[ i ] := AGL_NONE;
 
         DMGetGDeviceByDisplayID( DisplayIDType( scr_Display ), ogl_Device, FALSE );
-        ogl_Format := aglChoosePixelFormat( @ogl_Device, 1, @PBufferdAttr[ 0 ] );
+        ogl_Format := aglChoosePixelFormat( @ogl_Device, 1, @pbufferdAttr[ 0 ] );
         if not Assigned( ogl_Format ) Then
           begin
             log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
@@ -400,13 +399,13 @@ begin
       end;
     {$ENDIF}
   end;
-  Result.Next.rtType  := rtType;
-  Result.Next.Surface := Surface;
-  Result.Next.Flags   := Flags;
+  Result.next._type   := _type;
+  Result.next.Surface := Surface;
+  Result.next.Flags   := Flags;
 
-  Result.Next.Prev := Result;
-  Result.Next.Next := nil;
-  Result := Result.Next;
+  Result.next.prev := Result;
+  Result.next.next := nil;
+  Result := Result.next;
   INC( managerRTarget.Count );
 end;
 
@@ -414,7 +413,7 @@ procedure rtarget_Del;
 begin
   if not Assigned( Target ) Then exit;
 
-  case Target.rtType of
+  case Target._type of
     RT_TYPE_FBO:
       begin
         if glIsRenderBufferEXT( zglPFBO( Target.Handle ).RenderBuffer ) = GL_TRUE Then
@@ -445,29 +444,29 @@ begin
       end;
   end;
 
-  if Assigned( Target.Prev ) Then
-    Target.Prev.Next := Target.Next;
-  if Assigned( Target.Next ) Then
-    Target.Next.Prev := Target.Prev;
+  if Assigned( Target.prev ) Then
+    Target.prev.next := Target.next;
+  if Assigned( Target.next ) Then
+    Target.next.prev := Target.prev;
 
   if Assigned( Target.Handle ) Then
     FreeMemory( Target.Handle );
   FreeMemory( Target );
-  DEC( managerRTarget.Count );
-
   Target := nil;
+
+  DEC( managerRTarget.Count );
 end;
 
 procedure rtarget_Set;
 begin
-  batch2d_Flush;
+  batch2d_Flush();
 
   if Assigned( Target ) Then
     begin
       lRTarget := Target;
       lMode := ogl_Mode;
 
-      case Target.rtType of
+      case Target._type of
         RT_TYPE_SIMPLE:
           begin
           end;
@@ -503,7 +502,7 @@ begin
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
     end else
       begin
-        case lRTarget.rtType of
+        case lRTarget._type of
           RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
             begin
               glEnable( GL_TEXTURE_2D );
@@ -520,7 +519,7 @@ begin
             end;
         end;
 
-        if lRTarget.rtType = RT_TYPE_PBUFFER Then
+        if lRTarget._type = RT_TYPE_PBUFFER Then
           begin
             {$IFDEF LINUX}
             glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
@@ -535,8 +534,8 @@ begin
           end;
 
         ogl_Mode := lMode;
-        scr_SetViewPort;
-        if ( lRTarget.rtType = RT_TYPE_SIMPLE ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
+        scr_SetViewPort();
+        if ( lRTarget._type = RT_TYPE_SIMPLE ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
           glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
       end;
 end;
@@ -555,12 +554,12 @@ begin
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE );
         RenderCallback( Data );
-        batch2d_Flush;
+        batch2d_Flush();
 
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE );
         RenderCallback( Data );
-        batch2d_Flush;
+        batch2d_Flush();
 
         rtarget_Set( nil );
 

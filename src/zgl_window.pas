@@ -116,13 +116,7 @@ begin
 {$IFDEF LINUX}
   FillChar( wnd_Attr, SizeOf( wnd_Attr ), 0 );
   wnd_Attr.colormap   := XCreateColormap( scr_Display, wnd_Root, ogl_VisualInfo.visual, AllocNone );
-  wnd_Attr.event_mask := ExposureMask or
-                         FocusChangeMask or
-                         ButtonPressMask or
-                         ButtonReleaseMask or
-                         PointerMotionMask or
-                         KeyPressMask or
-                         KeyReleaseMask;
+  wnd_Attr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask;
 
   if wnd_FullScreen Then
     begin
@@ -137,16 +131,8 @@ begin
   {$ENDIF}
   wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
 
-  wnd_Handle := XCreateWindow( scr_Display,
-                               wnd_Root,
-                               wnd_X, wnd_Y,
-                               wnd_Width, wnd_Height,
-                               0,
-                               ogl_VisualInfo.depth,
-                               InputOutput,
-                               ogl_VisualInfo.visual,
-                               wnd_ValueMask,
-                               @wnd_Attr );
+  wnd_Handle := XCreateWindow( scr_Display, wnd_Root, wnd_X, wnd_Y, wnd_Width, wnd_Height, 0, ogl_VisualInfo.depth, InputOutput, ogl_VisualInfo.visual,
+                               wnd_ValueMask, @wnd_Attr );
 
   if wnd_Handle = 0 Then
     begin
@@ -174,7 +160,7 @@ begin
   wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', TRUE );
   XSetWMProtocols( scr_Display, wnd_Handle, @wnd_DestroyAtom, 1 );
 
-  wnd_Select;
+  wnd_Select();
 
   if wnd_FullScreen Then
     begin
@@ -223,17 +209,9 @@ begin
   if ogl_Format = 0 Then
     wnd_Handle := CreateWindowEx( WS_EX_TOOLWINDOW, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ),
-                                  wnd_ClassName,
-                                  PChar( wnd_Caption ),
-                                  wnd_Style,
-                                  wnd_X, wnd_Y,
+    wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ), wnd_ClassName, PChar( wnd_Caption ), wnd_Style, wnd_X, wnd_Y,
                                   wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                  wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ),
-                                  0,
-                                  0,
-                                  wnd_INST,
-                                  nil );
+                                  wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ), 0, 0, wnd_INST, nil );
 
   if wnd_Handle = 0 Then
     begin
@@ -247,7 +225,7 @@ begin
       u_Error( 'Cannot get device context' );
       exit;
     end;
-  wnd_Select;
+  wnd_Select();
 {$ENDIF}
 {$IFDEF DARWIN}
   size.Left   := wnd_X;
@@ -299,7 +277,7 @@ begin
   wnd_Events[ 14 ].eventKind  := kEventProcessCommand;
   InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wnd_Events[ 0 ], nil, nil );
 
-  wnd_Select;
+  wnd_Select();
 {$ENDIF}
   Result := TRUE;
 end;
@@ -340,7 +318,7 @@ procedure wnd_Update;
 {$ENDIF}
 begin
 {$IFDEF LINUX}
-  wnd_Destroy;
+  wnd_Destroy();
   wnd_Create( wnd_Width, wnd_Height );
   glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
   wnd_ShowCursor( app_ShowCursor );
@@ -391,7 +369,7 @@ begin
   if Assigned( wnd_Handle ) Then
     begin
       SetWTitle( wnd_Handle, wnd_Caption );
-      wnd_Select;
+      wnd_Select();
     end;
 {$ENDIF}
 end;
@@ -413,7 +391,7 @@ begin
     begin
       SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
       aglUpdateContext( ogl_Context );
-      wnd_Select;
+      wnd_Select();
     end;
 {$ENDIF}
   ogl_Width  := Width;
@@ -421,13 +399,13 @@ begin
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     scr_CorrectResolution( scr_ResW, scr_ResH )
   else
-    SetCurrentMode;
+    SetCurrentMode();
 end;
 
 procedure wnd_SetPos;
   {$IFDEF WINDOWS}
   var
-    Mode : LongWord;
+    mode : LongWord;
   {$ENDIF}
 begin
   wnd_X := X;
@@ -441,15 +419,15 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   if not app_Focus Then
-    Mode := HWND_BOTTOM
+    mode := HWND_BOTTOM
   else
-    Mode := HWND_TOPMOST;
+    mode := HWND_TOPMOST;
 
   if wnd_Handle <> 0 Then
     if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, Mode, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
+      SetWindowPos( wnd_Handle, mode, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
     else
-      SetWindowPos( wnd_Handle, Mode, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
+      SetWindowPos( wnd_Handle, mode, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then
@@ -499,7 +477,7 @@ procedure wnd_Select;
 begin
 {$IFDEF LINUX}
   XMapWindow( scr_Display, wnd_Handle );
-  glXWaitX;
+  glXWaitX();
 {$ENDIF}
 {$IFDEF WINDOWS}
   BringWindowToTop( wnd_Handle );

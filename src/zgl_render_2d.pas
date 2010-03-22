@@ -23,7 +23,6 @@ unit zgl_render_2d;
 
 interface
 uses
-  zgl_types,
   zgl_opengl_all,
   zgl_textures;
 
@@ -63,7 +62,7 @@ end;
 
 procedure batch2d_End;
 begin
-  batch2d_Flush;
+  batch2d_Flush();
   b2d_Batches  := 0;
   b2dcur_Mode  := 0;
   b2dcur_FX    := 0;
@@ -79,7 +78,7 @@ begin
     begin
       INC( b2d_Batches );
       b2d_New := TRUE;
-      glEnd;
+      glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_ALPHA_TEST );
@@ -96,13 +95,11 @@ end;
 
 function batch2d_Check;
 begin
-  if ( Mode <> b2dcur_Mode ) or
-     ( Texture <> b2dcur_Tex ) or
-     ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
+  if ( Mode <> b2dcur_Mode ) or ( Texture <> b2dcur_Tex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
      ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
     begin
       if not b2d_New Then
-        batch2d_Flush;
+        batch2d_Flush();
       b2d_New := TRUE;
     end;
 

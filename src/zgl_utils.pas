@@ -49,23 +49,23 @@ function u_BoolToStr( const Value : Boolean ) : String;
 function u_StrToBool( const Value : String ) : Boolean;
 
 // Только для английских символов попадающих в диапазон 0..127
-function u_StrUp( const str : String ) : String;
-function u_StrDown( const str : String ) : String;
+function u_StrUp( const Str : String ) : String;
+function u_StrDown( const Str : String ) : String;
 // Удаляет один символ из utf8-строки
-procedure u_Backspace( var str : String );
+procedure u_Backspace( var Str : String );
 // Возвращает количество символов в utf8-строке
-function  u_Length( const str : String ) : Integer;
+function  u_Length( const Str : String ) : Integer;
 // Возвращает количество слов, разделеных разделителем d
-function  u_Words( const str : String; const d : Char = ' ' ) : Integer;
-function  u_GetWord( const Str : String; const n : Integer; const d : Char = ' ' ) : String;
+function  u_Words( const Str : String; const D : Char = ' ' ) : Integer;
+function  u_GetWord( const Str : String; const N : Integer; const D : Char = ' ' ) : String;
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 
-procedure u_Error( const errStr : String );
-procedure u_Warning( const errStr : String );
+procedure u_Error( const ErrStr : String );
+procedure u_Warning( const ErrStr : String );
 
-function u_GetPOT( const v : Integer ) : Integer;
+function u_GetPOT( const Value : Integer ) : Integer;
 
-procedure u_Sleep( const msec : LongWord );
+procedure u_Sleep( const Msec : LongWord );
 
 {$IFDEF LINUX_OR_DARWIN}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -93,10 +93,10 @@ end;
 
 function u_StrToInt;
   var
-    E : Integer;
+    e : Integer;
 begin
-  Val( String( Value ), Result, E );
-  if E <> 0 Then
+  Val( String( Value ), Result, e );
+  if e <> 0 Then
     Result := 0;
 end;
 
@@ -107,10 +107,10 @@ end;
 
 function u_StrToFloat;
   var
-    E : Integer;
+    e : Integer;
 begin
-  Val( String( Value ), Result, E );
-  if E <> 0 Then
+  Val( String( Value ), Result, e );
+  if e <> 0 Then
     Result := 0;
 end;
 
@@ -166,13 +166,13 @@ begin
   if str = '' Then exit;
   i := 1;
   last := 0;
-  while i <= length( str ) do
+  while i <= length( Str ) do
     begin
       last := i;
-      font_GetCID( str, last, @i );
+      font_GetCID( Str, last, @i );
     end;
 
-  SetLength( str, last - 1 )
+  SetLength( Str, last - 1 )
 end;
 
 function u_Length;
@@ -181,10 +181,10 @@ function u_Length;
 begin
   Result := 0;
   i := 1;
-  while i <= length( str ) do
+  while i <= length( Str ) do
     begin
       INC( Result );
-      font_GetCID( str, i, @i );
+      font_GetCID( Str, i, @i );
     end;
 end;
 
@@ -196,12 +196,12 @@ begin
   m := 0;
   for i := 1 to length( Str ) do
     begin
-      if ( Str[ i ] <> d ) and ( m = 0 ) Then
+      if ( Str[ i ] <> D ) and ( m = 0 ) Then
         begin
           INC( Result );
           m := 1;
         end;
-      if ( Str[ i ] = d ) and ( m = 1 ) Then m := 0;
+      if ( Str[ i ] = D ) and ( m = 1 ) Then m := 0;
     end;
 end;
 
@@ -211,15 +211,15 @@ function u_GetWord;
     i, p : Integer;
 begin
   i := 0;
-  Result := d + Str;
+  Result := D + Str;
 
 b:
   INC( i );
-  p := Pos( d, Result );
+  p := Pos( D, Result );
   while Result[ p ] = d do Delete( Result, p, 1 );
 
-  p := Pos( d, Result );
-  if n > i Then
+  p := Pos( D, Result );
+  if N > i Then
     begin
       Delete( Result, 1, p - 1 );
       goto b;
@@ -230,28 +230,28 @@ end;
 
 procedure u_SortList;
   var
-    Lo, Hi : Integer;
-    Mid, T : String;
+    lo, hi : Integer;
+    mid, t : String;
 begin
-  Lo  := iLo;
-  Hi  := iHi;
-  Mid := List.Items[ ( Lo + Hi ) shr 1 ];
+  lo  := iLo;
+  hi  := iHi;
+  mid := List.Items[ ( lo + hi ) shr 1 ];
 
   repeat
-    while List.Items[ Lo ] < Mid do INC( Lo );
-    while List.Items[ Hi ] > Mid do DEC( Hi );
-    if Lo <= Hi then
+    while List.Items[ lo ] < mid do INC( lo );
+    while List.Items[ hi ] > mid do DEC( hi );
+    if lo <= hi then
       begin
-        T                := List.Items[ Lo ];
-        List.Items[ Lo ] := List.Items[ Hi ];
-        List.Items[ Hi ] := T;
-        INC( Lo );
-        DEC( Hi );
+        t                := List.Items[ lo ];
+        List.Items[ lo ] := List.Items[ hi ];
+        List.Items[ hi ] := t;
+        INC( lo );
+        DEC( hi );
       end;
-  until Lo > Hi;
+  until lo > hi;
 
-  if Hi > iLo Then u_SortList( List, iLo, Hi );
-  if Lo < iHi Then u_SortList( List, Lo, iHi );
+  if hi > iLo Then u_SortList( List, iLo, hi );
+  if lo < iHi Then u_SortList( List, lo, iHi );
 end;
 
 procedure u_Error;
@@ -261,16 +261,16 @@ procedure u_Error;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  WriteLn( 'ERROR: ' + errStr );
+  WriteLn( 'ERROR: ' + ErrStr );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  MessageBox( 0, PChar( errStr ), 'ERROR!', MB_OK or MB_ICONERROR );
+  MessageBox( 0, PChar( ErrStr ), 'ERROR!', MB_OK or MB_ICONERROR );
 {$ENDIF}
 {$IFDEF DARWIN}
-  StandardAlert( kAlertNoteAlert, 'ERROR!', errStr, nil, outItemHit );
+  StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
 {$ENDIF}
 
-  log_Add( 'ERROR: ' + errStr );
+  log_Add( 'ERROR: ' + ErrStr );
 end;
 
 procedure u_Warning;
@@ -280,21 +280,21 @@ procedure u_Warning;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  WriteLn( 'WARNING: ' + errStr );
+  WriteLn( 'WARNING: ' + ErrStr );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  MessageBox( 0, PChar( errStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
+  MessageBox( 0, PChar( ErrStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
 {$ENDIF}
 {$IFDEF DARWIN}
-  StandardAlert( kAlertNoteAlert, 'WARNING!', errStr, nil, outItemHit );
+  StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
 {$ENDIF}
 
-  log_Add( 'WARNING: ' + errStr );
+  log_Add( 'WARNING: ' + ErrStr );
 end;
 
 function u_GetPOT;
 begin
-  Result := v - 1;
+  Result := Value - 1;
   Result := Result or ( Result shr 1 );
   Result := Result or ( Result shr 2 );
   Result := Result or ( Result shr 4 );
@@ -310,12 +310,12 @@ procedure u_Sleep;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  tv.tv_sec  := msec div 1000;
-  tv.tv_usec := ( msec mod 1000 ) * 1000;
+  tv.tv_sec  := Msec div 1000;
+  tv.tv_usec := ( Msec mod 1000 ) * 1000;
   select( 0, nil, nil, nil, tv );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Sleep( msec );
+  Sleep( Msec );
 {$ENDIF}
 end;
 

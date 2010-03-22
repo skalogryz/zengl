@@ -34,7 +34,6 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_types,
   zgl_opengl_all;
 
 const
@@ -112,6 +111,7 @@ var
 
 implementation
 uses
+  zgl_types,
   zgl_main,
   zgl_application,
   zgl_window,
@@ -181,13 +181,13 @@ begin
       dmSize             := SizeOf( DEVMODE );
       dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
       dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
-      dmBitsPerPel       := GetDisplayColors;
-      dmDisplayFrequency := GetDisplayRefresh;
+      dmBitsPerPel       := GetDisplayColors();
+      dmDisplayFrequency := GetDisplayRefresh();
       dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  scr_Display  := CGMainDisplayID;
+  scr_Display  := CGMainDisplayID();
   scr_Desktop  := CGDisplayCurrentMode( scr_Display );
   scr_DesktopW := CGDisplayPixelsWide( scr_Display );
   scr_DesktopH := CGDisplayPixelsHigh( scr_Display );
@@ -202,7 +202,7 @@ function scr_Create;
 begin
   Result := FALSE;
 {$IFDEF LINUX}
-  scr_Init;
+  scr_Init();
 
   if not glXQueryExtension( scr_Display, i, j ) Then
     begin
@@ -280,13 +280,13 @@ begin
   wnd_Root := RootWindow( scr_Display, ogl_VisualInfo.screen );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  scr_Init;
+  scr_Init();
 {$ENDIF}
 {$IFDEF DARWIN}
-  scr_Init;
+  scr_Init();
 {$ENDIF}
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
-  scr_GetResList;
+  scr_GetResList();
   Result := TRUE;
 end;
 
@@ -342,15 +342,15 @@ end;
 procedure scr_Destroy;
 begin
 {$IFDEF LINUX}
-  scr_Reset;
+  scr_Reset();
   XFree( scr_ModeList );
-  glXWaitX;
+  glXWaitX();
 {$ENDIF}
 {$IFDEF WINDOWS}
-  scr_Reset;
+  scr_Reset();
 {$ENDIF}
 {$IFDEF DARWIN}
-  scr_Reset;
+  scr_Reset();
 {$ENDIF}
 end;
 
@@ -361,7 +361,7 @@ begin
   XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
   XUngrabKeyboard( scr_Display, CurrentTime );
   XUngrabPointer( scr_Display, CurrentTime );
-  glXWaitX;
+  glXWaitX();
 {$ENDIF}
 {$IFDEF WINDOWS}
   ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
@@ -374,8 +374,7 @@ end;
 
 procedure scr_Clear;
 begin
-  glClear( GL_COLOR_BUFFER_BIT   * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or
-           GL_DEPTH_BUFFER_BIT   * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
+  glClear( GL_COLOR_BUFFER_BIT * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
            GL_STENCIL_BUFFER_BIT * Byte( app_Flags and STENCIL_BUFFER_CLEAR > 0 ) );
 end;
 
@@ -394,7 +393,7 @@ begin
             glXGetVideoSyncSGI( sync );
             glXWaitVideoSyncSGI( 2, ( sync + 1 ) mod 2, sync );
           end;
-      glFinish;
+      glFinish();
     end;
 
   glXSwapBuffers( scr_Display, wnd_Handle );
@@ -402,12 +401,12 @@ begin
 {$IFDEF WINDOWS}
   if ogl_CanVSync Then
     begin
-      sync := wglGetSwapIntervalEXT;
+      sync := wglGetSwapIntervalEXT();
       if scr_VSync Then
         begin
           if sync = 0 Then
             wglSwapIntervalEXT( 1 );
-          glFinish;
+          glFinish();
         end else
           if sync <> 0 Then
             wglSwapIntervalEXT( 0 );
@@ -481,15 +480,13 @@ begin
       exit;
     end;
 
-  if ( wnd_FullScreen ) and
-     ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and
-     ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
+  if ( wnd_FullScreen ) and ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
     begin
       XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
       XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
     end else
       begin
-        scr_Reset;
+        scr_Reset();
         XMapWindow( scr_Display, wnd_Handle );
       end;
 {$ENDIF}
@@ -503,10 +500,7 @@ begin
           begin
             dmSize   := SizeOf( DEVMODE );
             dmFields := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
-            if ( dmPelsWidth  = scr_Width  ) and
-               ( dmPelsHeight = scr_Height ) and
-               ( dmBitsPerPel = scr_BPP    ) and
-               ( dmDisplayFrequency > r    ) and
+            if ( dmPelsWidth = scr_Width  ) and ( dmPelsHeight = scr_Height ) and ( dmBitsPerPel = scr_BPP ) and ( dmDisplayFrequency > r ) and
                ( dmDisplayFrequency <= scr_Desktop.dmDisplayFrequency ) Then
               begin
                 if ( ChangeDisplaySettings( scr_Settings, CDS_TEST or CDS_FULLSCREEN ) = DISP_CHANGE_SUCCESSFUL ) Then
@@ -537,18 +531,14 @@ begin
         end else
           ChangeDisplaySettings( scr_Settings, CDS_FULLSCREEN )
     end else
-      scr_Reset;
+      scr_Reset();
 {$ENDIF}
 {$IFDEF DARWIN}
   //CGDisplayCapture( scr_Display );
   if scr_Refresh <> 0 Then
     begin
-      scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display,
-                                                                    scr_BPP,
-                                                                    scr_Width, scr_Height,
-                                                                    scr_Refresh,
-                                                                    b );
-      scr_Refresh := b;
+      scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display, scr_BPP, scr_Width, scr_Height, scr_Refresh, b );
+      scr_Refresh  := b;
     end;
   if scr_Refresh = 0 Then
     scr_Settings := CGDisplayBestModeForParameters( scr_Display, scr_BPP, scr_Width, scr_Height, b );
@@ -562,16 +552,16 @@ begin
     end;
 
   if wnd_FullScreen Then
-    HideMenuBar
+    HideMenuBar()
   else
-    ShowMenuBar;
+    ShowMenuBar();
 {$ENDIF}
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
   else
     log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp windowed' );
   if app_Work Then
-    wnd_Update;
+    wnd_Update();
 end;
 
 procedure scr_CorrectResolution;
@@ -608,7 +598,7 @@ begin
   ogl_Height := Round( wnd_Height / scr_ResCY );
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
-  SetCurrentMode;
+  SetCurrentMode();
 
   cam2dZoomX := cam2dGlobal.Zoom.X;
   cam2dZoomY := cam2dGlobal.Zoom.Y;
@@ -654,13 +644,13 @@ begin
 
 {$IFDEF LINUX}
   XFree( scr_ModeList );
-  scr_Destroy;
-  scr_Create;
+  scr_Destroy();
+  scr_Create();
 {$ENDIF}
 
-  gl_Destroy;
-  wnd_Update;
-  gl_Create;
+  gl_Destroy();
+  wnd_Update();
+  gl_Create();
   if ogl_FSAA <> 0 Then
     log_Add( 'Set FSAA: ' + u_IntToStr( ogl_FSAA ) + 'x' )
   else
