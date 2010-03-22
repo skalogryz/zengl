@@ -80,8 +80,8 @@ procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; 
 function  tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
 
 var
-  CosTable : array[ 0..360 ] of Single;
-  SinTable : array[ 0..360 ] of Single;
+  cosTable : array[ 0..360 ] of Single;
+  sinTable : array[ 0..360 ] of Single;
 
 implementation
 uses
@@ -121,8 +121,8 @@ begin
   for i := 0 to 360 do
     begin
       rad_angle := i * ( pi / 180 );
-      CosTable[ i ] := cos( rad_angle );
-      SinTable[ i ] := sin( rad_angle );
+      cosTable[ i ] := cos( rad_angle );
+      sinTable[ i ] := sin( rad_angle );
     end;
 end;
 
@@ -133,7 +133,7 @@ begin
   else
     if Angle < 0 Then
       INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
-  Result := CosTable[ Angle ];
+  Result := cosTable[ Angle ];
 end;
 
 function m_Sin;
@@ -143,7 +143,7 @@ begin
   else
     if Angle < 0 Then
       INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
-  Result := SinTable[ Angle ];
+  Result := sinTable[ Angle ];
 end;
 
 function m_Distance;

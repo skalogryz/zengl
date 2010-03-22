@@ -160,9 +160,9 @@ type
 end;
 {$ENDIF}
 
-procedure jpg_Load( var pData : Pointer; var W, H : Word );
-procedure jpg_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : Word );
-procedure jpg_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
+procedure jpg_Load( var Data : Pointer; var W, H : Word );
+procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 procedure jpg_FillData;
 
 implementation
@@ -207,39 +207,39 @@ end;
 
 function Decoder_FillInputData( cinfo : j_decompress_ptr ) : Boolean; register;
   var
-    Decoder   : zglPJPGDecoder;
-    BytesRead : Integer;
+    decoder   : zglPJPGDecoder;
+    bytesRead : Integer;
 begin
-  Decoder := zglPJPGDecoder( cinfo.src );
-  BytesRead := mem_Read( jpgMem, Decoder.field^, INPUT_BUF_SIZE );
-  if BytesRead <= 0 Then
+  decoder := zglPJPGDecoder( cinfo.src );
+  bytesRead := mem_Read( jpgMem, decoder.field^, INPUT_BUF_SIZE );
+  if bytesRead <= 0 Then
     begin
       WARNMS( j_common_ptr( cinfo ), JWRN_JPEG_EOF );
 
-      Decoder.field[ 0 ] := JOCTET( $FF );
-      Decoder.field[ 1 ] := JOCTET( JPEG_EOI );
-      BytesRead := 2;
+      decoder.field[ 0 ] := JOCTET( $FF );
+      decoder.field[ 1 ] := JOCTET( JPEG_EOI );
+      bytesRead := 2;
     end;
 
-  Decoder.mgr.next_input_byte := JOCTETptr( Decoder.field );
-  Decoder.mgr.bytes_in_buffer := BytesRead;
+  decoder.mgr.next_input_byte := JOCTETptr( decoder.field );
+  decoder.mgr.bytes_in_buffer := bytesRead;
   Result := TRUE;
 end;
 
 procedure Decoder_SkipInputData( cinfo : j_decompress_ptr; BytesToSkip : Long ); register;
   var
-    Decoder : zglPJPGDecoder;
+    decoder : zglPJPGDecoder;
 begin
-  Decoder := zglPJPGDecoder( cInfo.src );
+  decoder := zglPJPGDecoder( cInfo.src );
   if BytesToSkip > 0 Then
     begin
       while BytesToSkip > Decoder.mgr.bytes_in_buffer do
         begin
-          DEC( BytesToSkip, Decoder.mgr.bytes_in_buffer );
+          DEC( BytesToSkip, decoder.mgr.bytes_in_buffer );
           Decoder_FillInputData( cInfo );
         end;
-      INC( Decoder.mgr.next_input_byte, size_t( BytesToSkip ) );
-      DEC( Decoder.mgr.bytes_in_buffer, size_t( BytesToSkip ) );
+      INC( decoder.mgr.next_input_byte, size_t( BytesToSkip ) );
+      DEC( decoder.mgr.bytes_in_buffer, size_t( BytesToSkip ) );
     end;
 end;
 {$ENDIF}
@@ -325,8 +325,8 @@ begin
   end;
 {$ENDIF}
 
-  zgl_GetMem( pData, jpgData.Width * jpgData.Height * 4 );
-  Move( Pointer( jpgData.Data )^, pData^, jpgData.Width * jpgData.Height * 4 );
+  zgl_GetMem( Data, jpgData.Width * jpgData.Height * 4 );
+  Move( Pointer( jpgData.Data )^, Data^, jpgData.Width * jpgData.Height * 4 );
   W := jpgData.Width;
   H := jpgData.Height;
 
@@ -348,16 +348,16 @@ end;
 procedure jpg_LoadFromFile;
 begin
   mem_LoadFromFile( jpgMem, FileName );
-  jpg_Load( pData, W, H );
+  jpg_Load( Data, W, H );
 end;
 
 procedure jpg_LoadFromMemory;
 begin
-  jpgMem.Size     := Memory.Size;
+  jpgMem.Size := Memory.Size;
   zgl_GetMem( jpgMem.Memory, Memory.Size );
   jpgMem.Position := Memory.Position;
   Move( Memory.Memory^, jpgMem.Memory^, Memory.Size );
-  jpg_Load( pData, W, H );
+  jpg_Load( Data, W, H );
 end;
 
 procedure jpg_FillData;

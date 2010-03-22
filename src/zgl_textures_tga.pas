@@ -50,9 +50,9 @@ type
     end;
 end;
 
-procedure tga_Load( var pData : Pointer; var W, H : Word );
-procedure tga_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : Word );
-procedure tga_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
+procedure tga_Load( var Data : Pointer; var W, H : Word );
+procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 
 procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
 procedure tga_FlipHorizontally( var Data : Pointer; w, h, pixelSize : Integer );
@@ -89,7 +89,7 @@ begin
     end;
 
   if tgaHeader.ImageType >= 9 Then
-    tga_RLEDecode
+    tga_RLEDecode()
   else
     begin
       SetLength( tgaData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize );
@@ -137,27 +137,27 @@ begin
 
   if tgaHeader.ImgSpec.Depth shr 3 = 3 Then
     begin
-      zgl_GetMem( pData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+      zgl_GetMem( Data, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
       for i := 0 to tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height - 1 do
         begin
-          PByte( Ptr( pData ) + i * 4 + 2 )^ := tgaData[ i * 3 + 0 ];
-          PByte( Ptr( pData ) + i * 4 + 1 )^ := tgaData[ i * 3 + 1 ];
-          PByte( Ptr( pData ) + i * 4 + 0 )^ := tgaData[ i * 3 + 2 ];
-          PByte( Ptr( pData ) + i * 4 + 3 )^ := 255;
+          PByte( Ptr( Data ) + i * 4 + 2 )^ := tgaData[ i * 3 + 0 ];
+          PByte( Ptr( Data ) + i * 4 + 1 )^ := tgaData[ i * 3 + 1 ];
+          PByte( Ptr( Data ) + i * 4 + 0 )^ := tgaData[ i * 3 + 2 ];
+          PByte( Ptr( Data ) + i * 4 + 3 )^ := 255;
         end;
     end else
       if tgaHeader.ImgSpec.Depth shr 3 = 4 Then
         begin
-          zgl_GetMem( pData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+          zgl_GetMem( Data, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
           for i := 0 to tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height - 1 do
             begin
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := tgaData[ i * 4 + 0 ];
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := tgaData[ i * 4 + 1 ];
-              PByte( Ptr( pData ) + i * 4 + 0 )^ := tgaData[ i * 4 + 2 ];
-              PByte( Ptr( pData ) + i * 4 + 3 )^ := tgaData[ i * 4 + 3 ];
+              PByte( Ptr( Data ) + i * 4 + 2 )^ := tgaData[ i * 4 + 0 ];
+              PByte( Ptr( Data ) + i * 4 + 1 )^ := tgaData[ i * 4 + 1 ];
+              PByte( Ptr( Data ) + i * 4 + 0 )^ := tgaData[ i * 4 + 2 ];
+              PByte( Ptr( Data ) + i * 4 + 3 )^ := tgaData[ i * 4 + 3 ];
             end;
         end else
-          pData := nil;
+          Data := nil;
   W := tgaHeader.ImgSpec.Width;
   H := tgaHeader.ImgSpec.Height;
 
@@ -172,16 +172,16 @@ end;
 procedure tga_LoadFromFile;
 begin
   mem_LoadFromFile( tgaMem, FileName );
-  tga_Load( pData, W, H );
+  tga_Load( Data, W, H );
 end;
 
 procedure tga_LoadFromMemory;
 begin
-  tgaMem.Size     := Memory.Size;
+  tgaMem.Size := Memory.Size;
   zgl_GetMem( tgaMem.Memory, Memory.Size );
   tgaMem.Position := Memory.Position;
   Move( Memory.Memory^, tgaMem.Memory^, Memory.Size );
-  tga_Load( pData, W, H );
+  tga_Load( Data, W, H );
 end;
 
 procedure tga_FlipVertically;
@@ -201,8 +201,8 @@ end;
 
 procedure tga_FlipHorizontally;
   var
-    scanLine : array of Byte;
     i, j, x  : Integer;
+    scanLine : array of Byte;
 begin
   SetLength( scanLine, w * pixelSize );
 
