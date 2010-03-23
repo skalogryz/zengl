@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.2.0b               }
-{ date:    2010.03.08           }
+{ version: 0.2 RC1              }
+{ date:    2010.03.23           }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
@@ -24,6 +24,10 @@ unit zglHeader;
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF MSWINDOWS}
+  {$DEFINE WINDOWS}
+{$ENDIF}
+
 interface
 {$IFDEF DARWIN}
 uses
@@ -31,13 +35,12 @@ uses
 {$ENDIF}
 
 type
-  DWORD   = LongWord;
-  Ptr     = {$IFDEF CPU64}QWORD{$ELSE}DWORD{$ENDIF};
+  Ptr     = {$IFDEF CPU64}QWORD{$ELSE}LongWord{$ENDIF};
   PPtr    = ^Ptr;
-  {$IFDEF WIN32}
-  HANDLE  = DWORD;
-  HDC     = DWORD;
-  HGLRC   = DWORD;
+  {$IFDEF WINDOWS}
+  HANDLE  = LongWord;
+  HDC     = LongWord;
+  HGLRC   = LongWord;
   {$ENDIF}
 
 type
@@ -46,21 +49,21 @@ type
     Items : array of String;
 end;
 
-type zglTFile = DWORD;
+type zglTFile = LongWord;
 type zglTFileList = zglTStringList;
 type
   zglPMemory = ^zglTMemory;
   zglTMemory = record
     Memory   : Pointer;
-    Size     : DWORD;
-    Position : DWORD;
+    Size     : LongWord;
+    Position : LongWord;
 end;
 
 const
 {$IFDEF LINUX}
   libZenGL = 'libZenGL.so';
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   libZenGL = 'ZenGL.dll';
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -74,7 +77,7 @@ procedure zglFree;
 
 var
   zgl_Init         : procedure( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-  zgl_InitToHandle : procedure( const Handle : DWORD; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+  zgl_InitToHandle : procedure( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
   zgl_Exit         : procedure;
 
 const
@@ -93,24 +96,24 @@ const
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_DECODER     = $000023;
   WIDGET_TYPE_ID         = $000030;
-  WIDGET_DESC_FILL       = $000031;
+  WIDGET_FILL_DESC       = $000031;
   WIDGET_ONDRAW          = $000032;
   WIDGET_ONPROC          = $000033;
 
 var
-  zgl_Reg : procedure( const What : DWORD; const UserData : Pointer );
+  zgl_Reg : procedure( const What : LongWord; const UserData : Pointer );
 
 const
-  SYS_FPS         = 1;  // DWORD,  := zgl_Get( SYS_FPS )
+  SYS_FPS         = 1;  // LongWord,  := zgl_Get( SYS_FPS )
   APP_PAUSED      = 2;  // Boolean
   APP_DIRECTORY   = 3;  // PAnsiChar
   USR_HOMEDIR     = 4;  // PAnsiChar
   LOG_FILENAME    = 5;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
-  ZGL_VERSION     = 6;  // DWORD
-  SCR_ADD_X       = 7;  // DWORD
-  SCR_ADD_Y       = 8;  // DWORD
-  DESKTOP_WIDTH   = 9;  // DWORD
-  DESKTOP_HEIGHT  = 10; // DWORD
+  ZGL_VERSION     = 6;  // LongWord
+  SCR_ADD_X       = 7;  // LongWord
+  SCR_ADD_Y       = 8;  // LongWord
+  DESKTOP_WIDTH   = 9;  // LongWord
+  DESKTOP_HEIGHT  = 10; // LongWord
   RESOLUTION_LIST = 11; // PResolutionList
   MANAGER_TIMER   = 12; // zglPTimerManager
   MANAGER_TEXTURE = 13; // zglPTextureManager
@@ -120,9 +123,9 @@ const
   MANAGER_GUI     = 17; // zglPGUIManager
 
 var
-  zgl_Get       : function( const What : DWORD ) : Ptr;
+  zgl_Get       : function( const What : LongWord ) : Ptr;
   zgl_GetSysDir : procedure;
-  zgl_GetMem    : procedure( var Mem : Pointer; const Size : DWORD );
+  zgl_GetMem    : procedure( var Mem : Pointer; const Size : LongWord );
 
 const
   COLOR_BUFFER_CLEAR    = $000001;
@@ -143,8 +146,8 @@ const
   CROP_INVISIBLE        = $008000;
 
 var
-  zgl_Enable  : procedure( const What : DWORD );
-  zgl_Disable : procedure( const What : DWORD );
+  zgl_Enable  : procedure( const What : LongWord );
+  zgl_Disable : procedure( const What : LongWord );
 
 // LOG
   log_Add : procedure( const Message : AnsiString; const Timings : Boolean = TRUE );
@@ -157,7 +160,7 @@ var
 
 // SCREEN
 type
-  zglPResolitionList = ^zglTResolutionList;
+  zglPResolutionList = ^zglTResolutionList;
   zglTResolutionList = record
     Count  : Integer;
     Width  : array of Integer;
@@ -207,7 +210,7 @@ type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Active     : Boolean;
-    Interval   : DWORD;
+    Interval   : LongWord;
     LastTick   : Double;
     OnTimer    : procedure;
 
@@ -217,12 +220,12 @@ end;
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count   : DWORD;
+    Count   : LongWord;
     First   : zglTTimer;
 end;
 
 var
-  timer_Add      : function( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
+  timer_Add      : function( const OnTimer : Pointer; const Interval : LongWord ) : zglPTimer;
   timer_Del      : procedure( var Timer : zglPTimer );
   timer_GetTicks : function : Double;
   timer_Reset    : procedure;
@@ -389,12 +392,12 @@ var
 type
   zglPTexture = ^zglTTexture;
   zglTTexture = record
-    ID            : DWORD;
+    ID            : LongWord;
     Width, Height : WORD;
     U, V          : Single;
     FramesX       : WORD;
     FramesY       : WORD;
-    Flags         : DWORD;
+    Flags         : LongWord;
 
     Prev, Next    : zglPTexture;
 end;
@@ -411,8 +414,8 @@ type
   zglPTextureManager = ^zglTTextureManager;
   zglTTextureManager = record
     Count   : record
-                Items   : DWORD;
-                Formats : DWORD;
+                Items   : LongWord;
+                Formats : LongWord;
               end;
     First   : zglTTexture;
     Formats : array of zglTTextureFormat;
@@ -446,24 +449,24 @@ var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
   tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
-  tex_CreateZero     : function( const Width, Height : WORD; const Color, Flags : DWORD ) : zglPTexture;
-  tex_LoadFromFile   : function( const FileName : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
-  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : DWORD ) : zglPTexture;
+  tex_CreateZero     : function( const Width, Height : WORD; const Color, Flags : LongWord ) : zglPTexture;
+  tex_LoadFromFile   : function( const FileName : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
+  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : WORD );
   tex_SetMask        : function( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
   tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
-  tex_Filter         : procedure( Texture : zglPTexture; const Flags : DWORD );
+  tex_Filter         : procedure( Texture : zglPTexture; const Flags : LongWord );
   tex_SetAnisotropy  : procedure( const Level : Byte );
 
 // RENDER TARGETS
 type
   zglPFBO = ^zglTFBO;
   zglTFBO = record
-    FrameBuffer  : DWORD;
-    RenderBuffer : DWORD;
+    FrameBuffer  : LongWord;
+    RenderBuffer : LongWord;
 end;
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
@@ -487,7 +490,7 @@ end;
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTRenderTarget;
 end;
 
@@ -565,8 +568,8 @@ const
   FX2D_SCALE    = $000010;
 
 var
-  fx2d_SetColor    : procedure( const Color : DWORD );
-  fx2d_SetVCA      : procedure( const c1, c2, c3, c4 : DWORD; const a1, a2, a3, a4 : Byte );
+  fx2d_SetColor    : procedure( const Color : LongWord );
+  fx2d_SetVCA      : procedure( const c1, c2, c3, c4 : LongWord; const a1, a2, a3, a4 : Byte );
   fx2d_SetVertexes : procedure( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
   fx2d_SetScale    : procedure( const scaleX, scaleY : Single );
 
@@ -594,12 +597,12 @@ const
   PR2D_SMOOTH = $020000;
 
 var
-  pr2d_Pixel   : procedure( const X, Y : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255 );
-  pr2d_Line    : procedure( const X1, Y1, X2, Y2 : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = 0 );
-  pr2d_Rect    : procedure( const X, Y, W, H : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = 0 );
-  pr2d_Circle  : procedure( const X, Y, Radius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-  pr2d_Ellipse : procedure( const X, Y, xRadius, yRadius : Single; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-  pr2d_TriList : procedure( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  pr2d_Pixel   : procedure( const X, Y : Single; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255 );
+  pr2d_Line    : procedure( const X1, Y1, X2, Y2 : Single; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const FX : LongWord = 0 );
+  pr2d_Rect    : procedure( const X, Y, W, H : Single; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const FX : LongWord = 0 );
+  pr2d_Circle  : procedure( const X, Y, Radius : Single; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : LongWord = 0 );
+  pr2d_Ellipse : procedure( const X, Y, xRadius, yRadius : Single; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : LongWord = 0 );
+  pr2d_TriList : procedure( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
 
 // Sprites 2D
 type
@@ -607,7 +610,7 @@ type
   zglPSEngine2D = ^zglTSEngine2D;
 
   zglTSEngine2D = record
-    Count : DWORD;
+    Count : LongWord;
     List  : array of zglPSprite2D;
   end;
 
@@ -622,7 +625,7 @@ type
     Angle   : Single;
     Frame   : Single;
     Alpha   : Integer;
-    FxFlags : DWORD;
+    FxFlags : LongWord;
     Data    : Pointer;
 
     OnInit  : procedure( const Sprite : zglPSprite2D );
@@ -659,13 +662,14 @@ var
   sengine2d_Draw      : procedure;
   sengine2d_Proc      : procedure;
 
-  ssprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-  asprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-  csprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-  tiles2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Tiles : zglTTiles2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-  sgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-  agrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
-  cgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+  texture2d_Draw : procedure( const Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  ssprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  asprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : WORD; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  csprite2d_Draw : procedure( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  tiles2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Tiles : zglTTiles2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  sgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  agrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+  cgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
 
 // Text
 type
@@ -698,7 +702,7 @@ end;
 type
   zglPFontManager = ^zglTFontManager;
   zglTFontManager = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTFont;
 end;
 
@@ -717,10 +721,10 @@ var
   font_Del            : procedure( var Font : zglPFont );
   font_LoadFromFile   : function( const FileName : String ) : zglPFont;
   font_LoadFromMemory : function( const Memory : zglTMemory ) : zglPFont;
-  text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
-  text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-  text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
-  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+  text_Draw           : procedure( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : LongWord = 0 );
+  text_DrawEx         : procedure( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
+  text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : LongWord = 0 );
+  text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
   text_GetWidth       : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
   textFx_SetLength    : procedure( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 
@@ -805,18 +809,21 @@ end;
   zglTWidget = record
     _id      : Integer;
     _type    : Integer;
-    desc     : Pointer;
-    data     : Pointer;
-    rect     : zglTRect;
-    rectEx   : zglTRect;
-    client   : zglTRect;
-    align    : DWORD;
-    layer    : Integer;
-    focus    : Boolean;
-    modal    : Boolean;
-    visible  : Boolean;
-    mousein  : Boolean;
-    draged   : Boolean;
+
+    Desc     : Pointer;
+    Data     : Pointer;
+    Rect     : zglTRect;
+    RectEx   : zglTRect;
+    Client   : zglTRect;
+
+    Align    : LongWord;
+    Layer    : Integer;
+
+    Visible  : Boolean;
+    Focus    : Boolean;
+    Modal    : Boolean;
+    MouseIn  : Boolean;
+    Draged   : Boolean;
 
     OnDraw   : procedure( const Widget : zglPWidget );
     OnProc   : procedure( const Event  : zglPEvent );
@@ -847,9 +854,11 @@ end;
   //Event
   zglTEvent = record
     _type      : Integer;
-    sender     : zglPWidget;
-    widget     : zglPWidget;
-    Next, Prev : zglPEvent;
+
+    Sender     : zglPWidget;
+    Widget     : zglPWidget;
+
+    next, prev : zglPEvent;
     case byte of
       0: ( drag_pos     : zglTPoint2D );
       1: ( mouse_pos    : zglTPoint2D );
@@ -861,7 +870,7 @@ end;
 
   //Event list
   zglTEventList = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTEvent;
 end;
 
@@ -869,7 +878,6 @@ end;
   zglTButtonDesc = record
     Font    : zglPFont;
     Caption : String;
-
     Pressed : Boolean;
 end;
 
@@ -877,7 +885,6 @@ end;
   zglTCheckBoxDesc = record
     Font    : zglPFont;
     Caption : String;
-
     Checked : Boolean;
 end;
 
@@ -885,7 +892,6 @@ end;
   zglTRadioButtonDesc = record
     Font    : zglPFont;
     Caption : String;
-
     Checked : Boolean;
     Group   : Integer;
 end;
@@ -898,9 +904,8 @@ end;
 
   zglPEditBoxDesc = ^zglTEditBoxDesc;
   zglTEditBoxDesc = record
-    Font : zglPFont;
-    Text : String;
-
+    Font     : zglPFont;
+    Text     : String;
     Max      : Integer;
     ReadOnly : Boolean;
 end;
@@ -921,7 +926,6 @@ end;
     ItemIndex     : Integer;
     ItemHeight    : Integer;
     DropDownCount : Integer;
-
     DropedDown    : Boolean;
 end;
 
@@ -941,8 +945,8 @@ end;
     Max      : Integer;
     Min      : Integer;
 
-    UPressed : Boolean;
-    DPressed : Boolean;
+    uPressed : Boolean;
+    dPressed : Boolean;
 end;
 
   zglPScrollBarDesc = ^zglTScrollBarDesc;
@@ -953,9 +957,9 @@ end;
     PageSize : Integer;
     Max      : Integer;
 
-    UPressed : Boolean;
-    DPressed : Boolean;
-    SDraged  : Boolean;
+    uPressed : Boolean;
+    dPressed : Boolean;
+    sDraged  : Boolean;
 end;
 
 var
@@ -970,13 +974,12 @@ const
   SND_ALL           = -2;
   SND_STREAM        = -3;
 
-  SND_STATE_PLAYING  = 1;
-  SND_STATE_PERCENT  = 2;
-  SND_STATE_TIME     = 3;
-  SND_INFO_LENGTH    = 4;
+  SND_STATE_PLAYING = 1;
+  SND_STATE_PERCENT = 2;
+  SND_STATE_TIME    = 3;
+  SND_INFO_LENGTH   = 4;
 
 type
-  zglPSoundChannel = ^zglTSoundChannel;
   zglPSound        = ^zglTSound;
   zglPSoundStream  = ^zglTSoundStream;
   zglPSoundDecoder = ^zglTSoundDecoder;
@@ -984,8 +987,7 @@ type
   zglPSoundManager = ^zglTSoundManager;
 
   zglTSoundChannel = record
-    Source     : DWORD;
-
+    Source     : LongWord;
     Frequency  : Integer;
     Volume     : Single;
     Position   : record
@@ -994,32 +996,32 @@ type
   end;
 
   zglTSound = record
-    Buffer     : DWORD;
-    sCount     : DWORD;
-    Channel    : array of zglTSoundChannel;
+    Buffer      : LongWord;
+    SourceCount : LongWord;
+    Channel     : array of zglTSoundChannel;
 
-    Data       : Pointer;
-    Size       : Integer;
-    Length     : Double;
-    Frequency  : Integer;
+    Data        : Pointer;
+    Size        : LongWord;
+    Length      : Double;
+    Frequency   : LongWord;
 
-    Prev, Next : zglPSound;
+    prev, next  : zglPSound;
   end;
 
   zglTSoundStream = record
-    _Data      : Pointer;
-    _File      : zglTFile;
-    _Decoder   : zglPSoundDecoder;
-    _Playing   : Boolean;
-    _Paused    : Boolean;
-    _Complete  : Double;
-    _LastTime  : Double;
+    _data      : Pointer;
+    _file      : zglTFile;
+    _decoder   : zglPSoundDecoder;
+    _playing   : Boolean;
+    _paused    : Boolean;
+    _complete  : Double;
+    _lastTime  : Double;
 
     Buffer     : Pointer;
-    BufferSize : DWORD;
+    BufferSize : LongWord;
 
-    Frequency  : DWORD;
-    Channels   : DWORD;
+    Frequency  : LongWord;
+    Channels   : LongWord;
     Length     : Double;
 
     Loop       : Boolean;
@@ -1028,7 +1030,7 @@ type
   zglTSoundDecoder = record
     Ext   : String;
     Open  : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-    Read  : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+    Read  : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : LongWord; var _End : Boolean ) : LongWord;
     Loop  : procedure( var Stream : zglTSoundStream );
     Close : procedure( var Stream : zglTSoundStream );
   end;
@@ -1036,14 +1038,14 @@ type
   zglTSoundFormat = record
     Extension  : String;
     Decoder    : zglPSoundDecoder;
-    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : Integer );
-    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : Integer );
+    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
   end;
 
   zglTSoundManager = record
     Count   : record
-      Items   : DWORD;
-      Formats : DWORD;
+      Items   : LongWord;
+      Formats : LongWord;
               end;
     First   : zglTSound;
     Formats : array of zglTSoundFormat;
@@ -1120,12 +1122,12 @@ const
 var
   file_Open         : procedure( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
   file_Exists       : function( const FileName : String ) : Boolean;
-  file_Seek         : function( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
-  file_GetPos       : function( const FileHandle : zglTFile ) : DWORD;
-  file_Read         : function( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
-  file_Write        : function( const FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
-  file_Trunc        : procedure( const FileHandle : zglTFile; const count : DWORD );
-  file_GetSize      : function( const FileHandle : zglTFile ) : DWORD;
+  file_Seek         : function( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
+  file_GetPos       : function( const FileHandle : zglTFile ) : LongWord;
+  file_Read         : function( const FileHandle : zglTFile; var buffer; const count : LongWord ) : LongWord;
+  file_Write        : function( const FileHandle : zglTFile; const buffer; const count : LongWord ) : LongWord;
+  file_Trunc        : procedure( const FileHandle : zglTFile; const count : LongWord );
+  file_GetSize      : function( const FileHandle : zglTFile ) : LongWord;
   file_Flush        : procedure( const FileHandle : zglTFile );
   file_Close        : procedure( var FileHandle : zglTFile );
   file_Find         : procedure( const Directory : String; var List : zglTFileList; const FindDir : Boolean = FALSE );
@@ -1137,10 +1139,10 @@ var
 var
   mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
   mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : String );
-  mem_Seek         : function( var Memory : zglTMemory; const Offset, Mode : DWORD ) : DWORD;
-  mem_Read         : function( var Memory : zglTMemory; var buffer; const count : DWORD ) : DWORD;
-  mem_Write        : function( var Memory : zglTMemory; const buffer; const count : DWORD ) : DWORD;
-  mem_SetSize      : procedure( var Memory : zglTMemory; const Size : DWORD );
+  mem_Seek         : function( var Memory : zglTMemory; const Offset, Mode : LongWord ) : LongWord;
+  mem_Read         : function( var Memory : zglTMemory; var buffer; const count : LongWord ) : LongWord;
+  mem_Write        : function( var Memory : zglTMemory; const buffer; const count : LongWord ) : LongWord;
+  mem_SetSize      : procedure( var Memory : zglTMemory; const Size : LongWord );
   mem_Free         : procedure( var Memory : zglTMemory );
 
 // Utils
@@ -1162,18 +1164,18 @@ function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 {$ENDIF}
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 
-function MessageBoxA( hWnd : DWORD; lpText, lpCaption : PAnsiChar; uType : DWORD) : Integer; stdcall; external 'user32.dll';
+function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
 {$ENDIF}
 
 implementation
 
 var
-  zglLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  zglLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
   {$IFDEF DARWIN}
   mainBundle   : CFBundleRef;
   tmpCFURLRef  : CFURLRef;
@@ -1271,7 +1273,7 @@ begin
   {$ENDIF}
   zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
 
-  if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WIN32} 0 {$ENDIF} Then
+  if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
     begin
       Result := TRUE;
       zgl_Init := dlsym( zglLib, 'zgl_Init' );
@@ -1393,6 +1395,7 @@ begin
       sengine2d_Draw := dlsym( zglLib, 'sengine2d_Draw' );
       sengine2d_Proc := dlsym( zglLib, 'sengine2d_Proc' );
 
+      texture2d_Draw := dlsym( zglLib, 'texture2d_Draw' );
       ssprite2d_Draw := dlsym( zglLib, 'ssprite2d_Draw' );
       asprite2d_Draw := dlsym( zglLib, 'asprite2d_Draw' );
       csprite2d_Draw := dlsym( zglLib, 'csprite2d_Draw' );
@@ -1495,7 +1498,7 @@ begin
           {$IFDEF LINUX}
           WriteLn( 'Error while loading ZenGL' );
           {$ENDIF}
-          {$IFDEF WIN32}
+          {$IFDEF WINDOWS}
           MessageBoxA( 0, 'Error while loading ZenGL', 'Error', $00000010 );
           {$ENDIF}
           {$IFDEF DARWIN}
