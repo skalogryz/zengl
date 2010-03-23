@@ -144,6 +144,7 @@ var
 
 implementation
 uses
+  zgl_types,
   zgl_sound,
   zgl_log,
   zgl_utils;
