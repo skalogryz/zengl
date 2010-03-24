@@ -813,7 +813,7 @@ begin
           {$ENDIF}
         end else
           for i := 1 to SND_MAX do
-            if sfStream[ LongWord( Sound ) ]._playing Then
+            if sfStream[ i ]._playing Then
               begin
                 sfVolumes[ i ] := Volume;
 
@@ -969,6 +969,12 @@ function snd_Get;
 begin
   if not sndInitialized Then exit;
 
+  if not Assigned( Sound ) Then
+    begin
+      Result := 0;
+      exit;
+    end;
+
   if ID = SND_STREAM Then
     begin
       case What of
@@ -978,16 +984,9 @@ begin
         SND_INFO_LENGTH: Result := Round( sfStream[ LongWord( Sound ) ].Length );
       end;
     end else
-      begin
-        if not Assigned( Sound ) Then
-          begin
-            Result := -1;
-            exit;
-          end;
-        case What of
-          SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
-          SND_INFO_LENGTH: Result := Round( Sound.Length );
-        end;
+      case What of
+        SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
+        SND_INFO_LENGTH: Result := Round( Sound.Length );
       end;
 end;
 
