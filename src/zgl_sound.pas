@@ -713,8 +713,9 @@ begin
 
   if ( ID = SND_STREAM ) Then
     begin
-      if ( Sound <> nil ) and ( sfStream[ LongWord( Sound ) ]._playing ) Then
+      if Assigned( Sound ) Then
         begin
+          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
           sfPositions[ LongWord( Sound ), 0 ] := X;
           sfPositions[ LongWord( Sound ), 1 ] := Y;
           sfPositions[ LongWord( Sound ), 2 ] := Z;
@@ -729,7 +730,7 @@ begin
           {$ENDIF}
         end else
           for i := 1 to SND_MAX do
-            if sfStream[ LongWord( Sound ) ]._playing Then
+            if sfSource[ i ] <> SND_ERROR Then
               begin
                 sfPositions[ i, 0 ] := X;
                 sfPositions[ i, 1 ] := Y;
@@ -799,8 +800,9 @@ begin
 
   if ( ID = SND_STREAM ) Then
     begin
-      if ( Sound <> nil ) and ( sfStream[ LongWord( Sound ) ]._playing ) Then
+      if Assigned( Sound ) Then
         begin
+          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
           sfVolumes[ LongWord( Sound ) ] := Volume;
 
           {$IFDEF USE_OPENAL}
@@ -813,7 +815,7 @@ begin
           {$ENDIF}
         end else
           for i := 1 to SND_MAX do
-            if sfStream[ i ]._playing Then
+            if sfSource[ i ] <> SND_ERROR Then
               begin
                 sfVolumes[ i ] := Volume;
 
@@ -867,23 +869,27 @@ procedure snd_SetFrequency;
 begin
   if not sndInitialized Then exit;
 
-  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ LongWord( Sound ) ]._playing ) Then
+  if ( ID = SND_STREAM ) Then
     begin
-      {$IFDEF USE_OPENAL}
-      alSourcef( sfSource[ LongWord( Sound ) ], AL_FREQUENCY, Frequency );
-      {$ELSE}
-      sfSource[ LongWord( Sound ) ].SetFrequency( Frequency );
-      {$ENDIF}
+      if Assigned( Sound ) Then
+        begin
+          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
+
+          {$IFDEF USE_OPENAL}
+          alSourcef( sfSource[ LongWord( Sound ) ], AL_FREQUENCY, Frequency );
+          {$ELSE}
+          sfSource[ LongWord( Sound ) ].SetFrequency( Frequency );
+          {$ENDIF}
+        end else
+          for i := 1 to SND_MAX do
+            if sfSource[ i ] <> SND_ERROR Then
+              {$IFDEF USE_OPENAL}
+              alSourcef( sfSource[ i ], AL_FREQUENCY, Frequency );
+              {$ELSE}
+              sfSource[ i ].SetFrequency( Frequency );
+              {$ENDIF}
       exit;
-    end else
-      if ID = SND_STREAM Then
-        for i := 1 to SND_MAX do
-          if sfStream[ i ]._Playing Then
-            {$IFDEF USE_OPENAL}
-            alSourcef( sfSource[ i ], AL_FREQUENCY, Frequency );
-            {$ELSE}
-            sfSource[ i ].SetFrequency( Frequency );
-            {$ENDIF}
+    end;
 
   if Assigned( Sound ) Then
     begin
@@ -925,23 +931,27 @@ procedure snd_SetFrequencyCoeff;
 begin
   if not sndInitialized Then exit;
 
-  if ( ID = SND_STREAM ) and ( Sound <> nil ) and ( sfStream[ LongWord( Sound ) ]._playing ) Then
+  if ( ID = SND_STREAM ) Then
     begin
-      {$IFDEF USE_OPENAL}
-      alSourcef( sfSource[ LongWord( Sound ) ], AL_FREQUENCY, Round( sfStream[ LongWord( Sound ) ].Frequency * Coefficient ) );
-      {$ELSE}
-      sfSource[ LongWord( Sound ) ].SetFrequency( Round( sfStream[ LongWord( Sound ) ].Frequency * Coefficient ) );
-      {$ENDIF}
+      if Assigned( Sound ) Then
+        begin
+          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
+
+          {$IFDEF USE_OPENAL}
+          alSourcef( sfSource[ LongWord( Sound ) ], AL_FREQUENCY, Round( sfStream[ LongWord( Sound ) ].Frequency * Coefficient ) );
+          {$ELSE}
+          sfSource[ LongWord( Sound ) ].SetFrequency( Round( sfStream[ LongWord( Sound ) ].Frequency * Coefficient ) );
+          {$ENDIF}
+        end else
+          for i := 1 to SND_MAX do
+            if sfSource[ i ] <> SND_ERROR Then
+              {$IFDEF USE_OPENAL}
+              alSourcef( sfSource[ i ], AL_FREQUENCY, Round( sfStream[ i ].Frequency * Coefficient ) );
+              {$ELSE}
+              sfSource[ i ].SetFrequency( Round( sfStream[ i ].Frequency * Coefficient ) );
+              {$ENDIF}
       exit;
-    end else
-      if ID = SND_STREAM Then
-        for i := 1 to SND_MAX do
-          if sfStream[ i ]._playing Then
-            {$IFDEF USE_OPENAL}
-            alSourcef( sfSource[ i ], AL_FREQUENCY, Round( sfStream[ i ].Frequency * Coefficient ) );
-            {$ELSE}
-            sfSource[ i ].SetFrequency( Round( sfStream[ i ].Frequency * Coefficient ) );
-            {$ENDIF}
+    end;
 
   if Assigned( Sound ) Then
     begin
