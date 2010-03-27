@@ -229,6 +229,7 @@ exports
   sengine2d_Proc           name prefix + 'sengine2d_Proc',
 
   // Sprite 2D
+  texture2d_Draw           name prefix + 'texture2d_Draw',
   ssprite2d_Draw           name prefix + 'ssprite2d_Draw',
   asprite2d_Draw           name prefix + 'asprite2d_Draw',
   csprite2d_Draw           name prefix + 'csprite2d_Draw',
