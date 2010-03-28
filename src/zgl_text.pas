@@ -300,7 +300,8 @@ begin
           while lineEnd and ( Text[ b ] = ' ' ) do INC( b );
           startWord := TRUE;
           lineEnd   := FALSE;
-          continue;
+          if imax = 0 Then
+            continue;
         end;
 
       if ( c = 32 ) and ( startWord ) and ( lc <> 10 ) and ( lc <> 32 ) Then
