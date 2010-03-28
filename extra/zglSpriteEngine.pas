@@ -229,7 +229,7 @@ procedure zglCSEngine2D.SortByID;
 begin
   lo   := iLo;
   hi   := iHi;
-  mid  := FList[ ( ho + li ) shr 1 ].ID;
+  mid  := FList[ ( lo + hi ) shr 1 ].ID;
 
   repeat
     while FList[ lo ].ID < mid do INC( lo );
