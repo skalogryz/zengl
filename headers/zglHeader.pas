@@ -2,7 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC1              }
-{ date:    2010.03.27           }
+{ date:    2010.03.28           }
+{ license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
