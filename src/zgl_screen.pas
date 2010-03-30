@@ -601,14 +601,15 @@ begin
 
   cam2dZoomX := cam2dGlobal.Zoom.X;
   cam2dZoomY := cam2dGlobal.Zoom.Y;
-  cam2dSX    := Round( -ogl_Width / 2 + scr_AddCX / scr_ResCX );
-  cam2dSY    := Round( -ogl_Height / 2 + scr_AddCY / scr_ResCY );
   ogl_CropR  := Round( sqrt( sqr( ogl_CropW / scr_ResCX / cam2dZoomX ) + sqr( ogl_CropH / scr_ResCY / cam2dZoomY ) ) ) div 2;
 end;
 
 procedure scr_SetViewPort;
 begin
   if ( ogl_Mode <> 2 ) and ( ogl_Mode <> 3 ) Then exit;
+
+  cam2dSX := Round( -ogl_Width / 2 + scr_AddCX / scr_ResCX );
+  cam2dSY := Round( -ogl_Height / 2 + scr_AddCY / scr_ResCY );
 
   if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
     begin
