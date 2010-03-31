@@ -81,7 +81,7 @@ begin
       glColor4ubv( @FX2D_VCA1[ 0 ] );
       gl_Vertex2f( X1 + 0.5, Y1 + 0.5 );
       glColor4ubv( @FX2D_VCA2[ 0 ] );
-      gl_Vertex2f( Y2 + 0.5, Y2 + 0.5 );
+      gl_Vertex2f( X2 + 0.5, Y2 + 0.5 );
     end else
       begin
         glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
