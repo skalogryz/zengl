@@ -180,15 +180,15 @@ begin
       exit;
     end;
 
-  if ( dx < 0 ) and ( dy > 0 ) Then { 2nd quad }
+  if ( dx < 0 ) and ( dy > 0 ) Then
     Result := 180 - ArcTan2( dx, dy )
   else
-    if ( dx < 0 ) and ( dy < 0 ) Then { 3rd quad }
+    if ( dx < 0 ) and ( dy < 0 ) Then
       Result := 180 + ArcTan2( dx, dy )
     else
-      if ( dx > 0 ) and ( dy < 0 ) Then { 4th quad }
+      if ( dx > 0 ) and ( dy < 0 ) Then
         Result := 360 - ArcTan2( dx, dy )
-      else                                { 1st quad }
+      else
         Result := ArcTan2( dx, dy )
 end;
 
