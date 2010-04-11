@@ -223,6 +223,7 @@ begin
 
   ogl_zDepth := 24;
   repeat
+    FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, None );
     ogl_Attr[ 0 ]  := GLX_RGBA;
     ogl_Attr[ 1 ]  := GL_TRUE;
     ogl_Attr[ 2 ]  := GLX_RED_SIZE;
@@ -231,13 +232,11 @@ begin
     ogl_Attr[ 5 ]  := 8;
     ogl_Attr[ 6 ]  := GLX_BLUE_SIZE;
     ogl_Attr[ 7 ]  := 8;
-    ogl_Attr[ 8 ]  := GLX_ALPHA_SIZE;
-    ogl_Attr[ 9 ]  := 8;
-    ogl_Attr[ 10 ] := GLX_DOUBLEBUFFER;
-    ogl_Attr[ 11 ] := GL_TRUE;
-    ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
-    ogl_Attr[ 13 ] := ogl_zDepth;
-    i := 14;
+    ogl_Attr[ 8 ]  := GLX_DOUBLEBUFFER;
+    ogl_Attr[ 9 ]  := GL_TRUE;
+    ogl_Attr[ 10 ] := GLX_DEPTH_SIZE;
+    ogl_Attr[ 11 ] := ogl_zDepth;
+    i := 12;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := GLX_STENCIL_SIZE;
@@ -245,12 +244,11 @@ begin
         INC( i, 2 );
       end;
     if ogl_FSAA > 0 Then
-        begin
-          ogl_Attr[ i     ] := GLX_SAMPLES_SGIS;
-          ogl_Attr[ i + 1 ] := ogl_FSAA;
-          INC( i, 2 );
-        end;
-    ogl_Attr[ i ] := None;
+      begin
+        ogl_Attr[ i     ] := GLX_SAMPLES_SGIS;
+        ogl_Attr[ i + 1 ] := ogl_FSAA;
+        INC( i, 2 );
+      end;
 
     log_Add( 'glXChooseVisual: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
     ogl_VisualInfo := glXChooseVisual( scr_Display, scr_Default, @ogl_Attr[ 0 ] );

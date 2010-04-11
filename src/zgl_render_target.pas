@@ -38,18 +38,10 @@ uses
   zgl_textures;
 
 const
-  RT_TYPE_SIMPLE  = 0;
+  RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
-  RT_TYPE_PBUFFER = 2;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
-
-type
-  zglPFBO = ^zglTFBO;
-  zglTFBO = record
-    FrameBuffer  : LongWord;
-    RenderBuffer : LongWord;
-end;
 
 {$IFDEF LINUX}
 type
@@ -77,6 +69,13 @@ type
     PBuffer : TAGLPbuffer;
 end;
 {$ENDIF}
+
+type
+  zglPFBO = ^zglTFBO;
+  zglTFBO = record
+    FrameBuffer  : LongWord;
+    RenderBuffer : LongWord;
+end;
 
 type
   zglPRenderTarget = ^zglTRenderTarget;
@@ -152,53 +151,13 @@ begin
 
   if ( not ogl_CanFBO ) and ( _type = RT_TYPE_FBO ) Then
     if ogl_CanPBuffer Then
-      _type := RT_TYPE_PBUFFER
-    else
-      _type := RT_TYPE_SIMPLE;
+      _type := RT_TYPE_PBUFFER;
 
   if ( not ogl_CanPBuffer ) and ( _type = RT_TYPE_PBUFFER ) Then
     if ogl_CanFBO Then
-      _type := RT_TYPE_FBO
-    else
-      _type := RT_TYPE_SIMPLE;
+      _type := RT_TYPE_FBO;
 
   case _type of
-    RT_TYPE_SIMPLE: Result.next.Handle := nil;
-    RT_TYPE_FBO:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
-        pFBO := Result.next.Handle;
-
-        glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
-        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
-        if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_TRUE Then
-          log_Add( 'FBO: Gen FrameBuffer - Success' )
-        else
-          begin
-            log_Add( 'FBO: Gen FrameBuffer - Error' );
-            exit;
-          end;
-
-        glGenRenderbuffersEXT( 1, @pFBO.RenderBuffer );
-        glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
-        if glIsRenderBufferEXT( pFBO.RenderBuffer ) = GL_TRUE Then
-          log_Add( 'FBO: Gen RenderBuffer - Success' )
-        else
-          begin
-            log_Add( 'FBO: Gen RenderBuffer - Error' );
-            exit;
-          end;
-
-        case ogl_zDepth of
-          24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-          32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        else
-          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        end;
-        glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
-        glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
-        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
-      end;
     {$IFDEF LINUX}
     RT_TYPE_PBUFFER:
       begin
@@ -397,6 +356,41 @@ begin
           end;
       end;
     {$ENDIF}
+    RT_TYPE_FBO:
+      begin
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
+        pFBO := Result.next.Handle;
+
+        glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
+        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
+        if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_TRUE Then
+          log_Add( 'FBO: Gen FrameBuffer - Success' )
+        else
+          begin
+            log_Add( 'FBO: Gen FrameBuffer - Error' );
+            exit;
+          end;
+
+        glGenRenderbuffersEXT( 1, @pFBO.RenderBuffer );
+        glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+        if glIsRenderBufferEXT( pFBO.RenderBuffer ) = GL_TRUE Then
+          log_Add( 'FBO: Gen RenderBuffer - Success' )
+        else
+          begin
+            log_Add( 'FBO: Gen RenderBuffer - Error' );
+            exit;
+          end;
+
+        case ogl_zDepth of
+          24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+          32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+        else
+          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+        end;
+        glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+        glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
+        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
+      end;
   end;
   Result.next._type   := _type;
   Result.next.Surface := Surface;
@@ -466,14 +460,6 @@ begin
       lMode := ogl_Mode;
 
       case Target._type of
-        RT_TYPE_SIMPLE:
-          begin
-          end;
-        RT_TYPE_FBO:
-          begin
-            glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, zglPFBO( Target.Handle ).FrameBuffer );
-            glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Target.Surface.ID, 0 );
-          end;
         RT_TYPE_PBUFFER:
           begin
             {$IFDEF LINUX}
@@ -487,6 +473,11 @@ begin
             aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
             SetCurrentMode;
             {$ENDIF}
+          end;
+        RT_TYPE_FBO:
+          begin
+            glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, zglPFBO( Target.Handle ).FrameBuffer );
+            glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Target.Surface.ID, 0 );
           end;
       end;
       ogl_Mode := 1;
@@ -502,13 +493,11 @@ begin
     end else
       begin
         case lRTarget._type of
-          RT_TYPE_SIMPLE, RT_TYPE_PBUFFER:
+          RT_TYPE_PBUFFER:
             begin
               glEnable( GL_TEXTURE_2D );
               glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
-              glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0,
-                                   Round( lRTarget.Surface.Width / lRTarget.Surface.U ),
-                                   Round( lRTarget.Surface.Height / lRTarget.Surface.V ) );
+              glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
               glDisable( GL_TEXTURE_2D );
             end;
           RT_TYPE_FBO:
@@ -534,8 +523,6 @@ begin
 
         ogl_Mode := lMode;
         scr_SetViewPort();
-        if ( lRTarget._type = RT_TYPE_SIMPLE ) and ( lRTarget.Flags and RT_CLEAR_SCREEN > 0 ) Then
-          glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
       end;
 end;
 

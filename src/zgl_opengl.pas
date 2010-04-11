@@ -160,7 +160,6 @@ begin
           dwFlags      := PFD_DRAW_TO_WINDOW or PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER;
           iPixelType   := PFD_TYPE_RGBA;
           cColorBits   := scr_BPP;
-          cAlphaBits   := 8;
           cDepthBits   := 24;
           cStencilBits := ogl_Stencil;
           iLayerType   := PFD_MAIN_PLANE;
@@ -211,28 +210,26 @@ begin
       ogl_zDepth := 24;
 
       repeat
-        ogl_iAttr[ 0 ] := WGL_ACCELERATION_ARB;
-        ogl_iAttr[ 1 ] := WGL_FULL_ACCELERATION_ARB;
-        ogl_iAttr[ 2 ] := WGL_DRAW_TO_WINDOW_ARB;
-        ogl_iAttr[ 3 ] := GL_TRUE;
-        ogl_iAttr[ 4 ] := WGL_SUPPORT_OPENGL_ARB;
-        ogl_iAttr[ 5 ] := GL_TRUE;
-        ogl_iAttr[ 6 ] := WGL_DOUBLE_BUFFER_ARB;
-        ogl_iAttr[ 7 ] := GL_TRUE;
-        ogl_iAttr[ 8 ] := WGL_DEPTH_BITS_ARB;
-        ogl_iAttr[ 9 ] := ogl_zDepth;
-        i := 10;
+        FillChar( ogl_iAttr[ 0 ], length( ogl_iAttr ) * 4, 0 );
+        ogl_iAttr[ 0 ]  := WGL_ACCELERATION_ARB;
+        ogl_iAttr[ 1 ]  := WGL_FULL_ACCELERATION_ARB;
+        ogl_iAttr[ 2 ]  := WGL_DRAW_TO_WINDOW_ARB;
+        ogl_iAttr[ 3 ]  := GL_TRUE;
+        ogl_iAttr[ 4 ]  := WGL_SUPPORT_OPENGL_ARB;
+        ogl_iAttr[ 5 ]  := GL_TRUE;
+        ogl_iAttr[ 6 ]  := WGL_DOUBLE_BUFFER_ARB;
+        ogl_iAttr[ 7 ]  := GL_TRUE;
+        ogl_iAttr[ 8 ]  := WGL_DEPTH_BITS_ARB;
+        ogl_iAttr[ 9 ]  := ogl_zDepth;
+        ogl_iAttr[ 10 ] := WGL_COLOR_BITS_ARB;
+        ogl_iAttr[ 11 ] := scr_BPP;
+        i := 12;
         if ogl_Stencil > 0 Then
           begin
             ogl_iAttr[ i     ] := WGL_STENCIL_BITS_ARB;
             ogl_iAttr[ i + 1 ] := ogl_Stencil;
             INC( i, 2 );
           end;
-        ogl_iAttr[ i     ] := WGL_COLOR_BITS_ARB;
-        ogl_iAttr[ i + 1 ] := scr_BPP;
-        ogl_iAttr[ i + 2 ] := WGL_ALPHA_BITS_ARB;
-        ogl_iAttr[ i + 3 ] := 8;
-        INC( i, 4 );
         if ogl_FSAA > 0 Then
           begin
             ogl_iAttr[ i     ] := WGL_SAMPLE_BUFFERS_ARB;
@@ -241,8 +238,6 @@ begin
             ogl_iAttr[ i + 3 ] := ogl_FSAA;
             INC( i, 4 );
           end;
-        ogl_iAttr[ i     ] := 0;
-        ogl_iAttr[ i + 1 ] := 0;
 
         log_Add( 'wglChoosePixelFormatARB: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
         wglChoosePixelFormatARB( wnd_DC, @ogl_iAttr, @ogl_fAttr, 1, @ogl_Format, @ogl_Formats );
@@ -259,15 +254,17 @@ begin
             DEC( ogl_zDepth, 8 );
       until ogl_Format <> 0;
 
-      if ogl_Format <> 0 Then
+      if ogl_Format = 0 Then
         begin
-          wnd_First := FALSE;
-          gl_Destroy();
-          wnd_Destroy();
-          wnd_Create( wnd_Width, wnd_Height );
-          Result := gl_Create();
-          exit;
+          log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
+          ogl_Format := PixelFormat;
         end;
+      wnd_First := FALSE;
+      gl_Destroy();
+      wnd_Destroy();
+      wnd_Create( wnd_Width, wnd_Height );
+      Result := gl_Create();
+      exit;
     end;
 
   if pixelFormat = 0 Then
@@ -285,19 +282,18 @@ begin
 
   ogl_zDepth := 24;
   repeat
-    ogl_Attr[ 0  ] := AGL_RGBA;
-    ogl_Attr[ 1  ] := AGL_RED_SIZE;
-    ogl_Attr[ 2  ] := 8;
-    ogl_Attr[ 3  ] := AGL_GREEN_SIZE;
-    ogl_Attr[ 4  ] := 8;
-    ogl_Attr[ 5  ] := AGL_BLUE_SIZE;
-    ogl_Attr[ 6  ] := 8;
-    ogl_Attr[ 7  ] := AGL_ALPHA_SIZE;
-    ogl_Attr[ 8  ] := 8;
-    ogl_Attr[ 9  ] := AGL_DOUBLEBUFFER;
-    ogl_Attr[ 10 ] := AGL_DEPTH_SIZE;
-    ogl_Attr[ 11 ] := ogl_zDepth;
-    i := 12;
+    FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, AGL_NONE );
+    ogl_Attr[ 0 ] := AGL_RGBA;
+    ogl_Attr[ 1 ] := AGL_RED_SIZE;
+    ogl_Attr[ 2 ] := 8;
+    ogl_Attr[ 3 ] := AGL_GREEN_SIZE;
+    ogl_Attr[ 4 ] := 8;
+    ogl_Attr[ 5 ] := AGL_BLUE_SIZE;
+    ogl_Attr[ 6 ] := 8;
+    ogl_Attr[ 7 ] := AGL_DOUBLEBUFFER;
+    ogl_Attr[ 8 ] := AGL_DEPTH_SIZE;
+    ogl_Attr[ 9 ] := ogl_zDepth;
+    i := 10;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := AGL_STENCIL_SIZE;
@@ -312,7 +308,6 @@ begin
         ogl_Attr[ i + 3 ] := ogl_FSAA;
         INC( i, 4 );
       end;
-    ogl_Attr[ i ] := AGL_NONE;
 
     log_Add( 'aglChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA ) );
     DMGetGDeviceByDisplayID( DisplayIDType( scr_Display ), ogl_Device, FALSE );

@@ -93,9 +93,7 @@ const
   CROP_INVISIBLE        = $008000;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-{$IFDEF WINDOWS}
 procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-{$ENDIF}
 procedure zgl_Destroy;
 procedure zgl_Exit;
 procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
@@ -201,7 +199,6 @@ begin
   zgl_Destroy();
 end;
 
-{$IFDEF WINDOWS}
 procedure zgl_InitToHandle;
 begin
   zgl_GetSysDir();
@@ -213,7 +210,9 @@ begin
   if not scr_Create() Then exit;
   app_InitToHandle := TRUE;
   wnd_Handle := Handle;
+  {$IFDEF WINDOWS}
   wnd_DC := GetDC( wnd_Handle );
+  {$ENDIF}
   if not gl_Create() Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
@@ -225,7 +224,6 @@ begin
   app_PLoop();
   zgl_Destroy();
 end;
-{$ENDIF}
 
 procedure zgl_Destroy;
   var

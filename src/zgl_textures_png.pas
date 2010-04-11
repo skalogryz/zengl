@@ -428,10 +428,10 @@ end;
 procedure png_FilterRow;
   var
     i                          : Integer;
-    Paeth                      : Byte;
+    Paeth                      : Integer;
     PP, Left, Above, AboveLeft : Integer;
 
-  function PaethPredictor( a, b, c : Byte ) : Byte; {$IFDEF USE_INLINE} inline; {$ENDIF}
+  function PaethPredictor( a, b, c : Integer ) : Integer; {$IFDEF USE_INLINE} inline; {$ENDIF}
     var
       p, pa, pb, pc : Integer;
   begin
