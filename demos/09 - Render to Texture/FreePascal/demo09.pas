@@ -21,7 +21,7 @@ var
   fntMain : zglPFont;
   texTux  : zglPTexture;
   Mode    : Integer;
-  RTarget : array[ 0..2 ] of zglPRenderTarget;
+  RTarget : array[ 0..1 ] of zglPRenderTarget;
 
 procedure Init;
   var
@@ -38,9 +38,8 @@ begin
   // В процессе текстуру можно сменить присвоив RTarget[ n ].Surface другую zglPTexture, главное что бы совпадали размеры
   // с теми, что указаны в tex_CreateZero. Каждому таргету также указан флаг RT_FULL_SCREEN, отвечающий за то, что бы
   // в текстуру помещалось все содержимое экрана а не область 512x512
-  RTarget[ 0 ] := rtarget_Add( RT_TYPE_SIMPLE, tex_CreateZero( 512, 512, $FF000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN or RT_CLEAR_SCREEN );
-  RTarget[ 1 ] := rtarget_Add( RT_TYPE_PBUFFER, tex_CreateZero( 512, 512, $FF000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
-  RTarget[ 2 ] := rtarget_Add( RT_TYPE_FBO, tex_CreateZero( 512, 512, $FF000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
+  RTarget[ 0 ] := rtarget_Add( RT_TYPE_PBUFFER, tex_CreateZero( 512, 512, $00000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
+  RTarget[ 1 ] := rtarget_Add( RT_TYPE_FBO, tex_CreateZero( 512, 512, $00000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
 end;
 
 procedure RenderTux;
@@ -52,43 +51,25 @@ procedure Draw;
   var
     i : Integer;
 begin
-  // Для показательности разницы в скорости будем рендерить 9 раз
+  // Для показательности разницы в скорости будем рендерить 10 раз
   for i := 0 to 9 do
     begin
       rtarget_Set( RTarget[ Mode ] );
-      case Mode of
-        0:
-          begin
-            // Simple-режим отличается от остальных следующим:
-            // - для сохранения содержимого, нужно перерисовывать текстуру саму в себя,
-            //   без использования блендинга
-            // - т.к. этот способ все рисует в сцену, а потом в копирует в текстуру, то
-            //   после этого на экране все остается. Можно чистить через scr_Clear
-            //   но это вызовет "блики", если делать рендер в Draw не в начале
-            ssprite2d_Draw( RTarget[ Mode ].Surface, 0, 0, 800, 600, 0, 255, 0 );
-            RenderTux;
-          end;
-        1, 2:
-          begin
-            RenderTux;
-          end;
-      end;
+      RenderTux;
       rtarget_Set( nil );
     end;
 
   ssprite2d_Draw( RTarget[ Mode ].Surface, ( 800 - 512 ) / 2, ( 600 - 512 ) / 2, 512, 512, 0 );
 
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
-  text_Draw( fntMain, 0, 20, 'F1 - Simple' );
-  text_Draw( fntMain, 0, 40, 'F2 - PBuffer' );
-  text_Draw( fntMain, 0, 60, 'F3 - FBO' );
+  text_Draw( fntMain, 0, 20, 'F1 - PBuffer' );
+  text_Draw( fntMain, 0, 40, 'F2 - FBO' );
 end;
 
 procedure Timer;
 begin
   if key_Press( K_F1 ) Then Mode := 0;
   if key_Press( K_F2 ) Then Mode := 1;
-  if key_Press( K_F3 ) Then Mode := 2;
   if key_Press( K_ESCAPE ) Then zgl_Exit;
   key_ClearState;
 end;
