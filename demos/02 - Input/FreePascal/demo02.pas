@@ -64,7 +64,7 @@ begin
 
   // Если зажата левая кнопка мыши - заблокируем мышку по центру экрана
   // смещения можно получать используя функции mouse_DX и mouse_DY вызывая их до mouse_Lock
-  if mouse_Down( M_BLEFT ) Then
+  if mouse_Down( M_BRIGHT ) Then
     mouse_Lock;
 
   // "Считываем" в переменную введеный текст
@@ -89,7 +89,7 @@ Begin
 
   wnd_ShowCursor( TRUE );
 
-  scr_SetOptions( 800, 600, 32, REFRESH_MAXIMUM, FALSE, FALSE );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
 
   zgl_Init;
 End.

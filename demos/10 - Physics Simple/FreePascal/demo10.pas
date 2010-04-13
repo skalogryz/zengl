@@ -177,8 +177,6 @@ Begin
   randomize;
   timer_Add( @Proc, 16 );
 
-  scr_SetOptions( 800, 600, 32, 0, FALSE, FALSE );
-
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
@@ -191,6 +189,8 @@ Begin
   wnd_SetCaption( '10 - Physics Simple' );
 
   wnd_ShowCursor( TRUE );
+
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
 
   zgl_Init;
 End.

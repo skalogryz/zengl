@@ -159,7 +159,7 @@ begin
           nVersion     := 1;
           dwFlags      := PFD_DRAW_TO_WINDOW or PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER;
           iPixelType   := PFD_TYPE_RGBA;
-          cColorBits   := scr_BPP;
+          cColorBits   := 32;
           cDepthBits   := 24;
           cStencilBits := ogl_Stencil;
           iLayerType   := PFD_MAIN_PLANE;
@@ -190,11 +190,7 @@ begin
   if not wnd_First Then log_Add( 'Make Current OpenGL Context' );
 
   if ogl_Format = 0 Then
-  {$IFDEF USE_WINEHACK}
     wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormatARB' );
-  {$ELSE}
-    wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormat' );
-  {$ENDIF}
   if ( not Assigned( wglChoosePixelFormatARB ) ) and ( ogl_Format = 0 ) Then
     begin
       wnd_First := FALSE;
@@ -211,19 +207,27 @@ begin
 
       repeat
         FillChar( ogl_iAttr[ 0 ], length( ogl_iAttr ) * 4, 0 );
-        ogl_iAttr[ 0 ]  := WGL_ACCELERATION_ARB;
-        ogl_iAttr[ 1 ]  := WGL_FULL_ACCELERATION_ARB;
-        ogl_iAttr[ 2 ]  := WGL_DRAW_TO_WINDOW_ARB;
-        ogl_iAttr[ 3 ]  := GL_TRUE;
-        ogl_iAttr[ 4 ]  := WGL_SUPPORT_OPENGL_ARB;
-        ogl_iAttr[ 5 ]  := GL_TRUE;
-        ogl_iAttr[ 6 ]  := WGL_DOUBLE_BUFFER_ARB;
-        ogl_iAttr[ 7 ]  := GL_TRUE;
-        ogl_iAttr[ 8 ]  := WGL_DEPTH_BITS_ARB;
-        ogl_iAttr[ 9 ]  := ogl_zDepth;
+        ogl_iAttr[ 0  ] := WGL_ACCELERATION_ARB;
+        ogl_iAttr[ 1  ] := WGL_FULL_ACCELERATION_ARB;
+        ogl_iAttr[ 2  ] := WGL_DRAW_TO_WINDOW_ARB;
+        ogl_iAttr[ 3  ] := GL_TRUE;
+        ogl_iAttr[ 4  ] := WGL_SUPPORT_OPENGL_ARB;
+        ogl_iAttr[ 5  ] := GL_TRUE;
+        ogl_iAttr[ 6  ] := WGL_DOUBLE_BUFFER_ARB;
+        ogl_iAttr[ 7  ] := GL_TRUE;
+        ogl_iAttr[ 8  ] := WGL_PIXEL_TYPE_ARB;
+        ogl_iAttr[ 9  ] := WGL_TYPE_RGBA_ARB;
         ogl_iAttr[ 10 ] := WGL_COLOR_BITS_ARB;
-        ogl_iAttr[ 11 ] := scr_BPP;
-        i := 12;
+        ogl_iAttr[ 11 ] := 24;
+        ogl_iAttr[ 12 ] := WGL_RED_BITS_ARB;
+        ogl_iAttr[ 13 ] := 8;
+        ogl_iAttr[ 14 ] := WGL_GREEN_BITS_ARB;
+        ogl_iAttr[ 15 ] := 8;
+        ogl_iAttr[ 16 ] := WGL_BLUE_BITS_ARB;
+        ogl_iAttr[ 17 ] := 8;
+        ogl_iAttr[ 18 ] := WGL_DEPTH_BITS_ARB;
+        ogl_iAttr[ 19 ] := ogl_zDepth;
+        i := 20;
         if ogl_Stencil > 0 Then
           begin
             ogl_iAttr[ i     ] := WGL_STENCIL_BITS_ARB;
@@ -236,7 +240,6 @@ begin
             ogl_iAttr[ i + 1 ] := GL_TRUE;
             ogl_iAttr[ i + 2 ] := WGL_SAMPLES_ARB;
             ogl_iAttr[ i + 3 ] := ogl_FSAA;
-            INC( i, 4 );
           end;
 
         log_Add( 'wglChoosePixelFormatARB: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
@@ -256,7 +259,8 @@ begin
 
       if ogl_Format = 0 Then
         begin
-          log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
+          ogl_zDepth := 24;
+          log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil )  );
           ogl_Format := PixelFormat;
         end;
       wnd_First := FALSE;
@@ -349,11 +353,20 @@ begin
       exit;
     end;
   aglDestroyPixelFormat( ogl_Format );
+{$ENDIF}
 
+{$IFDEF LINUX}
+  ogl_3DAccelerator := glGetString( GL_RENDERER ) <> 'Software Rasterizer';
+{$ENDIF}
+{$IFDEF WINDOWS}
+  ogl_3DAccelerator := glGetString( GL_RENDERER ) <> 'GDI Generic';
+{$ENDIF}
+{$IFDEF DARWIN}
   ogl_3DAccelerator := glGetString( GL_RENDERER ) <> 'Apple Software Renderer';
+{$ENDIF}
   if not ogl_3DAccelerator Then
     u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
-{$ENDIF}
+
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
   log_Add( 'GL_RENDERER: ' + glGetString( GL_RENDERER ) );
 

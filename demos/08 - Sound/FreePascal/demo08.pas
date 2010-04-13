@@ -141,7 +141,7 @@ Begin
 
   wnd_ShowCursor( TRUE );
 
-  scr_SetOptions( SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_MAXIMUM, FALSE, FALSE );
+  scr_SetOptions( SCREEN_WIDTH, SCREEN_HEIGHT, REFRESH_MAXIMUM, FALSE, FALSE );
 
   zgl_Init;
 End.

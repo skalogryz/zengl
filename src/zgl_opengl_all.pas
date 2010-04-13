@@ -448,7 +448,8 @@ const
   GLX_LARGEST_PBUFFER    = $801C;
   GLX_DRAWABLE_TYPE      = $8010;
   GLX_RENDER_TYPE        = $8011;
-  GLX_PBUFFER_BIT        = $00000004;
+  GLX_RGBA_BIT           = $0001;
+  GLX_PBUFFER_BIT        = $0004;
 
   function  glXChooseVisual(dpy: PDisplay; screen: Integer; attribList: PInteger): PXVisualInfo; cdecl; external libGL;
   function  glXCreateContext(dpy: PDisplay; vis: PXVisualInfo; shareList: GLXContext; direct: Boolean): GLXContext; cdecl; external libGL;
@@ -484,10 +485,15 @@ const
   WGL_FULL_ACCELERATION_ARB = $2027;
   WGL_SUPPORT_OPENGL_ARB    = $2010;
   WGL_DOUBLE_BUFFER_ARB     = $2011;
+  WGL_PIXEL_TYPE_ARB        = $2013;
   WGL_COLOR_BITS_ARB        = $2014;
+  WGL_RED_BITS_ARB          = $2015;
+  WGL_GREEN_BITS_ARB        = $2017;
+  WGL_BLUE_BITS_ARB         = $2019;
   WGL_ALPHA_BITS_ARB        = $201B;
   WGL_DEPTH_BITS_ARB        = $2022;
   WGL_STENCIL_BITS_ARB      = $2023;
+  WGL_TYPE_RGBA_ARB         = $202B;
 
   // AA
   WGL_SAMPLE_BUFFERS_ARB    = $2041;

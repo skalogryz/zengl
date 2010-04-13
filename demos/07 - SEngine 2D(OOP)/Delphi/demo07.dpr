@@ -184,7 +184,7 @@ Begin
 
   wnd_ShowCursor( TRUE );
 
-  scr_SetOptions( 800, 600, 32, REFRESH_MAXIMUM, FALSE, FALSE );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
 
   zgl_Init;
 End.

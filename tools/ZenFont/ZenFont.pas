@@ -89,7 +89,7 @@ begin
 
   zgl_Disable( APP_USE_LOG );
 
-  scr_SetOptions( 800, 600, 32, 0, FALSE, TRUE );
+  scr_SetOptions( 800, 600, 0, FALSE, TRUE );
   wnd_SetCaption( 'ZenFont' );
   wnd_ShowCursor( TRUE );
 

@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.2 RC1              }
-{ date:    2010.03.28           }
+{ version: 0.2 RC2              }
+{ date:    2010.04.13           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -178,7 +178,7 @@ var
   scr_SetVSync          : procedure( const VSync : Boolean );
   // ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
   scr_SetFSAA           : procedure( const FSAA : Byte );
-  scr_SetOptions        : procedure( const Width, Height, BPP, Refresh : Word; const FullScreen, VSync : Boolean );
+  scr_SetOptions        : procedure( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
   scr_CorrectResolution : procedure( const Width, Height : Word );
 
 // Z BUFFER
@@ -482,9 +482,8 @@ type
   zglTRenderCallback = procedure( Data : Pointer );
 
 const
-  RT_TYPE_SIMPLE  = 0;
+  RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
-  RT_TYPE_PBUFFER = 2;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 

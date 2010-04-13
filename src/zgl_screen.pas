@@ -47,7 +47,7 @@ procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
-procedure scr_SetOptions( const Width, Height, BPP, Refresh : Word; const FullScreen, VSync : Boolean );
+procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
 procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( const VSync : Boolean );
@@ -69,7 +69,6 @@ end;
 var
   scr_Width   : Integer = 800;
   scr_Height  : Integer = 600;
-  scr_BPP     : Integer = 32;
   scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
@@ -224,16 +223,16 @@ begin
   ogl_zDepth := 24;
   repeat
     FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, None );
-    ogl_Attr[ 0 ]  := GLX_RGBA;
-    ogl_Attr[ 1 ]  := GL_TRUE;
-    ogl_Attr[ 2 ]  := GLX_RED_SIZE;
-    ogl_Attr[ 3 ]  := 8;
-    ogl_Attr[ 4 ]  := GLX_GREEN_SIZE;
-    ogl_Attr[ 5 ]  := 8;
-    ogl_Attr[ 6 ]  := GLX_BLUE_SIZE;
-    ogl_Attr[ 7 ]  := 8;
-    ogl_Attr[ 8 ]  := GLX_DOUBLEBUFFER;
-    ogl_Attr[ 9 ]  := GL_TRUE;
+    ogl_Attr[ 0  ] := GLX_RGBA;
+    ogl_Attr[ 1  ] := GL_TRUE;
+    ogl_Attr[ 2  ] := GLX_RED_SIZE;
+    ogl_Attr[ 3  ] := 8;
+    ogl_Attr[ 4  ] := GLX_GREEN_SIZE;
+    ogl_Attr[ 5  ] := 8;
+    ogl_Attr[ 6  ] := GLX_BLUE_SIZE;
+    ogl_Attr[ 7  ] := 8;
+    ogl_Attr[ 8  ] := GLX_DOUBLEBUFFER;
+    ogl_Attr[ 9  ] := GL_TRUE;
     ogl_Attr[ 10 ] := GLX_DEPTH_SIZE;
     ogl_Attr[ 11 ] := ogl_zDepth;
     i := 12;
@@ -247,7 +246,6 @@ begin
       begin
         ogl_Attr[ i     ] := GLX_SAMPLES_SGIS;
         ogl_Attr[ i + 1 ] := ogl_FSAA;
-        INC( i, 2 );
       end;
 
     log_Add( 'glXChooseVisual: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
@@ -440,7 +438,6 @@ begin
   wnd_Height     := Height;
   scr_Width      := Width;
   scr_Height     := Height;
-  scr_BPP        := BPP;
   wnd_FullScreen := FullScreen;
   scr_Vsync      := VSync;
   if not app_Initialized Then exit;
@@ -452,16 +449,11 @@ begin
     begin
       scr_Width  := Width;
       scr_Height := Height;
-      scr_BPP    := BPP;
     end else
       begin
         scr_Width  := zgl_Get( DESKTOP_WIDTH );
         scr_Height := zgl_Get( DESKTOP_HEIGHT );
-        {$IFDEF LINUX}
-        scr_BPP := BPP;
-        {$ENDIF}
         {$IFDEF WINDOWS}
-        scr_BPP     := GetDisplayColors;
         scr_Refresh := GetDisplayRefresh;
         {$ENDIF}
       end;
@@ -497,7 +489,7 @@ begin
           begin
             dmSize   := SizeOf( DEVMODE );
             dmFields := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
-            if ( dmPelsWidth = scr_Width  ) and ( dmPelsHeight = scr_Height ) and ( dmBitsPerPel = scr_BPP ) and ( dmDisplayFrequency > r ) and
+            if ( dmPelsWidth = scr_Width  ) and ( dmPelsHeight = scr_Height ) and ( dmBitsPerPel = 32 ) and ( dmDisplayFrequency > r ) and
                ( dmDisplayFrequency <= scr_Desktop.dmDisplayFrequency ) Then
               begin
                 if ( ChangeDisplaySettings( scr_Settings, CDS_TEST or CDS_FULLSCREEN ) = DISP_CHANGE_SUCCESSFUL ) Then
@@ -516,7 +508,7 @@ begin
 
           dmPelsWidth        := scr_Width;
           dmPelsHeight       := scr_Height;
-          dmBitsPerPel       := scr_BPP;
+          dmBitsPerPel       := 32;
           dmDisplayFrequency := scr_Refresh;
           dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
         end;
@@ -534,11 +526,11 @@ begin
   //CGDisplayCapture( scr_Display );
   if scr_Refresh <> 0 Then
     begin
-      scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display, scr_BPP, scr_Width, scr_Height, scr_Refresh, b );
+      scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display, 32, scr_Width, scr_Height, scr_Refresh, b );
       scr_Refresh  := b;
     end;
   if scr_Refresh = 0 Then
-    scr_Settings := CGDisplayBestModeForParameters( scr_Display, scr_BPP, scr_Width, scr_Height, b );
+    scr_Settings := CGDisplayBestModeForParameters( scr_Display, 32, scr_Width, scr_Height, b );
 
   if b = 1 Then
     CGDisplaySwitchToMode( scr_Display, scr_Settings )
@@ -554,9 +546,9 @@ begin
     ShowMenuBar();
 {$ENDIF}
   if wnd_FullScreen Then
-    log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
+    log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
   else
-    log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp windowed' );
+    log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
   if app_Work Then
     wnd_Update();
 end;
