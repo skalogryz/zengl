@@ -174,7 +174,7 @@ begin
   if Texture.Flags and TEX_RGB > 0 Then
     begin
       format  := GL_RGB;
-      iformat := GL_RGB * Byte( scr_BPP = 32 ) or GL_RGB16 * Byte( scr_BPP = 16 );
+      iformat := GL_RGB;
       if ogl_CanCompressE Then
         cformat := GL_COMPRESSED_RGB_S3TC_DXT1_EXT
       else
@@ -182,7 +182,7 @@ begin
     end else
       begin
         format  := GL_RGBA;
-        iformat := GL_RGBA * Byte( scr_BPP = 32 ) or GL_RGBA16 * Byte( scr_BPP = 16 );
+        iformat := GL_RGBA;
         if ogl_CanCompressE Then
           cformat := GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
         else
