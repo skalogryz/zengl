@@ -458,21 +458,24 @@ begin
         {$ENDIF}
       end;
 {$IFDEF LINUX}
-  for modeToSet := 0 to scr_ModeCount - 1 do
+  if wnd_FullScreen Then
     begin
-      scr_Settings := PXF86VidModeModeInfo( Ptr( scr_ModeList^ ) + modeToSet * SizeOf( TXF86VidModeModeInfo ) )^;
-      if ( scr_Settings.hdisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
-    end;
-  if ( scr_Settings.hdisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
-    begin
-      log_Add( 'Cannot find mode to set...' );
-      exit;
-    end;
+      for modeToSet := 0 to scr_ModeCount - 1 do
+        begin
+          scr_Settings := PXF86VidModeModeInfo( Ptr( scr_ModeList^ ) + modeToSet * SizeOf( TXF86VidModeModeInfo ) )^;
+          if ( scr_Settings.hdisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
+        end;
+      if ( scr_Settings.hdisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
+        begin
+          log_Add( 'Cannot find mode to set...' );
+          exit;
+        end;
 
-  if ( wnd_FullScreen ) and ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
-    begin
-      XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
-      XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
+      if  and ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
+        begin
+          XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
+          XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
+        end;
     end else
       begin
         scr_Reset();
@@ -523,27 +526,31 @@ begin
       scr_Reset();
 {$ENDIF}
 {$IFDEF DARWIN}
-  //CGDisplayCapture( scr_Display );
-  if scr_Refresh <> 0 Then
-    begin
-      scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display, 32, scr_Width, scr_Height, scr_Refresh, b );
-      scr_Refresh  := b;
-    end;
-  if scr_Refresh = 0 Then
-    scr_Settings := CGDisplayBestModeForParameters( scr_Display, 32, scr_Width, scr_Height, b );
-
-  if b = 1 Then
-    CGDisplaySwitchToMode( scr_Display, scr_Settings )
-  else
-    begin
-      u_Warning( 'Cannot set fullscreen mode.' );
-      wnd_FullScreen := FALSE;
-    end;
-
   if wnd_FullScreen Then
-    HideMenuBar()
-  else
-    ShowMenuBar();
+    begin
+      //CGDisplayCapture( scr_Display );
+      if scr_Refresh <> 0 Then
+        begin
+          scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display, 32, scr_Width, scr_Height, scr_Refresh, b );
+          scr_Refresh  := b;
+        end;
+      if scr_Refresh = 0 Then
+        scr_Settings := CGDisplayBestModeForParameters( scr_Display, 32, scr_Width, scr_Height, b );
+
+      if b = 1 Then
+        CGDisplaySwitchToMode( scr_Display, scr_Settings )
+      else
+        begin
+          u_Warning( 'Cannot set fullscreen mode.' );
+          wnd_FullScreen := FALSE;
+        end;
+
+      HideMenuBar();
+    end else
+      begin
+        scr_Reset();
+        ShowMenuBar();
+       end;
 {$ENDIF}
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
