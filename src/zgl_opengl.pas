@@ -225,9 +225,11 @@ begin
         ogl_iAttr[ 15 ] := 8;
         ogl_iAttr[ 16 ] := WGL_BLUE_BITS_ARB;
         ogl_iAttr[ 17 ] := 8;
-        ogl_iAttr[ 18 ] := WGL_DEPTH_BITS_ARB;
-        ogl_iAttr[ 19 ] := ogl_zDepth;
-        i := 20;
+        ogl_iAttr[ 19 ] := WGL_ALPHA_BITS_ARB;
+        ogl_iAttr[ 20 ] := 8;
+        ogl_iAttr[ 21 ] := WGL_DEPTH_BITS_ARB;
+        ogl_iAttr[ 22 ] := ogl_zDepth;
+        i := 23;
         if ogl_Stencil > 0 Then
           begin
             ogl_iAttr[ i     ] := WGL_STENCIL_BITS_ARB;
@@ -287,17 +289,19 @@ begin
   ogl_zDepth := 24;
   repeat
     FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, AGL_NONE );
-    ogl_Attr[ 0 ] := AGL_RGBA;
-    ogl_Attr[ 1 ] := AGL_RED_SIZE;
-    ogl_Attr[ 2 ] := 8;
-    ogl_Attr[ 3 ] := AGL_GREEN_SIZE;
-    ogl_Attr[ 4 ] := 8;
-    ogl_Attr[ 5 ] := AGL_BLUE_SIZE;
-    ogl_Attr[ 6 ] := 8;
-    ogl_Attr[ 7 ] := AGL_DOUBLEBUFFER;
-    ogl_Attr[ 8 ] := AGL_DEPTH_SIZE;
-    ogl_Attr[ 9 ] := ogl_zDepth;
-    i := 10;
+    ogl_Attr[ 0  ] := AGL_RGBA;
+    ogl_Attr[ 1  ] := AGL_RED_SIZE;
+    ogl_Attr[ 2  ] := 8;
+    ogl_Attr[ 3  ] := AGL_GREEN_SIZE;
+    ogl_Attr[ 4  ] := 8;
+    ogl_Attr[ 5  ] := AGL_BLUE_SIZE;
+    ogl_Attr[ 6  ] := 8;
+    ogl_Attr[ 7  ] := AGL_ALPHA_SIZE;
+    ogl_Attr[ 8  ] := 8;
+    ogl_Attr[ 9  ] := AGL_DOUBLEBUFFER;
+    ogl_Attr[ 10 ] := AGL_DEPTH_SIZE;
+    ogl_Attr[ 11 ] := ogl_zDepth;
+    i := 12;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := AGL_STENCIL_SIZE;

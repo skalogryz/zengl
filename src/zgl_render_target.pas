@@ -131,10 +131,10 @@ function rtarget_Add;
     fbconfig     : GLXFBConfig;
     visualinfo   : PXVisualInfo;
     pbufferiAttr : array[ 0..15 ] of Integer;
-    fbconfigAttr : array[ 0..15 ] of Integer;
+    fbconfigAttr : array[ 0..31 ] of Integer;
 {$ENDIF}
 {$IFDEF WINDOWS}
-    pbufferiAttr : array[ 0..15 ] of Integer;
+    pbufferiAttr : array[ 0..31 ] of Integer;
     pbufferfAttr : array[ 0..15 ] of Single;
     pixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : LongWord;
@@ -165,18 +165,24 @@ begin
         pPBuffer := Result.next.Handle;
 
         FillChar( pbufferiAttr[ 0 ], 16 * 4, None );
-        FillChar( fbconfigAttr[ 0 ], 16 * 4, None );
-        fbconfigAttr[ 0 ] := GLX_DRAWABLE_TYPE;
-        fbconfigAttr[ 1 ] := GLX_PBUFFER_BIT;
-        fbconfigAttr[ 2 ] := GLX_DOUBLEBUFFER;
-        fbconfigAttr[ 3 ] := GL_FALSE;
-        fbconfigAttr[ 4 ] := GLX_RENDER_TYPE;
-        fbconfigAttr[ 5 ] := GLX_RGBA_BIT;
-        fbconfigAttr[ 6 ] := GLX_ALPHA_SIZE;
-        fbconfigAttr[ 7 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
-        fbconfigAttr[ 8 ] := GLX_DEPTH_SIZE;
-        fbconfigAttr[ 9 ] := ogl_zDepth;
-        i := 10;
+        FillChar( fbconfigAttr[ 0 ], 32 * 4, None );
+        fbconfigAttr[ 0  ] := GLX_DRAWABLE_TYPE;
+        fbconfigAttr[ 1  ] := GLX_PBUFFER_BIT;
+        fbconfigAttr[ 2  ] := GLX_DOUBLEBUFFER;
+        fbconfigAttr[ 3  ] := GL_TRUE;
+        fbconfigAttr[ 4  ] := GLX_RENDER_TYPE;
+        fbconfigAttr[ 5  ] := GLX_RGBA_BIT;
+        fbconfigAttr[ 6  ] := GLX_RED_SIZE;
+        fbconfigAttr[ 7  ] := 8;
+        fbconfigAttr[ 8  ] := GLX_GREEN_SIZE;
+        fbconfigAttr[ 9  ] := 8;
+        fbconfigAttr[ 10 ] := GLX_BLUE_SIZE;
+        fbconfigAttr[ 11 ] := 8;
+        fbconfigAttr[ 12 ] := GLX_ALPHA_SIZE;
+        fbconfigAttr[ 13 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        fbconfigAttr[ 14 ] := GLX_DEPTH_SIZE;
+        fbconfigAttr[ 15 ] := ogl_zDepth;
+        i := 16;
         if ogl_Stencil > 0 Then
           begin
             fbconfigAttr[ i     ] := GLX_STENCIL_SIZE;
@@ -262,19 +268,25 @@ begin
         zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
         pPBuffer := Result.next.Handle;
 
-        FillChar( pbufferiAttr[ 0 ], 16 * 4, 0 );
+        FillChar( pbufferiAttr[ 0 ], 32 * 4, 0 );
         FillChar( pbufferfAttr[ 0 ], 16 * 4, 0 );
-        pbufferiAttr[ 0 ] := WGL_DRAW_TO_PBUFFER_ARB;
-        pbufferiAttr[ 1 ] := GL_TRUE;
-        pbufferiAttr[ 2 ] := WGL_DOUBLE_BUFFER_ARB;
-        pbufferiAttr[ 3 ] := GL_FALSE;
-        pbufferiAttr[ 4 ] := WGL_COLOR_BITS_ARB;
-        pbufferiAttr[ 5 ] := 24;
-        pbufferiAttr[ 6 ] := WGL_ALPHA_BITS_ARB;
-        pbufferiAttr[ 7 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
-        pbufferiAttr[ 8 ] := WGL_DEPTH_BITS_ARB;
-        pbufferiAttr[ 9 ] := ogl_zDepth;
-        i := 10;
+        pbufferiAttr[ 0  ] := WGL_DRAW_TO_PBUFFER_ARB;
+        pbufferiAttr[ 1  ] := GL_TRUE;
+        pbufferiAttr[ 2  ] := WGL_DOUBLE_BUFFER_ARB;
+        pbufferiAttr[ 3  ] := GL_TRUE;
+        pbufferiAttr[ 4  ] := WGL_COLOR_BITS_ARB;
+        pbufferiAttr[ 5  ] := 24;
+        pbufferiAttr[ 6  ] := WGL_RED_BITS_ARB;
+        pbufferiAttr[ 7  ] := 8;
+        pbufferiAttr[ 8  ] := WGL_GREEN_BITS_ARB;
+        pbufferiAttr[ 9  ] := 8;
+        pbufferiAttr[ 10 ] := WGL_BLUE_BITS_ARB;
+        pbufferiAttr[ 11 ] := 8;
+        pbufferiAttr[ 12 ] := WGL_ALPHA_BITS_ARB;
+        pbufferiAttr[ 13 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        pbufferiAttr[ 14 ] := WGL_DEPTH_BITS_ARB;
+        pbufferiAttr[ 15 ] := ogl_zDepth;
+        i := 16;
         if ogl_Stencil > 0 Then
           begin
             pbufferiAttr[ i     ] := WGL_STENCIL_BITS_ARB;
@@ -334,7 +346,7 @@ begin
         pbufferdAttr[ 7  ] := AGL_BLUE_SIZE;
         pbufferdAttr[ 8  ] := 8;
         pbufferdAttr[ 9  ] := AGL_ALPHA_SIZE;
-        pbufferdAttr[ 10 ] := 8;
+        pbufferdAttr[ 10 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
         pbufferdAttr[ 11 ] := AGL_DEPTH_SIZE;
         pbufferdAttr[ 12 ] := ogl_zDepth;
         i := 13;
