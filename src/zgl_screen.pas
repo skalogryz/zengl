@@ -202,6 +202,13 @@ begin
 {$IFDEF LINUX}
   scr_Init();
 
+  if DefaultDepth( scr_Display, scr_Default ) < 24 Then
+    begin
+      u_Error( 'DefaultDepth not set to 24-bit.' );
+      zgl_Exit;
+      exit;
+    end;
+
   if not glXQueryExtension( scr_Display, i, j ) Then
     begin
       u_Error( 'GLX Extension not found' );
@@ -467,15 +474,14 @@ begin
         end;
       if ( scr_Settings.hdisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
         begin
-          log_Add( 'Cannot find mode to set...' );
-          exit;
-        end;
-
-      if ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
-        begin
-          XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
-          XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
-        end;
+          u_Warning( 'Cannot set fullscreen mode.' );
+          wnd_FullScreen := FALSE;
+        end else
+          if ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
+            begin
+              XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
+              XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
+            end;
     end else
       begin
         scr_Reset();
@@ -523,7 +529,14 @@ begin
         end else
           ChangeDisplaySettings( scr_Settings, CDS_FULLSCREEN )
     end else
-      scr_Reset();
+      begin
+        if ( scr_Desktop.dmBitsPerPel <> 32 ) and ( ogl_3DAccelerator ) Then
+          begin
+            u_Error( 'Desktop not set to 32-bit mode.' );
+            zgl_Exit;
+          end;
+        scr_Reset();
+      end;
 {$ENDIF}
 {$IFDEF DARWIN}
   if wnd_FullScreen Then
@@ -548,6 +561,11 @@ begin
       HideMenuBar();
     end else
       begin
+        if ( CGDisplayBitsPerPixel( scr_Display ) <> 32 ) and ( ogl_3DAccelerator ) Then
+          begin
+            u_Error( 'Desktop not set to 32-bit mode.' );
+            zgl_Exit;
+          end;
         scr_Reset();
         ShowMenuBar();
        end;

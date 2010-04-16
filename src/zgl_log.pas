@@ -76,7 +76,8 @@ procedure log_Add;
 begin
   if not app_Log Then exit;
   {$IFDEF LINUX}
-  writeln( Message );
+  if ( app_Log ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
+    writeln( Message );
   {$ENDIF}
   if Timings Then
     str := log_Timing + Message + #13#10
