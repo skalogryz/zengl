@@ -471,7 +471,7 @@ begin
           exit;
         end;
 
-      if  and ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
+      if ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
         begin
           XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
           XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
