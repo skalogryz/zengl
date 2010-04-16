@@ -283,9 +283,21 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   scr_Init();
+  if scr_Desktop.dmBitsPerPel <> 32 Then
+    begin
+      u_Error( 'Desktop not set to 32-bit mode.' );
+      zgl_Exit;
+      exit;
+    end;
 {$ENDIF}
 {$IFDEF DARWIN}
   scr_Init();
+  if CGDisplayBitsPerPixel( scr_Display ) <> 32 Then
+    begin
+      u_Error( 'Desktop not set to 32-bit mode.' );
+      zgl_Exit;
+      exit;
+    end;
 {$ENDIF}
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
   scr_GetResList();
@@ -523,15 +535,7 @@ begin
         end else
           ChangeDisplaySettings( scr_Settings, CDS_FULLSCREEN )
     end else
-      begin
-        if ( scr_Desktop.dmBitsPerPel <> 32 ) and ( ogl_3DAccelerator ) Then
-          begin
-            u_Error( 'Desktop not set to 32-bit mode.' );
-            zgl_Exit;
-            exit;
-          end;
-        scr_Reset();
-      end;
+      scr_Reset();
 {$ENDIF}
 {$IFDEF DARWIN}
   if wnd_FullScreen Then
@@ -556,15 +560,9 @@ begin
       HideMenuBar();
     end else
       begin
-        if ( CGDisplayBitsPerPixel( scr_Display ) <> 32 ) and ( ogl_3DAccelerator ) Then
-          begin
-            u_Error( 'Desktop not set to 32-bit mode.' );
-            zgl_Exit;
-            exit;
-          end;
         scr_Reset();
         ShowMenuBar();
-       end;
+      end;
 {$ENDIF}
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )

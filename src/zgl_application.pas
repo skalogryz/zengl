@@ -433,10 +433,12 @@ begin
           end;
         if not wnd_FullScreen Then
           begin
-            scr_Init();
-            scr_Width  := scr_Desktop.dmPelsWidth;
-            scr_Height := scr_Desktop.dmPelsHeight;
-            wnd_Update();
+            if scr_Create() Then
+              begin
+                scr_Width  := scr_Desktop.dmPelsWidth;
+                scr_Height := scr_Desktop.dmPelsHeight;
+                wnd_Update();
+              end;
           end else
             begin
               scr_Width  := wnd_Width;
