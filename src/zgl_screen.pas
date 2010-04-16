@@ -343,16 +343,10 @@ end;
 
 procedure scr_Destroy;
 begin
-{$IFDEF LINUX}
   scr_Reset();
+{$IFDEF LINUX}
   XFree( scr_ModeList );
   glXWaitX();
-{$ENDIF}
-{$IFDEF WINDOWS}
-  scr_Reset();
-{$ENDIF}
-{$IFDEF DARWIN}
-  scr_Reset();
 {$ENDIF}
 end;
 
@@ -534,6 +528,7 @@ begin
           begin
             u_Error( 'Desktop not set to 32-bit mode.' );
             zgl_Exit;
+            exit;
           end;
         scr_Reset();
       end;
@@ -565,6 +560,7 @@ begin
           begin
             u_Error( 'Desktop not set to 32-bit mode.' );
             zgl_Exit;
+            exit;
           end;
         scr_Reset();
         ShowMenuBar();
