@@ -79,7 +79,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -268,7 +268,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -438,7 +438,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -620,7 +620,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CROP_INVISIBLE > 0 ) Then
+  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -790,21 +790,21 @@ begin
   if tX < 0 Then
     begin
       aI := Round( -tX ) div i;
-      bI := Round( ogl_CropW / scr_ResCX ) div i + aI;
+      bI := Round( ogl_ClipW / scr_ResCX ) div i + aI;
     end else
       begin
         aI := 0;
-        bI := Round( ogl_CropW / scr_ResCX ) div i - Round( tX ) div i;
+        bI := Round( ogl_ClipW / scr_ResCX ) div i - Round( tX ) div i;
       end;
 
   if tY < 0 Then
     begin
       aJ := Round( -tY ) div j;
-      bJ := Round( ogl_CropH / scr_ResCY ) div j + aJ;
+      bJ := Round( ogl_ClipH / scr_ResCY ) div j + aJ;
     end else
       begin
         aJ := 0;
-        bJ := Round( ogl_CropH / scr_ResCY ) div j - Round( tY ) div j;
+        bJ := Round( ogl_ClipH / scr_ResCY ) div j - Round( tY ) div j;
       end;
 
   if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) or ( cam2dGlobal.Angle <> 0 ) Then
@@ -813,11 +813,11 @@ begin
         begin
           cam2dZoomX := cam2dGlobal.Zoom.X;
           cam2dZoomY := cam2dGlobal.Zoom.Y;
-          ogl_CropR  := Round( sqrt( sqr( ogl_CropW / cam2dZoomX ) + sqr( ogl_CropH / cam2dZoomY ) ) ) div 2;
+          ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / cam2dZoomX ) + sqr( ogl_ClipH / cam2dZoomY ) ) ) div 2;
         end;
 
-      tI := ogl_CropR div i - Round( ogl_CropW / scr_ResCX ) div i div 2 + 3;
-      tJ := ogl_CropR div j - Round( ogl_CropH / scr_ResCY ) div j div 2 + 3;
+      tI := ogl_ClipR div i - Round( ogl_ClipW / scr_ResCX ) div i div 2 + 3;
+      tJ := ogl_ClipR div j - Round( ogl_ClipH / scr_ResCY ) div j div 2 + 3;
       DEC( aI, tI );
       INC( bI, tI );
       DEC( aJ, tJ );

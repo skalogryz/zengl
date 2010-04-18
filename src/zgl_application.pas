@@ -853,6 +853,6 @@ begin
 end;
 
 initialization
-  app_Flags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CROP_INVISIBLE;
+  app_Flags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
 
 end.

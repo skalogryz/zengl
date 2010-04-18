@@ -116,11 +116,11 @@ end;
 function sprite2d_InScreenSimple;
 begin
   if Angle <> 0 Then
-    Result := ( ( X + W + H / 2 > ogl_CropX ) and ( X - W - H / 2 < ogl_CropX + ogl_CropW / scr_ResCX ) and
-                ( Y + H + W / 2 > ogl_CropY ) and ( Y - W - H / 2 < ogl_CropY + ogl_CropH / scr_ResCY ) )
+    Result := ( ( X + W + H / 2 > ogl_ClipX ) and ( X - W - H / 2 < ogl_ClipX + ogl_ClipW / scr_ResCX ) and
+                ( Y + H + W / 2 > ogl_ClipY ) and ( Y - W - H / 2 < ogl_ClipY + ogl_ClipH / scr_ResCY ) )
   else
-    Result := ( ( X + W > ogl_CropX ) and ( X < ogl_CropX + ogl_CropW / scr_ResCX ) and
-                ( Y + H > ogl_CropY ) and ( Y < ogl_CropY + ogl_CropH / scr_ResCY ) );
+    Result := ( ( X + W > ogl_ClipX ) and ( X < ogl_ClipX + ogl_ClipW / scr_ResCX ) and
+                ( Y + H > ogl_ClipY ) and ( Y < ogl_ClipY + ogl_ClipH / scr_ResCY ) );
 end;
 
 function sprite2d_InScreenCamera;
@@ -134,11 +134,11 @@ begin
         begin
           cam2dZoomX := cam2dGlobal.Zoom.X;
           cam2dZoomY := cam2dGlobal.Zoom.Y;
-          ogl_CropR  := Round( sqrt( sqr( ogl_CropW / scr_ResCX / cam2dZoomX ) + sqr( ogl_CropH / scr_ResCY / cam2dZoomY ) ) ) div 2;
+          ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / scr_ResCX / cam2dZoomX ) + sqr( ogl_ClipH / scr_ResCY / cam2dZoomY ) ) ) div 2;
         end;
-      cx   := ogl_CropX + cam2dGlobal.X + ( ogl_CropW / scr_ResCX ) / 2;
-      cy   := ogl_CropY + cam2dGlobal.Y + ( ogl_CropH / scr_ResCY ) / 2;
-      crad := ogl_CropR;
+      cx   := ogl_ClipX + cam2dGlobal.X + ( ogl_ClipW / scr_ResCX ) / 2;
+      cy   := ogl_ClipY + cam2dGlobal.Y + ( ogl_ClipH / scr_ResCY ) / 2;
+      crad := ogl_ClipR;
 
       sx   := X + W / 2;
       sy   := Y + H / 2;
@@ -147,11 +147,11 @@ begin
       Result := sqr( sx - cx ) + sqr( sy - cy ) < sqr( srad + crad );
     end else
       if Angle <> 0 Then
-        Result := ( ( X + W + H / 2 > ogl_CropX + cam2dGlobal.X ) and ( X - W - H / 2 < ogl_CropX + ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
-                    ( Y + H + W / 2 > ogl_CropY + cam2dGlobal.Y ) and ( Y - W - H / 2 < ogl_CropY + ogl_CropH / scr_ResCY + cam2dGlobal.Y ) )
+        Result := ( ( X + W + H / 2 > ogl_ClipX + cam2dGlobal.X ) and ( X - W - H / 2 < ogl_ClipX + ogl_ClipW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H + W / 2 > ogl_ClipY + cam2dGlobal.Y ) and ( Y - W - H / 2 < ogl_ClipY + ogl_ClipH / scr_ResCY + cam2dGlobal.Y ) )
       else
-        Result := ( ( X + W > ogl_CropX + cam2dGlobal.X ) and ( X < ogl_CropX + ogl_CropW / scr_ResCX + cam2dGlobal.X ) and
-                    ( Y + H > ogl_CropY + cam2dGlobal.Y ) and ( Y < ogl_CropY + ogl_CropH / scr_ResCY + cam2dGlobal.Y ) );
+        Result := ( ( X + W > ogl_ClipX + cam2dGlobal.X ) and ( X < ogl_ClipX + ogl_ClipW / scr_ResCX + cam2dGlobal.X ) and
+                    ( Y + H > ogl_ClipY + cam2dGlobal.Y ) and ( Y < ogl_ClipY + ogl_ClipH / scr_ResCY + cam2dGlobal.Y ) );
 end;
 
 initialization

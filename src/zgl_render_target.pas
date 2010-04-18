@@ -415,6 +415,10 @@ begin
             exit;
           end;
 
+        if Surface.Flags and TEX_RGB > 0 Then
+          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGB, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) )
+        else
+          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
         case ogl_zDepth of
           24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
           32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );

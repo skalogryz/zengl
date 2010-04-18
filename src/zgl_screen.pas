@@ -244,7 +244,7 @@ begin
     ogl_Attr[ 11 ] := GL_TRUE;
     ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
     ogl_Attr[ 13 ] := ogl_zDepth;
-    i := 12;
+    i := 14;
     if ogl_Stencil > 0 Then
       begin
         ogl_Attr[ i     ] := GLX_STENCIL_SIZE;
@@ -612,7 +612,7 @@ begin
 
   cam2dZoomX := cam2dGlobal.Zoom.X;
   cam2dZoomY := cam2dGlobal.Zoom.Y;
-  ogl_CropR  := Round( sqrt( sqr( ogl_CropW / scr_ResCX / cam2dZoomX ) + sqr( ogl_CropH / scr_ResCY / cam2dZoomY ) ) ) div 2;
+  ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / scr_ResCX / cam2dZoomX ) + sqr( ogl_ClipH / scr_ResCY / cam2dZoomY ) ) ) div 2;
 end;
 
 procedure scr_SetViewPort;
@@ -624,18 +624,18 @@ begin
 
   if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
     begin
-      ogl_CropX := 0;
-      ogl_CropY := 0;
-      ogl_CropW := wnd_Width - scr_AddCX * 2;
-      ogl_CropH := wnd_Height - scr_AddCY * 2;
-      glViewPort( scr_AddCX, scr_AddCY, ogl_CropW, ogl_CropH );
+      ogl_ClipX := 0;
+      ogl_ClipY := 0;
+      ogl_ClipW := wnd_Width - scr_AddCX * 2;
+      ogl_ClipH := wnd_Height - scr_AddCY * 2;
+      glViewPort( scr_AddCX, scr_AddCY, ogl_ClipW, ogl_ClipH );
     end else
       begin
-        ogl_CropX := 0;
-        ogl_CropY := 0;
-        ogl_CropW := wnd_Width;
-        ogl_CropH := wnd_Height;
-        glViewPort( 0, 0, ogl_CropW, ogl_CropH );
+        ogl_ClipX := 0;
+        ogl_ClipY := 0;
+        ogl_ClipW := wnd_Width;
+        ogl_ClipH := wnd_Height;
+        glViewPort( 0, 0, ogl_ClipW, ogl_ClipH );
       end;
 end;
 

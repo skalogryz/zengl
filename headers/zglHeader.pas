@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC2              }
-{ date:    2010.04.13           }
+{ date:    2010.04.19           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -144,7 +144,7 @@ const
   WND_USE_AUTOCENTER    = $001000;
   SND_CAN_PLAY          = $002000;
   SND_CAN_PLAY_FILE     = $004000;
-  CROP_INVISIBLE        = $008000;
+  CLIP_INVISIBLE        = $008000;
 
 var
   zgl_Enable  : procedure( const What : LongWord );

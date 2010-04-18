@@ -275,6 +275,7 @@
         <ShowHints Value="False"/>
         <ShowGenInfo Value="False"/>
       </Verbosity>
+      <CustomOptions Value="-Cg"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

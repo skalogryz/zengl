@@ -33,7 +33,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.2 RC1';
+  cs_ZenGL = 'ZenGL 0.2 RC2';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -90,7 +90,7 @@ const
   WND_USE_AUTOCENTER    = $001000;
   SND_CAN_PLAY          = $002000;
   SND_CAN_PLAY_FILE     = $004000;
-  CROP_INVISIBLE        = $008000;
+  CLIP_INVISIBLE        = $008000;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
@@ -270,7 +270,7 @@ begin
 
   for i := 1 to SND_MAX do
     snd_StopFile( i );
-  snd_Free;
+  snd_Free();
   {$ENDIF}
 
   if app_WorkTime <> 0 Then

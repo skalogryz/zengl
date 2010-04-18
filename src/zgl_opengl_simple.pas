@@ -127,15 +127,15 @@ begin
 
   INC( tSCount );
   SetLength( tScissor, tSCount );
-  tScissor[ tSCount - 1 ][ 0 ] := ogl_CropX;
-  tScissor[ tSCount - 1 ][ 1 ] := ogl_CropY;
-  tScissor[ tSCount - 1 ][ 2 ] := ogl_CropW;
-  tScissor[ tSCount - 1 ][ 3 ] := ogl_CropH;
+  tScissor[ tSCount - 1 ][ 0 ] := ogl_ClipX;
+  tScissor[ tSCount - 1 ][ 1 ] := ogl_ClipY;
+  tScissor[ tSCount - 1 ][ 2 ] := ogl_ClipW;
+  tScissor[ tSCount - 1 ][ 3 ] := ogl_ClipH;
 
-  ogl_CropX := X;
-  ogl_CropY := Y;
-  ogl_CropW := Width;
-  ogl_CropH := Height;
+  ogl_ClipX := X;
+  ogl_ClipY := Y;
+  ogl_ClipW := Width;
+  ogl_ClipH := Height;
 end;
 
 procedure scissor_End;
@@ -145,16 +145,16 @@ begin
   if tSCount - 1 < 0 Then
     exit;
   DEC( tSCount );
-  ogl_CropX := tScissor[ tSCount ][ 0 ];
-  ogl_CropY := tScissor[ tSCount ][ 1 ];
-  ogl_CropW := tScissor[ tSCount ][ 2 ];
-  ogl_CropH := tScissor[ tSCount ][ 3 ];
+  ogl_ClipX := tScissor[ tSCount ][ 0 ];
+  ogl_ClipY := tScissor[ tSCount ][ 1 ];
+  ogl_ClipW := tScissor[ tSCount ][ 2 ];
+  ogl_ClipH := tScissor[ tSCount ][ 3 ];
   SetLength( tScissor, tSCount );
 
   if tSCount > 0 Then
     begin
       glEnable( GL_SCISSOR_TEST );
-      glScissor( ogl_CropX, wnd_Height - ogl_CropY - ogl_CropH, ogl_CropW, ogl_CropH );
+      glScissor( ogl_ClipX, wnd_Height - ogl_ClipY - ogl_ClipH, ogl_ClipW, ogl_ClipH );
     end else
       glDisable( GL_SCISSOR_TEST );
 end;
