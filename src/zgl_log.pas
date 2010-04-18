@@ -56,6 +56,7 @@ begin
 
   file_Open( log, logFile, FOM_CREATE );
   // crazy code :)
+  es := '';
   for i := 0 to length( cs_ZenGL ) + 7 do
     es := es + '=';
   log_Add( es, FALSE );

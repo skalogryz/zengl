@@ -260,7 +260,6 @@ procedure text_DrawInRect;
     curWord, j : Integer;
     newLine    : Integer;
     lineWidth  : Integer;
-    SpaceShift : Integer;
     WordsCount : Integer;
     LinesCount : Integer;
     NewFlags   : Integer;
@@ -285,7 +284,6 @@ begin
   lineFeed   := FALSE;
   x          := Round( Rect.X ) + 1;
   y          := Round( Rect.Y ) + 1 - Round( Font.MaxHeight * textScale );
-  SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
   while i <= length( Text ) do
     begin
       lc   := c;
