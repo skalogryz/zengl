@@ -57,7 +57,7 @@ begin
   if key_Down( K_ALT ) and key_Press( K_ENTER ) Then
     begin
       FullScreen := not FullScreen;
-      scr_SetOptions( 800, 600, 32, REFRESH_MAXIMUM, FullScreen, FALSE );
+      scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FullScreen, FALSE );
     end;
   // По нажатию Escape завершить приложение
   if key_Press( K_ESCAPE ) Then zgl_Exit;
