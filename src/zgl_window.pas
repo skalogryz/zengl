@@ -68,12 +68,13 @@ var
   wnd_Handle    : HWND;
   wnd_DC        : HDC;
   wnd_INST      : HINST;
-  wnd_Class     : TWndClassEx;
-  wnd_ClassName : PChar = 'ZenGL';
+  wnd_Class     : TWndClassExW;
+  wnd_ClassName : PWideChar = 'ZenGL';
   wnd_Style     : LongWord;
   wnd_CpnSize   : Integer;
   wnd_BrdSizeX  : Integer;
   wnd_BrdSizeY  : Integer;
+  wnd_CaptionW  : PWideChar;
   {$ENDIF}
   {$IFDEF DARWIN}
   wnd_Handle  : WindowRef;
@@ -178,21 +179,21 @@ begin
 
   with wnd_Class do
     begin
-      cbSize        := SizeOf( TWndClassEx );
+      cbSize        := SizeOf( TWndClassExW );
       style         := CS_DBLCLKS or CS_OWNDC;
       lpfnWndProc   := @app_ProcessMessages;
       cbClsExtra    := 0;
       cbWndExtra    := 0;
       hInstance     := wnd_INST;
-      hIcon         := LoadIcon  ( wnd_INST, MakeIntResource( 'MAINICON' ) );
-      hIconSm       := LoadIcon  ( wnd_INST, MakeIntResource( 'MAINICON' ) );
-      hCursor       := LoadCursor( wnd_INST, IDC_ARROW );
+      hIcon         := LoadIconW  ( wnd_INST, 'MAINICON' );
+      hIconSm       := LoadIconW  ( wnd_INST, 'MAINICON' );
+      hCursor       := LoadCursorW( wnd_INST, {$IFNDEF FPC} IDC_ARROW {$ELSE} PWideChar( IDC_ARROW ) {$ENDIF} );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
       lpszClassName := wnd_ClassName;
     end;
 
-  if RegisterClassEx( wnd_Class ) = 0 Then
+  if RegisterClassExW( wnd_Class ) = 0 Then
     begin
       u_Error( 'Cannot register window class' );
       exit;
@@ -206,11 +207,11 @@ begin
     end else
       wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   if ogl_Format = 0 Then
-    wnd_Handle := CreateWindowEx( WS_EX_TOOLWINDOW, wnd_ClassName, PChar( wnd_Caption ), WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
+    wnd_Handle := CreateWindowExW( WS_EX_TOOLWINDOW, wnd_ClassName, wnd_CaptionW, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ), wnd_ClassName, PChar( wnd_Caption ), wnd_Style, wnd_X, wnd_Y,
-                                  wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                  wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ), 0, 0, wnd_INST, nil );
+    wnd_Handle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ), wnd_ClassName, wnd_CaptionW, wnd_Style, wnd_X, wnd_Y,
+                                   wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
+                                   wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ), 0, 0, wnd_INST, nil );
 
   if wnd_Handle = 0 Then
     begin
@@ -299,7 +300,7 @@ begin
       wnd_Handle := 0;
     end;
 
-  if not UnRegisterClass( wnd_ClassName, wnd_INST ) Then
+  if not UnRegisterClassW( wnd_ClassName, wnd_INST ) Then
     begin
       u_Error( 'Cannot unregister window class' );
       wnd_INST := 0;
@@ -333,8 +334,8 @@ begin
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  SetWindowLong( wnd_Handle, GWL_STYLE, wnd_Style );
-  SetWindowLong( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
+  SetWindowLongW( wnd_Handle, GWL_STYLE, wnd_Style );
+  SetWindowLongW( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
 {$IFDEF DARWIN}
   aglSetCurrentContext( ogl_Context );
@@ -348,6 +349,10 @@ begin
 end;
 
 procedure wnd_SetCaption;
+  {$IFDEF WINDOWS}
+  var
+    i,len : Integer;
+  {$ENDIF}
 begin
   wnd_Caption := NewCaption + #0;
 {$IFDEF LINUX}
@@ -361,8 +366,29 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
+  {$IFNDEF FPC}
+  if SizeOf( Char ) = 2 Then
+    begin
+      len := 2;
+      wnd_CaptionW := PWideChar( wnd_Caption );
+    end else
+  {$ENDIF}
+  len := 1;
+  if len = 1 Then
+    begin
+      if app_Flags and APP_USE_UTF8 = 0 Then
+        wnd_Caption := AnsiToUtf8( NewCaption ) + #0;
+      len := MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), nil, 0 );
+      if Assigned( wnd_CaptionW ) Then
+        FreeMem( wnd_CaptionW );
+      GetMem( wnd_CaptionW, len * 2 );
+      MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), wnd_CaptionW, len );
+      if app_Flags and APP_USE_UTF8 = 0 Then
+        wnd_Caption := wnd_CaptionW;
+    end;
+
   if wnd_Handle <> 0 Then
-    SetWindowText( wnd_Handle, PChar( wnd_Caption ) );
+    SetWindowTextW( wnd_Handle, wnd_CaptionW );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then

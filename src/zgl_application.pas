@@ -103,6 +103,7 @@ uses
   zgl_keyboard,
   zgl_mouse,
   zgl_timers,
+  zgl_font,
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -204,10 +205,10 @@ begin
   keysRepeat := 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  while PeekMessage( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
+  while PeekMessageW( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
       TranslateMessage( m );
-      DispatchMessage( m );
+      DispatchMessageW( m );
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -233,12 +234,10 @@ function app_ProcessMessages;
     where   : Point;
     SCAKey  : LongWord;
   {$ENDIF}
-  {$IFDEF LINUX_OR_DARWIN}
     i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of AnsiChar;
     str : AnsiString;
-  {$ENDIF}
     key : LongWord;
 begin
 {$IFDEF LINUX}
@@ -412,7 +411,7 @@ begin
   Result := 0;
   if ( not app_Work ) and ( Msg <> WM_ACTIVATE ) Then
     begin
-      Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+      Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
       exit;
     end;
   case Msg of
@@ -471,7 +470,7 @@ begin
        end;
     WM_NCHITTEST:
       begin
-        Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+        Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
         if ( not app_Focus ) and ( Result = HTCAPTION ) Then
           Result := HTCLIENT;
       end;
@@ -585,17 +584,26 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          if wParam >= 32 Then
+          if app_Flags and APP_USE_UTF8 > 0 Then
             begin
-              if app_Flags and APP_USE_UTF8 > 0 Then
-                key_InputText( AnsiToUtf8( Char( wParam ) ) )
-              else
-                key_InputText( Char( wParam ) );
-            end;
+              len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
+              WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
+              str := '';
+              for i := 0 to len - 1 do
+                str := str + c[ i ];
+              if str <> '' Then
+                key_InputText( str );
+            end else
+              for i := 32 to 255 do
+                if wParam = CP1251_TO_UTF8[ i ] Then
+                  begin
+                    key_InputText( Char( i ) );
+                    break;
+                  end;
         end;
       end;
   else
-    Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+    Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
   end;
 {$ENDIF}
 {$IFDEF DARWIN}
