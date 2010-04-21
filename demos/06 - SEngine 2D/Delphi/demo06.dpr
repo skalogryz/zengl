@@ -77,7 +77,6 @@ end;
 procedure AddMiku;
   var
     i : Integer;
-    s : zglPSprite2D;
 begin
   // При добавлении в менеджер спрайта, указывается текстура, Layer(положение по Z) и
   // указатели на основные функции - Инициализация, Рендер, Обработка и Уничтожение
@@ -116,9 +115,6 @@ begin
 end;
 
 procedure Draw;
-  var
-    i : Integer;
-    t : Single;
 begin
   batch2d_Begin;
 
@@ -146,8 +142,6 @@ begin
 end;
 
 procedure Timer;
-  var
-    i : Integer;
 begin
   INC( time, 2 );
 
@@ -160,6 +154,13 @@ begin
   key_ClearState;
 end;
 
+procedure Quit;
+begin
+  // Очищаем память от созданных спрайтов
+  sengine2d_Set( @sengine2d );
+  sengine2d_ClearAll;
+end;
+
 Begin
   randomize;
 
@@ -168,6 +169,7 @@ Begin
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
+  zgl_Reg( SYS_EXIT, @Quit );
 
   wnd_SetCaption( '06 - SEngine 2D' );
 

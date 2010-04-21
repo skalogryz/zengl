@@ -126,9 +126,6 @@ begin
 end;
 
 procedure Draw;
-  var
-    i : Integer;
-    t : Single;
 begin
   batch2d_Begin;
 
@@ -156,8 +153,6 @@ begin
 end;
 
 procedure Timer;
-  var
-    i : Integer;
 begin
   INC( time, 2 );
 
@@ -171,6 +166,13 @@ begin
   key_ClearState;
 end;
 
+procedure Quit;
+begin
+  // Очищаем память от созданных спрайтов
+  sengine2d.ClearAll;
+  sengine2d.Destroy;
+end;
+
 Begin
   randomize;
 
@@ -179,6 +181,7 @@ Begin
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
+  zgl_Reg( SYS_EXIT, @Quit );
 
   wnd_SetCaption( '07 - SEngine 2D(OOP)' );
 

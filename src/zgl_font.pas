@@ -134,6 +134,7 @@ begin
     Font.prev.next := Font.next;
   if Assigned( Font.next ) Then
     Font.next.prev := Font.prev;
+  SetLength( Font.Pages, 0 );
   FreeMemory( Font );
   Font := nil;
 

@@ -133,23 +133,25 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
 var
-  fl, fp : PAnsiChar;
+  buffer : PAnsiChar;
+  fn, fp : PAnsiChar;
   s      : AnsiString;
   t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
 begin
   wnd_INST := GetModuleHandle( nil );
-  GetMem( fl, 65535 );
-  GetMem( fp, 65535 );
-  GetModuleFileNameA( wnd_INST, fl, 65535 );
-  GetFullPathNameA( fl, 65535, fp, fl );
-  s := copy( AnsiString( fp ), 1, length( fp ) - length( fl ) );
+  GetMem( buffer, 65535 );
+  GetMem( fn, 65535 );
+  GetModuleFileNameA( wnd_INST, fn, 65535 );
+  GetFullPathNameA( fn, 65535, buffer, fp );
+  s := copy( AnsiString( buffer ), 1, length( buffer ) - length( fp ) );
   app_WorkDir := PAnsiChar( s );
-  fl := nil;
-  fp := nil;
 
   GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
   app_UsrHomeDir := t;
   app_UsrHomeDir := app_UsrHomeDir + '\';
+
+  FreeMem( buffer );
+  FreeMem( fn );
 {$ENDIF}
 {$IFDEF DARWIN}
 var
@@ -233,28 +235,28 @@ begin
   scr_Destroy();
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
-  while managerTimer.Count > 1 do
+  while managerTimer.Count > 0 do
     begin
       p := managerTimer.First.next;
       timer_Del( zglPTimer( p ) );
     end;
 
   log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
-  while managerRTarget.Count > 1 do
+  while managerRTarget.Count > 0 do
     begin
       p := managerRTarget.First.next;
       rtarget_Del( zglPRenderTarget( p ) );
     end;
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
-  while managerTexture.Count.Items > 1 do
+  while managerTexture.Count.Items > 0 do
     begin
       p := managerTexture.First.next;
       tex_Del( zglPTexture( p ) );
     end;
 
   log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
-  while managerFont.Count > 1 do
+  while managerFont.Count > 0 do
     begin
       p := managerFont.First.next;
       font_Del( zglPFont( p ) );
@@ -262,7 +264,7 @@ begin
 
   {$IFDEF USE_SOUND}
   log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
-  while managerSound.Count.Items > 1 do
+  while managerSound.Count.Items > 0 do
     begin
       p := managerSound.First.next;
       snd_Del( zglPSound( p ) );
