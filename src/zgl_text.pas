@@ -179,27 +179,27 @@ begin
 
       if Flags and TEXT_FX_VCA > 0 Then
         begin
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
           gl_Vertex2fv( @quad[ 0 ] );
 
-          glColor4ubv( @FX2D_VCA2[ 0 ] );
+          glColor4ubv( @fx2dVCA2[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 1 ] );
           gl_Vertex2fv( @quad[ 1 ] );
 
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          glColor4ubv( @fx2dVCA3[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
           gl_Vertex2fv( @quad[ 2 ] );
 
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          glColor4ubv( @fx2dVCA3[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
           gl_Vertex2fv( @quad[ 2 ] );
 
-          glColor4ubv( @FX2D_VCA4[ 0 ] );
+          glColor4ubv( @fx2dVCA4[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
           gl_Vertex2fv( @quad[ 3 ] );
 
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
           gl_Vertex2fv( @quad[ 0 ] );
         end else

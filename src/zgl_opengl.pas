@@ -80,7 +80,6 @@ var
 
   {$IFDEF LINUX}
   oglx_Extensions : AnsiString;
-  ogl_CanVSync2   : Boolean;
   ogl_PBufferMode : Integer;
   ogl_Context     : GLXContext;
   ogl_VisualInfo  : PXVisualInfo;
@@ -583,30 +582,12 @@ begin
 
   // WaitVSync
 {$IFDEF LINUX}
-  // Только с VideoSync на NVIDIA при вертикальной синхронизации проц
-  // не сжирается на 100%...
-  if gl_IsSupported( 'NVIDIA', glGetString( GL_VENDOR ) ) Then
-    begin
-      glXGetVideoSyncSGI  := gl_GetProc( 'glXGetVideoSyncSGI' );
-      glXWaitVideoSyncSGI := gl_GetProc( 'glXWaitVideoSyncSGI' );
-      ogl_CanVSync        := Assigned( glXGetVideoSyncSGI ) and Assigned( glXWaitVideoSyncSGI );
-    end else
-      ogl_CanVSync := FALSE;
-  if not ogl_CanVSync Then
-    begin
-      glXSwapIntervalSGI := gl_GetProc( 'glXSwapIntervalSGI' );
-      ogl_CanVSync  := Assigned( glXSwapIntervalSGI );
-      ogl_CanVSync2 := ogl_CanVSync;
-    end;
+  glXSwapIntervalSGI := gl_GetProc( 'glXSwapIntervalSGI' );
+  ogl_CanVSync       := Assigned( glXSwapIntervalSGI );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  wglGetSwapIntervalEXT := gl_GetProc( 'wglGetSwapInterval' );
-  if Assigned( wglGetSwapIntervalEXT ) Then
-    begin
-      ogl_CanVSync := TRUE;
-      wglSwapIntervalEXT := gl_GetProc( 'wglSwapInterval' );
-    end else
-      ogl_CanVSync := FALSE;
+  wglSwapIntervalEXT := gl_GetProc( 'wglSwapInterval' );
+  ogl_CanVSync       := Assigned( wglSwapIntervalEXT );
 {$ENDIF}
 {$IFDEF DARWIN}
   if aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then
@@ -615,6 +596,8 @@ begin
     ogl_CanVSync := FALSE;
   aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
 {$ENDIF}
+  if ogl_CanVSync Then
+    scr_SetVSync( scr_VSync );
   log_Add( 'Support WaitVSync: ' + u_BoolToStr( ogl_CanVSync ) );
 end;
 

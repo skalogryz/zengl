@@ -266,8 +266,7 @@ procedure key_InputText;
 begin
   if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
     begin
-      if ( app_Flags and APP_USE_ENGLISH_INPUT > 0 ) and
-         ( Text[ 1 ] <> ' ' )  Then
+      if ( app_Flags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
         begin
           c := Char( scancode_to_utf8( keysLast[ 0 ] ) );
           if c <> #0 Then

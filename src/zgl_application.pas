@@ -594,12 +594,16 @@ begin
               if str <> '' Then
                 key_InputText( str );
             end else
-              for i := 32 to 255 do
-                if wParam = CP1251_TO_UTF8[ i ] Then
-                  begin
-                    key_InputText( Char( i ) );
-                    break;
-                  end;
+              // FIXME: пока просто сокращу количество циклов, потом надо будет сделать полное завершение ввода
+              if wParam < 128 Then
+                key_InputText( Char( CP1251_TO_UTF8[ wParam ] ) )
+              else
+                for i := 128 to 255 do
+                  if wParam = CP1251_TO_UTF8[ i ] Then
+                    begin
+                      key_InputText( Char( i ) );
+                      break;
+                    end;
         end;
       end;
   else

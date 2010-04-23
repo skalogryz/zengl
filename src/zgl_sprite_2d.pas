@@ -61,6 +61,7 @@ procedure texture2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     texC : array[ 0..3 ] of zglTPoint2D;
+    p    : zglPPoint2D;
 
     x1, x2 : Single;
     y1, y2 : Single;
@@ -85,10 +86,10 @@ begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
       end else
         begin
-          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
-          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
-          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
-          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          mX := min( X + fx2dVX1, min( X + W + fx2dVX2, min( X + W + fx2dVX3, X + fx2dVX4 ) ) );
+          mY := min( Y + fx2dVY1, min( Y + fx2dVY2, min( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) );
+          mW := max( X + fx2dVX1, max( X + W + fx2dVX2, max( X + W + fx2dVX3, X + fx2dVX4 ) ) ) - mx;
+          mH := max( Y + fx2dVY1, max( Y + fx2dVY2, max( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) ) - mY;
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
@@ -126,51 +127,66 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * deg2rad );
-      c := Cos( Angle * deg2rad );
+      m_SinCos( Angle * deg2rad, s, c );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := x1 * c - y1 * s + cX;
-          quad[ 0 ].Y := x1 * s + y1 * c + cY;
-          quad[ 1 ].X := x2 * c - y1 * s + cX;
-          quad[ 1 ].Y := x2 * s + y1 * c + cY;
-          quad[ 2 ].X := x2 * c - y2 * s + cX;
-          quad[ 2 ].Y := x2 * s + y2 * c + cY;
-          quad[ 3 ].X := x1 * c - y2 * s + cX;
-          quad[ 3 ].Y := x1 * s + y2 * c + cY;
+          p := @quad[ 0 ];
+          p.X := x1 * c - y1 * s + cX;
+          p.Y := x1 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y1 * s + cX;
+          p.Y := x2 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y2 * s + cX;
+          p.Y := x2 * s + y2 * c + cY;
+          INC( p );
+          p.X := x1 * c - y2 * s + cX;
+          p.Y := x1 * s + y2 * c + cY;
         end else
           begin
-            quad[ 0 ].X := ( x1 + FX2D_VX1 ) * c - ( y1 + FX2D_VY1 ) * s + cX;
-            quad[ 0 ].Y := ( x1 + FX2D_VX1 ) * s + ( y1 + FX2D_VY1 ) * c + cY;
-            quad[ 1 ].X := ( x2 + FX2D_VX2 ) * c - ( y1 + FX2D_VY2 ) * s + cX;
-            quad[ 1 ].Y := ( x2 + FX2D_VX2 ) * s + ( y1 + FX2D_VY2 ) * c + cY;
-            quad[ 2 ].X := ( x2 + FX2D_VX3 ) * c - ( y2 + FX2D_VY3 ) * s + cX;
-            quad[ 2 ].Y := ( x2 + FX2D_VX3 ) * s + ( y2 + FX2D_VY3 ) * c + cY;
-            quad[ 3 ].X := ( x1 + FX2D_VX4 ) * c - ( y2 + FX2D_VY4 ) * s + cX;
-            quad[ 3 ].Y := ( x1 + FX2D_VX4 ) * s + ( y2 + FX2D_VY4 ) * c + cY;
+            p := @quad[ 0 ];
+            p.X := ( x1 + fx2dVX1 ) * c - ( y1 + fx2dVY1 ) * s + cX;
+            p.Y := ( x1 + fx2dVX1 ) * s + ( y1 + fx2dVY1 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX2 ) * c - ( y1 + fx2dVY2 ) * s + cX;
+            p.Y := ( x2 + fx2dVX2 ) * s + ( y1 + fx2dVY2 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX3 ) * c - ( y2 + fx2dVY3 ) * s + cX;
+            p.Y := ( x2 + fx2dVX3 ) * s + ( y2 + fx2dVY3 ) * c + cY;
+            INC( p );
+            p.X := ( x1 + fx2dVX4 ) * c - ( y2 + fx2dVY4 ) * s + cX;
+            p.Y := ( x1 + fx2dVX4 ) * s + ( y2 + fx2dVY4 ) * c + cY;
           end;
     end else
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := X;
-          quad[ 0 ].Y := Y;
-          quad[ 1 ].X := X + W;
-          quad[ 1 ].Y := Y;
-          quad[ 2 ].X := X + W;
-          quad[ 2 ].Y := Y + H;
-          quad[ 3 ].X := X;
-          quad[ 3 ].Y := Y + H;
+          p := @quad[ 0 ];
+          p.X := X;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y + H;
+          INC( p );
+          p.X := X;
+          p.Y := Y + H;
         end else
           begin
-            quad[ 0 ].X := X     + FX2D_VX1;
-            quad[ 0 ].Y := Y     + FX2D_VY1;
-            quad[ 1 ].X := X + W + FX2D_VX2;
-            quad[ 1 ].Y := Y     + FX2D_VY2;
-            quad[ 2 ].X := X + W + FX2D_VX3;
-            quad[ 2 ].Y := Y + H + FX2D_VY3;
-            quad[ 3 ].X := X     + FX2D_VX4;
-            quad[ 3 ].Y := Y + H + FX2D_VY4;
+            p := @quad[ 0 ];
+            p.X := X     + fx2dVX1;
+            p.Y := Y     + fx2dVY1;
+            INC( p );
+            p.X := X + W + fx2dVX2;
+            p.Y := Y     + fx2dVY2;
+            INC( p );
+            p.X := X + W + fx2dVX3;
+            p.Y := Y + H + fx2dVY3;
+            INC( p );
+            p.X := X     + fx2dVX4;
+            p.Y := Y + H + fx2dVY4;
           end;
 
   if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
@@ -186,33 +202,38 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @texC[ 0 ] );
       gl_Vertex2fv( @quad[ 0 ] );
 
-      glColor4ubv( @FX2D_VCA2[ 0 ] );
+      glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2fv( @texC[ 1 ] );
       gl_Vertex2fv( @quad[ 1 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @texC[ 2 ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @texC[ 2 ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA4[ 0 ] );
+      glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @texC[ 3 ] );
       gl_Vertex2fv( @quad[ 3 ] );
 
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @texC[ 0 ] );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
@@ -249,6 +270,7 @@ end;
 procedure ssprite2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
+    p    : zglPPoint2D;
 
     fU, fV : Single;
     x1, x2 : Single;
@@ -274,10 +296,10 @@ begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
       end else
         begin
-          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
-          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
-          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
-          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          mX := min( X + fx2dVX1, min( X + W + fx2dVX2, min( X + W + fx2dVX3, X + fx2dVX4 ) ) );
+          mY := min( Y + fx2dVY1, min( Y + fx2dVY2, min( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) );
+          mW := max( X + fx2dVX1, max( X + W + fx2dVX2, max( X + W + fx2dVX3, X + fx2dVX4 ) ) ) - mx;
+          mH := max( Y + fx2dVY1, max( Y + fx2dVY2, max( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) ) - mY;
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
@@ -295,51 +317,66 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * deg2rad );
-      c := Cos( Angle * deg2rad );
+      m_SinCos( Angle * deg2rad, s, c );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := x1 * c - y1 * s + cX;
-          quad[ 0 ].Y := x1 * s + y1 * c + cY;
-          quad[ 1 ].X := x2 * c - y1 * s + cX;
-          quad[ 1 ].Y := x2 * s + y1 * c + cY;
-          quad[ 2 ].X := x2 * c - y2 * s + cX;
-          quad[ 2 ].Y := x2 * s + y2 * c + cY;
-          quad[ 3 ].X := x1 * c - y2 * s + cX;
-          quad[ 3 ].Y := x1 * s + y2 * c + cY;
+          p := @quad[ 0 ];
+          p.X := x1 * c - y1 * s + cX;
+          p.Y := x1 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y1 * s + cX;
+          p.Y := x2 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y2 * s + cX;
+          p.Y := x2 * s + y2 * c + cY;
+          INC( p );
+          p.X := x1 * c - y2 * s + cX;
+          p.Y := x1 * s + y2 * c + cY;
         end else
           begin
-            quad[ 0 ].X := ( x1 + FX2D_VX1 ) * c - ( y1 + FX2D_VY1 ) * s + cX;
-            quad[ 0 ].Y := ( x1 + FX2D_VX1 ) * s + ( y1 + FX2D_VY1 ) * c + cY;
-            quad[ 1 ].X := ( x2 + FX2D_VX2 ) * c - ( y1 + FX2D_VY2 ) * s + cX;
-            quad[ 1 ].Y := ( x2 + FX2D_VX2 ) * s + ( y1 + FX2D_VY2 ) * c + cY;
-            quad[ 2 ].X := ( x2 + FX2D_VX3 ) * c - ( y2 + FX2D_VY3 ) * s + cX;
-            quad[ 2 ].Y := ( x2 + FX2D_VX3 ) * s + ( y2 + FX2D_VY3 ) * c + cY;
-            quad[ 3 ].X := ( x1 + FX2D_VX4 ) * c - ( y2 + FX2D_VY4 ) * s + cX;
-            quad[ 3 ].Y := ( x1 + FX2D_VX4 ) * s + ( y2 + FX2D_VY4 ) * c + cY;
+            p := @quad[ 0 ];
+            p.X := ( x1 + fx2dVX1 ) * c - ( y1 + fx2dVY1 ) * s + cX;
+            p.Y := ( x1 + fx2dVX1 ) * s + ( y1 + fx2dVY1 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX2 ) * c - ( y1 + fx2dVY2 ) * s + cX;
+            p.Y := ( x2 + fx2dVX2 ) * s + ( y1 + fx2dVY2 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX3 ) * c - ( y2 + fx2dVY3 ) * s + cX;
+            p.Y := ( x2 + fx2dVX3 ) * s + ( y2 + fx2dVY3 ) * c + cY;
+            INC( p );
+            p.X := ( x1 + fx2dVX4 ) * c - ( y2 + fx2dVY4 ) * s + cX;
+            p.Y := ( x1 + fx2dVX4 ) * s + ( y2 + fx2dVY4 ) * c + cY;
           end;
     end else
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := X;
-          quad[ 0 ].Y := Y;
-          quad[ 1 ].X := X + W;
-          quad[ 1 ].Y := Y;
-          quad[ 2 ].X := X + W;
-          quad[ 2 ].Y := Y + H;
-          quad[ 3 ].X := X;
-          quad[ 3 ].Y := Y + H;
+          p := @quad[ 0 ];
+          p.X := X;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y + H;
+          INC( p );
+          p.X := X;
+          p.Y := Y + H;
         end else
           begin
-            quad[ 0 ].X := X     + FX2D_VX1;
-            quad[ 0 ].Y := Y     + FX2D_VY1;
-            quad[ 1 ].X := X + W + FX2D_VX2;
-            quad[ 1 ].Y := Y     + FX2D_VY2;
-            quad[ 2 ].X := X + W + FX2D_VX3;
-            quad[ 2 ].Y := Y + H + FX2D_VY3;
-            quad[ 3 ].X := X     + FX2D_VX4;
-            quad[ 3 ].Y := Y + H + FX2D_VY4;
+            p := @quad[ 0 ];
+            p.X := X     + fx2dVX1;
+            p.Y := Y     + fx2dVY1;
+            INC( p );
+            p.X := X + W + fx2dVX2;
+            p.Y := Y     + fx2dVY2;
+            INC( p );
+            p.X := X + W + fx2dVX3;
+            p.Y := Y + H + fx2dVY3;
+            INC( p );
+            p.X := X     + fx2dVX4;
+            p.Y := Y + H + fx2dVY4;
           end;
 
   if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
@@ -355,33 +392,38 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( fU, Texture^.V - fV );
       gl_Vertex2fv( @quad[ 0 ] );
 
-      glColor4ubv( @FX2D_VCA2[ 0 ] );
+      glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2f( Texture^.U - fU, Texture^.V - fV );
       gl_Vertex2fv( @quad[ 1 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( Texture^.U - fU, fV );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( Texture^.U - fU, fV );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA4[ 0 ] );
+      glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2f( fU, fV );
       gl_Vertex2fv( @quad[ 3 ] );
 
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( fU, Texture^.V - fV );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
@@ -418,6 +460,7 @@ end;
 procedure asprite2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
+    p    : zglPPoint2D;
 
     tX, tY, tU, tV, u, v : Single;
 
@@ -444,10 +487,10 @@ begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
       end else
         begin
-          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
-          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
-          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
-          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          mX := min( X + fx2dVX1, min( X + W + fx2dVX2, min( X + W + fx2dVX3, X + fx2dVX4 ) ) );
+          mY := min( Y + fx2dVY1, min( Y + fx2dVY2, min( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) );
+          mW := max( X + fx2dVX1, max( X + W + fx2dVX2, max( X + W + fx2dVX3, X + fx2dVX4 ) ) ) - mx;
+          mH := max( Y + fx2dVY1, max( Y + fx2dVY2, max( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) ) - mY;
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
@@ -477,51 +520,66 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * deg2rad );
-      c := Cos( Angle * deg2rad );
+      m_SinCos( Angle * deg2rad, s, c );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := x1 * c - y1 * s + cX;
-          quad[ 0 ].Y := x1 * s + y1 * c + cY;
-          quad[ 1 ].X := x2 * c - y1 * s + cX;
-          quad[ 1 ].Y := x2 * s + y1 * c + cY;
-          quad[ 2 ].X := x2 * c - y2 * s + cX;
-          quad[ 2 ].Y := x2 * s + y2 * c + cY;
-          quad[ 3 ].X := x1 * c - y2 * s + cX;
-          quad[ 3 ].Y := x1 * s + y2 * c + cY;
+          p := @quad[ 0 ];
+          p.X := x1 * c - y1 * s + cX;
+          p.Y := x1 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y1 * s + cX;
+          p.Y := x2 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y2 * s + cX;
+          p.Y := x2 * s + y2 * c + cY;
+          INC( p );
+          p.X := x1 * c - y2 * s + cX;
+          p.Y := x1 * s + y2 * c + cY;
         end else
           begin
-            quad[ 0 ].X := ( x1 + FX2D_VX1 ) * c - ( y1 + FX2D_VY1 ) * s + cX;
-            quad[ 0 ].Y := ( x1 + FX2D_VX1 ) * s + ( y1 + FX2D_VY1 ) * c + cY;
-            quad[ 1 ].X := ( x2 + FX2D_VX2 ) * c - ( y1 + FX2D_VY2 ) * s + cX;
-            quad[ 1 ].Y := ( x2 + FX2D_VX2 ) * s + ( y1 + FX2D_VY2 ) * c + cY;
-            quad[ 2 ].X := ( x2 + FX2D_VX3 ) * c - ( y2 + FX2D_VY3 ) * s + cX;
-            quad[ 2 ].Y := ( x2 + FX2D_VX3 ) * s + ( y2 + FX2D_VY3 ) * c + cY;
-            quad[ 3 ].X := ( x1 + FX2D_VX4 ) * c - ( y2 + FX2D_VY4 ) * s + cX;
-            quad[ 3 ].Y := ( x1 + FX2D_VX4 ) * s + ( y2 + FX2D_VY4 ) * c + cY;
+            p := @quad[ 0 ];
+            p.X := ( x1 + fx2dVX1 ) * c - ( y1 + fx2dVY1 ) * s + cX;
+            p.Y := ( x1 + fx2dVX1 ) * s + ( y1 + fx2dVY1 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX2 ) * c - ( y1 + fx2dVY2 ) * s + cX;
+            p.Y := ( x2 + fx2dVX2 ) * s + ( y1 + fx2dVY2 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX3 ) * c - ( y2 + fx2dVY3 ) * s + cX;
+            p.Y := ( x2 + fx2dVX3 ) * s + ( y2 + fx2dVY3 ) * c + cY;
+            INC( p );
+            p.X := ( x1 + fx2dVX4 ) * c - ( y2 + fx2dVY4 ) * s + cX;
+            p.Y := ( x1 + fx2dVX4 ) * s + ( y2 + fx2dVY4 ) * c + cY;
           end;
     end else
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := X;
-          quad[ 0 ].Y := Y;
-          quad[ 1 ].X := X + W;
-          quad[ 1 ].Y := Y;
-          quad[ 2 ].X := X + W;
-          quad[ 2 ].Y := Y + H;
-          quad[ 3 ].X := X;
-          quad[ 3 ].Y := Y + H;
+          p := @quad[ 0 ];
+          p.X := X;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y + H;
+          INC( p );
+          p.X := X;
+          p.Y := Y + H;
         end else
           begin
-            quad[ 0 ].X := X     + FX2D_VX1;
-            quad[ 0 ].Y := Y     + FX2D_VY1;
-            quad[ 1 ].X := X + W + FX2D_VX2;
-            quad[ 1 ].Y := Y     + FX2D_VY2;
-            quad[ 2 ].X := X + W + FX2D_VX3;
-            quad[ 2 ].Y := Y + H + FX2D_VY3;
-            quad[ 3 ].X := X     + FX2D_VX4;
-            quad[ 3 ].Y := Y + H + FX2D_VY4;
+            p := @quad[ 0 ];
+            p.X := X     + fx2dVX1;
+            p.Y := Y     + fx2dVY1;
+            INC( p );
+            p.X := X + W + fx2dVX2;
+            p.Y := Y     + fx2dVY2;
+            INC( p );
+            p.X := X + W + fx2dVX3;
+            p.Y := Y + H + fx2dVY3;
+            INC( p );
+            p.X := X     + fx2dVX4;
+            p.Y := Y + H + fx2dVY4;
           end;
 
   if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
@@ -537,33 +595,38 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX - u + tU, tY - tV );
       gl_Vertex2fv( @quad[ 0 ] );
 
-      glColor4ubv( @FX2D_VCA2[ 0 ] );
+      glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2f( tX - tU, tY - tV );
       gl_Vertex2fv( @quad[ 1 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tX - tU, tY - v + tV );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tX - tU, tY - v + tV );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA4[ 0 ] );
+      glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2f( tX - u + tU, tY - v + tV );
       gl_Vertex2fv( @quad[ 3 ] );
 
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX - u + tU, tY - tV );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
@@ -600,6 +663,7 @@ end;
 procedure csprite2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
+    p    : zglPPoint2D;
 
     tU, tV, tX, tY, tW, tH : Single;
 
@@ -626,10 +690,10 @@ begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
       end else
         begin
-          mX := min( X + FX2D_VX1, min( X + W + FX2D_VX2, min( X + W + FX2D_VX3, X + FX2D_VX4 ) ) );
-          mY := min( Y + FX2D_VY1, min( Y + FX2D_VY2, min( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) );
-          mW := max( X + FX2D_VX1, max( X + W + FX2D_VX2, max( X + W + FX2D_VX3, X + FX2D_VX4 ) ) ) - mx;
-          mH := max( Y + FX2D_VY1, max( Y + FX2D_VY2, max( Y + H + FX2D_VY3, Y + H + FX2D_VY4 ) ) ) - mY;
+          mX := min( X + fx2dVX1, min( X + W + fx2dVX2, min( X + W + fx2dVX3, X + fx2dVX4 ) ) );
+          mY := min( Y + fx2dVY1, min( Y + fx2dVY2, min( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) );
+          mW := max( X + fx2dVX1, max( X + W + fx2dVX2, max( X + W + fx2dVX3, X + fx2dVX4 ) ) ) - mx;
+          mH := max( Y + fx2dVY1, max( Y + fx2dVY2, max( Y + H + fx2dVY3, Y + H + fx2dVY4 ) ) ) - mY;
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
@@ -655,51 +719,66 @@ begin
       cX :=  X + W / 2;
       cY :=  Y + H / 2;
 
-      s := Sin( Angle * deg2rad );
-      c := Cos( Angle * deg2rad );
+      m_SinCos( Angle * deg2rad, s, c );
 
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := x1 * c - y1 * s + cX;
-          quad[ 0 ].Y := x1 * s + y1 * c + cY;
-          quad[ 1 ].X := x2 * c - y1 * s + cX;
-          quad[ 1 ].Y := x2 * s + y1 * c + cY;
-          quad[ 2 ].X := x2 * c - y2 * s + cX;
-          quad[ 2 ].Y := x2 * s + y2 * c + cY;
-          quad[ 3 ].X := x1 * c - y2 * s + cX;
-          quad[ 3 ].Y := x1 * s + y2 * c + cY;
+          p := @quad[ 0 ];
+          p.X := x1 * c - y1 * s + cX;
+          p.Y := x1 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y1 * s + cX;
+          p.Y := x2 * s + y1 * c + cY;
+          INC( p );
+          p.X := x2 * c - y2 * s + cX;
+          p.Y := x2 * s + y2 * c + cY;
+          INC( p );
+          p.X := x1 * c - y2 * s + cX;
+          p.Y := x1 * s + y2 * c + cY;
         end else
           begin
-            quad[ 0 ].X := ( x1 + FX2D_VX1 ) * c - ( y1 + FX2D_VY1 ) * s + cX;
-            quad[ 0 ].Y := ( x1 + FX2D_VX1 ) * s + ( y1 + FX2D_VY1 ) * c + cY;
-            quad[ 1 ].X := ( x2 + FX2D_VX2 ) * c - ( y1 + FX2D_VY2 ) * s + cX;
-            quad[ 1 ].Y := ( x2 + FX2D_VX2 ) * s + ( y1 + FX2D_VY2 ) * c + cY;
-            quad[ 2 ].X := ( x2 + FX2D_VX3 ) * c - ( y2 + FX2D_VY3 ) * s + cX;
-            quad[ 2 ].Y := ( x2 + FX2D_VX3 ) * s + ( y2 + FX2D_VY3 ) * c + cY;
-            quad[ 3 ].X := ( x1 + FX2D_VX4 ) * c - ( y2 + FX2D_VY4 ) * s + cX;
-            quad[ 3 ].Y := ( x1 + FX2D_VX4 ) * s + ( y2 + FX2D_VY4 ) * c + cY;
+            p := @quad[ 0 ];
+            p.X := ( x1 + fx2dVX1 ) * c - ( y1 + fx2dVY1 ) * s + cX;
+            p.Y := ( x1 + fx2dVX1 ) * s + ( y1 + fx2dVY1 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX2 ) * c - ( y1 + fx2dVY2 ) * s + cX;
+            p.Y := ( x2 + fx2dVX2 ) * s + ( y1 + fx2dVY2 ) * c + cY;
+            INC( p );
+            p.X := ( x2 + fx2dVX3 ) * c - ( y2 + fx2dVY3 ) * s + cX;
+            p.Y := ( x2 + fx2dVX3 ) * s + ( y2 + fx2dVY3 ) * c + cY;
+            INC( p );
+            p.X := ( x1 + fx2dVX4 ) * c - ( y2 + fx2dVY4 ) * s + cX;
+            p.Y := ( x1 + fx2dVX4 ) * s + ( y2 + fx2dVY4 ) * c + cY;
           end;
     end else
       if FX and FX2D_VCHANGE = 0 Then
         begin
-          quad[ 0 ].X := X;
-          quad[ 0 ].Y := Y;
-          quad[ 1 ].X := X + W;
-          quad[ 1 ].Y := Y;
-          quad[ 2 ].X := X + W;
-          quad[ 2 ].Y := Y + H;
-          quad[ 3 ].X := X;
-          quad[ 3 ].Y := Y + H;
+          p := @quad[ 0 ];
+          p.X := X;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y;
+          INC( p );
+          p.X := X + W;
+          p.Y := Y + H;
+          INC( p );
+          p.X := X;
+          p.Y := Y + H;
         end else
           begin
-            quad[ 0 ].X := X     + FX2D_VX1;
-            quad[ 0 ].Y := Y     + FX2D_VY1;
-            quad[ 1 ].X := X + W + FX2D_VX2;
-            quad[ 1 ].Y := Y     + FX2D_VY2;
-            quad[ 2 ].X := X + W + FX2D_VX3;
-            quad[ 2 ].Y := Y + H + FX2D_VY3;
-            quad[ 3 ].X := X     + FX2D_VX4;
-            quad[ 3 ].Y := Y + H + FX2D_VY4;
+            p := @quad[ 0 ];
+            p.X := X     + fx2dVX1;
+            p.Y := Y     + fx2dVY1;
+            INC( p );
+            p.X := X + W + fx2dVX2;
+            p.Y := Y     + fx2dVY2;
+            INC( p );
+            p.X := X + W + fx2dVX3;
+            p.Y := Y + H + fx2dVY3;
+            INC( p );
+            p.X := X     + fx2dVX4;
+            p.Y := Y + H + fx2dVY4;
           end;
 
   if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
@@ -715,33 +794,38 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
       gl_Vertex2fv( @quad[ 0 ] );
 
-      glColor4ubv( @FX2D_VCA2[ 0 ] );
+      glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2f( tW - tU, tY + tV );
       gl_Vertex2fv( @quad[ 1 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
       gl_Vertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @FX2D_VCA4[ 0 ] );
+      glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2f( tX + tU, tH - tV );
       gl_Vertex2fv( @quad[ 3 ] );
 
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
@@ -851,9 +935,14 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   u := Texture.U / Texture.FramesX;
   v := Texture.V / Texture.FramesY;

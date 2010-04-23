@@ -78,9 +78,9 @@ begin
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glColor4ubv( @fx2dVCA1[ 0 ] );
       gl_Vertex2f( X1 + 0.5, Y1 + 0.5 );
-      glColor4ubv( @FX2D_VCA2[ 0 ] );
+      glColor4ubv( @fx2dVCA2[ 0 ] );
       gl_Vertex2f( X2 + 0.5, Y2 + 0.5 );
     end else
       begin
@@ -114,22 +114,22 @@ begin
 
       if FX and FX2D_VCA > 0 Then
         begin
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           gl_Vertex2f( X,     Y );
 
-          glColor4ubv( @FX2D_VCA2[ 0 ] );
+          glColor4ubv( @fx2dVCA2[ 0 ] );
           gl_Vertex2f( X + W, Y );
 
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          glColor4ubv( @fx2dVCA3[ 0 ] );
           gl_Vertex2f( X + W, Y + H );
 
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          glColor4ubv( @fx2dVCA3[ 0 ] );
           gl_Vertex2f( X + W, Y + H );
 
-          glColor4ubv( @FX2D_VCA4[ 0 ] );
+          glColor4ubv( @fx2dVCA4[ 0 ] );
           gl_Vertex2f( X,     Y + H );
 
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           gl_Vertex2f( X,     Y );
         end else
           begin
@@ -157,22 +157,22 @@ begin
 
       if FX and FX2D_VCA > 0 Then
         begin
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           gl_Vertex2f( X + 0.5,     Y + 0.5 );
 
-          glColor4ubv( @FX2D_VCA2[ 0 ] );
+          glColor4ubv( @fx2dVCA2[ 0 ] );
           gl_Vertex2f( X + W - 0.5, Y + 0.5 );
 
           gl_Vertex2f( X + W - 0.5, Y + 0.5 );
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          glColor4ubv( @fx2dVCA3[ 0 ] );
           gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
 
           gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
-          glColor4ubv( @FX2D_VCA4[ 0 ] );
+          glColor4ubv( @fx2dVCA4[ 0 ] );
           gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
 
           gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           gl_Vertex2f( X + 0.5,     Y + 0.5 );
         end else
           begin

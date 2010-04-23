@@ -95,9 +95,14 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   for i := 0 to Grid.Cols - 2 do
     begin
@@ -197,9 +202,14 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   for i := 0 to Grid.Cols - 2 do
     begin
@@ -297,9 +307,14 @@ begin
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   for i := 0 to Grid.Cols - 2 do
     begin

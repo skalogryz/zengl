@@ -465,11 +465,8 @@ const
 
 var
   glXGetProcAddressARB: function(name: PChar): Pointer; cdecl;
-
   glXSwapIntervalSGI: function( interval: Integer): Integer; cdecl;
-  glXGetVideoSyncSGI: function(var counter: LongWord): Integer; cdecl;
-  glXWaitVideoSyncSGI: function(divisor, remainder: Integer; var count: LongWord): Integer; cdecl;
-
+  // PBuffer
   glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
   glXChooseFBConfig: function(dpy: PDisplay; screen: Integer; attribList: PInteger; nitems: PInteger): GLXFBConfig; cdecl;
   glXCreatePbuffer: function(dpy: PDisplay; config: Integer; attribList: PInteger): GLXPBuffer; cdecl;
@@ -506,7 +503,6 @@ const
 var
   wglChoosePixelFormatARB: function(hdc: HDC; const piAttribIList: PGLint; const pfAttribFList: PGLfloat; nMaxFormats: GLuint; piFormats: PGLint; nNumFormats: PGLuint): BOOL; stdcall;
   wglSwapIntervalEXT: function(interval: GLint): BOOL; stdcall;
-  wglGetSwapIntervalEXT: function(): GLint; stdcall;
   // PBuffer
   wglCreatePbufferARB: function(hDC: HDC; iPixelFormat: GLint; iWidth: GLint; iHeight: GLint; const piAttribList: PGLint): THandle; stdcall;
   wglGetPbufferDCARB: function(hPbuffer: THandle): HDC; stdcall;

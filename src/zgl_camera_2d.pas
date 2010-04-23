@@ -133,8 +133,7 @@ begin
       if cam2dGlobal.Angle <> cam2dAngle Then
         begin
           cam2dAngle := cam2dGlobal.Angle;
-          cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
-          cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
+          m_SinCos( cam2dGlobal.Angle * deg2rad * deg2rad, cam2dSin, cam2dCos );
         end;
       xa := ogl_Width  / 2 + ( X + cam2dSX ) * cam2dCos - ( Y + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
       ya := ogl_Height / 2 + ( X + cam2dSX ) * cam2dSin + ( Y + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
@@ -163,8 +162,7 @@ begin
       if cam2dGlobal.Angle <> cam2dAngle Then
         begin
           cam2dAngle := cam2dGlobal.Angle;
-          cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
-          cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
+          m_SinCos( cam2dGlobal.Angle * deg2rad * deg2rad, cam2dSin, cam2dCos );
         end;
       v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] + cam2dSX ) * cam2dCos - ( v2[ 1 ] + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
       v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] + cam2dSX ) * cam2dSin + ( v2[ 1 ] + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;

@@ -66,6 +66,8 @@ end;
 function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 
+function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
 function  m_Sin( Angle : Integer ) : Single;
@@ -111,6 +113,21 @@ function max;
 begin
   if a > b Then Result := a else Result := b;
 end;
+
+function m_SinCos;
+{$IFDEF USE_ASM}
+asm
+  FLD Angle
+  FSINCOS
+  FSTP [EDX]
+  FSTP [EAX]
+end;
+{$ELSE}
+begin
+  s := Sin( Angle );
+  c := Cos( Angle );
+end;
+{$ENDIF}
 
 procedure InitCosSinTables;
   var

@@ -69,8 +69,8 @@ var
   t_tmr     : TimeVal;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  frequency : int64;
-  freq      : Single;
+  t_frequency : int64;
+  t_freq      : Single;
   {$ENDIF}
   t_start   : Double;
 
@@ -172,7 +172,7 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   QueryPerformanceCounter( t );
-  Result := 1000 * T * freq - t_start;
+  Result := 1000 * T * t_freq - t_start;
 {$ENDIF}
 {$IFDEF DARWIN}
   Microseconds( t );
@@ -195,8 +195,8 @@ end;
 
 initialization
 {$IFDEF WINDOWS}
-  QueryPerformanceFrequency( frequency );
-  freq := 1 / frequency;
+  QueryPerformanceFrequency( t_frequency );
+  t_freq := 1 / t_frequency;
 {$ENDIF}
   t_start := timer_GetTicks();
 

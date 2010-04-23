@@ -389,43 +389,14 @@ begin
 end;
 
 procedure scr_Flush;
-  var
-    sync : LongWord;
 begin
 {$IFDEF LINUX}
-  if scr_VSync Then
-    begin
-      if ogl_CanVSync2 Then
-        glXSwapIntervalSGI( 1 )
-      else
-        if ogl_CanVSync Then
-          begin
-            glXGetVideoSyncSGI( sync );
-            glXWaitVideoSyncSGI( 2, ( sync + 1 ) mod 2, sync );
-          end;
-      glFinish();
-    end;
-
   glXSwapBuffers( scr_Display, wnd_Handle );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if ogl_CanVSync Then
-    begin
-      sync := wglGetSwapIntervalEXT();
-      if scr_VSync Then
-        begin
-          if sync = 0 Then
-            wglSwapIntervalEXT( 1 );
-          glFinish();
-        end else
-          if sync <> 0 Then
-            wglSwapIntervalEXT( 0 );
-    end;
-
   SwapBuffers( wnd_DC );
 {$ENDIF}
 {$IFDEF DARWIN}
-//  glFinish;
   aglSwapBuffers( ogl_Context );
 {$ENDIF}
 end;
@@ -642,6 +613,14 @@ end;
 procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
+{$IFDEF LINUX}
+  if ogl_CanVSync Then
+    glXSwapIntervalSGI( Integer( scr_VSync ) );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  if ogl_CanVSync Then
+    wglSwapIntervalEXT( Integer( scr_VSync ) );
+{$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( ogl_Context ) Then
     aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );

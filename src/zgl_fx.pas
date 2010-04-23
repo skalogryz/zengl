@@ -54,19 +54,20 @@ procedure fx2d_SetScale( const scaleX, scaleY : Single );
 
 var
   // FX2D_COLORMIX
-  FX2D_R : Byte = 255;
-  FX2D_G : Byte = 255;
-  FX2D_B : Byte = 255;
+  fx2dColor    : array[ 0..3 ] of Byte;
+  fx2dAlpha    : PByte;
+  fx2dColorDef : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  fx2dAlphaDef : PByte;
 
   // FX2D_VCA
-  FX2D_VCA1 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
-  FX2D_VCA2 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
-  FX2D_VCA3 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
-  FX2D_VCA4 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  fx2dVCA1 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  fx2dVCA2 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  fx2dVCA3 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
+  fx2dVCA4 : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
 
   // FX2D_VCHANGE
-  FX2D_VX1, FX2D_VX2, FX2D_VX3, FX2D_VX4 : Single;
-  FX2D_VY1, FX2D_VY2, FX2D_VY3, FX2D_VY4 : Single;
+  fx2dVX1, fx2dVX2, fx2dVX3, fx2dVX4 : Single;
+  fx2dVY1, fx2dVY2, fx2dVY3, fx2dVY4 : Single;
 
   // FX2D_SCALE
   FX2D_SX, FX2D_SY : Single;
@@ -150,44 +151,44 @@ end;
 
 procedure fx2d_SetColor;
 begin
-  FX2D_R :=   Color             shr 16;
-  FX2D_G := ( Color and $FF00 ) shr 8;
-  FX2D_B :=   Color and $FF;
+  fx2dColor[ 0 ] :=   Color             shr 16;
+  fx2dColor[ 1 ] := ( Color and $FF00 ) shr 8;
+  fx2dColor[ 2 ] :=   Color and $FF;
 end;
 
 procedure fx2d_SetVCA;
 begin
-  FX2D_VCA1[ 0 ] :=   C1             shr 16;
-  FX2D_VCA1[ 1 ] := ( C1 and $FF00 ) shr 8;
-  FX2D_VCA1[ 2 ] :=   C1 and $FF;
-  FX2D_VCA1[ 3 ] := A1;
+  fx2dVCA1[ 0 ] :=   C1             shr 16;
+  fx2dVCA1[ 1 ] := ( C1 and $FF00 ) shr 8;
+  fx2dVCA1[ 2 ] :=   C1 and $FF;
+  fx2dVCA1[ 3 ] := A1;
 
-  FX2D_VCA2[ 0 ] :=   C2             shr 16;
-  FX2D_VCA2[ 1 ] := ( C2 and $FF00 ) shr 8;
-  FX2D_VCA2[ 2 ] :=   C2 and $FF;
-  FX2D_VCA2[ 3 ] := A2;
+  fx2dVCA2[ 0 ] :=   C2             shr 16;
+  fx2dVCA2[ 1 ] := ( C2 and $FF00 ) shr 8;
+  fx2dVCA2[ 2 ] :=   C2 and $FF;
+  fx2dVCA2[ 3 ] := A2;
 
-  FX2D_VCA3[ 0 ] :=   C3             shr 16;
-  FX2D_VCA3[ 1 ] := ( C3 and $FF00 ) shr 8;
-  FX2D_VCA3[ 2 ] :=   C3 and $FF;
-  FX2D_VCA3[ 3 ] := A3;
+  fx2dVCA3[ 0 ] :=   C3             shr 16;
+  fx2dVCA3[ 1 ] := ( C3 and $FF00 ) shr 8;
+  fx2dVCA3[ 2 ] :=   C3 and $FF;
+  fx2dVCA3[ 3 ] := A3;
 
-  FX2D_VCA4[ 0 ] :=   C4             shr 16;
-  FX2D_VCA4[ 1 ] := ( C4 and $FF00 ) shr 8;
-  FX2D_VCA4[ 2 ] :=   C4 and $FF;
-  FX2D_VCA4[ 3 ] := A4;
+  fx2dVCA4[ 0 ] :=   C4             shr 16;
+  fx2dVCA4[ 1 ] := ( C4 and $FF00 ) shr 8;
+  fx2dVCA4[ 2 ] :=   C4 and $FF;
+  fx2dVCA4[ 3 ] := A4;
 end;
 
 procedure fx2d_SetVertexes;
 begin
-  FX2D_VX1 := x1;
-  FX2D_VY1 := y1;
-  FX2D_VX2 := x2;
-  FX2D_VY2 := y2;
-  FX2D_VX3 := x3;
-  FX2D_VY3 := y3;
-  FX2D_VX4 := x4;
-  FX2D_VY4 := y4;
+  fx2dVX1 := x1;
+  fx2dVY1 := y1;
+  fx2dVX2 := x2;
+  fx2dVY2 := y2;
+  fx2dVX3 := x3;
+  fx2dVY3 := y3;
+  fx2dVX4 := x4;
+  fx2dVY4 := y4;
 end;
 
 procedure fx2d_SetScale;
@@ -195,5 +196,9 @@ begin
   FX2D_SX := scaleX;
   FX2D_SY := scaleY;
 end;
+
+initialization
+  fx2dAlpha    := @fx2dColor[ 3 ];
+  fx2dAlphaDef := @fx2dColorDef[ 3 ];
 
 end.
