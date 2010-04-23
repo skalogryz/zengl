@@ -93,41 +93,23 @@ begin
 end;
 
 function batch2d_Check;
-  label _end;
 begin
-  if Texture <> b2dcur_Tex Then
+  if ( Mode <> b2dcur_Mode ) or ( Texture <> b2dcur_Tex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
+     ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
     begin
-      b2dcur_Tex := Texture;
-      goto _end;
+      if not b2d_New Then
+        batch2d_Flush();
+      b2d_New := TRUE;
     end;
 
-  if Mode <> b2dcur_Mode Then
-    begin
-      b2dcur_Mode := Mode;
-      goto _end;
-    end;
+  b2dcur_Mode   := Mode;
+  b2dcur_Tex    := Texture;
+  b2dcur_FX     := FX;
+  b2dcur_Smooth := FX and PR2D_SMOOTH;
+  if FX and FX_BLEND = 0 Then
+    b2dcur_Blend := 0;
 
-  if ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) Then
-    begin
-      b2dcur_FX := FX;
-      if FX and FX_BLEND = 0 Then
-        b2dcur_Blend := 0;
-      goto _end;
-    end;
-
-  if b2dcur_Smooth <> FX and PR2D_SMOOTH Then
-    begin
-      b2dcur_Smooth := FX and PR2D_SMOOTH;
-      goto _end;
-    end;
-
-  Result := FALSE;
-  exit;
-
-_end:
-  if not b2d_New Then
-    batch2d_Flush();
-  Result  := TRUE;
+  Result := b2d_New;
   b2d_New := FALSE;
 end;
 
