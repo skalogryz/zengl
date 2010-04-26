@@ -47,6 +47,7 @@ procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
+procedure scr_SetWindowedMode;
 procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
 procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
@@ -285,12 +286,8 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   scr_Init();
-  if scr_Desktop.dmBitsPerPel <> 32 Then
-    begin
-      u_Error( 'Desktop not set to 32-bit mode.' );
-      zgl_Exit;
-      exit;
-    end;
+  if ( not wnd_FullScreen ) and ( scr_Desktop.dmBitsPerPel <> 32 ) Then
+    scr_SetWindowedMode();
 {$ENDIF}
 {$IFDEF DARWIN}
   scr_Init();
@@ -401,6 +398,37 @@ begin
 {$ENDIF}
 end;
 
+procedure scr_SetWindowedMode;
+  {$IFDEF WINDOWS}
+  var
+    settings : DEVMODE;
+  {$ENDIF}
+begin
+  {$IFDEF LINUX}
+  scr_Reset();
+  XMapWindow( scr_Display, wnd_Handle );
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  if scr_Desktop.dmBitsPerPel <> 32 Then
+    begin
+      settings              := scr_Desktop;
+      settings.dmBitsPerPel := 32;
+
+      if ChangeDisplaySettings( settings, CDS_TEST or CDS_FULLSCREEN ) <> DISP_CHANGE_SUCCESSFUL Then
+        begin
+          u_Error( 'Desktop doesn''t support 32-bit color mode.' );
+          zgl_Exit;
+        end else
+          ChangeDisplaySettings( settings, CDS_FULLSCREEN );
+    end else
+      scr_Reset();
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  scr_Reset();
+  ShowMenuBar();
+  {$ENDIF}
+end;
+
 procedure scr_SetOptions;
   var
   {$IFDEF LINUX}
@@ -462,10 +490,7 @@ begin
               XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
             end;
     end else
-      begin
-        scr_Reset();
-        XMapWindow( scr_Display, wnd_Handle );
-      end;
+      scr_SetWindowedMode();
 {$ENDIF}
 {$IFDEF WINDOWS}
   if wnd_FullScreen Then
@@ -508,7 +533,7 @@ begin
         end else
           ChangeDisplaySettings( scr_Settings, CDS_FULLSCREEN )
     end else
-      scr_Reset();
+      scr_SetWindowedMode();
 {$ENDIF}
 {$IFDEF DARWIN}
   if wnd_FullScreen Then
@@ -532,10 +557,7 @@ begin
 
       HideMenuBar();
     end else
-      begin
-        scr_Reset();
-        ShowMenuBar();
-      end;
+      scr_SetWindowedMode();
 {$ENDIF}
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
