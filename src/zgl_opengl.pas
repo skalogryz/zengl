@@ -224,11 +224,11 @@ begin
         ogl_iAttr[ 15 ] := 8;
         ogl_iAttr[ 16 ] := WGL_BLUE_BITS_ARB;
         ogl_iAttr[ 17 ] := 8;
-        ogl_iAttr[ 19 ] := WGL_ALPHA_BITS_ARB;
-        ogl_iAttr[ 20 ] := 8;
-        ogl_iAttr[ 21 ] := WGL_DEPTH_BITS_ARB;
-        ogl_iAttr[ 22 ] := ogl_zDepth;
-        i := 23;
+        ogl_iAttr[ 18 ] := WGL_ALPHA_BITS_ARB;
+        ogl_iAttr[ 19 ] := 8;
+        ogl_iAttr[ 20 ] := WGL_DEPTH_BITS_ARB;
+        ogl_iAttr[ 21 ] := ogl_zDepth;
+        i := 22;
         if ogl_Stencil > 0 Then
           begin
             ogl_iAttr[ i     ] := WGL_STENCIL_BITS_ARB;
@@ -417,7 +417,6 @@ begin
     u_Error( 'Cannot release current OpenGL context');
 
   glXDestroyContext( scr_Display, ogl_Context );
-  glXWaitGL();
 {$ENDIF}
 {$IFDEF WINDOWS}
   if not wglMakeCurrent( wnd_DC, 0 ) Then
