@@ -44,6 +44,9 @@ uses
   zgl_textures_png,
   zgl_textures_tga,
 
+  {$IFDEF USE_TEXTURE_ATLAS}
+  zgl_texture_atlas,
+  {$ENDIF}
   zgl_render_target,
 
   {$IFDEF USE_SOUND}
@@ -67,7 +70,12 @@ uses
   {$ENDIF}
 
   zgl_primitives_2d,
+  {$IFDEF USE_SENGINE}
   zgl_sengine_2d,
+  {$ENDIF}
+  {$IFDEF USE_PARTICLES}
+  zgl_particles_2d,
+  {$ENDIF}
   zgl_sprite_2d,
   zgl_grid_2d,
 
@@ -91,9 +99,8 @@ const
 exports
   // Main
   zgl_Init                 name prefix + 'zgl_Init',
-  {$IFDEF WINDOWS}
-  zgl_InitToHandle,
-  {$ENDIF}
+  zgl_InitToHandle         name prefix + 'zgl_InitToHandle',
+
   zgl_Exit                 name prefix + 'zgl_Exit',
   zgl_Reg                  name prefix + 'zgl_Reg',
   zgl_Get                  name prefix + 'zgl_Get',
@@ -175,6 +182,16 @@ exports
   tex_Filter               name prefix + 'tex_Filter',
   tex_SetAnisotropy        name prefix + 'tex_SetAnisotropy',
 
+  // Texture Atlases
+  {$IFDEF USE_TEXTURE_ATLAS}
+  atlas_Add                name prefix + 'atlas_Add',
+  atlas_Del                name prefix + 'atlas_Del',
+  atlas_GetFrameCoord      name prefix + 'atlas_GetFrameCoord',
+  atlas_InsertFromTexture  name prefix + 'atlas_InsertFromTexture',
+  atlas_InsertFromFile     name prefix + 'atlas_InsertFromFile',
+  atlas_InsertFromMemory   name prefix + 'atlas_InsertFromMemory',
+  {$ENDIF}
+
   // OpenGL
   Set2DMode                name prefix + 'Set2DMode',
   Set3DMode                name prefix + 'Set3DMode',
@@ -220,12 +237,27 @@ exports
   pr2d_TriList             name prefix + 'pr2d_TriList',
 
   // Sprite Engine 2D
+  {$IFDEF USE_SENGINE}
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
   sengine2d_DelSprite      name prefix + 'sengine2d_DelSprite',
   sengine2d_ClearAll       name prefix + 'sengine2d_ClearAll',
   sengine2d_Set            name prefix + 'sengine2d_Set',
   sengine2d_Draw           name prefix + 'sengine2d_Draw',
   sengine2d_Proc           name prefix + 'sengine2d_Proc',
+  {$ENDIF}
+
+  // Particles Engine 2D
+  {$IFDEF USE_PARTICLES}
+  pengine2d_AddEmitter     name prefix + 'pengine2d_AddEmitter',
+  pengine2d_DelEmitter     name prefix + 'pengine2d_DelEmitter',
+  pengine2d_ClearAll       name prefix + 'pengine2d_ClearAll',
+  pengine2d_Set            name prefix + 'pengine2d_Set',
+  pengine2d_Draw           name prefix + 'pengine2d_Draw',
+  pengine2d_Proc           name prefix + 'pengine2d_Proc',
+  emitter2d_Init           name prefix + 'emitter2d_Init',
+  emitter2d_Draw           name prefix + 'emitter2d_Draw',
+  emitter2d_Proc           name prefix + 'emitter2d_Proc',
+  {$ENDIF}
 
   // Sprite 2D
   texture2d_Draw           name prefix + 'texture2d_Draw',

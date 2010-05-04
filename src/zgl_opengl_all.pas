@@ -164,6 +164,7 @@ const
   GL_QUADS                          = $0007;
 
   // Texture
+  GL_UNPACK_ROW_LENGTH              = $0CF2;
   GL_TEXTURE_2D                     = $0DE1;
   GL_TEXTURE0_ARB                   = $84C0;
   GL_MAX_TEXTURE_SIZE               = $0D33;
@@ -366,7 +367,9 @@ var
   procedure glDeleteTextures(n: GLsizei; const textures: PGLuint); stdcall; external libGL;
   procedure glTexParameterf(target: GLenum; pname: GLenum; param: GLfloat); stdcall; external libGL;
   procedure glTexParameteri(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
+  procedure glPixelStorei(pname: GLenum; param: GLint); stdcall; external libGL;
   procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall; external libGL;
+  procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall; external libGL;
   procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGL;
   procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
@@ -459,8 +462,6 @@ const
   function  glXQueryExtension(dpy: PDisplay; var errorb, event: Integer): Boolean; cdecl; external libGL;
   function  glXQueryVersion(dpy: PDisplay; var major, minor: Integer): Boolean; cdecl; external libGL;
   function  glXIsDirect(dpy: PDisplay; ctx: GLXContext): Boolean; cdecl; external libGL;
-  procedure glXWaitGL; cdecl; external libGL;
-  procedure glXWaitX; cdecl; external libGL;
   function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PChar; cdecl; external libGL;
 
 var

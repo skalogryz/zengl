@@ -23,7 +23,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="43">
+    <Units Count="44">
       <Unit0>
         <Filename Value="ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -239,6 +239,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_particles_2d"/>
       </Unit42>
+      <Unit43>
+        <Filename Value="zgl_texture_atlas.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_texture_atlas"/>
+      </Unit43>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

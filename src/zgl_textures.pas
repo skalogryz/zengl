@@ -25,7 +25,7 @@ unit zgl_textures;
 interface
 
 uses
-  zgl_opengl_all,
+  zgl_math_2d,
   zgl_memory;
 
 const
@@ -37,20 +37,25 @@ const
 
   TEX_GRAYSCALE         = $000020;
   TEX_INVERT            = $000040;
+  TEX_CUSTOM_EFFECT     = $000080;
 
-  TEX_FILTER_NEAREST    = $000080;
-  TEX_FILTER_LINEAR     = $000100;
-  TEX_FILTER_BILINEAR   = $000200;
-  TEX_FILTER_TRILINEAR  = $000400;
-  TEX_FILTER_ANISOTROPY = $000800;
+  TEX_FILTER_NEAREST    = $000100;
+  TEX_FILTER_LINEAR     = $000200;
+  TEX_FILTER_BILINEAR   = $000400;
+  TEX_FILTER_TRILINEAR  = $000800;
+  TEX_FILTER_ANISOTROPY = $001000;
 
-  TEX_RGB               = $001000;
-  TEX_CALCULATE_ALPHA   = $002000;
+  TEX_RGB               = $002000;
+  TEX_CALCULATE_ALPHA   = $004000;
 
   TEX_QUALITY_LOW       = $400000;
   TEX_QUALITY_MEDIUM    = $800000;
 
   TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT or TEX_CALCULATE_ALPHA;
+
+type
+  zglPTextureCoord = ^zglTTextureCoord;
+  zglTTextureCoord = array[ 0..3 ] of zglTPoint2D;
 
 type
   zglPTexture = ^zglTTexture;
@@ -60,6 +65,7 @@ type
     U, V          : Single;
     FramesX       : Word;
     FramesY       : Word;
+    FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
 
     prev, next    : zglPTexture;
@@ -93,10 +99,12 @@ function  tex_LoadFromFile( const FileName : String; const TransparentColor, Fla
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 function  tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
+procedure tex_CalcTexCoords( var Texture : zglTTexture );
 
 procedure tex_Filter( Texture : zglPTexture; const Flags : LongWord );
 procedure tex_SetAnisotropy( const Level : Byte );
 
+procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
 procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single );
 procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : Word );
 procedure tex_CalcInvert( var pData : Pointer; const Width, Height : Word );
@@ -105,9 +113,12 @@ procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : Lon
 
 procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
 
+procedure zeroce( var pData : Pointer; const Width, Height : Word );
+
 var
-  managerTexture : zglTTextureManager;
-  zeroTexture    : zglPTexture;
+  managerTexture       : zglTTextureManager;
+  zeroTexture          : zglPTexture;
+  tex_CalcCustomEffect : procedure( var pData : Pointer; const Width, Height : Word ) = zeroce;
 
 implementation
 uses
@@ -115,10 +126,13 @@ uses
   zgl_main,
   zgl_screen,
   zgl_opengl,
+  zgl_opengl_all,
   zgl_render_2d,
   zgl_file,
   zgl_log,
   zgl_utils;
+
+procedure zeroce; begin end;
 
 function tex_Add;
 begin
@@ -142,6 +156,7 @@ begin
     Texture.prev.next := Texture.next;
   if Assigned( Texture.next ) Then
     Texture.next.prev := Texture.prev;
+  SetLength( Texture.FramesCoord, 0 );
   FreeMemory( Texture );
   Texture := nil;
 
@@ -152,15 +167,7 @@ procedure tex_Create;
   var
     format, iformat, cformat : LongWord;
 begin
-  if Texture.Flags and TEX_GRAYSCALE > 0 Then
-    tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
-  if Texture.Flags and TEX_INVERT > 0 Then
-    tex_CalcInvert( pData, Texture.Width, Texture.Height );
-  if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
-    tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
-  if Texture.Flags and TEX_RGB > 0 Then
-    tex_CalcRGB( pData, Texture.Width, Texture.Height );
-
+  tex_CalcFlags( Texture, pData );
   if Texture.Flags and TEX_COMPRESS >= 1 Then
     if ( not ogl_CanCompressE ) and ( not ogl_CanCompressA ) Then
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
@@ -212,6 +219,8 @@ begin
       Texture.Width  := Round( Texture.Width * Texture.U );
       Texture.Height := Round( Texture.Height * Texture.V );
     end;
+
+  tex_CalcTexCoords( Texture );
 end;
 
 function tex_CreateZero;
@@ -238,10 +247,10 @@ end;
 
 function tex_LoadFromFile;
   var
-    i      : Integer;
-    pData  : Pointer;
-    w, h   : Word;
-    ext    : String;
+    i     : Integer;
+    pData : Pointer;
+    w, h  : Word;
+    ext   : String;
 begin
   Result := nil;
   pData  := nil;
@@ -269,7 +278,7 @@ begin
       exit;
     end;
 
-  Result         := tex_Add;
+  Result         := tex_Add();
   Result.Width   := w;
   Result.Height  := h;
   Result.U       := 1;
@@ -290,9 +299,9 @@ end;
 
 function tex_LoadFromMemory;
   var
-    i      : Integer;
-    pData  : Pointer;
-    w, h   : Word;
+    i     : Integer;
+    pData : Pointer;
+    w, h  : Word;
 begin
   Result := nil;
   pData  := nil;
@@ -345,6 +354,7 @@ begin
 
   Texture.FramesX := Round( Texture.Width ) div FrameWidth;
   Texture.FramesY := Round( Texture.Height ) div FrameHeight;
+  tex_CalcTexCoords( Texture^ );
 end;
 
 function tex_SetMask;
@@ -387,6 +397,50 @@ begin
   FreeMem( pData );
   FreeMem( tData );
   FreeMem( mData );
+end;
+
+procedure tex_CalcTexCoords;
+  var
+    i : Integer;
+    tX, tY, u, v : Single;
+begin
+  SetLength( Texture.FramesCoord, Texture.FramesX * Texture.FramesY + 1 );
+  u := Texture.U / Texture.FramesX;
+  v := Texture.V / Texture.FramesY;
+
+  Texture.FramesCoord[ 0, 0 ].X := 0;
+  Texture.FramesCoord[ 0, 0 ].Y := Texture.V;
+  Texture.FramesCoord[ 0, 1 ].X := Texture.U;
+  Texture.FramesCoord[ 0, 1 ].Y := Texture.V;
+  Texture.FramesCoord[ 0, 2 ].X := Texture.U;
+  Texture.FramesCoord[ 0, 2 ].Y := 0;
+  Texture.FramesCoord[ 0, 3 ].X := 0;
+  Texture.FramesCoord[ 0, 3 ].Y := 0;
+  for i := 1 to Texture.FramesX * Texture.FramesY do
+    begin
+      tY := i div Texture.FramesX;
+      tX := i - tY * Texture.FramesX;
+      tY := Texture.FramesY - tY;
+      if tX = 0 Then
+        begin
+          tX := Texture.FramesX;
+          tY := tY + 1;
+        end;
+      tX := tX * u;
+      tY := tY * v;
+
+      Texture.FramesCoord[ i, 0 ].X := tX - u;
+      Texture.FramesCoord[ i, 0 ].Y := tY;
+
+      Texture.FramesCoord[ i, 1 ].X := tX;
+      Texture.FramesCoord[ i, 1 ].Y := tY;
+
+      Texture.FramesCoord[ i, 2 ].X := tX;
+      Texture.FramesCoord[ i, 2 ].Y := tY - v;
+
+      Texture.FramesCoord[ i, 3 ].X := tX - u;
+      Texture.FramesCoord[ i, 3 ].Y := tY - v;
+    end;
 end;
 
 procedure tex_Filter;
@@ -453,6 +507,20 @@ begin
     ogl_Anisotropy := ogl_MaxAnisotropy
   else
     ogl_Anisotropy := Level;
+end;
+
+procedure tex_CalcFlags;
+begin
+  if Texture.Flags and TEX_GRAYSCALE > 0 Then
+    tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
+  if Texture.Flags and TEX_INVERT > 0 Then
+    tex_CalcInvert( pData, Texture.Width, Texture.Height );
+  if Texture.Flags and TEX_CUSTOM_EFFECT > 0 Then
+    tex_CalcCustomEffect( pData, Texture.Width, Texture.Height );
+  if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
+    tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
+  if Texture.Flags and TEX_RGB > 0 Then
+    tex_CalcRGB( pData, Texture.Width, Texture.Height );
 end;
 
 procedure tex_CalcPOT;

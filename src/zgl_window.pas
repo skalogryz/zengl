@@ -25,7 +25,7 @@ unit zgl_window;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil
+  X, XLib, XUtil, XAtom
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows
@@ -93,11 +93,29 @@ uses
   zgl_opengl_simple,
   zgl_utils;
 
-function wnd_Create;
-  {$IFDEF LINUX}
+{$IFDEF LINUX}
+procedure wnd_SetHints( Initialized : Boolean = TRUE );
   var
     sizehints : TXSizeHints;
-  {$ENDIF}
+begin
+  FillChar( sizehints, SizeOf( TXSizeHints ), 0 );
+  if wnd_FullScreen and Initialized Then
+    sizehints.flags    := PBaseSize or PWinGravity
+  else
+    sizehints.flags    := PPosition or PSize or PMinSize or PMaxSize;
+  sizehints.x          := wnd_X;
+  sizehints.y          := wnd_Y;
+  sizehints.width      := wnd_Width;
+  sizehints.height     := wnd_Height;
+  sizehints.min_width  := wnd_Width;
+  sizehints.max_width  := wnd_Width;
+  sizehints.min_height := wnd_Height;
+  sizehints.max_height := wnd_Height;
+  XSetWMNormalHints( scr_Display, wnd_Handle, @sizehints );
+end;
+{$ENDIF}
+
+function wnd_Create;
   {$IFDEF DARWIN}
   var
     size   : MacOSAll.Rect;
@@ -116,23 +134,10 @@ begin
 {$IFDEF LINUX}
   FillChar( wnd_Attr, SizeOf( wnd_Attr ), 0 );
   wnd_Attr.colormap   := XCreateColormap( scr_Display, wnd_Root, ogl_VisualInfo.visual, AllocNone );
-  wnd_Attr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask;
-
-  if wnd_FullScreen Then
-    begin
-      wnd_X := 0;
-      wnd_Y := 0;
-  {$IFDEF FPC_VERSION_24x}
-      wnd_Attr.override_redirect := 1;
-    end else wnd_Attr.override_redirect := 0;
-  {$ELSE}
-      wnd_Attr.override_redirect := TRUE;
-    end else wnd_Attr.override_redirect := FALSE;
-  {$ENDIF}
-  wnd_ValueMask := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
-
-  wnd_Handle := XCreateWindow( scr_Display, wnd_Root, wnd_X, wnd_Y, wnd_Width, wnd_Height, 0, ogl_VisualInfo.depth, InputOutput, ogl_VisualInfo.visual,
-                               wnd_ValueMask, @wnd_Attr );
+  wnd_Attr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask or StructureNotifyMask;
+  wnd_ValueMask       := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
+  wnd_Handle          := XCreateWindow( scr_Display, wnd_Root, wnd_X, wnd_Y, wnd_Width, wnd_Height, 0, ogl_VisualInfo.depth, InputOutput, ogl_VisualInfo.visual,
+                                        wnd_ValueMask, @wnd_Attr );
 
   if wnd_Handle = 0 Then
     begin
@@ -140,37 +145,16 @@ begin
       exit;
     end;
 
-  sizehints.flags      := PPosition or PSize or PMinSize or PMaxSize;
-  sizehints.x          := wnd_X;
-  sizehints.y          := wnd_Y;
-  sizehints.width      := wnd_Width;
-  sizehints.height     := wnd_Height;
-  sizehints.min_width  := wnd_Width;
-  sizehints.max_width  := wnd_Width;
-  sizehints.min_height := wnd_Height;
-  sizehints.max_height := wnd_Height;
-
-  XSetWMNormalHints( scr_Display, wnd_Handle, @sizehints );
+  wnd_Select();
 
   wnd_Class.res_name  := 'ZenGL';
   wnd_Class.res_class := 'ZenGL Class';
   XSetClassHint( scr_Display, wnd_Handle, @wnd_Class );
+  wnd_SetHints( FALSE );
 
   wnd_DestroyAtom := XInternAtom( scr_Display, 'WM_DELETE_WINDOW', TRUE );
   wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', TRUE );
   XSetWMProtocols( scr_Display, wnd_Handle, @wnd_DestroyAtom, 1 );
-
-  wnd_Select();
-
-  if wnd_FullScreen Then
-    begin
-      XGrabKeyboard( scr_Display, wnd_Handle, True, GrabModeAsync, GrabModeAsync, CurrentTime );
-      XGrabPointer( scr_Display, wnd_Handle, True, ButtonPressMask, GrabModeAsync, GrabModeAsync, wnd_Handle, None, CurrentTime );
-    end else
-      begin
-        XUngrabKeyboard( scr_Display, CurrentTime );
-        XUngrabPointer( scr_Display, CurrentTime );
-      end;
 {$ENDIF}
 {$IFDEF WINDOWS}
   wnd_CpnSize  := GetSystemMetrics( SM_CYCAPTION  );
@@ -276,7 +260,6 @@ begin
   wnd_Events[ 14 ].eventClass := kEventClassCommand;
   wnd_Events[ 14 ].eventKind  := kEventProcessCommand;
   InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wnd_Events[ 0 ], nil, nil );
-
   wnd_Select();
 {$ENDIF}
   Result := TRUE;
@@ -312,16 +295,29 @@ begin
 end;
 
 procedure wnd_Update;
-{$IFDEF WINDOWS}
+  {$IFDEF LINUX}
+  var
+    event : TXEvent;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
   var
     FullScreen : Boolean;
-{$ENDIF}
+  {$ENDIF}
 begin
 {$IFDEF LINUX}
-  wnd_Destroy();
-  wnd_Create( wnd_Width, wnd_Height );
-  glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
-  wnd_ShowCursor( app_ShowCursor );
+  XSync( scr_Display, 1 );
+  wnd_SetHints();
+
+  FillChar( event, SizeOf( TXEvent ), 0 );
+  event._type                := ClientMessage;
+  event.xclient._type        := ClientMessage;
+  event.xclient.send_event   := 1;
+  event.xclient.window       := wnd_Handle;
+  event.xclient.message_type := XInternAtom( scr_Display, '_NET_WM_STATE', TRUE );
+  event.xclient.format       := 32;
+  event.xclient.data.l[ 0 ]  := Integer( wnd_FullScreen );
+  event.xclient.data.l[ 1 ]  := XInternAtom( scr_Display, '_NET_WM_STATE_FULLSCREEN', TRUE );
+  XSendEvent( scr_Display, wnd_Root, False, SubstructureRedirectMask or SubstructureNotifyMask, @event );
 {$ENDIF}
 {$IFDEF WINDOWS}
   if app_Focus Then
@@ -342,16 +338,16 @@ begin
 {$ENDIF}
   app_Work := TRUE;
   wnd_SetCaption( wnd_Caption );
-  wnd_SetSize( wnd_Width, wnd_Height );
 
   if app_Flags and WND_USE_AUTOCENTER > 0 Then
     wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2 );
+  wnd_SetSize( wnd_Width, wnd_Height );
 end;
 
 procedure wnd_SetCaption;
   {$IFDEF WINDOWS}
   var
-    i,len : Integer;
+    i, len : Integer;
   {$ENDIF}
 begin
   wnd_Caption := NewCaption + #0;
@@ -404,15 +400,18 @@ begin
   wnd_Width  := Width;
   wnd_Height := Height;
 {$IFDEF LINUX}
-  if wnd_Handle <> 0 Then
-    XResizeWindow( scr_Display, wnd_Handle, Width, Height );
+  if ( not app_InitToHandle ) and ( wnd_Handle <> 0 ) Then
+    begin
+      wnd_SetHints();
+      XResizeWindow( scr_Display, wnd_Handle, wnd_Width, wnd_Height );
+    end;
 {$ENDIF}
 {$IFDEF WINDOWS}
   if not app_InitToHandle Then
     wnd_SetPos( wnd_X, wnd_Y );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if Assigned( wnd_Handle ) Then
+  if ( not app_InitToHandle ) and Assigned( wnd_Handle ) Then
     begin
       SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
       aglUpdateContext( ogl_Context );
@@ -502,7 +501,6 @@ procedure wnd_Select;
 begin
 {$IFDEF LINUX}
   XMapWindow( scr_Display, wnd_Handle );
-  glXWaitX();
 {$ENDIF}
 {$IFDEF WINDOWS}
   BringWindowToTop( wnd_Handle );

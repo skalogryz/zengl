@@ -164,15 +164,6 @@ begin
       snd_MainLoop();
       {$ENDIF}
 
-      {$IFDEF LINUX}
-      // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
-      if wnd_FullScreen Then
-        begin
-          app_Focus := TRUE;
-          app_Pause := FALSE;
-        end;
-      {$ENDIF}
-
       if app_Pause Then
         begin
           timer_Reset();
@@ -268,6 +259,14 @@ begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
             app_PActivate( FALSE );
+          end;
+        ConfigureNotify:
+          begin
+            // Для особо одаренных оконных менеджеров :)
+            if wnd_FullScreen and ( ( event.xconfigure.x <> 0 ) or ( event.xconfigure.y <> 0 ) ) Then
+              wnd_SetPos( 0, 0 );
+            if ( event.xconfigure.width <> wnd_Width ) or ( event.xconfigure.height <> wnd_Height ) Then
+              wnd_SetSize( wnd_Width, wnd_Height );
           end;
 
         MotionNotify:

@@ -31,6 +31,10 @@ type
   TByteArray = array[ 0..65535 ] of Byte;
 
 type
+  zglPTexCoordIndex = ^zglTTexCoordIndex;
+  zglTTexCoordIndex = array[ 0..3 ] of Integer;
+
+type
   zglTStringList = record
     Count : Integer;
     Items : array of String;

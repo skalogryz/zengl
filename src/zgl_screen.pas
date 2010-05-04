@@ -25,7 +25,7 @@ unit zgl_screen;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil, xf86vmode, UnixType,
+  X, XLib, XUtil, XRandr, UnixType,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -89,10 +89,11 @@ var
   {$IFDEF LINUX}
   scr_Display   : PDisplay;
   scr_Default   : cint;
-  scr_Settings  : TXF86VidModeModeInfo;
-  scr_Desktop   : TXF86VidModeModeInfo;
-  scr_ModeCount : LongWord;
-  scr_ModeList  : PPXF86VidModeModeInfo;
+  scr_Settings  : Pointer;
+  scr_Desktop   : LongInt;
+  scr_Current   : LongInt;
+  scr_ModeCount : LongInt;
+  scr_ModeList  : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
   scr_Settings : DEVMODE;
@@ -143,7 +144,7 @@ end;
 procedure scr_Init;
   {$IFDEF LINUX}
   var
-    i, j : Integer;
+    Rotation : Word;
   {$ENDIF}
 begin
   scr_Initialized := TRUE;
@@ -161,18 +162,11 @@ begin
     end;
 
   scr_Default := DefaultScreen( scr_Display );
+  wnd_Root    := DefaultRootWindow( scr_Display );
 
-  {$IFDEF FPC_VERSION_24x}
-  if XF86VidModeQueryExtension( scr_Display, @i, @j ) = 0 Then
-  {$ELSE}
-  if not XF86VidModeQueryExtension( scr_Display, @i, @j ) Then
-  {$ENDIF}
-    begin
-      u_Error( 'XF86VidMode Extension not found' );
-      exit;
-    end else log_Add( 'XF86VidMode Extension - ok' );
-  XF86VidModeGetAllModeLines( scr_Display, scr_Default, @scr_ModeCount, @scr_ModeList );
-  XF86VidModeGetModeLine( scr_Display, scr_Default, @scr_Desktop.dotclock, PXF86VidModeModeLine( Pointer( @scr_Desktop ) + SizeOf( scr_Desktop.dotclock ) ) );
+  scr_ModeList := XRRSizes( scr_Display, XRRRootToScreen( scr_Display, wnd_Root ), @scr_ModeCount );
+  scr_Settings := XRRGetScreenInfo( scr_Display, wnd_Root );
+  scr_Desktop  := XRRConfigCurrentConfiguration( scr_Settings, @Rotation );
 {$ENDIF}
 {$IFDEF WINDOWS}
   with scr_Desktop do
@@ -281,8 +275,6 @@ begin
     end;
 
   ogl_zDepth := ogl_VisualInfo.depth;
-
-  wnd_Root := RootWindow( scr_Display, ogl_VisualInfo.screen );
 {$ENDIF}
 {$IFDEF WINDOWS}
   scr_Init();
@@ -307,7 +299,7 @@ procedure scr_GetResList;
   var
     i : Integer;
   {$IFDEF LINUX}
-    tmp_Settings : TXF86VidModeModeInfo;
+    tmp_Settings : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
     tmp_Settings : DEVMODE;
@@ -324,15 +316,16 @@ begin
 {$IFDEF LINUX}
   for i := 0 to scr_ModeCount - 1 do
     begin
-      tmp_Settings := PXF86VidModeModeInfo( Ptr( scr_ModeList^ ) + i * SizeOf( TXF86VidModeModeInfo ) )^;
-      if not Already( tmp_Settings.hdisplay, tmp_Settings.vdisplay ) Then
+      tmp_Settings := scr_ModeList;
+      if not Already( tmp_Settings.Width, tmp_Settings.Height ) Then
         begin
           INC( scr_ResList.Count );
           SetLength( scr_ResList.Width, scr_ResList.Count );
           SetLength( scr_ResList.Height, scr_ResList.Count );
-          scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.hdisplay;
-          scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.vdisplay;
+          scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.Width;
+          scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.Height;
         end;
+      INC( tmp_Settings );
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -355,20 +348,15 @@ end;
 procedure scr_Destroy;
 begin
   scr_Reset();
-{$IFDEF LINUX}
-  XFree( scr_ModeList );
-  glXWaitX();
-{$ENDIF}
+  {$IFDEF LINUX}
+  XRRFreeScreenConfigInfo( scr_Settings );
+  {$ENDIF}
 end;
 
 procedure scr_Reset;
 begin
 {$IFDEF LINUX}
-  XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Desktop );
-  XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
-  XUngrabKeyboard( scr_Display, CurrentTime );
-  XUngrabPointer( scr_Display, CurrentTime );
-  glXWaitX();
+  XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Desktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
   ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
@@ -433,6 +421,7 @@ procedure scr_SetOptions;
   var
   {$IFDEF LINUX}
     modeToSet : Integer;
+    mode      : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
     i : Integer;
@@ -474,21 +463,24 @@ begin
 {$IFDEF LINUX}
   if wnd_FullScreen Then
     begin
+      scr_Current := -1;
+      mode        := scr_ModeList;
+
       for modeToSet := 0 to scr_ModeCount - 1 do
-        begin
-          scr_Settings := PXF86VidModeModeInfo( Ptr( scr_ModeList^ ) + modeToSet * SizeOf( TXF86VidModeModeInfo ) )^;
-          if ( scr_Settings.hdisplay = scr_Width ) and ( scr_Settings.vdisplay = scr_Height ) Then break;
-        end;
-      if ( scr_Settings.hdisplay <> scr_Width ) or ( scr_Settings.vdisplay <> scr_Height ) Then
+        if ( mode.Width = scr_Width ) and ( mode.Height = scr_Height ) Then
+          begin
+            scr_Current := modeToSet;
+            break;
+          end else
+            INC( mode );
+
+      if scr_Current = -1 Then
         begin
           u_Warning( 'Cannot set fullscreen mode.' );
+          scr_Current    := scr_Desktop;
           wnd_FullScreen := FALSE;
-        end else
-          if ( scr_Settings.hdisplay <> scr_Desktop.hDisplay ) and ( scr_Settings.vdisplay <> scr_Desktop.vDisplay ) Then
-            begin
-              XF86VidModeSwitchToMode( scr_Display, scr_Default, @scr_Settings );
-              XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
-            end;
+        end;
+      XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Current, 1, 0 );
     end else
       scr_SetWindowedMode();
 {$ENDIF}

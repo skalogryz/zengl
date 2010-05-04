@@ -25,8 +25,9 @@ unit zgl_sprite_2d;
 interface
 
 uses
-  zgl_textures,
+  zgl_types,
   zgl_fx,
+  zgl_textures,
   zgl_math_2d;
 
 type
@@ -57,11 +58,15 @@ uses
   zgl_render_2d,
   zgl_camera_2d;
 
+const
+  FLIP_TEXCOORD : array[ 0..3 ] of zglTTexCoordIndex = ( ( 0, 1, 2, 3 ), ( 1, 0, 3, 2 ), ( 3, 2, 1, 0 ), ( 2, 3, 0, 1 ) );
+
 procedure texture2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
-    texC : array[ 0..3 ] of zglTPoint2D;
+    tci  : zglPTexCoordIndex;
     p    : zglPPoint2D;
+    mode : Integer;
 
     x1, x2 : Single;
     y1, y2 : Single;
@@ -94,38 +99,17 @@ begin
         end;
 
   // Текстурные координаты
-  if ( FX and FX2D_FLIPX > 0 ) and ( FX and FX2D_FLIPY > 0 ) Then
-    begin
-      texC[ 0 ] := TexCoord[ 2 ];
-      texC[ 1 ] := TexCoord[ 3 ];
-      texC[ 2 ] := TexCoord[ 0 ];
-      texC[ 3 ] := TexCoord[ 1 ];
-    end else
-      if FX and FX2D_FLIPX > 0 Then
-        begin
-          texC[ 0 ] := TexCoord[ 1 ];
-          texC[ 1 ] := TexCoord[ 0 ];
-          texC[ 2 ] := TexCoord[ 3 ];
-          texC[ 3 ] := TexCoord[ 2 ];
-        end else
-          if FX and FX2D_FLIPY > 0 Then
-            begin
-              texC[ 0 ] := TexCoord[ 3 ];
-              texC[ 1 ] := TexCoord[ 2 ];
-              texC[ 2 ] := TexCoord[ 1 ];
-              texC[ 3 ] := TexCoord[ 0 ];
-            end else
-              Move( TexCoord[ 0 ], texC[ 0 ], 4 * SizeOf( zglTPoint2D ) );
+  tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
 
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       x1 := -W / 2;
       y1 := -H / 2;
-      x2 :=  W / 2;
-      y2 :=  H / 2;
-      cX :=  X + W / 2;
-      cY :=  Y + H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -189,7 +173,11 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if FX and FX2D_VCA > 0 Then
+    mode := GL_TRIANGLES
+  else
+    mode := GL_QUADS;
+  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -198,7 +186,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( mode );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -214,47 +202,41 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @texC[ 0 ] );
+      glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
       gl_Vertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      glTexCoord2fv( @texC[ 1 ] );
+      glTexCoord2fv( @TexCoord[ tci[ 1 ] ] );
       gl_Vertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @texC[ 2 ] );
+      glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @texC[ 2 ] );
+      glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
-      glTexCoord2fv( @texC[ 3 ] );
+      glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
       gl_Vertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @texC[ 0 ] );
+      glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
       begin
-        glTexCoord2fv( @texC[ 0 ] );
+        glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
         gl_Vertex2fv( @quad[ 0 ] );
 
-        glTexCoord2fv( @texC[ 1 ] );
+        glTexCoord2fv( @TexCoord[ tci[ 1 ] ] );
         gl_Vertex2fv( @quad[ 1 ] );
 
-        glTexCoord2fv( @texC[ 2 ] );
+        glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
         gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2fv( @texC[ 2 ] );
-        gl_Vertex2fv( @quad[ 2 ] );
-
-        glTexCoord2fv( @texC[ 3 ] );
+        glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
         gl_Vertex2fv( @quad[ 3 ] );
-
-        glTexCoord2fv( @texC[ 0 ] );
-        gl_Vertex2fv( @quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -271,8 +253,10 @@ procedure ssprite2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
+    tc   : zglPTextureCoord;
+    tci  : zglPTexCoordIndex;
+    mode : Integer;
 
-    fU, fV : Single;
     x1, x2 : Single;
     y1, y2 : Single;
     cX, cY : Single;
@@ -304,18 +288,18 @@ begin
         end;
 
   // Текстурные координаты
-  if FX and FX2D_FLIPX > 0 Then fU := Texture^.U else fU := 0;
-  if FX and FX2D_FLIPY > 0 Then fV := Texture^.V else fV := 0;
+  tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
+  tc  := @Texture.FramesCoord[ 0 ];
 
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       x1 := -W / 2;
       y1 := -H / 2;
-      x2 :=  W / 2;
-      y2 :=  H / 2;
-      cX :=  X + W / 2;
-      cY :=  Y + H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -379,7 +363,11 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if FX and FX2D_VCA > 0 Then
+    mode := GL_TRIANGLES
+  else
+    mode := GL_QUADS;
+  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -388,7 +376,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( mode );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -404,47 +392,41 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2f( fU, Texture^.V - fV );
+      glTexCoord2fv( @tc[ tci[ 0 ] ] );
       gl_Vertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      glTexCoord2f( Texture^.U - fU, Texture^.V - fV );
+      glTexCoord2fv( @tc[ tci[ 1 ] ] );
       gl_Vertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2f( Texture^.U - fU, fV );
+      glTexCoord2fv( @tc[ tci[ 2 ] ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2f( Texture^.U - fU, fV );
+      glTexCoord2fv( @tc[ tci[ 2 ] ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
-      glTexCoord2f( fU, fV );
+      glTexCoord2fv( @tc[ tci[ 3 ] ] );
       gl_Vertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2f( fU, Texture^.V - fV );
+      glTexCoord2fv( @tc[ tci[ 0 ] ] );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
       begin
-        glTexCoord2f( fU, Texture^.V - fV );
+        glTexCoord2fv( @tc[ tci[ 0 ] ] );
         gl_Vertex2fv( @quad[ 0 ] );
 
-        glTexCoord2f( Texture^.U - fU, Texture^.V - fV );
+        glTexCoord2fv( @tc[ tci[ 1 ] ] );
         gl_Vertex2fv( @quad[ 1 ] );
 
-        glTexCoord2f( Texture^.U - fU, fV );
+        glTexCoord2fv( @tc[ tci[ 2 ] ] );
         gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( Texture^.U - fU, fV );
-        gl_Vertex2fv( @quad[ 2 ] );
-
-        glTexCoord2f( fU, fV );
+        glTexCoord2fv( @tc[ tci[ 3 ] ] );
         gl_Vertex2fv( @quad[ 3 ] );
-
-        glTexCoord2f( fU, Texture^.V - fV );
-        gl_Vertex2fv( @quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -461,8 +443,10 @@ procedure asprite2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
-
-    tX, tY, tU, tV, u, v : Single;
+    tc   : zglPTextureCoord;
+    tci  : zglPTexCoordIndex;
+    fc   : Integer;
+    mode : Integer;
 
     x1, x2 : Single;
     y1, y2 : Single;
@@ -495,30 +479,24 @@ begin
         end;
 
   // Текстурные координаты
-  u := Texture.U / Texture.FramesX;
-  v := Texture.V / Texture.FramesY;
-  if FX and FX2D_FLIPX > 0 Then tU := u else tU := 0;
-  if FX and FX2D_FLIPY > 0 Then tV := v else tV := 0;
-  tY := Frame div Texture.FramesX;
-  tX := Frame - tY * Texture.FramesX;
-  tY := Texture.FramesY - tY;
-  if tX = 0 Then
-    begin
-      tX := Texture.FramesX;
-      tY := tY + 1;
-    end;
-  tX := tX * u;
-  tY := tY * v;
+  fc := Texture.FramesX * Texture.FramesY;
+  if Frame > fc Then
+    DEC( Frame, ( ( Frame - 1 ) div fc ) * fc )
+  else
+    if Frame < 1 Then
+      INC( Frame, ( abs( Frame ) div fc + 1 ) * fc );
+  tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
+  tc  := @Texture.FramesCoord[ Frame ];
 
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       x1 := -W / 2;
       y1 := -H / 2;
-      x2 :=  W / 2;
-      y2 :=  H / 2;
-      cX :=  X + W / 2;
-      cY :=  Y + H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -582,7 +560,11 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if FX and FX2D_VCA > 0 Then
+    mode := GL_TRIANGLES
+  else
+    mode := GL_QUADS;
+  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -591,7 +573,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( mode );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -607,47 +589,41 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2f( tX - u + tU, tY - tV );
+      glTexCoord2fv( @tc[ tci[ 0 ] ] );
       gl_Vertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      glTexCoord2f( tX - tU, tY - tV );
+      glTexCoord2fv( @tc[ tci[ 1 ] ] );
       gl_Vertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2f( tX - tU, tY - v + tV );
+      glTexCoord2fv( @tc[ tci[ 2 ] ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2f( tX - tU, tY - v + tV );
+      glTexCoord2fv( @tc[ tci[ 2 ] ] );
       gl_Vertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
-      glTexCoord2f( tX - u + tU, tY - v + tV );
+      glTexCoord2fv( @tc[ tci[ 3 ] ] );
       gl_Vertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2f( tX - u + tU, tY - tV );
+      glTexCoord2fv( @tc[ tci[ 0 ] ] );
       gl_Vertex2fv( @quad[ 0 ] );
     end else
       begin
-        glTexCoord2f( tX - u + tU, tY - tV );
+        glTexCoord2fv( @tc[ tci[ 0 ] ] );
         gl_Vertex2fv( @quad[ 0 ] );
 
-        glTexCoord2f( tX - tU, tY - tV );
+        glTexCoord2fv( @tc[ tci[ 1 ] ] );
         gl_Vertex2fv( @quad[ 1 ] );
 
-        glTexCoord2f( tX - tU, tY - v + tV );
+        glTexCoord2fv( @tc[ tci[ 2 ] ] );
         gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( tX - tU, tY - v + tV );
-        gl_Vertex2fv( @quad[ 2 ] );
-
-        glTexCoord2f( tX - u + tU, tY - v + tV );
+        glTexCoord2fv( @tc[ tci[ 3 ] ] );
         gl_Vertex2fv( @quad[ 3 ] );
-
-        glTexCoord2f( tX - u + tU, tY - tV );
-        gl_Vertex2fv( @quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -664,6 +640,7 @@ procedure csprite2d_Draw;
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
+    mode : Integer;
 
     tU, tV, tX, tY, tW, tH : Single;
 
@@ -714,10 +691,10 @@ begin
     begin
       x1 := -W / 2;
       y1 := -H / 2;
-      x2 :=  W / 2;
-      y2 :=  H / 2;
-      cX :=  X + W / 2;
-      cY :=  Y + H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -781,7 +758,11 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if FX and FX2D_VCA > 0 Then
+    mode := GL_TRIANGLES
+  else
+    mode := GL_QUADS;
+  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -790,7 +771,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( mode );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -839,14 +820,8 @@ begin
         glTexCoord2f( tW - tU, tH - tV );
         gl_Vertex2fv( @quad[ 2 ] );
 
-        glTexCoord2f( tW - tU, tH - tV );
-        gl_Vertex2fv( @quad[ 2 ] );
-
         glTexCoord2f( tX + tU, tH - tV );
         gl_Vertex2fv( @quad[ 3 ] );
-
-        glTexCoord2f( tX + tU, tY + tV );
-        gl_Vertex2fv( @quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -922,7 +897,7 @@ begin
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;
   if bJ >= Tiles.Count.Y Then bJ := Tiles.Count.Y - 1;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -931,7 +906,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -975,14 +950,8 @@ begin
         glTexCoord2f( tX - tU, tY - v + tV );
         gl_Vertex2f( x + i * w + w, y + j * h + h );
 
-        glTexCoord2f( tX - tU, tY - v + tV );
-        gl_Vertex2f( x + i * w + w, y + j * h + h );
-
         glTexCoord2f( tX - u + tU, tY - v + tV );
         gl_Vertex2f( x + i * w, y + j * h + h );
-
-        glTexCoord2f( tX - u + tU, tY - tV );
-        gl_Vertex2f( x + i * w, y + j * h );
       end;
 
   if not b2d_Started Then

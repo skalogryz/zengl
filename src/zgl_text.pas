@@ -77,6 +77,7 @@ procedure text_Draw;
     quad     : array[ 0..3 ] of zglTPoint2D;
     sx       : Single;
     lastPage : Integer;
+    mode     : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
 
@@ -102,17 +103,21 @@ begin
   c := font_GetCID( Text, 1, @i );
   s := 1;
   i := 1;
+  if Flags and TEXT_FX_VCA > 0 Then
+    mode := GL_TRIANGLES
+  else
+    mode := GL_QUADS;
   if not b2d_Started Then
     begin
       if Assigned( Font.CharDesc[ c ] ) Then
         begin
           lastPage := Font.CharDesc[ c ].Page;
-          batch2d_Check( GL_TRIANGLES, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
+          batch2d_Check( mode, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
 
           glEnable( GL_BLEND );
           glEnable( GL_TEXTURE_2D );
           glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
-          glBegin( GL_TRIANGLES );
+          glBegin( mode );
         end else
           begin
             glEnable( GL_BLEND );
@@ -158,13 +163,13 @@ begin
               glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
               glBegin( GL_TRIANGLES );
             end else
-              if batch2d_Check( GL_TRIANGLES, FX_BLEND, Font.Pages[ CharDesc.Page ] ) Then
+              if batch2d_Check( mode, FX_BLEND, Font.Pages[ CharDesc.Page ] ) Then
                 begin
                   glEnable( GL_BLEND );
 
                   glEnable( GL_TEXTURE_2D );
                   glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
-                  glBegin( GL_TRIANGLES );
+                  glBegin( mode );
                 end;
         end;
 
@@ -213,14 +218,8 @@ begin
             glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
             gl_Vertex2fv( @quad[ 2 ] );
 
-            glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-            gl_Vertex2fv( @quad[ 2 ] );
-
             glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
             gl_Vertex2fv( @quad[ 3 ] );
-
-            glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-            gl_Vertex2fv( @quad[ 0 ] );
           end;
 
       X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;

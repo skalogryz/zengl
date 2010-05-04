@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.2 RC2              }
-{ date:    2010.04.19           }
+{ version: 0.2 RC3              }
+{ date:    2010.05.04           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -61,8 +61,9 @@ type
 end;
 
 const
+  _ZGL_VERSION = '0.2';
 {$IFDEF LINUX}
-  libZenGL = 'libZenGL.so';
+  libZenGL = 'libZenGL.so.' + _ZGL_VERSION;
 {$ENDIF}
 {$IFDEF WINDOWS}
   libZenGL = 'ZenGL.dll';
@@ -92,6 +93,7 @@ const
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
+  TEX_CURRENT_EFFECT     = $000013;
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
@@ -118,10 +120,11 @@ const
   RESOLUTION_LIST = 11; // PResolutionList
   MANAGER_TIMER   = 12; // zglPTimerManager
   MANAGER_TEXTURE = 13; // zglPTextureManager
-  MANAGER_FONT    = 14; // zglPFontManager
-  MANAGER_RTARGET = 15; // zglTRenderTargetManager
-  MANAGER_SOUND   = 16; // zglPSoundManager
-  MANAGER_GUI     = 17; // zglPGUIManager
+  MANAGER_ATLAS   = 14; // zglPAtlasManager
+  MANAGER_FONT    = 15; // zglPFontManager
+  MANAGER_RTARGET = 16; // zglTRenderTargetManager
+  MANAGER_SOUND   = 17; // zglPSoundManager
+  MANAGER_GUI     = 18; // zglPGUIManager
 
 var
   zgl_Get       : function( const What : LongWord ) : Ptr;
@@ -389,7 +392,42 @@ var
   Set2DMode : procedure;
   Set3DMode : procedure( FOVY : Single = 45 );
 
+// 2D
+type
+  zglPPoint2D = ^zglTPoint2D;
+  zglTPoint2D = record
+    X, Y : Single;
+end;
+
+type
+  zglPPoints2D = ^zglTPoints2D;
+  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
+
+type
+  zglPLine = ^zglTLine;
+  zglTLine = record
+    x0, y0 : Single;
+    x1, y1 : Single;
+end;
+
+type
+  zglPRect = ^zglTRect;
+  zglTRect = record
+    X, Y, W, H : Single;
+end;
+
+type
+  zglPCircle = ^zglTCircle;
+  zglTCircle = record
+    cX, cY : Single;
+    Radius : Single;
+end;
+
 // TEXTURES
+type
+  zglPTextureCoord = ^zglTTextureCoord;
+  zglTTextureCoord = array[ 0..3 ] of zglTPoint2D;
+
 type
   zglPTexture = ^zglTTexture;
   zglTTexture = record
@@ -398,6 +436,7 @@ type
     U, V          : Single;
     FramesX       : Word;
     FramesY       : Word;
+    FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
 
     prev, next    : zglPTexture;
@@ -431,15 +470,16 @@ const
 
   TEX_GRAYSCALE         = $000020;
   TEX_INVERT            = $000040;
+  TEX_CUSTOM_EFFECT     = $000080;
 
-  TEX_FILTER_NEAREST    = $000080;
-  TEX_FILTER_LINEAR     = $000100;
-  TEX_FILTER_BILINEAR   = $000200;
-  TEX_FILTER_TRILINEAR  = $000400;
-  TEX_FILTER_ANISOTROPY = $000800;
+  TEX_FILTER_NEAREST    = $000100;
+  TEX_FILTER_LINEAR     = $000200;
+  TEX_FILTER_BILINEAR   = $000400;
+  TEX_FILTER_TRILINEAR  = $000800;
+  TEX_FILTER_ANISOTROPY = $001000;
 
-  TEX_RGB               = $001000;
-  TEX_CALCULATE_ALPHA   = $002000;
+  TEX_RGB               = $002000;
+  TEX_CALCULATE_ALPHA   = $004000;
 
   TEX_QUALITY_LOW       = $400000;
   TEX_QUALITY_MEDIUM    = $800000;
@@ -458,6 +498,43 @@ var
   tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
   tex_Filter         : procedure( Texture : zglPTexture; const Flags : LongWord );
   tex_SetAnisotropy  : procedure( const Level : Byte );
+
+// ATLASES
+type
+  zglPAtlasNode = ^zglTAtlasNode;
+  zglTAtlasNode = record
+    Leaf     : Boolean;
+    Texture  : zglPTexture;
+    TexCoord : zglTTextureCoord;
+    FramesX  : Word;
+    FramesY  : Word;
+    Rect     : zglTRect;
+    child    : array[ 0..1 ] of zglPAtlasNode;
+  end;
+
+type
+  zglPAtlas = ^zglTAtlas;
+  zglTAtlas = record
+    root       : zglTAtlasNode;
+    Texture    : zglPTexture;
+    Full       : Boolean;
+    prev, next : zglPAtlas;
+  end;
+
+type
+  zglPAtlasManager = ^zglTAtlasManager;
+  zglTAtlasManager = record
+    Count : LongWord;
+    First : zglTAtlas;
+end;
+
+var
+  atlas_Add               : function( const Width, Height : Word; const Flags : LongWord ) : zglPAtlas;
+  atlas_Del               : procedure( var Atlas : zglPAtlas );
+  atlas_GetFrameCoord     : procedure( const Node : zglPAtlasNode; const Frame : Word; var TexCoord : array of zglTPoint2D );
+  atlas_InsertFromTexture : function( const Atlas : zglPAtlas; const Texture : zglPTexture ) : zglPAtlasNode;
+  atlas_InsertFromFile    : function( const Atlas : zglPAtlas; const FileName : String; const TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+  atlas_InsertFromMemory  : function( const Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPAtlasNode;
 
 // RENDER TARGETS
 type
@@ -492,37 +569,6 @@ var
   rtarget_Del    : procedure( var Target : zglPRenderTarget );
   rtarget_Set    : procedure( const Target : zglPRenderTarget );
   rtarget_DrawIn : procedure( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
-
-// 2D
-type
-  zglPPoint2D = ^zglTPoint2D;
-  zglTPoint2D = record
-    X, Y : Single;
-end;
-
-type
-  zglPPoints2D = ^zglTPoints2D;
-  zglTPoints2D = array[ 0..0 ] of zglTPoint2D;
-
-type
-  zglPLine = ^zglTLine;
-  zglTLine = record
-    x0, y0 : Single;
-    x1, y1 : Single;
-end;
-
-type
-  zglPRect = ^zglTRect;
-  zglTRect = record
-    X, Y, W, H : Single;
-end;
-
-type
-  zglPCircle = ^zglTCircle;
-  zglTCircle = record
-    cX, cY : Single;
-    Radius : Single;
-end;
 
 // FX
 const
@@ -654,6 +700,182 @@ var
   sgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
   agrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
   cgrid2d_Draw   : procedure( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+
+// Particles
+const
+  EMITTER_MAX_PARTICLES = 1024;
+
+  EMITTER_POINT     = 1;
+  EMITTER_LINE      = 2;
+  EMITTER_RECTANGLE = 3;
+  EMITTER_CIRCLE    = 4;
+
+type
+  PDiagramByte = ^TDiagramByte;
+  TDiagramByte = record
+    Life  : Single;
+    Value : Byte;
+  end;
+
+type
+  PDiagramLW = ^TDiagramLW;
+  TDiagramLW = record
+    Life  : Single;
+    Value : LongWord;
+  end;
+
+type
+  PDiagramSingle = ^TDiagramSingle;
+  TDiagramSingle = record
+    Life  : Single;
+    Value : Single;
+  end;
+
+type
+  zglPParticle2D = ^zglTParticle2D;
+  zglTParticle2D = record
+    _lColorID     : Integer;
+    _lAlphaID     : Integer;
+    _lSizeXID     : Integer;
+    _lSizeYID     : Integer;
+    _lVelocityID  : Integer;
+    _laVelocityID : Integer;
+    _lSpinID      : Integer;
+    ID            : Integer;
+
+    Life          : Single;
+    LifeTime      : LongWord;
+    Time          : Double;
+
+    Frame         : Word;
+    Color         : LongWord;
+    Alpha         : Byte;
+
+    Position      : zglTPoint2D;
+    Size          : zglTPoint2D;
+    SizeS         : zglTPoint2D;
+    Angle         : Single;
+    Direction     : Single;
+
+    Velocity      : Single;
+    VelocityS     : Single;
+    aVelocity     : Single;
+    aVelocityS    : Single;
+    Spin          : Single;
+  end;
+
+type
+  zglPEmitterPoint = ^zglTEmitterPoint;
+  zglTEmitterPoint = record
+    Direction : Single;
+    Spread    : Single;
+  end;
+
+type
+  zglPEmitterLine = ^zglTEmitterLine;
+  zglTEmitterLine = record
+    Direction : Single;
+    Spread    : Single;
+    Size      : Single;
+    TwoSide   : Boolean;
+  end;
+
+type
+  zglPEmitterRect = ^zglTEmitterRect;
+  zglTEmitterRect = record
+    Rect : zglTRect;
+  end;
+
+type
+  zglPEmitterCircle = ^zglTEmitterCircle;
+  zglTEmitterCircle = record
+    cX, cY : Single;
+    Radius : Single;
+  end;
+
+type
+  zglPParticleParams = ^zglTParticleParams;
+  zglTParticleParams = record
+    Texture    : zglPTexture;
+    BlendMode  : Byte;
+    ColorMode  : Byte;
+
+    LifeTimeS  : LongWord;
+    LifeTimeV  : LongWord;
+    Frame      : array[ 0..1 ] of LongWord;
+    Color      : array of TDiagramLW;
+    Alpha      : array of TDiagramByte;
+    SizeXS     : Single;
+    SizeYS     : Single;
+    SizeXV     : Single;
+    SizeYV     : Single;
+    SizeXD     : array of TDiagramSingle;
+    SizeYD     : array of TDiagramSingle;
+    AngleS     : Single;
+    AngleV     : Single;
+    VelocityS  : Single;
+    VelocityV  : Single;
+    VelocityD  : array of TDiagramSingle;
+    aVelocityS : Single;
+    aVelocityV : Single;
+    aVelocityD : array of TDiagramSingle;
+    SpinS      : Single;
+    SpinV      : Single;
+    SpinD      : array of TDiagramSingle;
+  end;
+
+type
+  zglPEmitter2D = ^zglTEmitter2D;
+  zglTEmitter2D = record
+    _type       : Byte;
+    _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
+    _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
+    _parCreated : LongWord;
+
+    Params      : record
+      LifeTime : LongWord;
+      Loop     : Boolean;
+      Emission : LongWord;
+      Position : zglTPoint2D;
+                  end;
+    ParParams   : zglTParticleParams;
+
+    Life        : Single;
+    Time        : Double;
+    LastSecond  : Double;
+    Particles   : LongWord;
+    BBox        : record
+      MinX, MaxX : Single;
+      MinY, MaxY : Single;
+                  end;
+
+    case Byte of
+      EMITTER_POINT: ( AsPoint : zglTEmitterPoint );
+      EMITTER_LINE: ( AsLine : zglTEmitterLine );
+      EMITTER_RECTANGLE: ( AsRect : zglTEmitterRect );
+      EMITTER_CIRCLE: ( AsCircle : zglTEmitterCircle );
+  end;
+
+type
+  zglPPEngine2D = ^zglTPEngine2D;
+  zglTPEngine2D = record
+    Count : record
+      Emitters  : LongWord;
+      Particles : LongWord;
+            end;
+    List  : array of zglTEmitter2D;
+  end;
+
+var
+  pengine2d_AddEmitter : function( const Emitter : zglTEmitter2D ) : Integer;
+  pengine2d_DelEmitter : procedure( const ID : Integer );
+  pengine2d_ClearAll   : procedure;
+  pengine2d_Set        : procedure( const PEngine : zglPPEngine2D );
+  pengine2d_Draw       : procedure;
+  pengine2d_Proc       : procedure( const dt : Double );
+  emitter2d_Init       : procedure( var Emitter : zglTEmitter2D );
+  emitter2d_Draw       : procedure( const Emitter : zglTEmitter2D );
+  emitter2d_Proc       : procedure( var Emitter : zglTEmitter2D; const dt : Double );
 
 // Text
 type
@@ -1242,9 +1464,9 @@ begin
 end;
 
 procedure zglFree;
-Begin
+begin
   dlClose( zglLib );
-End;
+end;
 
 
 function zglLoad;
@@ -1339,6 +1561,13 @@ begin
       tex_Filter := dlsym( zglLib, 'tex_Filter' );
       tex_SetAnisotropy := dlsym( zglLib, 'tex_SetAnisotropy' );
 
+      atlas_Add := dlsym( zglLib, 'atlas_Add' );
+      atlas_Del := dlsym( zglLib, 'atlas_Del' );
+      atlas_GetFrameCoord := dlsym( zglLib, 'atlas_GetFrameCoord' );
+      atlas_InsertFromTexture := dlsym( zglLib, 'atlas_InsertFromTexture' );
+      atlas_InsertFromFile := dlsym( zglLib, 'atlas_InsertFromFile' );
+      atlas_InsertFromMemory := dlsym( zglLib, 'atlas_InsertFromMemory' );
+
       Set2DMode := dlsym( zglLib, 'Set2DMode' );
       Set3DMode := dlsym( zglLib, 'Set3DMode' );
 
@@ -1389,6 +1618,16 @@ begin
       sgrid2d_Draw := dlsym( zglLib, 'sgrid2d_Draw' );
       agrid2d_Draw := dlsym( zglLib, 'agrid2d_Draw' );
       cgrid2d_Draw := dlsym( zglLib, 'cgrid2d_Draw' );
+
+      pengine2d_AddEmitter := dlsym( zglLib, 'pengine2d_AddEmitter' );
+      pengine2d_DelEmitter := dlsym( zglLib, 'pengine2d_DelEmitter' );
+      pengine2d_ClearAll := dlsym( zglLib, 'pengine2d_ClearAll' );
+      pengine2d_Set := dlsym( zglLib, 'pengine2d_Set' );
+      pengine2d_Draw := dlsym( zglLib, 'pengine2d_Draw' );
+      pengine2d_Proc := dlsym( zglLib, 'pengine2d_Proc' );
+      emitter2d_Init := dlsym( zglLib, 'emitter2d_Init' );
+      emitter2d_Draw := dlsym( zglLib, 'emitter2d_Draw' );
+      emitter2d_Proc := dlsym( zglLib, 'emitter2d_Proc' );
 
       font_Add := dlsym( zglLib, 'font_Add' );
       font_Del := dlsym( zglLib, 'font_Del' );

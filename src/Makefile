@@ -5,7 +5,8 @@ INCLUDE = -FuPasJPEG
 OUTPUT  = ./
 DESTDIR = /usr
 TMP     = -FUtmp
-TARGET  = libZenGL.so
+VERSION = 0.2
+TARGET  = libZenGL.so.$(VERSION)
 TARGETW = ZenGL.dll
 TARGETM = libZenGL.dylib
 

@@ -24,6 +24,9 @@ unit zgl_main;
 
 interface
 uses
+  {$IFDEF LINUX}
+  XRandr,
+  {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
@@ -33,7 +36,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.2 RC2';
+  cs_ZenGL = 'ZenGL 0.2 RC3';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -46,6 +49,7 @@ const
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
+  TEX_CURRENT_EFFECT     = $000013;
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
@@ -69,10 +73,11 @@ const
   RESOLUTION_LIST = 11;
   MANAGER_TIMER   = 12;
   MANAGER_TEXTURE = 13;
-  MANAGER_FONT    = 14;
-  MANAGER_RTARGET = 15;
-  MANAGER_SOUND   = 16;
-  MANAGER_GUI     = 17;
+  MANAGER_ATLAS   = 14;
+  MANAGER_FONT    = 15;
+  MANAGER_RTARGET = 16;
+  MANAGER_SOUND   = 17;
+  MANAGER_GUI     = 18;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR    = $000001;
@@ -114,6 +119,9 @@ uses
   zgl_timers,
   zgl_log,
   zgl_textures,
+  {$IFDEF USE_TEXTURE_ATLAS}
+  zgl_texture_atlas,
+  {$ENDIF}
   zgl_render_target,
   zgl_font,
   {$IFDEF USE_GUI}
@@ -183,10 +191,6 @@ begin
   app_Initialized := TRUE;
   if wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
-  {$IFDEF LINUX}
-  if ( wnd_FullScreen ) and ( ( wnd_Width <> zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height <> zgl_Get( DESKTOP_HEIGHT ) ) ) Then
-    scr_SetOptions( wnd_Width, wnd_Height, scr_Refresh, wnd_FullScreen, scr_VSync );
-  {$ENDIF}
 
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
   if not gl_Create() Then exit;
@@ -195,6 +199,10 @@ begin
 
   Set2DMode();
   wnd_ShowCursor( app_ShowCursor );
+
+  {$IFDEF LINUX}
+  scr_SetOptions( wnd_Width, wnd_Height, scr_Refresh, wnd_FullScreen, scr_VSync );
+  {$ENDIF}
 
   app_PInit();
   app_PLoop();
@@ -247,6 +255,15 @@ begin
       p := managerRTarget.First.next;
       rtarget_Del( zglPRenderTarget( p ) );
     end;
+
+  {$IFDEF USE_TEXTURE_ATLAS}
+  log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
+  while managerAtlas.Count > 0 do
+    begin
+      p := managerAtlas.First.next;
+      atlas_Del( zglPAtlas( p ) );
+    end;
+  {$ENDIF}
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 0 do
@@ -347,6 +364,11 @@ begin
         managerTexture.Formats[ managerTexture.Count.Formats ].MemLoader := UserData;
         INC( managerTexture.Count.Formats );
       end;
+    TEX_CURRENT_EFFECT:
+      begin
+        tex_CalcCustomEffect := UserData;
+        if not Assigned( tex_CalcCustomEffect ) Then tex_CalcCustomEffect := zeroce;
+      end;
     // Sound
     {$IFDEF USE_SOUND}
     SND_FORMAT_EXTENSION:
@@ -418,7 +440,7 @@ begin
     SCR_ADD_Y: Result := scr_AddCY;
     DESKTOP_WIDTH:
     {$IFDEF LINUX}
-      Result := scr_Desktop.hdisplay;
+      Result := PXRRScreenSize( scr_ModeList + scr_Desktop * SizeOf( PXRRScreenSize ) ).width;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scr_Desktop.dmPelsWidth;
@@ -428,7 +450,7 @@ begin
     {$ENDIF}
     DESKTOP_HEIGHT:
     {$IFDEF LINUX}
-      Result := scr_Desktop.vdisplay;
+      Result := PXRRScreenSize( scr_ModeList + scr_Desktop * SizeOf( PXRRScreenSize ) ).height;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scr_Desktop.dmPelsHeight;
@@ -441,6 +463,9 @@ begin
     // Managers
     MANAGER_TIMER:   Result := Ptr( @managerTimer );
     MANAGER_TEXTURE: Result := Ptr( @managerTexture );
+    {$IFDEF USE_TEXTURE_ATLAS}
+    MANAGER_ATLAS:   Result := Ptr( @managerAtlas );
+    {$ENDIF}
     MANAGER_FONT:    Result := Ptr( @managerFont );
     MANAGER_RTARGET: Result := Ptr( @managerRTarget );
     {$IFDEF USE_SOUND}
