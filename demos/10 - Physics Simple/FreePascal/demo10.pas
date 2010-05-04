@@ -87,7 +87,6 @@ procedure Init;
     e, u       : Single;
 begin
   fnt := font_LoadFromFile( '../res/font.zfi' );
-  fnt.Pages[ 0 ] := tex_LoadFromFile( '../res/font_0.png', $FF000000, TEX_DEFAULT_2D );
 
   // Создаем новый "мир"
   space            := cpSpaceNew;

@@ -28,8 +28,6 @@ procedure Init;
 begin
   // Загрузка шрифта и вывод текста освещен в "04 - Text"
   fnt := font_LoadFromFile( '../res/font.zfi' );
-  for i := 0 to fnt.Count.Pages - 1 do
-    fnt.Pages[ i ] := tex_LoadFromFile( '../res/font_' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
 
   // Начнем считывать текст с клавиатуры и ограничимся 20 символами
   key_BeginReadText( something, 20 );

@@ -25,9 +25,9 @@ procedure Init;
 begin
   // Загружаем данные о шрифте
   fnt := font_LoadFromFile( '../res/font.zfi' );
-  // Загружаем текстуры
-  for i := 0 to fnt.Count.Pages - 1 do
-    fnt.Pages[ i ] := tex_LoadFromFile( '../res/font_' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
+  // Если же текстуры именуются без использования маски вида "FontName-pageN.ext", то загрузку можно произвести вручную следующим образом
+  //for i := 0 to fnt.Count.Pages - 1 do
+  //  fnt.Pages[ i ] := tex_LoadFromFile( '../res/font-page' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
 end;
 
 procedure Draw;

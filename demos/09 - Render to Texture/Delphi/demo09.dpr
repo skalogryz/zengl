@@ -31,8 +31,6 @@ begin
   tex_SetFrameSize( textux, 64, 64 );
 
   fntMain := font_LoadFromFile( '../res/font.zfi' );
-  for i := 0 to fntMain.Count.Pages - 1 do
-    fntMain.Pages[ i ] := tex_LoadFromFile( '../res/font_' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
 
   // —оздаем три различных RenderTarget'а и к каждому "цепл€ем" пустую текстуру
   // ¬ процессе текстуру можно сменить присвоив RTarget[ n ].Surface другую zglPTexture, главное что бы совпадали размеры

@@ -110,8 +110,6 @@ begin
     AddMiku;
 
   fntMain := font_LoadFromFile( '../res/font.zfi' );
-  for i := 0 to fntMain.Count.Pages - 1 do
-    fntMain.Pages[ i ] := tex_LoadFromFile( '../res/font_' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
 end;
 
 procedure Draw;

@@ -9,7 +9,7 @@ Lazarus    - содержит lpi-файл проекта, который исп
 - Delphi >= 7
 
 Для пользователей Debian и Debian-based дистрибутивов(Ubuntu, Linux Mint, etc.) - убедитесь, что у вас установлены все необходимые dev-пакеты:
-- libXxf86vm-dev
+- libxrandr-dev
 - libglu1-mesa-dev
 - libgl1-mesa-dev
 Возможно подобные пакеты понадобятся и в других дистрибутивах, если на стадии линковки возникнет ошибка(Error while linking)
