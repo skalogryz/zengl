@@ -391,6 +391,7 @@ procedure fontgen_PutChar( var pData : Pointer; const X, Y, ID : Integer );
   var
     i, j   : Integer;
     fw, fh : Integer;
+    pixel  : PByte;
 begin
   if length( fg_CharsImage[ ID ] ) = 0 Then exit;
 
@@ -400,10 +401,11 @@ begin
   for i := 0 to fw - 1 do
     for j := 0 to fh - 1 do
       begin
-        PByte( Ptr( pData ) + ( i + X ) * 4 + ( j + Y ) * fg_PageSize * 4 + 0 )^ := 255;
-        PByte( Ptr( pData ) + ( i + X ) * 4 + ( j + Y ) * fg_PageSize * 4 + 1 )^ := 255;
-        PByte( Ptr( pData ) + ( i + X ) * 4 + ( j + Y ) * fg_PageSize * 4 + 2 )^ := 255;
-        PByte( Ptr( pData ) + ( i + X ) * 4 + ( j + Y ) * fg_PageSize * 4 + 3 )^ := fg_CharsImage[ ID, i + j * fw ];
+        pixel  := PByte( Ptr( pData ) + ( i + X ) * 4 + ( j + Y ) * fg_PageSize * 4 );
+        pixel^ := 255; INC( pixel );
+        pixel^ := 255; INC( pixel );
+        pixel^ := 255; INC( pixel );
+        pixel^ := fg_CharsImage[ ID, i + j * fw ];
       end;
 end;
 
@@ -519,7 +521,7 @@ begin
 
         XftDrawRect( draw, @rBlack, 0, 0, sx, sy );
         XftDrawString16( draw, @rWhite, XFont, XGlyphInfo.x, XGlyphInfo.y, @fg_CharsUID[ i ], 1 );
-        image := XGetImage( scr_Display, pixmap, 0, 0, sx, sy, $FFFFFF, XYPixmap );
+        image := XGetImage( scr_Display, pixmap, 0, 0, sx, sy, AllPlanes, ZPixmap );
         SetLength( fg_CharsImage[ i ], cx * cy );
 
         for sx := 0 to cx - 1 do
