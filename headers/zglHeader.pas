@@ -61,9 +61,8 @@ type
 end;
 
 const
-  _ZGL_VERSION = '0.2';
 {$IFDEF LINUX}
-  libZenGL = 'libZenGL.so.' + _ZGL_VERSION;
+  libZenGL = 'libZenGL.so';
 {$ENDIF}
 {$IFDEF WINDOWS}
   libZenGL = 'ZenGL.dll';
