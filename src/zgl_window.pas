@@ -152,8 +152,8 @@ begin
   XSetClassHint( scr_Display, wnd_Handle, @wnd_Class );
   wnd_SetHints( FALSE );
 
-  wnd_DestroyAtom := XInternAtom( scr_Display, 'WM_DELETE_WINDOW', TRUE );
-  wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', TRUE );
+  wnd_DestroyAtom := XInternAtom( scr_Display, 'WM_DELETE_WINDOW', FALSE );
+  wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', FALSE );
   XSetWMProtocols( scr_Display, wnd_Handle, @wnd_DestroyAtom, 1 );
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -313,10 +313,10 @@ begin
   event.xclient._type        := ClientMessage;
   event.xclient.send_event   := 1;
   event.xclient.window       := wnd_Handle;
-  event.xclient.message_type := XInternAtom( scr_Display, '_NET_WM_STATE', TRUE );
+  event.xclient.message_type := XInternAtom( scr_Display, '_NET_WM_STATE', FALSE );
   event.xclient.format       := 32;
   event.xclient.data.l[ 0 ]  := Integer( wnd_FullScreen );
-  event.xclient.data.l[ 1 ]  := XInternAtom( scr_Display, '_NET_WM_STATE_FULLSCREEN', TRUE );
+  event.xclient.data.l[ 1 ]  := XInternAtom( scr_Display, '_NET_WM_STATE_FULLSCREEN', FALSE );
   XSendEvent( scr_Display, wnd_Root, False, SubstructureRedirectMask or SubstructureNotifyMask, @event );
 {$ENDIF}
 {$IFDEF WINDOWS}
