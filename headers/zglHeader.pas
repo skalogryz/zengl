@@ -365,7 +365,7 @@ var
   key_Press         : function( const KeyCode : Byte ) : Boolean;
   key_Last          : function( const KeyAction : Byte ) : Byte;
   key_BeginReadText : procedure( const Text : String; const MaxSymbols : Integer = -1 );
-  key_GetText       : function( var Result : String );
+  key_GetText       : procedure( var Result : String );
   key_EndReadText   : procedure;
   key_ClearState    : procedure;
 
