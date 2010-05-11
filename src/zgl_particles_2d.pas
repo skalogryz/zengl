@@ -210,7 +210,6 @@ procedure particle2d_Proc( var Particle : zglTParticle2D; const Params : zglTPar
 implementation
 uses
   zgl_main,
-  zgl_application,
   zgl_opengl,
   zgl_opengl_all,
   zgl_fx,
@@ -221,7 +220,6 @@ uses
 var
   _pengine  : zglTPEngine2D;
   pengine2d : zglPPEngine2D;
-  lastClip  : Boolean;
 
 function pengine2d_AddEmitter;
 begin
@@ -271,9 +269,6 @@ procedure emitter2d_Draw;
     cX, cY : Single;
     c, s   : Single;
 begin
-  lastClip := app_Flags and CLIP_INVISIBLE > 0;
-  if lastClip Then
-    app_Flags := app_Flags xor CLIP_INVISIBLE;
   with Emitter.BBox do
     if not sprite2d_InScreen( MinX, MinY, MaxX - MinX, MaxY - MinY, 0 ) Then exit;
 
@@ -430,9 +425,6 @@ begin
           glDisable( GL_ALPHA_TEST );
         end;
     end;
-
-  if lastClip Then
-    app_Flags := app_Flags or CLIP_INVISIBLE;
 end;
 
 procedure emitter2d_Proc;
@@ -674,5 +666,8 @@ begin
           Life := 0;
     end;
 end;
+
+initialization
+  pengine2d := @_pengine;
 
 end.

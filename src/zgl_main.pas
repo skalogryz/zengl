@@ -105,6 +105,8 @@ procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
 function  zgl_Get( const What : LongWord ) : Ptr;
 procedure zgl_GetSysDir;
 procedure zgl_GetMem( var Mem : Pointer; const Size : LongWord );
+procedure zgl_FreeMem( var Mem : Pointer );
+procedure zgl_FreeStr( var Str : String );
 procedure zgl_Enable( const What : LongWord );
 procedure zgl_Disable( const What : LongWord );
 
@@ -484,10 +486,18 @@ begin
       GetMem( Mem, Size );
       FillChar( Mem^, Size, 0 );
     end else
-      begin
-        FreeMem( Mem );
-        Mem := nil;
-      end;
+      Mem := nil;
+end;
+
+procedure zgl_FreeMem;
+begin
+  FreeMem( Mem );
+  Mem := nil;
+end;
+
+procedure zgl_FreeStr;
+begin
+  Str := '';
 end;
 
 procedure zgl_Enable;

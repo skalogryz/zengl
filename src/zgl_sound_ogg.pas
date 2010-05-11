@@ -100,10 +100,14 @@ uses
   zgl_utils;
 
 const
+  OGG_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'O', 'G', 'G', #0 );
 {$IFDEF LINUX}
-  libogg        = 'libogg.so';
-  libvorbis     = 'libvorbis.so';
-  libvorbisfile = 'libvorbisfile.so';
+  libogg         = 'libogg.so';
+  libvorbis      = 'libvorbis.so';
+  libvorbisfile  = 'libvorbisfile.so';
+  libogg0        = 'libogg.so.0';
+  libvorbis0     = 'libvorbis.so.0';
+  libvorbisfile3 = 'libvorbisfile.so.3';
 {$ENDIF}
 {$IFDEF WINDOWS}
   libogg        = 'libogg.dll';
@@ -401,9 +405,9 @@ begin
   {$IFDEF LINUX}
   if ( ogg_Library = LIB_ERROR ) and ( vorbis_Library = LIB_ERROR ) and ( vorbisfile_Library = LIB_ERROR ) Then
     begin
-      ogg_Library        := dlopen( PChar( libogg + '.0' ), $001 );
-      vorbis_Library     := dlopen( PChar( libvorbis + '.0' ), $001 );
-      vorbisfile_Library := dlopen( PChar( libvorbisfile + '.3' ), $001 );
+      ogg_Library        := dlopen( libogg0, $001 );
+      vorbis_Library     := dlopen( libvorbis0, $001 );
+      vorbisfile_Library := dlopen( libvorbisfile3, $001 );
     end;
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -583,12 +587,12 @@ begin
 end;
 
 initialization
-  oggDecoder.Ext   := 'OGG';
+  oggDecoder.Ext   := OGG_EXTENSION;
   oggDecoder.Open  := ogg_DecoderOpen;
   oggDecoder.Read  := ogg_DecoderRead;
   oggDecoder.Loop  := ogg_DecoderLoop;
   oggDecoder.Close := ogg_DecoderClose;
-  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'OGG' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION,   @OGG_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
   zgl_Reg( SND_FORMAT_DECODER,     @oggDecoder );

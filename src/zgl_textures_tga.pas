@@ -28,6 +28,9 @@ uses
   zgl_file,
   zgl_memory;
 
+const
+  TGA_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'T', 'G', 'A', #0 );
+
 type
   zglPTGAHeader = ^zglTTGAHeader;
   zglTTGAHeader = packed record
@@ -256,7 +259,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'tga' ) );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @TGA_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @tga_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @tga_LoadFromMemory );
 

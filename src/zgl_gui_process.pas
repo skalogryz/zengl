@@ -423,10 +423,15 @@ begin
           if not ReadOnly Then
             key_BeginReadText( Text, Max );
         end;
+      EVENT_FOCUS_OUT:
+        begin
+          if not ReadOnly Then
+            key_EndReadText();
+        end;
       EVENT_KEY_DOWN:
         begin
           if not ReadOnly Then
-            key_EndReadText( Text );
+            key_GetText( Text );
         end;
     end;
   gui_ProcEvents( Event );

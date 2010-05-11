@@ -296,14 +296,23 @@ begin
       exit;
     end;
 
-  log_Add( 'OpenAL: open device' );
-  log_Add( 'OpenAL: Default device is "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
-
-  {$IFDEF WINDOWS}
-  //oal_Device := alcOpenDevice( 'Generic Software' );
-  //if not Assigned( oal_Device ) Then
+  {$IFDEF LINUX}
+  log_Add( 'OpenAL: opening "ALSA Software"' );
+  oal_Device := alcOpenDevice( 'ALSA Software' );
   {$ENDIF}
-    oal_Device := alcOpenDevice( nil );
+  {$IFDEF WINDOWS}
+  log_Add( 'OpenAL: opening "Generic Software"' );
+  oal_Device := alcOpenDevice( 'Generic Software' );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  log_Add( 'OpenAL: opening "CoreAudio Software"' );
+  oal_Device := alcOpenDevice( 'CoreAudio Software' );
+  {$ENDIF}
+  if not Assigned( oal_Device ) Then
+    begin
+      oal_Device := alcOpenDevice( nil );
+      log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
+    end;
   if not Assigned( oal_Device ) Then
     begin
       log_Add( 'Cannot open sound device' );

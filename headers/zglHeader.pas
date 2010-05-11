@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC3              }
-{ date:    2010.05.04           }
+{ date:    2010.05.11           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -129,6 +129,8 @@ var
   zgl_Get       : function( const What : LongWord ) : Ptr;
   zgl_GetSysDir : procedure;
   zgl_GetMem    : procedure( var Mem : Pointer; const Size : LongWord );
+  zgl_FreeMem   : procedure( var Mem : Pointer );
+  zgl_FreeStr   : procedure( var Str : String );
 
 const
   COLOR_BUFFER_CLEAR    = $000001;
@@ -363,7 +365,8 @@ var
   key_Press         : function( const KeyCode : Byte ) : Boolean;
   key_Last          : function( const KeyAction : Byte ) : Byte;
   key_BeginReadText : procedure( const Text : String; const MaxSymbols : Integer = -1 );
-  key_EndReadText   : procedure( var Result : String );
+  key_GetText       : function( var Result : String );
+  key_EndReadText   : procedure;
   key_ClearState    : procedure;
 
 // MOUSE
@@ -1490,6 +1493,8 @@ begin
       zgl_Get := dlsym( zglLib, 'zgl_Get' );
       zgl_GetSysDir := dlsym( zglLib, 'zgl_GetSysDir' );
       zgl_GetMem := dlsym( zglLib, 'zgl_GetMem' );
+      zgl_FreeMem := dlsym( zglLib, 'zgl_FreeMem' );
+      zgl_FreeStr := dlsym( zglLib, 'zgl_FreeStr' );
       zgl_Enable := dlsym( zglLib, 'zgl_Enable' );
       zgl_Disable := dlsym( zglLib, 'zgl_Disable' );
 
@@ -1533,6 +1538,7 @@ begin
       key_Press := dlsym( zglLib, 'key_Press' );
       key_Last := dlsym( zglLib, 'key_Last' );
       key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
+      key_GetText := dlsym( zglLib, 'key_GetText' );
       key_EndReadText := dlsym( zglLib, 'key_EndReadText' );
       key_ClearState := dlsym( zglLib, 'key_ClearState' );
 

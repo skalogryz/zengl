@@ -40,6 +40,9 @@ uses
 
   zgl_memory;
 
+const
+  JPG_EXTENSION  : array[ 0..3 ] of AnsiChar = ( 'J', 'P', 'G', #0 );
+
 {$IFDEF USE_PASJPEG}
 const
   INPUT_BUF_SIZE = 4096;
@@ -435,7 +438,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'jpg' ) );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @JPG_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
 

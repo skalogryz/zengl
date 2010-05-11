@@ -66,7 +66,7 @@ begin
     mouse_Lock;
 
   // "Считываем" в переменную введеный текст
-  key_EndReadText( something );
+  key_GetText( something );
 
   // Обязательно очищаем состояния
   key_ClearState;

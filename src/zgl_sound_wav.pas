@@ -35,6 +35,8 @@ uses
   zgl_memory;
 
 const
+  WAV_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'W', 'A', 'V', #0 );
+
   WAV_STANDARD  = $0001;
   WAV_IMA_ADPCM = $0011;
   WAV_MP3       = $0055;
@@ -138,7 +140,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'WAV' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION,   @WAV_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @wav_LoadFromMemory );
 

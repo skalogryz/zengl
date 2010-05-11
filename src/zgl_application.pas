@@ -368,6 +368,7 @@ begin
             keysUp  [ key ] := FALSE;
             doKeyPress( key );
 
+            if keysCanText Then
             case key of
               K_SYSRQ, K_PAUSE,
               K_ESCAPE, K_ENTER, K_KP_ENTER,
@@ -577,6 +578,7 @@ begin
       end;
     WM_CHAR:
       begin
+        if keysCanText Then
         case winkey_to_scancode( wParam ) of
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
@@ -591,7 +593,6 @@ begin
               if str <> '' Then
                 key_InputText( str );
             end else
-              // FIXME: пока просто сокращу количество циклов, потом надо будет сделать полное завершение ввода
               if wParam < 128 Then
                 key_InputText( Char( CP1251_TO_UTF8[ wParam ] ) )
               else
@@ -715,6 +716,7 @@ begin
               if eKind <> kEventRawKeyRepeat Then
                 doKeyPress( key );
 
+              if keysCanText Then
               case key of
                 K_SYSRQ, K_PAUSE,
                 K_ESCAPE, K_ENTER, K_KP_ENTER,

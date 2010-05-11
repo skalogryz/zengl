@@ -164,7 +164,8 @@ function  key_Up( const KeyCode : Byte ) : Boolean;
 function  key_Press( const KeyCode : Byte ) : Boolean;
 function  key_Last( const KeyAction : Byte ) : Byte;
 procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer = -1 );
-procedure key_EndReadText( var Result : String );
+procedure key_GetText( var Result : String );
+procedure key_EndReadText;
 procedure key_ClearState;
 
 procedure key_InputText( const Text : String );
@@ -200,6 +201,7 @@ var
   keysPress    : array[ 0..255 ] of Boolean;
   keysCanPress : array[ 0..255 ] of Boolean;
   keysText     : String = '';
+  keysCanText  : Boolean;
   keysMax      : Integer;
   keysLast     : array[ 0..1 ] of Byte;
   {$IFDEF LINUX}
@@ -234,13 +236,20 @@ end;
 
 procedure key_BeginReadText;
 begin
-  keysText := Text;
-  keysMax  := MaxSymbols;
+  keysText    := Text;
+  keysMax     := MaxSymbols;
+  keysCanText := TRUE;
+end;
+
+procedure key_GetText;
+begin
+  Result := keysText;
 end;
 
 procedure key_EndReadText;
 begin
-  Result := keysText;
+  keysText    := '';
+  keysCanText := FALSE;
 end;
 
 procedure key_ClearState;
