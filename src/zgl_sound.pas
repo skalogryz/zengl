@@ -662,8 +662,10 @@ procedure snd_Stop;
       begin
         {$IFDEF USE_OPENAL}
         alSourceStop( Sound.Channel[ ID ].Source );
+        alSourceRewind( Sound.Channel[ ID ].Source );
         alSourcei( Sound.Channel[ ID ].Source, AL_BUFFER, AL_NONE );
         {$ELSE}
+        Sound.Channel[ ID ].Source.SetCurrentPosition( 0 );
         Sound.Channel[ ID ].Source.Stop();
         {$ENDIF}
       end;
