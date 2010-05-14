@@ -41,7 +41,7 @@ uses
   zgl_memory;
 
 const
-  JPG_EXTENSION  : array[ 0..3 ] of AnsiChar = ( 'J', 'P', 'G', #0 );
+  JPG_EXTENSION  : array[ 0..3 ] of Char = ( 'J', 'P', 'G', #0 );
 
 {$IFDEF USE_PASJPEG}
 const

@@ -100,7 +100,7 @@ uses
   zgl_utils;
 
 const
-  OGG_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'O', 'G', 'G', #0 );
+  OGG_EXTENSION : array[ 0..3 ] of Char = ( 'O', 'G', 'G', #0 );
 {$IFDEF LINUX}
   libogg         = 'libogg.so';
   libvorbis      = 'libvorbis.so';

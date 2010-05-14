@@ -35,7 +35,7 @@ uses
   zgl_memory;
 
 const
-  PNG_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'P', 'N', 'G', #0 );
+  PNG_EXTENSION : array[ 0..3 ] of Char = ( 'P', 'N', 'G', #0 );
   PNG_SIGNATURE : array[ 0..7 ] of AnsiChar = ( #137, #80, #78, #71, #13, #10, #26, #10 );
 
   PNG_FILTER_NONE    = 0;

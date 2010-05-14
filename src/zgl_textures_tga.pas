@@ -29,7 +29,7 @@ uses
   zgl_memory;
 
 const
-  TGA_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'T', 'G', 'A', #0 );
+  TGA_EXTENSION : array[ 0..3 ] of Char = ( 'T', 'G', 'A', #0 );
 
 type
   zglPTGAHeader = ^zglTTGAHeader;

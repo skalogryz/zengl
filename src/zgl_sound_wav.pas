@@ -35,7 +35,7 @@ uses
   zgl_memory;
 
 const
-  WAV_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'W', 'A', 'V', #0 );
+  WAV_EXTENSION : array[ 0..3 ] of Char = ( 'W', 'A', 'V', #0 );
 
   WAV_STANDARD  = $0001;
   WAV_IMA_ADPCM = $0011;
