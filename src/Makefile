@@ -1,6 +1,6 @@
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
-FLAGS   = -O3 -XdsX -CX -Sd -Cg
+FLAGS   = -O3 -XdsX -CX -Sd
 INCLUDE = -FuPasJPEG
 OUTPUT  = ./
 DESTDIR = /usr
