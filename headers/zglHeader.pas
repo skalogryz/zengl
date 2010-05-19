@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC3              }
-{ date:    2010.05.11           }
+{ date:    2010.05.19           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -50,7 +50,11 @@ type
     Items : array of String;
 end;
 
+{$IFNDEF WINDOWS}
+type zglTFile = LongInt;
+{$ELSE}
 type zglTFile = LongWord;
+{$ENDIF}
 type zglTFileList = zglTStringList;
 type
   zglPMemory = ^zglTMemory;
@@ -235,6 +239,27 @@ var
   timer_GetTicks : function : Double;
   timer_Reset    : procedure;
 
+// MOUSE
+const
+  M_BLEFT  = 0;
+  M_BMIDLE = 1;
+  M_BRIGHT = 2;
+  M_WUP    = 0;
+  M_WDOWN  = 1;
+
+var
+  mouse_X          : function : Integer;
+  mouse_Y          : function : Integer;
+  mouse_DX         : function : Integer;
+  mouse_DY         : function : Integer;
+  mouse_Down       : function( const Button : Byte ) : Boolean;
+  mouse_Up         : function( const Button : Byte ) : Boolean;
+  mouse_Click      : function( const Button : Byte ) : Boolean;
+  mouse_DblClick   : function( const Button : Byte ) : Boolean;
+  mouse_Wheel      : function( const Axis : Byte ) : Boolean;
+  mouse_ClearState : procedure;
+  mouse_Lock       : procedure;
+
 // KEYBOARD
 const
   K_SYSRQ      = $B7;
@@ -369,26 +394,43 @@ var
   key_EndReadText   : procedure;
   key_ClearState    : procedure;
 
-// MOUSE
+// JOYSTICK
+type
+  zglPJoyInfo = ^zglTJoyInfo;
+  zglTJoyInfo = record
+    Name   : AnsiString;
+    Count  : record
+      Axes    : Integer;
+      Buttons : Integer;
+             end;
+    Caps   : LongWord;
+  end;
+
 const
-  M_BLEFT  = 0;
-  M_BMIDLE = 1;
-  M_BRIGHT = 2;
-  M_WUP    = 0;
-  M_WDOWN  = 1;
+  JOY_HAS_Z   = $000001;
+  JOY_HAS_R   = $000002;
+  JOY_HAS_U   = $000004;
+  JOY_HAS_V   = $000008;
+  JOY_HAS_POV = $000010;
+
+  JOY_AXIS_X = 0;
+  JOY_AXIS_Y = 1;
+  JOY_AXIS_Z = 2;
+  JOY_AXIS_R = 3;
+  JOY_AXIS_U = 4;
+  JOY_AXIS_V = 5;
+  JOY_POVX   = 6;
+  JOY_POVY   = 7;
 
 var
-  mouse_X          : function : Integer;
-  mouse_Y          : function : Integer;
-  mouse_DX         : function : Integer;
-  mouse_DY         : function : Integer;
-  mouse_Down       : function( const Button : Byte ) : Boolean;
-  mouse_Up         : function( const Button : Byte ) : Boolean;
-  mouse_Click      : function( const Button : Byte ) : Boolean;
-  mouse_DblClick   : function( const Button : Byte ) : Boolean;
-  mouse_Wheel      : function( const Axis : Byte ) : Boolean;
-  mouse_ClearState : procedure;
-  mouse_Lock       : procedure;
+  joy_Init       : function : Byte;
+  joy_GetInfo    : function ( const JoyID : Byte ) : zglPJoyInfo;
+  joy_AxisPos    : function ( const JoyID, Axis : Byte ) : Single;
+  joy_Down       : function ( const JoyID, Button : Byte ) : Boolean;
+  joy_Up         : function ( const JoyID, Button : Byte ) : Boolean;
+  joy_Press      : function ( const JoyID, Button : Byte ) : Boolean;
+  joy_Last       : function ( const JoyID : Byte; const Axis : Boolean ) : Integer;
+  joy_ClearState : procedure;
 
 // GL
   Set2DMode : procedure;
@@ -1329,6 +1371,8 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
+  FILE_ERROR = {$IFNDEF WINDOWS} -1 {$ELSE} 0 {$ENDIF};
+
 var
   file_Open         : procedure( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
   file_Exists       : function( const FileName : String ) : Boolean;
@@ -1336,7 +1380,6 @@ var
   file_GetPos       : function( const FileHandle : zglTFile ) : LongWord;
   file_Read         : function( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
   file_Write        : function( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
-  file_Trunc        : procedure( const FileHandle : zglTFile; const Bytes : LongWord );
   file_GetSize      : function( const FileHandle : zglTFile ) : LongWord;
   file_Flush        : procedure( const FileHandle : zglTFile );
   file_Close        : procedure( var FileHandle : zglTFile );
@@ -1533,15 +1576,6 @@ begin
       timer_GetTicks := dlsym( zglLib, 'timer_GetTicks' );
       timer_Reset := dlsym( zglLib, 'timer_Reset' );
 
-      key_Down := dlsym( zglLib, 'key_Down' );
-      key_Up := dlsym( zglLib, 'key_Up' );
-      key_Press := dlsym( zglLib, 'key_Press' );
-      key_Last := dlsym( zglLib, 'key_Last' );
-      key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
-      key_GetText := dlsym( zglLib, 'key_GetText' );
-      key_EndReadText := dlsym( zglLib, 'key_EndReadText' );
-      key_ClearState := dlsym( zglLib, 'key_ClearState' );
-
       mouse_X := dlsym( zglLib, 'mouse_X' );
       mouse_Y := dlsym( zglLib, 'mouse_Y' );
       mouse_DX := dlsym( zglLib, 'mouse_DX' );
@@ -1553,6 +1587,24 @@ begin
       mouse_Wheel := dlsym( zglLib, 'mouse_Wheel' );
       mouse_ClearState := dlsym( zglLib, 'mouse_ClearState' );
       mouse_Lock := dlsym( zglLib, 'mouse_Lock' );
+
+      key_Down := dlsym( zglLib, 'key_Down' );
+      key_Up := dlsym( zglLib, 'key_Up' );
+      key_Press := dlsym( zglLib, 'key_Press' );
+      key_Last := dlsym( zglLib, 'key_Last' );
+      key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
+      key_GetText := dlsym( zglLib, 'key_GetText' );
+      key_EndReadText := dlsym( zglLib, 'key_EndReadText' );
+      key_ClearState := dlsym( zglLib, 'key_ClearState' );
+
+      joy_Init := dlsym( zglLib, 'joy_Init' );
+      joy_GetInfo := dlsym( zglLib, 'joy_GetInfo' );
+      joy_AxisPos := dlsym( zglLib, 'joy_AxisPos' );
+      joy_Down := dlsym( zglLib, 'joy_Down' );
+      joy_Up := dlsym( zglLib, 'joy_Up' );
+      joy_Press := dlsym( zglLib, 'joy_Press' );
+      joy_Last := dlsym( zglLib, 'joy_Last' );
+      joy_ClearState := dlsym( zglLib, 'joy_ClearState' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );
       tex_Del := dlsym( zglLib, 'tex_Del' );
@@ -1702,7 +1754,6 @@ begin
       file_GetPos := dlsym( zglLib, 'file_GetPos' );
       file_Read := dlsym( zglLib, 'file_Read' );
       file_Write := dlsym( zglLib, 'file_Write' );
-      file_Trunc := dlsym( zglLib, 'file_Trunc' );
       file_GetSize := dlsym( zglLib, 'file_GetSize' );
       file_Flush := dlsym( zglLib, 'file_Flush' );
       file_Close := dlsym( zglLib, 'file_Close' );

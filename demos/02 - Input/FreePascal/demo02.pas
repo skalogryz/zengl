@@ -5,8 +5,9 @@ uses
   zgl_screen,
   zgl_window,
   zgl_timers,
-  zgl_keyboard,
   zgl_mouse,
+  zgl_keyboard,
+  zgl_joystick,
   zgl_font,
   zgl_text,
   zgl_textures,
@@ -21,16 +22,16 @@ var
   something  : String;
   lineAlpha  : Byte;
 
-
 procedure Init;
-  var
-    i : Integer;
 begin
   // Загрузка шрифта и вывод текста освещен в "04 - Text"
   fnt := font_LoadFromFile( '../res/font.zfi' );
 
   // Начнем считывать текст с клавиатуры и ограничимся 20 символами
   key_BeginReadText( something, 20 );
+
+  // Инициализируем поддержку джойстиков
+  joy_Init();
 end;
 
 procedure Draw;
@@ -41,10 +42,39 @@ begin
   text_Draw( fnt, 0, 20, 'Alt+Enter - FullScreen/Windowed mode' );
   text_Draw( fnt, 0, 40, 'Left mouse button - lock mouse :)' );
 
-  text_Draw( fnt, 400, 300 - 30, 'Enter something(maximum - 20 symbols):', TEXT_HALIGN_CENTER );
-  text_Draw( fnt, 400, 300, something, TEXT_HALIGN_CENTER );
+  text_Draw( fnt, 400, 300 - 100, 'Enter something(maximum - 20 symbols):', TEXT_HALIGN_CENTER );
+  text_Draw( fnt, 400, 300 - 70, something, TEXT_HALIGN_CENTER );
   w := text_GetWidth( fnt, something );
-  pr2d_Rect( 400 + w / 2, 300, 10, 20, $FFFFFF, lineAlpha, PR2D_FILL );
+  pr2d_Rect( 400 + w / 2, 300 - 70, 10, 20, $FFFFFF, lineAlpha, PR2D_FILL );
+
+  text_Draw( fnt, 400, 360, 'JOYSTICK', TEXT_HALIGN_CENTER );
+
+  // Вывод состояния осей и кнопок первого джойстика в системе
+  text_Draw( fnt, 100, 400, 'Axis X: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_X ) ) );
+  text_Draw( fnt, 100, 420, 'Axis Y: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Y ) ) );
+  text_Draw( fnt, 100, 440, 'Axis Z: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Z ) ) );
+  text_Draw( fnt, 100, 460, 'Axis R: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_R ) ) );
+  text_Draw( fnt, 100, 480, 'Axis U: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_U ) ) );
+  text_Draw( fnt, 100, 500, 'Axis V: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_V ) ) );
+  text_Draw( fnt, 100, 520, 'POVX: ' + u_FloatToStr( joy_AxisPos( 0, JOY_POVX ) ) );
+  text_Draw( fnt, 100, 540, 'POVY: ' + u_FloatToStr( joy_AxisPos( 0, JOY_POVY ) ) );
+
+  text_Draw( fnt, 400, 400, 'Button1: ' + u_BoolToStr( joy_Down( 0, 0 ) ) );
+  text_Draw( fnt, 400, 420, 'Button2: ' + u_BoolToStr( joy_Down( 0, 1 ) ) );
+  text_Draw( fnt, 400, 440, 'Button3: ' + u_BoolToStr( joy_Down( 0, 2 ) ) );
+  text_Draw( fnt, 400, 460, 'Button4: ' + u_BoolToStr( joy_Down( 0, 3 ) ) );
+  text_Draw( fnt, 400, 480, 'Button5: ' + u_BoolToStr( joy_Down( 0, 4 ) ) );
+  text_Draw( fnt, 400, 500, 'Button6: ' + u_BoolToStr( joy_Down( 0, 5 ) ) );
+  text_Draw( fnt, 400, 520, 'Button7: ' + u_BoolToStr( joy_Down( 0, 6 ) ) );
+  text_Draw( fnt, 400, 540, 'Button8: ' + u_BoolToStr( joy_Down( 0, 7 ) ) );
+  text_Draw( fnt, 550, 400, 'Button9: ' + u_BoolToStr( joy_Down( 0, 8 ) ) );
+  text_Draw( fnt, 550, 420, 'Button10: ' + u_BoolToStr( joy_Down( 0, 9 ) ) );
+  text_Draw( fnt, 550, 440, 'Button11: ' + u_BoolToStr( joy_Down( 0, 10 ) ) );
+  text_Draw( fnt, 550, 460, 'Button12: ' + u_BoolToStr( joy_Down( 0, 11 ) ) );
+  text_Draw( fnt, 550, 480, 'Button13: ' + u_BoolToStr( joy_Down( 0, 12 ) ) );
+  text_Draw( fnt, 550, 500, 'Button14: ' + u_BoolToStr( joy_Down( 0, 13 ) ) );
+  text_Draw( fnt, 550, 520, 'Button15: ' + u_BoolToStr( joy_Down( 0, 14 ) ) );
+  text_Draw( fnt, 550, 540, 'Button16: ' + u_BoolToStr( joy_Down( 0, 15 ) ) );
 end;
 
 procedure Timer;
@@ -71,6 +101,7 @@ begin
   // Обязательно очищаем состояния
   key_ClearState;
   mouse_ClearState;
+  joy_ClearState;
 end;
 
 Begin
