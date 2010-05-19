@@ -24,7 +24,8 @@ unit zgl_log;
 
 interface
 uses
-  zgl_file;
+  zgl_file,
+  zgl_utils;
 
 procedure log_Init;
 procedure log_Close;
@@ -33,7 +34,7 @@ procedure log_Flush;
 function  log_Timing : AnsiString;
 
 var
-  log      : zglTFile;
+  log      : zglTFile = FILE_ERROR;
   logStart : LongWord;
   logFile  : PChar = 'log.txt';
 
@@ -41,8 +42,7 @@ implementation
 uses
   zgl_application,
   zgl_main,
-  zgl_timers,
-  zgl_utils;
+  zgl_timers;
 
 procedure log_Init;
   var

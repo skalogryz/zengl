@@ -100,8 +100,11 @@ uses
   zgl_opengl_all,
   zgl_opengl_simple,
   zgl_log,
-  zgl_keyboard,
   zgl_mouse,
+  zgl_keyboard,
+  {$IFDEF USE_JOYSTICK}
+  zgl_joystick,
+  {$ENDIF}
   zgl_timers,
   zgl_font,
   {$IFDEF USE_SOUND}
@@ -160,6 +163,9 @@ begin
   while app_Work do
     begin
       app_ProcessOS();
+      {$IFDEF USE_JOYSTICK}
+      joy_Proc();
+      {$ENDIF}
       {$IFDEF USE_SOUND}
       snd_MainLoop();
       {$ENDIF}

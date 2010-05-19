@@ -26,7 +26,7 @@ interface
 
 uses
   {$IFDEF LINUX_OR_DARWIN}
-  baseunix,
+  BaseUnix,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -34,8 +34,7 @@ uses
   zgl_types;
 
 {$IFDEF LINUX_OR_DARWIN}
-type PFILE = Pointer;
-type zglTFile = PFILE;
+type zglTFile = LongInt;
 {$ENDIF}
 {$IFDEF WINDOWS}
 type zglTFile = THandle;
@@ -61,7 +60,6 @@ function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord 
 function  file_GetPos( const FileHandle : zglTFile ) : LongWord;
 function  file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
 function  file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
-procedure file_Trunc( const FileHandle : zglTFile; const Bytes : LongWord );
 function  file_GetSize( const FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( const FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
@@ -72,19 +70,7 @@ procedure file_GetDirectory( const FileName : String; var Result : String );
 procedure file_SetPath( const Path : String );
 
 {$IFDEF LINUX_OR_DARWIN}
-// "Домо оригато" разработчикам FreePascal, которые принципиально
-// не портировали модуль libc на платформу x86_64
 const
-  { POSIX file modes: group permission...  }
-  S_IRWXG = $0038;
-  S_IRGRP = $0020;
-  S_IWGRP = $0010;
-  S_IXGRP = $0008;
-  { POSIX file modes: other permission...  }
-  S_IRWXO = $0007;
-  S_IROTH = $0004;
-  S_IWOTH = $0002;
-  S_IXOTH = $0001;
   { read/write search permission for everyone }
   MODE_MKDIR = S_IWUSR or S_IRUSR or
                S_IWGRP or S_IRGRP or
@@ -92,37 +78,18 @@ const
                S_IXUSR or S_IXGRP or S_IXOTH;
 
 type
-  Pdirent = ^dirent;
-  dirent  = record
-    d_ino    : LongWord;
-    d_off    : LongInt;
-    d_reclen : Word;
-    d_type   : Byte;
-    d_name   : array[ 0..255 ] of AnsiChar;
-  end;
-
-type
-  TDirEnt       = dirent;
   PPDirEnt      = ^PDirEnt;
   PPPDirEnt     = ^PPDirEnt;
   TSelectorFunc = function(const p1: PDirEnt): Integer; cdecl;
   TCompareFunc  = function(const p1, p2: Pointer): Integer; cdecl;
 
-function fopen(__filename:Pchar; __modes:Pchar):PFILE;cdecl;external 'libc' name 'fopen';
-function fclose(__stream:PFILE):longint;cdecl;external 'libc' name 'fclose';
-function fflush(__stream:PFILE):longint;cdecl;external 'libc' name 'fflush';
-function fread(__ptr:pointer; __size:size_t; __n:size_t; __stream:PFILE):size_t;cdecl;external 'libc' name 'fread';
-function fwrite(__ptr:pointer; __size:size_t; __n:size_t; __s:PFILE):size_t;cdecl;external 'libc' name 'fwrite';
-function fseek(__stream:PFILE; __off:longint; __whence:longint):longint;cdecl;external 'libc' name 'fseek';
-function ftell(__stream:PFILE):longint;cdecl;external 'libc' name 'ftell';
-function ftruncate(__fd:longint; __length:LongInt):longint;cdecl;external 'libc' name 'ftruncate';
-function access(__name:Pchar; __type:longint):longint;cdecl;external 'libc' name 'access';
 function scandir(__dir:Pchar; __namelist:PPPdirent; __selector:TSelectorfunc; __cmp:TComparefunc):longint;cdecl;external 'libc' name 'scandir';
 function free( ptr : Pointer ):longint;cdecl;external 'libc' name 'free';
-function mkdir(pathname:Pchar; mode:mode_t):longint;cdecl;external 'libc' name 'mkdir';
 {$ENDIF}
 
 implementation
+uses
+  zgl_utils;
 
 var
   filePath : String = '';
@@ -131,9 +98,9 @@ procedure file_Open;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   case Mode of
-    FOM_CREATE: FileHandle := fopen( PChar( filePath + FileName ), 'w' );
-    FOM_OPENR:  FileHandle := fopen( PChar( filePath + FileName ), 'r' );
-    FOM_OPENRW: FileHandle := fopen( PChar( filePath + FileName ), 'r+' );
+    FOM_CREATE: FileHandle := FpOpen( filePath + FileName, O_Creat or O_Trunc or O_RdWr );
+    FOM_OPENR:  FileHandle := FpOpen( filePath + FileName, O_RdOnly );
+    FOM_OPENRW: FileHandle := FpOpen( filePath + FileName, O_RdWr );
   end;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -148,7 +115,7 @@ end;
 function file_MakeDir;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  Result := mkdir( PChar( Directory ), MODE_MKDIR ) = 0;
+  Result := FpMkdir( Directory, MODE_MKDIR ) = FILE_ERROR;
 {$ENDIF}
 {$IFDEF WINDOWS}
   Result := CreateDirectory( PChar( Directory ), nil );
@@ -162,7 +129,7 @@ function file_Exists;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  Result := not Boolean( access( PChar( filePath + FileName ), F_OK ) );
+  Result := not Boolean( FpAccess( filePath + FileName, F_OK ) );
 {$ENDIF}
 {$IFDEF WINDOWS}
   file_Open( fileHandle, FileName, FOM_OPENR );
@@ -176,9 +143,9 @@ function file_Seek;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   case Mode of
-    FSM_SET: Result := fseek( FileHandle, Offset, SEEK_SET );
-    FSM_CUR: Result := fseek( FileHandle, Offset, SEEK_CUR );
-    FSM_END: Result := fseek( FileHandle, Offset, SEEK_END );
+    FSM_SET: Result := FpLseek( FileHandle, Offset, SEEK_SET );
+    FSM_CUR: Result := FpLseek( FileHandle, Offset, SEEK_CUR );
+    FSM_END: Result := FpLseek( FileHandle, Offset, SEEK_END );
   end;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -193,7 +160,7 @@ end;
 function file_GetPos;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  Result := ftell( FileHandle );
+  Result := FpLseek( FileHandle, 0, SEEK_CUR );
 {$ENDIF}
 {$IFDEF WINDOWS}
   Result := SetFilePointer( FileHandle, 0, nil, FILE_CURRENT );
@@ -203,12 +170,12 @@ end;
 function file_Read;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  Result := ftell( FileHandle );
+  Result := FpLseek( FileHandle, 0, SEEK_CUR );
   if Result + Bytes > file_GetSize( FileHandle ) Then
     Result := file_GetSize( FileHandle ) - Result
   else
     Result := Bytes;
-  fread( @Buffer, Bytes, 1, FileHandle );
+  FpRead( FileHandle, Buffer, Bytes );
 {$ENDIF}
 {$IFDEF WINDOWS}
   ReadFile( FileHandle, Buffer, Bytes, Result, nil );
@@ -218,22 +185,15 @@ end;
 function file_Write;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  Result := ftell( FileHandle );
+  Result := FpLseek( FileHandle, 0, SEEK_CUR );
   if Result + Bytes > file_GetSize( FileHandle ) Then
     Result := file_GetSize( FileHandle ) - Result
   else
     Result := Bytes;
-  fwrite( @Buffer, Bytes, 1, FileHandle );
+  FpWrite( FileHandle, Buffer, Bytes );
 {$ENDIF}
 {$IFDEF WINDOWS}
   WriteFile( FileHandle, Buffer, Bytes, Result, nil );
-{$ENDIF}
-end;
-
-procedure file_Trunc;
-begin
-{$IFDEF LINUX_OR_DARWIN}
-  ftruncate( LongWord( FileHandle ), Bytes );
 {$ENDIF}
 end;
 
@@ -245,10 +205,9 @@ function file_GetSize;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   // Весьма безумная реализация 8)
-  tmp := ftell( FileHandle );
-  fseek( FileHandle, 0, SEEK_END );
-  Result := ftell( FileHandle );
-  fseek( FileHandle, tmp, SEEK_SET );
+  tmp    := FpLseek( FileHandle, 0, SEEK_CUR );
+  Result := FpLseek( FileHandle, 0, SEEK_END );
+  FpLseek( FileHandle, tmp, SEEK_SET );
 {$ENDIF}
 {$IFDEF WINDOWS}
   Result := GetFileSize( FileHandle, nil );
@@ -258,7 +217,7 @@ end;
 procedure file_Flush;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  fflush( FileHandle );
+  //fflush( FileHandle );
 {$ENDIF}
 {$IFDEF WINDOWS}
   FlushFileBuffers( FileHandle );
@@ -268,8 +227,8 @@ end;
 procedure file_Close;
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  fclose( FileHandle );
-  FileHandle := nil;
+  FpClose( FileHandle );
+  FileHandle := 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
   CloseHandle( FileHandle );

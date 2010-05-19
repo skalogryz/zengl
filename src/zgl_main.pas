@@ -25,7 +25,7 @@ unit zgl_main;
 interface
 uses
   {$IFDEF LINUX}
-  XRandr,
+  BaseUnix, XRandr,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -139,7 +139,7 @@ procedure zgl_GetSysDir;
 begin
   app_WorkDir := './';
 
-  app_UsrHomeDir := getenv( 'HOME' ) + '/';
+  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
 {$ENDIF}
 {$IFDEF WINDOWS}
 var

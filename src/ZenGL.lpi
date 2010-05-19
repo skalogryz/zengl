@@ -9,7 +9,7 @@
       <UseAppBundle Value="False"/>
     </General>
     <VersionInfo>
-      <ProjectVersion Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="0.0.0.0" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
@@ -23,7 +23,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="44">
+    <Units Count="45">
       <Unit0>
         <Filename Value="ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -244,6 +244,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_texture_atlas"/>
       </Unit43>
+      <Unit44>
+        <Filename Value="zgl_joystick.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_joystick"/>
+      </Unit44>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

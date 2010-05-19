@@ -38,6 +38,9 @@ uses
 
   zgl_mouse,
   zgl_keyboard,
+  {$IFDEF USE_JOYSTICK}
+  zgl_joystick,
+  {$ENDIF}
 
   zgl_textures,
   zgl_textures_jpg,
@@ -171,6 +174,18 @@ exports
   key_GetText              name prefix + 'key_GetText',
   key_EndReadText          name prefix + 'key_EndReadText',
   key_ClearState           name prefix + 'key_ClearState',
+
+  // Joystick
+  {$IFDEF USE_JOYSTICK}
+  joy_Init                 name prefix + 'joy_Init',
+  joy_GetInfo              name prefix + 'joy_GetInfo',
+  joy_AxisPos              name prefix + 'joy_AxisPos',
+  joy_Down                 name prefix + 'joy_Down',
+  joy_Up                   name prefix + 'joy_Up',
+  joy_Press                name prefix + 'joy_Press',
+  joy_Last                 name prefix + 'joy_Last',
+  joy_ClearState           name prefix + 'joy_ClearState',
+  {$ENDIF}
 
   // Textures
   tex_Add                  name prefix + 'tex_Add',
@@ -350,7 +365,6 @@ exports
   file_GetPos              name prefix + 'file_GetPos',
   file_Read                name prefix + 'file_Read',
   file_Write               name prefix + 'file_Write',
-  file_Trunc               name prefix + 'file_Trunc',
   file_GetSize             name prefix + 'file_GetSize',
   file_Flush               name prefix + 'file_Flush',
   file_Close               name prefix + 'file_Close',

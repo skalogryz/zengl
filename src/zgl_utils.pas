@@ -33,12 +33,11 @@ uses
   {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  zgl_types,
-  zgl_log;
+  zgl_types;
 
 const
   LIB_ERROR  = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
-  FILE_ERROR = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
+  FILE_ERROR = {$IFDEF LINUX_OR_DARWIN}  -1 {$ELSE} 0 {$ENDIF};
 
 function u_IntToStr( const Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
@@ -72,7 +71,6 @@ function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 
 function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ):longint;cdecl;external 'libc';
-function getenv(_para1:Pchar):Pchar;cdecl;external 'libc' name 'getenv';
 {$ENDIF}
 
 {$IFDEF WINDOWS}
@@ -83,7 +81,8 @@ function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall;
 
 implementation
 uses
-  zgl_font;
+  zgl_font,
+  zgl_log;
 
 function u_IntToStr;
 begin
