@@ -107,41 +107,45 @@ end;
 
   //Widget
   zglTWidget = record
-    _id      : Integer;
-    _type    : Integer;
+    _id        : Integer;
+    _type      : Integer;
 
-    Desc     : Pointer;
-    Data     : Pointer;
-    Rect     : zglTRect;
-    RectEx   : zglTRect;
-    Client   : zglTRect;
+    Desc       : Pointer;
+    Data       : Pointer;
+    Rect       : zglTRect;
+    RectEx     : zglTRect;
+    Client     : zglTRect;
 
-    Align    : LongWord;
-    Layer    : Integer;
+    Align      : LongWord;
+    Layer      : Integer;
 
-    Visible  : Boolean;
-    Focus    : Boolean;
-    Modal    : Boolean;
-    MouseIn  : Boolean;
-    Draged   : Boolean;
+    Visible    : Boolean;
+    Focus      : Boolean;
+    Modal      : Boolean;
+    MouseIn    : Boolean;
+    Draged     : Boolean;
 
-    OnDraw   : procedure( const Widget : zglPWidget );
-    OnProc   : procedure( const Event  : zglPEvent );
-    Events   : zglTEvents;
+    OnDraw     : procedure( const Widget : zglPWidget );
+    OnProc     : procedure( const Event : zglPEvent );
+    OnFreeDesc : procedure( var Desc : Pointer );
+    OnFreeData : procedure( var Data : Pointer );
+    Events     : zglTEvents;
 
-    parent   : zglPWidget;
-    children : Integer;
-    child    : array of zglPWidget;
-    parts    : Integer;
-    part     : array of zglPWidget;
+    parent     : zglPWidget;
+    children   : Integer;
+    child      : array of zglPWidget;
+    parts      : Integer;
+    part       : array of zglPWidget;
 end;
 
   zglTWidgetType = record
     _type    : Integer;
     FillDesc : procedure( Src : Pointer; var Desc : Pointer );
 
-    OnDraw : procedure( const Widget : zglPWidget );
-    OnProc : procedure( const Event  : zglPEvent );
+    OnDraw     : procedure( const Widget : zglPWidget );
+    OnProc     : procedure( const Event : zglPEvent );
+    OnFreeDesc : procedure( var Desc : Pointer );
+    OnFreeData : procedure( var Data : Pointer );
 end;
 
   //GUI Manager
@@ -262,17 +266,20 @@ end;
     sDraged  : Boolean;
 end;
 
-procedure gui_FillButtonDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillCheckBoxDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillRadioButtonDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillLabelDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillEditBoxDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillListBoxDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillComboBoxDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillGroupBoxDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillScrollBoxDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillSpinDesc( Src : Pointer; var Desc : Pointer );
-procedure gui_FillScrollBarDesc( Src : Pointer; var Desc : Pointer );
+procedure gui_FillButtonDesc( Src : zglPButtonDesc; var Desc : zglPButtonDesc );
+procedure gui_FillCheckBoxDesc( Src : zglPCheckBoxDesc; var Desc : zglPCheckBoxDesc );
+procedure gui_FillRadioButtonDesc( Src : zglPRadioButtonDesc; var Desc : zglPRadioButtonDesc );
+procedure gui_FillLabelDesc( Src : zglPLabelDesc; var Desc : zglPLabelDesc );
+procedure gui_FillEditBoxDesc( Src : zglPEditBoxDesc; var Desc : zglPEditBoxDesc );
+procedure gui_FillListBoxDesc( Src : zglPListBoxDesc; var Desc : zglPListBoxDesc );
+procedure gui_FillComboBoxDesc( Src : zglPComboBoxDesc; var Desc : zglPComboBoxDesc );
+procedure gui_FillGroupBoxDesc( Src : zglPGroupBoxDesc; var Desc : zglPGroupBoxDesc );
+procedure gui_FillScrollBoxDesc( Src : zglPScrollBoxDesc; var Desc : zglPScrollBoxDesc );
+procedure gui_FillSpinDesc( Src : zglPSpinDesc; var Desc : zglPSpinDesc );
+procedure gui_FillScrollBarDesc( Src : zglPScrollBarDesc; var Desc : zglPScrollBarDesc );
+
+procedure gui_FreeListBoxDesc( var Desc : zglPListBoxDesc );
+procedure gui_FreeComboBoxDesc( var Desc : zglPComboBoxDesc );
 
 implementation
 uses
@@ -283,11 +290,11 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTButtonDesc ) );
 
   if Assigned( Src ) Then
-    with zglTButtonDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font    := zglTButtonDesc( Src^ ).Font;
-        Caption := zglTButtonDesc( Src^ ).Caption;
-        Pressed := zglTButtonDesc( Src^ ).Pressed;
+        Font    := Src.Font;
+        Caption := Src.Caption;
+        Pressed := Src.Pressed;
       end;
 end;
 
@@ -296,11 +303,11 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTCheckBoxDesc ) );
 
   if Assigned( Src ) Then
-    with zglTCheckBoxDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font    := zglTCheckBoxDesc( Src^ ).Font;
-        Caption := zglTCheckBoxDesc( Src^ ).Caption;
-        Checked := zglTCheckBoxDesc( Src^ ).Checked;
+        Font    := Src.Font;
+        Caption := Src.Caption;
+        Checked := Src.Checked;
       end;
 end;
 
@@ -309,12 +316,12 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTRadioButtonDesc ) );
 
   if Assigned( Src ) Then
-    with zglTRadioButtonDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font    := zglTRadioButtonDesc( Src^ ).Font;
-        Caption := zglTRadioButtonDesc( Src^ ).Caption;
-        Checked := zglTRadioButtonDesc( Src^ ).Checked;
-        Group   := zglTRadioButtonDesc( Src^ ).Group;
+        Font    := Src.Font;
+        Caption := Src.Caption;
+        Checked := Src.Checked;
+        Group   := Src.Group;
       end;
 end;
 
@@ -323,11 +330,10 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTLabelDesc ) );
 
   if Assigned( Src ) Then
-    with zglTLabelDesc( Desc^ ) do
-      begin
-        Font    := zglTLabelDesc( Src^ ).Font;
-        Caption := zglTLabelDesc( Src^ ).Caption;
-      end;
+    begin
+      Desc.Font    := Src.Font;
+      Desc.Caption := Src.Caption;
+    end;
 end;
 
 procedure gui_FillEditBoxDesc;
@@ -335,12 +341,12 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTEditBoxDesc ) );
 
   if Assigned( Src ) Then
-    with zglTEditBoxDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font     := zglTEditBoxDesc( Src^ ).Font;
-        Text     := zglTEditBoxDesc( Src^ ).Text;
-        Max      := zglTEditBoxDesc( Src^ ).Max;
-        ReadOnly := zglTEditBoxDesc( Src^ ).ReadOnly;
+        Font     := Src.Font;
+        Text     := Src.Text;
+        Max      := Src.Max;
+        ReadOnly := Src.ReadOnly;
       end;
 end;
 
@@ -351,18 +357,18 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTListBoxDesc ) );
 
   if Assigned( Src ) Then
-    with zglTListBoxDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font       := zglTListBoxDesc( Src^ ).Font;
-        SelectMode := zglTListBoxDesc( Src^ ).SelectMode;
-        ItemIndex  := zglTListBoxDesc( Src^ ).ItemIndex;
-        ItemHeight := zglTListBoxDesc( Src^ ).ItemHeight;
+        Font       := Src.Font;
+        SelectMode := Src.SelectMode;
+        ItemIndex  := Src.ItemIndex;
+        ItemHeight := Src.ItemHeight;
         if ItemHeight = 0 Then
           ItemHeight := Font.MaxHeight + 4;
-        List.Count := zglTListBoxDesc( Src^ ).List.Count;
+        List.Count := Src.List.Count;
         SetLength( List.Items, List.Count );
         for i := 0 to List.Count - 1 do
-          List.Items[ i ] := zglTListBoxDesc( Src^ ).List.Items[ i ];
+          List.Items[ i ] := Src.List.Items[ i ];
       end;
 end;
 
@@ -373,18 +379,18 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTComboBoxDesc ) );
 
   if Assigned( Src ) Then
-    with zglTComboBoxDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font       := zglTComboBoxDesc( Src^ ).Font;
-        ItemIndex  := zglTComboBoxDesc( Src^ ).ItemIndex;
-        ItemHeight := zglTComboBoxDesc( Src^ ).ItemHeight;
+        Font       := Src.Font;
+        ItemIndex  := Src.ItemIndex;
+        ItemHeight := Src.ItemHeight;
         if ItemHeight = 0 Then
           ItemHeight := Font.MaxHeight + 4;
-        DropDownCount := zglTComboBoxDesc( Src^ ).DropDownCount;
-        List.Count := zglTListBoxDesc( Src^ ).List.Count;
+        DropDownCount := Src.DropDownCount;
+        List.Count := Src.List.Count;
         SetLength( List.Items, List.Count );
         for i := 0 to List.Count - 1 do
-          List.Items[ i ] := zglTComboBoxDesc( Src^ ).List.Items[ i ];
+          List.Items[ i ] := Src.List.Items[ i ];
       end;
 end;
 
@@ -393,10 +399,10 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTGroupBoxDesc ) );
 
   if Assigned( Src ) Then
-    with zglTGroupBoxDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Font    := zglTGroupBoxDesc( Src^ ).Font;
-        Caption := zglTGroupBoxDesc( Src^ ).Caption;
+        Font    := Src.Font;
+        Caption := Src.Caption;
       end;
 end;
 
@@ -405,7 +411,7 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTScrollBoxDesc ) );
 
   if Assigned( Src ) Then
-    with zglTScrollBoxDesc( Desc^ ) do
+    with Desc^ do
       begin
       end;
 end;
@@ -415,11 +421,11 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTSpinDesc ) );
 
   if Assigned( Src ) Then
-    with zglTSpinDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Value    := zglTSpinDesc( Src^ ).Value;
-        Max      := zglTSpinDesc( Src^ ).Max;
-        Min      := zglTSpinDesc( Src^ ).Min;
+        Value := Src.Value;
+        Max   := Src.Max;
+        Min   := Src.Min;
       end;
 end;
 
@@ -428,14 +434,42 @@ begin
   zgl_GetMem( Desc, SizeOf( zglTScrollBarDesc ) );
 
   if Assigned( Src ) Then
-    with zglTScrollBarDesc( Desc^ ) do
+    with Desc^ do
       begin
-        Kind     := zglTScrollBarDesc( Src^ ).Kind;
-        Step     := zglTScrollBarDesc( Src^ ).Step;
-        Position := zglTScrollBarDesc( Src^ ).Position;
-        PageSize := zglTScrollBarDesc( Src^ ).PageSize;
-        Max      := zglTScrollBarDesc( Src^ ).Max;
+        Kind     := Src.Kind;
+        Step     := Src.Step;
+        Position := Src.Position;
+        PageSize := Src.PageSize;
+        Max      := Src.Max;
       end;
+end;
+
+procedure gui_FreeListBoxDesc;
+  var
+    i : Integer;
+begin
+  with Desc^ do
+    begin
+      for i := 0 to List.Count - 1 do
+        List.Items[ i ] := '';
+      SetLength( List.Items, 0 );
+    end;
+
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeComboBoxDesc;
+  var
+    i : Integer;
+begin
+  with Desc^ do
+    begin
+      for i := 0 to List.Count - 1 do
+        List.Items[ i ] := '';
+      SetLength( List.Items, 0 );
+    end;
+
+  FreeMem( Desc );
 end;
 
 end.

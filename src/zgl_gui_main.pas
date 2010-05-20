@@ -93,12 +93,14 @@ begin
   zgl_Reg( WIDGET_FILL_DESC, @gui_FillListBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawListBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcListBox );
+  zgl_Reg( WIDGET_ONFREEDESC,@gui_FreeListBoxDesc );
 
   // ComboBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_COMBOBOX ) );
   zgl_Reg( WIDGET_FILL_DESC, @gui_FillComboBoxDesc );
   zgl_Reg( WIDGET_ONDRAW,    @gui_DrawComboBox );
   zgl_Reg( WIDGET_ONPROC,    @gui_ProcComboBox );
+  zgl_Reg( WIDGET_ONFREEDESC,@gui_FreeComboBoxDesc );
 
   // GroupBox
   zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_GROUPBOX ) );
@@ -270,8 +272,10 @@ begin
   for i := High( managerGUI.Types ) downto 0 do
     if Result._type = managerGUI.Types[ i ]._type Then
       begin
-        Result.OnDraw := managerGUI.Types[ i ].OnDraw;
-        Result.OnProc := managerGUI.Types[ i ].OnProc;
+        Result.OnDraw     := managerGUI.Types[ i ].OnDraw;
+        Result.OnProc     := managerGUI.Types[ i ].OnProc;
+        Result.OnFreeDesc := managerGUI.Types[ i ].OnFreeDesc;
+        Result.OnFreeData := managerGUI.Types[ i ].OnFreeData;
       end;
 
   gui_AlignWidget( Result );
@@ -312,7 +316,16 @@ begin
       SetLength( Widget.parent.part, Widget.parent.parts );
     end;
 
-  FreeMem( Widget.Desc );
+  if Assigned( Widget.OnFreeDesc ) Then
+    Widget.OnFreeDesc( Widget.Desc )
+  else
+    FreeMem( Widget.Desc );
+
+  if Assigned( Widget.OnFreeData ) Then
+    Widget.OnFreeData( Widget.Data )
+  else
+    FreeMem( Widget.Data );
+
   FreeMem( Widget );
   Widget := nil;
 end;

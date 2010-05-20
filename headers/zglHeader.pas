@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC3              }
-{ date:    2010.05.19           }
+{ date:    2010.05.21           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -105,6 +105,8 @@ const
   WIDGET_FILL_DESC       = $000031;
   WIDGET_ONDRAW          = $000032;
   WIDGET_ONPROC          = $000033;
+  WIDGET_ONFREEDESC      = $000034;
+  WIDGET_ONFREEDATA      = $000035;
 
 var
   zgl_Reg : procedure( const What : LongWord; const UserData : Pointer );
@@ -1059,41 +1061,45 @@ end;
 
   //Widget
   zglTWidget = record
-    _id      : Integer;
-    _type    : Integer;
+    _id        : Integer;
+    _type      : Integer;
 
-    Desc     : Pointer;
-    Data     : Pointer;
-    Rect     : zglTRect;
-    RectEx   : zglTRect;
-    Client   : zglTRect;
+    Desc       : Pointer;
+    Data       : Pointer;
+    Rect       : zglTRect;
+    RectEx     : zglTRect;
+    Client     : zglTRect;
 
-    Align    : LongWord;
-    Layer    : Integer;
+    Align      : LongWord;
+    Layer      : Integer;
 
-    Visible  : Boolean;
-    Focus    : Boolean;
-    Modal    : Boolean;
-    MouseIn  : Boolean;
-    Draged   : Boolean;
+    Visible    : Boolean;
+    Focus      : Boolean;
+    Modal      : Boolean;
+    MouseIn    : Boolean;
+    Draged     : Boolean;
 
-    OnDraw   : procedure( const Widget : zglPWidget );
-    OnProc   : procedure( const Event  : zglPEvent );
-    Events   : zglTEvents;
+    OnDraw     : procedure( const Widget : zglPWidget );
+    OnProc     : procedure( const Event : zglPEvent );
+    OnFreeDesc : procedure( var Desc : Pointer );
+    OnFreeData : procedure( var Data : Pointer );
+    Events     : zglTEvents;
 
-    parent   : zglPWidget;
-    children : Integer;
-    child    : array of zglPWidget;
-    parts    : Integer;
-    part     : array of zglPWidget;
+    parent     : zglPWidget;
+    children   : Integer;
+    child      : array of zglPWidget;
+    parts      : Integer;
+    part       : array of zglPWidget;
 end;
 
   zglTWidgetType = record
     _type    : Integer;
     FillDesc : procedure( Src : Pointer; var Desc : Pointer );
 
-    OnDraw : procedure( const Widget : zglPWidget );
-    OnProc : procedure( const Event  : zglPEvent );
+    OnDraw     : procedure( const Widget : zglPWidget );
+    OnProc     : procedure( const Event : zglPEvent );
+    OnFreeDesc : procedure( var Desc : Pointer );
+    OnFreeData : procedure( var Data : Pointer );
 end;
 
   //GUI Manager
