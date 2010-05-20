@@ -92,7 +92,7 @@ begin
 
   // Если зажата левая кнопка мыши - заблокируем мышку по центру экрана
   // смещения можно получать используя функции mouse_DX и mouse_DY вызывая их до mouse_Lock
-  if mouse_Down( M_BRIGHT ) Then
+  if mouse_Down( M_BLEFT ) Then
     mouse_Lock;
 
   // "Считываем" в переменную введеный текст
