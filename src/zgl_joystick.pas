@@ -381,10 +381,13 @@ begin
     end;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  state.dwSize  := SizeOf( TJOYINFOEX );
-  state.dwFlags := JOY_RETURNALL or JOY_USEDEADZONE;
+  state.dwSize := SizeOf( TJOYINFOEX );
   for i := 0 to joyCount - 1 do
     begin
+      state.dwFlags := JOY_RETURNALL or JOY_USEDEADZONE;
+      if joyArray[ i ].caps.wCaps and JOYCAPS_POVCTS > 0 Then
+        state.dwFlags := state.dwFlags or JOY_RETURNPOVCTS;
+
       if joyGetPosEx( i, @state ) = 0 Then
         begin
           for j := 0 to joyArray[ i ].Info.Count.Axes - 1 do
@@ -438,7 +441,7 @@ end;
 function joy_AxisPos;
 begin
   Result := 0;
-  if ( JoyID >= joyCount ) or ( Axis >= joyArray[ JoyID ].Info.Count.Axes ) Then exit;
+  if ( JoyID >= joyCount ) or ( Axis > 7 ) Then exit;
 
   Result := joyArray[ JoyID ].State.Axis[ Axis ];
 end;
