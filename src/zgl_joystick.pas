@@ -351,7 +351,7 @@ begin
   {$IFDEF LINUX}
   for i := 0 to joyCount - 1 do
     begin
-      if FpRead( joyArray[ i ].device, event, 8 ) = 8 Then
+      while FpRead( joyArray[ i ].device, event, 8 ) = 8 do
         case event._type of
           JS_EVENT_AXIS:
             begin
