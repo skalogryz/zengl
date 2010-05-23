@@ -1224,7 +1224,7 @@ var
   gui_Init      : procedure;
   gui_Draw      : procedure;
   gui_Proc      : procedure;
-  gui_AddWidget : function( const _type : Integer; const X, Y, W, H : Single; const Focus, Visible : Boolean; const Desc, Data : Pointer; const Parent : zglPWidget ) : zglPWidget;
+  gui_AddWidget : function( const _type : Integer; const X, Y, W, H : Single; const Focus, Visible : Boolean; const Desc, Data : Pointer; const Parent : zglPWidget; const Part : Boolean = FALSE ) : zglPWidget;
   gui_DelWidget : procedure( var Widget : zglPWidget );
 
 // Sound

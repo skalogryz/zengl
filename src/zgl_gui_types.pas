@@ -278,8 +278,17 @@ procedure gui_FillScrollBoxDesc( Src : zglPScrollBoxDesc; var Desc : zglPScrollB
 procedure gui_FillSpinDesc( Src : zglPSpinDesc; var Desc : zglPSpinDesc );
 procedure gui_FillScrollBarDesc( Src : zglPScrollBarDesc; var Desc : zglPScrollBarDesc );
 
+procedure gui_FreeButtonDesc( var Desc : zglPButtonDesc );
+procedure gui_FreeCheckBoxDesc( var Desc : zglPCheckBoxDesc );
+procedure gui_FreeRadioButtonDesc( var Desc : zglPRadioButtonDesc );
+procedure gui_FreeLabelDesc( var Desc : zglPLabelDesc );
+procedure gui_FreeEditBoxDesc( var Desc : zglPEditBoxDesc );
 procedure gui_FreeListBoxDesc( var Desc : zglPListBoxDesc );
 procedure gui_FreeComboBoxDesc( var Desc : zglPComboBoxDesc );
+procedure gui_FreeGroupBoxDesc( var Desc : zglPGroupBoxDesc );
+procedure gui_FreeScrollBoxDesc( var Desc : zglPScrollBoxDesc );
+procedure gui_FreeSpinDesc( var Desc : zglPSpinDesc );
+procedure gui_FreeScrollBarDesc( var Desc : zglPScrollBarDesc );
 
 implementation
 uses
@@ -444,6 +453,41 @@ begin
       end;
 end;
 
+procedure gui_FreeButtonDesc;
+begin
+  Desc.Caption := '';
+
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeCheckBoxDesc;
+begin
+  Desc.Caption := '';
+
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeRadioButtonDesc;
+begin
+  Desc.Caption := '';
+
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeLabelDesc;
+begin
+  Desc.Caption := '';
+
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeEditBoxDesc;
+begin
+  Desc.Text := '';
+
+  FreeMem( Desc );
+end;
+
 procedure gui_FreeListBoxDesc;
   var
     i : Integer;
@@ -469,6 +513,28 @@ begin
       SetLength( List.Items, 0 );
     end;
 
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeGroupBoxDesc;
+begin
+  Desc.Caption := '';
+
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeScrollBoxDesc;
+begin
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeSpinDesc;
+begin
+  FreeMem( Desc );
+end;
+
+procedure gui_FreeScrollBarDesc;
+begin
   FreeMem( Desc );
 end;
 

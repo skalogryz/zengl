@@ -59,72 +59,81 @@ begin
   managerGUI.Main.OnProc  := @gui_ProcEvents;
 
   // Button
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_BUTTON ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillButtonDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawButton );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcButton );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_BUTTON ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillButtonDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawButton );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcButton );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeButtonDesc );
 
   // CheckBox
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_CHECKBOX ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillCheckBoxDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawCheckBox );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcCheckBox );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_CHECKBOX ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillCheckBoxDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawCheckBox );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcCheckBox );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeCheckBoxDesc );
 
   // RadioButton
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_RADIOBUTTON ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillRadioButtonDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawRadioButton );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcRadioButton );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_RADIOBUTTON ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillRadioButtonDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawRadioButton );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcRadioButton );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeRadioButtonDesc );
 
   // Label
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_LABEL ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillLabelDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawLabel );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcLabel );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_LABEL ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillLabelDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawLabel );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcLabel );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeLabelDesc );
 
   // EditBox
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_EDITBOX ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillEditBoxDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawEditBox );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcEditBox );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_EDITBOX ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillEditBoxDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawEditBox );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcEditBox );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeEditBoxDesc );
 
   // ListBox
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_LISTBOX ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillListBoxDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawListBox );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcListBox );
-  zgl_Reg( WIDGET_ONFREEDESC,@gui_FreeListBoxDesc );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_LISTBOX ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillListBoxDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawListBox );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcListBox );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeListBoxDesc );
 
   // ComboBox
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_COMBOBOX ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillComboBoxDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawComboBox );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcComboBox );
-  zgl_Reg( WIDGET_ONFREEDESC,@gui_FreeComboBoxDesc );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_COMBOBOX ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillComboBoxDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawComboBox );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcComboBox );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeComboBoxDesc );
 
   // GroupBox
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_GROUPBOX ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillGroupBoxDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawGroupBox );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcGroupBox );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_GROUPBOX ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillGroupBoxDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawGroupBox );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcGroupBox );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeGroupBoxDesc );
 
   // ScrollBox
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SCROLLBOX ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillScrollBoxDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawScrollBox );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcScrollBox );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_SCROLLBOX ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillScrollBoxDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawScrollBox );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcScrollBox );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeScrollBoxDesc );
 
   // Spin
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SPIN ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillSpinDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawSpin );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcSpin );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_SPIN ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillSpinDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawSpin );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcSpin );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeSpinDesc );
 
   // ScrollBar
-  zgl_Reg( WIDGET_TYPE_ID,   Pointer( WIDGET_SCROLLBAR ) );
-  zgl_Reg( WIDGET_FILL_DESC, @gui_FillScrollBarDesc );
-  zgl_Reg( WIDGET_ONDRAW,    @gui_DrawScrollBar );
-  zgl_Reg( WIDGET_ONPROC,    @gui_ProcScrollBar );
+  zgl_Reg( WIDGET_TYPE_ID,    Pointer( WIDGET_SCROLLBAR ) );
+  zgl_Reg( WIDGET_FILL_DESC,  @gui_FillScrollBarDesc );
+  zgl_Reg( WIDGET_ONDRAW,     @gui_DrawScrollBar );
+  zgl_Reg( WIDGET_ONPROC,     @gui_ProcScrollBar );
+  zgl_Reg( WIDGET_ONFREEDESC, @gui_FreeScrollBarDesc );
 end;
 
 procedure gui_Draw;
@@ -321,10 +330,13 @@ begin
   else
     FreeMem( Widget.Desc );
 
-  if Assigned( Widget.OnFreeData ) Then
-    Widget.OnFreeData( Widget.Data )
-  else
-    FreeMem( Widget.Data );
+  if Assigned( Widget.Data ) Then
+    begin
+      if Assigned( Widget.OnFreeData ) Then
+        Widget.OnFreeData( Widget.Data )
+      else
+        FreeMem( Widget.Data );
+    end;
 
   FreeMem( Widget );
   Widget := nil;
