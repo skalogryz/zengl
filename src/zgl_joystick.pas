@@ -250,6 +250,13 @@ begin
                 16, 17: Caps := Caps or JOY_HAS_POV;
               end;
 
+          for j := 1 to 255 do
+            if joyArray[ joyCount ].Info.Name[ j ] = #0 Then
+              begin
+                SetLength( joyArray[ joyCount ].Info.Name, j - 1 );
+                break;
+              end;
+
           // Проверяем реально ли это джойстик, т.к. на ноутбуках могут попасться и акселерометры :)
           if ( joyArray[ joyCount ].Info.Count.Axes >= 2 ) and ( joyArray[ joyCount ].Info.Count.Buttons > 0 ) Then
             begin
