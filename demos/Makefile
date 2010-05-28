@@ -7,8 +7,7 @@ DEMO06 = "06 - SEngine 2D/FreePascal/"
 DEMO07 = "07 - SEngine 2D(OOP)/FreePascal/"
 DEMO08 = "08 - Sound/FreePascal/"
 DEMO09 = "09 - Render to Texture/FreePascal/"
-DEMO10 = "10 - Physics Simple/FreePascal/"
-DEMO11 = "11 - Particles 2D/FreePascal/"
+DEMO10 = "10 - Particles 2D/FreePascal/"
 
 all:
 	make -C $(DEMO01)
@@ -21,7 +20,6 @@ all:
 	make -C $(DEMO08)
 	make -C $(DEMO09)
 	make -C $(DEMO10)
-	make -C $(DEMO11)
 
 win32:
 	make -C $(DEMO01) win32
@@ -34,7 +32,6 @@ win32:
 	make -C $(DEMO08) win32
 	make -C $(DEMO09) win32
 	make -C $(DEMO10) win32
-	make -C $(DEMO11) win32
 
 clean:
 	make -C $(DEMO01) clean
@@ -47,4 +44,3 @@ clean:
 	make -C $(DEMO08) clean
 	make -C $(DEMO09) clean
 	make -C $(DEMO10) clean
-	make -C $(DEMO11) clean

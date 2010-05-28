@@ -9,15 +9,15 @@ program demo01;
 {$DEFINE STATIC}
 
 uses
-  {$IFDEF STATIC}
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
   // Перед использованием модулей, не забудьте указать путь к исходным кодам ZenGL :)
   zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
   zgl_utils
-  {$ELSE}
-  zglHeader
   {$ENDIF}
   ;
 
@@ -57,17 +57,17 @@ Begin
     // В Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна
     // быть предварительно установлена. Если же нужно грузить библиотеку из
     // директории с исполняемым файлом то следует вписать './libZenGL.so'
-    zglLoad( 'libZenGL.so' );
+    zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF WIN32}
-    zglLoad( 'ZenGL.dll' );
+    zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF DARWIN}
     // libZenGL.dylib следует предварительно поместить в директорию
     // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложения
     // Также следует упомянуть, что лог-файл будет создаваться в корневой директории
     // поэтому либо отключайте его, либо указывайте свой путь и имя, как описано в справке
-    zglLoad( 'libZenGL.dylib' );
+    zglLoad( libZenGL );
     {$ENDIF}
   {$ENDIF}
 

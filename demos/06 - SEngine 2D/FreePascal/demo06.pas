@@ -3,7 +3,12 @@
 // Этот же пример с использованием спрайтового менеджера на классах ищите в "07 - SEngine 2D(OOP)"
 program demo06;
 
+{$DEFINE STATIC}
+
 uses
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -20,7 +25,9 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
-  zgl_utils;
+  zgl_utils
+  {$ENDIF}
+  ;
 
 var
   fntMain   : zglPFont;
@@ -161,6 +168,10 @@ begin
 end;
 
 Begin
+  {$IFNDEF STATIC}
+  zglLoad( libZenGL );
+  {$ENDIF}
+
   randomize;
 
   timer_Add( @Timer, 16 );

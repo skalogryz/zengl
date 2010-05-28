@@ -1,6 +1,9 @@
 program demo02;
 
 uses
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -14,6 +17,7 @@ uses
   zgl_textures_png,
   zgl_primitives_2d,
   zgl_utils
+  {$ENDIF}
   ;
 
 var
@@ -105,6 +109,10 @@ begin
 end;
 
 Begin
+  {$IFNDEF STATIC}
+  zglLoad( libZenGL );
+  {$ENDIF}
+
   timer_Add( @Timer, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );

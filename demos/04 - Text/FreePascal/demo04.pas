@@ -1,6 +1,11 @@
 program demo04;
 
+{$DEFINE STATIC}
+
 uses
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -14,7 +19,9 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
-  zgl_utils;
+  zgl_utils
+  {$ENDIF}
+  ;
 
 var
   fnt : zglPFont;
@@ -86,6 +93,10 @@ begin
 end;
 
 Begin
+  {$IFNDEF STATIC}
+  zglLoad( libZenGL );
+  {$ENDIF}
+
   randomize;
 
   timer_Add( @Proc, 16 );

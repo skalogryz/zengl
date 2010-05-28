@@ -1,6 +1,11 @@
 program demo08;
 
+{$DEFINE STATIC}
+
 uses
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -22,7 +27,9 @@ uses
                     // Все нужные файлы можно найти тут - http://andru-kun.inf.ua/zengl_extra.html
   zgl_math_2d,
   zgl_collision_2d,
-  zgl_utils;
+  zgl_utils
+  {$ENDIF}
+  ;
 
 const
   SCREEN_WIDTH  = 800;
@@ -124,6 +131,10 @@ begin
 end;
 
 Begin
+  {$IFNDEF STATIC}
+  zglLoad( libZenGL );
+  {$ENDIF}
+
   randomize;
 
   timer_Add( @Proc, 16 );
