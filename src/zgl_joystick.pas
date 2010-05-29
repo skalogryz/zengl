@@ -496,6 +496,8 @@ begin
       end;
 end;
 
+initialization
+
 finalization
   joy_Close();
 

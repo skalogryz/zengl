@@ -93,6 +93,11 @@ uses
   zgl_opengl_simple,
   zgl_utils;
 
+{$IFNDEF FPC}
+// Various versions of Delphi... sucks again
+function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcall; external user32 name 'LoadCursorW';
+{$ENDIF}
+
 {$IFDEF LINUX}
 procedure wnd_SetHints( Initialized : Boolean = TRUE );
   var
@@ -171,7 +176,7 @@ begin
       hInstance     := wnd_INST;
       hIcon         := LoadIconW  ( wnd_INST, 'MAINICON' );
       hIconSm       := LoadIconW  ( wnd_INST, 'MAINICON' );
-      hCursor       := LoadCursorW( wnd_INST, {$IFNDEF FPC} IDC_ARROW {$ELSE} PWideChar( IDC_ARROW ) {$ENDIF} );
+      hCursor       := LoadCursorW( wnd_INST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
       lpszClassName := wnd_ClassName;

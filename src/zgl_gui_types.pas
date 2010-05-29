@@ -296,7 +296,7 @@ uses
 
 procedure gui_FillButtonDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTButtonDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTButtonDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -309,7 +309,7 @@ end;
 
 procedure gui_FillCheckBoxDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTCheckBoxDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTCheckBoxDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -322,7 +322,7 @@ end;
 
 procedure gui_FillRadioButtonDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTRadioButtonDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTRadioButtonDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -336,7 +336,7 @@ end;
 
 procedure gui_FillLabelDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTLabelDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTLabelDesc ) );
 
   if Assigned( Src ) Then
     begin
@@ -347,7 +347,7 @@ end;
 
 procedure gui_FillEditBoxDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTEditBoxDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTEditBoxDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -363,7 +363,7 @@ procedure gui_FillListBoxDesc;
   var
     i : Integer;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTListBoxDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTListBoxDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -385,7 +385,7 @@ procedure gui_FillComboBoxDesc;
   var
     i : Integer;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTComboBoxDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTComboBoxDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -405,7 +405,7 @@ end;
 
 procedure gui_FillGroupBoxDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTGroupBoxDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTGroupBoxDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -417,7 +417,7 @@ end;
 
 procedure gui_FillScrollBoxDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTScrollBoxDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTScrollBoxDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -427,7 +427,7 @@ end;
 
 procedure gui_FillSpinDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTSpinDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTSpinDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
@@ -440,7 +440,7 @@ end;
 
 procedure gui_FillScrollBarDesc;
 begin
-  zgl_GetMem( Desc, SizeOf( zglTScrollBarDesc ) );
+  zgl_GetMem( Pointer( Desc ), SizeOf( zglTScrollBarDesc ) );
 
   if Assigned( Src ) Then
     with Desc^ do
