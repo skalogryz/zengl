@@ -428,7 +428,7 @@ Begin
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
 
-  wnd_SetCaption( '11 - Particles 2D' );
+  wnd_SetCaption( '10 - Particles 2D' );
 
   wnd_ShowCursor( TRUE );
 
