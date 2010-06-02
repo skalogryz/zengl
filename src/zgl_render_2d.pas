@@ -20,6 +20,8 @@
 }
 unit zgl_render_2d;
 
+{$I zgl_config.cfg}
+
 interface
 uses
   zgl_opengl_all,

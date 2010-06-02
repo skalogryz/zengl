@@ -20,6 +20,8 @@
 }
 unit zgl_gui_utils;
 
+{$I zgl_config.cfg}
+
 interface
 
 uses
