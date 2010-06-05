@@ -201,7 +201,6 @@ function  joy_AxisPos( const JoyID, Axis : Byte ) : Single;
 function  joy_Down( const JoyID, Button : Byte ) : Boolean;
 function  joy_Up( const JoyID, Button : Byte ) : Boolean;
 function  joy_Press( const JoyID, Button : Byte ) : Boolean;
-function  joy_Last( const JoyID : Byte; const Axis : Boolean ) : Integer;
 procedure joy_ClearState;
 
 implementation
@@ -475,10 +474,6 @@ begin
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;
 
   Result := joyArray[ JoyID ].State.BtnPress[ Button ];
-end;
-
-function joy_Last;
-begin
 end;
 
 procedure joy_ClearState;

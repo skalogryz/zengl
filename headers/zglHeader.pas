@@ -431,7 +431,6 @@ var
   joy_Down       : function ( const JoyID, Button : Byte ) : Boolean;
   joy_Up         : function ( const JoyID, Button : Byte ) : Boolean;
   joy_Press      : function ( const JoyID, Button : Byte ) : Boolean;
-  joy_Last       : function ( const JoyID : Byte; const Axis : Boolean ) : Integer;
   joy_ClearState : procedure;
 
 // GL
@@ -1609,7 +1608,6 @@ begin
       joy_Down := dlsym( zglLib, 'joy_Down' );
       joy_Up := dlsym( zglLib, 'joy_Up' );
       joy_Press := dlsym( zglLib, 'joy_Press' );
-      joy_Last := dlsym( zglLib, 'joy_Last' );
       joy_ClearState := dlsym( zglLib, 'joy_ClearState' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );

@@ -183,7 +183,6 @@ exports
   joy_Down                 name prefix + 'joy_Down',
   joy_Up                   name prefix + 'joy_Up',
   joy_Press                name prefix + 'joy_Press',
-  joy_Last                 name prefix + 'joy_Last',
   joy_ClearState           name prefix + 'joy_ClearState',
   {$ENDIF}
 
