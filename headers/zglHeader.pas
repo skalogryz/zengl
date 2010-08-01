@@ -1,8 +1,8 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.2 RC3              }
-{ date:    2010.05.21           }
+{ version: 0.2 RC4              }
+{ date:    2010.08.01           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -101,12 +101,6 @@ const
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_DECODER     = $000023;
-  WIDGET_TYPE_ID         = $000030;
-  WIDGET_FILL_DESC       = $000031;
-  WIDGET_ONDRAW          = $000032;
-  WIDGET_ONPROC          = $000033;
-  WIDGET_ONFREEDESC      = $000034;
-  WIDGET_ONFREEDATA      = $000035;
 
 var
   zgl_Reg : procedure( const What : LongWord; const UserData : Pointer );
@@ -129,7 +123,6 @@ const
   MANAGER_FONT    = 15; // zglPFontManager
   MANAGER_RTARGET = 16; // zglTRenderTargetManager
   MANAGER_SOUND   = 17; // zglPSoundManager
-  MANAGER_GUI     = 18; // zglPGUIManager
 
 var
   zgl_Get       : function( const What : LongWord ) : Ptr;
@@ -981,251 +974,6 @@ var
   text_GetWidth       : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
   textFx_SetLength    : procedure( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 
-// GUI
-const
-  WIDGET_UNKNOWN     = 0;
-  WIDGET_BUTTON      = 1;
-  WIDGET_CHECKBOX    = 2;
-  WIDGET_RADIOBUTTON = 3;
-  WIDGET_LABEL       = 4;
-  WIDGET_EDITBOX     = 5;
-  WIDGET_LISTBOX     = 6;
-  WIDGET_COMBOBOX    = 7;
-  WIDGET_GROUPBOX    = 8;
-  WIDGET_SCROLLBOX   = 9;
-  WIDGET_SPIN        = 10;
-  WIDGET_SCROLLBAR   = 11;
-
-  // ScrollBar
-  SCROLLBAR_VERTICAL   = 0;
-  SCROLLBAR_HORIZONTAL = 1;
-
-  // Select Mode
-  SELECT_BY_CLICK = 0;
-  SELECT_BY_DOWN  = 1;
-
-  // Align
-  ALIGN_NONE    = 0;
-  ALIGN_CLIENT  = 1;
-  ALIGN_LEFT    = 2;
-  ALIGN_RIGHT   = 3;
-  ALIGN_TOP     = 4;
-  ALIGN_BOTTOM  = 5;
-
-  // Events
-  EVENT_CREATE      = 1;
-
-  EVENT_FOCUS_IN    = 2;
-  EVENT_FOCUS_OUT   = 3;
-
-  EVENT_DRAG_START  = 4;
-  EVENT_DRAG_MOVE   = 5;
-  EVENT_DRAG_END    = 6;
-
-  EVENT_MOUSE_MOVE  = 7;
-  EVENT_MOUSE_ENTER = 8;
-  EVENT_MOUSE_LEAVE = 9;
-  EVENT_MOUSE_DOWN  = 10;
-  EVENT_MOUSE_UP    = 11;
-  EVENT_MOUSE_CLICK = 12;
-  EVENT_MOUSE_WHEEL = 13;
-
-  EVENT_KEY_DOWN    = 14;
-  EVENT_KEY_UP      = 15;
-  EVENT_KEY_CHAR    = 16;
-
-  EVENT_DRAW_MODAL  = 17;
-
-type
-  zglPEvent  = ^zglTEvent;
-  zglPWidget = ^zglTWidget;
-
-  //Events
-  zglTEvents = record
-    OnCreate     : procedure( Widget : zglPWidget );
-    OnFocus      : procedure( Widget : zglPWidget; const Focus : Boolean );
-    OnStartDrag  : procedure( Widget : zglPWidget );
-    OnDrag       : procedure( Widget : zglPWidget; const X, Y : Single );
-    OnEndDrag    : procedure( Widget : zglPWidget; const X, Y : Single );
-    OnClick      : procedure( Widget : zglPWidget );
-    OnMouseUp    : procedure( Widget : zglPWidget );
-    OnMouseMove  : procedure( Widget : zglPWidget; const X, Y : Single );
-    OnMouseEnter : procedure( Widget : zglPWidget );
-    OnMouseLeave : procedure( Widget : zglPWidget );
-    OnMouseWheel : procedure( Widget : zglPWidget; const Axis : Byte );
-    OnKeyDown    : procedure( Widget : zglPWidget; const KeyCode : Byte );
-    OnKeyUp      : procedure( Widget : zglPWidget; const KeyCode : Byte );
-    OnChange     : procedure( Widget : zglPWidget; const Value, Change : Integer );
-end;
-
-  //Widget
-  zglTWidget = record
-    _id        : Integer;
-    _type      : Integer;
-
-    Desc       : Pointer;
-    Data       : Pointer;
-    Rect       : zglTRect;
-    RectEx     : zglTRect;
-    Client     : zglTRect;
-
-    Align      : LongWord;
-    Layer      : Integer;
-
-    Visible    : Boolean;
-    Focus      : Boolean;
-    Modal      : Boolean;
-    MouseIn    : Boolean;
-    Draged     : Boolean;
-
-    OnDraw     : procedure( const Widget : zglPWidget );
-    OnProc     : procedure( const Event : zglPEvent );
-    OnFreeDesc : procedure( var Desc : Pointer );
-    OnFreeData : procedure( var Data : Pointer );
-    Events     : zglTEvents;
-
-    parent     : zglPWidget;
-    children   : Integer;
-    child      : array of zglPWidget;
-    parts      : Integer;
-    part       : array of zglPWidget;
-end;
-
-  zglTWidgetType = record
-    _type    : Integer;
-    FillDesc : procedure( Src : Pointer; var Desc : Pointer );
-
-    OnDraw     : procedure( const Widget : zglPWidget );
-    OnProc     : procedure( const Event : zglPEvent );
-    OnFreeDesc : procedure( var Desc : Pointer );
-    OnFreeData : procedure( var Data : Pointer );
-end;
-
-  //GUI Manager
-  zglPGUIManager = ^zglTGUIManager;
-  zglTGUIManager = record
-    Main  : zglTWidget;
-    Types : array of zglTWidgetType;
-end;
-
-  //Event
-  zglTEvent = record
-    _type      : Integer;
-
-    Sender     : zglPWidget;
-    Widget     : zglPWidget;
-
-    next, prev : zglPEvent;
-    case byte of
-      0: ( drag_pos     : zglTPoint2D );
-      1: ( mouse_pos    : zglTPoint2D );
-      2: ( mouse_button : Byte );
-      3: ( mouse_wheel  : Byte );
-      4: ( key_code     : Byte );
-      5: ( key_char     : PChar );
-end;
-
-  //Event list
-  zglTEventList = record
-    Count : LongWord;
-    First : zglTEvent;
-end;
-
-  zglPButtonDesc = ^zglTButtonDesc;
-  zglTButtonDesc = record
-    Font    : zglPFont;
-    Caption : String;
-    Pressed : Boolean;
-end;
-
-  zglPCheckBoxDesc = ^zglTCheckBoxDesc;
-  zglTCheckBoxDesc = record
-    Font    : zglPFont;
-    Caption : String;
-    Checked : Boolean;
-end;
-
-  zglPRadioButtonDesc = ^zglTRadioButtonDesc;
-  zglTRadioButtonDesc = record
-    Font    : zglPFont;
-    Caption : String;
-    Checked : Boolean;
-    Group   : Integer;
-end;
-
-  zglPLabelDesc = ^zglTLabelDesc;
-  zglTLabelDesc = record
-    Font    : zglPFont;
-    Caption : String;
-end;
-
-  zglPEditBoxDesc = ^zglTEditBoxDesc;
-  zglTEditBoxDesc = record
-    Font     : zglPFont;
-    Text     : String;
-    Max      : Integer;
-    ReadOnly : Boolean;
-end;
-
-  zglPListBoxDesc = ^zglTListBoxDesc;
-  zglTListBoxDesc = record
-    Font       : zglPFont;
-    List       : zglTStringList;
-    ItemIndex  : Integer;
-    ItemHeight : Integer;
-    SelectMode : Integer;
-end;
-
-  zglPComboBoxDesc = ^zglTComboBoxDesc;
-  zglTComboBoxDesc = record
-    Font          : zglPFont;
-    List          : zglTStringList;
-    ItemIndex     : Integer;
-    ItemHeight    : Integer;
-    DropDownCount : Integer;
-    DropedDown    : Boolean;
-end;
-
-  zglPGroupBoxDesc = ^zglTGroupBoxDesc;
-  zglTGroupBoxDesc = record
-    Font    : zglPFont;
-    Caption : String;
-end;
-
-  zglPScrollBoxDesc = ^zglTScrollBoxDesc;
-  zglTScrollBoxDesc = record
-end;
-
-  zglPSpinDesc = ^zglTSpinDesc;
-  zglTSpinDesc = record
-    Value    : Integer;
-    Max      : Integer;
-    Min      : Integer;
-
-    uPressed : Boolean;
-    dPressed : Boolean;
-end;
-
-  zglPScrollBarDesc = ^zglTScrollBarDesc;
-  zglTScrollBarDesc = record
-    Kind     : Byte;
-    Step     : Integer;
-    Position : Integer;
-    PageSize : Integer;
-    Max      : Integer;
-
-    uPressed : Boolean;
-    dPressed : Boolean;
-    sDraged  : Boolean;
-end;
-
-var
-  gui_Init      : procedure;
-  gui_Draw      : procedure;
-  gui_Proc      : procedure;
-  gui_AddWidget : function( const _type : Integer; const X, Y, W, H : Single; const Focus, Visible : Boolean; const Desc, Data : Pointer; const Parent : zglPWidget; const Part : Boolean = FALSE ) : zglPWidget;
-  gui_DelWidget : procedure( var Widget : zglPWidget );
-
 // Sound
 const
   SND_ALL           = -2;
@@ -1245,7 +993,7 @@ type
 
   zglTSoundChannel = record
     Source     : LongWord;
-    Frequency  : Integer;
+    Speed      : Single;
     Volume     : Single;
     Position   : record
       X, Y, Z : Single;
@@ -1271,6 +1019,7 @@ type
     _decoder   : zglPSoundDecoder;
     _playing   : Boolean;
     _paused    : Boolean;
+    _waiting   : Boolean;
     _complete  : Double;
     _lastTime  : Double;
 
@@ -1319,8 +1068,7 @@ var
   snd_Stop              : procedure( const Sound : zglPSound; const ID : Integer );
   snd_SetPos            : procedure( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
   snd_SetVolume         : procedure( const Sound : zglPSound; const ID : Integer; const Volume : Single );
-  snd_SetFrequency      : procedure( const Sound : zglPSound; const ID, Frequency : Integer );
-  snd_SetFrequencyCoeff : procedure( const Sound : zglPSound; const ID : Integer; const Coefficient : Single );
+  snd_SetSpeed          : procedure( const Sound : zglPSound; const ID : Integer; const Speed : Single );
   snd_Get               : function( const Sound : zglPSound; const ID, What : Integer ) : Integer;
   snd_PlayFile          : function( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
   snd_PauseFile         : procedure( const ID : Integer );
@@ -1701,12 +1449,6 @@ begin
       text_GetWidth := dlsym( zglLib, 'text_GetWidth' );
       textFx_SetLength := dlsym( zglLib, 'textFx_SetLength' );
 
-      gui_Init := dlsym( zglLib, 'gui_Init' );
-      gui_Draw := dlsym( zglLib, 'gui_Draw' );
-      gui_Proc := dlsym( zglLib, 'gui_Proc' );
-      gui_AddWidget := dlsym( zglLib, 'gui_AddWidget' );
-      gui_DelWidget := dlsym( zglLib, 'gui_DelWidget' );
-
       snd_Init := dlsym( zglLib, 'snd_Init' );
       snd_Free := dlsym( zglLib, 'snd_Free' );
       snd_Add  := dlsym( zglLib, 'snd_Add' );
@@ -1717,8 +1459,7 @@ begin
       snd_Stop := dlsym( zglLib, 'snd_Stop' );
       snd_SetPos := dlsym( zglLib, 'snd_SetPos' );
       snd_SetVolume := dlsym( zglLib, 'snd_SetVolume' );
-      snd_SetFrequency := dlsym( zglLib, 'snd_SetFrequency' );
-      snd_SetFrequencyCoeff := dlsym( zglLib, 'snd_SetFrequencyCoeff' );
+      snd_SetSpeed := dlsym( zglLib, 'snd_SetSpeed' );
       snd_Get := dlsym( zglLib, 'snd_Get' );
       snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
       snd_PauseFile := dlsym( zglLib, 'snd_PauseFile' );

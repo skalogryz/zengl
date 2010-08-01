@@ -122,6 +122,7 @@ begin
     end else
       begin
         s := iniRec.Sections - 1;
+        if s < 0 Then exit;
         INC( iniRec.Section[ s ].Keys );
         k := iniRec.Section[ s ].Keys - 1;
 

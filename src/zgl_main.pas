@@ -128,9 +128,6 @@ uses
   {$ENDIF}
   zgl_render_target,
   zgl_font,
-  {$IFDEF USE_GUI}
-  zgl_gui_main,
-  {$ENDIF}
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -397,39 +394,6 @@ begin
             managerSound.Formats[ i ].Decoder := UserData;
       end;
     {$ENDIF}
-    // GUI
-    {$IFDEF USE_GUI}
-    WIDGET_TYPE_ID:
-      begin
-        if LongWord( UserData ) > length( managerGUI.Types ) Then
-          begin
-            SetLength( managerGUI.Types, length( managerGUI.Types ) + 1 );
-            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := LongWord( UserData );
-            widgetTLast := length( managerGUI.Types ) - 1;
-          end else
-            widgetTLast := LongWord( UserData );
-      end;
-    WIDGET_FILL_DESC:
-      begin
-        managerGUI.Types[ widgetTLast ].FillDesc := UserData;
-      end;
-    WIDGET_ONDRAW:
-      begin
-        managerGUI.Types[ widgetTLast ].OnDraw := UserData;
-      end;
-    WIDGET_ONPROC:
-      begin
-        managerGUI.Types[ widgetTLast ].OnProc := UserData;
-      end;
-    WIDGET_ONFREEDESC:
-      begin
-        managerGUI.Types[ widgetTLast ].OnFreeDesc := UserData;
-      end;
-    WIDGET_ONFREEDATA:
-      begin
-        managerGUI.Types[ widgetTLast ].OnFreeData := UserData;
-      end;
-    {$ENDIF}
   end;
 end;
 
@@ -482,9 +446,6 @@ begin
     MANAGER_RTARGET: Result := Ptr( @managerRTarget );
     {$IFDEF USE_SOUND}
     MANAGER_SOUND:   Result := Ptr( @managerSound );
-    {$ENDIF}
-    {$IFDEF USE_GUI}
-    MANAGER_GUI:     Result := Ptr( @managerGUI );
     {$ENDIF}
   end;
 end;

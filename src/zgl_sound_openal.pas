@@ -64,6 +64,7 @@ const
   AL_VELOCITY                               =$1006;
   AL_ORIENTATION                            =$100F;
 
+  AL_PITCH                                  =$1003;
   AL_LOOPING                                =$1007;
   AL_GAIN                                   =$100A;
   AL_FREQUENCY                              =$2001;

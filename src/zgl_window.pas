@@ -310,13 +310,13 @@ procedure wnd_Update;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  XSync( scr_Display, 1 );
+  XSync( scr_Display, X_TRUE );
   wnd_SetHints();
 
   FillChar( event, SizeOf( TXEvent ), 0 );
   event._type                := ClientMessage;
   event.xclient._type        := ClientMessage;
-  event.xclient.send_event   := 1;
+  event.xclient.send_event   := X_TRUE;
   event.xclient.window       := wnd_Handle;
   event.xclient.message_type := XInternAtom( scr_Display, '_NET_WM_STATE', FALSE );
   event.xclient.format       := 32;

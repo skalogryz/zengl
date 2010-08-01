@@ -65,13 +65,6 @@ uses
   zgl_font,
   zgl_text,
 
-  {$IFDEF USE_GUI}
-  zgl_gui_main,
-  zgl_gui_types,
-  zgl_gui_process,
-  zgl_gui_render,
-  {$ENDIF}
-
   zgl_primitives_2d,
   {$IFDEF USE_SENGINE}
   zgl_sengine_2d,
@@ -298,15 +291,6 @@ exports
   text_GetWidth            name prefix + 'text_GetWidth',
   textFx_SetLength         name prefix + 'textFx_SetLength',
 
-  // GUI
-  {$IFDEF USE_GUI}
-  gui_Init                 name prefix + 'gui_Init',
-  gui_Draw                 name prefix + 'gui_Draw',
-  gui_Proc                 name prefix + 'gui_Proc',
-  gui_AddWidget            name prefix + 'gui_AddWidget',
-  gui_DelWidget            name prefix + 'gui_DelWidget',
-  {$ENDIF}
-
   // Sound
   {$IFDEF USE_SOUND}
   snd_Init                 name prefix + 'snd_Init',
@@ -319,8 +303,7 @@ exports
   snd_Stop                 name prefix + 'snd_Stop',
   snd_SetPos               name prefix + 'snd_SetPos',
   snd_SetVolume            name prefix + 'snd_SetVolume',
-  snd_SetFrequency         name prefix + 'snd_SetFrequency',
-  snd_SetFrequencyCoeff    name prefix + 'snd_SetFrequencyCoeff',
+  snd_SetSpeed             name prefix + 'snd_SetSpeed',
   snd_PlayFile             name prefix + 'snd_PlayFile',
   snd_PauseFile            name prefix + 'snd_PauseFile',
   snd_StopFile             name prefix + 'snd_StopFile',
