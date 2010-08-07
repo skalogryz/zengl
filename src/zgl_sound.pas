@@ -253,34 +253,36 @@ begin
               alSourcePlay( oal_Sources[ i ] );
           {$ELSE}
           {$ENDIF}
-          for i := 1 to SND_MAX do
-            if sfStream[ i ]._playing and sfStream[ i ]._waiting Then
-              begin
-                sfStream[ i ]._waiting := FALSE;
-                snd_ResumeFile( i );
-              end;
         end;
+      for i := 1 to SND_MAX do
+        if sfStream[ i ]._playing and sfStream[ i ]._waiting Then
+          begin
+            sfStream[ i ]._waiting := FALSE;
+            snd_ResumeFile( i );
+          end;
     end else
-      if not sndAutoPaused Then
-        begin
-          sndAutoPaused := TRUE;
-          {$IFDEF USE_OPENAL}
-          for i := 0 to length( oal_Sources ) - 1 do
-            begin
-              alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
-              if z = AL_PLAYING Then
-                alSourcePause( oal_Sources[ i ] );
-              oal_SrcState[ i ] := z;
-            end;
-          {$ELSE}
-          {$ENDIF}
-          for i := 1 to SND_MAX do
-            if sfStream[ i ]._playing and ( not sfStream[ i ]._paused ) and ( not sfStream[ i ]._waiting ) Then
+      begin
+        if not sndAutoPaused Then
+          begin
+            sndAutoPaused := TRUE;
+            {$IFDEF USE_OPENAL}
+            for i := 0 to length( oal_Sources ) - 1 do
               begin
-                snd_PauseFile( i );
-                sfStream[ i ]._waiting := TRUE;
+                alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
+                if z = AL_PLAYING Then
+                  alSourcePause( oal_Sources[ i ] );
+                oal_SrcState[ i ] := z;
               end;
-        end;
+            {$ELSE}
+            {$ENDIF}
+          end;
+        for i := 1 to SND_MAX do
+          if sfStream[ i ]._playing and ( not sfStream[ i ]._paused ) and ( not sfStream[ i ]._waiting ) Then
+            begin
+              snd_PauseFile( i );
+              sfStream[ i ]._waiting := TRUE;
+            end;
+      end;
 end;
 
 function snd_Init;
