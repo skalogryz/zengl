@@ -1056,6 +1056,7 @@ begin
   sfSource[ Result ].SetFrequency( sfStream[ Result ].Frequency );
 {$ENDIF}
 
+  sfStream[ Result ]._playing  := TRUE;
   sfStream[ Result ]._paused   := FALSE;
   sfStream[ Result ]._waiting  := FALSE;
   sfStream[ Result ]._complete := 0;
@@ -1074,13 +1075,11 @@ begin
      ( not sfStream[ ID ]._playing ) or ( sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;
 
   sfStream[ ID ]._paused := TRUE;
-{$IFDEF WINDOWS}
-  SuspendThread( sfThread[ ID ] );
-{$ENDIF}
 
 {$IFDEF USE_OPENAL}
   alSourcePause( sfSource[ ID ] );
 {$ELSE}
+  SuspendThread( sfThread[ ID ] );
   sfSource[ ID ].Stop();
 {$ENDIF}
 end;
@@ -1107,9 +1106,6 @@ begin
   alSourcePlay( sfSource[ ID ] );
 {$ELSE}
   sfSource[ ID ].Play( 0, 0, DSBPLAY_LOOPING );
-{$ENDIF}
-
-{$IFDEF WINDOWS}
   ResumeThread( sfThread[ ID ] );
 {$ENDIF}
 end;
@@ -1137,7 +1133,6 @@ begin
   while ( processed < 1 ) and sfStream[ id ]._playing do
     alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
   {$ENDIF}
-  sfStream[ id ]._playing := TRUE;
   while app_Work and sfStream[ id ]._playing do
     begin
       if not sndInitialized Then break;
