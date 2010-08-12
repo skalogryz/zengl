@@ -8,7 +8,9 @@
   (You may HAVE to do that if your compiler doesn't like null source files.)}
 
 {$IFDEF CPU64}
-  {$PIC ON}
+  {$IFNDEF WINDOWS}
+    {$PIC ON}
+  {$ENDIF}
 {$ENDIF}
 
 { Arithmetic coding is unsupported for legal reasons.  Complaints to IBM. }

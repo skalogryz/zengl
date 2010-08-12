@@ -22,6 +22,9 @@ macos: clean
 win32: clean
 	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
 
+win64: clean
+	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -WG
+
 clean:
 	rm -f *.*~
 	rm -f -R ./tmp/*
