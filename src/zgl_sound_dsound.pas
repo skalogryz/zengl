@@ -76,6 +76,12 @@ type
     guid3DAlgorithm : TGUID;
   end;
 
+  PDSBPositionNotify = ^TDSBPositionNotify;
+  TDSBPositionNotify = packed record
+    dwOffset: DWORD;
+    hEventNotify: THandle;
+  end;
+
   IDirectSound = interface (IUnknown)
     ['{279AFA83-4981-11CE-A521-0020AF0BE560}']
     function CreateSoundBuffer(const lpDSBufferDesc: TDSBufferDesc;
@@ -120,6 +126,11 @@ type
     function Restore: HResult; stdcall;
   end;
 
+  IDirectSoundNotify = interface(IUnknown)
+    ['{b0210783-89cd-11d0-af08-00a0c925cd16}']
+    function SetNotificationPositions(dwPositionNotifies: DWORD; pcPositionNotifies: PDSBPositionNotify): HResult; stdcall;
+  end;
+
 function  InitDSound : Boolean;
 procedure FreeDSound;
 
@@ -144,8 +155,12 @@ uses
   zgl_log,
   zgl_utils;
 
+function CoInitialize(pvReserved: Pointer): HResult; stdcall; external 'ole32.dll' name 'CoInitialize';
+procedure CoUninitialize; stdcall; external 'ole32.dll' name 'CoUninitialize';
+
 function InitDSound;
 begin
+  CoInitialize( nil );
   dsound_Library    := dlopen( 'DSound.dll' );
   DirectSoundCreate := dlsym( dsound_Library, 'DirectSoundCreate' );
   Result            := dsound_Library <> 0;
@@ -154,6 +169,7 @@ end;
 procedure FreeDSound;
 begin
   dlclose( dsound_Library );
+  CoUninitialize();
 end;
 
 procedure dsu_CreateBuffer;
