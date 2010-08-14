@@ -82,7 +82,7 @@ procedure zglFree;
 
 var
   zgl_Init         : procedure( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-  zgl_InitToHandle : procedure( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+  zgl_InitToHandle : procedure( const Handle : Ptr; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
   zgl_Exit         : procedure;
 
 const

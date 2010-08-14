@@ -1062,7 +1062,7 @@ begin
   sfStream[ Result ]._complete := 0;
   sfStream[ Result ]._lastTime := timer_GetTicks;
 {$IFDEF LINUX_OR_DARWIN}
-  sfThread[ Result ] := BeginThread( @snd_ProcFile, Pointer( Result ) );
+  sfThread[ Result ] := LongWord( BeginThread( @snd_ProcFile, Pointer( Result ) ) );
 {$ENDIF}
 {$IFDEF WINDOWS}
   sfThread[ Result ] := CreateThread( nil, 0, @snd_ProcFile, Pointer( Result ), 0, sfThreadID[ Result ] );

@@ -31,7 +31,7 @@ uses
   Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
-  MacOSAll,
+  BaseUnix, MacOSAll,
   {$ENDIF}
   zgl_types;
 
@@ -100,7 +100,7 @@ const
   CLIP_INVISIBLE        = $008000;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+procedure zgl_InitToHandle( const Handle : Ptr; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 procedure zgl_Destroy;
 procedure zgl_Exit;
 procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
@@ -175,7 +175,7 @@ begin
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   app_WorkDir := appPath + '/';
 
-  app_UsrHomeDir := getenv( 'HOME' ) + '/';
+  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
 {$ENDIF}
   app_GetSysDirs := TRUE;
 end;
@@ -220,7 +220,11 @@ begin
 
   if not scr_Create() Then exit;
   app_InitToHandle := TRUE;
+  {$IFNDEF DARWIN}
   wnd_Handle := Handle;
+  {$ELSE}
+  wnd_Handle := WindowPtr( Handle );
+  {$ENDIF}
   {$IFDEF WINDOWS}
   wnd_DC := GetDC( wnd_Handle );
   {$ENDIF}
