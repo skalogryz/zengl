@@ -222,6 +222,8 @@ begin
   size.Right  := wnd_X + wnd_Width;
   size.Bottom := wnd_Y + wnd_Height;
   wnd_Attr    := kWindowCloseBoxAttribute or kWindowCollapseBoxAttribute or kWindowStandardHandlerAttribute;// or kWindowCompositingAttribute;
+  if wnd_FullScreen Then
+    wnd_Attr := wnd_Attr or kWindowNoTitleBarAttribute;
   status      := CreateNewWindow( kDocumentWindowClass, wnd_Attr, size, wnd_Handle );
 
   if ( status <> noErr ) or ( wnd_Handle = nil ) Then
@@ -339,6 +341,13 @@ begin
   SetWindowLongW( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
 {$IFDEF DARWIN}
+  if wnd_FullScreen Then
+    ChangeWindowAttributes( wnd_Handle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
+  else
+    ChangeWindowAttributes( wnd_Handle, kWindowResizableAttribute, kWindowNoTitleBarAttribute );
+  // I don't know why I need set and clear kWindowResizableAttribute...
+  ChangeWindowAttributes( wnd_Handle, 0, kWindowResizableAttribute );
+
   aglSetCurrentContext( ogl_Context );
 {$ENDIF}
   app_Work := TRUE;

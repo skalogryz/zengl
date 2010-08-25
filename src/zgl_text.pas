@@ -160,27 +160,27 @@ begin
             begin
               glEnd();
 
-              glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
+              glBindTexture( GL_TEXTURE_2D, Font.Pages[ charDesc.Page ].ID );
               glBegin( GL_TRIANGLES );
             end else
-              if batch2d_Check( mode, FX_BLEND, Font.Pages[ CharDesc.Page ] ) Then
+              if batch2d_Check( mode, FX_BLEND, Font.Pages[ charDesc.Page ] ) Then
                 begin
                   glEnable( GL_BLEND );
 
                   glEnable( GL_TEXTURE_2D );
-                  glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
+                  glBindTexture( GL_TEXTURE_2D, Font.Pages[ charDesc.Page ].ID );
                   glBegin( mode );
                 end;
         end;
 
       quad[ 0 ].X := X + ( charDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
-      quad[ 0 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - CharDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
+      quad[ 0 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - charDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
       quad[ 1 ].X := X + ( charDesc.ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale;
-      quad[ 1 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - CharDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
+      quad[ 1 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - charDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
       quad[ 2 ].X := X + ( charDesc.ShiftX + charDesc.Width ) * textScale + Font.Padding[ 2 ];
-      quad[ 2 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - CharDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
+      quad[ 2 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - charDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
       quad[ 3 ].X := X + ( charDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
-      quad[ 3 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - CharDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
+      quad[ 3 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - charDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
 
       if Flags and TEXT_FX_VCA > 0 Then
         begin
