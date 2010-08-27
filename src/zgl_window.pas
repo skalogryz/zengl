@@ -345,7 +345,7 @@ begin
     ChangeWindowAttributes( wnd_Handle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
   else
     ChangeWindowAttributes( wnd_Handle, kWindowResizableAttribute, kWindowNoTitleBarAttribute );
-  // I don't know why I need set and clear kWindowResizableAttribute...
+  // Какой индус из Apple придумал, что необходимо менять kWindowResizableAttribute вместе с kWindowNoTitleBarAttribute...
   ChangeWindowAttributes( wnd_Handle, 0, kWindowResizableAttribute );
 
   aglSetCurrentContext( ogl_Context );
