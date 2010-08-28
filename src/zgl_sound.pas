@@ -176,7 +176,7 @@ var
   sfCS          : TRTLCriticalSection;
   sfNotify      : array[ 1..SND_MAX ] of IDirectSoundNotify;
   sfNotifyPos   : array[ 1..SND_MAX ] of TDSBPositionNotify;
-  sfNotifyEvent : array[ 1..SND_MAX ] of HANDLE;
+  sfNotifyEvent : array[ 1..SND_MAX ] of THandle;
   sfSource      : array[ 1..SND_MAX ] of IDirectSoundBuffer;
   sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}

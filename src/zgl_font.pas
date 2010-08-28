@@ -106,7 +106,7 @@ uses
 
 var
   fntMem : zglTMemory;
-  fntID  : array[ 0..12 ] of AnsiChar;
+  fntID  : array[ 0..13 ] of AnsiChar;
 
 function font_Add;
 begin
@@ -315,6 +315,7 @@ begin
 end;
 
 initialization
+  fntID[ 13 ] := #0;
   if SizeOf( Char ) = 1 Then
     font_GetCID := font_GetCP1251ID
   {$IFNDEF FPC}
