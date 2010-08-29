@@ -368,5 +368,9 @@ exports
   u_SortList               name prefix + 'u_SortList'
   ;
 
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
+
 begin
 end.

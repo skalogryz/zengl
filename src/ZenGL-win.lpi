@@ -13,6 +13,12 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <MinorVersionNr Value="2"/>
+      <CharSet Value="04B0"/>
+      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Crossplatform library for gamedevelopment" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.2 RC4"/>
+    </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
@@ -256,7 +262,7 @@
   <CompilerOptions>
     <Version Value="9"/>
     <Target>
-      <Filename Value="./libZenGL"/>
+      <Filename Value="./ZenGL.dll"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
