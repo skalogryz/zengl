@@ -2,12 +2,12 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC4              }
-{ date:    2010.08.01           }
+{ date:    2010.09.06           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
 { mail: dr.andru@gmail.com      }
-{ JID:  dr.andru@gmail.com      }
+{ JID:  dr.andru@googlemail.com }
 { ICQ:  496-929-849             }
 { site: http://andru-kun.inf.ua }
 {-------------------------------}
@@ -597,13 +597,11 @@ type
   zglTRenderCallback = procedure( Data : Pointer );
 
 const
-  RT_TYPE_PBUFFER = 0;
-  RT_TYPE_FBO     = 1;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 
 var
-  rtarget_Add    : function( _type : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+  rtarget_Add    : function( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
   rtarget_Del    : procedure( var Target : zglPRenderTarget );
   rtarget_Set    : procedure( const Target : zglPRenderTarget );
   rtarget_DrawIn : procedure( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );

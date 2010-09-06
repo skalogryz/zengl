@@ -98,7 +98,7 @@ end;
 type
   zglTRenderCallback = procedure( Data : Pointer );
 
-function  rtarget_Add( _type : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function  rtarget_Add( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
 procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
@@ -123,7 +123,7 @@ var
 
 function rtarget_Add;
   var
-    i        : Integer;
+    i, _type : Integer;
     pFBO     : zglPFBO;
     pPBuffer : zglPPBuffer;
 {$IFDEF LINUX}
@@ -149,13 +149,12 @@ begin
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
 
-  if ( not ogl_CanFBO ) and ( _type = RT_TYPE_FBO ) Then
+  _type := RT_TYPE_FBO;
+  if not ogl_CanFBO Then
     if ogl_CanPBuffer Then
-      _type := RT_TYPE_PBUFFER;
-
-  if ( not ogl_CanPBuffer ) and ( _type = RT_TYPE_PBUFFER ) Then
-    if ogl_CanFBO Then
-      _type := RT_TYPE_FBO;
+      _type := RT_TYPE_PBUFFER
+    else
+      exit;
 
   case _type of
     {$IFDEF LINUX}
@@ -397,9 +396,7 @@ begin
 
         glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
-        if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_TRUE Then
-          log_Add( 'FBO: Gen FrameBuffer - Success' )
-        else
+        if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_FALSE Then
           begin
             log_Add( 'FBO: Gen FrameBuffer - Error' );
             exit;
@@ -407,9 +404,7 @@ begin
 
         glGenRenderbuffersEXT( 1, @pFBO.RenderBuffer );
         glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
-        if glIsRenderBufferEXT( pFBO.RenderBuffer ) = GL_TRUE Then
-          log_Add( 'FBO: Gen RenderBuffer - Success' )
-        else
+        if glIsRenderBufferEXT( pFBO.RenderBuffer ) = GL_FALSE Then
           begin
             log_Add( 'FBO: Gen RenderBuffer - Error' );
             exit;
