@@ -150,11 +150,10 @@ begin
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
 
   _type := RT_TYPE_FBO;
-  if not ogl_CanFBO Then
-    if ogl_CanPBuffer Then
-      _type := RT_TYPE_PBUFFER
-    else
-      exit;
+  if ( not ogl_CanFBO ) and ( ogl_CanPBuffer ) Then
+    _type := RT_TYPE_PBUFFER
+  else
+    exit;
 
   case _type of
     {$IFDEF LINUX}
