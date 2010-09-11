@@ -14,10 +14,10 @@ all: clean
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
 macos: clean
-	$(FPC_MAC)386 ZenGL.pas $(INCLUDE) -FE$(OUTPUT) -FU $(TMP) $(FLAGS) -o$(TARGETM)-386
-	$(FPC_MAC)ppc ZenGL.pas $(INCLUDE) -FE$(OUTPUT) -FU $(TMP) $(FLAGS) -o$(TARGETM)-ppc
+	$(FPC_MAC)386 ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)-386 -k"-no_order_inits" -k"-no_order_data"
+	$(FPC_MAC)ppc ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)-ppc -k"-no_order_inits" -k"-no_order_data"
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(OUTPUT)$(TARGETM)
-	#rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
+	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
 win32: clean
 	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
