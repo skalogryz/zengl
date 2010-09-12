@@ -261,7 +261,7 @@ begin
 
   if not file_Exists( FileName ) Then
     begin
-      log_Add( 'Cannot read ' + FileName );
+      log_Add( 'Cannot read "' + FileName + '"' );
       exit;
     end;
 
