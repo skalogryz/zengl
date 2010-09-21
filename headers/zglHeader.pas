@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC4              }
-{ date:    2010.09.06           }
+{ date:    2010.09.21           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -183,6 +183,15 @@ var
   scr_SetFSAA           : procedure( const FSAA : Byte );
   scr_SetOptions        : procedure( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
   scr_CorrectResolution : procedure( const Width, Height : Word );
+
+// GL
+const
+  TARGET_SCREEN  = 1;
+  TARGET_TEXTURE = 2;
+
+var
+  Set2DMode : procedure;
+  Set3DMode : procedure( FOVY : Single = 45 );
 
 // Z BUFFER
   zbuffer_SetDepth  : procedure( const zNear, zFar : Single );
@@ -426,10 +435,6 @@ var
   joy_Press      : function ( const JoyID, Button : Byte ) : Boolean;
   joy_ClearState : procedure;
 
-// GL
-  Set2DMode : procedure;
-  Set3DMode : procedure( FOVY : Single = 45 );
-
 // 2D
 type
   zglPPoint2D = ^zglTPoint2D;
@@ -597,6 +602,7 @@ type
   zglTRenderCallback = procedure( Data : Pointer );
 
 const
+  RT_DEFAULT      = $00;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 

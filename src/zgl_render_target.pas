@@ -40,6 +40,7 @@ uses
 const
   RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
+  RT_DEFAULT      = $00;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 
@@ -119,7 +120,12 @@ uses
 
 var
   lRTarget : zglPRenderTarget;
-  lMode : Integer;
+  lGLW     : Integer;
+  lGLH     : Integer;
+  lClipW   : Integer;
+  lClipH   : Integer;
+  lResCX   : Single;
+  lResCY   : Single;
 
 function rtarget_Add;
   var
@@ -489,8 +495,14 @@ begin
 
   if Assigned( Target ) Then
     begin
-      lRTarget := Target;
-      lMode := ogl_Mode;
+      lRTarget   := Target;
+      lGLW       := ogl_Width;
+      lGLH       := ogl_Height;
+      lClipW     := ogl_ClipW;
+      lClipH     := ogl_ClipH;
+      lResCX     := scr_ResCX;
+      lResCY     := scr_ResCY;
+      ogl_Target := TARGET_TEXTURE;
 
       case Target._type of
         RT_TYPE_PBUFFER:
@@ -513,15 +525,23 @@ begin
             glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, Target.Surface.ID, 0 );
           end;
       end;
-      ogl_Mode := 1;
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
       else
-        glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
-                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ), ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
+        begin
+          ogl_Width  := Target.Surface.Width;
+          ogl_Height := Target.Surface.Height;
+          ogl_ClipX  := 0;
+          ogl_ClipY  := 0;
+          ogl_ClipW  := ogl_Width;
+          ogl_ClipH  := ogl_Height;
+          scr_ResCX  := 1;
+          scr_ResCY  := 1;
+          SetCurrentMode();
+        end;
 
-      if ( Target.Flags and RT_CLEAR_SCREEN > 0 ) Then
+      if Target.Flags and RT_CLEAR_SCREEN > 0 Then
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
     end else
       if Assigned( lRTarget ) Then
@@ -552,9 +572,21 @@ begin
               end;
           end;
 
-          ogl_Mode := lMode;
-          scr_SetViewPort();
-          lRTarget := nil;
+          ogl_Target := TARGET_SCREEN;
+          if lRTarget.Flags and RT_FULL_SCREEN > 0 Then
+            scr_SetViewPort()
+          else
+            begin
+              ogl_Width  := lGLW;
+              ogl_Height := lGLH;
+              ogl_ClipW  := lClipW;
+              ogl_ClipH  := lClipH;
+              scr_ResCX  := lResCX;
+              scr_ResCY  := lResCY;
+              SetCurrentMode();
+            end;
+
+          lRTarget   := nil;
       end;
 end;
 

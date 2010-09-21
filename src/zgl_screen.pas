@@ -602,24 +602,34 @@ end;
 
 procedure scr_SetViewPort;
 begin
-  if ( ogl_Mode <> 2 ) and ( ogl_Mode <> 3 ) Then exit;
-
-  cam2dSX := Round( -ogl_Width / 2 + scr_AddCX / scr_ResCX );
-  cam2dSY := Round( -ogl_Height / 2 + scr_AddCY / scr_ResCY );
-
-  if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
+  if ogl_Target = TARGET_SCREEN Then
     begin
-      ogl_ClipX := 0;
-      ogl_ClipY := 0;
-      ogl_ClipW := wnd_Width - scr_AddCX * 2;
-      ogl_ClipH := wnd_Height - scr_AddCY * 2;
-      glViewPort( scr_AddCX, scr_AddCY, ogl_ClipW, ogl_ClipH );
+      cam2dSX := Round( -ogl_Width / 2 + scr_AddCX / scr_ResCX );
+      cam2dSY := Round( -ogl_Height / 2 + scr_AddCY / scr_ResCY );
+
+      if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
+        begin
+          ogl_ClipX := 0;
+          ogl_ClipY := 0;
+          ogl_ClipW := wnd_Width - scr_AddCX * 2;
+          ogl_ClipH := wnd_Height - scr_AddCY * 2;
+          glViewPort( scr_AddCX, scr_AddCY, ogl_ClipW, ogl_ClipH );
+        end else
+          begin
+            ogl_ClipX := 0;
+            ogl_ClipY := 0;
+            ogl_ClipW := wnd_Width;
+            ogl_ClipH := wnd_Height;
+            glViewPort( 0, 0, ogl_ClipW, ogl_ClipH );
+          end;
     end else
       begin
+        cam2dSX   := Round( -ogl_Width / 2 );
+        cam2dSY   := Round( -ogl_Height / 2 );
         ogl_ClipX := 0;
         ogl_ClipY := 0;
-        ogl_ClipW := wnd_Width;
-        ogl_ClipH := wnd_Height;
+        ogl_ClipW := ogl_Width;
+        ogl_ClipH := ogl_Height;
         glViewPort( 0, 0, ogl_ClipW, ogl_ClipH );
       end;
 end;
