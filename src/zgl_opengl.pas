@@ -35,6 +35,10 @@ uses
   {$ENDIF}
   zgl_opengl_all;
 
+const
+  TARGET_SCREEN  = 1;
+  TARGET_TEXTURE = 2;
+
 function  gl_Create : Boolean;
 procedure gl_Destroy;
 procedure gl_ResetState;
@@ -52,7 +56,8 @@ var
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of LongWord;
 
-  ogl_Mode : Word = 3; // 2D/3D Modes
+  ogl_Mode   : Integer = 3; // 2D/3D Modes
+  ogl_Target : Integer = TARGET_SCREEN;
 
   ogl_Width  : Integer;
   ogl_Height : Integer;
