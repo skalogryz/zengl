@@ -1,7 +1,7 @@
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XdsX -CX -Sd
-INCLUDE = -FuPasJPEG
+INCLUDE =  -Fu../lib -Fu../lib/PasJPEG
 OUTPUT  = ./
 DESTDIR = /usr
 TMP     = -FUtmp

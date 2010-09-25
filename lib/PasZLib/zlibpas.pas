@@ -74,7 +74,7 @@ const
 
   Z_DEFLATED = 8;
 
-  _z_errmsg: array[0..9] of PChar = (
+  _z_errmsg: array[0..9] of PAnsiChar = (
     'need dictionary',      // Z_NEED_DICT      (2)
     'stream end',           // Z_STREAM_END     (1)
     '',                     // Z_OK             (0)
