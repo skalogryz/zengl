@@ -58,6 +58,23 @@ procedure scr_SetFSAA( const FSAA : Byte );
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
 function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
 {$ENDIF}
+{$IFDEF WINDOWS}
+const
+  MONITOR_DEFAULTTOPRIMARY = $00000001;
+
+type
+  HMONITOR = THANDLE;
+  MONITORINFOEX = record
+    cbSize    : LongWord;
+    rcMonitor : TRect;
+    rcWork    : TRect;
+    dwFlags   : LongWord;
+    szDevice  : array[ 0..CCHDEVICENAME - 1 ] of WideChar;
+  end;
+
+function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
+function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
+{$ENDIF}
 
 type
   zglPResolutionList = ^zglTResolutionList;
@@ -96,8 +113,10 @@ var
   scr_ModeList  : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  scr_Settings : DEVMODE;
-  scr_Desktop  : DEVMODE;
+  scr_Settings : DEVMODEW;
+  scr_Desktop  : DEVMODEW;
+  scr_Monitor  : HMONITOR;
+  scr_MonInfo  : MONITORINFOEX;
   {$ENDIF}
   {$IFDEF DARWIN}
   scr_Display  : CGDirectDisplayID;
@@ -169,9 +188,14 @@ begin
   scr_Desktop  := XRRConfigCurrentConfiguration( scr_Settings, @Rotation );
 {$ENDIF}
 {$IFDEF WINDOWS}
+  scr_Monitor := MonitorFromWindow( wnd_Handle, MONITOR_DEFAULTTOPRIMARY );
+  FillChar( scr_MonInfo, SizeOf( MONITORINFOEX ), 0 );
+  scr_MonInfo.cbSize := SizeOf( MONITORINFOEX );
+  GetMonitorInfoW( scr_Monitor, scr_MonInfo );
+
   with scr_Desktop do
     begin
-      dmSize             := SizeOf( DEVMODE );
+      dmSize             := SizeOf( DEVMODEW );
       dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
       dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
       dmBitsPerPel       := GetDisplayColors();
@@ -302,7 +326,7 @@ procedure scr_GetResList;
     tmp_Settings : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
-    tmp_Settings : DEVMODE;
+    tmp_Settings : DEVMODEW;
   {$ENDIF}
   function Already( Width, Height : Integer ) : Boolean;
     var
@@ -330,7 +354,7 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   i := 0;
-  while EnumDisplaySettings( nil, i, tmp_Settings ) <> FALSE do
+  while EnumDisplaySettingsW( scr_MonInfo.szDevice, i, tmp_Settings ) <> FALSE do
     begin
       if not Already( tmp_Settings.dmPelsWidth, tmp_Settings.dmPelsHeight ) Then
         begin
@@ -359,7 +383,7 @@ begin
   XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Desktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
+  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, DEVMODEW( nil^ ), 0, 0, nil );
 {$ENDIF}
 {$IFDEF DARWIN}
   CGDisplaySwitchToMode( scr_Display, scr_Desktop );
@@ -389,7 +413,7 @@ end;
 procedure scr_SetWindowedMode;
   {$IFDEF WINDOWS}
   var
-    settings : DEVMODE;
+    settings : DEVMODEW;
   {$ENDIF}
 begin
   {$IFDEF LINUX}
@@ -402,12 +426,12 @@ begin
       settings              := scr_Desktop;
       settings.dmBitsPerPel := 32;
 
-      if ChangeDisplaySettings( settings, CDS_TEST or CDS_FULLSCREEN ) <> DISP_CHANGE_SUCCESSFUL Then
+      if ChangeDisplaySettingsExW( scr_MonInfo.szDevice, settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
           u_Error( 'Desktop doesn''t support 32-bit color mode.' );
           zgl_Exit;
         end else
-          ChangeDisplaySettings( settings, CDS_FULLSCREEN );
+          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, settings, 0, 0, nil );
     end else
       scr_Reset();
   {$ENDIF}
@@ -489,15 +513,15 @@ begin
     begin
       i := 0;
       r := 0;
-      while EnumDisplaySettings( nil, i, scr_Settings ) <> FALSE do
+      while EnumDisplaySettingsW( scr_MonInfo.szDevice, i, scr_Settings ) <> FALSE do
         with scr_Settings do
           begin
-            dmSize   := SizeOf( DEVMODE );
+            dmSize   := SizeOf( DEVMODEW );
             dmFields := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
             if ( dmPelsWidth = scr_Width  ) and ( dmPelsHeight = scr_Height ) and ( dmBitsPerPel = 32 ) and ( dmDisplayFrequency > r ) and
                ( dmDisplayFrequency <= scr_Desktop.dmDisplayFrequency ) Then
               begin
-                if ( ChangeDisplaySettings( scr_Settings, CDS_TEST or CDS_FULLSCREEN ) = DISP_CHANGE_SUCCESSFUL ) Then
+                if ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, CDS_TEST, nil ) = DISP_CHANGE_SUCCESSFUL Then
                   r := dmDisplayFrequency
                 else
                   break;
@@ -507,7 +531,7 @@ begin
 
       with scr_Settings do
         begin
-          dmSize := SizeOf( DEVMODE );
+          dmSize := SizeOf( DEVMODEW );
           if scr_Refresh = REFRESH_MAXIMUM Then scr_Refresh := r;
           if scr_Refresh = REFRESH_DEFAULT Then scr_Refresh := 0;
 
@@ -518,12 +542,12 @@ begin
           dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
         end;
 
-      if ChangeDisplaySettings( scr_Settings, CDS_TEST or CDS_FULLSCREEN ) <> DISP_CHANGE_SUCCESSFUL Then
+      if ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
           u_Warning( 'Cannot set fullscreen mode.' );
           wnd_FullScreen := FALSE;
         end else
-          ChangeDisplaySettings( scr_Settings, CDS_FULLSCREEN )
+          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, 0, nil );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
