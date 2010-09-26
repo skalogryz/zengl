@@ -245,6 +245,9 @@ procedure zgl_Destroy;
     i : Integer;
     p : Pointer;
 begin
+  if app_WorkTime <> 0 Then
+    log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
+
   scr_Destroy();
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
@@ -296,9 +299,6 @@ begin
     snd_StopFile( i );
   snd_Free();
   {$ENDIF}
-
-  if app_WorkTime <> 0 Then
-    log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
   gl_Destroy();
   if not app_InitToHandle Then wnd_Destroy();
