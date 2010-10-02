@@ -292,7 +292,7 @@ begin
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
-  log_Add( 'Successful loading of texture: "' + FileName + '"' );
+  log_Add( 'Texture loaded: "' + FileName + '"' );
 
   FreeMemory( pData );
 end;
