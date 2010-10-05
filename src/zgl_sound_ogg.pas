@@ -428,7 +428,7 @@ begin
       ov_pcm_seek       := dlsym( vorbisfile_Library, 'ov_pcm_seek' );
       ov_pcm_total      := dlsym( vorbisfile_Library, 'ov_pcm_total' );
 
-      log_Add( 'Ogg: Successful initialized'  );
+      log_Add( 'Ogg: Initialized'  );
       oggInit := TRUE;
     end else
       begin
@@ -446,8 +446,8 @@ begin
   if not oggLoad Then ogg_Init;
   if not oggInit Then exit;
 
-  file_Open( Stream._File, FileName, FOM_OPENR );
-  zgl_GetMem( Stream._Data, SizeOf( zglTOggStream ) );
+  file_Open( Stream._file, FileName, FOM_OPENR );
+  zgl_GetMem( Stream._data, SizeOf( zglTOggStream ) );
 
   with zglTOggStream( Stream._Data^ ) do
     begin
