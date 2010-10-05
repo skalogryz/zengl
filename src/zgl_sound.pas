@@ -350,7 +350,7 @@ begin
   i := 64;
   SetLength( oal_Sources, i );
   alGenSources( i, @oal_Sources[ 0 ] );
-  while alcGetError( nil ) <> AL_NO_ERROR do
+  while alGetError( nil ) <> AL_NO_ERROR do
     begin
       DEC( i, 8 );
       if i = 0 Then break;
