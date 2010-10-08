@@ -338,9 +338,9 @@ procedure scr_GetResList;
   end;
 begin
 {$IFDEF LINUX}
+  tmp_Settings := scr_ModeList;
   for i := 0 to scr_ModeCount - 1 do
     begin
-      tmp_Settings := scr_ModeList;
       if not Already( tmp_Settings.Width, tmp_Settings.Height ) Then
         begin
           INC( scr_ResList.Count );
