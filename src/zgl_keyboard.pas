@@ -68,6 +68,7 @@ const
   K_SHIFT      = $FF - $03;
   K_SHIFT_L    = $2A;
   K_SHIFT_R    = $36;
+  K_SUPER      = $FF - $04;
   K_SUPER_L    = $DB;
   K_SUPER_R    = $DC;
   K_APP_MENU   = $DD;
@@ -190,9 +191,14 @@ type
     key : Integer;
   end;
 const
-  Modifier : array[ 0..2 ] of zglTModifier = ( ( bit: 4096; key: K_CTRL ),
-                                               ( bit: 512;  key: K_SHIFT ),
-                                               ( bit: 256;  key: K_ALT ) );
+  Modifier : array[ 0..7 ] of zglTModifier = ( ( bit: $010000; key: K_NUMLOCK ),
+                                               ( bit: $008000; key: K_CTRL_R  ),
+                                               ( bit: $004000; key: K_ALT_R   ),
+                                               ( bit: $002000; key: K_SHIFT_R ),
+                                               ( bit: $001000; key: K_CTRL_L  ),
+                                               ( bit: $000800; key: K_ALT_L   ),
+                                               ( bit: $000200; key: K_SHIFT_L ),
+                                               ( bit: $000100; key: K_SUPER   ) );
 {$ENDIF}
 
 var
@@ -522,7 +528,7 @@ begin
     // $3A: Result := K_ALT_R;
     $38: Result := K_SHIFT_L;
     // $38: Result := K_SHIFT_R;
-    //: Result := K_SUPER_L;
+    $37: Result := K_SUPER_L;
     //: Result := K_SUPER_R;
     //: Result := K_APP_MENU;
 
@@ -616,6 +622,7 @@ end;
 function SCA;
 begin
   Result := KeyCode;
+  if ( KeyCode = K_SUPER_L ) or ( KeyCode = K_SUPER_R ) Then Result := K_SUPER;
   if ( KeyCode = K_SHIFT_L ) or ( KeyCode = K_SHIFT_R ) Then Result := K_SHIFT;
   if ( KeyCode = K_CTRL_L ) or ( KeyCode = K_CTRL_R ) Then Result := K_CTRL;
   if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;

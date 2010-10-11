@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC4              }
-{ date:    2010.09.21           }
+{ date:    2010.10.12           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -298,6 +298,7 @@ const
   K_SHIFT      = $FF - $03;
   K_SHIFT_L    = $2A;
   K_SHIFT_R    = $36;
+  K_SUPER      = $FF - $04;
   K_SUPER_L    = $DB;
   K_SUPER_R    = $DC;
   K_APP_MENU   = $DD;

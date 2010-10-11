@@ -689,7 +689,7 @@ begin
           kEventRawKeyModifiersChanged:
             begin
               GetEventParameter( inEvent, kEventParamKeyModifiers, typeUInt32, nil, 4, nil, @SCAKey );
-              for i := 0 to 2 do
+              for i := 0 to 7 do
                 if SCAKey and Modifier[ i ].bit > 0 Then
                   begin
                     if not keysDown[ Modifier[ i ].key ] Then
@@ -697,6 +697,12 @@ begin
                     keysDown[ Modifier[ i ].key ] := TRUE;
                     keysUp  [ Modifier[ i ].key ] := FALSE;
                     keysLast[ KA_DOWN ]           := Modifier[ i ].key;
+
+                    key := SCA( Modifier[ i ].key );
+                    if not keysDown[ key ] Then
+                      doKeyPress( key );
+                    keysDown[ key ] := TRUE;
+                    keysUp  [ key ] := FALSE;
                   end else
                     begin
                       if keysDown[ Modifier[ i ].key ] Then
@@ -705,6 +711,11 @@ begin
                           keysLast[ KA_UP ]           := Modifier[ i ].key;
                         end;
                       keysDown[ Modifier[ i ].key ] := FALSE;
+
+                      key := SCA( Modifier[ i ].key );
+                      if keysDown[ key ] Then
+                        keysUp[ key ] := TRUE;
+                      keysDown[ key ] := FALSE;
                     end;
             end;
           kEventRawKeyDown, kEventRawKeyRepeat:
@@ -791,6 +802,10 @@ begin
           begin
             GetEventParameter( inEvent, kEventParamMouseButton, typeMouseButton, nil, SizeOf( EventMouseButton ), nil, @mButton );
 
+            // Magic Mouse !!! XD
+            if keysDown[ K_SUPER ] and ( mButton = kEventMouseButtonPrimary ) Then
+              mButton := kEventMouseButtonSecondary;
+
             case mButton of
               kEventMouseButtonPrimary: // Left
                 begin
@@ -833,6 +848,10 @@ begin
         kEventMouseUp:
           begin
             GetEventParameter( inEvent, kEventParamMouseButton, typeMouseButton, nil, SizeOf( EventMouseButton ), nil, @mButton );
+
+            // Magic Mouse !!! XD
+            if keysDown[ K_SUPER ] and ( mButton = kEventMouseButtonPrimary ) Then
+              mButton := kEventMouseButtonSecondary;
 
             case mButton of
               kEventMouseButtonPrimary: // Left
