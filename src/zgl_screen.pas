@@ -576,9 +576,9 @@ begin
       scr_SetWindowedMode();
 {$ENDIF}
   if wnd_FullScreen Then
-    log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
+    log_Add( 'Screen options changed to: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
   else
-    log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
+    log_Add( 'Screen options changed to: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
   if app_Work Then
     wnd_Update();
 end;
@@ -690,9 +690,9 @@ begin
   wnd_Update();
   gl_Create();
   if ogl_FSAA <> 0 Then
-    log_Add( 'Set FSAA: ' + u_IntToStr( ogl_FSAA ) + 'x' )
+    log_Add( 'FSAA changed to: ' + u_IntToStr( ogl_FSAA ) + 'x' )
   else
-    log_Add( 'Set FSAA: off' );
+    log_Add( 'FSAA changed to: off' );
 end;
 
 end.

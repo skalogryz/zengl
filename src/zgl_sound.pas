@@ -552,7 +552,7 @@ begin
 
   if not Assigned( Result.Data ) Then
     begin
-      log_Add( 'Cannot load sound: From Memory' );
+      log_Add( 'Unable to load sound: From Memory' );
       snd_Del( Result );
       exit;
     end;
