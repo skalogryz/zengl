@@ -1,18 +1,26 @@
 program demo01;
 
-// Приложение можно собрать с ZenGL либо статично, либо используя so/dll/dylib.
+// RU: Приложение можно собрать с ZenGL либо статично, либо используя so/dll/dylib.
 // Для этого закомментируйте объявление ниже. Преимущество статичной компиляции
-// заключается в меньшем размере, но требует подключение каждого модуля вручную
+// заключается в меньшем размере, но требует подключение каждого модуля вручную.
 // Также статическая компиляция обязывает исполнять условия LGPL-лицензии,
 // в частности требуется открытие исходных кодов приложения, которое использует
 // исходные коды ZenGL. Использование же только so/dll/dylib этого не требует.
+//
+// EN: Application can be compiled with ZenGL statically or with using so/dll/dylib.
+// For this comment the define below. Advantage of static compilation is smaller
+// size of application, but it require including all units.
+// Also static compilation require to follow the terms of LGPL-license,
+// particularly you must open source code of application that use
+// source code of ZenGL. Using so/dll/dylib doesn't require this.
 {$DEFINE STATIC}
 
 uses
   {$IFNDEF STATIC}
   zglHeader
   {$ELSE}
-  // Перед использованием модулей, не забудьте указать путь к исходным кодам ZenGL :)
+  // RU: Перед использованием модулей, не забудьте указать путь к исходным кодам ZenGL :)
+  // EN: Before using the modules don't forget to set path to source code of ZenGL :)
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -27,12 +35,14 @@ var
 
 procedure Init;
 begin
-  // Тут можно выполнять загрузку основных ресурсов
+  // RU: Тут можно выполнять загрузку основных ресурсов.
+  // EN: Here can be loading of main resources.
 end;
 
 procedure Draw;
 begin
-  // Тут "рисуем" что угодно :)
+  // RU: Тут "рисуем" что угодно :)
+  // EN: Here "draw" anything :)
 end;
 
 procedure Update( dt : Double );
@@ -42,7 +52,8 @@ end;
 
 procedure Timer;
 begin
-  // Будем в заголовке показывать количество кадров в секунду
+  // RU: Будем в заголовке показывать количество кадров в секунду.
+  // EN: Caption will show the frames per second.
   wnd_SetCaption( '01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) + ' ]' );
 end;
 
@@ -54,53 +65,77 @@ end;
 Begin
   {$IFNDEF STATIC}
     {$IFDEF LINUX}
-    // В Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна
+    // RU: В Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна
     // быть предварительно установлена. Если же нужно грузить библиотеку из
     // директории с исполняемым файлом то следует вписать './libZenGL.so'
+    //
+    // EN: Under GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be
+    // installed before it will be used. If you want to load library from directory with
+    // executable file you can write below './libZenGL.so' instead of libZenGL
     zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF WIN32}
     zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF DARWIN}
-    // libZenGL.dylib следует предварительно поместить в директорию
-    // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложения
-    // Также следует упомянуть, что лог-файл будет создаваться в корневой директории
-    // поэтому либо отключайте его, либо указывайте свой путь и имя, как описано в справке
+    // RU: libZenGL.dylib следует предварительно поместить в директорию
+    // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложения.
+    // Также следует упомянуть, что лог-файл будет создаваться в корневой директории,
+    // поэтому либо отключайте его, либо указывайте свой путь и имя, как описано в справке.
+    //
+    // EN: libZenGL.dylib must be placed into this directory
+    // MyApp.app/Contents/Frameworks/, where MyApp.app - Bundle of your application.
+    // Also you must know, that log-file will be created in root directory, so you must
+    // disable a log, or choose your own path and name for it. How to do this you can find
+    // in help.
     zglLoad( libZenGL );
     {$ENDIF}
   {$ENDIF}
 
-  // Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к
-  // домашеней директории пользователя, или к исполняемому файлу(не работает для Linux)
+  // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к
+  // домашеней директории пользователя, или к исполняемому файлу(не работает для GNU/Linux).
+  //
+  // EN: For loading/creating your own options/profiles/etc. you can get path to user home
+  // directory, or to executable file(not works for GNU/Linux).
   DirApp  := PChar( zgl_Get( APP_DIRECTORY ) );
   DirHome := PChar( zgl_Get( USR_HOMEDIR ) );
 
-  // Создаем таймер с интервалом 1000мс.
+  // RU: Создаем таймер с интервалом 1000мс.
+  // EN: Create a timer with interval 1000ms.
   timer_Add( @Timer, 1000 );
 
-  // Регистрируем процедуру, что выполнится сразу после инициализации ZenGL
+  // RU: Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
+  // EN: Register the procedure, that will be executed after ZenGL initialization.
   zgl_Reg( SYS_LOAD, @Init );
-  // Регистрируем процедуру, где будет происходить рендер
+  // RU: Регистрируем процедуру, где будет происходить рендер.
+  // EN: Register the render procedure.
   zgl_Reg( SYS_DRAW, @Draw );
-  // Регистрируем процедуру, которая будет принимать разницу времени между кадрами
+  // RU: Регистрируем процедуру, которая будет принимать разницу времени между кадрами.
+  // EN: Register the procedure, that will get delta time between the frames.
   zgl_Reg( SYS_UPDATE, @Update );
-  // Регистрируем процедуру, которая выполнится после завершения работы ZenGL
+  // RU: Регистрируем процедуру, которая выполнится после завершения работы ZenGL.
+  // EN: Register the procedure, that will be executed after ZenGL shutdown.
   zgl_Reg( SYS_EXIT, @Quit );
 
-  // Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использования этой кодировки
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использования этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
   zgl_Enable( APP_USE_UTF8 );
 
-  // Устанавливаем заголовок окна
+  // RU: Устанавливаем заголовок окна.
+  // EN: Set the caption of the window.
   wnd_SetCaption( '01 - Initialization' );
 
-  // Разрешаем курсор мыши
+  // RU: Разрешаем курсор мыши.
+  // EN: Allow to show the mouse cursor.
   wnd_ShowCursor( TRUE );
 
-  // Указываем первоначальные настройки
+  // RU: Указываем первоначальные настройки.
+  // EN: Set screen options.
   scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
 
-  // Инициализируем ZenGL
+  // RU: Инициализируем ZenGL.
+  // EN: Initialize ZenGL.
   zgl_Init();
 End.
