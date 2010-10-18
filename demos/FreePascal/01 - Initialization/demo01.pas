@@ -9,10 +9,10 @@ program demo01;
 //
 // EN: Application can be compiled with ZenGL statically or with using so/dll/dylib.
 // For this comment the define below. Advantage of static compilation is smaller
-// size of application, but it require including all units.
-// Also static compilation require to follow the terms of LGPL-license,
+// size of application, but it requires including all units.
+// Also static compilation requires to follow the terms of LGPL-license,
 // particularly you must open source code of application that use
-// source code of ZenGL. Using so/dll/dylib doesn't require this.
+// source code of ZenGL. Using so/dll/dylib doesn't requires this.
 {$DEFINE STATIC}
 
 uses
