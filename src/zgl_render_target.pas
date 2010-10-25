@@ -147,6 +147,7 @@ function rtarget_Add;
 {$ENDIF}
 {$IFDEF DARWIN}
     pbufferdAttr : array[ 0..31 ] of LongWord;
+    pixelFormat  : TAGLPixelFormat;
 {$ENDIF}
 begin
   Result := @managerRTarget.First;
@@ -370,22 +371,22 @@ begin
           end;
 
         DMGetGDeviceByDisplayID( DisplayIDType( scr_Display ), ogl_Device, FALSE );
-        ogl_Format := aglChoosePixelFormat( @ogl_Device, 1, @pbufferdAttr[ 0 ] );
-        if not Assigned( ogl_Format ) Then
+        pixelFormat := aglChoosePixelFormat( @ogl_Device, 1, @pbufferdAttr[ 0 ] );
+        if not Assigned( pixelFormat ) Then
           begin
             log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
             ogl_CanPBuffer := FALSE;
             exit;
           end;
 
-        pPBuffer.Context := aglCreateContext( ogl_Format, ogl_Context );
+        pPBuffer.Context := aglCreateContext( pixelFormat, ogl_Context );
         if not Assigned( pPBuffer.Context ) Then
           begin
             log_Add( 'PBuffer: aglCreateContext - failed' );
             ogl_CanPBuffer := FALSE;
             exit;
           end;
-        aglDestroyPixelFormat( ogl_Format );
+        aglDestroyPixelFormat( pixelFormat );
 
         if aglCreatePBuffer( Surface.Width, Surface.Height, GL_TEXTURE_2D, GL_RGBA, 0, @pPBuffer.PBuffer ) = GL_FALSE Then
           begin
@@ -445,12 +446,14 @@ procedure rtarget_Del;
 begin
   if not Assigned( Target ) Then exit;
 
+  tex_Del( Target.Surface );
+
   case Target._type of
     RT_TYPE_FBO:
       begin
         if glIsRenderBufferEXT( zglPFBO( Target.Handle ).RenderBuffer ) = GL_TRUE Then
           glDeleteRenderbuffersEXT( 1, @zglPFBO( Target.Handle ).RenderBuffer );
-        if glIsRenderBufferEXT( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
+        if glIsFramebufferEXT( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
           glDeleteFramebuffersEXT( 1, @zglPFBO( Target.Handle ).FrameBuffer );
       end;
     RT_TYPE_PBUFFER:
