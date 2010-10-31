@@ -15,7 +15,8 @@ uses
   zgl_fx,
   zgl_primitives_2d,
   zgl_textures,
-  zgl_textures_png, // Важный момент, обязательно один раз подключить модуль с поддержкой нужного формата данных
+  zgl_textures_png, // RU: Важный момент, обязательно один раз подключить модуль с поддержкой нужного формата данных.
+                    // EN: Important moment, unit that support needed format must be included one time.
   zgl_font,
   zgl_text,
   zgl_math_2d,
@@ -35,9 +36,11 @@ begin
   dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
   {$ENDIF}
 
-  // Загружаем данные о шрифте
+  // RU: Загружаем данные о шрифте.
+  // EN: Load the font.
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );
-  // Если же текстуры именуются без использования маски вида "FontName-pageN.ext", то загрузку можно произвести вручную следующим образом
+  // RU: Если же текстуры именуются без использования маски вида "FontName-pageN.ext", то загрузку можно произвести вручную следующим образом:
+  // EN: If textures were named without special mask - "FontName-pageN.ext", then it can be loaded this way:
   //for i := 0 to fnt.Count.Pages - 1 do
   //  fnt.Pages[ i ] := tex_LoadFromFile( dirRes + 'font-page' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
 end;
@@ -72,8 +75,10 @@ begin
   r.Y := 300 - 128;
   r.W := 384;
   r.H := 256;
-  // Если возникает вопрос почему я разделил текст на две части, то отвечу - FreePascal капризничает, и не хочет
+  // RU: Если возникает вопрос почему я разделил текст на две части, то отвечу - FreePascal капризничает, и не хочет
   // обрабатывать константные строки длиннее 255 символов :)
+  // EN: If you want to know why I use two parts of text, I can answer - because FreePascal doesn't like constant
+  // string with more than 255 symbols :)
   text_DrawInRect( fnt, r, 'Этот текст использует выравнивание по ширине и центрируется по вертикали.' +
                            ' Текст, который не помещается в пределах прямоугольника будет отсечен.', TEXT_HALIGN_JUSTIFY or TEXT_VALIGN_CENTER );
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
@@ -85,7 +90,8 @@ begin
   text_DrawInRect( fnt, r, 'Для переноса строк можно использовать LF-символ' + #10 + 'код которого равен 10 и обозначен в таблице Unicode как "Line Feed"', TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
-  // Выводим количество FPS в правом углу, используя text_GetWidth
+  // RU: Выводим количество FPS в правом углу, используя text_GetWidth.
+  // EN: Render frames per second in the top right corner using text_GetWidth.
   s := 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) );
   text_Draw( fnt, 800 - text_GetWidth( fnt, s ), 0, s );
   batch2d_End();
@@ -109,8 +115,10 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  // Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использования этой кодировки
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
   zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '04 - Text' );

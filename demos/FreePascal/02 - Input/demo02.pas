@@ -35,13 +35,16 @@ begin
   dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
   {$ENDIF}
 
-  // Загрузка шрифта и вывод текста освещен в "04 - Text"
+  // RU: Загрузка шрифта и вывод текста освещен в "04 - Text".
+  // EN: Font loading and text rendering will be described in this demo - "04 - Text".
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );
 
-  // Начнем считывать текст с клавиатуры и ограничимся 20 символами
+  // RU: Начнем считывать текст с клавиатуры и ограничимся 20 символами.
+  // EN: Start to read a text and set maximum count of symbols to 20.
   key_BeginReadText( something, 20 );
 
-  // Инициализируем поддержку джойстиков
+  // RU: Инициализируем поддержку джойстиков.
+  // EN: Initialize joystick support.
   joy_Init();
 end;
 
@@ -60,7 +63,8 @@ begin
 
   text_Draw( fnt, 400, 360, 'JOYSTICK', TEXT_HALIGN_CENTER );
 
-  // Вывод состояния осей и кнопок первого джойстика в системе
+  // RU: Вывод состояния осей и кнопок первого джойстика в системе.
+  // EN: Show the state of axes and buttons of first joystick in the system.
   text_Draw( fnt, 100, 400, 'Axis X: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_X ) ) );
   text_Draw( fnt, 100, 420, 'Axis Y: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Y ) ) );
   text_Draw( fnt, 100, 440, 'Axis Z: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Z ) ) );
@@ -92,24 +96,30 @@ procedure Timer;
 begin
   DEC( lineAlpha, 10 );
 
-  // Если зажат Alt и был нажат Enter - переключиться в полноэкранный или оконный режим
+  // RU: Если зажат Alt и был нажат Enter - переключиться в полноэкранный или оконный режим.
+  // EN: If Alt+Enter was pressed - switch to fullscreen or windowed mode.
   if key_Down( K_ALT ) and key_Press( K_ENTER ) Then
     begin
       FullScreen := not FullScreen;
       scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FullScreen, FALSE );
     end;
-  // По нажатию Escape завершить приложение
+  // RU: По нажатию Escape завершить приложение.
+  // EN: If Escape was pressed - shutdown the application.
   if key_Press( K_ESCAPE ) Then zgl_Exit();
 
-  // Если зажата левая кнопка мыши - заблокируем мышку по центру экрана
-  // смещения можно получать используя функции mouse_DX и mouse_DY вызывая их до mouse_Lock
+  // RU: Если зажата левая кнопка мыши - заблокируем мышку по центру экрана.
+  // Смещения можно получать используя функции mouse_DX и mouse_DY вызывая их до mouse_Lock.
+  // EN: If left mouse button is down - lock the mouse cursor in center of screen.
+  // Delta can be obtained from functions mouse_DX and mouse_DY by calling them before mouse_Lock.
   if mouse_Down( M_BLEFT ) Then
     mouse_Lock();
 
-  // "Считываем" в переменную введеный текст
+  // RU: "Считываем" в переменную введеный текст.
+  // EN: "Read" the text to variable.
   key_GetText( something );
 
-  // Обязательно очищаем состояния
+  // RU: Обязательно очищаем состояния.
+  // EN: Necessarily clear all the states.
   key_ClearState();
   mouse_ClearState();
   joy_ClearState();
@@ -125,8 +135,10 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  // Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использования этой кодировки
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
   zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '02 - Input' );
