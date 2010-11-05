@@ -1,5 +1,6 @@
 program demo09;
 
+{$R *.res}
 {$DEFINE STATIC}
 
 uses
@@ -41,10 +42,10 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
-  // РЎРѕР·РґР°РµРј RenderTarget Рё "С†РµРїР»СЏРµРј" РїСѓСЃС‚СѓСЋ С‚РµРєСЃС‚СѓСЂСѓ. Р’ РїСЂРѕС†РµСЃСЃРµ С‚РµРєСЃС‚СѓСЂСѓ РјРѕР¶РЅРѕ СЃРјРµРЅРёС‚СЊ РїСЂРёСЃРІРѕРёРІ
-  // rtarget.Surface РґСЂСѓРіСѓСЋ zglPTexture, РіР»Р°РІРЅРѕРµ С‡С‚Рѕ Р±С‹ СЃРѕРІРїР°РґР°Р»Рё СЂР°Р·РјРµСЂС‹ СЃ С‚РµРјРё, С‡С‚Рѕ СѓРєР°Р·Р°РЅС‹ РІ
-  // tex_CreateZero. РўР°СЂРіРµС‚Сѓ С‚Р°РєР¶Рµ СѓРєР°Р·Р°РЅ С„Р»Р°Рі RT_FULL_SCREEN, РѕС‚РІРµС‡Р°СЋС‰РёР№ Р·Р° С‚Рѕ, С‡С‚Рѕ Р±С‹ РІ С‚РµРєСЃС‚СѓСЂСѓ
-  // РїРѕРјРµС‰Р°Р»РѕСЃСЊ РІСЃРµ СЃРѕРґРµСЂР¶РёРјРѕРµ СЌРєСЂР°РЅР° Р° РЅРµ РѕР±Р»Р°СЃС‚СЊ 512x512(РІ СЂРµР¶РёРјРµ RT_DEFAULT)
+  // Создаем RenderTarget и "цепляем" пустую текстуру. В процессе текстуру можно сменить присвоив
+  // rtarget.Surface другую zglPTexture, главное что бы совпадали размеры с теми, что указаны в
+  // tex_CreateZero. Таргету также указан флаг RT_FULL_SCREEN, отвечающий за то, что бы в текстуру
+  // помещалось все содержимое экрана а не область 512x512(в режиме RT_DEFAULT)
   rtarget := rtarget_Add( tex_CreateZero( 512, 512, $00000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
 end;
 
@@ -52,17 +53,17 @@ procedure Draw;
   var
     i : Integer;
 begin
-  // RU: РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С‚РµРєСѓС‰РёР№ RenderTarget.
+  // RU: Устанавливаем текущий RenderTarget.
   // EN: Set current RenderTarget.
   rtarget_Set( rtarget );
-  // RU: Р РёСЃСѓРµРј РІ РЅРµРіРѕ
+  // RU: Рисуем в него
   // EN: Render to it.
   asprite2d_Draw( texTux, random( 800 - 64 ), random( 600 - 64 ), 64, 64, 0, random( 9 ) + 1 );
-  // RU: Р’РѕР·РІСЂР°С‰Р°РµРјСЃСЏ Рє РѕР±С‹С‡РЅРѕРјСѓ СЂРµРЅРґРµСЂСѓ.
+  // RU: Возвращаемся к обычному рендеру.
   // EN: Return to default rendering.
   rtarget_Set( nil );
 
-  // RU: РўРµРїРµСЂСЊ СЂРёСЃСѓРµРј СЃРѕРґРµСЂР¶РёРјРѕРµ RenderTarget'Р°.
+  // RU: Теперь рисуем содержимое RenderTarget'а.
   // EN: Render content of RenderTarget.
   ssprite2d_Draw( rtarget.Surface, ( 800 - 512 ) / 2, ( 600 - 512 ) / 2, 512, 512, 0 );
 
@@ -86,12 +87,6 @@ Begin
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
-
-  // RU: Рў.Рє. РјРѕРґСѓР»СЊ СЃРѕС…СЂР°РЅРµРЅ РІ РєРѕРґРёСЂРѕРІРєРµ UTF-8 Рё РІ РЅРµРј РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
-  // СЃР»РµРґСѓРµС‚ СѓРєР°Р·Р°С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ СЌС‚РѕР№ РєРѕРґРёСЂРѕРІРєРё.
-  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
-  // string variables.
-  zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '09 - Render to Texture' );
 

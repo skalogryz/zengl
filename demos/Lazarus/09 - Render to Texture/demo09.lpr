@@ -1,5 +1,6 @@
 program demo09;
 
+{$R *.res}
 {$DEFINE STATIC}
 
 uses

@@ -5,6 +5,7 @@
 // sprite engine from directory "extra"(unit zglSpriteEngine.pas)
 program demo07;
 
+{$R *.res}
 {$DEFINE STATIC}
 
 uses

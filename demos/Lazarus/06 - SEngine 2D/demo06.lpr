@@ -7,6 +7,7 @@
 // This example with classes can be find in this demo - "07 - SEngine 2D(OOP)"
 program demo06;
 
+{$R *.res}
 {$DEFINE STATIC}
 
 uses

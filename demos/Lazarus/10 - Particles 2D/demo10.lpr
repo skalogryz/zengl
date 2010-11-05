@@ -4,6 +4,7 @@
 // EN: Do not use this example! :)
 program demo10;
 
+{$R *.res}
 {$DEFINE STATIC}
 
 uses
