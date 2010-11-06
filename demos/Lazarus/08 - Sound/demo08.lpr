@@ -25,14 +25,12 @@ uses
                     // EN: Enabling support of wav.
   zgl_sound_ogg,    // RU: Включает поддержку ogg.
                     // Для декодирования ogg-файлов понадобятся libogg.dll, libvorbis.dll и libvorbisfile.dll.
-                    // Но можно обойтись и статической компиляцией, правда не стоит забывать о лицензии LGPL.
-                    // Все нужные файлы можно найти тут:
+                    // Но можно обойтись и статической сборкой. Все нужные файлы можно найти тут:
                     // http://andru-kun.inf.ua/zengl_extra.html
                     //
                     // EN: Enabling support of ogg.
                     // For decoding ogg-files will be needed libogg.dll, libvorbis.dll and libvorbisfile.dll.
-                    // Or not, if static compilation will be used. But don't forget about LGPL license.
-                    // All needed files can be find here:
+                    // Or not, if static linking will be used. All needed files can be find here:
                     // http://andru-kun.inf.ua/zengl_extra.html
   zgl_math_2d,
   zgl_collision_2d,
