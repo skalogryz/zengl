@@ -1,6 +1,6 @@
-// RU: Этот пример использует стандартный процедурный спрайтовый менеджер, который
-// сгодиться для решения простых задач или для любителей plain-style вроде меня :)
-// Этот же пример с использованием спрайтового менеджера на классах ищите в "07 - SEngine 2D(OOP)"
+// RU: Р­С‚РѕС‚ РїСЂРёРјРµСЂ РёСЃРїРѕР»СЊР·СѓРµС‚ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РїСЂРѕС†РµРґСѓСЂРЅС‹Р№ СЃРїСЂР°Р№С‚РѕРІС‹Р№ РјРµРЅРµРґР¶РµСЂ, РєРѕС‚РѕСЂС‹Р№
+// СЃРіРѕРґРёС‚СЊСЃСЏ РґР»СЏ СЂРµС€РµРЅРёСЏ РїСЂРѕСЃС‚С‹С… Р·Р°РґР°С‡ РёР»Рё РґР»СЏ Р»СЋР±РёС‚РµР»РµР№ plain-style РІСЂРѕРґРµ РјРµРЅСЏ :)
+// Р­С‚РѕС‚ Р¶Рµ РїСЂРёРјРµСЂ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃРїСЂР°Р№С‚РѕРІРѕРіРѕ РјРµРЅРµРґР¶РµСЂР° РЅР° РєР»Р°СЃСЃР°С… РёС‰РёС‚Рµ РІ "07 - SEngine 2D(OOP)"
 //
 // EN: This example use standard procedural sprite engine that can be used for
 // simple tasks or for anything if you like plain-style code as me :)
@@ -47,7 +47,7 @@ procedure MikuInit( const Sprite : zglPSprite2D );
 begin
   Sprite.X := 800 + random( 800 );
   Sprite.Y := random( 600 - 128 );
-  // RU: Задаем скорость движения. В пользовательском параметре Data выделим память под структуру zglTPoint2D.
+  // RU: Р—Р°РґР°РµРј СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ. Р’ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРј РїР°СЂР°РјРµС‚СЂРµ Data РІС‹РґРµР»РёРј РїР°РјСЏС‚СЊ РїРѕРґ СЃС‚СЂСѓРєС‚СѓСЂСѓ zglTPoint2D.
   // EN: Set the moving speed. Allocate memory for structure zglTPoint2D in userspace parameter "Data".
   zgl_GetMem( Sprite.Data, SizeOf( zglTPoint2D ) );
   with zglTPoint2D( Sprite.Data^ ) do
@@ -76,10 +76,10 @@ begin
       Frame := Frame + ( abs( speed.X ) + abs( speed.Y ) ) / 25;
       if Frame > 8 Then
         Frame := 1;
-      // RU: Если спрайт выходит за пределы по X, сразу же удаляем его.
+      // RU: Р•СЃР»Рё СЃРїСЂР°Р№С‚ РІС‹С…РѕРґРёС‚ Р·Р° РїСЂРµРґРµР»С‹ РїРѕ X, СЃСЂР°Р·Сѓ Р¶Рµ СѓРґР°Р»СЏРµРј РµРіРѕ.
       // EN: Delete the sprite if it goes beyond X.
       if X < -128 Then sengine2d_DelSprite( ID );
-      // RU: Если спрайт выходит за пределы по Y, ставим его в очередь на удаление.
+      // RU: Р•СЃР»Рё СЃРїСЂР°Р№С‚ РІС‹С…РѕРґРёС‚ Р·Р° РїСЂРµРґРµР»С‹ РїРѕ Y, СЃС‚Р°РІРёРј РµРіРѕ РІ РѕС‡РµСЂРµРґСЊ РЅР° СѓРґР°Р»РµРЅРёРµ.
       // EN: Add sprite to queue for delete if it goes beyond Y.
       if Y < -128 Then Destroy := TRUE;
       if Y > 600  Then Destroy := TRUE;
@@ -88,32 +88,32 @@ end;
 
 procedure MikuFree( const Sprite : zglPSprite2D );
 begin
-  // RU: Очистим ранее выделенную память.
+  // RU: РћС‡РёСЃС‚РёРј СЂР°РЅРµРµ РІС‹РґРµР»РµРЅРЅСѓСЋ РїР°РјСЏС‚СЊ.
   // EN: Free the memory allocated for Data.
   zgl_FreeMem( Sprite.Data );
 end;
 
-// RU: Добавить 100 спрайтов.
+// RU: Р”РѕР±Р°РІРёС‚СЊ 100 СЃРїСЂР°Р№С‚РѕРІ.
 // EN: Add 100 sprites.
 procedure AddMiku;
   var
     i : Integer;
 begin
-  // RU: При добавлении спрайта в менеджер спрайтов указывается текстура, слой(положение по Z) и
-  // указатели на основные функции - Инициализация, Рендер, Обработка и Уничтожение.
+  // RU: РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё СЃРїСЂР°Р№С‚Р° РІ РјРµРЅРµРґР¶РµСЂ СЃРїСЂР°Р№С‚РѕРІ СѓРєР°Р·С‹РІР°РµС‚СЃСЏ С‚РµРєСЃС‚СѓСЂР°, СЃР»РѕР№(РїРѕР»РѕР¶РµРЅРёРµ РїРѕ Z) Рё
+  // СѓРєР°Р·Р°С‚РµР»Рё РЅР° РѕСЃРЅРѕРІРЅС‹Рµ С„СѓРЅРєС†РёРё - РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ, Р РµРЅРґРµСЂ, РћР±СЂР°Р±РѕС‚РєР° Рё РЈРЅРёС‡С‚РѕР¶РµРЅРёРµ.
   // EN: For adding sprite to sprite engine must be set next parameters: texture, layer(Z-coordinate) and
   // pointers to Initialization, Render, Process and Destroy functions.
   for i := 1 to 100 do
     sengine2d_AddSprite( texMiku, random( 10 ), @MikuInit, @MikuDraw, @MikuProc, @MikuFree );
 end;
 
-// RU: Удалить 100 спрайтов.
+// RU: РЈРґР°Р»РёС‚СЊ 100 СЃРїСЂР°Р№С‚РѕРІ.
 // EN: Delete 100 sprites.
 procedure DelMiku;
   var
     i : Integer;
 begin
-  // RU: Удалим 100 спрайтов со случайным ID.
+  // RU: РЈРґР°Р»РёРј 100 СЃРїСЂР°Р№С‚РѕРІ СЃРѕ СЃР»СѓС‡Р°Р№РЅС‹Рј ID.
   // EN: Delete 100 sprites with random ID.
   for i := 1 to 100 do
     sengine2d_DelSprite( random( sengine2d.Count ) );
@@ -132,10 +132,10 @@ begin
   texMiku := tex_LoadFromFile( dirRes + 'miku.png', $FF000000, TEX_DEFAULT_2D );
   tex_SetFrameSize( texMiku, 128, 128 );
 
-  // RU: Устанавливаем текущим менеджером спрайтов свой.
+  // RU: РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С‚РµРєСѓС‰РёРј РјРµРЅРµРґР¶РµСЂРѕРј СЃРїСЂР°Р№С‚РѕРІ СЃРІРѕР№.
   // EN: Set own sprite engine as current.
   sengine2d_Set( @sengine2d );
-  // RU: Создадим 1000 спрайтов Miku-chan :)
+  // RU: РЎРѕР·РґР°РґРёРј 1000 СЃРїСЂР°Р№С‚РѕРІ Miku-chan :)
   // EN: Create 1000 sprites of Miku-chan :)
   for i := 0 to 9 do
     AddMiku();
@@ -146,7 +146,7 @@ end;
 procedure Draw;
 begin
   batch2d_Begin();
-  // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
+  // RU: Р РёСЃСѓРµРј РІСЃРµ СЃРїСЂР°Р№С‚С‹ РЅР°С…РѕРґСЏС‰РёРµСЃСЏ РІ С‚РµРєСѓС‰РµРј СЃРїСЂР°Р№С‚РѕРІРѕРј РјРµРЅРµРґР¶РµСЂРµ.
   // EN: Render all sprites contained in current sprite engine.
   if time > 255 Then
     sengine2d_Draw();
@@ -174,10 +174,10 @@ procedure Timer;
 begin
   INC( time, 2 );
 
-  // RU: Выполняем обработку всех спрайтов в текущем спрайтовом менеджере.
+  // RU: Р’С‹РїРѕР»РЅСЏРµРј РѕР±СЂР°Р±РѕС‚РєСѓ РІСЃРµС… СЃРїСЂР°Р№С‚РѕРІ РІ С‚РµРєСѓС‰РµРј СЃРїСЂР°Р№С‚РѕРІРѕРј РјРµРЅРµРґР¶РµСЂРµ.
   // EN: Process all sprites contained in current sprite engine.
   sengine2d_Proc();
-  // RU: По нажатию пробела очистить все спрайты.
+  // RU: РџРѕ РЅР°Р¶Р°С‚РёСЋ РїСЂРѕР±РµР»Р° РѕС‡РёСЃС‚РёС‚СЊ РІСЃРµ СЃРїСЂР°Р№С‚С‹.
   // EN: Delete all sprites if space was pressed.
   if key_Press( K_SPACE ) Then sengine2d_ClearAll();
   if key_Press( K_UP ) Then AddMiku();
@@ -188,7 +188,7 @@ end;
 
 procedure Quit;
 begin
-  // RU: Очищаем память от созданных спрайтов.
+  // RU: РћС‡РёС‰Р°РµРј РїР°РјСЏС‚СЊ РѕС‚ СЃРѕР·РґР°РЅРЅС‹С… СЃРїСЂР°Р№С‚РѕРІ.
   // EN: Free allocated memory for sprites.
   sengine2d_Set( @sengine2d );
   sengine2d_ClearAll();
@@ -208,8 +208,8 @@ Begin
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_EXIT, @Quit );
 
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
+  // RU: Рў.Рє. РјРѕРґСѓР»СЊ СЃРѕС…СЂР°РЅРµРЅ РІ РєРѕРґРёСЂРѕРІРєРµ UTF-8 Рё РІ РЅРµРј РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+  // СЃР»РµРґСѓРµС‚ СѓРєР°Р·Р°С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ СЌС‚РѕР№ РєРѕРґРёСЂРѕРІРєРё.
   // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
   // string variables.
   zgl_Enable( APP_USE_UTF8 );

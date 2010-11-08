@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC4              }
-{ date:    2010.10.12           }
+{ date:    2010.11.08           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -183,6 +183,7 @@ var
   scr_SetFSAA           : procedure( const FSAA : Byte );
   scr_SetOptions        : procedure( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
   scr_CorrectResolution : procedure( const Width, Height : Word );
+  scr_ReadPixels        : procedure( var pData : Pointer; const X, Y, Width, Height : Word );
 
 // GL
 const
@@ -245,11 +246,11 @@ var
 
 // MOUSE
 const
-  M_BLEFT  = 0;
-  M_BMIDLE = 1;
-  M_BRIGHT = 2;
-  M_WUP    = 0;
-  M_WDOWN  = 1;
+  M_BLEFT   = 0;
+  M_BMIDDLE = 1;
+  M_BRIGHT  = 2;
+  M_WUP     = 0;
+  M_WDOWN   = 1;
 
 var
   mouse_X          : function : Integer;
@@ -510,25 +511,21 @@ const
   TEX_CLAMP             = $000002;
   TEX_REPEAT            = $000004;
   TEX_COMPRESS          = $000008;
+
   TEX_CONVERT_TO_POT    = $000010;
+  TEX_CALCULATE_ALPHA   = $000020;
 
-  TEX_GRAYSCALE         = $000020;
-  TEX_INVERT            = $000040;
-  TEX_CUSTOM_EFFECT     = $000080;
+  TEX_GRAYSCALE         = $000040;
+  TEX_INVERT            = $000080;
+  TEX_CUSTOM_EFFECT     = $000100;
 
-  TEX_FILTER_NEAREST    = $000100;
-  TEX_FILTER_LINEAR     = $000200;
-  TEX_FILTER_BILINEAR   = $000400;
-  TEX_FILTER_TRILINEAR  = $000800;
-  TEX_FILTER_ANISOTROPY = $001000;
+  TEX_FILTER_NEAREST    = $000200;
+  TEX_FILTER_LINEAR     = $000400;
+  TEX_FILTER_BILINEAR   = $000800;
+  TEX_FILTER_TRILINEAR  = $001000;
+  TEX_FILTER_ANISOTROPY = $002000;
 
-  TEX_RGB               = $002000;
-  TEX_CALCULATE_ALPHA   = $004000;
-
-  TEX_QUALITY_LOW       = $400000;
-  TEX_QUALITY_MEDIUM    = $800000;
-
-  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_CONVERT_TO_POT or TEX_FILTER_LINEAR or TEX_CALCULATE_ALPHA;
+  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT or TEX_CALCULATE_ALPHA;
 
 var
   tex_Add            : function : zglPTexture;
@@ -539,7 +536,8 @@ var
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
   tex_SetMask        : function( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
-  tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
+  tex_SetData        : procedure( const Texture : zglPTexture; const pData : Pointer; const X, Y, Width, Height : Word; const Stride : Integer = 0 );
+  tex_GetData        : procedure( const Texture : zglPTexture; var pData : Pointer );
   tex_Filter         : procedure( Texture : zglPTexture; const Flags : LongWord );
   tex_SetAnisotropy  : procedure( const Level : Byte );
 
@@ -631,6 +629,7 @@ const
 var
   fx_SetBlendMode : procedure( const Mode : Byte );
   fx_SetColorMode : procedure( const Mode : Byte );
+  fx_SetColorMask : procedure( const R, G, B, Alpha : Boolean );
 
 // FX 2D
 const
@@ -1312,6 +1311,7 @@ begin
       scr_SetFSAA := dlsym( zglLib, 'scr_SetFSAA' );
       scr_SetOptions := dlsym( zglLib, 'scr_SetOptions' );
       scr_CorrectResolution := dlsym( zglLib, 'scr_CorrectResolution' );
+      scr_ReadPixels := dlsym( zglLib, 'scr_ReadPixels' );
 
       ini_LoadFromFile := dlsym( zglLib, 'ini_LoadFromFile' );
       ini_SaveToFile := dlsym( zglLib, 'ini_SaveToFile' );
@@ -1371,6 +1371,7 @@ begin
       tex_LoadFromMemory := dlsym( zglLib, 'tex_LoadFromMemory' );
       tex_SetFrameSize := dlsym( zglLib, 'tex_SetFrameSize' );
       tex_SetMask := dlsym( zglLib, 'tex_SetMask' );
+      tex_SetData := dlsym( zglLib, 'tex_SetData' );
       tex_GetData := dlsym( zglLib, 'tex_GetData' );
       tex_Filter := dlsym( zglLib, 'tex_Filter' );
       tex_SetAnisotropy := dlsym( zglLib, 'tex_SetAnisotropy' );
@@ -1398,6 +1399,7 @@ begin
 
       fx_SetBlendMode := dlsym( zglLib, 'fx_SetBlendMode' );
       fx_SetColorMode := dlsym( zglLib, 'fx_SetColorMode' );
+      fx_SetColorMask := dlsym( zglLib, 'fx_SetColorMask' );
       fx2d_SetColor := dlsym( zglLib, 'fx2d_SetColor' );
       fx2d_SetVCA := dlsym( zglLib, 'fx2d_SetVCA' );
       fx2d_SetVertexes := dlsym( zglLib, 'fx2d_SetVertexes' );

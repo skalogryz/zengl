@@ -36,15 +36,15 @@ begin
   dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
   {$ENDIF}
 
-  // RU: Загрузка шрифта и вывод текста освещен в "04 - Text".
+  // RU: Р—Р°РіСЂСѓР·РєР° С€СЂРёС„С‚Р° Рё РІС‹РІРѕРґ С‚РµРєСЃС‚Р° РѕСЃРІРµС‰РµРЅ РІ "04 - Text".
   // EN: Font loading and text rendering will be described in this demo - "04 - Text".
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );
 
-  // RU: Начнем считывать текст с клавиатуры и ограничимся 20 символами.
+  // RU: РќР°С‡РЅРµРј СЃС‡РёС‚С‹РІР°С‚СЊ С‚РµРєСЃС‚ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹ Рё РѕРіСЂР°РЅРёС‡РёРјСЃСЏ 20 СЃРёРјРІРѕР»Р°РјРё.
   // EN: Start to read a text and set maximum count of symbols to 20.
   key_BeginReadText( something, 20 );
 
-  // RU: Инициализируем поддержку джойстиков.
+  // RU: РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РїРѕРґРґРµСЂР¶РєСѓ РґР¶РѕР№СЃС‚РёРєРѕРІ.
   // EN: Initialize joystick support.
   joy_Init();
 end;
@@ -64,7 +64,7 @@ begin
 
   text_Draw( fnt, 400, 360, 'JOYSTICK', TEXT_HALIGN_CENTER );
 
-  // RU: Вывод состояния осей и кнопок первого джойстика в системе.
+  // RU: Р’С‹РІРѕРґ СЃРѕСЃС‚РѕСЏРЅРёСЏ РѕСЃРµР№ Рё РєРЅРѕРїРѕРє РїРµСЂРІРѕРіРѕ РґР¶РѕР№СЃС‚РёРєР° РІ СЃРёСЃС‚РµРјРµ.
   // EN: Show the state of axes and buttons of first joystick in the system.
   text_Draw( fnt, 100, 400, 'Axis X: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_X ) ) );
   text_Draw( fnt, 100, 420, 'Axis Y: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Y ) ) );
@@ -97,29 +97,29 @@ procedure Timer;
 begin
   DEC( lineAlpha, 10 );
 
-  // RU: Если зажат Alt и был нажат Enter - переключиться в полноэкранный или оконный режим.
+  // RU: Р•СЃР»Рё Р·Р°Р¶Р°С‚ Alt Рё Р±С‹Р» РЅР°Р¶Р°С‚ Enter - РїРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РІ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ РёР»Рё РѕРєРѕРЅРЅС‹Р№ СЂРµР¶РёРј.
   // EN: If Alt+Enter was pressed - switch to fullscreen or windowed mode.
   if key_Down( K_ALT ) and key_Press( K_ENTER ) Then
     begin
       FullScreen := not FullScreen;
       scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FullScreen, FALSE );
     end;
-  // RU: По нажатию Escape завершить приложение.
+  // RU: РџРѕ РЅР°Р¶Р°С‚РёСЋ Escape Р·Р°РІРµСЂС€РёС‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ.
   // EN: If Escape was pressed - shutdown the application.
   if key_Press( K_ESCAPE ) Then zgl_Exit();
 
-  // RU: Если зажата левая кнопка мыши - заблокируем мышку по центру экрана.
-  // Смещения можно получать используя функции mouse_DX и mouse_DY вызывая их до mouse_Lock.
+  // RU: Р•СЃР»Рё Р·Р°Р¶Р°С‚Р° Р»РµРІР°СЏ РєРЅРѕРїРєР° РјС‹С€Рё - Р·Р°Р±Р»РѕРєРёСЂСѓРµРј РјС‹С€РєСѓ РїРѕ С†РµРЅС‚СЂСѓ СЌРєСЂР°РЅР°.
+  // РЎРјРµС‰РµРЅРёСЏ РјРѕР¶РЅРѕ РїРѕР»СѓС‡Р°С‚СЊ РёСЃРїРѕР»СЊР·СѓСЏ С„СѓРЅРєС†РёРё mouse_DX Рё mouse_DY РІС‹Р·С‹РІР°СЏ РёС… РґРѕ mouse_Lock.
   // EN: If left mouse button is down - lock the mouse cursor in center of screen.
   // Delta can be obtained from functions mouse_DX and mouse_DY by calling them before mouse_Lock.
   if mouse_Down( M_BLEFT ) Then
     mouse_Lock();
 
-  // RU: "Считываем" в переменную введеный текст.
+  // RU: "РЎС‡РёС‚С‹РІР°РµРј" РІ РїРµСЂРµРјРµРЅРЅСѓСЋ РІРІРµРґРµРЅС‹Р№ С‚РµРєСЃС‚.
   // EN: "Read" the text to variable.
   key_GetText( something );
 
-  // RU: Обязательно очищаем состояния.
+  // RU: РћР±СЏР·Р°С‚РµР»СЊРЅРѕ РѕС‡РёС‰Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёСЏ.
   // EN: Necessarily clear all the states.
   key_ClearState();
   mouse_ClearState();
@@ -136,8 +136,8 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
+  // RU: Рў.Рє. РјРѕРґСѓР»СЊ СЃРѕС…СЂР°РЅРµРЅ РІ РєРѕРґРёСЂРѕРІРєРµ UTF-8 Рё РІ РЅРµРј РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+  // СЃР»РµРґСѓРµС‚ СѓРєР°Р·Р°С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ СЌС‚РѕР№ РєРѕРґРёСЂРѕРІРєРё.
   // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
   // string variables.
   zgl_Enable( APP_USE_UTF8 );

@@ -33,23 +33,19 @@ const
   TEX_CLAMP             = $000002;
   TEX_REPEAT            = $000004;
   TEX_COMPRESS          = $000008;
+
   TEX_CONVERT_TO_POT    = $000010;
+  TEX_CALCULATE_ALPHA   = $000020;
 
-  TEX_GRAYSCALE         = $000020;
-  TEX_INVERT            = $000040;
-  TEX_CUSTOM_EFFECT     = $000080;
+  TEX_GRAYSCALE         = $000040;
+  TEX_INVERT            = $000080;
+  TEX_CUSTOM_EFFECT     = $000100;
 
-  TEX_FILTER_NEAREST    = $000100;
-  TEX_FILTER_LINEAR     = $000200;
-  TEX_FILTER_BILINEAR   = $000400;
-  TEX_FILTER_TRILINEAR  = $000800;
-  TEX_FILTER_ANISOTROPY = $001000;
-
-  TEX_RGB               = $002000;
-  TEX_CALCULATE_ALPHA   = $004000;
-
-  TEX_QUALITY_LOW       = $400000;
-  TEX_QUALITY_MEDIUM    = $800000;
+  TEX_FILTER_NEAREST    = $000200;
+  TEX_FILTER_LINEAR     = $000400;
+  TEX_FILTER_BILINEAR   = $000800;
+  TEX_FILTER_TRILINEAR  = $001000;
+  TEX_FILTER_ANISOTROPY = $002000;
 
   TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT or TEX_CALCULATE_ALPHA;
 
@@ -108,10 +104,10 @@ procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
 procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single );
 procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : Word );
 procedure tex_CalcInvert( var pData : Pointer; const Width, Height : Word );
-procedure tex_CalcRGB( var pData : Pointer; const Width, Height : Word );
 procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : LongWord; const Width, Height : Word );
 
-procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSize : Integer );
+procedure tex_SetData( const Texture : zglPTexture; const pData : Pointer; const X, Y, Width, Height : Word; const Stride : Integer = 0 );
+procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer );
 
 procedure zeroce( var pData : Pointer; const Width, Height : Word );
 
@@ -165,7 +161,7 @@ end;
 
 procedure tex_Create;
   var
-    format, iformat, cformat : LongWord;
+    cformat : LongWord;
 begin
   tex_CalcFlags( Texture, pData );
   if Texture.Flags and TEX_COMPRESS >= 1 Then
@@ -178,38 +174,25 @@ begin
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-  if Texture.Flags and TEX_RGB > 0 Then
-    begin
-      format  := GL_RGB;
-      iformat := GL_RGB;
-      if ogl_CanCompressE Then
-        cformat := GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-      else
-        cformat := GL_COMPRESSED_RGB_ARB;
-    end else
-      begin
-        format  := GL_RGBA;
-        iformat := GL_RGBA;
-        if ogl_CanCompressE Then
-          cformat := GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-        else
-          cformat := GL_COMPRESSED_RGBA_ARB;
-      end;
+  if ogl_CanCompressE Then
+    cformat := GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+  else
+    cformat := GL_COMPRESSED_RGBA_ARB;
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
   if Texture.Flags and TEX_MIPMAP = 0 Then
     begin
       if Texture.Flags and TEX_COMPRESS = 0 Then
-        glTexImage2D( GL_TEXTURE_2D, 0, iformat, Texture.Width, Texture.Height, 0, format, GL_UNSIGNED_BYTE, pData )
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData )
       else
-        glTexImage2D( GL_TEXTURE_2D, 0, cformat, Texture.Width, Texture.Height, 0, format, GL_UNSIGNED_BYTE, pData );
+        glTexImage2D( GL_TEXTURE_2D, 0, cformat, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
     end else
       begin
         if Texture.Flags and TEX_COMPRESS = 0 Then
-          gluBuild2DMipmaps( GL_TEXTURE_2D, iformat, Texture.Width, Texture.Height, format, GL_UNSIGNED_BYTE, pData )
+          gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, Texture.Width, Texture.Height, GL_RGBA, GL_UNSIGNED_BYTE, pData )
         else
-          gluBuild2DMipmaps( GL_TEXTURE_2D, cformat, Texture.Width, Texture.Height, format, GL_UNSIGNED_BYTE, pData )
+          gluBuild2DMipmaps( GL_TEXTURE_2D, cformat, Texture.Width, Texture.Height, GL_RGBA, GL_UNSIGNED_BYTE, pData )
       end;
 
   glDisable( GL_TEXTURE_2D );
@@ -225,8 +208,8 @@ end;
 
 function tex_CreateZero;
   var
-    i       : LongWord;
-    pData   : Pointer;
+    i     : LongWord;
+    pData : Pointer;
 begin
   GetMem( pData, Width * Height * 4 );
   for i := 0 to Width * Height - 1 do
@@ -286,9 +269,7 @@ begin
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Flags;
-  if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
-    Result.Flags := Flags xor TEX_CALCULATE_ALPHA;
-  if ( Result.Flags and TEX_RGB = 0 ) and ( Result.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+  if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -328,9 +309,7 @@ begin
   Result.FramesX := 1;
   Result.FramesY := 1;
   Result.Flags   := Flags;
-  if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
-    Result.Flags := Flags xor TEX_CALCULATE_ALPHA;
-  if ( Result.Flags and TEX_RGB = 0 ) and ( Result.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+  if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -341,17 +320,6 @@ procedure tex_SetFrameSize;
 begin
   if not Assigned( Texture ) Then exit;
 
-  if Texture.Flags and TEX_QUALITY_MEDIUM > 0 Then
-    begin
-      FrameWidth := FrameWidth div 2;
-      FrameHeight := FrameHeight div 2;
-    end else
-      if Texture.Flags and TEX_QUALITY_LOW > 0 Then
-        begin
-          FrameWidth := FrameWidth div 4;
-          FrameHeight := FrameHeight div 4;
-        end;
-
   Texture.FramesX := Round( Texture.Width ) div FrameWidth;
   Texture.FramesY := Round( Texture.Height ) div FrameHeight;
   tex_CalcTexCoords( Texture^ );
@@ -359,28 +327,28 @@ end;
 
 function tex_SetMask;
   var
-    i, j         : Integer;
-    tSize, mSize : Integer;
-    tData, mData : Pointer;
-    pData        : Pointer;
-    rW, mW       : Integer;
+    i, j   : Integer;
+    tData  : Pointer;
+    mData  : Pointer;
+    pData  : Pointer;
+    rW, mW : Integer;
 begin
   if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) Then exit;
 
   rW := Round( Texture.Width / Texture.U );
   mW := Round( Mask.Width / Mask.U );
 
-  tex_GetData( Texture, tData, tSize );
-  tex_GetData( Mask, mData, mSize );
+  tex_GetData( Texture, tData );
+  tex_GetData( Mask, mData );
   GetMem( pData, Texture.Width * Texture.Height * 4 );
 
   for i := 0 to Texture.Width - 1 do
     for j := 0 to Texture.Height - 1 do
       begin
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 0 )^ := PByte( Ptr( tData ) + i * tSize + j * rW * tSize + 0 )^;
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 1 )^ := PByte( Ptr( tData ) + i * tSize + j * rW * tSize + 1 )^;
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 2 )^ := PByte( Ptr( tData ) + i * tSize + j * rW * tSize + 2 )^;
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 3 )^ := PByte( Ptr( mData ) + i * mSize + j * mW * mSize + 0 )^;
+        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 0 )^ := PByte( Ptr( tData ) + i * 4 + j * rW * 4 + 0 )^;
+        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 1 )^ := PByte( Ptr( tData ) + i * 4 + j * rW * 4 + 1 )^;
+        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 2 )^ := PByte( Ptr( tData ) + i * 4 + j * rW * 4 + 2 )^;
+        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 + j * mW * 4 + 0 )^;
       end;
 
   Result         := tex_Add();
@@ -390,7 +358,11 @@ begin
   Result.V       := 1;
   Result.FramesX := 1;
   Result.FramesY := 1;
-  Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 ) xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 );
+  Result.Flags   := Texture.Flags;
+  if Result.Flags and TEX_GRAYSCALE > 0 Then
+    Result.Flags := Result.Flags xor TEX_GRAYSCALE;
+  if Result.Flags and TEX_INVERT > 0 Then
+    Result.Flags := Result.Flags xor TEX_INVERT;
   tex_Create( Result^, pData );
   tex_Del( Texture );
 
@@ -519,8 +491,6 @@ begin
     tex_CalcCustomEffect( pData, Texture.Width, Texture.Height );
   if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
     tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
-  if Texture.Flags and TEX_RGB > 0 Then
-    tex_CalcRGB( pData, Texture.Width, Texture.Height );
 end;
 
 procedure tex_CalcPOT;
@@ -588,19 +558,6 @@ begin
       PByte( p + 1 )^ := 255 - PByte( p + 1 )^;
       PByte( p + 2 )^ := 255 - PByte( p + 2 )^;
     end;
-end;
-
-procedure tex_CalcRGB;
-  var
-    i : LongWord;
-begin
-  for i := 0 to Width * Height - 1 do
-    begin
-      PByte( Ptr( pData ) + i * 3 + 0 )^ := PByte( Ptr( pData ) + i * 4 + 0 )^;
-      PByte( Ptr( pData ) + i * 3 + 1 )^ := PByte( Ptr( pData ) + i * 4 + 1 )^;
-      PByte( Ptr( pData ) + i * 3 + 2 )^ := PByte( Ptr( pData ) + i * 4 + 2 )^;
-    end;
-  ReallocMem( pData, Width * Height * 3 );
 end;
 
 procedure tex_CalcTransparent;
@@ -693,23 +650,44 @@ begin
       end;
 end;
 
-procedure tex_GetData;
+procedure tex_SetData;
 begin
+  if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then
+    exit;
+
   if b2d_Started Then
     begin
       batch2d_Flush();
       b2d_New := TRUE;
     end;
 
-  pSize := 3 + Byte( Texture.Flags and TEX_RGB = 0 );
-  GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * pSize );
+  glEnable( GL_TEXTURE_2D );
+  glPixelStorei( GL_UNPACK_ROW_LENGTH, Stride );
+  glBindTexture( GL_TEXTURE_2D, Texture.ID );
+  glTexSubImage2D( GL_TEXTURE_2D, 0, X, Texture.Height - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+  glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
+  glDisable( GL_TEXTURE_2D );
+end;
+
+procedure tex_GetData;
+begin
+  if not Assigned( Texture ) Then
+    begin
+      pData := nil;
+      exit;
+    end;
+
+  if b2d_Started Then
+    begin
+      batch2d_Flush();
+      b2d_New := TRUE;
+    end;
+
+  GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * 4 );
 
   glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
-  if Texture.Flags and TEX_RGB > 0 Then
-    glGetTexImage( GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, pData )
-  else
-    glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+  glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glDisable( GL_TEXTURE_2D );
 end;
 

@@ -46,6 +46,7 @@ const
 
 procedure fx_SetBlendMode( const Mode : Byte );
 procedure fx_SetColorMode( const Mode : Byte );
+procedure fx_SetColorMask( const R, G, B, Alpha : Boolean );
 
 procedure fx2d_SetColor( const Color : LongWord );
 procedure fx2d_SetVCA( const c1, c2, c3, c4 : LongWord; const a1, a2, a3, a4 : Byte );
@@ -147,6 +148,11 @@ begin
         glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
       end;
   end;
+end;
+
+procedure fx_SetColorMask;
+begin
+  glColorMask( Byte( R ), Byte( G ), Byte( B ), Byte( Alpha ) );
 end;
 
 procedure fx2d_SetColor;

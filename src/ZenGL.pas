@@ -65,6 +65,13 @@ uses
   zgl_font,
   zgl_text,
 
+  {$IFDEF USE_GUI}
+  zgl_gui_main,
+  zgl_gui_types,
+  zgl_gui_process,
+  zgl_gui_render,
+  {$ENDIF}
+
   zgl_primitives_2d,
   {$IFDEF USE_SENGINE}
   zgl_sengine_2d,
@@ -121,6 +128,7 @@ exports
   scr_SetFSAA              name prefix + 'scr_SetFSAA',
   scr_SetOptions           name prefix + 'scr_SetOptions',
   scr_CorrectResolution    name prefix + 'scr_CorrectResolution',
+  scr_ReadPixels           name prefix + 'scr_ReadPixels',
 
   // INI
   ini_LoadFromFile         name prefix + 'ini_LoadFromFile',
@@ -188,6 +196,7 @@ exports
   tex_LoadFromMemory       name prefix + 'tex_LoadFromMemory',
   tex_SetFrameSize         name prefix + 'tex_SetFrameSize',
   tex_SetMask              name prefix + 'tex_SetMask',
+  tex_SetData              name prefix + 'tex_SetData',
   tex_GetData              name prefix + 'tex_GetData',
   tex_Filter               name prefix + 'tex_Filter',
   tex_SetAnisotropy        name prefix + 'tex_SetAnisotropy',
@@ -223,6 +232,7 @@ exports
   // FX
   fx_SetBlendMode          name prefix + 'fx_SetBlendMode',
   fx_SetColorMode          name prefix + 'fx_SetColorMode',
+  fx_SetColorMask          name prefix + 'fx_SetColorMask',
   // FX 2D
   fx2d_SetColor            name prefix + 'fx2d_SetColor',
   fx2d_SetVCA              name prefix + 'fx2d_SetVCA',
@@ -290,6 +300,15 @@ exports
   text_DrawInRectEx        name prefix + 'text_DrawInRectEx',
   text_GetWidth            name prefix + 'text_GetWidth',
   textFx_SetLength         name prefix + 'textFx_SetLength',
+
+  // GUI
+  {$IFDEF USE_GUI}
+  gui_Init                 name prefix + 'gui_Init',
+  gui_Draw                 name prefix + 'gui_Draw',
+  gui_Proc                 name prefix + 'gui_Proc',
+  gui_AddWidget            name prefix + 'gui_AddWidget',
+  gui_DelWidget            name prefix + 'gui_DelWidget',
+  {$ENDIF}
 
   // Sound
   {$IFDEF USE_SOUND}

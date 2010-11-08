@@ -21,11 +21,11 @@ uses
   zgl_text,
   zgl_sprite_2d,
   zgl_sound,
-  zgl_sound_wav,    // RU: Âêëş÷àåò ïîääåğæêó wav.
+  zgl_sound_wav,    // RU: Ğ’ĞºĞ»ÑÑ‡Ğ°ĞµÑ‚ Ğ¿Ğ¾Ğ´Ğ´ĞµÑ€Ğ¶ĞºÑƒ wav.
                     // EN: Enabling support of wav.
-  zgl_sound_ogg,    // RU: Âêëş÷àåò ïîääåğæêó ogg.
-                    // Äëÿ äåêîäèğîâàíèÿ ogg-ôàéëîâ ïîíàäîáÿòñÿ libogg.dll, libvorbis.dll è libvorbisfile.dll.
-                    // Íî ìîæíî îáîéòèñü è ñòàòè÷åñêîé ñáîğêîé. Âñå íóæíûå ôàéëû ìîæíî íàéòè òóò:
+  zgl_sound_ogg,    // RU: Ğ’ĞºĞ»ÑÑ‡Ğ°ĞµÑ‚ Ğ¿Ğ¾Ğ´Ğ´ĞµÑ€Ğ¶ĞºÑƒ ogg.
+                    // Ğ”Ğ»Ñ Ğ´ĞµĞºĞ¾Ğ´Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ ogg-Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ² Ğ¿Ğ¾Ğ½Ğ°Ğ´Ğ¾Ğ±ÑÑ‚ÑÑ libogg.dll, libvorbis.dll Ğ¸ libvorbisfile.dll.
+                    // ĞĞ¾ Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¾Ğ±Ğ¾Ğ¹Ñ‚Ğ¸ÑÑŒ Ğ¸ ÑÑ‚Ğ°Ñ‚Ğ¸Ñ‡ĞµÑĞºĞ¾Ğ¹ ÑĞ±Ğ¾Ñ€ĞºĞ¾Ğ¹. Ğ’ÑĞµ Ğ½ÑƒĞ¶Ğ½Ñ‹Ğµ Ñ„Ğ°Ğ¹Ğ»Ñ‹ Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ½Ğ°Ğ¹Ñ‚Ğ¸ Ñ‚ÑƒÑ‚:
                     // http://andru-kun.inf.ua/zengl_extra.html
                     //
                     // EN: Enabling support of ogg.
@@ -50,7 +50,7 @@ var
   audio  : Integer;
   state  : Integer;
 
-// RU: Ò.ê. çâóêîâàÿ ïîäñèñòåìà íàöåëåíà íà 3D, äëÿ ïîçèöèîíèğîâàíèÿ çâóêîâ â 2D íóæíû íåêîòîğûå óõèùğåíèÿ
+// RU: Ğ¢.Ğº. Ğ·Ğ²ÑƒĞºĞ¾Ğ²Ğ°Ñ Ğ¿Ğ¾Ğ´ÑĞ¸ÑÑ‚ĞµĞ¼Ğ° Ğ½Ğ°Ñ†ĞµĞ»ĞµĞ½Ğ° Ğ½Ğ° 3D, Ğ´Ğ»Ñ Ğ¿Ğ¾Ğ·Ğ¸Ñ†Ğ¸Ğ¾Ğ½Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ğ·Ğ²ÑƒĞºĞ¾Ğ² Ğ² 2D Ğ½ÑƒĞ¶Ğ½Ñ‹ Ğ½ĞµĞºĞ¾Ñ‚Ğ¾Ñ€Ñ‹Ğµ ÑƒÑ…Ğ¸Ñ‰Ñ€ĞµĞ½Ğ¸Ñ
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D
 function CalcX2D( const X : Single ) : Single;
 begin
@@ -70,18 +70,18 @@ begin
   dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
   {$ENDIF}
 
-  // RU: Èíèöèàëèçèğóåì çâóêîâóş ïîäñèñòåìó.
-  // Äëÿ Windows ìîæíî ñäåëàòü âûáîğ ìåæäó DirectSound è OpenAL ãëÿíóâ ôàéë zgl_config.cfg
+  // RU: Ğ˜Ğ½Ğ¸Ñ†Ğ¸Ğ°Ğ»Ğ¸Ğ·Ğ¸Ñ€ÑƒĞµĞ¼ Ğ·Ğ²ÑƒĞºĞ¾Ğ²ÑƒÑ Ğ¿Ğ¾Ğ´ÑĞ¸ÑÑ‚ĞµĞ¼Ñƒ.
+  // Ğ”Ğ»Ñ Windows Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ ÑĞ´ĞµĞ»Ğ°Ñ‚ÑŒ Ğ²Ñ‹Ğ±Ğ¾Ñ€ Ğ¼ĞµĞ¶Ğ´Ñƒ DirectSound Ğ¸ OpenAL Ğ³Ğ»ÑĞ½ÑƒĞ² Ñ„Ğ°Ğ¹Ğ» zgl_config.cfg
   //
   // EN: Initializing sound subsystem
   // For Windows can be used DirectSound or OpenAL, see zgl_config.cfg
   snd_Init();
 
-  // RU: Çàãğóæàåì çâóêîâîé ôàéë è óñòàíàâëèâàåì äëÿ íåãî ìàêñèìàëüíîe êîëè÷åñòâî ïğîèãğûâàåìûõ ñåìïëîâ â 2.
+  // RU: Ğ—Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°ĞµĞ¼ Ğ·Ğ²ÑƒĞºĞ¾Ğ²Ğ¾Ğ¹ Ñ„Ğ°Ğ¹Ğ» Ğ¸ ÑƒÑÑ‚Ğ°Ğ½Ğ°Ğ²Ğ»Ğ¸Ğ²Ğ°ĞµĞ¼ Ğ´Ğ»Ñ Ğ½ĞµĞ³Ğ¾ Ğ¼Ğ°ĞºÑĞ¸Ğ¼Ğ°Ğ»ÑŒĞ½Ğ¾e ĞºĞ¾Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ Ğ¿Ñ€Ğ¾Ğ¸Ğ³Ñ€Ñ‹Ğ²Ğ°ĞµĞ¼Ñ‹Ñ… ÑĞµĞ¼Ğ¿Ğ»Ğ¾Ğ² Ğ² 2.
   // EN: Load the sound file and set maximum count of samples that can be played to the 2.
   sound := snd_LoadFromFile( dirRes + 'click.wav', 2 );
 
-  // RU: Çàãğóæàåì òåêñòóğû, êîòîğûå áóäóò èíäèêàòîğàìè.
+  // RU: Ğ—Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°ĞµĞ¼ Ñ‚ĞµĞºÑÑ‚ÑƒÑ€Ñ‹, ĞºĞ¾Ñ‚Ğ¾Ñ€Ñ‹Ğµ Ğ±ÑƒĞ´ÑƒÑ‚ Ğ¸Ğ½Ğ´Ğ¸ĞºĞ°Ñ‚Ğ¾Ñ€Ğ°Ğ¼Ğ¸.
   // EN: Load the textures, that will be indicators.
   icon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png', $FF000000, TEX_DEFAULT_2D );
   icon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png', $FF000000, TEX_DEFAULT_2D );
@@ -113,9 +113,9 @@ procedure Proc;
     r : zglTRect;
     p : Integer;
 begin
-  // RU: Ïğîâåğÿåì èãğàåò ëè ìóçûêà(1 - èãğàåò, 0 - íå èãğàåò). Òàê æå ìîæíî ïğîâåğèòü è çâóêè - ïîäñòàâèâ zglPSound è ID âîò òàê:
+  // RU: ĞŸÑ€Ğ¾Ğ²ĞµÑ€ÑĞµĞ¼ Ğ¸Ğ³Ñ€Ğ°ĞµÑ‚ Ğ»Ğ¸ Ğ¼ÑƒĞ·Ñ‹ĞºĞ°(1 - Ğ¸Ğ³Ñ€Ğ°ĞµÑ‚, 0 - Ğ½Ğµ Ğ¸Ğ³Ñ€Ğ°ĞµÑ‚). Ğ¢Ğ°Ğº Ğ¶Ğµ Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€Ğ¸Ñ‚ÑŒ Ğ¸ Ğ·Ğ²ÑƒĞºĞ¸ - Ğ¿Ğ¾Ğ´ÑÑ‚Ğ°Ğ²Ğ¸Ğ² zglPSound Ğ¸ ID Ğ²Ğ¾Ñ‚ Ñ‚Ğ°Ğº:
   // snd_Get( Sound, ID...
-  // ID âîçâğàùàåòñÿ ôóíêöèåé snd_Play
+  // ID Ğ²Ğ¾Ğ·Ğ²Ñ€Ğ°Ñ‰Ğ°ĞµÑ‚ÑÑ Ñ„ÑƒĞ½ĞºÑ†Ğ¸ĞµĞ¹ snd_Play
   //
   // EN: Check if music playing(1 - playing, 0 - not playing). Sounds also can be checked this way - just use zglPSound and ID:
   // snd_Get( Sound, ID...
@@ -126,8 +126,8 @@ begin
 
   if mouse_Click( M_BLEFT ) Then
     begin
-      // RU: Â äàííîì ñëó÷àè ìû íà÷èíàåì âîñïğîèçâîäèòü çâóê ñğàçó â óêàçàííûõ êîîğäèíàòàõ, íî èõ ìîæíî ìåíÿòü è â ïğîöåññå èñïîëüçóÿ ïğîöåäóğó snd_SetPos.
-      // Âàæíî: Äëÿ OpenAL ìîæíî ïîçèöèîíèğîâàòü òîëüêî mono-çâóêè
+      // RU: Ğ’ Ğ´Ğ°Ğ½Ğ½Ğ¾Ğ¼ ÑĞ»ÑƒÑ‡Ğ°Ğ¸ Ğ¼Ñ‹ Ğ½Ğ°Ñ‡Ğ¸Ğ½Ğ°ĞµĞ¼ Ğ²Ğ¾ÑĞ¿Ñ€Ğ¾Ğ¸Ğ·Ğ²Ğ¾Ğ´Ğ¸Ñ‚ÑŒ Ğ·Ğ²ÑƒĞº ÑÑ€Ğ°Ğ·Ñƒ Ğ² ÑƒĞºĞ°Ğ·Ğ°Ğ½Ğ½Ñ‹Ñ… ĞºĞ¾Ğ¾Ñ€Ğ´Ğ¸Ğ½Ğ°Ñ‚Ğ°Ñ…, Ğ½Ğ¾ Ğ¸Ñ… Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¼ĞµĞ½ÑÑ‚ÑŒ Ğ¸ Ğ² Ğ¿Ñ€Ğ¾Ñ†ĞµÑÑĞµ Ğ¸ÑĞ¿Ğ¾Ğ»ÑŒĞ·ÑƒÑ Ğ¿Ñ€Ğ¾Ñ†ĞµĞ´ÑƒÑ€Ñƒ snd_SetPos.
+      // Ğ’Ğ°Ğ¶Ğ½Ğ¾: Ğ”Ğ»Ñ OpenAL Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¿Ğ¾Ğ·Ğ¸Ñ†Ğ¸Ğ¾Ğ½Ğ¸Ñ€Ğ¾Ğ²Ğ°Ñ‚ÑŒ Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ mono-Ğ·Ğ²ÑƒĞºĞ¸
       //
       // EN: In this case, we begin to play the sound directly in these coordinates, but they can be changed later using procedure snd_SetPos.
       // Important: OpenAL can position only mono-sounds.
@@ -141,7 +141,7 @@ begin
         audio := snd_PlayFile( dirRes + 'music.ogg');
     end;
 
-  // RU: Ïîëó÷àåì â ïğîöåíòàõ ïîçèöèş ïğîèãğûâàíèÿ àóäèîïîòîêà è ñòàâèì ãğîìêîñòü äëÿ ïëàâíûõ ïåğåõîäîâ.
+  // RU: ĞŸĞ¾Ğ»ÑƒÑ‡Ğ°ĞµĞ¼ Ğ² Ğ¿Ñ€Ğ¾Ñ†ĞµĞ½Ñ‚Ğ°Ñ… Ğ¿Ğ¾Ğ·Ğ¸Ñ†Ğ¸Ñ Ğ¿Ñ€Ğ¾Ğ¸Ğ³Ñ€Ñ‹Ğ²Ğ°Ğ½Ğ¸Ñ Ğ°ÑƒĞ´Ğ¸Ğ¾Ğ¿Ğ¾Ñ‚Ğ¾ĞºĞ° Ğ¸ ÑÑ‚Ğ°Ğ²Ğ¸Ğ¼ Ğ³Ñ€Ğ¾Ğ¼ĞºĞ¾ÑÑ‚ÑŒ Ğ´Ğ»Ñ Ğ¿Ğ»Ğ°Ğ²Ğ½Ñ‹Ñ… Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´Ğ¾Ğ².
   // EN: Get position in percent's for audio stream and set volume for smooth playing.
   p := snd_Get( zglPSound( audio ), SND_STREAM, SND_STATE_PERCENT );
   if ( p >= 0 ) and ( p < 25 ) Then
@@ -166,8 +166,8 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  // RU: Ò.ê. ìîäóëü ñîõğàíåí â êîäèğîâêå UTF-8 è â íåì èñïîëüçóşòñÿ ñòğîêîâûå ïåğåìåííûå
-  // ñëåäóåò óêàçàòü èñïîëüçîâàíèå ıòîé êîäèğîâêè.
+  // RU: Ğ¢.Ğº. Ğ¼Ğ¾Ğ´ÑƒĞ»ÑŒ ÑĞ¾Ñ…Ñ€Ğ°Ğ½ĞµĞ½ Ğ² ĞºĞ¾Ğ´Ğ¸Ñ€Ğ¾Ğ²ĞºĞµ UTF-8 Ğ¸ Ğ² Ğ½ĞµĞ¼ Ğ¸ÑĞ¿Ğ¾Ğ»ÑŒĞ·ÑƒÑÑ‚ÑÑ ÑÑ‚Ñ€Ğ¾ĞºĞ¾Ğ²Ñ‹Ğµ Ğ¿ĞµÑ€ĞµĞ¼ĞµĞ½Ğ½Ñ‹Ğµ
+  // ÑĞ»ĞµĞ´ÑƒĞµÑ‚ ÑƒĞºĞ°Ğ·Ğ°Ñ‚ÑŒ Ğ¸ÑĞ¿Ğ¾Ğ»ÑŒĞ·Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ ÑÑ‚Ğ¾Ğ¹ ĞºĞ¾Ğ´Ğ¸Ñ€Ğ¾Ğ²ĞºĞ¸.
   // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
   // string variables.
   zgl_Enable( APP_USE_UTF8 );

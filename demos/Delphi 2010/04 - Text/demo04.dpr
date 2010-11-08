@@ -16,7 +16,7 @@ uses
   zgl_fx,
   zgl_primitives_2d,
   zgl_textures,
-  zgl_textures_png, // RU: Важный момент, обязательно один раз подключить модуль с поддержкой нужного формата данных.
+  zgl_textures_png, // RU: Р’Р°Р¶РЅС‹Р№ РјРѕРјРµРЅС‚, РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РѕРґРёРЅ СЂР°Р· РїРѕРґРєР»СЋС‡РёС‚СЊ РјРѕРґСѓР»СЊ СЃ РїРѕРґРґРµСЂР¶РєРѕР№ РЅСѓР¶РЅРѕРіРѕ С„РѕСЂРјР°С‚Р° РґР°РЅРЅС‹С….
                     // EN: Important moment, unit that support needed format must be included one time.
   zgl_font,
   zgl_text,
@@ -37,10 +37,10 @@ begin
   dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
   {$ENDIF}
 
-  // RU: Загружаем данные о шрифте.
+  // RU: Р—Р°РіСЂСѓР¶Р°РµРј РґР°РЅРЅС‹Рµ Рѕ С€СЂРёС„С‚Рµ.
   // EN: Load the font.
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );
-  // RU: Если же текстуры именуются без использования маски вида "FontName-pageN.ext", то загрузку можно произвести вручную следующим образом:
+  // RU: Р•СЃР»Рё Р¶Рµ С‚РµРєСЃС‚СѓСЂС‹ РёРјРµРЅСѓСЋС‚СЃСЏ Р±РµР· РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РјР°СЃРєРё РІРёРґР° "FontName-pageN.ext", С‚Рѕ Р·Р°РіСЂСѓР·РєСѓ РјРѕР¶РЅРѕ РїСЂРѕРёР·РІРµСЃС‚Рё РІСЂСѓС‡РЅСѓСЋ СЃР»РµРґСѓСЋС‰РёРј РѕР±СЂР°Р·РѕРј:
   // EN: If textures were named without special mask - "FontName-pageN.ext", then it can be loaded this way:
   //for i := 0 to fnt.Count.Pages - 1 do
   //  fnt.Pages[ i ] := tex_LoadFromFile( dirRes + 'font-page' + u_IntToStr( i ) + '.png', $FF000000, TEX_DEFAULT_2D );
@@ -53,45 +53,45 @@ procedure Draw;
     s : String;
 begin
   batch2d_Begin();
-  text_Draw( fnt, 400, 25, 'Строка с выравниванием по центру', TEXT_HALIGN_CENTER );
-  text_DrawEx( fnt, 400, 65, 2, 0, 'Масштабирование', 255, $FFFFFF, TEXT_HALIGN_CENTER );
+  text_Draw( fnt, 400, 25, 'РЎС‚СЂРѕРєР° СЃ РІС‹СЂР°РІРЅРёРІР°РЅРёРµРј РїРѕ С†РµРЅС‚СЂСѓ', TEXT_HALIGN_CENTER );
+  text_DrawEx( fnt, 400, 65, 2, 0, 'РњР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµ', 255, $FFFFFF, TEXT_HALIGN_CENTER );
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
-  text_Draw( fnt, 400, 125, 'Градация цвета для каждого символа', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
+  text_Draw( fnt, 400, 125, 'Р“СЂР°РґР°С†РёСЏ С†РІРµС‚Р° РґР»СЏ РєР°Р¶РґРѕРіРѕ СЃРёРјРІРѕР»Р°', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
 
   r.X := 0;
   r.Y := 300 - 128;
   r.W := 192;
   r.H := 256;
-  text_DrawInRect( fnt, r, 'Обычный вывод текста в прямоугольнике' );
+  text_DrawInRect( fnt, r, 'РћР±С‹С‡РЅС‹Р№ РІС‹РІРѕРґ С‚РµРєСЃС‚Р° РІ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєРµ' );
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
   r.X := 800 - 192;
   r.Y := 300 - 128;
   r.W := 192;
   r.H := 256;
-  text_DrawInRect( fnt, r, 'Вывод текста используя выравнивание по правому краю и размещение снизу', TEXT_HALIGN_RIGHT or TEXT_VALIGN_BOTTOM );
+  text_DrawInRect( fnt, r, 'Р’С‹РІРѕРґ С‚РµРєСЃС‚Р° РёСЃРїРѕР»СЊР·СѓСЏ РІС‹СЂР°РІРЅРёРІР°РЅРёРµ РїРѕ РїСЂР°РІРѕРјСѓ РєСЂР°СЋ Рё СЂР°Р·РјРµС‰РµРЅРёРµ СЃРЅРёР·Сѓ', TEXT_HALIGN_RIGHT or TEXT_VALIGN_BOTTOM );
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
   r.X := 400 - 192;
   r.Y := 300 - 128;
   r.W := 384;
   r.H := 256;
-  // RU: Если возникает вопрос почему я разделил текст на две части, то отвечу - FreePascal капризничает, и не хочет
-  // обрабатывать константные строки длиннее 255 символов :)
+  // RU: Р•СЃР»Рё РІРѕР·РЅРёРєР°РµС‚ РІРѕРїСЂРѕСЃ РїРѕС‡РµРјСѓ СЏ СЂР°Р·РґРµР»РёР» С‚РµРєСЃС‚ РЅР° РґРІРµ С‡Р°СЃС‚Рё, С‚Рѕ РѕС‚РІРµС‡Сѓ - FreePascal РєР°РїСЂРёР·РЅРёС‡Р°РµС‚, Рё РЅРµ С…РѕС‡РµС‚
+  // РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РєРѕРЅСЃС‚Р°РЅС‚РЅС‹Рµ СЃС‚СЂРѕРєРё РґР»РёРЅРЅРµРµ 255 СЃРёРјРІРѕР»РѕРІ :)
   // EN: If you want to know why I use two parts of text, I can answer - because FreePascal doesn't like constant
   // string with more than 255 symbols :)
-  text_DrawInRect( fnt, r, 'Этот текст использует выравнивание по ширине и центрируется по вертикали.' +
-                           ' Текст, который не помещается в пределах прямоугольника будет отсечен.', TEXT_HALIGN_JUSTIFY or TEXT_VALIGN_CENTER );
+  text_DrawInRect( fnt, r, 'Р­С‚РѕС‚ С‚РµРєСЃС‚ РёСЃРїРѕР»СЊР·СѓРµС‚ РІС‹СЂР°РІРЅРёРІР°РЅРёРµ РїРѕ С€РёСЂРёРЅРµ Рё С†РµРЅС‚СЂРёСЂСѓРµС‚СЃСЏ РїРѕ РІРµСЂС‚РёРєР°Р»Рё.' +
+                           ' РўРµРєСЃС‚, РєРѕС‚РѕСЂС‹Р№ РЅРµ РїРѕРјРµС‰Р°РµС‚СЃСЏ РІ РїСЂРµРґРµР»Р°С… РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР° Р±СѓРґРµС‚ РѕС‚СЃРµС‡РµРЅ.', TEXT_HALIGN_JUSTIFY or TEXT_VALIGN_CENTER );
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
   r.X := 400 - 320;
   r.Y := 300 + 160;
   r.W := 640;
   r.H := 128;
-  text_DrawInRect( fnt, r, 'Для переноса строк можно использовать LF-символ' + #10 + 'код которого равен 10 и обозначен в таблице Unicode как "Line Feed"', TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
+  text_DrawInRect( fnt, r, 'Р”Р»СЏ РїРµСЂРµРЅРѕСЃР° СЃС‚СЂРѕРє РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ LF-СЃРёРјРІРѕР»' + #10 + 'РєРѕРґ РєРѕС‚РѕСЂРѕРіРѕ СЂР°РІРµРЅ 10 Рё РѕР±РѕР·РЅР°С‡РµРЅ РІ С‚Р°Р±Р»РёС†Рµ Unicode РєР°Рє "Line Feed"', TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
-  // RU: Выводим количество FPS в правом углу, используя text_GetWidth.
+  // RU: Р’С‹РІРѕРґРёРј РєРѕР»РёС‡РµСЃС‚РІРѕ FPS РІ РїСЂР°РІРѕРј СѓРіР»Сѓ, РёСЃРїРѕР»СЊР·СѓСЏ text_GetWidth.
   // EN: Render frames per second in the top right corner using text_GetWidth.
   s := 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) );
   text_Draw( fnt, 800 - text_GetWidth( fnt, s ), 0, s );
@@ -116,8 +116,8 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
+  // RU: Рў.Рє. РјРѕРґСѓР»СЊ СЃРѕС…СЂР°РЅРµРЅ РІ РєРѕРґРёСЂРѕРІРєРµ UTF-8 Рё РІ РЅРµРј РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+  // СЃР»РµРґСѓРµС‚ СѓРєР°Р·Р°С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ СЌС‚РѕР№ РєРѕРґРёСЂРѕРІРєРё.
   // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
   // string variables.
   zgl_Enable( APP_USE_UTF8 );

@@ -89,7 +89,6 @@ const
   GL_FLOAT                          = $1406;
 
   // PixelFormat
-  GL_RGB                            = $1907;
   GL_RGBA                           = $1908;
 
   // Alpha Function
@@ -120,6 +119,8 @@ const
   GL_FUNC_ADD_EXT                   = $8006;
   GL_MIN_EXT                        = $8007;
   GL_MAX_EXT                        = $8008;
+  GL_FUNC_SUBTRACT_EXT              = $800A;
+  GL_FUNC_REVERSE_SUBTRACT_EXT      = $800B;
   GL_BLEND_EQUATION_EXT             = $8009;
 
   GL_BLEND_DST_RGB_EXT              = $80C8;
@@ -312,6 +313,8 @@ type
 
   procedure glShadeModel(mode: GLenum); stdcall; external libGL;
 
+  procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall; external libGL;
+
   // Clear
   procedure glClear(mask: GLbitfield); stdcall; external libGL;
   procedure glClearColor(red, green, blue, alpha: GLclampf); stdcall; external libGL;
@@ -342,9 +345,8 @@ type
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;
   procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;
 var
-  glBlendFuncSeparateEXT: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
   glBlendEquationEXT: procedure(mode: GLenum); stdcall;
-  glBlendEquationSeparateEXT: procedure(modeRGB: GLenum; modeAlpha: GLenum); stdcall;
+  glBlendFuncSeparateEXT: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
   // Matrix
   procedure glPushMatrix; stdcall; external libGL;
   procedure glPopMatrix; stdcall; external libGL;

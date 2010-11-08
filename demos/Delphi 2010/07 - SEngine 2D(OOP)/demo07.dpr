@@ -1,5 +1,5 @@
-// RU: Этот пример аналогичен предыдущему, за исключением того, что использует
-// спрайтовый менеджер на основе классов из директории extra(модуль zglSpriteEngine.pas)
+// RU: Р­С‚РѕС‚ РїСЂРёРјРµСЂ Р°РЅР°Р»РѕРіРёС‡РµРЅ РїСЂРµРґС‹РґСѓС‰РµРјСѓ, Р·Р° РёСЃРєР»СЋС‡РµРЅРёРµРј С‚РѕРіРѕ, С‡С‚Рѕ РёСЃРїРѕР»СЊР·СѓРµС‚
+// СЃРїСЂР°Р№С‚РѕРІС‹Р№ РјРµРЅРµРґР¶РµСЂ РЅР° РѕСЃРЅРѕРІРµ РєР»Р°СЃСЃРѕРІ РёР· РґРёСЂРµРєС‚РѕСЂРёРё extra(РјРѕРґСѓР»СЊ zglSpriteEngine.pas)
 //
 // EN: This example is equal to previous one, but this example use object oriented
 // sprite engine from directory "extra"(unit zglSpriteEngine.pas)
@@ -9,7 +9,7 @@ program demo07;
 {$DEFINE STATIC}
 
 uses
-  zglSpriteEngine, // RU: Этот модуль лежит в директории extra. В нем так же есть дефайн STATIC необходимый для смены режима сборки.
+  zglSpriteEngine, // RU: Р­С‚РѕС‚ РјРѕРґСѓР»СЊ Р»РµР¶РёС‚ РІ РґРёСЂРµРєС‚РѕСЂРёРё extra. Р’ РЅРµРј С‚Р°Рє Р¶Рµ РµСЃС‚СЊ РґРµС„Р°Р№РЅ STATIC РЅРµРѕР±С…РѕРґРёРјС‹Р№ РґР»СЏ СЃРјРµРЅС‹ СЂРµР¶РёРјР° СЃР±РѕСЂРєРё.
                    // EN: This unit can be found in "extra" directory. There is also define STATIC in it, that needed for changing build mode.
   {$IFNDEF STATIC}
   zglHeader,
@@ -55,15 +55,15 @@ var
 // Miku
 procedure CMiku.OnInit;
 begin
-  // RU: Укажем свою текстуру и слой для спрайта, заодно установятся стандартные
-  // параметры вроде ширины и высоты на основе данных о кадре в текстуре.
+  // RU: РЈРєР°Р¶РµРј СЃРІРѕСЋ С‚РµРєСЃС‚СѓСЂСѓ Рё СЃР»РѕР№ РґР»СЏ СЃРїСЂР°Р№С‚Р°, Р·Р°РѕРґРЅРѕ СѓСЃС‚Р°РЅРѕРІСЏС‚СЃСЏ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Рµ
+  // РїР°СЂР°РјРµС‚СЂС‹ РІСЂРѕРґРµ С€РёСЂРёРЅС‹ Рё РІС‹СЃРѕС‚С‹ РЅР° РѕСЃРЅРѕРІРµ РґР°РЅРЅС‹С… Рѕ РєР°РґСЂРµ РІ С‚РµРєСЃС‚СѓСЂРµ.
   // EN: Set own texture and layer for sprite, also standard parameters will be
   // set automatically(like width and height from info about texture).
   inherited OnInit( texMiku, random( 10 ) );
 
   X := 800 + random( 800 );
   Y := random( 600 - 128 );
-  // RU: Задаем скорость движения.
+  // RU: Р—Р°РґР°РµРј СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ.
   // EN: Set the moving speed.
   FSpeed.X := -random( 10 ) / 5 - 0.5;
   FSpeed.Y := ( random( 10 ) - 5 ) / 5;
@@ -71,8 +71,8 @@ end;
 
 procedure CMiku.OnDraw;
 begin
-  // RU: Т.к. по сути эта процедура объявлена только для примера, то вызовем основной
-  // метод OnDraw класса zglCSprite2D.
+  // RU: Рў.Рє. РїРѕ СЃСѓС‚Рё СЌС‚Р° РїСЂРѕС†РµРґСѓСЂР° РѕР±СЉСЏРІР»РµРЅР° С‚РѕР»СЊРєРѕ РґР»СЏ РїСЂРёРјРµСЂР°, С‚Рѕ РІС‹Р·РѕРІРµРј РѕСЃРЅРѕРІРЅРѕР№
+  // РјРµС‚РѕРґ OnDraw РєР»Р°СЃСЃР° zglCSprite2D.
   // EN: Because in fact, this procedure is declared only for example, so call to the
   // main method OnDraw of class zglCSprite2D.
   inherited;
@@ -86,10 +86,10 @@ begin
   Frame := Frame + ( abs( FSpeed.X ) + abs( FSpeed.Y ) ) / 25;
   if Frame > 8 Then
     Frame := 1;
-  // RU: Если спрайт выходит за пределы по X, сразу же удаляем его.
+  // RU: Р•СЃР»Рё СЃРїСЂР°Р№С‚ РІС‹С…РѕРґРёС‚ Р·Р° РїСЂРµРґРµР»С‹ РїРѕ X, СЃСЂР°Р·Сѓ Р¶Рµ СѓРґР°Р»СЏРµРј РµРіРѕ.
   // EN: Delete the sprite if it goes beyond X.
   if X < -128 Then sengine2d.DelSprite( ID );
-  // RU: Если спрайт выходит за пределы по Y, ставим его в очередь на удаление
+  // RU: Р•СЃР»Рё СЃРїСЂР°Р№С‚ РІС‹С…РѕРґРёС‚ Р·Р° РїСЂРµРґРµР»С‹ РїРѕ Y, СЃС‚Р°РІРёРј РµРіРѕ РІ РѕС‡РµСЂРµРґСЊ РЅР° СѓРґР°Р»РµРЅРёРµ
   // EN: Add sprite to queue for delete if it goes beyond Y.
   if Y < -128 Then Destroy := TRUE;
   if Y > 600  Then Destroy := TRUE;
@@ -100,7 +100,7 @@ begin
   inherited;
 end;
 
-// RU: Добавить 100 спрайтов.
+// RU: Р”РѕР±Р°РІРёС‚СЊ 100 СЃРїСЂР°Р№С‚РѕРІ.
 // EN: Add 100 sprites.
 procedure AddMiku;
   var
@@ -108,24 +108,24 @@ procedure AddMiku;
 begin
   for i := 1 to 100 do
     begin
-      // RU: Запрашиваем у спрайтового менеджера новое "место" под спрайт :)
+      // RU: Р—Р°РїСЂР°С€РёРІР°РµРј Сѓ СЃРїСЂР°Р№С‚РѕРІРѕРіРѕ РјРµРЅРµРґР¶РµСЂР° РЅРѕРІРѕРµ "РјРµСЃС‚Рѕ" РїРѕРґ СЃРїСЂР°Р№С‚ :)
       // EN: Request a "place" for a new sprite :)
       ID := sengine2d.AddSprite();
-      // RU: Создаем экземпляр спрайта CMiku. Аргументами конструктора являются
-      // сам менеджер и будущий ID для спрайта.
+      // RU: РЎРѕР·РґР°РµРј СЌРєР·РµРјРїР»СЏСЂ СЃРїСЂР°Р№С‚Р° CMiku. РђСЂРіСѓРјРµРЅС‚Р°РјРё РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР° СЏРІР»СЏСЋС‚СЃСЏ
+      // СЃР°Рј РјРµРЅРµРґР¶РµСЂ Рё Р±СѓРґСѓС‰РёР№ ID РґР»СЏ СЃРїСЂР°Р№С‚Р°.
       // EN: Create a new CMiku. Constructor arguments must be current sprite
       // engine and future ID for sprite.
       sengine2d.List[ ID ] := CMiku.Create( sengine2d, ID );
     end;
 end;
 
-// RU: Удалить 100 спрайтов.
+// RU: РЈРґР°Р»РёС‚СЊ 100 СЃРїСЂР°Р№С‚РѕРІ.
 // EN: Delete 100 sprites.
 procedure DelMiku;
   var
     i : Integer;
 begin
-  // RU: Удалим 100 спрайтов со случайным ID.
+  // RU: РЈРґР°Р»РёРј 100 СЃРїСЂР°Р№С‚РѕРІ СЃРѕ СЃР»СѓС‡Р°Р№РЅС‹Рј ID.
   // EN: Delete 100 sprites with random ID.
   for i := 1 to 100 do
     sengine2d.DelSprite( random( sengine2d.Count ) );
@@ -144,10 +144,10 @@ begin
   texMiku := tex_LoadFromFile( dirRes + 'miku.png', $FF000000, TEX_DEFAULT_2D );
   tex_SetFrameSize( texMiku, 128, 128 );
 
-  // RU: Создаем экземпляр zglCSEngine2D.
+  // RU: РЎРѕР·РґР°РµРј СЌРєР·РµРјРїР»СЏСЂ zglCSEngine2D.
   // EN: Create zglCSEngine2D object.
   sengine2d := zglCSEngine2D.Create();
-  // RU: Создадим 1000 спрайтов Miku-chan :)
+  // RU: РЎРѕР·РґР°РґРёРј 1000 СЃРїСЂР°Р№С‚РѕРІ Miku-chan :)
   // EN: Create 1000 sprites of Miku-chan :)
   for i := 0 to 9 do
     AddMiku();
@@ -158,7 +158,7 @@ end;
 procedure Draw;
 begin
   batch2d_Begin();
-  // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
+  // RU: Р РёСЃСѓРµРј РІСЃРµ СЃРїСЂР°Р№С‚С‹ РЅР°С…РѕРґСЏС‰РёРµСЃСЏ РІ С‚РµРєСѓС‰РµРј СЃРїСЂР°Р№С‚РѕРІРѕРј РјРµРЅРµРґР¶РµСЂРµ.
   // EN: Render all sprites contained in current sprite engine.
   if time > 255 Then
     sengine2d.Draw();
@@ -186,10 +186,10 @@ procedure Timer;
 begin
   INC( time, 2 );
 
-  // RU: Выполняем обработку всех спрайтов в текущем спрайтовом менеджере.
+  // RU: Р’С‹РїРѕР»РЅСЏРµРј РѕР±СЂР°Р±РѕС‚РєСѓ РІСЃРµС… СЃРїСЂР°Р№С‚РѕРІ РІ С‚РµРєСѓС‰РµРј СЃРїСЂР°Р№С‚РѕРІРѕРј РјРµРЅРµРґР¶РµСЂРµ.
   // EN: Process all sprites contained in current sprite engine.
   sengine2d.Proc();
-  // RU: По нажатию пробела очистить все спрайты.
+  // RU: РџРѕ РЅР°Р¶Р°С‚РёСЋ РїСЂРѕР±РµР»Р° РѕС‡РёСЃС‚РёС‚СЊ РІСЃРµ СЃРїСЂР°Р№С‚С‹.
   // EN: Delete all sprites if space was pressed.
   if key_Press( K_SPACE ) Then sengine2d.ClearAll();
   if key_Press( K_UP ) Then AddMiku();
@@ -200,7 +200,7 @@ end;
 
 procedure Quit;
 begin
-  // RU: Очищаем память от созданных спрайтов.
+  // RU: РћС‡РёС‰Р°РµРј РїР°РјСЏС‚СЊ РѕС‚ СЃРѕР·РґР°РЅРЅС‹С… СЃРїСЂР°Р№С‚РѕРІ.
   // EN: Free allocated memory for sprites.
   sengine2d.ClearAll();
   sengine2d.Destroy();
@@ -216,8 +216,8 @@ Begin
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_EXIT, @Quit );
 
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
+  // RU: Рў.Рє. РјРѕРґСѓР»СЊ СЃРѕС…СЂР°РЅРµРЅ РІ РєРѕРґРёСЂРѕРІРєРµ UTF-8 Рё РІ РЅРµРј РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ СЃС‚СЂРѕРєРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+  // СЃР»РµРґСѓРµС‚ СѓРєР°Р·Р°С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ СЌС‚РѕР№ РєРѕРґРёСЂРѕРІРєРё.
   // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
   // string variables.
   zgl_Enable( APP_USE_UTF8 );

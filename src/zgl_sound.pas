@@ -180,11 +180,8 @@ var
   sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 
-  {$IFDEF LINUX_OR_DARWIN}
-  sfThread  : array[ 1..SND_MAX ] of LongWord;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  sfThread   : array[ 1..SND_MAX ] of LongWord;
+  sfThread : array[ 1..SND_MAX ] of LongWord;
+  {$IFNDEF FPC}
   sfThreadID : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 

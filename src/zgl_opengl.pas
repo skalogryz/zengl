@@ -191,7 +191,7 @@ begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
-  if not wnd_First Then log_Add( 'Make Current OpenGL Context' );
+  if not wnd_First Then log_Add( 'Making current OpenGL context' );
 
   if ogl_Format = 0 Then
     wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormatARB' );
@@ -360,7 +360,6 @@ begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
-  aglDestroyPixelFormat( ogl_Format );
 {$ENDIF}
 
 {$IFDEF LINUX}
@@ -401,12 +400,9 @@ begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 
+  glBlendEquationEXT( GL_FUNC_ADD_EXT );
   if ogl_Separate Then
-    begin
-      glBlendEquationEXT( GL_FUNC_ADD_EXT );
-      glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-      glBlendEquationSeparateEXT( GL_FUNC_ADD_EXT, GL_FUNC_ADD_EXT );
-    end;
+    glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 
   glDisable( GL_BLEND );
   glDisable( GL_ALPHA_TEST );
@@ -430,6 +426,7 @@ begin
   wglDeleteContext( ogl_Context );
 {$ENDIF}
 {$IFDEF DARWIN}
+  aglDestroyPixelFormat( ogl_Format );
   if aglSetCurrentContext( nil ) = GL_FALSE Then
     u_Error( 'Cannot release current OpenGL context' );
 
@@ -488,12 +485,9 @@ begin
   ogl_Anisotropy := ogl_MaxAnisotropy;
   log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( ogl_MaxAnisotropy ) );
 
-  glBlendFuncSeparateEXT     := gl_GetProc( 'glBlendFuncSeparate' );
-  glBlendEquationEXT         := gl_GetProc( 'glBlendEquation' );
-  glBlendEquationSeparateEXT := gl_GetProc( 'glBlendEquationSeparate' );
-  ogl_Separate := Assigned( glBlendFuncSeparateEXT ) and Assigned( glBlendEquationEXT ) and Assigned( glBlendEquationSeparateEXT ) and
-                  gl_IsSupported( 'GL_EXT_blend_func_separate', ogl_Extensions ) and
-                  gl_IsSupported( 'GL_EXT_blend_equation_separate', ogl_Extensions );
+  glBlendEquationEXT     := gl_GetProc( 'glBlendEquation' );
+  glBlendFuncSeparateEXT := gl_GetProc( 'glBlendFuncSeparate' );
+  ogl_Separate := Assigned( glBlendEquationEXT ) and Assigned( glBlendFuncSeparateEXT ) and gl_IsSupported( 'GL_EXT_blend_func_separate', ogl_Extensions );
   log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( ogl_Separate ) );
 
   // VBO

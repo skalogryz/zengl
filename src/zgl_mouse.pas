@@ -36,11 +36,11 @@ uses
   ;
 
 const
-  M_BLEFT  = 0;
-  M_BMIDLE = 1;
-  M_BRIGHT = 2;
-  M_WUP    = 0;
-  M_WDOWN  = 1;
+  M_BLEFT   = 0;
+  M_BMIDDLE = 1;
+  M_BRIGHT  = 2;
+  M_WUP     = 0;
+  M_WDOWN   = 1;
 
 function mouse_X : Integer;
 function mouse_Y : Integer;
@@ -137,9 +137,9 @@ begin
   {$ENDIF}
   {$IFDEF WINDOWS}
   case Button of
-    M_BLEFT:  Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
-    M_BMIDLE: Result := GetAsyncKeyState( VK_MBUTTON ) and $8000 <> 0;
-    M_BRIGHT: Result := GetAsyncKeyState( VK_RBUTTON ) and $8000 <> 0;
+    M_BLEFT:   Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
+    M_BMIDDLE: Result := GetAsyncKeyState( VK_MBUTTON ) and $8000 <> 0;
+    M_BRIGHT:  Result := GetAsyncKeyState( VK_RBUTTON ) and $8000 <> 0;
   end;
   {$ENDIF}
 end;

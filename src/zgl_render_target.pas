@@ -185,7 +185,7 @@ begin
         fbconfigAttr[ 10 ] := GLX_BLUE_SIZE;
         fbconfigAttr[ 11 ] := 8;
         fbconfigAttr[ 12 ] := GLX_ALPHA_SIZE;
-        fbconfigAttr[ 13 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        fbconfigAttr[ 13 ] := 8;
         fbconfigAttr[ 14 ] := GLX_DEPTH_SIZE;
         fbconfigAttr[ 15 ] := ogl_zDepth;
         i := 16;
@@ -289,7 +289,7 @@ begin
         pbufferiAttr[ 10 ] := WGL_BLUE_BITS_ARB;
         pbufferiAttr[ 11 ] := 8;
         pbufferiAttr[ 12 ] := WGL_ALPHA_BITS_ARB;
-        pbufferiAttr[ 13 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        pbufferiAttr[ 13 ] := 8;
         pbufferiAttr[ 14 ] := WGL_DEPTH_BITS_ARB;
         pbufferiAttr[ 15 ] := ogl_zDepth;
         i := 16;
@@ -352,7 +352,7 @@ begin
         pbufferdAttr[ 7  ] := AGL_BLUE_SIZE;
         pbufferdAttr[ 8  ] := 8;
         pbufferdAttr[ 9  ] := AGL_ALPHA_SIZE;
-        pbufferdAttr[ 10 ] := 8 * Byte( Surface.Flags and TEX_RGB = 0 );
+        pbufferdAttr[ 10 ] := 8;
         pbufferdAttr[ 11 ] := AGL_DEPTH_SIZE;
         pbufferdAttr[ 12 ] := ogl_zDepth;
         i := 13;
@@ -417,10 +417,7 @@ begin
             exit;
           end;
 
-        if Surface.Flags and TEX_RGB > 0 Then
-          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGB, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) )
-        else
-          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+        glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
         case ogl_zDepth of
           24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
           32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );

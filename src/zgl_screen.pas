@@ -25,15 +25,15 @@ unit zgl_screen;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil, XRandr, UnixType,
+  X, XLib, XUtil, XRandr, UnixType
   {$ENDIF}
   {$IFDEF WINDOWS}
-  Windows,
+  Windows
   {$ENDIF}
   {$IFDEF DARWIN}
-  MacOSAll,
+  MacOSAll
   {$ENDIF}
-  zgl_opengl_all;
+  ;
 
 const
   REFRESH_MAXIMUM = 0;
@@ -53,6 +53,7 @@ procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( const VSync : Boolean );
 procedure scr_SetFSAA( const FSAA : Byte );
+procedure scr_ReadPixels( var pData : Pointer; const X, Y, Width, Height : Word );
 
 {$IFDEF LINUX}
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
@@ -135,6 +136,7 @@ uses
   zgl_application,
   zgl_window,
   zgl_opengl,
+  zgl_opengl_all,
   zgl_opengl_simple,
   zgl_camera_2d,
   zgl_log,
@@ -693,6 +695,12 @@ begin
     log_Add( 'FSAA changed to: ' + u_IntToStr( ogl_FSAA ) + 'x' )
   else
     log_Add( 'FSAA changed to: off' );
+end;
+
+procedure scr_ReadPixels;
+begin
+  GetMem( pData, Width * Height * 4 );
+  glReadPixels( X, ogl_ClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
 
 end.

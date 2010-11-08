@@ -68,7 +68,7 @@ begin
   // TEX_DEFAULT_2D - complex of flags that needed for 2D sprites. Description can be found in help.
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png', $FF000000, TEX_DEFAULT_2D );
 
-  texBack := tex_LoadFromFile( dirRes + 'back01.jpg', $FF000000, TEX_DEFAULT_2D or TEX_RGB );
+  texBack := tex_LoadFromFile( dirRes + 'back01.jpg', $FF000000, TEX_DEFAULT_2D );
 
   texGround := tex_LoadFromFile( dirRes + 'ground.png', $FF000000, TEX_DEFAULT_2D );
   // RU: Указываем размер кадра в текстуре.
