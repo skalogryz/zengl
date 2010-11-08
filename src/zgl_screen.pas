@@ -138,6 +138,7 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,
+  zgl_render_2d,
   zgl_camera_2d,
   zgl_log,
   zgl_utils;
@@ -699,6 +700,7 @@ end;
 
 procedure scr_ReadPixels;
 begin
+  batch2d_Flush();
   GetMem( pData, Width * Height * 4 );
   glReadPixels( X, ogl_ClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
