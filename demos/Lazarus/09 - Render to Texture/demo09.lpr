@@ -42,10 +42,15 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
-  // Создаем RenderTarget и "цепляем" пустую текстуру. В процессе текстуру можно сменить присвоив
+  // RU: Создаем RenderTarget и "цепляем" пустую текстуру. В процессе текстуру можно сменить присвоив
   // rtarget.Surface другую zglPTexture, главное что бы совпадали размеры с теми, что указаны в
   // tex_CreateZero. Таргету также указан флаг RT_FULL_SCREEN, отвечающий за то, что бы в текстуру
-  // помещалось все содержимое экрана а не область 512x512(в режиме RT_DEFAULT)
+  // помещалось все содержимое экрана а не область 512x512(как с флагом RT_DEFAULT).
+  //
+  // EN: Create a RenderTarget and "bind" empty texture to it. Later texture can be changed by changing
+  // rtarget.Surface to another zglPTexture, the only requirement - the same size of textures, that was
+  // set in tex_CreateZero. Also target use flag RT_FULL_SCREEN that responsible for rendering whole
+  // content of screen to target, not only region 512x512(like with flag RT_DEFAULT).
   rtarget := rtarget_Add( tex_CreateZero( 512, 512, $00000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
 end;
 
