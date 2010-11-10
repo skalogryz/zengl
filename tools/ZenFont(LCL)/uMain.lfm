@@ -1,0 +1,205 @@
+object Form1: TForm1
+  Left = 560
+  Height = 600
+  Top = 240
+  Width = 800
+  ActiveControl = Panel1
+  Caption = 'ZenFont 0.2.1(LCL)'
+  ClientHeight = 600
+  ClientWidth = 800
+  Constraints.MaxHeight = 600
+  Constraints.MaxWidth = 800
+  Constraints.MinHeight = 600
+  Constraints.MinWidth = 800
+  OnActivate = FormActivate
+  OnClose = FormClose
+  Position = poDesktopCenter
+  LCLVersion = '0.9.29'
+  Visible = True
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 128
+    Top = 472
+    Width = 800
+    Align = alBottom
+    Caption = 'Parameters'
+    ClientHeight = 110
+    ClientWidth = 796
+    TabOrder = 0
+    object CheckBoxAntialiasing: TCheckBox
+      Left = 10
+      Height = 22
+      Top = 10
+      Width = 96
+      Caption = 'Antialiasing'
+      Checked = True
+      OnChange = CheckBoxAntialiasingChange
+      State = cbChecked
+      TabOrder = 0
+    end
+    object CheckBoxPack: TCheckBox
+      Left = 10
+      Height = 22
+      Top = 40
+      Width = 53
+      Caption = 'Pack'
+      Checked = True
+      OnChange = CheckBoxPackChange
+      State = cbChecked
+      TabOrder = 1
+    end
+    object UpDownCurrentPage: TUpDown
+      Left = 275
+      Height = 26
+      Top = 45
+      Width = 15
+      Associate = EditCurrentPage
+      Min = 1
+      Position = 1
+      TabOrder = 10
+      Wrap = False
+    end
+    object EditCurrentPage: TEdit
+      Left = 210
+      Height = 26
+      Top = 45
+      Width = 65
+      ReadOnly = True
+      TabOrder = 11
+      Text = 'EditCurrentPage'
+    end
+    object LabelCurrentPage: TLabel
+      Left = 120
+      Height = 17
+      Top = 48
+      Width = 87
+      Caption = 'Current Page:'
+      ParentColor = False
+    end
+    object ComboBoxPageSize: TComboBox
+      Left = 190
+      Height = 30
+      Top = 7
+      Width = 100
+      ItemHeight = 0
+      ItemIndex = 1
+      Items.Strings = (
+        '128'
+        '256'
+        '512'
+        '1024'
+        '2048'
+      )
+      OnChange = ComboBoxPageSizeChange
+      Style = csDropDownList
+      TabOrder = 2
+      Text = '256'
+    end
+    object LabelPageSize: TLabel
+      Left = 120
+      Height = 17
+      Top = 13
+      Width = 62
+      Caption = 'Page Size:'
+      ParentColor = False
+    end
+    object ButtonChooseFont: TButton
+      Left = 10
+      Height = 25
+      Top = 80
+      Width = 280
+      Caption = 'Choose Font'
+      OnClick = ButtonChooseFontClick
+      TabOrder = 3
+    end
+    object ButtonSaveFont: TButton
+      Left = 690
+      Height = 25
+      Top = 40
+      Width = 100
+      Caption = 'Save Font'
+      OnClick = ButtonSaveFontClick
+      TabOrder = 8
+    end
+    object ButtonExit: TButton
+      Left = 690
+      Height = 25
+      Top = 80
+      Width = 100
+      Caption = 'Exit'
+      OnClick = ButtonExitClick
+      TabOrder = 9
+    end
+    object Memo1: TMemo
+      Left = 300
+      Height = 65
+      Top = 10
+      Width = 380
+      Lines.Strings = (
+        '!"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿЁЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐґ'
+      )
+      ParentFont = False
+      ScrollBars = ssVertical
+      TabOrder = 6
+      WordWrap = False
+    end
+    object ButtonDefaultSymbols: TButton
+      Left = 298
+      Height = 25
+      Top = 80
+      Width = 190
+      Caption = 'Set default symbols'
+      Enabled = False
+      OnClick = ButtonDefaultSymbolsClick
+      TabOrder = 4
+    end
+    object ButtonImportSymbols: TButton
+      Left = 490
+      Height = 25
+      Top = 80
+      Width = 190
+      Caption = 'Import symbols from file'
+      Enabled = False
+      OnClick = ButtonImportSymbolsClick
+      TabOrder = 5
+    end
+    object ButtonRebuildFont: TButton
+      Left = 690
+      Height = 25
+      Top = 10
+      Width = 100
+      Caption = 'Rebuild Font'
+      OnClick = ButtonRebuildFontClick
+      TabOrder = 7
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 472
+    Top = 0
+    Width = 800
+    Align = alClient
+    TabOrder = 1
+    OnMouseDown = Panel1MouseDown
+    OnMouseMove = Panel1MouseMove
+    OnMouseUp = Panel1MouseUp
+  end
+  object SaveFontDialog: TSaveDialog
+    Title = 'Save Font'
+    Filter = 'Zen Font Info|*.zfi'
+    left = 130
+  end
+  object FontDialog: TFontDialog
+    Title = 'Choose the Font'
+    Font.Height = -13
+    Font.Name = 'Sans'
+    MinFontSize = 0
+    MaxFontSize = 0
+    left = 230
+  end
+  object OpenDialog: TOpenDialog
+    Title = 'Open text file'
+    Filter = 'Any UTF-8 file|*.*'
+    left = 30
+  end
+end
