@@ -930,8 +930,8 @@ begin
     for j := aJ to bJ do
       begin
         // Текстурные координаты
-        tY := Tiles.Tiles[ j, i ] div Texture.FramesX;
-        tX := Tiles.Tiles[ j, i ] - tY * Texture.FramesX;
+        tY := Tiles.Tiles[ i, j ] div Texture.FramesX;
+        tX := Tiles.Tiles[ i, j ] - tY * Texture.FramesX;
         tY := Texture.FramesY - tY;
         if tX = 0 Then
           begin

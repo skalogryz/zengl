@@ -85,7 +85,7 @@ function decode_mcu_AC_refine (cinfo : j_decompress_ptr;
 { Initialize for a Huffman-compressed scan. }
 
 {METHODDEF}
-procedure start_pass_phuff_decoder (cinfo : j_decompress_ptr); 
+procedure start_pass_phuff_decoder (cinfo : j_decompress_ptr);
 var
   entropy : phuff_entropy_ptr;
   is_DC_band, bad : boolean;
@@ -457,6 +457,7 @@ begin
   end;
 
   { Account for restart interval (no-op if not using restarts) }
+  if ( entropy^.restarts_to_go > 0 ) Then
   Dec(entropy^.restarts_to_go);
 
   decode_mcu_DC_first := TRUE;
@@ -651,6 +652,7 @@ begin
   end;
 
   { Account for restart interval (no-op if not using restarts) }
+  if ( entropy^.restarts_to_go > 0 ) Then
   Dec(entropy^.restarts_to_go);
 
   decode_mcu_AC_first := TRUE;
