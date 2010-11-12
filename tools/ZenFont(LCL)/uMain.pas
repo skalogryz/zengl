@@ -35,6 +35,7 @@ type
     CheckBoxAntialiasing: TCheckBox;
     CheckBoxPack: TCheckBox;
     ComboBoxPageSize: TComboBox;
+    EditChars: TEdit;
     EditTest: TEdit;
     FontDialog: TFontDialog;
     GroupBox1: TGroupBox;
@@ -47,7 +48,6 @@ type
     Label4: TLabel;
     LabelPageSize: TLabel;
     LabelCurrentPage: TLabel;
-    Memo1: TMemo;
     OpenDialog: TOpenDialog;
     Panel1: TPanel;
     SaveFontDialog: TSaveDialog;
@@ -140,9 +140,9 @@ end;
 
 procedure TForm1.SetDefaultSymbolList;
 begin
-  Memo1.Lines.Text := ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}' +
-                      '~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ' +
-                      'ЁЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐґ';
+  EditChars.Text := ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}' +
+                    '~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ' +
+                    'ЁЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐґ';
 end;
 
 procedure TForm1.UpdateSymbolList;
@@ -153,9 +153,9 @@ begin
   i := 1;
   FillChar( fg_CharsUse, 65536, 0 );
   fg_Font.Count.Chars := 0;
-  while i <= length( Memo1.Lines.Text ) do
+  while i <= length( EditChars.Text ) do
     begin
-      c := font_GetCID( Memo1.Lines.Text, i, @i );
+      c := font_GetCID( EditChars.Text, i, @i );
       if not fg_CharsUse[ c ] Then
         begin
           fg_CharsUse[ c ] := TRUE;
@@ -168,6 +168,8 @@ procedure TForm1.UpdateFont;
 begin
   fontgen_BuildFont( fg_Font, FontDialog.Font.Name );
   SpinCurrentPage.MaxValue := fg_Font.Count.Pages;
+  if SpinCurrentPage.Value > SpinCurrentPage.MaxValue Then
+    SpinCurrentPage.Value := SpinCurrentPage.MaxValue;
 end;
 
 procedure TForm1.ButtonChooseFontClick(Sender: TObject);
@@ -202,7 +204,7 @@ begin
     begin
       s.LoadFromFile( OpenDialog.FileName );
       for i := 0 to s.Count - 1 do
-        Memo1.Lines.Append( s.Strings[ i ] );
+        EditChars.Text := EditChars.Text + s.Strings[ i ];
     end;
 end;
 
