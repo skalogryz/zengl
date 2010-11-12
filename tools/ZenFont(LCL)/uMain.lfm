@@ -1,9 +1,8 @@
 object Form1: TForm1
-  Left = 560
+  Left = 556
   Height = 600
-  Top = 240
+  Top = 192
   Width = 800
-  ActiveControl = Panel1
   Caption = 'ZenFont 0.2.1(LCL)'
   ClientHeight = 600
   ClientWidth = 800
@@ -28,9 +27,9 @@ object Form1: TForm1
     TabOrder = 0
     object CheckBoxAntialiasing: TCheckBox
       Left = 10
-      Height = 22
+      Height = 17
       Top = 95
-      Width = 96
+      Width = 73
       Caption = 'Antialiasing'
       Checked = True
       OnChange = CheckBoxAntialiasingChange
@@ -39,9 +38,9 @@ object Form1: TForm1
     end
     object CheckBoxPack: TCheckBox
       Left = 10
-      Height = 22
+      Height = 17
       Top = 120
-      Width = 53
+      Width = 45
       Caption = 'Pack'
       Checked = True
       OnChange = CheckBoxPackChange
@@ -50,18 +49,18 @@ object Form1: TForm1
     end
     object LabelCurrentPage: TLabel
       Left = 10
-      Height = 17
+      Height = 14
       Top = 55
-      Width = 87
+      Width = 66
       Caption = 'Current Page:'
       ParentColor = False
     end
     object ComboBoxPageSize: TComboBox
       Left = 90
-      Height = 30
+      Height = 21
       Top = 10
       Width = 70
-      ItemHeight = 0
+      ItemHeight = 13
       ItemIndex = 3
       Items.Strings = (
         '128'
@@ -77,9 +76,9 @@ object Form1: TForm1
     end
     object LabelPageSize: TLabel
       Left = 10
-      Height = 17
+      Height = 14
       Top = 15
-      Width = 62
+      Width = 52
       Caption = 'Page Size:'
       ParentColor = False
     end
@@ -121,57 +120,57 @@ object Form1: TForm1
     end
     object GroupBox2: TGroupBox
       Left = 170
-      Height = 175
-      Top = 0
-      Width = 135
+      Height = 70
+      Top = 104
+      Width = 460
       Caption = 'Char Padding'
-      ClientHeight = 157
-      ClientWidth = 131
+      ClientHeight = 52
+      ClientWidth = 456
       TabOrder = 7
       object Label1: TLabel
-        Left = 10
-        Height = 17
-        Top = 50
-        Width = 26
+        Left = 120
+        Height = 14
+        Top = 15
+        Width = 23
         Caption = 'Top:'
         ParentColor = False
       end
       object Label2: TLabel
-        Left = 11
-        Height = 17
+        Left = 10
+        Height = 14
         Top = 15
-        Width = 30
+        Width = 22
         Caption = 'Left:'
         ParentColor = False
       end
       object Label3: TLabel
-        Left = 10
-        Height = 17
-        Top = 85
-        Width = 37
+        Left = 220
+        Height = 14
+        Top = 15
+        Width = 29
         Caption = 'Right:'
         ParentColor = False
       end
       object Label4: TLabel
-        Left = 10
-        Height = 17
-        Top = 120
-        Width = 51
+        Left = 340
+        Height = 14
+        Top = 15
+        Width = 37
         Caption = 'Bottom:'
         ParentColor = False
       end
       object SpinTop: TSpinEdit
-        Left = 70
-        Height = 26
-        Top = 45
+        Left = 160
+        Height = 21
+        Top = 10
         Width = 50
         OnChange = SpinTopChange
         TabOrder = 1
         Value = 2
       end
       object SpinLeft: TSpinEdit
-        Left = 70
-        Height = 26
+        Left = 60
+        Height = 21
         Top = 10
         Width = 50
         OnChange = SpinLeftChange
@@ -179,18 +178,18 @@ object Form1: TForm1
         Value = 2
       end
       object SpinRight: TSpinEdit
-        Left = 70
-        Height = 26
-        Top = 80
+        Left = 280
+        Height = 21
+        Top = 10
         Width = 50
         OnChange = SpinRightChange
         TabOrder = 2
         Value = 2
       end
       object SpinBottom: TSpinEdit
-        Left = 70
-        Height = 26
-        Top = 115
+        Left = 400
+        Height = 21
+        Top = 10
         Width = 50
         OnChange = SpinBottomChange
         TabOrder = 3
@@ -199,7 +198,7 @@ object Form1: TForm1
     end
     object SpinCurrentPage: TSpinEdit
       Left = 110
-      Height = 26
+      Height = 21
       Top = 50
       Width = 50
       MaxValue = 1
@@ -208,42 +207,41 @@ object Form1: TForm1
       Value = 1
     end
     object GroupBox3: TGroupBox
-      Left = 315
-      Height = 175
+      Left = 170
+      Height = 100
       Top = 0
-      Width = 315
+      Width = 460
       Caption = 'Chars'
-      ClientHeight = 157
-      ClientWidth = 311
+      ClientHeight = 82
+      ClientWidth = 456
       TabOrder = 9
       object Memo1: TMemo
         Left = 10
-        Height = 105
+        Height = 35
         Top = 10
-        Width = 290
+        Width = 435
         Lines.Strings = (
           ''
         )
-        ParentFont = False
-        ScrollBars = ssVertical
+        ScrollBars = ssHorizontal
         TabOrder = 0
         WordWrap = False
       end
       object ButtonDefaultSymbols: TButton
         Left = 10
         Height = 25
-        Top = 125
-        Width = 140
+        Top = 50
+        Width = 150
         Caption = 'Set default'
         OnClick = ButtonDefaultSymbolsClick
         TabOrder = 1
       end
       object ButtonImportSymbols: TButton
-        Left = 160
+        Left = 170
         Height = 25
-        Top = 125
-        Width = 140
-        Caption = 'Import'
+        Top = 50
+        Width = 150
+        Caption = 'Import from file'
         Enabled = False
         OnClick = ButtonImportSymbolsClick
         TabOrder = 2
