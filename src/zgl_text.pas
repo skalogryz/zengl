@@ -97,7 +97,7 @@ begin
     if Flags and TEXT_VALIGN_BOTTOM > 0 Then
       Y := Y - Font.MaxHeight * textScale;
 
-  FillChar( quad[ 0 ], SizeOf( quad[ 0 ] ) * 3, 0 );
+  FillChar( quad[ 0 ], SizeOf( zglTPoint2D ) * 4, 0 );
   charDesc := nil;
   lastPage := -1;
   c := font_GetCID( Text, 1, @i );
@@ -154,14 +154,14 @@ begin
 
       if lastPage <> charDesc.Page Then
         begin
-          lastPage := Font.CharDesc[ c ].Page;
+          lastPage := charDesc.Page;
 
           if ( not b2d_Started ) Then
             begin
               glEnd();
 
               glBindTexture( GL_TEXTURE_2D, Font.Pages[ charDesc.Page ].ID );
-              glBegin( GL_TRIANGLES );
+              glBegin( mode );
             end else
               if batch2d_Check( mode, FX_BLEND, Font.Pages[ charDesc.Page ] ) Then
                 begin
@@ -222,7 +222,7 @@ begin
             gl_Vertex2fv( @quad[ 3 ] );
           end;
 
-      X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;
+      X := X + ( charDesc.ShiftP + textStep ) * textScale;
     end;
 
   if not b2d_Started Then

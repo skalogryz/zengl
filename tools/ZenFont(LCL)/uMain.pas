@@ -18,6 +18,7 @@ uses
   zgl_primitives_2d,
   zgl_sprite_2d,
   zgl_font,
+  zgl_text,
   zgl_font_gen;
 
 type
@@ -34,10 +35,12 @@ type
     CheckBoxAntialiasing: TCheckBox;
     CheckBoxPack: TCheckBox;
     ComboBoxPageSize: TComboBox;
+    EditTest: TEdit;
     FontDialog: TFontDialog;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
+    GroupBox4: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -114,12 +117,20 @@ begin
 end;
 
 procedure Draw;
+  var
+    w : Single;
 begin
   pr2d_Rect( 0, 0, Form1.Panel1.Width, Form1.Panel1.Height, $505050, 255, PR2D_FILL );
   pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL );
 
   if Assigned( fg_Font.Pages ) Then
-    ssprite2d_Draw( fg_Font.Pages[ Form1.SpinCurrentPage.Value - 1 ], fontX, fontY, fg_PageSize, fg_PageSize, 0 );
+    begin
+      ssprite2d_Draw( fg_Font.Pages[ Form1.SpinCurrentPage.Value - 1 ], fontX, fontY, fg_PageSize, fg_PageSize, 0 );
+
+      w := text_GetWidth( fg_Font, Form1.EditTest.Text );
+      pr2d_Rect( ( Form1.Panel1.Width - w ) / 2, Form1.Panel1.Height - fg_Font.MaxShiftY - fg_Font.MaxHeight, w, fg_Font.MaxShiftY + fg_Font.MaxHeight, $000000, 255, PR2D_FILL );
+      text_Draw( fg_Font, Form1.Panel1.Width div 2, Form1.Panel1.Height - fg_Font.MaxHeight, Form1.EditTest.Text, TEXT_HALIGN_CENTER );
+    end;
 
   Application.ProcessMessages();
   u_Sleep( 10 );
@@ -129,7 +140,7 @@ end;
 
 procedure TForm1.SetDefaultSymbolList;
 begin
-  Memo1.Lines.Text := '!"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}' +
+  Memo1.Lines.Text := ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}' +
                       '~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ' +
                       'ЁЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐґ';
 end;
