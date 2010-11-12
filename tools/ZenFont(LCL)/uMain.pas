@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls,
+  ExtCtrls, ComCtrls, Spin,
   {$IFDEF LCLGTK}
   GLib, GTK, GDK,
   {$ENDIF}
@@ -34,16 +34,25 @@ type
     CheckBoxAntialiasing: TCheckBox;
     CheckBoxPack: TCheckBox;
     ComboBoxPageSize: TComboBox;
-    EditCurrentPage: TEdit;
     FontDialog: TFontDialog;
     GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     LabelPageSize: TLabel;
     LabelCurrentPage: TLabel;
     Memo1: TMemo;
     OpenDialog: TOpenDialog;
     Panel1: TPanel;
     SaveFontDialog: TSaveDialog;
-    UpDownCurrentPage: TUpDown;
+    SpinCurrentPage: TSpinEdit;
+    SpinTop: TSpinEdit;
+    SpinLeft: TSpinEdit;
+    SpinRight: TSpinEdit;
+    SpinBottom: TSpinEdit;
     procedure ButtonChooseFontClick(Sender: TObject);
     procedure ButtonDefaultSymbolsClick(Sender: TObject);
     procedure ButtonExitClick(Sender: TObject);
@@ -61,18 +70,24 @@ type
       );
     procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure SpinLeftChange(Sender: TObject);
+    procedure SpinTopChange(Sender: TObject);
+    procedure SpinBottomChange(Sender: TObject);
+    procedure SpinRightChange(Sender: TObject);
   private
     { private declarations }
   public
     { public declarations }
-    procedure RebuildSymbolList;
-    procedure RebuildFont;
+    procedure SetDefaultSymbolList;
+    procedure UpdateSymbolList;
+    procedure UpdateFont;
   end;
 
 var
-  Form1: TForm1;
-  zglInited : Boolean;
-  fontMoving : Boolean;
+  Form1        : TForm1;
+
+  zglInited    : Boolean;
+  fontMoving   : Boolean;
   fontX, fontY : Integer;
   lastX, lastY : Integer;
 
@@ -91,37 +106,9 @@ begin
   fontgen_Init();
   fg_Font := font_Add();
 
-  // English
-  for i := 32 to 126 do
-    begin
-      fg_CharsUse[ i ] := TRUE;
-      INC( fg_Font.Count.Chars );
-    end;
-  // Europe
-  for i := 161 to 255 do
-    begin
-      fg_CharsUse[ i ] := TRUE;
-      INC( fg_Font.Count.Chars );
-    end;
-  // Russian
-  fg_CharsUse[ 1025 ] := TRUE; // Ё
-  fg_CharsUse[ 1105 ] := TRUE; // ё
-  INC( fg_Font.Count.Chars, 2 );
-  for i := 1040 to 1103 do
-    begin
-      fg_CharsUse[ i ] := TRUE;
-      INC( fg_Font.Count.Chars );
-    end;
-  // Ukranian
-  fg_CharsUse[ 1028 ] := TRUE; // Є
-  fg_CharsUse[ 1108 ] := TRUE; // є
-  fg_CharsUse[ 1030 ] := TRUE; // І
-  fg_CharsUse[ 1110 ] := TRUE; // і
-  fg_CharsUse[ 1031 ] := TRUE; // Ї
-  fg_CharsUse[ 1111 ] := TRUE; // ї
-  INC( fg_Font.Count.Chars, 6 );
-
-  Form1.RebuildFont();
+  Form1.SetDefaultSymbolList();
+  Form1.UpdateSymbolList();
+  Form1.UpdateFont();
   fontX := ( Form1.Panel1.Width - fg_PageSize ) div 2;
   fontY := ( Form1.Panel1.Height - fg_PageSize ) div 2;
 end;
@@ -132,7 +119,7 @@ begin
   pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL );
 
   if Assigned( fg_Font.Pages ) Then
-    ssprite2d_Draw( fg_Font.Pages[ Form1.UpDownCurrentPage.Position - 1 ], fontX, fontY, fg_PageSize, fg_PageSize, 0 );
+    ssprite2d_Draw( fg_Font.Pages[ Form1.SpinCurrentPage.Value - 1 ], fontX, fontY, fg_PageSize, fg_PageSize, 0 );
 
   Application.ProcessMessages();
   u_Sleep( 10 );
@@ -140,7 +127,14 @@ end;
 
 { TForm1 }
 
-procedure TForm1.RebuildSymbolList;
+procedure TForm1.SetDefaultSymbolList;
+begin
+  Memo1.Lines.Text := '!"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}' +
+                      '~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ' +
+                      'ЁЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐґ';
+end;
+
+procedure TForm1.UpdateSymbolList;
   var
     i : Integer;
     c : Word;
@@ -159,10 +153,10 @@ begin
     end;
 end;
 
-procedure TForm1.RebuildFont;
+procedure TForm1.UpdateFont;
 begin
   fontgen_BuildFont( fg_Font, FontDialog.Font.Name );
-  UpDownCurrentPage.Max := fg_Font.Count.Pages;
+  SpinCurrentPage.MaxValue := fg_Font.Count.Pages;
 end;
 
 procedure TForm1.ButtonChooseFontClick(Sender: TObject);
@@ -172,13 +166,14 @@ begin
       fg_FontSize   := FontDialog.Font.Size;
       fg_FontBold   := fsBold in FontDialog.Font.Style;
       fg_FontItalic := fsItalic in FontDialog.Font.Style;
-      RebuildFont();
+      UpdateFont();
     end;
 end;
 
 procedure TForm1.ButtonDefaultSymbolsClick(Sender: TObject);
 begin
-  RebuildSymbolList();
+  SetDefaultSymbolList();
+  UpdateSymbolList();
 end;
 
 procedure TForm1.ButtonExitClick(Sender: TObject);
@@ -202,7 +197,7 @@ end;
 
 procedure TForm1.ButtonRebuildFontClick(Sender: TObject);
 begin
-  RebuildFont();
+  UpdateFont();
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -239,6 +234,30 @@ begin
   fontMoving := FALSE;
 end;
 
+procedure TForm1.SpinLeftChange(Sender: TObject);
+begin
+  fg_FontPadding[ 0 ] := SpinLeft.Value;
+  UpdateFont();
+end;
+
+procedure TForm1.SpinTopChange(Sender: TObject);
+begin
+  fg_FontPadding[ 1 ] := SpinTop.Value;
+  UpdateFont();
+end;
+
+procedure TForm1.SpinRightChange(Sender: TObject);
+begin
+  fg_FontPadding[ 2 ] := SpinRight.Value;
+  UpdateFont();
+end;
+
+procedure TForm1.SpinBottomChange(Sender: TObject);
+begin
+  fg_FontPadding[ 3 ] := SpinBottom.Value;
+  UpdateFont();
+end;
+
 procedure TForm1.ButtonSaveFontClick(Sender: TObject);
   var
     style : String;
@@ -265,19 +284,19 @@ end;
 procedure TForm1.CheckBoxAntialiasingChange(Sender: TObject);
 begin
   fg_FontAA := CheckBoxAntialiasing.Checked;
-  RebuildFont();
+  UpdateFont();
 end;
 
 procedure TForm1.CheckBoxPackChange(Sender: TObject);
 begin
   fg_FontPack := CheckBoxPack.Checked;
-  RebuildFont();
+  UpdateFont();
 end;
 
 procedure TForm1.ComboBoxPageSizeChange(Sender: TObject);
 begin
   fg_PageSize := StrToInt( ComboBoxPageSize.Items[ ComboBoxPageSize.ItemIndex ] );
-  RebuildFont();
+  UpdateFont();
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);

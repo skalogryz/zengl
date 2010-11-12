@@ -18,18 +18,18 @@ object Form1: TForm1
   Visible = True
   object GroupBox1: TGroupBox
     Left = 0
-    Height = 128
-    Top = 472
+    Height = 200
+    Top = 400
     Width = 800
     Align = alBottom
     Caption = 'Parameters'
-    ClientHeight = 110
+    ClientHeight = 182
     ClientWidth = 796
     TabOrder = 0
     object CheckBoxAntialiasing: TCheckBox
       Left = 10
       Height = 22
-      Top = 10
+      Top = 95
       Width = 96
       Caption = 'Antialiasing'
       Checked = True
@@ -40,7 +40,7 @@ object Form1: TForm1
     object CheckBoxPack: TCheckBox
       Left = 10
       Height = 22
-      Top = 40
+      Top = 120
       Width = 53
       Caption = 'Pack'
       Checked = True
@@ -48,41 +48,21 @@ object Form1: TForm1
       State = cbChecked
       TabOrder = 1
     end
-    object UpDownCurrentPage: TUpDown
-      Left = 275
-      Height = 26
-      Top = 45
-      Width = 15
-      Associate = EditCurrentPage
-      Min = 1
-      Position = 1
-      TabOrder = 10
-      Wrap = False
-    end
-    object EditCurrentPage: TEdit
-      Left = 210
-      Height = 26
-      Top = 45
-      Width = 65
-      ReadOnly = True
-      TabOrder = 11
-      Text = 'EditCurrentPage'
-    end
     object LabelCurrentPage: TLabel
-      Left = 120
+      Left = 10
       Height = 17
-      Top = 48
+      Top = 55
       Width = 87
       Caption = 'Current Page:'
       ParentColor = False
     end
     object ComboBoxPageSize: TComboBox
-      Left = 190
+      Left = 90
       Height = 30
-      Top = 7
-      Width = 100
+      Top = 10
+      Width = 70
       ItemHeight = 0
-      ItemIndex = 1
+      ItemIndex = 3
       Items.Strings = (
         '128'
         '256'
@@ -93,12 +73,12 @@ object Form1: TForm1
       OnChange = ComboBoxPageSizeChange
       Style = csDropDownList
       TabOrder = 2
-      Text = '256'
+      Text = '1024'
     end
     object LabelPageSize: TLabel
-      Left = 120
+      Left = 10
       Height = 17
-      Top = 13
+      Top = 15
       Width = 62
       Caption = 'Page Size:'
       ParentColor = False
@@ -106,76 +86,173 @@ object Form1: TForm1
     object ButtonChooseFont: TButton
       Left = 10
       Height = 25
-      Top = 80
-      Width = 280
+      Top = 150
+      Width = 150
       Caption = 'Choose Font'
       OnClick = ButtonChooseFontClick
       TabOrder = 3
     end
     object ButtonSaveFont: TButton
-      Left = 690
+      Left = 640
       Height = 25
       Top = 40
-      Width = 100
+      Width = 150
       Caption = 'Save Font'
       OnClick = ButtonSaveFontClick
-      TabOrder = 8
-    end
-    object ButtonExit: TButton
-      Left = 690
-      Height = 25
-      Top = 80
-      Width = 100
-      Caption = 'Exit'
-      OnClick = ButtonExitClick
-      TabOrder = 9
-    end
-    object Memo1: TMemo
-      Left = 300
-      Height = 65
-      Top = 10
-      Width = 380
-      Lines.Strings = (
-        '!"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿЁЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐґ'
-      )
-      ParentFont = False
-      ScrollBars = ssVertical
-      TabOrder = 6
-      WordWrap = False
-    end
-    object ButtonDefaultSymbols: TButton
-      Left = 298
-      Height = 25
-      Top = 80
-      Width = 190
-      Caption = 'Set default symbols'
-      Enabled = False
-      OnClick = ButtonDefaultSymbolsClick
-      TabOrder = 4
-    end
-    object ButtonImportSymbols: TButton
-      Left = 490
-      Height = 25
-      Top = 80
-      Width = 190
-      Caption = 'Import symbols from file'
-      Enabled = False
-      OnClick = ButtonImportSymbolsClick
       TabOrder = 5
     end
+    object ButtonExit: TButton
+      Left = 640
+      Height = 25
+      Top = 150
+      Width = 150
+      Caption = 'Exit'
+      OnClick = ButtonExitClick
+      TabOrder = 6
+    end
     object ButtonRebuildFont: TButton
-      Left = 690
+      Left = 640
       Height = 25
       Top = 10
-      Width = 100
+      Width = 150
       Caption = 'Rebuild Font'
       OnClick = ButtonRebuildFontClick
+      TabOrder = 4
+    end
+    object GroupBox2: TGroupBox
+      Left = 170
+      Height = 175
+      Top = 0
+      Width = 135
+      Caption = 'Char Padding'
+      ClientHeight = 157
+      ClientWidth = 131
       TabOrder = 7
+      object Label1: TLabel
+        Left = 10
+        Height = 17
+        Top = 50
+        Width = 26
+        Caption = 'Top:'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 11
+        Height = 17
+        Top = 15
+        Width = 30
+        Caption = 'Left:'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 10
+        Height = 17
+        Top = 85
+        Width = 37
+        Caption = 'Right:'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 10
+        Height = 17
+        Top = 120
+        Width = 51
+        Caption = 'Bottom:'
+        ParentColor = False
+      end
+      object SpinTop: TSpinEdit
+        Left = 70
+        Height = 26
+        Top = 45
+        Width = 50
+        OnChange = SpinTopChange
+        TabOrder = 1
+        Value = 2
+      end
+      object SpinLeft: TSpinEdit
+        Left = 70
+        Height = 26
+        Top = 10
+        Width = 50
+        OnChange = SpinLeftChange
+        TabOrder = 0
+        Value = 2
+      end
+      object SpinRight: TSpinEdit
+        Left = 70
+        Height = 26
+        Top = 80
+        Width = 50
+        OnChange = SpinRightChange
+        TabOrder = 2
+        Value = 2
+      end
+      object SpinBottom: TSpinEdit
+        Left = 70
+        Height = 26
+        Top = 115
+        Width = 50
+        OnChange = SpinBottomChange
+        TabOrder = 3
+        Value = 2
+      end
+    end
+    object SpinCurrentPage: TSpinEdit
+      Left = 110
+      Height = 26
+      Top = 50
+      Width = 50
+      MaxValue = 1
+      MinValue = 1
+      TabOrder = 8
+      Value = 1
+    end
+    object GroupBox3: TGroupBox
+      Left = 315
+      Height = 175
+      Top = 0
+      Width = 315
+      Caption = 'Chars'
+      ClientHeight = 157
+      ClientWidth = 311
+      TabOrder = 9
+      object Memo1: TMemo
+        Left = 10
+        Height = 105
+        Top = 10
+        Width = 290
+        Lines.Strings = (
+          ''
+        )
+        ParentFont = False
+        ScrollBars = ssVertical
+        TabOrder = 0
+        WordWrap = False
+      end
+      object ButtonDefaultSymbols: TButton
+        Left = 10
+        Height = 25
+        Top = 125
+        Width = 140
+        Caption = 'Set default'
+        OnClick = ButtonDefaultSymbolsClick
+        TabOrder = 1
+      end
+      object ButtonImportSymbols: TButton
+        Left = 160
+        Height = 25
+        Top = 125
+        Width = 140
+        Caption = 'Import'
+        Enabled = False
+        OnClick = ButtonImportSymbolsClick
+        TabOrder = 2
+      end
     end
   end
   object Panel1: TPanel
     Left = 0
-    Height = 472
+    Height = 400
     Top = 0
     Width = 800
     Align = alClient
