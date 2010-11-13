@@ -147,13 +147,17 @@ end;
 
 procedure TForm1.UpdateSymbolList;
   var
-    i, j : Integer;
+    i, j, len : Integer;
     c : Word;
 begin
+  Panel1.Canvas.Clear();
+  Application.ProcessMessages();
+
   i := 1;
   FillChar( fg_CharsUse, 65536, 0 );
   fg_Font.Count.Chars := 0;
-  while i <= length( EditChars.Text ) do
+  len := length( EditChars.Text );
+  while i <= len do
     begin
       c := font_GetCID( EditChars.Text, i, @j );
       if not fg_CharsUse[ c ] Then
