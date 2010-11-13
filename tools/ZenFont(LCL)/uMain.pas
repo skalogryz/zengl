@@ -93,6 +93,7 @@ var
   fontMoving   : Boolean;
   fontX, fontY : Integer;
   lastX, lastY : Integer;
+  utf8chars    : array[ 0..65535, 0..5 ] of AnsiChar;
 
 implementation
 
@@ -110,7 +111,6 @@ begin
   fg_Font := font_Add();
 
   Form1.SetDefaultSymbolList();
-  Form1.UpdateSymbolList();
   Form1.UpdateFont();
   fontX := ( Form1.Panel1.Width - fg_PageSize ) div 2;
   fontY := ( Form1.Panel1.Height - fg_PageSize ) div 2;
@@ -147,7 +147,7 @@ end;
 
 procedure TForm1.UpdateSymbolList;
   var
-    i : Integer;
+    i, j : Integer;
     c : Word;
 begin
   i := 1;
@@ -155,17 +155,26 @@ begin
   fg_Font.Count.Chars := 0;
   while i <= length( EditChars.Text ) do
     begin
-      c := font_GetCID( EditChars.Text, i, @i );
+      c := font_GetCID( EditChars.Text, i, @j );
       if not fg_CharsUse[ c ] Then
         begin
           fg_CharsUse[ c ] := TRUE;
+          FillChar( utf8chars[ c, 0 ], 6, 0 );
+          Move( EditChars.Text[ i ], utf8chars[ c, 0 ], j - i );
           INC( fg_Font.Count.Chars );
         end;
+      i := j;
     end;
+
+  EditChars.Text := '';
+  for i := 0 to 65535 do
+    if fg_CharsUse[ i ] Then
+      EditChars.Text := EditChars.Text + utf8chars[ i ];
 end;
 
 procedure TForm1.UpdateFont;
 begin
+  UpdateSymbolList();
   fontgen_BuildFont( fg_Font, FontDialog.Font.Name );
   SpinCurrentPage.MaxValue := fg_Font.Count.Pages;
   if SpinCurrentPage.Value > SpinCurrentPage.MaxValue Then
@@ -186,7 +195,7 @@ end;
 procedure TForm1.ButtonDefaultSymbolsClick(Sender: TObject);
 begin
   SetDefaultSymbolList();
-  UpdateSymbolList();
+  UpdateFont();
 end;
 
 procedure TForm1.ButtonExitClick(Sender: TObject);
@@ -205,6 +214,8 @@ begin
       s.LoadFromFile( OpenDialog.FileName );
       for i := 0 to s.Count - 1 do
         EditChars.Text := EditChars.Text + s.Strings[ i ];
+
+      UpdateFont();
     end;
 end;
 
