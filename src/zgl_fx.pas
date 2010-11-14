@@ -85,10 +85,8 @@ procedure fx_SetBlendMode;
     dstBlend : LongWord;
 begin
   if b2d_Started and ( Mode <> b2dcur_Blend ) Then
-    begin
-      batch2d_Flush();
-      b2d_New := TRUE;
-    end;
+    batch2d_Flush();
+
   b2dcur_Blend := Mode;
   case Mode of
     FX_BLEND_NORMAL:
@@ -131,10 +129,8 @@ end;
 procedure fx_SetColorMode;
 begin
   if b2d_Started and ( Mode <> b2dcur_Color ) Then
-    begin
-      batch2d_Flush();
-      b2d_New := TRUE;
-    end;
+    batch2d_Flush();
+
   b2dcur_Color := Mode;
   case Mode of
     FX_COLOR_MIX:
@@ -151,7 +147,15 @@ begin
 end;
 
 procedure fx_SetColorMask;
+  var
+    mask : Integer;
 begin
+  mask := Byte( R ) + Byte( G ) shl 1 + Byte( B ) shl 2 + Byte( Alpha ) shl 3;
+  if b2d_Started and ( mask <> b2dcur_ColorMask ) Then
+    batch2d_Flush();
+
+  b2dcur_ColorMask := mask;
+
   glColorMask( Byte( R ), Byte( G ), Byte( B ), Byte( Alpha ) );
 end;
 
