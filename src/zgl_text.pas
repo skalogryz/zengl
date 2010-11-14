@@ -329,6 +329,8 @@ end;
 
 function text_GetHeight;
 begin
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
+
   textScale := Scale;
   textStep  := Step;
   text_CalcRect( Font, Rect, Text, TEXT_HALIGN_LEFT );
