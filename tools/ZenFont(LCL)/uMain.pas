@@ -96,6 +96,8 @@ var
   utf8chars    : array[ 0..65535, 0..5 ] of AnsiChar;
 
 implementation
+uses
+  uProcessing;
 
 {$R *.lfm}
 
@@ -150,6 +152,11 @@ procedure TForm1.UpdateSymbolList;
     i, j, len : Integer;
     c : Word;
 begin
+  Form2.Show();
+  Form2.Left := Form1.Left + ( Form1.Width - Form2.Width ) div 2;
+  Form2.Top := Form1.Top + ( Form1.Height - Form2.Height ) div 2;
+  Form2.ProgressBar1.Position := 0;
+
   Panel1.Canvas.Clear();
   Application.ProcessMessages();
 
@@ -157,8 +164,12 @@ begin
   FillChar( fg_CharsUse, 65536, 0 );
   fg_Font.Count.Chars := 0;
   len := length( EditChars.Text );
+  Form2.ProgressBar1.Max := len;
   while i <= len do
     begin
+      Form2.ProgressBar1.Position := i;
+      Form2.ProgressBar1.Update();
+
       c := font_GetCID( EditChars.Text, i, @j );
       if not fg_CharsUse[ c ] Then
         begin
@@ -174,6 +185,9 @@ begin
   for i := 0 to 65535 do
     if fg_CharsUse[ i ] Then
       EditChars.Text := EditChars.Text + utf8chars[ i ];
+
+  Form2.Hide();
+  Application.ProcessMessages();
 end;
 
 procedure TForm1.UpdateFont;
