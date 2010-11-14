@@ -319,7 +319,7 @@ begin
 
   if SaveFontDialog.Execute() Then
     begin
-      fontgen_SaveFont( fg_Font, SaveFontDialog.FileName );
+      fontgen_SaveFont( fg_Font, UTF8ToAnsi( SaveFontDialog.FileName ) );
     end;
 end;
 
