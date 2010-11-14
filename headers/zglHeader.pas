@@ -2,7 +2,7 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 { version: 0.2 RC4              }
-{ date:    2010.11.08           }
+{ date:    2010.11.14           }
 { license: GNU LGPL version 3   }
 {-------------------------------}
 { by:   Andru ( Kemka Andrey )  }
@@ -976,6 +976,7 @@ var
   text_DrawInRect     : procedure( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : LongWord = 0 );
   text_DrawInRectEx   : procedure( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
   text_GetWidth       : function( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
+  text_GetHeight      : function( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Scale : Single = 1.0; const Step : Single = 0.0 ) : Single;
   textFx_SetLength    : procedure( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 
 // Sound
@@ -1454,6 +1455,7 @@ begin
       text_DrawInRect := dlsym( zglLib, 'text_DrawInRect' );
       text_DrawInRectEx := dlsym( zglLib, 'text_DrawInRectEx' );
       text_GetWidth := dlsym( zglLib, 'text_GetWidth' );
+      text_GetHeight := dlsym( zglLib, 'text_GetHeight' );
       textFx_SetLength := dlsym( zglLib, 'textFx_SetLength' );
 
       snd_Init := dlsym( zglLib, 'snd_Init' );
