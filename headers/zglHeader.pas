@@ -1,15 +1,20 @@
 {-------------------------------}
 {-----------= ZenGL =-----------}
 {-------------------------------}
-{ version: 0.2 RC4              }
-{ date:    2010.11.14           }
-{ license: GNU LGPL version 3   }
-{-------------------------------}
-{ by:   Andru ( Kemka Andrey )  }
+{                               }
+{ version:  0.2 RC4             }
+{ date:     2010.11.14          }
+{ license:  GNU LGPL version 3  }
+{ homepage: http://zengl.org    }
+{                               }
+{-------- developed by: --------}
+{                               }
+{     Kemka Andrey aka Andru    }
+{                               }
 { mail: dr.andru@gmail.com      }
 { JID:  dr.andru@googlemail.com }
 { ICQ:  496-929-849             }
-{ site: http://andru-kun.inf.ua }
+{ www:  http://andru-kun.inf.ua }
 {-------------------------------}
 unit zglHeader;
 
