@@ -424,7 +424,9 @@ begin
         else
           glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
         end;
-        glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+        // Уберу аттач, т.к. пока буфер глубины нигде не используется, а феерично глючная серяи GeForce FX показывает пустой экран... Потом понадобится костыль,
+        // описанный тут: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
+        //glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
         glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
       end;
