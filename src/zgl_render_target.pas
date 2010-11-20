@@ -40,9 +40,12 @@ uses
 const
   RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
+
   RT_DEFAULT      = $00;
   RT_FULL_SCREEN  = $01;
-  RT_CLEAR_SCREEN = $02;
+  RT_USE_DEPTH    = $02;
+  RT_CLEAR_COLOR  = $04;
+  RT_CLEAR_DEPTH  = $08;
 
 {$IFDEF LINUX}
 type
@@ -157,6 +160,11 @@ begin
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
 
   _type := RT_TYPE_FBO;
+
+  // GeForce FX sucks: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
+  if gl_IsSupported( 'GeForce FX', ogl_Renderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
+    _type := RT_TYPE_PBUFFER;
+
   if not ogl_CanFBO Then
     if ogl_CanPBuffer Then
       _type := RT_TYPE_PBUFFER
@@ -418,15 +426,17 @@ begin
           end;
 
         glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        case ogl_zDepth of
-          24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-          32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        else
-          glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        end;
-        // Уберу аттач, т.к. пока буфер глубины нигде не используется, а феерично глючная серяи GeForce FX показывает пустой экран... Потом понадобится костыль,
-        // описанный тут: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
-        //glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+        if Flags and RT_USE_DEPTH > 0 Then
+          begin
+            case ogl_zDepth of
+              24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+              32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+            else
+              glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+            end;
+            glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+          end;
+
         glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
       end;
@@ -543,8 +553,10 @@ begin
           SetCurrentMode();
         end;
 
-      if Target.Flags and RT_CLEAR_SCREEN > 0 Then
-        glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
+      if Target.Flags and RT_CLEAR_COLOR > 0 Then
+        glClear( GL_COLOR_BUFFER_BIT );
+      if Target.Flags and RT_CLEAR_DEPTH > 0 Then
+        glClear( GL_DEPTH_BUFFER_BIT );
     end else
       if Assigned( lRTarget ) Then
         begin

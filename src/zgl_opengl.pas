@@ -67,6 +67,7 @@ var
   ogl_ClipH  : Integer;
   ogl_ClipR  : Integer;
 
+  ogl_Renderer      : AnsiString;
   ogl_Extensions    : AnsiString;
   ogl_3DAccelerator : Boolean;
   ogl_CanVSync      : Boolean;
@@ -362,20 +363,21 @@ begin
     end;
 {$ENDIF}
 
+  ogl_Renderer := glGetString( GL_RENDERER );
 {$IFDEF LINUX}
-  ogl_3DAccelerator := glGetString( GL_RENDERER ) <> 'Software Rasterizer';
+  ogl_3DAccelerator := ogl_Renderer <> 'Software Rasterizer';
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ogl_3DAccelerator := glGetString( GL_RENDERER ) <> 'GDI Generic';
+  ogl_3DAccelerator := ogl_Renderer <> 'GDI Generic';
 {$ENDIF}
 {$IFDEF DARWIN}
-  ogl_3DAccelerator := glGetString( GL_RENDERER ) <> 'Apple Software Renderer';
+  ogl_3DAccelerator := ogl_Renderer <> 'Apple Software Renderer';
 {$ENDIF}
   if not ogl_3DAccelerator Then
     u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
 
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
-  log_Add( 'GL_RENDERER: ' + glGetString( GL_RENDERER ) );
+  log_Add( 'GL_RENDERER: ' + ogl_Renderer );
 
   gl_LoadEx();
   gl_ResetState();

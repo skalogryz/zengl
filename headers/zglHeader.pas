@@ -608,7 +608,9 @@ type
 const
   RT_DEFAULT      = $00;
   RT_FULL_SCREEN  = $01;
-  RT_CLEAR_SCREEN = $02;
+  RT_USE_DEPTH    = $02;
+  RT_CLEAR_COLOR  = $04;
+  RT_CLEAR_DEPTH  = $08;
 
 var
   rtarget_Add    : function( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
