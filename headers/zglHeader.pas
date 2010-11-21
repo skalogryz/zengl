@@ -2,8 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 {                               }
-{ version:  0.2 RC4             }
-{ date:     2010.11.14          }
+{ version:  0.2 RC5             }
+{ date:     2010.11.21          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -15,6 +15,7 @@
 { JID:  dr.andru@googlemail.com }
 { ICQ:  496-929-849             }
 { www:  http://andru-kun.inf.ua }
+{                               }
 {-------------------------------}
 unit zglHeader;
 
@@ -114,20 +115,23 @@ const
   SYS_FPS         = 1;  // LongWord,  := zgl_Get( SYS_FPS )
   APP_PAUSED      = 2;  // Boolean
   APP_DIRECTORY   = 3;  // PAnsiChar
-  USR_HOMEDIR     = 4;  // PAnsiChar
-  LOG_FILENAME    = 5;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
-  ZGL_VERSION     = 6;  // LongWord
-  SCR_ADD_X       = 7;  // LongWord
-  SCR_ADD_Y       = 8;  // LongWord
-  DESKTOP_WIDTH   = 9;  // LongWord
-  DESKTOP_HEIGHT  = 10; // LongWord
-  RESOLUTION_LIST = 11; // PResolutionList
-  MANAGER_TIMER   = 12; // zglPTimerManager
-  MANAGER_TEXTURE = 13; // zglPTextureManager
-  MANAGER_ATLAS   = 14; // zglPAtlasManager
-  MANAGER_FONT    = 15; // zglPFontManager
-  MANAGER_RTARGET = 16; // zglTRenderTargetManager
-  MANAGER_SOUND   = 17; // zglPSoundManager
+  APP_WND_HANDLE  = 4;  // TWindow(GNU/Linux), HWND(Windows), WindowRef(MacOS X)
+  APP_OGL_CONTEXT = 5;  // GLXContext(GNU/Linux), HGLRC(Windows), TAGLContext(MacOS X)
+  APP_D3D_DEVICE  = 5;  // For ZenGL with Direct3D render only
+  USR_HOMEDIR     = 6;  // PAnsiChar
+  LOG_FILENAME    = 7;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
+  ZGL_VERSION     = 8;  // LongWord
+  SCR_ADD_X       = 9;  // LongWord
+  SCR_ADD_Y       = 10; // LongWord
+  DESKTOP_WIDTH   = 11; // LongWord
+  DESKTOP_HEIGHT  = 12; // LongWord
+  RESOLUTION_LIST = 13; // PResolutionList
+  MANAGER_TIMER   = 14; // zglPTimerManager
+  MANAGER_TEXTURE = 15; // zglPTextureManager
+  MANAGER_ATLAS   = 16; // zglPAtlasManager
+  MANAGER_FONT    = 17; // zglPFontManager
+  MANAGER_RTARGET = 18; // zglTRenderTargetManager
+  MANAGER_SOUND   = 19; // zglPSoundManager
 
 var
   zgl_Get       : function( const What : LongWord ) : Ptr;
@@ -184,7 +188,8 @@ var
   scr_Clear             : procedure;
   scr_Flush             : procedure;
   scr_SetVSync          : procedure( const VSync : Boolean );
-  // ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
+  // RU: ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
+  // EN: WARNING: Function will destroy OpenGL context, so all resources must be reloaded
   scr_SetFSAA           : procedure( const FSAA : Byte );
   scr_SetOptions        : procedure( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
   scr_CorrectResolution : procedure( const Width, Height : Word );

@@ -25,7 +25,7 @@ unit zgl_main;
 interface
 uses
   {$IFDEF LINUX}
-  BaseUnix, XRandr,
+  BaseUnix, X, XRandr,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -36,7 +36,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.2 RC4';
+  cs_ZenGL = 'ZenGL 0.2 RC5';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -65,21 +65,23 @@ const
   SYS_FPS         = 1;
   APP_PAUSED      = 2;
   APP_DIRECTORY   = 3;
-  USR_HOMEDIR     = 4;
-  LOG_FILENAME    = 5;
-  ZGL_VERSION     = 6;
-  SCR_ADD_X       = 7;
-  SCR_ADD_Y       = 8;
-  DESKTOP_WIDTH   = 9;
-  DESKTOP_HEIGHT  = 10;
-  RESOLUTION_LIST = 11;
-  MANAGER_TIMER   = 12;
-  MANAGER_TEXTURE = 13;
-  MANAGER_ATLAS   = 14;
-  MANAGER_FONT    = 15;
-  MANAGER_RTARGET = 16;
-  MANAGER_SOUND   = 17;
-  MANAGER_GUI     = 18;
+  APP_WND_HANDLE  = 4;
+  APP_OGL_CONTEXT = 5;
+  USR_HOMEDIR     = 6;
+  LOG_FILENAME    = 7;
+  ZGL_VERSION     = 8;
+  SCR_ADD_X       = 9;
+  SCR_ADD_Y       = 10;
+  DESKTOP_WIDTH   = 11;
+  DESKTOP_HEIGHT  = 12;
+  RESOLUTION_LIST = 13;
+  MANAGER_TIMER   = 14;
+  MANAGER_TEXTURE = 15;
+  MANAGER_ATLAS   = 16;
+  MANAGER_FONT    = 17;
+  MANAGER_RTARGET = 18;
+  MANAGER_SOUND   = 19;
+  MANAGER_GUI     = 20;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR    = $000001;
@@ -221,13 +223,15 @@ begin
 
   if not scr_Create() Then exit;
   app_InitToHandle := TRUE;
-  {$IFNDEF DARWIN}
-  wnd_Handle := Handle;
-  {$ELSE}
-  wnd_Handle := WindowPtr( Handle );
+  {$IFDEF LINUX}
+  wnd_Handle := TWindow( Handle );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  wnd_Handle := WindowRef( Handle );
   {$ENDIF}
   {$IFDEF WINDOWS}
-  wnd_DC := GetDC( wnd_Handle );
+  wnd_Handle := HWND( Handle );
+  wnd_DC     := GetDC( wnd_Handle );
   {$ENDIF}
   if not gl_Create() Then exit;
   wnd_SetCaption( wnd_Caption );
@@ -414,6 +418,8 @@ begin
     SYS_FPS: Result := app_FPS;
     APP_PAUSED: Result := Byte( app_Pause );
     APP_DIRECTORY: Result := Ptr( PAnsiChar( app_WorkDir ) );
+    APP_WND_HANDLE: Result := Ptr( wnd_Handle );
+    APP_OGL_CONTEXT: Result := Ptr( ogl_Context );
     USR_HOMEDIR: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
     LOG_FILENAME: Result := Ptr( @logfile );
     //ZGL_VERSION: Result := cv_version;
