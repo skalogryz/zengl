@@ -386,7 +386,7 @@ begin
   XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Desktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, DEVMODEW( nil^ ), 0, 0, nil );
+  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
 {$IFDEF DARWIN}
   CGDisplaySwitchToMode( scr_Display, scr_Desktop );
@@ -434,7 +434,7 @@ begin
           u_Error( 'Desktop doesn''t support 32-bit color mode.' );
           zgl_Exit;
         end else
-          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, settings, 0, 0, nil );
+          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
     end else
       scr_Reset();
   {$ENDIF}
@@ -550,7 +550,7 @@ begin
           u_Warning( 'Cannot set fullscreen mode.' );
           wnd_FullScreen := FALSE;
         end else
-          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, 0, nil );
+          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, CDS_FULLSCREEN, nil );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
