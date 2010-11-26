@@ -104,17 +104,17 @@ begin
   Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
 end;
 
-function min;
+function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   if a > b Then Result := b else Result := a;
 end;
 
-function max;
+function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   if a > b Then Result := a else Result := b;
 end;
 
-function m_SinCos;
+function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 {$IFDEF USE_ASM}
 asm
   FLD Angle
@@ -142,7 +142,7 @@ begin
     end;
 end;
 
-function m_Cos;
+function m_Cos( Angle : Integer ) : Single;
 begin
   if Angle > 360 Then
     DEC( Angle, ( Angle div 360 ) * 360 )
@@ -152,7 +152,7 @@ begin
   Result := cosTable[ Angle ];
 end;
 
-function m_Sin;
+function m_Sin( Angle : Integer ) : Single;
 begin
   if Angle > 360 Then
     DEC( Angle, ( Angle div 360 ) * 360 )
@@ -162,17 +162,17 @@ begin
   Result := sinTable[ Angle ];
 end;
 
-function m_Distance;
+function m_Distance( const x1, y1, x2, y2 : Single ) : Single;
 begin
   Result := sqrt( sqr( x1 - x2 ) + sqr( y1 - y2 ) );
 end;
 
-function m_FDistance;
+function m_FDistance( const x1, y1, x2, y2 : Single ) : Single;
 begin
   Result := sqr( x1 - x2 ) + sqr( y1 - y2 );
 end;
 
-function m_Angle;
+function m_Angle( const x1, y1, x2, y2 : Single ) : Single;
   var
     dx, dy : Single;
 begin
@@ -209,7 +209,7 @@ begin
         Result := ArcTan2( dx, dy )
 end;
 
-function m_Orientation;
+function m_Orientation( const x, y, x1, y1, x2, y2 : Single ) : Integer;
   var
     orientation : Single;
 begin
@@ -277,7 +277,7 @@ begin
   end;
 end;
 
-procedure tess_Triangulate;
+procedure tess_Triangulate( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
   var
     i : Integer;
     v : array[ 0..2 ] of Double;
@@ -301,7 +301,7 @@ begin
     gluTessEndPolygon( tess );
 end;
 
-procedure tess_AddHole;
+procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
   var
     i : Integer;
     v : array[ 0..2 ] of Double;
@@ -325,7 +325,7 @@ begin
     end;
 end;
 
-function tess_GetData;
+function tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
 begin
   if not tessFinish Then
     begin

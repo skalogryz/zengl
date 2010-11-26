@@ -84,12 +84,12 @@ uses
   zgl_font,
   zgl_log;
 
-function u_IntToStr;
+function u_IntToStr( const Value : Integer ) : String;
 begin
   Str( Value, Result );
 end;
 
-function u_StrToInt;
+function u_StrToInt( const Value : String ) : Integer;
   var
     e : Integer;
 begin
@@ -98,12 +98,12 @@ begin
     Result := 0;
 end;
 
-function u_FloatToStr;
+function u_FloatToStr( const Value : Single; const Digits : Integer = 2 ) : String;
 begin
   Str( Value:0:Digits, Result );
 end;
 
-function u_StrToFloat;
+function u_StrToFloat( const Value : String ) : Single;
   var
     e : Integer;
 begin
@@ -112,7 +112,7 @@ begin
     Result := 0;
 end;
 
-function u_BoolToStr;
+function u_BoolToStr( const Value : Boolean ) : String;
 begin
   if Value Then
     Result := 'TRUE'
@@ -120,7 +120,7 @@ begin
     Result := 'FALSE';
 end;
 
-function u_StrToBool;
+function u_StrToBool( const Value : String ) : Boolean;
 begin
   if Value = '1' Then
     Result := TRUE
@@ -131,7 +131,7 @@ begin
       Result := FALSE;
 end;
 
-function u_StrUp;
+function u_StrUp( const Str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -144,7 +144,7 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-function u_StrDown;
+function u_StrDown( const Str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -157,7 +157,7 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-procedure u_Backspace;
+procedure u_Backspace( var Str : String );
   var
     i, last : Integer;
 begin
@@ -173,7 +173,7 @@ begin
   SetLength( Str, last - 1 )
 end;
 
-function u_Length;
+function u_Length( const Str : String ) : Integer;
   var
     i : Integer;
 begin
@@ -186,7 +186,7 @@ begin
     end;
 end;
 
-function u_Words;
+function u_Words( const Str : String; const D : Char = ' ' ) : Integer;
   var
     i, m : Integer;
 begin
@@ -203,7 +203,7 @@ begin
     end;
 end;
 
-function u_GetWord;
+function u_GetWord( const Str : String; const N : Integer; const D : Char = ' ' ) : String;
   label b;
   var
     i, p : Integer;
@@ -226,7 +226,7 @@ b:
   Delete( Result, p, length( Result ) - p + 1 );
 end;
 
-procedure u_SortList;
+procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
   var
     lo, hi : Integer;
     mid, t : String;
@@ -252,7 +252,7 @@ begin
   if lo < iHi Then u_SortList( List, lo, iHi );
 end;
 
-procedure u_Error;
+procedure u_Error( const ErrStr : String );
   {$IFDEF DARWIN}
   var
     outItemHit: SInt16;
@@ -271,7 +271,7 @@ begin
   log_Add( 'ERROR: ' + ErrStr );
 end;
 
-procedure u_Warning;
+procedure u_Warning( const ErrStr : String );
   {$IFDEF DARWIN}
   var
     outItemHit: SInt16;
@@ -290,7 +290,7 @@ begin
   log_Add( 'WARNING: ' + ErrStr );
 end;
 
-function u_GetPOT;
+function u_GetPOT( const Value : Integer ) : Integer;
 begin
   Result := Value - 1;
   Result := Result or ( Result shr 1 );
@@ -301,7 +301,7 @@ begin
   Result := Result + 1;
 end;
 
-procedure u_Sleep;
+procedure u_Sleep( const Msec : LongWord );
   {$IFDEF LINUX_OR_DARWIN}
   var
     tv : TimeVal;

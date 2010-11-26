@@ -214,7 +214,7 @@ var
   joyArray : array[ 0..15 ] of zglTJoy;
   joyCount : Integer;
 
-function joy_Init;
+function joy_Init : Byte;
   var
     i, j : Integer;
   {$IFDEF WINDOWS}
@@ -436,7 +436,7 @@ begin
   {$ENDIF}
 end;
 
-function joy_GetInfo;
+function joy_GetInfo( const JoyID : Byte ) : zglPJoyInfo;
 begin
   Result := nil;
   if JoyID >= joyCount Then exit;
@@ -444,7 +444,7 @@ begin
   Result := @joyArray[ JoyID ].Info;
 end;
 
-function joy_AxisPos;
+function joy_AxisPos( const JoyID, Axis : Byte ) : Single;
 begin
   Result := 0;
   if ( JoyID >= joyCount ) or ( Axis > 7 ) Then exit;
@@ -452,7 +452,7 @@ begin
   Result := joyArray[ JoyID ].State.Axis[ Axis ];
 end;
 
-function joy_Down;
+function joy_Down( const JoyID, Button : Byte ) : Boolean;
 begin
   Result := FALSE;
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;
@@ -460,7 +460,7 @@ begin
   Result := joyArray[ JoyID ].State.BtnDown[ Button ];
 end;
 
-function joy_Up;
+function joy_Up( const JoyID, Button : Byte ) : Boolean;
 begin
   Result := FALSE;
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;
@@ -468,7 +468,7 @@ begin
   Result := joyArray[ JoyID ].State.BtnUp[ Button ];
 end;
 
-function joy_Press;
+function joy_Press( const JoyID, Button : Byte ) : Boolean;
 begin
   Result := FALSE;
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;

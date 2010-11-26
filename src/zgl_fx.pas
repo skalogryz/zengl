@@ -79,7 +79,7 @@ uses
   zgl_opengl_all,
   zgl_render_2d;
 
-procedure fx_SetBlendMode;
+procedure fx_SetBlendMode( const Mode : Byte );
   var
     srcBlend : LongWord;
     dstBlend : LongWord;
@@ -126,7 +126,7 @@ begin
     glBlendFunc( srcBlend, dstBlend );
 end;
 
-procedure fx_SetColorMode;
+procedure fx_SetColorMode( const Mode : Byte );
 begin
   if b2d_Started and ( Mode <> b2dcur_Color ) Then
     batch2d_Flush();
@@ -146,7 +146,7 @@ begin
   end;
 end;
 
-procedure fx_SetColorMask;
+procedure fx_SetColorMask( const R, G, B, Alpha : Boolean );
   var
     mask : Integer;
 begin
@@ -159,14 +159,14 @@ begin
   glColorMask( Byte( R ), Byte( G ), Byte( B ), Byte( Alpha ) );
 end;
 
-procedure fx2d_SetColor;
+procedure fx2d_SetColor( const Color : LongWord );
 begin
   fx2dColor[ 0 ] :=   Color             shr 16;
   fx2dColor[ 1 ] := ( Color and $FF00 ) shr 8;
   fx2dColor[ 2 ] :=   Color and $FF;
 end;
 
-procedure fx2d_SetVCA;
+procedure fx2d_SetVCA( const c1, c2, c3, c4 : LongWord; const a1, a2, a3, a4 : Byte );
 begin
   fx2dVCA1[ 0 ] :=   C1             shr 16;
   fx2dVCA1[ 1 ] := ( C1 and $FF00 ) shr 8;
@@ -189,7 +189,7 @@ begin
   fx2dVCA4[ 3 ] := A4;
 end;
 
-procedure fx2d_SetVertexes;
+procedure fx2d_SetVertexes( const x1, y1, x2, y2, x3, y3, x4, y4 : Single );
 begin
   fx2dVX1 := x1;
   fx2dVY1 := y1;
@@ -201,7 +201,7 @@ begin
   fx2dVY4 := y4;
 end;
 
-procedure fx2d_SetScale;
+procedure fx2d_SetScale( const scaleX, scaleY : Single );
 begin
   FX2D_SX := scaleX;
   FX2D_SY := scaleY;

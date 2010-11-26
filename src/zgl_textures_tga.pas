@@ -56,10 +56,6 @@ procedure tga_Load( var Data : Pointer; var W, H : Word );
 procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 
-procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
-procedure tga_FlipHorizontally( var Data : Pointer; w, h, pixelSize : Integer );
-procedure tga_RLEDecode;
-
 implementation
 uses
   zgl_types,
@@ -72,7 +68,79 @@ var
   tgaData    : array of Byte;
   tgaPalette : array of Byte;
 
-procedure tga_Load;
+procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
+  var
+    i        : Integer;
+    scanLine : array of Byte;
+begin
+  SetLength( scanLine, w * pixelSize );
+
+  for i := 0 to h shr 1 - 1 do
+    begin
+      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
+      Move( Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, Pointer( Ptr( Data ) + i * w * pixelSize )^, w * pixelSize );
+      Move( scanLine[ 0 ], Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, w * pixelSize );
+    end;
+end;
+
+procedure tga_FlipHorizontally( var Data : Pointer; w, h, pixelSize : Integer );
+  var
+    i, j, x  : Integer;
+    scanLine : array of Byte;
+begin
+  SetLength( scanLine, w * pixelSize );
+
+  for i := 0 to h - 1 do
+    begin
+      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
+      for x := 0 to w - 1 do
+        for j := 0 to pixelSize - 1 do
+          PByte( Ptr( Data ) +  i * w * pixelSize + x * pixelSize + j )^ := scanLine[ ( w - 1 - x ) * pixelSize + j ];
+    end;
+end;
+
+procedure tga_RLEDecode;
+  var
+    pixelSize : Integer;
+    i, j, n   : Integer;
+    packetHdr : Byte;
+    packet    : array of Byte;
+    packetLen : Byte;
+begin
+  pixelSize := tgaHeader.ImgSpec.Depth div 8;
+  n         := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize;
+  SetLength( tgaData, n );
+
+  SetLength( packet, pixelSize );
+
+  i := 0;
+  while i < n do
+    begin
+      mem_Read( tgaMem, packetHdr, 1 );
+      packetLen := ( packetHdr and $7F ) + 1;
+      if ( packetHdr and $80 ) <> 0 Then
+        begin
+          mem_Read( tgaMem, packet[ 0 ], pixelSize );
+          for j := 0 to ( packetLen * pixelSize ) - 1 do
+            begin
+              tgaData[ i ] := packet[ j mod pixelSize ];
+              INC( i );
+            end;
+        end else
+          begin
+            for j := 0 to ( packetLen * pixelSize ) - 1 do
+              begin
+                mem_Read( tgaMem, packet[ j mod pixelSize ], 1 );
+                tgaData[ i ] := packet[ j mod pixelSize ];
+                INC( i );
+             end;
+          end;
+    end;
+
+  tgaHeader.ImageType := tgaHeader.ImageType - 8;
+end;
+
+procedure tga_Load( var Data : Pointer; var W, H : Word );
   label _exit;
   var
     i         : LongWord;
@@ -171,91 +239,19 @@ _exit:
   end;
 end;
 
-procedure tga_LoadFromFile;
+procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 begin
   mem_LoadFromFile( tgaMem, FileName );
   tga_Load( Data, W, H );
 end;
 
-procedure tga_LoadFromMemory;
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 begin
   tgaMem.Size := Memory.Size;
   zgl_GetMem( tgaMem.Memory, Memory.Size );
   tgaMem.Position := Memory.Position;
   Move( Memory.Memory^, tgaMem.Memory^, Memory.Size );
   tga_Load( Data, W, H );
-end;
-
-procedure tga_FlipVertically;
-  var
-    i        : Integer;
-    scanLine : array of Byte;
-begin
-  SetLength( scanLine, w * pixelSize );
-
-  for i := 0 to h shr 1 - 1 do
-    begin
-      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
-      Move( Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, Pointer( Ptr( Data ) + i * w * pixelSize )^, w * pixelSize );
-      Move( scanLine[ 0 ], Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, w * pixelSize );
-    end;
-end;
-
-procedure tga_FlipHorizontally;
-  var
-    i, j, x  : Integer;
-    scanLine : array of Byte;
-begin
-  SetLength( scanLine, w * pixelSize );
-
-  for i := 0 to h - 1 do
-    begin
-      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
-      for x := 0 to w - 1 do
-        for j := 0 to pixelSize - 1 do
-          PByte( Ptr( Data ) +  i * w * pixelSize + x * pixelSize + j )^ := scanLine[ ( w - 1 - x ) * pixelSize + j ];
-    end;
-end;
-
-procedure tga_RLEDecode;
-  var
-    pixelSize : Integer;
-    i, j, n   : Integer;
-    packetHdr : Byte;
-    packet    : array of Byte;
-    packetLen : Byte;
-begin
-  pixelSize := tgaHeader.ImgSpec.Depth div 8;
-  n         := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize;
-  SetLength( tgaData, n );
-
-  SetLength( packet, pixelSize );
-
-  i := 0;
-  while i < n do
-    begin
-      mem_Read( tgaMem, packetHdr, 1 );
-      packetLen := ( packetHdr and $7F ) + 1;
-      if ( packetHdr and $80 ) <> 0 Then
-        begin
-          mem_Read( tgaMem, packet[ 0 ], pixelSize );
-          for j := 0 to ( packetLen * pixelSize ) - 1 do
-            begin
-              tgaData[ i ] := packet[ j mod pixelSize ];
-              INC( i );
-            end;
-        end else
-          begin
-            for j := 0 to ( packetLen * pixelSize ) - 1 do
-              begin
-                mem_Read( tgaMem, packet[ j mod pixelSize ], 1 );
-                tgaData[ i ] := packet[ j mod pixelSize ];
-                INC( i );
-             end;
-          end;
-    end;
-
-  tgaHeader.ImageType := tgaHeader.ImageType - 8;
 end;
 
 initialization

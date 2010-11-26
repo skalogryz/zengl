@@ -70,7 +70,7 @@ begin
   scr_SetViewPort();
 end;
 
-procedure Set3DMode;
+procedure Set3DMode( const FOVY : Single = 45 );
 begin
   ogl_Mode := 3;
   ogl_FOVY := FOVY;
@@ -95,7 +95,7 @@ begin
     Set3DMode( ogl_FOVY );
 end;
 
-procedure zbuffer_SetDepth;
+procedure zbuffer_SetDepth( const zNear, zFar : Single );
 begin
   ogl_zNear := zNear;
   ogl_zFar  := zFar;
@@ -106,7 +106,7 @@ begin
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 
-procedure scissor_Begin;
+procedure scissor_Begin( X, Y, Width, Height : Integer );
 begin
   if b2d_Started Then
     batch2d_Flush();

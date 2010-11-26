@@ -121,7 +121,7 @@ begin
   INC( managerFont.Count );
 end;
 
-procedure font_Del;
+procedure font_Del( var Font : zglPFont );
   var
     i : Integer;
 begin
@@ -141,7 +141,7 @@ begin
   DEC( managerFont.Count );
 end;
 
-function font_Load;
+function font_Load : zglPFont;
   var
     i : Integer;
     c : LongWord;
@@ -185,7 +185,7 @@ begin
   mem_Free( fntMem );
 end;
 
-function font_LoadFromFile;
+function font_LoadFromFile( const FileName : String ) : zglPFont;
   var
     i, j : Integer;
     dir  : String;
@@ -222,7 +222,7 @@ begin
       end;
 end;
 
-function font_LoadFromMemory;
+function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 begin
   Result := nil;
   fntMem.Size := Memory.Size;
@@ -239,7 +239,7 @@ begin
       Result := font_Load();
 end;
 
-function font_GetUTF8ID;
+function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
 begin
   case Byte( Text[ Pos ] ) of
     0..127:
@@ -300,14 +300,14 @@ begin
   end;
 end;
 
-function font_GetUTF16ID;
+function font_GetUTF16ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
 begin
   if Assigned( Shift ) Then
     Shift^ := Pos + 1;
   Result := Integer( Text[ Pos ] );
 end;
 
-function font_GetCP1251ID;
+function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
 begin
   if Assigned( Shift ) Then
     Shift^ := Pos + 1;

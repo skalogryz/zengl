@@ -53,7 +53,7 @@ var
   sengine2d : zglCSEngine2D;
 
 // Miku
-procedure CMiku.OnInit;
+procedure CMiku.OnInit( const _Texture : zglPTexture; const _Layer : Integer );
 begin
   // RU: Укажем свою текстуру и слой для спрайта, заодно установятся стандартные
   // параметры вроде ширины и высоты на основе данных о кадре в текстуре.

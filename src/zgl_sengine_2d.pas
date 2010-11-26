@@ -76,7 +76,7 @@ var
   _sengine  : zglTSEngine2D;
   sengine2d : zglPSEngine2D;
 
-function sengine2d_AddSprite;
+function sengine2d_AddSprite( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   var
     new : zglPSprite2D;
 begin
@@ -109,7 +109,7 @@ begin
     Result.OnInit( Result );
 end;
 
-procedure sengine2d_DelSprite;
+procedure sengine2d_DelSprite( const ID : Integer );
   var
     i : Integer;
 begin
@@ -144,7 +144,7 @@ begin
   sengine2d.Count := 0;
 end;
 
-procedure sengine2d_Set;
+procedure sengine2d_Set( const SEngine : zglPSEngine2D );
 begin
   if Assigned( SEngine ) Then
     sengine2d := SEngine
@@ -230,7 +230,7 @@ begin
     end;
 end;
 
-procedure sengine2d_Sort;
+procedure sengine2d_Sort( iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
     t : zglPSprite2D;
@@ -257,7 +257,7 @@ begin
   if lo < iHi Then sengine2d_Sort( lo, iHi );
 end;
 
-procedure sengine2d_SortID;
+procedure sengine2d_SortID( iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
     t : zglPSprite2D;

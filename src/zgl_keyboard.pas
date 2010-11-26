@@ -220,34 +220,34 @@ uses
   zgl_main,
   zgl_utils;
 
-function key_Down;
+function key_Down( const KeyCode : Byte ) : Boolean;
 begin
   Result := keysDown[ KeyCode ];
 end;
 
-function key_Up;
+function key_Up( const KeyCode : Byte ) : Boolean;
 begin
   Result := keysUp[ KeyCode ];
 end;
 
-function key_Press;
+function key_Press( const KeyCode : Byte ) : Boolean;
 begin
   Result := keysPress[ KeyCode ];
 end;
 
-function key_Last;
+function key_Last( const KeyAction : Byte ) : Byte;
 begin
   Result := keysLast[ KeyAction ];
 end;
 
-procedure key_BeginReadText;
+procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer = -1 );
 begin
   keysText    := Text;
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
 end;
 
-procedure key_GetText;
+procedure key_GetText( var Result : String );
 begin
   Result := keysText;
 end;
@@ -275,7 +275,7 @@ begin
   keysLast[ KA_UP   ] := 0;
 end;
 
-procedure key_InputText;
+procedure key_InputText( const Text : String );
   var
     c : Char;
 begin
@@ -292,7 +292,7 @@ begin
 end;
 
 // Костыли мои костыли :)
-function scancode_to_utf8;
+function scancode_to_utf8( const ScanCode : Byte ) : Byte;
 begin
   Result := 0;
 
@@ -391,7 +391,7 @@ end;
 {$IFDEF LINUX}
 // Большинство сканкодов можно получить простым преобразованием, закомментированные
 // оставил себе на память :)
-function xkey_to_scancode;
+function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
 begin
   case XKey of
     //XK_Sys_Req:      Result := K_SYSRQ;
@@ -476,7 +476,7 @@ end;
 {$ENDIF}
 
 {$IFDEF WINDOWS}
-function winkey_to_scancode;
+function winkey_to_scancode( WinKey : Integer ) : Byte;
 begin
   case WinKey of
     $26: Result := K_UP;
@@ -497,7 +497,7 @@ end;
 {$ENDIF}
 
 {$IFDEF DARWIN}
-function mackey_to_scancode;
+function mackey_to_scancode( MacKey : Integer ) : Byte;
 begin
   case MacKey of
     //: Result := K_SYSRQ;
@@ -619,7 +619,7 @@ begin
 end;
 {$ENDIF}
 
-function SCA;
+function SCA( KeyCode : LongWord ) : LongWord;
 begin
   Result := KeyCode;
   if ( KeyCode = K_SUPER_L ) or ( KeyCode = K_SUPER_R ) Then Result := K_SUPER;
@@ -628,7 +628,7 @@ begin
   if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;
 end;
 
-procedure doKeyPress;
+procedure doKeyPress( KeyCode : LongWord );
 begin
   {$IFDEF LINUX}
   if keysRepeat < 2 Then

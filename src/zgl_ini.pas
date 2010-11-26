@@ -49,8 +49,8 @@ type
     Section  : array of zglTINISection;
 end;
 
-procedure ini_LoadFromFile( const FileName : AnsiString );
-procedure ini_SaveToFile( const FileName : AnsiString );
+procedure ini_LoadFromFile( const FileName : String );
+procedure ini_SaveToFile( const FileName : String );
 procedure ini_Add( const Section, Key : AnsiString );
 procedure ini_Del( const Section, Key : AnsiString );
 procedure ini_Clear( const Section : AnsiString );
@@ -143,7 +143,45 @@ begin
       end;
 end;
 
-procedure ini_Add;
+procedure ini_LoadFromFile( const FileName : String );
+begin
+  ini_Free;
+  if not file_Exists( FileName ) Then exit;
+  iniRec.FileName := FileName;
+
+  mem_LoadFromFile( iniMem, FileName );
+  ini_Process;
+  mem_Free( iniMem );
+end;
+
+procedure ini_SaveToFile( const FileName : String );
+  var
+    f    : zglTFile;
+    i, j : Integer;
+    s    : AnsiString;
+begin
+  file_Open( f, FileName, FOM_CREATE );
+  for i := 0 to iniRec.Sections - 1 do
+    begin
+      s := '[ ' + iniRec.Section[ i ].Name + ' ]' + #13#10;
+      file_Write( f, s[ 1 ], length( s ) );
+      for j := 0 to iniRec.Section[ i ].Keys - 1 do
+        begin
+          s := iniRec.Section[ i ].Key[ j ].Name + ' = ';
+          file_Write( f, s[ 1 ], length( s ) );
+          s := iniRec.Section[ i ].Key[ j ].Value + #13#10;
+          file_Write( f, s[ 1 ], length( s ) );
+        end;
+      if i = iniRec.Sections - 1 Then break;
+        begin
+          s := #13#10;
+          file_Write( f, s[ 1 ], 1 );
+        end;
+    end;
+  file_Close( f );
+end;
+
+procedure ini_Add( const Section, Key : AnsiString );
   var
     s, k   : AnsiString;
     ns, nk : Integer;
@@ -172,7 +210,7 @@ begin
     end;
 end;
 
-procedure ini_Del;
+procedure ini_Del( const Section, Key : AnsiString );
   var
     s, k : AnsiString;
     i, ns, nk : Integer;
@@ -199,7 +237,7 @@ begin
         end;
 end;
 
-procedure ini_Clear;
+procedure ini_Clear( const Section : AnsiString );
   var
     s : AnsiString;
     ns, nk : Integer;
@@ -220,7 +258,7 @@ begin
         end;
 end;
 
-function ini_IsSection;
+function ini_IsSection( const Section : AnsiString ) : Boolean;
   var
     s : AnsiString;
     i, j : Integer;
@@ -232,7 +270,7 @@ begin
   Result := i <> -1;
 end;
 
-function ini_IsKey;
+function ini_IsKey( const Section, Key : AnsiString ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -243,45 +281,7 @@ begin
   Result := INI_GetID( s, k, i, j );
 end;
 
-procedure ini_LoadFromFile;
-begin
-  ini_Free;
-  if not file_Exists( FileName ) Then exit;
-  iniRec.FileName := FileName;
-
-  mem_LoadFromFile( iniMem, FileName );
-  ini_Process;
-  mem_Free( iniMem );
-end;
-
-procedure ini_SaveToFile;
-  var
-    f    : zglTFile;
-    i, j : Integer;
-    s    : AnsiString;
-begin
-  file_Open( f, FileName, FOM_CREATE );
-  for i := 0 to iniRec.Sections - 1 do
-    begin
-      s := '[ ' + iniRec.Section[ i ].Name + ' ]' + #13#10;
-      file_Write( f, s[ 1 ], length( s ) );
-      for j := 0 to iniRec.Section[ i ].Keys - 1 do
-        begin
-          s := iniRec.Section[ i ].Key[ j ].Name + ' = ';
-          file_Write( f, s[ 1 ], length( s ) );
-          s := iniRec.Section[ i ].Key[ j ].Value + #13#10;
-          file_Write( f, s[ 1 ], length( s ) );
-        end;
-      if i = iniRec.Sections - 1 Then break;
-        begin
-          s := #13#10;
-          file_Write( f, s[ 1 ], 1 );
-        end;
-    end;
-  file_Close( f );
-end;
-
-procedure ini_ReadKeyStr;
+procedure ini_ReadKeyStr( const Section, Key : AnsiString; var Result : AnsiString );
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -294,7 +294,7 @@ begin
     Result := iniRec.Section[ i ].Key[ j ].Value;
 end;
 
-function ini_ReadKeyInt;
+function ini_ReadKeyInt( const Section, Key : AnsiString ) : Integer;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -307,7 +307,7 @@ begin
     Result := u_StrToInt( iniRec.Section[ i ].Key[ j ].Value );
 end;
 
-function ini_ReadKeyFloat;
+function ini_ReadKeyFloat( const Section, Key : AnsiString ) : Single;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -320,7 +320,7 @@ begin
     Result := u_StrToFloat( iniRec.Section[ i ].Key[ j ].Value );
 end;
 
-function ini_ReadKeyBool;
+function ini_ReadKeyBool( const Section, Key : AnsiString ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -333,7 +333,7 @@ begin
     Result := u_StrToBool( iniRec.Section[ i ].Key[ j ].Value );
 end;
 
-function ini_WriteKeyStr;
+function ini_WriteKeyStr( const Section, Key, Value : AnsiString ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -353,7 +353,7 @@ begin
       end;
 end;
 
-function ini_WriteKeyInt;
+function ini_WriteKeyInt( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -373,7 +373,7 @@ begin
       end;
 end;
 
-function ini_WriteKeyFloat;
+function ini_WriteKeyFloat( const Section, Key : AnsiString; const Value : Single; const Digits : Integer = 2 ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -393,7 +393,7 @@ begin
       end;
 end;
 
-function ini_WriteKeyBool;
+function ini_WriteKeyBool( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -413,13 +413,13 @@ begin
       end;
 end;
 
-procedure ini_CopyKey;
+procedure ini_CopyKey( var k1, k2 : zglTINIKey );
 begin
   k1.Name  := k2.Name;
   k1.Value := k2.Value;
 end;
 
-procedure ini_CopySection;
+procedure ini_CopySection( var s1, s2 : zglTINISection );
   var
     i : Integer;
 begin
@@ -430,7 +430,7 @@ begin
     ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
 end;
 
-function ini_GetID;
+function ini_GetID( S, K : AnsiString; var idS, idK : Integer ) : Boolean;
   var
     s1, s2 : AnsiString;
     i, j   : Integer;

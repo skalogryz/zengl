@@ -102,7 +102,7 @@ begin
   mpLoad := TRUE;
 end;
 
-function mp_DecoderOpen;
+function mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
   var
     mem : zglTMemory;
 begin
@@ -126,7 +126,7 @@ begin
       Result := FALSE;
 end;
 
-function mp_DecoderRead;
+function mp_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : DWORD; var _End : Boolean ) : DWORD;
 begin
   if not mpInit Then exit;
 
@@ -134,14 +134,14 @@ begin
   _End := Result = 0;
 end;
 
-procedure mp_DecoderLoop;
+procedure mp_DecoderLoop( var Stream : zglTSoundStream );
 begin
   if not mpInit Then exit;
 
   ModPlug_Seek( PModPlugFile( Stream._data ), 0 );
 end;
 
-procedure mp_DecoderClose;
+procedure mp_DecoderClose( var Stream : zglTSoundStream );
 begin
   if not mpInit Then exit;
 

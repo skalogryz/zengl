@@ -75,7 +75,7 @@ var
   textWordsCount : Integer;
   textLinesCount : Integer;
 
-procedure text_Draw;
+procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : LongWord = 0 );
   var
     i, c, s  : Integer;
     charDesc : zglPCharDesc;
@@ -239,7 +239,7 @@ begin
     end;
 end;
 
-procedure text_DrawEx;
+procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
 begin
   textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
@@ -256,7 +256,7 @@ begin
   textStep      := 0;
 end;
 
-procedure text_DrawInRect;
+procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : LongWord = 0 );
   var
     i, j, b    : Integer;
     NewFlags   : Integer;
@@ -285,7 +285,7 @@ begin
     end;
 end;
 
-procedure text_DrawInRectEx;
+procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
 begin
   textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
@@ -302,7 +302,7 @@ begin
   textStep      := 0;
 end;
 
-function text_GetWidth;
+function text_GetWidth( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
   var
     i : Integer;
     c : LongWord;
@@ -327,7 +327,7 @@ begin
     Result := lResult;
 end;
 
-function text_GetHeight;
+function text_GetHeight( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Scale : Single = 1.0; const Step : Single = 0.0 ) : Single;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
 
@@ -339,14 +339,14 @@ begin
   textStep  := 0;
 end;
 
-procedure textFx_SetLength;
+procedure textFx_SetLength( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 begin
   textLength    := Length;
   textLCoord    := LastCoord;
   textLCharDesc := LastCharDesc;
 end;
 
-procedure text_CalcRect;
+procedure text_CalcRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : LongWord = 0 );
   var
     x, y, sX   : Integer;
     b, i, imax : Integer;

@@ -71,7 +71,7 @@ begin
     file_Close( log );
 end;
 
-procedure log_Add;
+procedure log_Add( const Message : AnsiString; const Timings : Boolean = TRUE );
   var
     str : AnsiString;
 begin
@@ -98,7 +98,7 @@ begin
     file_Flush( log );
 end;
 
-function log_Timing;
+function log_Timing : AnsiString;
   var
     v : LongWord;
 begin

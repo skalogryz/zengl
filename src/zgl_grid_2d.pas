@@ -51,7 +51,7 @@ uses
   zgl_render_2d,
   zgl_camera_2d;
 
-procedure sgrid2d_Draw;
+procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
@@ -145,7 +145,7 @@ begin
     end;
 end;
 
-procedure agrid2d_Draw;
+procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
@@ -246,7 +246,7 @@ begin
     end;
 end;
 
-procedure cgrid2d_Draw;
+procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;

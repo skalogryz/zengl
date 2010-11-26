@@ -81,7 +81,7 @@ uses
   zgl_file,
   zgl_utils;
 
-function atlas_Add;
+function atlas_Add( const Width, Height : Word; const Flags : LongWord ) : zglPAtlas;
   var
     atlas : zglPAtlas;
 begin
@@ -104,7 +104,7 @@ begin
   Result := atlas;
 end;
 
-procedure atlas_Del;
+procedure atlas_Del( var Atlas : zglPAtlas );
 begin
   if not Assigned( Atlas ) Then exit;
 
@@ -121,7 +121,7 @@ begin
   DEC( managerAtlas.Count );
 end;
 
-function atlas_AddNode;
+function atlas_AddNode( const Node : zglPAtlasNode; const Texture : zglPTexture; const Width, Height : Integer ) : zglPAtlasNode;
   var
     dw, dh : Single;
     c1, c2 : zglPAtlasNode;
@@ -207,7 +207,7 @@ begin
       end;
 end;
 
-procedure atlas_DelNode;
+procedure atlas_DelNode( var Node : zglPAtlasNode );
 begin
   if not Assigned( Node ) Then exit;
 
@@ -218,7 +218,7 @@ begin
   Node := nil;
 end;
 
-procedure atlas_GetFrameCoord;
+procedure atlas_GetFrameCoord( const Node : zglPAtlasNode; const Frame : Word; var TexCoord : array of zglTPoint2D );
   var
     tX, tY, u, v : Single;
 begin
@@ -248,9 +248,8 @@ begin
   TexCoord[ 3 ].Y := tY - v;
 end;
 
-function atlas_InsertFromTexture;
+function atlas_InsertFromTexture( const Atlas : zglPAtlas; const Texture : zglPTexture ) : zglPAtlasNode;
   var
-    i     : Integer;
     pData : Pointer;
 begin
   if not Assigned( Texture ) Then exit;
@@ -264,7 +263,7 @@ begin
   FreeMem( pData );
 end;
 
-function atlas_InsertFromFile;
+function atlas_InsertFromFile( const Atlas : zglPAtlas; const FileName : String; const TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
     i     : Integer;
     pData : Pointer;
@@ -315,7 +314,7 @@ begin
   FreeMemory( pData );
 end;
 
-function atlas_InsertFromMemory;
+function atlas_InsertFromMemory( const Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
     i     : Integer;
     pData : Pointer;
@@ -356,7 +355,7 @@ begin
   FreeMemory( pData );
 end;
 
-procedure atals_InsertDataToNode;
+procedure atals_InsertDataToNode( var Node : zglPAtlasNode; const pData : Pointer; const RowLength, Width, Height : Word );
 begin
   glEnable( GL_TEXTURE_2D );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, RowLength );

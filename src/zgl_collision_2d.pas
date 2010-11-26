@@ -64,12 +64,12 @@ begin
     Result := -sqr( sqr( d ) / ( sqr( dx ) + sqr( dy ) ) );
 end;
 
-function col2d_PointInRect;
+function col2d_PointInRect( const X, Y : Single; const Rect : zglTRect ) : Boolean;
 begin
   Result := ( X > Rect.X ) and ( X < Rect.X + Rect.W ) and ( Y > Rect.Y ) and ( Y < Rect.Y + Rect.H );
 end;
 
-function col2d_PointInTriangle;
+function col2d_PointInTriangle( const X, Y : Single; const P1, P2, P3 : zglTPoint2D ) : Boolean;
   var
     o1 : Integer;
     o2 : Integer;
@@ -93,12 +93,12 @@ begin
     end;
 end;
 
-function col2d_PointInCircle;
+function col2d_PointInCircle( const X, Y : Single; const Circle : zglTCircle ) : Boolean;
 begin
   Result := sqr( Circle.cX - X ) + sqr( Circle.cY - Y ) < sqr( Circle.Radius );
 end;
 
-function col2d_Line;
+function col2d_Line( const A, B : zglTLine; ColPoint : zglPPoint2D ) : Boolean;
   var
     s, t, tmp : Single;
     s1, s2    : array[ 0..1 ] of Single;
@@ -128,7 +128,7 @@ begin
     end;
 end;
 
-function col2d_LineVsRect;
+function col2d_LineVsRect( const Line : zglTLine; const Rect : zglTRect; ColPoint : zglPPoint2D ) : Boolean;
   var
     line0 : zglTLine;
 begin
@@ -182,7 +182,7 @@ begin
       end;
 end;
 
-function col2d_LineVsCircle;
+function col2d_LineVsCircle( const Line : zglTLine; const Circle : zglTCircle ) : Boolean;
   var
     p1, p2  : array[ 0..1 ] of Single;
     dx, dy  : Single;
@@ -209,7 +209,7 @@ begin
       Result := a + b + c < 0;
 end;
 
-function col2d_LineVsCircleXY;
+function col2d_LineVsCircleXY( const Line : zglTLine; const Circle : zglTCircle; const Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
   var
     p1      : array of zglTPoint2D;
     line0   : zglTLine;
@@ -248,12 +248,12 @@ begin
     end;
 end;
 
-function col2d_Rect;
+function col2d_Rect( const Rect1, Rect2 : zglTRect ) : Boolean;
 begin
   Result := ( Rect1.X + Rect1.W >= Rect2.X ) and ( Rect1.X <= Rect2.X + Rect2.W ) and ( Rect1.Y + Rect1.H >= Rect2.Y ) and ( Rect1.Y <= Rect2.Y + Rect2.H );
 end;
 
-function col2d_ClipRect;
+function col2d_ClipRect( const Rect1, Rect2 : zglTRect ) : zglTRect;
 begin
   if ( Rect1.X < Rect2.X ) or ( Rect1.X > Rect2.X + Rect2.W ) Then
     Result.X := Rect2.X
@@ -273,17 +273,17 @@ begin
     Result.H := ( Rect2.Y + Rect2.H ) - Result.Y - 1;
 end;
 
-function col2d_RectInRect;
+function col2d_RectInRect( const Rect1, Rect2 : zglTRect ) : Boolean;
 begin
   Result := ( Rect1.X > Rect2.X ) and ( Rect1.X + Rect1.W < Rect2.X + Rect2.W ) and ( Rect1.Y > Rect2.Y ) and ( Rect1.Y + Rect1.H < Rect2.Y + Rect2.H );
 end;
 
-function col2d_RectInCircle;
+function col2d_RectInCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
 begin
   Result := col2d_PointInCircle( Rect.X, Rect.Y, Circle ) and col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle );
 end;
 
-function col2d_RectVsCircle;
+function col2d_RectVsCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
 begin
   // бред сидого программера :)
   Result := ( col2d_PointInCircle( Rect.X, Rect.Y, Circle ) or col2d_PointInCircle( Rect.X + Rect.W, Rect.Y, Circle ) or
@@ -293,17 +293,17 @@ begin
               col2d_PointInRect( Circle.cX, Circle.cY + Circle.Radius, Rect ) or col2d_PointInRect( Circle.cX - Circle.Radius, Circle.cY, Rect ) );
 end;
 
-function col2d_Circle;
+function col2d_Circle( const Circle1, Circle2 : zglTCircle ) : Boolean;
 begin
   Result := sqr( Circle1.cX - Circle2.cX ) + sqr( Circle1.cY - Circle2.cY ) <= sqr( Circle1.Radius + Circle2.Radius );
 end;
 
-function col2d_CircleInCircle;
+function col2d_CircleInCircle( const Circle1, Circle2 : zglTCircle ) : Boolean;
 begin
   Result := sqr( Circle1.cX - Circle2.cX ) + sqr( Circle1.cY - Circle2.cY ) < sqr( Circle1.Radius - Circle2.Radius );
 end;
 
-function col2d_CircleInRect;
+function col2d_CircleInRect( const Circle : zglTCircle; const Rect : zglTRect ) : Boolean;
 begin
   Result := col2d_PointInRect( Circle.cX + Circle.Radius, Circle.cY + Circle.Radius, Rect ) and
             col2d_PointInRect( Circle.cX - Circle.Radius, Circle.cY + Circle.Radius, Rect ) and

@@ -113,7 +113,7 @@ uses
   zgl_log,
   zgl_utils;
 
-function gl_Create;
+function gl_Create : Boolean;
   {$IFDEF WINDOWS}
   var
     i               : Integer;

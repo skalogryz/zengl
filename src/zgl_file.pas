@@ -94,7 +94,7 @@ uses
 var
   filePath : String = '';
 
-procedure file_Open;
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
 begin
 {$IFDEF LINUX_OR_DARWIN}
   case Mode of
@@ -112,7 +112,7 @@ begin
 {$ENDIF}
 end;
 
-function file_MakeDir;
+function file_MakeDir( const Directory : String ) : Boolean;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := FpMkdir( Directory, MODE_MKDIR ) = FILE_ERROR;
@@ -122,7 +122,7 @@ begin
 {$ENDIF}
 end;
 
-function file_Exists;
+function file_Exists( const FileName : String ) : Boolean;
   {$IFDEF WINDOWS}
   var
     fileHandle : zglTFile;
@@ -139,7 +139,7 @@ begin
 {$ENDIF}
 end;
 
-function file_Seek;
+function file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   case Mode of
@@ -157,7 +157,7 @@ begin
 {$ENDIF}
 end;
 
-function file_GetPos;
+function file_GetPos( const FileHandle : zglTFile ) : LongWord;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := FpLseek( FileHandle, 0, SEEK_CUR );
@@ -167,7 +167,7 @@ begin
 {$ENDIF}
 end;
 
-function file_Read;
+function file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := FpLseek( FileHandle, 0, SEEK_CUR );
@@ -182,7 +182,7 @@ begin
 {$ENDIF}
 end;
 
-function file_Write;
+function file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := FpLseek( FileHandle, 0, SEEK_CUR );
@@ -197,7 +197,7 @@ begin
 {$ENDIF}
 end;
 
-function file_GetSize;
+function file_GetSize( const FileHandle : zglTFile ) : LongWord;
   {$IFDEF LINUX_OR_DARWIN}
   var
     tmp : LongWord;
@@ -214,7 +214,7 @@ begin
 {$ENDIF}
 end;
 
-procedure file_Flush;
+procedure file_Flush( const FileHandle : zglTFile );
 begin
 {$IFDEF LINUX_OR_DARWIN}
   //fflush( FileHandle );
@@ -224,7 +224,7 @@ begin
 {$ENDIF}
 end;
 
-procedure file_Close;
+procedure file_Close( var FileHandle : zglTFile );
 begin
 {$IFDEF LINUX_OR_DARWIN}
   FpClose( FileHandle );
@@ -247,7 +247,7 @@ begin
 end;
 {$ENDIF}
 
-procedure file_Find;
+procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
   {$IFDEF LINUX_OR_DARWIN}
   var
     i     : Integer;
@@ -308,7 +308,7 @@ begin
     Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
 end;
 
-procedure file_GetName;
+procedure file_GetName( const FileName : String; var Result : String );
   var
     tmp : String;
 begin
@@ -321,12 +321,12 @@ begin
   Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
-procedure file_GetExtension;
+procedure file_GetExtension( const FileName : String; var Result : String );
 begin
   GetStr( FileName, Result, '.', FALSE );
 end;
 
-procedure file_GetDirectory;
+procedure file_GetDirectory( const FileName : String; var Result : String );
 begin
   GetStr( FileName, Result, '/', TRUE );
   {$IFDEF WINDOWS}
@@ -335,7 +335,7 @@ begin
   {$ENDIF}
 end;
 
-procedure file_SetPath;
+procedure file_SetPath( const Path : String );
 begin
   filePath := Path;
 end;

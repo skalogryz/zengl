@@ -96,7 +96,7 @@ begin
     end;
 end;
 
-function batch2d_Check;
+function batch2d_Check( const Mode, FX : LongWord; const Texture : zglPTexture ) : Boolean;
 begin
   if ( Mode <> b2dcur_Mode ) or ( Texture <> b2dcur_Tex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
      ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
@@ -117,7 +117,7 @@ begin
   b2d_New := FALSE;
 end;
 
-function sprite2d_InScreenSimple;
+function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
 begin
   if Angle <> 0 Then
     Result := ( ( X + W + H / 2 > ogl_ClipX ) and ( X - W - H / 2 < ogl_ClipX + ogl_ClipW / scr_ResCX ) and
@@ -127,7 +127,7 @@ begin
                 ( Y + H > ogl_ClipY ) and ( Y < ogl_ClipY + ogl_ClipH / scr_ResCY ) );
 end;
 
-function sprite2d_InScreenCamera;
+function sprite2d_InScreenCamera( const X, Y, W, H, Angle : Single ) : Boolean;
   var
     cx, cy, crad : Single;
     sx, sy, srad : Single;

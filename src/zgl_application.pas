@@ -52,7 +52,6 @@ function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam :
 {$IFDEF DARWIN}
 function app_ProcessMessages( inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr ): OSStatus; cdecl;
 {$ENDIF}
-procedure app_CalcFPS;
 
 var
   app_Initialized  : Boolean;

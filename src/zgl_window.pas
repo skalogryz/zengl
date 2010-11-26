@@ -120,7 +120,7 @@ begin
 end;
 {$ENDIF}
 
-function wnd_Create;
+function wnd_Create( const Width, Height : Integer ) : Boolean;
   {$IFDEF DARWIN}
   var
     size   : MacOSAll.Rect;
@@ -358,7 +358,7 @@ begin
   wnd_SetSize( wnd_Width, wnd_Height );
 end;
 
-procedure wnd_SetCaption;
+procedure wnd_SetCaption( const NewCaption : String );
   {$IFDEF WINDOWS}
   var
     i, len : Integer;
@@ -409,7 +409,7 @@ begin
 {$ENDIF}
 end;
 
-procedure wnd_SetSize;
+procedure wnd_SetSize( const Width, Height : Integer );
 begin
   wnd_Width  := Width;
   wnd_Height := Height;
@@ -440,7 +440,7 @@ begin
     SetCurrentMode();
 end;
 
-procedure wnd_SetPos;
+procedure wnd_SetPos( const X, Y : Integer );
   {$IFDEF WINDOWS}
   var
     mode : LongWord;
@@ -476,7 +476,7 @@ begin
 {$ENDIF}
 end;
 
-procedure wnd_ShowCursor;
+procedure wnd_ShowCursor( const Show : Boolean );
 {$IFDEF LINUX}
   var
     mask   : TPixmap;

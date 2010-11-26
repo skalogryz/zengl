@@ -136,54 +136,7 @@ uses
   {$ENDIF}
   zgl_utils;
 
-procedure zgl_GetSysDir;
-{$IFDEF LINUX}
-begin
-  app_WorkDir := './';
-
-  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
-{$ENDIF}
-{$IFDEF WINDOWS}
-var
-  buffer : PAnsiChar;
-  fn, fp : PAnsiChar;
-  s      : AnsiString;
-  t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
-begin
-  wnd_INST := GetModuleHandle( nil );
-  GetMem( buffer, 65535 );
-  GetMem( fn, 65535 );
-  GetModuleFileNameA( wnd_INST, fn, 65535 );
-  GetFullPathNameA( fn, 65535, buffer, fp );
-  s := copy( AnsiString( buffer ), 1, length( buffer ) - length( fp ) );
-  app_WorkDir := PAnsiChar( s );
-
-  GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
-  app_UsrHomeDir := t;
-  app_UsrHomeDir := app_UsrHomeDir + '\';
-
-  FreeMem( buffer );
-  FreeMem( fn );
-{$ENDIF}
-{$IFDEF DARWIN}
-var
-  appBundle   : CFBundleRef;
-  appCFURLRef : CFURLRef;
-  appCFString : CFStringRef;
-  appPath     : array[ 0..8191 ] of AnsiChar;
-begin
-  appBundle   := CFBundleGetMainBundle();
-  appCFURLRef := CFBundleCopyBundleURL( appBundle );
-  appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
-  CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
-  app_WorkDir := appPath + '/';
-
-  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
-{$ENDIF}
-  app_GetSysDirs := TRUE;
-end;
-
-procedure zgl_Init;
+procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 begin
   zgl_GetSysDir();
   log_Init();
@@ -213,7 +166,7 @@ begin
   zgl_Destroy();
 end;
 
-procedure zgl_InitToHandle;
+procedure zgl_InitToHandle( const Handle : Ptr; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 begin
   zgl_GetSysDir();
   log_Init();
@@ -318,7 +271,7 @@ begin
   app_Work := FALSE;
 end;
 
-procedure zgl_Reg;
+procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
   var
     i : Integer;
 begin
@@ -406,7 +359,7 @@ begin
   end;
 end;
 
-function zgl_Get;
+function zgl_Get( const What : LongWord ) : Ptr;
 begin
   if ( What = APP_DIRECTORY ) or ( What = USR_HOMEDIR ) Then
     if not app_GetSysDirs Then zgl_GetSysDir();
@@ -461,7 +414,54 @@ begin
   end;
 end;
 
-procedure zgl_GetMem;
+procedure zgl_GetSysDir;
+{$IFDEF LINUX}
+begin
+  app_WorkDir := './';
+
+  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
+{$ENDIF}
+{$IFDEF WINDOWS}
+var
+  buffer : PAnsiChar;
+  fn, fp : PAnsiChar;
+  s      : AnsiString;
+  t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
+begin
+  wnd_INST := GetModuleHandle( nil );
+  GetMem( buffer, 65535 );
+  GetMem( fn, 65535 );
+  GetModuleFileNameA( wnd_INST, fn, 65535 );
+  GetFullPathNameA( fn, 65535, buffer, fp );
+  s := copy( AnsiString( buffer ), 1, length( buffer ) - length( fp ) );
+  app_WorkDir := PAnsiChar( s );
+
+  GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
+  app_UsrHomeDir := t;
+  app_UsrHomeDir := app_UsrHomeDir + '\';
+
+  FreeMem( buffer );
+  FreeMem( fn );
+{$ENDIF}
+{$IFDEF DARWIN}
+var
+  appBundle   : CFBundleRef;
+  appCFURLRef : CFURLRef;
+  appCFString : CFStringRef;
+  appPath     : array[ 0..8191 ] of AnsiChar;
+begin
+  appBundle   := CFBundleGetMainBundle();
+  appCFURLRef := CFBundleCopyBundleURL( appBundle );
+  appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
+  CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
+  app_WorkDir := appPath + '/';
+
+  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
+{$ENDIF}
+  app_GetSysDirs := TRUE;
+end;
+
+procedure zgl_GetMem( var Mem : Pointer; const Size : LongWord );
 begin
   if Size > 0 Then
     begin
@@ -471,18 +471,18 @@ begin
       Mem := nil;
 end;
 
-procedure zgl_FreeMem;
+procedure zgl_FreeMem( var Mem : Pointer );
 begin
   FreeMem( Mem );
   Mem := nil;
 end;
 
-procedure zgl_FreeStr;
+procedure zgl_FreeStr( var Str : String );
 begin
   Str := '';
 end;
 
-procedure zgl_Enable;
+procedure zgl_Enable( const What : LongWord );
 begin
   app_Flags := app_Flags or What;
 
@@ -523,7 +523,7 @@ begin
     render2d_Clip := TRUE;
 end;
 
-procedure zgl_Disable;
+procedure zgl_Disable( const What : LongWord );
 begin
   if app_Flags and What > 0 Then
     app_Flags := app_Flags xor What;

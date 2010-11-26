@@ -70,7 +70,7 @@ var
   wavMemory : zglTMemory;
   wavHeader : zglTWAVHeader;
 
-procedure wav_Load;
+procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
   var
     chunkName : array[ 0..3 ] of AnsiChar;
     skip      : Integer;
@@ -124,13 +124,13 @@ begin
   mem_Free( wavMemory );
 end;
 
-procedure wav_LoadFromFile;
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
 begin
   mem_LoadFromFile( wavMemory, FileName );
   wav_Load( Data, Size, Format, Frequency );
 end;
 
-procedure wav_LoadFromMemory;
+procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 begin
   wavMemory.Size := Memory.Size;
   zgl_GetMem( wavMemory.Memory, Memory.Size );

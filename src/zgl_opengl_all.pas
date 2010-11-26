@@ -584,7 +584,7 @@ uses
   zgl_log,
   zgl_utils;
 
-function InitGL;
+function InitGL : Boolean;
 begin
   Result := FALSE;
 
@@ -622,7 +622,7 @@ begin
   Result := aglSetInteger( ctx, pname, @i );
 end;
 
-function InitAGL;
+function InitAGL : Boolean;
 begin
   agl_Library := dlopen( libAGL, $001 );
   if agl_Library <> nil Then
@@ -653,7 +653,7 @@ begin
 end;
 {$ENDIF}
 
-function gl_GetProc;
+function gl_GetProc( const Proc : AnsiString ) : Pointer;
 begin
   {$IFDEF WINDOWS}
   Result := wglGetProcAddress( PAnsiChar( Proc ) );
@@ -675,7 +675,7 @@ begin
   {$ENDIF}
 end;
 
-function gl_IsSupported;
+function gl_IsSupported( const Extension : AnsiString; const SearchIn: AnsiString ) : Boolean;
   var
     extPos: Integer;
 begin

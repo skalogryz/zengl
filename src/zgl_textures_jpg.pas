@@ -165,7 +165,6 @@ end;
 procedure jpg_Load( var Data : Pointer; var W, H : Word );
 procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
-procedure jpg_FillData;
 
 implementation
 uses
@@ -246,7 +245,82 @@ begin
 end;
 {$ENDIF}
 
-procedure jpg_Load;
+procedure jpg_FillData;
+  {$IFDEF USE_PASJPEG}
+  var
+    i, j  : JDIMENSION;
+    color : JSAMPLE_PTR;
+  {$ELSE}
+  var
+    bi   : BITMAPINFO;
+    bmp  : HBITMAP;
+    DC   : HDC;
+    p    : Pointer;
+    W, H : Longint;
+    i    : Integer;
+    t    : Byte;
+  {$ENDIF}
+begin
+{$IFDEF USE_PASJPEG}
+  color := JSAMPLE_PTR( jpgData.Buffer[ 0 ] );
+  if not jpgData.Grayscale Then
+    begin
+     for i := 0 to jpgData.Width - 1 do
+        begin
+          j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
+          jpgData.Data[ j + 0 ] := PByte( Ptr( color ) + i * 3 + 0 )^;
+          jpgData.Data[ j + 1 ] := PByte( Ptr( color ) + i * 3 + 1 )^;
+          jpgData.Data[ j + 2 ] := PByte( Ptr( color ) + i * 3 + 2 )^;
+          jpgData.Data[ j + 3 ] := 255;
+        end;
+    end else
+      begin
+        for i := 0 to jpgData.Width - 1 do
+          begin
+            j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
+            jpgData.Data[ j + 0 ] := color^;
+            jpgData.Data[ j + 1 ] := color^;
+            jpgData.Data[ j + 2 ] := color^;
+            jpgData.Data[ j + 3 ] := 255;
+
+            INC( color );
+          end;
+      end;
+{$ELSE}
+  DC := CreateCompatibleDC( GetDC( 0 ) );
+  jpgData.Buffer.get_Width ( W );
+  jpgData.Buffer.get_Height( H );
+  jpgData.Width  := MulDiv( W, GetDeviceCaps( DC, LOGPIXELSX ), 2540 );
+  jpgData.Height := MulDiv( H, GetDeviceCaps( DC, LOGPIXELSY ), 2540 );
+
+  FillChar( bi, SizeOf( bi ), 0 );
+  bi.bmiHeader.biSize        := SizeOf( BITMAPINFOHEADER );
+  bi.bmiHeader.biBitCount    := 32;
+  bi.bmiHeader.biWidth       := jpgData.Width;
+  bi.bmiHeader.biHeight      := jpgData.Height;
+  bi.bmiHeader.biCompression := BI_RGB;
+  bi.bmiHeader.biPlanes      := 1;
+  bmp := CreateDIBSection( DC, bi, DIB_RGB_COLORS, p, 0, 0 );
+  SelectObject( DC, bmp );
+  jpgData.Buffer.Render( DC, 0, 0, jpgData.Width, jpgData.Height, 0, H, W, -H, nil );
+
+  for i := 0 to jpgData.Width * jpgData.Height - 1 do
+    begin
+      t := PByte( Ptr( p ) + i * 4 + 2 )^;
+      PByte( Ptr( p ) + i * 4 + 2 )^ := PByte( Ptr( p ) + i * 4 + 0 )^;
+      PByte( Ptr( p ) + i * 4 + 0 )^ := t;
+      PByte( Ptr( p ) + i * 4 + 3 )^ := 255;
+    end;
+
+  SetLength( jpgData.Data, jpgData.Width * jpgData.Height * 4 );
+  Move( p^, Pointer( jpgData.Data )^, jpgData.Width * jpgData.Height * 4 );
+
+  DeleteObject( bmp );
+  DeleteDC    ( DC );
+{$ENDIF}
+end;
+
+procedure jpg_Load( var Data : Pointer; var W, H : Word );
   label _exit;
   {$IFDEF USE_PASJPEG}
   var
@@ -347,94 +421,19 @@ _exit:
   end;
 end;
 
-procedure jpg_LoadFromFile;
+procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 begin
   mem_LoadFromFile( jpgMem, FileName );
   jpg_Load( Data, W, H );
 end;
 
-procedure jpg_LoadFromMemory;
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 begin
   jpgMem.Size := Memory.Size;
   zgl_GetMem( jpgMem.Memory, Memory.Size );
   jpgMem.Position := Memory.Position;
   Move( Memory.Memory^, jpgMem.Memory^, Memory.Size );
   jpg_Load( Data, W, H );
-end;
-
-procedure jpg_FillData;
-  {$IFDEF USE_PASJPEG}
-  var
-    i, j  : JDIMENSION;
-    color : JSAMPLE_PTR;
-  {$ELSE}
-  var
-    bi   : BITMAPINFO;
-    bmp  : HBITMAP;
-    DC   : HDC;
-    p    : Pointer;
-    W, H : Longint;
-    i    : Integer;
-    t    : Byte;
-  {$ENDIF}
-begin
-{$IFDEF USE_PASJPEG}
-  color := JSAMPLE_PTR( jpgData.Buffer[ 0 ] );
-  if not jpgData.Grayscale Then
-    begin
-     for i := 0 to jpgData.Width - 1 do
-        begin
-          j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
-          jpgData.Data[ j + 0 ] := PByte( Ptr( color ) + i * 3 + 0 )^;
-          jpgData.Data[ j + 1 ] := PByte( Ptr( color ) + i * 3 + 1 )^;
-          jpgData.Data[ j + 2 ] := PByte( Ptr( color ) + i * 3 + 2 )^;
-          jpgData.Data[ j + 3 ] := 255;
-        end;
-    end else
-      begin
-        for i := 0 to jpgData.Width - 1 do
-          begin
-            j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
-            jpgData.Data[ j + 0 ] := color^;
-            jpgData.Data[ j + 1 ] := color^;
-            jpgData.Data[ j + 2 ] := color^;
-            jpgData.Data[ j + 3 ] := 255;
-
-            INC( color );
-          end;
-      end;
-{$ELSE}
-  DC := CreateCompatibleDC( GetDC( 0 ) );
-  jpgData.Buffer.get_Width ( W );
-  jpgData.Buffer.get_Height( H );
-  jpgData.Width  := MulDiv( W, GetDeviceCaps( DC, LOGPIXELSX ), 2540 );
-  jpgData.Height := MulDiv( H, GetDeviceCaps( DC, LOGPIXELSY ), 2540 );
-
-  FillChar( bi, SizeOf( bi ), 0 );
-  bi.bmiHeader.biSize        := SizeOf( BITMAPINFOHEADER );
-  bi.bmiHeader.biBitCount    := 32;
-  bi.bmiHeader.biWidth       := jpgData.Width;
-  bi.bmiHeader.biHeight      := jpgData.Height;
-  bi.bmiHeader.biCompression := BI_RGB;
-  bi.bmiHeader.biPlanes      := 1;
-  bmp := CreateDIBSection( DC, bi, DIB_RGB_COLORS, p, 0, 0 );
-  SelectObject( DC, bmp );
-  jpgData.Buffer.Render( DC, 0, 0, jpgData.Width, jpgData.Height, 0, H, W, -H, nil );
-
-  for i := 0 to jpgData.Width * jpgData.Height - 1 do
-    begin
-      t := PByte( Ptr( p ) + i * 4 + 2 )^;
-      PByte( Ptr( p ) + i * 4 + 2 )^ := PByte( Ptr( p ) + i * 4 + 0 )^;
-      PByte( Ptr( p ) + i * 4 + 0 )^ := t;
-      PByte( Ptr( p ) + i * 4 + 3 )^ := 255;
-    end;
-
-  SetLength( jpgData.Data, jpgData.Width * jpgData.Height * 4 );
-  Move( p^, Pointer( jpgData.Data )^, jpgData.Width * jpgData.Height * 4 );
-
-  DeleteObject( bmp );
-  DeleteDC    ( DC );
-{$ENDIF}
 end;
 
 initialization

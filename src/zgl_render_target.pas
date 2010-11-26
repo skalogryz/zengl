@@ -130,7 +130,7 @@ var
   lResCX   : Single;
   lResCY   : Single;
 
-function rtarget_Add;
+function rtarget_Add( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
   var
     i, _type : Integer;
     pFBO     : zglPFBO;
@@ -451,7 +451,7 @@ begin
   INC( managerRTarget.Count );
 end;
 
-procedure rtarget_Del;
+procedure rtarget_Del( var Target : zglPRenderTarget );
 begin
   if not Assigned( Target ) Then exit;
 
@@ -501,7 +501,7 @@ begin
   DEC( managerRTarget.Count );
 end;
 
-procedure rtarget_Set;
+procedure rtarget_Set( const Target : zglPRenderTarget );
 begin
   batch2d_Flush();
 
@@ -600,11 +600,11 @@ begin
               SetCurrentMode();
             end;
 
-          lRTarget   := nil;
+          lRTarget := nil;
       end;
 end;
 
-procedure rtarget_DrawIn;
+procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
 begin
   if ogl_Separate Then
     begin

@@ -135,7 +135,7 @@ implementation
 uses
   zgl_utils;
 
-function InitOpenAL;
+function InitOpenAL : Boolean;
 begin
   Result := FALSE;
   oal_Library := dlopen( libopenal {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
@@ -181,7 +181,7 @@ begin
   dlclose( oal_Library );
 end;
 
-function oal_GetSource;
+function oal_GetSource( const Source : Pointer ) : LongWord;
   var
     i, state : Integer;
 begin

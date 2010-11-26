@@ -1,4 +1,4 @@
-unit zglSpriteEngine;
+﻿unit zglSpriteEngine;
 
 // Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
 {$DEFINE STATIC}
@@ -72,12 +72,64 @@ uses
   zgl_sprite_2d;
 {$ENDIF}
 
-function zglCSEngine2D.GetSprite;
+procedure zglCSEngine2D.SortByLayer( iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t : zglCSprite2D;
+begin
+  lo   := iLo;
+  hi   := iHi;
+  mid  := FList[ ( lo + hi ) shr 1 ].Layer;
+
+  repeat
+    while FList[ lo ].Layer < mid do INC( lo );
+    while FList[ hi ].Layer > mid do DEC( hi );
+    if lo <= hi then
+      begin
+        t           := FList[ lo ];
+        FList[ lo ] := FList[ hi ];
+        FList[ hi ] := t;
+        INC( lo );
+        DEC( hi );
+      end;
+  until lo > hi;
+
+  if hi > iLo Then SortByLayer( iLo, hi );
+  if lo < iHi Then SortByLayer( lo, iHi );
+end;
+
+procedure zglCSEngine2D.SortByID( iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t : zglCSprite2D;
+begin
+  lo   := iLo;
+  hi   := iHi;
+  mid  := FList[ ( lo + hi ) shr 1 ].ID;
+
+  repeat
+    while FList[ lo ].ID < mid do INC( lo );
+    while FList[ hi ].ID > mid do DEC( hi );
+    if Lo <= Hi then
+      begin
+        t           := FList[ lo ];
+        FList[ lo ] := FList[ hi ];
+        FList[ hi ] := t;
+        INC( lo );
+        DEC( hi );
+      end;
+  until lo > hi;
+
+  if hi > iLo Then SortByID( iLo, hi );
+  if lo < iHi Then SortByID( lo, iHi );
+end;
+
+function zglCSEngine2D.GetSprite( ID : LongWord ) : zglCSprite2D;
 begin
   Result := FList[ ID ];
 end;
 
-procedure zglCSEngine2D.SetSprite;
+procedure zglCSEngine2D.SetSprite( ID : LongWord; const Sprite : zglCSprite2D );
 begin
   FList[ ID ] := Sprite;
 end;
@@ -101,7 +153,7 @@ begin
   Result.OnInit( Texture, Layer );
 end;
 
-procedure zglCSEngine2D.DelSprite;
+procedure zglCSEngine2D.DelSprite( const ID : Integer );
   var
     i : Integer;
 begin
@@ -196,59 +248,7 @@ begin
     end;
 end;
 
-procedure zglCSEngine2D.SortByLayer;
-  var
-    lo, hi, mid : Integer;
-    t : zglCSprite2D;
-begin
-  lo   := iLo;
-  hi   := iHi;
-  mid  := FList[ ( lo + hi ) shr 1 ].Layer;
-
-  repeat
-    while FList[ lo ].Layer < mid do INC( lo );
-    while FList[ hi ].Layer > mid do DEC( hi );
-    if lo <= hi then
-      begin
-        t           := FList[ lo ];
-        FList[ lo ] := FList[ hi ];
-        FList[ hi ] := t;
-        INC( lo );
-        DEC( hi );
-      end;
-  until lo > hi;
-
-  if hi > iLo Then SortByLayer( iLo, hi );
-  if lo < iHi Then SortByLayer( lo, iHi );
-end;
-
-procedure zglCSEngine2D.SortByID;
-  var
-    lo, hi, mid : Integer;
-    t : zglCSprite2D;
-begin
-  lo   := iLo;
-  hi   := iHi;
-  mid  := FList[ ( lo + hi ) shr 1 ].ID;
-
-  repeat
-    while FList[ lo ].ID < mid do INC( lo );
-    while FList[ hi ].ID > mid do DEC( hi );
-    if Lo <= Hi then
-      begin
-        t           := FList[ lo ];
-        FList[ lo ] := FList[ hi ];
-        FList[ hi ] := t;
-        INC( lo );
-        DEC( hi );
-      end;
-  until lo > hi;
-
-  if hi > iLo Then SortByID( iLo, hi );
-  if lo < iHi Then SortByID( lo, iHi );
-end;
-
-constructor zglCSprite2D.Create;
+constructor zglCSprite2D.Create( const _Manager : zglCSEngine2D; const _ID : Integer );
 begin
   Manager := _Manager;
   ID      := _ID;
@@ -261,7 +261,7 @@ begin
   OnFree;
 end;
 
-procedure zglCSprite2D.OnInit;
+procedure zglCSprite2D.OnInit( const _Texture : zglPTexture; const _Layer : Integer );
 begin
   Texture := _Texture;
   Layer   := _Layer;

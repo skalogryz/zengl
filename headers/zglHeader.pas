@@ -213,8 +213,8 @@ var
   scissor_End   : procedure;
 
 // INI
-  ini_LoadFromFile  : procedure( const FileName : AnsiString );
-  ini_SaveToFile    : procedure( const FileName : AnsiString );
+  ini_LoadFromFile  : procedure( const FileName : String );
+  ini_SaveToFile    : procedure( const FileName : String );
   ini_Add           : procedure( const Section, Key : AnsiString );
   ini_Del           : procedure( const Section, Key : AnsiString );
   ini_Clear         : procedure( const Section : AnsiString );

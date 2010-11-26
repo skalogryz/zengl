@@ -214,7 +214,7 @@ begin
 {$ENDIF}
 end;
 
-function scr_Create;
+function scr_Create : Boolean;
   {$IFDEF LINUX}
   var
     i, j : Integer;
@@ -444,7 +444,7 @@ begin
   {$ENDIF}
 end;
 
-procedure scr_SetOptions;
+procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
   var
   {$IFDEF LINUX}
     modeToSet : Integer;
@@ -586,7 +586,7 @@ begin
     wnd_Update();
 end;
 
-procedure scr_CorrectResolution;
+procedure scr_CorrectResolution( const Width, Height : Word );
 begin
   scr_ResW  := Width;
   scr_ResH  := Height;
@@ -661,7 +661,7 @@ begin
       end;
 end;
 
-procedure scr_SetVSync;
+procedure scr_SetVSync( const VSync : Boolean );
 begin
   scr_VSync := VSync;
 {$IFDEF LINUX}
@@ -678,7 +678,7 @@ begin
 {$ENDIF}
 end;
 
-procedure scr_SetFSAA;
+procedure scr_SetFSAA( const FSAA : Byte );
 begin
   if ogl_FSAA = FSAA Then exit;
   ogl_FSAA := FSAA;
@@ -698,7 +698,7 @@ begin
     log_Add( 'FSAA changed to: off' );
 end;
 
-procedure scr_ReadPixels;
+procedure scr_ReadPixels( var pData : Pointer; const X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );

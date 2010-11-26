@@ -221,15 +221,15 @@ var
   _pengine  : zglTPEngine2D;
   pengine2d : zglPPEngine2D;
 
-function pengine2d_AddEmitter;
+function pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : Integer;
 begin
 end;
 
-procedure pengine2d_DelEmitter;
+procedure pengine2d_DelEmitter( const ID : Integer );
 begin
 end;
 
-procedure pengine2d_Set;
+procedure pengine2d_Set( const PEngine : zglPPEngine2D );
 begin
 end;
 
@@ -241,11 +241,11 @@ procedure pengine2d_Draw;
 begin
 end;
 
-procedure pengine2d_Proc;
+procedure pengine2d_Proc( const dt : Double );
 begin
 end;
 
-procedure emitter2d_Init;
+procedure emitter2d_Init( var Emitter : zglTEmitter2D );
   var
     i : Integer;
 begin
@@ -257,7 +257,7 @@ begin
       end;
 end;
 
-procedure emitter2d_Draw;
+procedure emitter2d_Draw( const Emitter : zglTEmitter2D );
   var
     i      : Integer;
     p      : zglPParticle2D;
@@ -427,7 +427,7 @@ begin
     end;
 end;
 
-procedure emitter2d_Proc;
+procedure emitter2d_Proc( var Emitter : zglTEmitter2D; const dt : Double );
   var
     i        : Integer;
     p        : zglPParticle2D;
@@ -554,7 +554,7 @@ begin
     end;
 end;
 
-procedure emitter2d_Sort;
+procedure emitter2d_Sort( var Emitter : zglTEmitter2D; const iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
     t           : zglPParticle2D;
@@ -581,7 +581,7 @@ begin
   if lo < iHi Then emitter2d_Sort( Emitter, lo, iHi );
 end;
 
-procedure particle2d_Proc;
+procedure particle2d_Proc( var Particle : zglTParticle2D; const Params : zglTParticleParams; const dt : Double );
   var
     i            : Integer;
     coeff        : Single;
