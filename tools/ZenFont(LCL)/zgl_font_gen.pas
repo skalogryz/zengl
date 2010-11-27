@@ -195,6 +195,21 @@ uses
   zgl_utils,
   math;
 
+procedure image_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
+  var
+    i        : Integer;
+    scanLine : array of Byte;
+begin
+  SetLength( scanLine, w * pixelSize );
+
+  for i := 0 to h shr 1 - 1 do
+    begin
+      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
+      Move( Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, Pointer( Ptr( Data ) + i * w * pixelSize )^, w * pixelSize );
+      Move( scanLine[ 0 ], Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, w * pixelSize );
+    end;
+end;
+
 function fontgen_InsertSymbol( const node : zglPSymbolNode; const r : zglTRect; const ID : Integer ) : zglPSymbolNode;
   var
     dw, dh : Single;
@@ -335,7 +350,7 @@ begin
 end;
 {$ENDIF}
 
-function fontgen_Init;
+function fontgen_Init : Boolean;
   var
     i : Integer;
     {$IFDEF LINUX}
@@ -409,7 +424,7 @@ begin
       end;
 end;
 
-procedure fontgen_BuildFont;
+procedure fontgen_BuildFont( var Font : zglPFont; const FontName : String );
   var
     pData    : Pointer;
     i, j     : Integer;
@@ -656,7 +671,7 @@ begin
           sn := fontgen_InsertSymbol( @fg_FontNodes[ Font.Count.Pages - 1 ], sr, CharUID );
           if not Assigned( sn ) Then
             begin
-              tga_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
+              image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
               tex_Create( Font.Pages[ Font.Count.Pages - 1 ]^, pData );
               FreeMemory( pData );
 
@@ -704,7 +719,7 @@ begin
                 INC( i );
               end;
         end;
-      tga_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
+      image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
       tex_Create( Font.Pages[ Font.Count.Pages - 1 ]^, pData );
       FreeMemory( pData );
     end else
@@ -763,7 +778,7 @@ begin
                 Font.MaxHeight := Round( Max( Font.MaxHeight, fg_CharsSize[ CharID ].H ) );
                 Font.MaxShiftY := Round( Max( Font.MaxShiftY, Font.CharDesc[ CharUID ].ShiftY ) );
             end;
-          tga_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
+          image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
           tex_Create( Font.Pages[ i ]^, pData );
           FreeMemory( pData );
         end;
@@ -774,7 +789,7 @@ begin
   Font.Padding[ 3 ] := fg_FontPadding[ 3 ];
 end;
 
-procedure fontgen_SaveFont;
+procedure fontgen_SaveFont( const Font : zglPFont; const FileName : String );
   var
     TGA  : zglTTGAHeader;
     F    : zglTFile;
