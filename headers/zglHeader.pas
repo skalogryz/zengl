@@ -2,8 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 {                               }
-{ version:  0.2 RC5             }
-{ date:     2010.11.21          }
+{ version:  0.2 RC6             }
+{ date:     2010.11.27          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -668,6 +668,7 @@ end;
 
 var
   cam2d_Set   : procedure( const Camera : zglPCamera2D );
+  cam2d_Get   : function : zglPCamera2D;
   cam2d_Apply : procedure( const Camera : zglPCamera2D );
 
 // Render 2D
@@ -886,6 +887,7 @@ type
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
     _parCreated : LongWord;
 
+    ID          : Integer;
     Params      : record
       LifeTime : LongWord;
       Loop     : Boolean;
@@ -917,18 +919,20 @@ type
       Emitters  : LongWord;
       Particles : LongWord;
             end;
-    List  : array of zglTEmitter2D;
+    List  : array of zglPEmitter2D;
   end;
 
 var
-  pengine2d_AddEmitter : function( const Emitter : zglTEmitter2D ) : Integer;
-  pengine2d_DelEmitter : procedure( const ID : Integer );
-  pengine2d_ClearAll   : procedure;
   pengine2d_Set        : procedure( const PEngine : zglPPEngine2D );
+  pengine2d_Get        : function : zglPPEngine2D;
   pengine2d_Draw       : procedure;
   pengine2d_Proc       : procedure( const dt : Double );
+  pengine2d_AddEmitter : function( const Emitter : zglTEmitter2D ) : zglPEmitter2D;
+  pengine2d_DelEmitter : procedure( const ID : Integer );
+  pengine2d_ClearAll   : procedure;
   emitter2d_Init       : procedure( var Emitter : zglTEmitter2D );
-  emitter2d_Draw       : procedure( const Emitter : zglTEmitter2D );
+  emitter2d_Free       : procedure( var Emitter : zglTEmitter2D );
+  emitter2d_Draw       : procedure( var Emitter : zglTEmitter2D );
   emitter2d_Proc       : procedure( var Emitter : zglTEmitter2D; const dt : Double );
 
 // Text
@@ -1094,6 +1098,10 @@ var
 
 // MATH
 const
+  pi      = 3.1415926;
+  rad2deg = 57.29578049;
+  deg2rad = 0.017453292;
+
   ORIENTATION_LEFT  = -1;
   ORIENTATION_RIGHT = 1;
   ORIENTATION_ZERO  = 0;
@@ -1419,6 +1427,7 @@ begin
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );
 
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );
+      cam2d_Get := dlsym( zglLib, 'cam2d_Get' );
       cam2d_Apply := dlsym( zglLib, 'cam2d_Apply' );
 
       batch2d_Begin := dlsym( zglLib, 'batch2d_Begin' );
@@ -1448,13 +1457,15 @@ begin
       agrid2d_Draw := dlsym( zglLib, 'agrid2d_Draw' );
       cgrid2d_Draw := dlsym( zglLib, 'cgrid2d_Draw' );
 
+      pengine2d_Set := dlsym( zglLib, 'pengine2d_Set' );
+      pengine2d_Get := dlsym( zglLib, 'pengine2d_Get' );
+      pengine2d_Draw := dlsym( zglLib, 'pengine2d_Draw' );
+      pengine2d_Proc := dlsym( zglLib, 'pengine2d_Proc' );
       pengine2d_AddEmitter := dlsym( zglLib, 'pengine2d_AddEmitter' );
       pengine2d_DelEmitter := dlsym( zglLib, 'pengine2d_DelEmitter' );
       pengine2d_ClearAll := dlsym( zglLib, 'pengine2d_ClearAll' );
-      pengine2d_Set := dlsym( zglLib, 'pengine2d_Set' );
-      pengine2d_Draw := dlsym( zglLib, 'pengine2d_Draw' );
-      pengine2d_Proc := dlsym( zglLib, 'pengine2d_Proc' );
       emitter2d_Init := dlsym( zglLib, 'emitter2d_Init' );
+      emitter2d_Free := dlsym( zglLib, 'emitter2d_Free' );
       emitter2d_Draw := dlsym( zglLib, 'emitter2d_Draw' );
       emitter2d_Proc := dlsym( zglLib, 'emitter2d_Proc' );
 

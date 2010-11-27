@@ -38,6 +38,7 @@ type
 end;
 
 procedure cam2d_Set( const Camera : zglPCamera2D );
+function  cam2d_Get : zglPCamera2D;
 procedure cam2d_Apply( const Camera : zglPCamera2D );
 
 procedure cam2d_Vertex2f( X, Y : Single ); stdcall;
@@ -78,6 +79,11 @@ begin
         gl_Vertex2fv := @cam2d_Vertex2fv;
         sprite2d_InScreen := sprite2d_InScreenCamera;
       end;
+end;
+
+function cam2d_Get : zglPCamera2D;
+begin
+  Result := cam2dGlobal;
 end;
 
 procedure cam2d_Apply( const Camera : zglPCamera2D );

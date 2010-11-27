@@ -158,6 +158,7 @@ type
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
     _parCreated : LongWord;
 
+    ID          : Integer;
     Params      : record
       LifeTime : LongWord;
       Loop     : Boolean;
@@ -189,19 +190,20 @@ type
       Emitters  : LongWord;
       Particles : LongWord;
             end;
-    List  : array of zglTEmitter2D;
+    List  : array of zglPEmitter2D;
   end;
 
-function  pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : Integer;
+procedure pengine2d_Set( const PEngine : zglPPEngine2D );
+function  pengine2d_Get : zglPPEngine2D;
+procedure pengine2d_Draw;
+procedure pengine2d_Proc( const dt : Double );
+function  pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( const ID : Integer );
 procedure pengine2d_ClearAll;
 
-procedure pengine2d_Set( const PEngine : zglPPEngine2D );
-procedure pengine2d_Draw;
-procedure pengine2d_Proc( const dt : Double );
-
 procedure emitter2d_Init( var Emitter : zglTEmitter2D );
-procedure emitter2d_Draw( const Emitter : zglTEmitter2D );
+procedure emitter2d_Free( var Emitter : zglTEmitter2D );
+procedure emitter2d_Draw( var Emitter : zglTEmitter2D );
 procedure emitter2d_Proc( var Emitter : zglTEmitter2D; const dt : Double );
 procedure emitter2d_Sort( var Emitter : zglTEmitter2D; const iLo, iHi : Integer );
 
@@ -221,28 +223,164 @@ var
   _pengine  : zglTPEngine2D;
   pengine2d : zglPPEngine2D;
 
-function pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : Integer;
-begin
-end;
-
-procedure pengine2d_DelEmitter( const ID : Integer );
-begin
-end;
-
 procedure pengine2d_Set( const PEngine : zglPPEngine2D );
 begin
+  if Assigned( PEngine ) Then
+    pengine2d := PEngine
+  else
+    pengine2d := @_pengine;
 end;
 
-procedure pengine2d_ClearAll;
+function pengine2d_Get : zglPPEngine2D;
 begin
+  Result := pengine2d;
 end;
 
 procedure pengine2d_Draw;
+  var
+    i, j : Integer;
 begin
+  j := pengine2d.Count.Emitters - 1;
+  for i := 0 to j do
+    emitter2d_Draw( pengine2d.List[ i ]^ );
 end;
 
 procedure pengine2d_Proc( const dt : Double );
+  var
+    i : Integer;
+    e : zglPEmitter2D;
 begin
+  i := 0;
+  pengine2d.Count.Particles := 0;
+  while i < pengine2d.Count.Emitters do
+    begin
+      e := pengine2d.List[ i ];
+      emitter2d_Proc( e^, dt );
+      if ( e.Life <= 0 ) and ( not e.Params.Loop ) and ( e.Particles = 0 ) Then
+        pengine2d_DelEmitter( i )
+      else
+        begin
+          INC( i );
+          INC( pengine2d.Count.Particles, e.Particles );
+        end;
+    end;
+end;
+
+function pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : zglPEmitter2D;
+  var
+    new : zglPEmitter2D;
+    len : Integer;
+begin
+  if pengine2d.Count.Emitters + 1 > length( pengine2d.List ) Then
+    SetLength( pengine2d.List, length( pengine2d.List ) + 16384 );
+
+  zgl_GetMem( Pointer( new ), SizeOf( zglTEmitter2D ) );
+  pengine2d.List[ pengine2d.Count.Emitters ] := new;
+  INC( pengine2d.Count.Emitters );
+
+  new._type       := Emitter._type;
+  new._parCreated := Emitter._parCreated;
+  new.ID          := pengine2d.Count.Emitters - 1;
+  new.Params      := Emitter.Params;
+  new.Life        := Emitter.Life;
+  new.Time        := Emitter.Time;
+  new.LastSecond  := Emitter.LastSecond;
+  new.Particles   := Emitter.Particles;
+  new.BBox        := Emitter.BBox;
+  Result          := new;
+  case Emitter._type of
+    EMITTER_POINT:     new.AsPoint  := Emitter.AsPoint;
+    EMITTER_LINE:      new.AsLine   := Emitter.AsLine;
+    EMITTER_RECTANGLE: new.AsRect   := Emitter.AsRect;
+    EMITTER_CIRCLE:    new.AsCircle := Emitter.AsCircle;
+  end;
+  with new.ParParams do
+    begin
+      Texture   := Emitter.ParParams.Texture;
+      BlendMode := Emitter.ParParams.BlendMode;
+      ColorMode := Emitter.ParParams.ColorMode;
+
+      LifeTimeS := Emitter.ParParams.LifeTimeS;
+      LifeTimeV := Emitter.ParParams.LifeTimeV;
+      Frame     := Emitter.ParParams.Frame;
+
+      len := length( Emitter.ParParams.Color );
+      SetLength( Color, len );
+      Move( Emitter.ParParams.Color[ 0 ], Color[ 0 ], len * SizeOf( Color[ 0 ] ) );
+
+      len := length( Emitter.ParParams.Alpha );
+      SetLength( Alpha, len );
+      Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
+
+      SizeXS := Emitter.ParParams.SizeXS;
+      SizeYS := Emitter.ParParams.SizeYS;
+      SizeXV := Emitter.ParParams.SizeXV;
+      SizeYV := Emitter.ParParams.SizeYV;
+
+      len := length( Emitter.ParParams.SizeXD );
+      SetLength( SizeXD, len );
+      Move( Emitter.ParParams.SizeXD[ 0 ], SizeXD[ 0 ], len * SizeOf( SizeXD[ 0 ] ) );
+
+      len := length( Emitter.ParParams.SizeYD );
+      SetLength( SizeYD, len );
+      Move( Emitter.ParParams.SizeYD[ 0 ], SizeYD[ 0 ], len * SizeOf( SizeYD[ 0 ] ) );
+
+      AngleS    := Emitter.ParParams.AngleS;
+      AngleV    := Emitter.ParParams.AngleV;
+      VelocityS := Emitter.ParParams.VelocityS;
+      VelocityV := Emitter.ParParams.VelocityV;
+
+      len := length( Emitter.ParParams.VelocityD );
+      SetLength( VelocityD, len );
+      Move( Emitter.ParParams.VelocityD[ 0 ], VelocityD[ 0 ], len * SizeOf( VelocityD[ 0 ] ) );
+
+      aVelocityS := Emitter.ParParams.aVelocityS;
+      aVelocityV := Emitter.ParParams.aVelocityV;
+
+      len := length( Emitter.ParParams.aVelocityD );
+      SetLength( aVelocityD, len );
+      Move( Emitter.ParParams.aVelocityD[ 0 ], aVelocityD[ 0 ], len * SizeOf( aVelocityD[ 0 ] ) );
+
+      SpinS := Emitter.ParParams.SpinS;
+      SpinV := Emitter.ParParams.SpinV;
+
+      len := length( Emitter.ParParams.SpinD );
+      SetLength( SpinD, len );
+      Move( Emitter.ParParams.SpinD[ 0 ], SpinD[ 0 ], len * SizeOf( SpinD[ 0 ] ) );
+    end;
+
+  Move( Emitter._particle[ 0 ], new._particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
+  emitter2d_Init( Result^ );
+end;
+
+procedure pengine2d_DelEmitter( const ID : Integer );
+  var
+    i : Integer;
+begin
+  if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) or ( pengine2d.Count.Emitters = 0 ) Then exit;
+
+  emitter2d_Free( pengine2d.List[ ID ]^ );
+  FreeMem( pengine2d.List[ ID ] );
+  for i := ID to pengine2d.Count.Emitters - 2 do
+    begin
+      pengine2d.List[ i ]    := pengine2d.List[ i + 1 ];
+      pengine2d.List[ i ].ID := i;
+    end;
+
+  DEC( pengine2d.Count.Emitters );
+end;
+
+procedure pengine2d_ClearAll;
+  var
+    i : Integer;
+begin
+  for i := 0 to pengine2d.Count.Emitters - 1 do
+    begin
+      emitter2d_Free( pengine2d.List[ i ]^ );
+      FreeMem( pengine2d.List[ i ] );
+    end;
+  SetLength( pengine2d.List, 0 );
+  pengine2d.Count.Emitters := 0;
 end;
 
 procedure emitter2d_Init( var Emitter : zglTEmitter2D );
@@ -257,7 +395,21 @@ begin
       end;
 end;
 
-procedure emitter2d_Draw( const Emitter : zglTEmitter2D );
+procedure emitter2d_Free( var Emitter : zglTEmitter2D );
+begin
+  with Emitter.ParParams do
+    begin
+      SetLength( Color, 0 );
+      SetLength( Alpha, 0 );
+      SetLength( SizeXD, 0 );
+      SetLength( SizeYD, 0 );
+      SetLength( VelocityD, 0 );
+      SetLength( aVelocityD, 0 );
+      SetLength( SpinD, 0 );
+    end;
+end;
+
+procedure emitter2d_Draw( var Emitter : zglTEmitter2D );
   var
     i      : Integer;
     p      : zglPParticle2D;

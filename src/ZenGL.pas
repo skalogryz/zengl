@@ -234,6 +234,7 @@ exports
 
   // Camera 2D
   cam2d_Set                name prefix + 'cam2d_Set',
+  cam2d_Get                name prefix + 'cam2d_Get',
   cam2d_Apply              name prefix + 'cam2d_Apply',
 
   // Render 2D
@@ -261,13 +262,15 @@ exports
 
   // Particles Engine 2D
   {$IFDEF USE_PARTICLES}
+  pengine2d_Set            name prefix + 'pengine2d_Set',
+  pengine2d_Get            name prefix + 'pengine2d_Get',
+  pengine2d_Draw           name prefix + 'pengine2d_Draw',
+  pengine2d_Proc           name prefix + 'pengine2d_Proc',
   pengine2d_AddEmitter     name prefix + 'pengine2d_AddEmitter',
   pengine2d_DelEmitter     name prefix + 'pengine2d_DelEmitter',
   pengine2d_ClearAll       name prefix + 'pengine2d_ClearAll',
-  pengine2d_Set            name prefix + 'pengine2d_Set',
-  pengine2d_Draw           name prefix + 'pengine2d_Draw',
-  pengine2d_Proc           name prefix + 'pengine2d_Proc',
   emitter2d_Init           name prefix + 'emitter2d_Init',
+  emitter2d_Free           name prefix + 'emitter2d_Free',
   emitter2d_Draw           name prefix + 'emitter2d_Draw',
   emitter2d_Proc           name prefix + 'emitter2d_Proc',
   {$ENDIF}

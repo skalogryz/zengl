@@ -18,7 +18,7 @@
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="2"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Crossplatform game development library" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.2 RC4"/>
+      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.2 RC6"/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>

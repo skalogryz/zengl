@@ -61,6 +61,7 @@ procedure sengine2d_DelSprite( const ID : Integer );
 procedure sengine2d_ClearAll;
 
 procedure sengine2d_Set( const SEngine : zglPSEngine2D );
+function  sengine2d_Get : zglPSEngine2D;
 procedure sengine2d_Draw;
 procedure sengine2d_Proc;
 procedure sengine2d_Sort( iLo, iHi : Integer );
@@ -150,6 +151,11 @@ begin
     sengine2d := SEngine
   else
     sengine2d := @_sengine;
+end;
+
+function sengine2d_Get : zglPSEngine2D;
+begin
+  Result := sengine2d;
 end;
 
 procedure sengine2d_Draw;
