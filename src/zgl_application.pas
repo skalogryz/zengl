@@ -25,16 +25,16 @@ unit zgl_application;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib,
+  X, XLib
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
-  Messages,
+  Messages
   {$ENDIF}
   {$IFDEF DARWIN}
-  MacOSAll,
+  MacOSAll
   {$ENDIF}
-  zgl_types;
+  ;
 
 procedure zero;
 procedure zerou( dt : Double );
@@ -96,9 +96,7 @@ uses
   zgl_screen,
   zgl_window,
   zgl_opengl,
-  zgl_opengl_all,
   zgl_opengl_simple,
-  zgl_log,
   zgl_mouse,
   zgl_keyboard,
   {$IFDEF USE_JOYSTICK}

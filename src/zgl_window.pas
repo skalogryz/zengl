@@ -25,7 +25,7 @@ unit zgl_window;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil, XAtom
+  X, XLib, XUtil
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows

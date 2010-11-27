@@ -215,9 +215,7 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_fx,
-  zgl_render_2d,
-  zgl_sprite_2d,
-  zgl_collision_2d;
+  zgl_render_2d;
 
 var
   _pengine  : zglTPEngine2D;
@@ -735,7 +733,6 @@ end;
 
 procedure particle2d_Proc( var Particle : zglTParticle2D; const Params : zglTParticleParams; const dt : Double );
   var
-    i            : Integer;
     coeff        : Single;
     speed        : Single;
     iLife        : Single;

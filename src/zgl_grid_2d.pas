@@ -44,7 +44,6 @@ procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const 
 implementation
 uses
   zgl_application,
-  zgl_main,
   zgl_screen,
   zgl_opengl,
   zgl_opengl_all,

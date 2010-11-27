@@ -25,7 +25,7 @@ unit zgl_screen;
 interface
 uses
   {$IFDEF LINUX}
-  X, XLib, XUtil, XRandr, UnixType
+  X, XLib, XRandr, UnixType
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows
@@ -131,7 +131,6 @@ var
 
 implementation
 uses
-  zgl_types,
   zgl_main,
   zgl_application,
   zgl_window,
@@ -382,11 +381,12 @@ end;
 
 procedure scr_Reset;
 begin
+  scr_Changing := TRUE;
 {$IFDEF LINUX}
   XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Desktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
+  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Desktop, 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
 {$IFDEF DARWIN}
   CGDisplaySwitchToMode( scr_Display, scr_Desktop );

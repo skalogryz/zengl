@@ -56,7 +56,6 @@ procedure text_CalcRect( const Font : zglPFont; const Rect : zglTRect; const Tex
 
 implementation
 uses
-  zgl_main,
   zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,

@@ -24,7 +24,6 @@ unit zgl_texture_atlas;
 
 interface
 uses
-  zgl_types,
   zgl_textures,
   zgl_memory,
   zgl_math_2d;

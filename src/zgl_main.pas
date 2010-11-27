@@ -207,7 +207,6 @@ begin
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
   app_PExit();
-  scr_Destroy();
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 0 do
@@ -259,6 +258,7 @@ begin
   snd_Free();
   {$ENDIF}
 
+  scr_Destroy();
   gl_Destroy();
   if not app_InitToHandle Then wnd_Destroy();
 
