@@ -47,7 +47,7 @@ type
     Manager : zglCSEngine2D;
     Texture : zglPTexture;
     Destroy : Boolean;
-    Layer   : Integer;
+    Layer   : LongWord;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
@@ -182,9 +182,39 @@ end;
 
 procedure zglCSEngine2D.Draw;
   var
-    i, a, b, l : Integer;
+    i : Integer;
     s : zglCSprite2D;
 begin
+  i := 0;
+  while i < FCount do
+    begin
+      s := FList[ i ];
+      s.OnDraw();
+
+      if s.Destroy Then
+        DelSprite( s.ID )
+      else
+        INC( i );
+    end;
+end;
+
+procedure zglCSEngine2D.Proc;
+  var
+    i, a, b, l : Integer;
+    s          : zglCSprite2D;
+begin
+  i := 0;
+  while i < FCount do
+    begin
+      s := FList[ i ];
+      s.OnProc();
+
+      if s.Destroy Then
+        DelSprite( s.ID )
+      else
+        INC( i );
+    end;
+
   if FCount > 1 Then
     begin
       l := 0;
@@ -215,36 +245,6 @@ begin
               break;
             end;
         end;
-    end;
-
-  i := 0;
-  while i < FCount do
-    begin
-      s := FList[ i ];
-      s.OnDraw();
-
-      if s.Destroy Then
-        DelSprite( s.ID )
-      else
-        INC( i );
-    end;
-end;
-
-procedure zglCSEngine2D.Proc;
-  var
-    i : Integer;
-    s : zglCSprite2D;
-begin
-  i := 0;
-  while i < FCount do
-    begin
-      s := FList[ i ];
-      s.OnProc();
-
-      if s.Destroy Then
-        DelSprite( s.ID )
-      else
-        INC( i );
     end;
 end;
 

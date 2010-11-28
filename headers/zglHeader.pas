@@ -704,7 +704,7 @@ type
     Manager : zglPSEngine2D;
     Texture : zglPTexture;
     Destroy : Boolean;
-    Layer   : Integer;
+    Layer   : LongWord;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
@@ -889,6 +889,7 @@ type
 
     ID          : Integer;
     Params      : record
+      Layer    : LongWord;
       LifeTime : LongWord;
       Loop     : Boolean;
       Emission : LongWord;

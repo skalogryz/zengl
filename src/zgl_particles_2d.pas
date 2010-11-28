@@ -160,6 +160,7 @@ type
 
     ID          : Integer;
     Params      : record
+      Layer    : LongWord;
       LifeTime : LongWord;
       Loop     : Boolean;
       Emission : LongWord;
@@ -201,6 +202,9 @@ function  pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( const ID : Integer );
 procedure pengine2d_ClearAll;
 
+procedure pengine2d_Sort( iLo, iHi : Integer );
+procedure pengine2d_SortID( iLo, iHi : Integer );
+
 procedure emitter2d_Init( var Emitter : zglTEmitter2D );
 procedure emitter2d_Free( var Emitter : zglTEmitter2D );
 procedure emitter2d_Draw( var Emitter : zglTEmitter2D );
@@ -236,17 +240,16 @@ end;
 
 procedure pengine2d_Draw;
   var
-    i, j : Integer;
+    i : Integer;
 begin
-  j := pengine2d.Count.Emitters - 1;
-  for i := 0 to j do
+  for i := 0 to pengine2d.Count.Emitters - 1 do
     emitter2d_Draw( pengine2d.List[ i ]^ );
 end;
 
 procedure pengine2d_Proc( const dt : Double );
   var
-    i : Integer;
-    e : zglPEmitter2D;
+    i, a, b, l : Integer;
+    e          : zglPEmitter2D;
 begin
   i := 0;
   pengine2d.Count.Particles := 0;
@@ -260,6 +263,38 @@ begin
         begin
           INC( i );
           INC( pengine2d.Count.Particles, e.Particles );
+        end;
+    end;
+
+  if pengine2d.Count.Emitters > 1 Then
+    begin
+      l := 0;
+      for i := 0 to pengine2d.Count.Emitters - 1 do
+        begin
+          e := pengine2d.List[ i ];
+          if e.Params.Layer > l Then l := e.Params.Layer;
+          if e.Params.Layer < l Then
+            begin
+              pengine2d_Sort( 0, pengine2d.Count.Emitters - 1 );
+              // TODO: наверное сделать выбор вкл./выкл. устойчивой сортировки
+              l := pengine2d.List[ 0 ].Params.Layer;
+              a := 0;
+              for b := 0 to pengine2d.Count.Emitters - 1 do
+                begin
+                  e := pengine2d.List[ b ];
+                  if ( l <> e.Params.Layer ) Then
+                    begin
+                      pengine2d_SortID( a, b - 1 );
+                      a := b;
+                      l := e.Params.Layer;
+                    end;
+                  if b = pengine2d.Count.Emitters - 1 Then
+                    pengine2d_SortID( a, b );
+                end;
+              for a := 0 to pengine2d.Count.Emitters - 1 do
+                pengine2d.List[ a ].ID := a;
+              break;
+            end;
         end;
     end;
 end;
@@ -379,6 +414,60 @@ begin
     end;
   SetLength( pengine2d.List, 0 );
   pengine2d.Count.Emitters := 0;
+end;
+
+procedure pengine2d_Sort( iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t : zglPEmitter2D;
+begin
+  lo   := iLo;
+  hi   := iHi;
+  mid  := pengine2d.List[ ( lo + hi ) shr 1 ].Params.Layer;
+
+  with pengine2d^ do
+  repeat
+    while List[ lo ].Params.Layer < mid do INC( lo );
+    while List[ hi ].Params.Layer > mid do DEC( hi );
+    if lo <= hi then
+      begin
+        t          := List[ lo ];
+        List[ lo ] := List[ hi ];
+        List[ hi ] := t;
+        INC( lo );
+        DEC( hi );
+      end;
+  until lo > hi;
+
+  if hi > iLo Then pengine2d_Sort( iLo, hi );
+  if lo < iHi Then pengine2d_Sort( lo, iHi );
+end;
+
+procedure pengine2d_SortID( iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t : zglPEmitter2D;
+begin
+  lo   := iLo;
+  hi   := iHi;
+  mid  := pengine2d.List[ ( lo + hi ) shr 1 ].ID;
+
+  with pengine2d^ do
+  repeat
+    while List[ lo ].ID < mid do INC( lo );
+    while List[ hi ].ID > mid do DEC( hi );
+    if lo <= hi then
+      begin
+        t          := List[ lo ];
+        List[ lo ] := List[ hi ];
+        List[ hi ] := t;
+        INC( lo );
+        DEC( hi );
+      end;
+  until lo > hi;
+
+  if hi > iLo Then pengine2d_SortID( iLo, hi );
+  if lo < iHi Then pengine2d_SortID( lo, iHi );
 end;
 
 procedure emitter2d_Init( var Emitter : zglTEmitter2D );

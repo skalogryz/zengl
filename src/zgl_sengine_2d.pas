@@ -41,7 +41,7 @@ type
     Manager : zglPSEngine2D;
     Texture : zglPTexture;
     Destroy : Boolean;
-    Layer   : Integer;
+    Layer   : LongWord;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
@@ -160,9 +160,49 @@ end;
 
 procedure sengine2d_Draw;
   var
-    i, a, b, l : Integer;
+    i : Integer;
     s : zglPSprite2D;
 begin
+  i := 0;
+  while i < sengine2d.Count do
+    begin
+      s := sengine2d.List[ i ];
+      if Assigned( s.OnDraw ) Then
+        s.OnDraw( s )
+      else
+        asprite2d_Draw( s.Texture, s.X, s.Y, s.W, s.H, s.Angle, Round( s.Frame ), s.Alpha, s.FxFlags );
+
+      if Assigned( s ) Then
+        begin
+          if s.Destroy Then
+            sengine2d_DelSprite( s.ID )
+          else
+            INC( i );
+        end;
+    end;
+end;
+
+procedure sengine2d_Proc;
+  var
+    i, a, b, l : Integer;
+    s          : zglPSprite2D;
+begin
+  i := 0;
+  while i < sengine2d.Count do
+    begin
+      s := sengine2d.List[ i ];
+      if Assigned( s.OnProc ) Then
+        s.OnProc( s );
+
+      if Assigned( s ) Then
+        begin
+          if s.Destroy Then
+            sengine2d_DelSprite( s.ID )
+          else
+            INC( i );
+        end;
+    end;
+
   if sengine2d.Count > 1 Then
     begin
       l := 0;
@@ -192,46 +232,6 @@ begin
                 sengine2d.List[ a ].ID := a;
               break;
             end;
-        end;
-    end;
-
-  i := 0;
-  while i < sengine2d.Count do
-    begin
-      s := sengine2d.List[ i ];
-      if Assigned( s.OnDraw ) Then
-        s.OnDraw( s )
-      else
-        asprite2d_Draw( s.Texture, s.X, s.Y, s.W, s.H, s.Angle, Round( s.Frame ), s.Alpha, s.FxFlags );
-
-      if Assigned( s ) Then
-        begin
-          if s.Destroy Then
-            sengine2d_DelSprite( s.ID )
-          else
-            INC( i );
-        end;
-    end;
-end;
-
-procedure sengine2d_Proc;
-  var
-    i : Integer;
-    s : zglPSprite2D;
-begin
-  i := 0;
-  while i < sengine2d.Count do
-    begin
-      s := sengine2d.List[ i ];
-      if Assigned( s.OnProc ) Then
-        s.OnProc( s );
-
-      if Assigned( s ) Then
-        begin
-          if s.Destroy Then
-            sengine2d_DelSprite( s.ID )
-          else
-            INC( i );
         end;
     end;
 end;
