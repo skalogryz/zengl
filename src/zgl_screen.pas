@@ -466,12 +466,8 @@ begin
   ogl_Height     := Height;
   wnd_Width      := Width;
   wnd_Height     := Height;
-  scr_Width      := Width;
-  scr_Height     := Height;
   wnd_FullScreen := FullScreen;
   scr_Vsync      := VSync;
-  if not app_Initialized Then exit;
-  scr_SetVSync( scr_VSync );
 
   if Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
@@ -487,6 +483,9 @@ begin
         scr_Refresh := GetDisplayRefresh;
         {$ENDIF}
       end;
+
+  if not app_Initialized Then exit;
+  scr_SetVSync( scr_VSync );
 {$IFDEF LINUX}
   if wnd_FullScreen Then
     begin
