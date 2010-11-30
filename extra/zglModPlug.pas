@@ -50,7 +50,7 @@ type
 
 procedure mp_Init;
 function  mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-function  mp_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : DWORD; var _End : Boolean ) : DWORD;
+function  mp_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : DWORD; var _End : Boolean ) : DWORD;
 procedure mp_DecoderLoop( var Stream : zglTSoundStream );
 procedure mp_DecoderClose( var Stream : zglTSoundStream );
 
@@ -126,7 +126,7 @@ begin
       Result := FALSE;
 end;
 
-function mp_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : DWORD; var _End : Boolean ) : DWORD;
+function mp_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : DWORD; var _End : Boolean ) : DWORD;
 begin
   if not mpInit Then exit;
 

@@ -26,11 +26,11 @@ type
     procedure SortByID( iLo, iHi : Integer );
 
     function  GetSprite( ID : LongWord ) : zglCSprite2D;
-    procedure SetSprite( ID : LongWord; const Sprite : zglCSprite2D );
+    procedure SetSprite( ID : LongWord; Sprite : zglCSprite2D );
   public
     function  AddSprite : Integer; overload;
-    function  AddSprite( const Texture : zglPTexture; const Layer : Integer ) : zglCSprite2D; overload;
-    procedure DelSprite( const ID : Integer );
+    function  AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D; overload;
+    procedure DelSprite( ID : Integer );
     procedure ClearAll;
 
     procedure Draw;
@@ -55,10 +55,10 @@ type
     Alpha   : Integer;
     FxFlags : LongWord;
 
-    constructor Create( const _Manager : zglCSEngine2D; const _ID : Integer );
+    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
     destructor  Free;
 
-    procedure OnInit( const _Texture : zglPTexture; const _Layer : Integer ); virtual;
+    procedure OnInit( _Texture : zglPTexture; _Layer : Integer ); virtual;
     procedure OnDraw; virtual;
     procedure OnProc; virtual;
     procedure OnFree; virtual;
@@ -142,7 +142,7 @@ begin
   INC( FCount );
 end;
 
-function zglCSEngine2D.AddSprite( const Texture : zglPTexture; const Layer : Integer ) : zglCSprite2D;
+function zglCSEngine2D.AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D;
   var
     id : Integer;
 begin
@@ -248,7 +248,7 @@ begin
     end;
 end;
 
-constructor zglCSprite2D.Create( const _Manager : zglCSEngine2D; const _ID : Integer );
+constructor zglCSprite2D.Create( _Manager : zglCSEngine2D; _ID : Integer );
 begin
   Manager := _Manager;
   ID      := _ID;
@@ -261,7 +261,7 @@ begin
   OnFree;
 end;
 
-procedure zglCSprite2D.OnInit( const _Texture : zglPTexture; const _Layer : Integer );
+procedure zglCSprite2D.OnInit( _Texture : zglPTexture; _Layer : Integer );
 begin
   Texture := _Texture;
   Layer   := _Layer;

@@ -50,17 +50,17 @@ type
     FxFlags : LongWord;
     Data    : Pointer;
 
-    OnInit  : procedure( const Sprite : zglPSprite2D );
-    OnDraw  : procedure( const Sprite : zglPSprite2D );
-    OnProc  : procedure( const Sprite : zglPSprite2D );
-    OnFree  : procedure( const Sprite : zglPSprite2D );
+    OnInit  : procedure( Sprite : zglPSprite2D );
+    OnDraw  : procedure( Sprite : zglPSprite2D );
+    OnProc  : procedure( Sprite : zglPSprite2D );
+    OnFree  : procedure( Sprite : zglPSprite2D );
   end;
 
-function  sengine2d_AddSprite( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
-procedure sengine2d_DelSprite( const ID : Integer );
+function  sengine2d_AddSprite( Texture : zglPTexture; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
+procedure sengine2d_DelSprite( ID : Integer );
 procedure sengine2d_ClearAll;
 
-procedure sengine2d_Set( const SEngine : zglPSEngine2D );
+procedure sengine2d_Set( SEngine : zglPSEngine2D );
 function  sengine2d_Get : zglPSEngine2D;
 procedure sengine2d_Draw;
 procedure sengine2d_Proc;
@@ -77,7 +77,7 @@ var
   _sengine  : zglTSEngine2D;
   sengine2d : zglPSEngine2D;
 
-function sengine2d_AddSprite( const Texture : zglPTexture; const Layer : Integer; const OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
+function sengine2d_AddSprite( Texture : zglPTexture; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   var
     new : zglPSprite2D;
 begin
@@ -110,7 +110,7 @@ begin
     Result.OnInit( Result );
 end;
 
-procedure sengine2d_DelSprite( const ID : Integer );
+procedure sengine2d_DelSprite( ID : Integer );
   var
     i : Integer;
 begin
@@ -145,7 +145,7 @@ begin
   sengine2d.Count := 0;
 end;
 
-procedure sengine2d_Set( const SEngine : zglPSEngine2D );
+procedure sengine2d_Set( SEngine : zglPSEngine2D );
 begin
   if Assigned( SEngine ) Then
     sengine2d := SEngine

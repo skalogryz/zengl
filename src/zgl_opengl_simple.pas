@@ -25,10 +25,10 @@ unit zgl_opengl_simple;
 interface
 
 procedure Set2DMode;
-procedure Set3DMode( const FOVY : Single = 45 );
+procedure Set3DMode( FOVY : Single = 45 );
 procedure SetCurrentMode;
 
-procedure zbuffer_SetDepth( const zNear, zFar : Single );
+procedure zbuffer_SetDepth( zNear, zFar : Single );
 procedure zbuffer_Clear;
 
 procedure scissor_Begin( X, Y, Width, Height : Integer );
@@ -70,7 +70,7 @@ begin
   scr_SetViewPort();
 end;
 
-procedure Set3DMode( const FOVY : Single = 45 );
+procedure Set3DMode( FOVY : Single = 45 );
 begin
   ogl_Mode := 3;
   ogl_FOVY := FOVY;
@@ -95,7 +95,7 @@ begin
     Set3DMode( ogl_FOVY );
 end;
 
-procedure zbuffer_SetDepth( const zNear, zFar : Single );
+procedure zbuffer_SetDepth( zNear, zFar : Single );
 begin
   ogl_zNear := zNear;
   ogl_zFar  := zFar;

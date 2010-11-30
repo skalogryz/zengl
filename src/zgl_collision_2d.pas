@@ -29,14 +29,14 @@ uses
   zgl_math_2d;
 
 // point 2d
-function col2d_PointInRect( const X, Y : Single; const Rect : zglTRect ) : Boolean;
-function col2d_PointInTriangle( const X, Y : Single; const P1, P2, P3 : zglTPoint2D ) : Boolean;
-function col2d_PointInCircle( const X, Y : Single; const Circle : zglTCircle ) : Boolean;
+function col2d_PointInRect( X, Y : Single; const Rect : zglTRect ) : Boolean;
+function col2d_PointInTriangle( X, Y : Single; const P1, P2, P3 : zglTPoint2D ) : Boolean;
+function col2d_PointInCircle( X, Y : Single; const Circle : zglTCircle ) : Boolean;
 // line 2d
 function col2d_Line( const A, B : zglTLine; ColPoint : zglPPoint2D ) : Boolean;
 function col2d_LineVsRect( const Line : zglTLine; const Rect : zglTRect; ColPoint : zglPPoint2D ) : Boolean;
 function col2d_LineVsCircle( const Line : zglTLine; const Circle : zglTCircle ) : Boolean;
-function col2d_LineVsCircleXY( const Line : zglTLine; const Circle : zglTCircle; const Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
+function col2d_LineVsCircleXY( const Line : zglTLine; const Circle : zglTCircle; Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
 // rect
 function col2d_Rect( const Rect1, Rect2 : zglTRect ) : Boolean;
 function col2d_ClipRect( const Rect1, Rect2 : zglTRect ) : zglTRect;
@@ -64,12 +64,12 @@ begin
     Result := -sqr( sqr( d ) / ( sqr( dx ) + sqr( dy ) ) );
 end;
 
-function col2d_PointInRect( const X, Y : Single; const Rect : zglTRect ) : Boolean;
+function col2d_PointInRect( X, Y : Single; const Rect : zglTRect ) : Boolean;
 begin
   Result := ( X > Rect.X ) and ( X < Rect.X + Rect.W ) and ( Y > Rect.Y ) and ( Y < Rect.Y + Rect.H );
 end;
 
-function col2d_PointInTriangle( const X, Y : Single; const P1, P2, P3 : zglTPoint2D ) : Boolean;
+function col2d_PointInTriangle( X, Y : Single; const P1, P2, P3 : zglTPoint2D ) : Boolean;
   var
     o1 : Integer;
     o2 : Integer;
@@ -93,7 +93,7 @@ begin
     end;
 end;
 
-function col2d_PointInCircle( const X, Y : Single; const Circle : zglTCircle ) : Boolean;
+function col2d_PointInCircle( X, Y : Single; const Circle : zglTCircle ) : Boolean;
 begin
   Result := sqr( Circle.cX - X ) + sqr( Circle.cY - Y ) < sqr( Circle.Radius );
 end;
@@ -209,7 +209,7 @@ begin
       Result := a + b + c < 0;
 end;
 
-function col2d_LineVsCircleXY( const Line : zglTLine; const Circle : zglTCircle; const Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
+function col2d_LineVsCircleXY( const Line : zglTLine; const Circle : zglTCircle; Precision : Byte; ColPoint : zglPPoint2D ) : Boolean;
   var
     p1      : array of zglTPoint2D;
     line0   : zglTLine;

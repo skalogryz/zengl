@@ -61,13 +61,13 @@ function  ini_ReadKeyInt( const Section, Key : AnsiString ) : Integer;
 function  ini_ReadKeyFloat( const Section, Key : AnsiString ) : Single;
 function  ini_ReadKeyBool( const Section, Key : AnsiString ) : Boolean;
 function  ini_WriteKeyStr( const Section, Key, Value : AnsiString ) : Boolean;
-function  ini_WriteKeyInt( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
-function  ini_WriteKeyFloat( const Section, Key : AnsiString; const Value : Single; const Digits : Integer = 2 ) : Boolean;
-function  ini_WriteKeyBool( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
+function  ini_WriteKeyInt( const Section, Key : AnsiString; Value : Integer ) : Boolean;
+function  ini_WriteKeyFloat( const Section, Key : AnsiString; Value : Single; Digits : Integer = 2 ) : Boolean;
+function  ini_WriteKeyBool( const Section, Key : AnsiString; Value : Boolean ) : Boolean;
 
 procedure ini_CopyKey( var k1, k2 : zglTINIKey );
 procedure ini_CopySection( var s1, s2 : zglTINISection );
-function  ini_GetID( S, K : AnsiString; var idS, idK : Integer ) : Boolean;
+function  ini_GetID( const S, K : AnsiString; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;
 procedure ini_Free;
 
@@ -80,7 +80,7 @@ uses
   zgl_file,
   zgl_utils;
 
-function delSpaces( str : AnsiString ) : AnsiString;
+function delSpaces( const str : AnsiString ) : AnsiString;
   var
     i, b, e : Integer;
 begin
@@ -353,7 +353,7 @@ begin
       end;
 end;
 
-function ini_WriteKeyInt( const Section, Key : AnsiString; const Value : Integer ) : Boolean;
+function ini_WriteKeyInt( const Section, Key : AnsiString; Value : Integer ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -373,7 +373,7 @@ begin
       end;
 end;
 
-function ini_WriteKeyFloat( const Section, Key : AnsiString; const Value : Single; const Digits : Integer = 2 ) : Boolean;
+function ini_WriteKeyFloat( const Section, Key : AnsiString; Value : Single; Digits : Integer = 2 ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -393,7 +393,7 @@ begin
       end;
 end;
 
-function ini_WriteKeyBool( const Section, Key : AnsiString; const Value : Boolean ) : Boolean;
+function ini_WriteKeyBool( const Section, Key : AnsiString; Value : Boolean ) : Boolean;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -430,7 +430,7 @@ begin
     ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
 end;
 
-function ini_GetID( S, K : AnsiString; var idS, idK : Integer ) : Boolean;
+function ini_GetID( const S, K : AnsiString; var idS, idK : Integer ) : Boolean;
   var
     s1, s2 : AnsiString;
     i, j   : Integer;

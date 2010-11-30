@@ -194,24 +194,24 @@ type
     List  : array of zglPEmitter2D;
   end;
 
-procedure pengine2d_Set( const PEngine : zglPPEngine2D );
+procedure pengine2d_Set( PEngine : zglPPEngine2D );
 function  pengine2d_Get : zglPPEngine2D;
 procedure pengine2d_Draw;
-procedure pengine2d_Proc( const dt : Double );
-function  pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : zglPEmitter2D;
-procedure pengine2d_DelEmitter( const ID : Integer );
+procedure pengine2d_Proc( dt : Double );
+function  pengine2d_AddEmitter( Emitter : zglPEmitter2D ) : zglPEmitter2D;
+procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
 
 procedure pengine2d_Sort( iLo, iHi : Integer );
 procedure pengine2d_SortID( iLo, iHi : Integer );
 
-procedure emitter2d_Init( var Emitter : zglTEmitter2D );
-procedure emitter2d_Free( var Emitter : zglTEmitter2D );
-procedure emitter2d_Draw( var Emitter : zglTEmitter2D );
-procedure emitter2d_Proc( var Emitter : zglTEmitter2D; const dt : Double );
-procedure emitter2d_Sort( var Emitter : zglTEmitter2D; const iLo, iHi : Integer );
+procedure emitter2d_Init( Emitter : zglPEmitter2D );
+procedure emitter2d_Free( Emitter : zglPEmitter2D );
+procedure emitter2d_Draw( Emitter : zglPEmitter2D );
+procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
+procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
 
-procedure particle2d_Proc( var Particle : zglTParticle2D; const Params : zglTParticleParams; const dt : Double );
+procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
 
 implementation
 uses
@@ -225,7 +225,7 @@ var
   _pengine  : zglTPEngine2D;
   pengine2d : zglPPEngine2D;
 
-procedure pengine2d_Set( const PEngine : zglPPEngine2D );
+procedure pengine2d_Set( PEngine : zglPPEngine2D );
 begin
   if Assigned( PEngine ) Then
     pengine2d := PEngine
@@ -243,10 +243,10 @@ procedure pengine2d_Draw;
     i : Integer;
 begin
   for i := 0 to pengine2d.Count.Emitters - 1 do
-    emitter2d_Draw( pengine2d.List[ i ]^ );
+    emitter2d_Draw( pengine2d.List[ i ] );
 end;
 
-procedure pengine2d_Proc( const dt : Double );
+procedure pengine2d_Proc( dt : Double );
   var
     i, a, b, l : Integer;
     e          : zglPEmitter2D;
@@ -256,7 +256,7 @@ begin
   while i < pengine2d.Count.Emitters do
     begin
       e := pengine2d.List[ i ];
-      emitter2d_Proc( e^, dt );
+      emitter2d_Proc( e, dt );
       if ( e.Life <= 0 ) and ( not e.Params.Loop ) and ( e.Particles = 0 ) Then
         pengine2d_DelEmitter( i )
       else
@@ -299,7 +299,7 @@ begin
     end;
 end;
 
-function pengine2d_AddEmitter( const Emitter : zglTEmitter2D ) : zglPEmitter2D;
+function pengine2d_AddEmitter( Emitter : zglPEmitter2D ) : zglPEmitter2D;
   var
     new : zglPEmitter2D;
     len : Integer;
@@ -383,16 +383,16 @@ begin
     end;
 
   Move( Emitter._particle[ 0 ], new._particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
-  emitter2d_Init( Result^ );
+  emitter2d_Init( Result );
 end;
 
-procedure pengine2d_DelEmitter( const ID : Integer );
+procedure pengine2d_DelEmitter( ID : Integer );
   var
     i : Integer;
 begin
   if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) or ( pengine2d.Count.Emitters = 0 ) Then exit;
 
-  emitter2d_Free( pengine2d.List[ ID ]^ );
+  emitter2d_Free( pengine2d.List[ ID ] );
   FreeMem( pengine2d.List[ ID ] );
   for i := ID to pengine2d.Count.Emitters - 2 do
     begin
@@ -409,7 +409,7 @@ procedure pengine2d_ClearAll;
 begin
   for i := 0 to pengine2d.Count.Emitters - 1 do
     begin
-      emitter2d_Free( pengine2d.List[ i ]^ );
+      emitter2d_Free( pengine2d.List[ i ] );
       FreeMem( pengine2d.List[ i ] );
     end;
   SetLength( pengine2d.List, 0 );
@@ -470,19 +470,19 @@ begin
   if lo < iHi Then pengine2d_SortID( lo, iHi );
 end;
 
-procedure emitter2d_Init( var Emitter : zglTEmitter2D );
+procedure emitter2d_Init( Emitter : zglPEmitter2D );
   var
     i : Integer;
 begin
   for i := 0 to EMITTER_MAX_PARTICLES - 1 do
-    with Emitter do
+    with Emitter^ do
       begin
         _list[ i ]    := @_particle[ i ];
         _list[ i ].ID := i;
       end;
 end;
 
-procedure emitter2d_Free( var Emitter : zglTEmitter2D );
+procedure emitter2d_Free( Emitter : zglPEmitter2D );
 begin
   with Emitter.ParParams do
     begin
@@ -496,7 +496,7 @@ begin
     end;
 end;
 
-procedure emitter2d_Draw( var Emitter : zglTEmitter2D );
+procedure emitter2d_Draw( Emitter : zglPEmitter2D );
   var
     i      : Integer;
     p      : zglPParticle2D;
@@ -511,7 +511,7 @@ begin
   with Emitter.BBox do
     if not sprite2d_InScreen( MinX, MinY, MaxX - MinX, MaxY - MinY, 0 ) Then exit;
 
-  with Emitter do
+  with Emitter^ do
     begin
       fx_SetBlendMode( ParParams.BlendMode );
       fx_SetColorMode( ParParams.ColorMode );
@@ -666,14 +666,14 @@ begin
     end;
 end;
 
-procedure emitter2d_Proc( var Emitter : zglTEmitter2D; const dt : Double );
+procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
   var
     i        : Integer;
     p        : zglPParticle2D;
     parCount : LongWord;
     size     : Single;
 begin
-  with Emitter do
+  with Emitter^ do
     begin
       BBox.MinX := Params.Position.X;
       BBox.MaxX := Params.Position.X;
@@ -683,7 +683,7 @@ begin
       i := 0;
       while i < Particles do
         begin
-          particle2d_Proc( _list[ i ]^, Emitter.ParParams, dt );
+          particle2d_Proc( _list[ i ], @Emitter.ParParams, dt );
           if _list[ i ].Life = 0 Then
             begin
               p                      := _list[ i ];
@@ -760,7 +760,7 @@ begin
               end;
           end;
 
-          particle2d_Proc( p^, Emitter.ParParams, ( parCount - i ) * dt / parCount );
+          particle2d_Proc( p, @Emitter.ParParams, ( parCount - i ) * dt / parCount );
           INC( Particles );
         end;
 
@@ -793,7 +793,7 @@ begin
     end;
 end;
 
-procedure emitter2d_Sort( var Emitter : zglTEmitter2D; const iLo, iHi : Integer );
+procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
     t           : zglPParticle2D;
@@ -802,7 +802,7 @@ begin
   hi   := iHi;
   mid  := Emitter._list[ ( lo + hi ) shr 1 ].ID;
 
-  with Emitter do
+  with Emitter^ do
     repeat
       while _list[ lo ].ID < mid do INC( lo );
       while _list[ hi ].ID > mid do DEC( hi );
@@ -820,7 +820,7 @@ begin
   if lo < iHi Then emitter2d_Sort( Emitter, lo, iHi );
 end;
 
-procedure particle2d_Proc( var Particle : zglTParticle2D; const Params : zglTParticleParams; const dt : Double );
+procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
   var
     coeff        : Single;
     speed        : Single;
@@ -832,7 +832,7 @@ procedure particle2d_Proc( var Particle : zglTParticle2D; const Params : zglTPar
     prevL, nextL : PDiagramLW;
     prevS, nextS : PDiagramSingle;
 begin
-  with Particle do
+  with Particle^ do
     begin
       Time  := Time + dt;
       iLife := Time / LifeTime;

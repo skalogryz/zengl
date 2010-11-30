@@ -48,7 +48,7 @@ function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
 function gl_GetProc( const Proc : AnsiString ) : Pointer;
-function gl_IsSupported( const Extension : AnsiString; const SearchIn: AnsiString ) : Boolean;
+function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
 
 var
   gl_TexCoord2f  : procedure( U, V : Single ); stdcall;
@@ -675,7 +675,7 @@ begin
   {$ENDIF}
 end;
 
-function gl_IsSupported( const Extension : AnsiString; const SearchIn: AnsiString ) : Boolean;
+function gl_IsSupported( const Extension, SearchIn: AnsiString ) : Boolean;
   var
     extPos: Integer;
 begin

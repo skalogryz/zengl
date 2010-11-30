@@ -37,9 +37,9 @@ type
     Grid : array of array of zglTPoint2D;
   end;
 
-procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
-procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
-procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure sgrid2d_Draw( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure agrid2d_Draw( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; Frame : Integer; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure cgrid2d_Draw( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 
 implementation
 uses
@@ -50,7 +50,7 @@ uses
   zgl_render_2d,
   zgl_camera_2d;
 
-procedure sgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure sgrid2d_Draw( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
@@ -144,7 +144,7 @@ begin
     end;
 end;
 
-procedure agrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const Frame : Integer; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure agrid2d_Draw( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; Frame : Integer; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;
@@ -245,7 +245,7 @@ begin
     end;
 end;
 
-procedure cgrid2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure cgrid2d_Draw( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     i, j : Integer;

@@ -39,11 +39,11 @@ const
   LIB_ERROR  = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
   FILE_ERROR = {$IFDEF LINUX_OR_DARWIN}  -1 {$ELSE} 0 {$ENDIF};
 
-function u_IntToStr( const Value : Integer ) : String;
+function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
-function u_FloatToStr( const Value : Single; const Digits : Integer = 2 ) : String;
+function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
 function u_StrToFloat( const Value : String ) : Single;
-function u_BoolToStr( const Value : Boolean ) : String;
+function u_BoolToStr( Value : Boolean ) : String;
 function u_StrToBool( const Value : String ) : Boolean;
 
 // Только для английских символов попадающих в диапазон 0..127
@@ -54,16 +54,16 @@ procedure u_Backspace( var Str : String );
 // Возвращает количество символов в utf8-строке
 function  u_Length( const Str : String ) : Integer;
 // Возвращает количество слов, разделеных разделителем d
-function  u_Words( const Str : String; const D : Char = ' ' ) : Integer;
-function  u_GetWord( const Str : String; const N : Integer; const D : Char = ' ' ) : String;
+function  u_Words( const Str : String; D : Char = ' ' ) : Integer;
+function  u_GetWord( const Str : String; N : Integer; D : Char = ' ' ) : String;
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 
 procedure u_Error( const ErrStr : String );
 procedure u_Warning( const ErrStr : String );
 
-function u_GetPOT( const Value : Integer ) : Integer;
+function u_GetPOT( Value : Integer ) : Integer;
 
-procedure u_Sleep( const Msec : LongWord );
+procedure u_Sleep( Msec : LongWord );
 
 {$IFDEF LINUX_OR_DARWIN}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -84,7 +84,7 @@ uses
   zgl_font,
   zgl_log;
 
-function u_IntToStr( const Value : Integer ) : String;
+function u_IntToStr( Value : Integer ) : String;
 begin
   Str( Value, Result );
 end;
@@ -98,7 +98,7 @@ begin
     Result := 0;
 end;
 
-function u_FloatToStr( const Value : Single; const Digits : Integer = 2 ) : String;
+function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
 begin
   Str( Value:0:Digits, Result );
 end;
@@ -112,7 +112,7 @@ begin
     Result := 0;
 end;
 
-function u_BoolToStr( const Value : Boolean ) : String;
+function u_BoolToStr( Value : Boolean ) : String;
 begin
   if Value Then
     Result := 'TRUE'
@@ -186,7 +186,7 @@ begin
     end;
 end;
 
-function u_Words( const Str : String; const D : Char = ' ' ) : Integer;
+function u_Words( const Str : String; D : Char = ' ' ) : Integer;
   var
     i, m : Integer;
 begin
@@ -203,7 +203,7 @@ begin
     end;
 end;
 
-function u_GetWord( const Str : String; const N : Integer; const D : Char = ' ' ) : String;
+function u_GetWord( const Str : String; N : Integer; D : Char = ' ' ) : String;
   label b;
   var
     i, p : Integer;
@@ -290,7 +290,7 @@ begin
   log_Add( 'WARNING: ' + ErrStr );
 end;
 
-function u_GetPOT( const Value : Integer ) : Integer;
+function u_GetPOT( Value : Integer ) : Integer;
 begin
   Result := Value - 1;
   Result := Result or ( Result shr 1 );
@@ -301,7 +301,7 @@ begin
   Result := Result + 1;
 end;
 
-procedure u_Sleep( const Msec : LongWord );
+procedure u_Sleep( Msec : LongWord );
   {$IFDEF LINUX_OR_DARWIN}
   var
     tv : TimeVal;

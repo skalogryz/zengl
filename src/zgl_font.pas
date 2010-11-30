@@ -90,13 +90,13 @@ function font_Load : zglPFont;
 function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
-function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
-function font_GetUTF16ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
-function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+function font_GetUTF8ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
+function font_GetUTF16ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
+function font_GetCP1251ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 
 var
   managerFont : zglTFontManager;
-  font_GetCID : function( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+  font_GetCID : function( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 
 implementation
 uses
@@ -239,7 +239,7 @@ begin
       Result := font_Load();
 end;
 
-function font_GetUTF8ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+function font_GetUTF8ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 begin
   case Byte( Text[ Pos ] ) of
     0..127:
@@ -300,14 +300,14 @@ begin
   end;
 end;
 
-function font_GetUTF16ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+function font_GetUTF16ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 begin
   if Assigned( Shift ) Then
     Shift^ := Pos + 1;
   Result := Integer( Text[ Pos ] );
 end;
 
-function font_GetCP1251ID( const Text : String; const Pos : Integer; const Shift : PInteger ) : LongWord;
+function font_GetCP1251ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 begin
   if Assigned( Shift ) Then
     Shift^ := Pos + 1;

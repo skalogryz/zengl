@@ -60,7 +60,7 @@ begin
   for i := 0 to 6 do
   with eFire[ i ] do
     begin
-      emitter2d_Init( eFire[ i ] );
+      emitter2d_Init( @eFire[ i ] );
 
       if i < 3 Then
         begin
@@ -217,7 +217,7 @@ begin
 
     with eDiamond do
       begin
-        emitter2d_Init( eDiamond );
+        emitter2d_Init( @eDiamond );
 
         for j := 0 to EMITTER_MAX_PARTICLES - 1 do
           begin
@@ -304,7 +304,7 @@ begin
 
     with eRain do
       begin
-        emitter2d_Init( eRain );
+        emitter2d_Init( @eRain );
 
         _type             := EMITTER_LINE;
         Params.Loop       := TRUE;
@@ -386,9 +386,9 @@ begin
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
   for i := 0 to 6 do
-    emitter2d_Draw( eFire[ i ] );
-  emitter2d_Draw( eDiamond );
-  emitter2d_Draw( eRain );
+    emitter2d_Draw( @eFire[ i ] );
+  emitter2d_Draw( @eDiamond );
+  emitter2d_Draw( @eRain );
 
   if debug Then
     begin
@@ -423,9 +423,9 @@ procedure Update( dt : Double );
     i : Integer;
 begin
   for i := 0 to 6 do
-    emitter2d_Proc( eFire[ i ], dt );
-  emitter2d_Proc( eDiamond, dt );
-  emitter2d_Proc( eRain, dt );
+    emitter2d_Proc( @eFire[ i ], dt );
+  emitter2d_Proc( @eDiamond, dt );
+  emitter2d_Proc( @eRain, dt );
 
   count := 0;
   for i := 0 to 6 do

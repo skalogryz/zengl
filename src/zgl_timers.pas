@@ -53,7 +53,7 @@ type
     First : zglTTimer;
 end;
 
-function  timer_Add( const OnTimer : Pointer; const Interval : LongWord ) : zglPTimer;
+function  timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
 procedure timer_Del( var Timer : zglPTimer );
 
 procedure timer_MainLoop;
@@ -79,7 +79,7 @@ uses
   zgl_application,
   zgl_main;
 
-function timer_Add( const OnTimer : Pointer; const Interval : LongWord ) : zglPTimer;
+function timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
 begin
   Result := @managerTimer.First;
   while Assigned( Result.next ) do

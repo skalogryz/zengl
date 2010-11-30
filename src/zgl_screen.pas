@@ -48,12 +48,12 @@ procedure scr_Clear;
 procedure scr_Flush;
 
 procedure scr_SetWindowedMode;
-procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
-procedure scr_CorrectResolution( const Width, Height : Word );
+procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
+procedure scr_CorrectResolution( Width, Height : Word );
 procedure scr_SetViewPort;
-procedure scr_SetVSync( const VSync : Boolean );
-procedure scr_SetFSAA( const FSAA : Byte );
-procedure scr_ReadPixels( var pData : Pointer; const X, Y, Width, Height : Word );
+procedure scr_SetVSync( VSync : Boolean );
+procedure scr_SetFSAA( FSAA : Byte );
+procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 
 {$IFDEF LINUX}
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
@@ -444,7 +444,7 @@ begin
   {$ENDIF}
 end;
 
-procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
+procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
   var
   {$IFDEF LINUX}
     modeToSet : Integer;
@@ -585,7 +585,7 @@ begin
     wnd_Update();
 end;
 
-procedure scr_CorrectResolution( const Width, Height : Word );
+procedure scr_CorrectResolution( Width, Height : Word );
 begin
   scr_ResW  := Width;
   scr_ResH  := Height;
@@ -660,7 +660,7 @@ begin
       end;
 end;
 
-procedure scr_SetVSync( const VSync : Boolean );
+procedure scr_SetVSync( VSync : Boolean );
 begin
   scr_VSync := VSync;
 {$IFDEF LINUX}
@@ -677,7 +677,7 @@ begin
 {$ENDIF}
 end;
 
-procedure scr_SetFSAA( const FSAA : Byte );
+procedure scr_SetFSAA( FSAA : Byte );
 begin
   if ogl_FSAA = FSAA Then exit;
   ogl_FSAA := FSAA;
@@ -697,7 +697,7 @@ begin
     log_Add( 'FSAA changed to: off' );
 end;
 
-procedure scr_ReadPixels( var pData : Pointer; const X, Y, Width, Height : Word );
+procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );

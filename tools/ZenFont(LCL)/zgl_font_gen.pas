@@ -51,7 +51,7 @@ type
 
 function  fontgen_Init : Boolean;
 procedure fontgen_BuildFont( var Font : zglPFont; const FontName : String );
-procedure fontgen_SaveFont( const Font : zglPFont; const FileName : String );
+procedure fontgen_SaveFont( Font : zglPFont; const FileName : String );
 
 var
   fg_Font        : zglPFont;
@@ -210,7 +210,7 @@ begin
     end;
 end;
 
-function fontgen_InsertSymbol( const node : zglPSymbolNode; const r : zglTRect; const ID : Integer ) : zglPSymbolNode;
+function fontgen_InsertSymbol( node : zglPSymbolNode; const r : zglTRect; ID : Integer ) : zglPSymbolNode;
   var
     dw, dh : Single;
     c1, c2 : zglPSymbolNode;
@@ -287,7 +287,7 @@ begin
       end;
 end;
 
-procedure fontgen_FreeSymbolNode( const node : zglPSymbolNode; const root : Boolean );
+procedure fontgen_FreeSymbolNode( node : zglPSymbolNode; root : Boolean );
 begin
   if Assigned( node.child[ 0 ] ) Then
     fontgen_FreeSymbolNode( node.child[ 0 ], FALSE );
@@ -319,7 +319,7 @@ begin
   Result := 1;
 end;
 
-procedure FontGetSize( const pData : Pointer; const W, H : Integer; var nW, nH, mX, mY : Integer );
+procedure FontGetSize( pData : Pointer; W, H : Integer; var nW, nH, mX, mY : Integer );
   var
     i, j       : Integer;
     maxX, minX : Integer;
@@ -402,7 +402,7 @@ begin
   Result := TRUE;
 end;
 
-procedure fontgen_PutChar( var pData : Pointer; const X, Y, ID : Integer );
+procedure fontgen_PutChar( var pData : Pointer; X, Y, ID : Integer );
   var
     i, j   : Integer;
     fw, fh : Integer;
@@ -789,7 +789,7 @@ begin
   Font.Padding[ 3 ] := fg_FontPadding[ 3 ];
 end;
 
-procedure fontgen_SaveFont( const Font : zglPFont; const FileName : String );
+procedure fontgen_SaveFont( Font : zglPFont; const FileName : String );
   var
     TGA  : zglTTGAHeader;
     F    : zglTFile;

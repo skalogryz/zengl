@@ -196,11 +196,11 @@ const
 function  joy_Init : Byte;
 procedure joy_Close;
 procedure joy_Proc;
-function  joy_GetInfo( const JoyID : Byte ) : zglPJoyInfo;
-function  joy_AxisPos( const JoyID, Axis : Byte ) : Single;
-function  joy_Down( const JoyID, Button : Byte ) : Boolean;
-function  joy_Up( const JoyID, Button : Byte ) : Boolean;
-function  joy_Press( const JoyID, Button : Byte ) : Boolean;
+function  joy_GetInfo( JoyID : Byte ) : zglPJoyInfo;
+function  joy_AxisPos( JoyID, Axis : Byte ) : Single;
+function  joy_Down( JoyID, Button : Byte ) : Boolean;
+function  joy_Up( JoyID, Button : Byte ) : Boolean;
+function  joy_Press( JoyID, Button : Byte ) : Boolean;
 procedure joy_ClearState;
 
 implementation
@@ -436,7 +436,7 @@ begin
   {$ENDIF}
 end;
 
-function joy_GetInfo( const JoyID : Byte ) : zglPJoyInfo;
+function joy_GetInfo( JoyID : Byte ) : zglPJoyInfo;
 begin
   Result := nil;
   if JoyID >= joyCount Then exit;
@@ -444,7 +444,7 @@ begin
   Result := @joyArray[ JoyID ].Info;
 end;
 
-function joy_AxisPos( const JoyID, Axis : Byte ) : Single;
+function joy_AxisPos( JoyID, Axis : Byte ) : Single;
 begin
   Result := 0;
   if ( JoyID >= joyCount ) or ( Axis > 7 ) Then exit;
@@ -452,7 +452,7 @@ begin
   Result := joyArray[ JoyID ].State.Axis[ Axis ];
 end;
 
-function joy_Down( const JoyID, Button : Byte ) : Boolean;
+function joy_Down( JoyID, Button : Byte ) : Boolean;
 begin
   Result := FALSE;
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;
@@ -460,7 +460,7 @@ begin
   Result := joyArray[ JoyID ].State.BtnDown[ Button ];
 end;
 
-function joy_Up( const JoyID, Button : Byte ) : Boolean;
+function joy_Up( JoyID, Button : Byte ) : Boolean;
 begin
   Result := FALSE;
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;
@@ -468,7 +468,7 @@ begin
   Result := joyArray[ JoyID ].State.BtnUp[ Button ];
 end;
 
-function joy_Press( const JoyID, Button : Byte ) : Boolean;
+function joy_Press( JoyID, Button : Byte ) : Boolean;
 begin
   Result := FALSE;
   if ( JoyID >= joyCount ) or ( Button >= joyArray[ JoyID ].Info.Count.Buttons ) Then exit;

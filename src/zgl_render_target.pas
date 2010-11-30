@@ -102,10 +102,10 @@ end;
 type
   zglTRenderCallback = procedure( Data : Pointer );
 
-function  rtarget_Add( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function  rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
-procedure rtarget_Set( const Target : zglPRenderTarget );
-procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
+procedure rtarget_Set( Target : zglPRenderTarget );
+procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
 
 var
   managerRTarget : zglTRenderTargetManager;
@@ -130,7 +130,7 @@ var
   lResCX   : Single;
   lResCY   : Single;
 
-function rtarget_Add( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
   var
     i, _type : Integer;
     pFBO     : zglPFBO;
@@ -501,7 +501,7 @@ begin
   DEC( managerRTarget.Count );
 end;
 
-procedure rtarget_Set( const Target : zglPRenderTarget );
+procedure rtarget_Set( Target : zglPRenderTarget );
 begin
   batch2d_Flush();
 
@@ -604,7 +604,7 @@ begin
       end;
 end;
 
-procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
+procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
 begin
   if ogl_Separate Then
     begin

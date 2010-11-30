@@ -71,13 +71,13 @@ function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
 function  m_Sin( Angle : Integer ) : Single;
-function  m_Distance( const x1, y1, x2, y2 : Single ) : Single;
-function  m_FDistance( const x1, y1, x2, y2 : Single ) : Single;
-function  m_Angle( const x1, y1, x2, y2 : Single ) : Single;
-function  m_Orientation( const x, y, x1, y1, x2, y2 : Single ) : Integer;
+function  m_Distance( x1, y1, x2, y2 : Single ) : Single;
+function  m_FDistance( x1, y1, x2, y2 : Single ) : Single;
+function  m_Angle( x1, y1, x2, y2 : Single ) : Single;
+function  m_Orientation( x, y, x1, y1, x2, y2 : Single ) : Integer;
 
-procedure tess_Triangulate( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
-procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
+procedure tess_Triangulate( Contour : zglPPoints2D; iLo, iHi : Integer; AddHoles : Boolean = FALSE );
+procedure tess_AddHole( Contour : zglPPoints2D; iLo, iHi : Integer; LastHole : Boolean = TRUE );
 function  tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
 
 var
@@ -99,7 +99,7 @@ var
   tessVCount  : Integer;
   tessVerts   : array of zglTPoint2D;
 
-function ArcTan2( const dx, dy : Single ) : Single;
+function ArcTan2( dx, dy : Single ) : Single;
 begin
   Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
 end;
@@ -162,17 +162,17 @@ begin
   Result := sinTable[ Angle ];
 end;
 
-function m_Distance( const x1, y1, x2, y2 : Single ) : Single;
+function m_Distance( x1, y1, x2, y2 : Single ) : Single;
 begin
   Result := sqrt( sqr( x1 - x2 ) + sqr( y1 - y2 ) );
 end;
 
-function m_FDistance( const x1, y1, x2, y2 : Single ) : Single;
+function m_FDistance( x1, y1, x2, y2 : Single ) : Single;
 begin
   Result := sqr( x1 - x2 ) + sqr( y1 - y2 );
 end;
 
-function m_Angle( const x1, y1, x2, y2 : Single ) : Single;
+function m_Angle( x1, y1, x2, y2 : Single ) : Single;
   var
     dx, dy : Single;
 begin
@@ -209,7 +209,7 @@ begin
         Result := ArcTan2( dx, dy )
 end;
 
-function m_Orientation( const x, y, x1, y1, x2, y2 : Single ) : Integer;
+function m_Orientation( x, y, x1, y1, x2, y2 : Single ) : Integer;
   var
     orientation : Single;
 begin
@@ -277,7 +277,7 @@ begin
   end;
 end;
 
-procedure tess_Triangulate( const Contour : zglPPoints2D; const iLo, iHi : Integer; const AddHoles : Boolean = FALSE );
+procedure tess_Triangulate( Contour : zglPPoints2D; iLo, iHi : Integer; AddHoles : Boolean = FALSE );
   var
     i : Integer;
     v : array[ 0..2 ] of Double;
@@ -301,7 +301,7 @@ begin
     gluTessEndPolygon( tess );
 end;
 
-procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; const LastHole : Boolean = TRUE );
+procedure tess_AddHole( Contour : zglPPoints2D; iLo, iHi : Integer; LastHole : Boolean = TRUE );
   var
     i : Integer;
     v : array[ 0..2 ] of Double;

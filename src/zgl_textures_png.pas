@@ -282,7 +282,7 @@ begin
   end;
 end;
 
-function png_DecodeIDAT( const Buffer : Pointer; const Bytes : Integer ) : Integer;
+function png_DecodeIDAT( Buffer : Pointer; Bytes : Integer ) : Integer;
   var
     IDATHeader : zglTPNGChunkName;
 begin

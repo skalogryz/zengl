@@ -134,10 +134,10 @@ type
 function  InitDSound : Boolean;
 procedure FreeDSound;
 
-procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; const BufferSize : LongWord; const Format : Pointer );
-procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; const DataSize : LongWord; const Pos : LongWord = 0 );
-function  dsu_CalcPos( const X, Y, Z : Single; var Volume : Single ) : Integer;
-function  dsu_CalcVolume( const Volume : Single ) : Integer;
+procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; BufferSize : LongWord; Format : Pointer );
+procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; DataSize : LongWord; Pos : LongWord = 0 );
+function  dsu_CalcPos( X, Y, Z : Single; var Volume : Single ) : Integer;
+function  dsu_CalcVolume( Volume : Single ) : Integer;
 
 var
   dsound_Library    : HMODULE;
@@ -172,7 +172,7 @@ begin
   CoUninitialize();
 end;
 
-procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; const BufferSize : LongWord; const Format : Pointer );
+procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; BufferSize : LongWord; Format : Pointer );
   var
     bufferDesc : TDSBufferDesc;
 begin
@@ -189,7 +189,7 @@ begin
   ds_Device.CreateSoundBuffer( bufferDesc, Buffer, nil );
 end;
 
-procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; const DataSize : LongWord; const Pos : LongWord = 0 );
+procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; DataSize : LongWord; Pos : LongWord = 0 );
   var
     block1, block2 : Pointer;
     b1Size, b2Size : LongWord;
@@ -200,7 +200,7 @@ begin
   Buffer.Unlock( block1, b1Size, block2, b2Size );
 end;
 
-function dsu_CalcPos( const X, Y, Z : Single; var Volume : Single ) : Integer;
+function dsu_CalcPos( X, Y, Z : Single; var Volume : Single ) : Integer;
   var
     dist, angle : Single;
 begin
@@ -221,7 +221,7 @@ begin
   if Volume < 0 Then Volume := 0;
 end;
 
-function dsu_CalcVolume( const Volume : Single ) : Integer;
+function dsu_CalcVolume( Volume : Single ) : Integer;
 begin
   if Volume = 0 Then
     Result := -10000

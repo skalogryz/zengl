@@ -35,14 +35,14 @@ uses
   {$ENDIF}
   ;
 
-function  wnd_Create( const Width, Height : Integer ) : Boolean;
+function  wnd_Create( Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
 procedure wnd_SetCaption( const NewCaption : String );
-procedure wnd_SetSize( const Width, Height : Integer );
-procedure wnd_SetPos( const X, Y : Integer );
-procedure wnd_ShowCursor( const Show : Boolean );
+procedure wnd_SetSize( Width, Height : Integer );
+procedure wnd_SetPos( X, Y : Integer );
+procedure wnd_ShowCursor( Show : Boolean );
 procedure wnd_Select;
 
 var
@@ -120,7 +120,7 @@ begin
 end;
 {$ENDIF}
 
-function wnd_Create( const Width, Height : Integer ) : Boolean;
+function wnd_Create( Width, Height : Integer ) : Boolean;
   {$IFDEF DARWIN}
   var
     size   : MacOSAll.Rect;
@@ -409,7 +409,7 @@ begin
 {$ENDIF}
 end;
 
-procedure wnd_SetSize( const Width, Height : Integer );
+procedure wnd_SetSize( Width, Height : Integer );
 begin
   wnd_Width  := Width;
   wnd_Height := Height;
@@ -440,7 +440,7 @@ begin
     SetCurrentMode();
 end;
 
-procedure wnd_SetPos( const X, Y : Integer );
+procedure wnd_SetPos( X, Y : Integer );
   {$IFDEF WINDOWS}
   var
     mode : LongWord;
@@ -476,7 +476,7 @@ begin
 {$ENDIF}
 end;
 
-procedure wnd_ShowCursor( const Show : Boolean );
+procedure wnd_ShowCursor( Show : Boolean );
 {$IFDEF LINUX}
   var
     mask   : TPixmap;

@@ -108,7 +108,7 @@ type
   zglTSoundDecoder = record
     Ext   : String;
     Open  : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-    Read  : function( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : LongWord; var _End : Boolean ) : LongWord;
+    Read  : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
     Loop  : procedure( var Stream : zglTSoundStream );
     Close : procedure( var Stream : zglTSoundStream );
   end;
@@ -132,22 +132,22 @@ type
 procedure snd_MainLoop;
 function  snd_Init : Boolean;
 procedure snd_Free;
-function  snd_Add( const SourceCount : Integer ) : zglPSound;
+function  snd_Add( SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
-function  snd_LoadFromFile( const FileName : String; const SourceCount : Integer = 8 ) : zglPSound;
-function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 8 ) : zglPSound;
+function  snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
+function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
 
-function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
-procedure snd_Stop( const Sound : zglPSound; const ID : Integer );
-procedure snd_SetPos( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
-procedure snd_SetVolume( const Sound : zglPSound; const ID : Integer; const Volume : Single );
-procedure snd_SetSpeed( const Sound : zglPSound; const ID : Integer; const Speed : Single );
-function  snd_Get( const Sound : zglPSound; const ID, What : Integer ) : Integer;
+function  snd_Play( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
+procedure snd_Stop( Sound : zglPSound; ID : Integer );
+procedure snd_SetPos( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
+procedure snd_SetVolume( Sound : zglPSound; ID : Integer; Volume : Single );
+procedure snd_SetSpeed( Sound : zglPSound; ID : Integer; Speed : Single );
+function  snd_Get( Sound : zglPSound; ID, What : Integer ) : Integer;
 
-function  snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
-procedure snd_PauseFile( const ID : Integer );
-procedure snd_StopFile( const ID : Integer );
-procedure snd_ResumeFile( const ID : Integer );
+function  snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+procedure snd_PauseFile( ID : Integer );
+procedure snd_StopFile( ID : Integer );
+procedure snd_ResumeFile( ID : Integer );
 function  snd_ProcFile( data : Pointer ) : LongInt; register;
 
 var
@@ -428,7 +428,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_Add( const SourceCount : Integer ) : zglPSound;
+function snd_Add( SourceCount : Integer ) : zglPSound;
   {$IFDEF USE_OPENAL}
   var
     i : Integer;
@@ -486,7 +486,7 @@ begin
   DEC( managerSound.Count.Items );
 end;
 
-function snd_LoadFromFile( const FileName : String; const SourceCount : Integer = 8 ) : zglPSound;
+function snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
   var
     i   : Integer;
     f   : LongWord;
@@ -530,7 +530,7 @@ begin
   log_Add( 'Sound loaded: "' + FileName + '"' );
 end;
 
-function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 8 ) : zglPSound;
+function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
   var
     i : Integer;
     f : LongWord;
@@ -563,7 +563,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
+function snd_Play( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
   var
     i : Integer;
     {$IFNDEF USE_OPENAL}
@@ -645,11 +645,11 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_Stop( const Sound : zglPSound; const ID : Integer );
+procedure snd_Stop( Sound : zglPSound; ID : Integer );
   var
     i, j : Integer;
     snd : zglPSound;
-  procedure Stop( const Sound : zglPSound; const ID : Integer );
+  procedure Stop( Sound : zglPSound; ID : Integer );
   begin
     if Sound.Channel[ ID ].Source <> SND_ERROR Then
       begin
@@ -688,14 +688,14 @@ begin
         end;
 end;
 
-procedure snd_SetPos( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
+procedure snd_SetPos( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
   var
     i, j : Integer;
     snd  : zglPSound;
     {$IFNDEF USE_OPENAL}
     vol  : Single;
     {$ENDIF}
-  procedure SetPos( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
+  procedure SetPos( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
   begin
     Sound.Channel[ ID ].Position.X := X;
     Sound.Channel[ ID ].Position.Y := Y;
@@ -771,14 +771,14 @@ begin
         end;
 end;
 
-procedure snd_SetVolume( const Sound : zglPSound; const ID : Integer; const Volume : Single );
+procedure snd_SetVolume( Sound : zglPSound; ID : Integer; Volume : Single );
   var
     i, j : Integer;
     snd  : zglPSound;
     {$IFNDEF USE_OPENAL}
     vol  : Single;
     {$ENDIF}
-  procedure SetVolume( const Sound : zglPSound; const ID : Integer; const Volume : Single );
+  procedure SetVolume( Sound : zglPSound; ID : Integer; Volume : Single );
   begin
     Sound.Channel[ ID ].Volume := Volume;
 
@@ -854,11 +854,11 @@ begin
         end;
 end;
 
-procedure snd_SetSpeed( const Sound : zglPSound; const ID : Integer; const Speed : Single );
+procedure snd_SetSpeed( Sound : zglPSound; ID : Integer; Speed : Single );
   var
     i, j : Integer;
     snd  : zglPSound;
-  procedure SetFrequency( const Sound : zglPSound; const ID : Integer; const Speed : Single );
+  procedure SetFrequency( Sound : zglPSound; ID : Integer; Speed : Single );
   begin
     Sound.Channel[ ID ].Speed := Speed;
 
@@ -916,7 +916,7 @@ begin
         end;
 end;
 
-function snd_Get( const Sound : zglPSound; const ID, What : Integer ) : Integer;
+function snd_Get( Sound : zglPSound; ID, What : Integer ) : Integer;
 begin
   if not sndInitialized Then exit;
 
@@ -954,7 +954,7 @@ begin
   Result := -1;
 end;
 
-function snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
+function snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
   var
     i         : Integer;
     ext       : String;
@@ -1064,7 +1064,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_PauseFile( const ID : Integer );
+procedure snd_PauseFile( ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or
      ( not sfStream[ ID ]._playing ) or ( sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;
@@ -1079,7 +1079,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_StopFile( const ID : Integer );
+procedure snd_StopFile( ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or ( not sfStream[ ID ]._playing ) Then exit;
 
@@ -1091,7 +1091,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_ResumeFile( const ID : Integer );
+procedure snd_ResumeFile( ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or
      ( not sfStream[ ID ]._playing ) or ( not sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;

@@ -32,19 +32,19 @@ const
   PR2D_FILL   = $010000;
   PR2D_SMOOTH = $020000;
 
-procedure pr2d_Pixel( const X, Y : Single; const Color : LongWord; const Alpha : Byte = 255 );
-procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : LongWord; const Alpha : Byte = 255; const FX : LongWord = 0 );
-procedure pr2d_Rect( const X, Y, W, H : Single; const Color : LongWord; const Alpha : Byte = 255; const FX : LongWord = 0 );
-procedure pr2d_Circle( const X, Y, Radius : Single; const Color : LongWord; const Alpha : Byte = 255; const Quality : Word = 32; const FX : LongWord = 0 );
-procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : LongWord; const Alpha : Byte = 255; const Quality : Word = 32; const FX : LongWord = 0 );
-procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure pr2d_Pixel( X, Y : Single; Color : LongWord; Alpha : Byte = 255 );
+procedure pr2d_Line( X1, Y1, X2, Y2 : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
+procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
+procedure pr2d_Circle( X, Y, Radius : Single; Color : LongWord; Alpha : Byte = 255; Quality : Word = 32; FX : LongWord = 0 );
+procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; Color : LongWord; Alpha : Byte = 255; Quality : Word = 32; FX : LongWord = 0 );
+procedure pr2d_TriList( Texture : zglPTexture; TriList, TexCoords : zglPPoints2D; iLo, iHi : Integer; Color : LongWord = $FFFFFF; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 
 implementation
 uses
   zgl_opengl_all,
   zgl_render_2d;
 
-procedure pr2d_Pixel( const X, Y : Single; const Color : LongWord; const Alpha : Byte = 255 );
+procedure pr2d_Pixel( X, Y : Single; Color : LongWord; Alpha : Byte = 255 );
 begin
   if ( not b2d_Started ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
     begin
@@ -62,7 +62,7 @@ begin
     end;
 end;
 
-procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : LongWord; const Alpha : Byte = 255; const FX : LongWord = 0 );
+procedure pr2d_Line( X1, Y1, X2, Y2 : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
   if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
     begin
@@ -102,7 +102,7 @@ begin
     end;
 end;
 
-procedure pr2d_Rect( const X, Y, W, H : Single; const Color : LongWord; const Alpha : Byte = 255; const FX : LongWord = 0 );
+procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
  if FX and PR2D_FILL > 0 Then
    begin
@@ -149,6 +149,11 @@ begin
         end;
    end else
     begin
+      X := X + 0.5;
+      Y := Y + 0.5;
+      W := W - 0.5;
+      H := H - 0.5;
+
       if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
@@ -158,36 +163,36 @@ begin
       if FX and FX2D_VCA > 0 Then
         begin
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          gl_Vertex2f( X + 0.5,     Y + 0.5 );
+          gl_Vertex2f( X,     Y );
 
           glColor4ubv( @fx2dVCA2[ 0 ] );
-          gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+          gl_Vertex2f( X + W, Y );
 
-          gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+          gl_Vertex2f( X + W, Y );
           glColor4ubv( @fx2dVCA3[ 0 ] );
-          gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+          gl_Vertex2f( X + W, Y + H );
 
-          gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+          gl_Vertex2f( X + W, Y + H );
           glColor4ubv( @fx2dVCA4[ 0 ] );
-          gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+          gl_Vertex2f( X,     Y + H );
 
-          gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+          gl_Vertex2f( X,     Y + H );
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          gl_Vertex2f( X + 0.5,     Y + 0.5 );
+          gl_Vertex2f( X,     Y );
         end else
           begin
             glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-            gl_Vertex2f( X + 0.5,     Y + 0.5 );
-            gl_Vertex2f( X + W - 0.5, Y + 0.5 );
+            gl_Vertex2f( X,     Y );
+            gl_Vertex2f( X + W, Y );
 
-            gl_Vertex2f( X + W - 0.5, Y + 0.5 );
-            gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
+            gl_Vertex2f( X + W, Y );
+            gl_Vertex2f( X + W, Y + H );
 
-            gl_Vertex2f( X + W - 0.5, Y + H - 0.5 );
-            gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
+            gl_Vertex2f( X + W, Y + H );
+            gl_Vertex2f( X,     Y + H );
 
-            gl_Vertex2f( X + 0.5,     Y + H - 0.5 );
-            gl_Vertex2f( X + 0.5,     Y + 0.5 );
+            gl_Vertex2f( X,     Y + H );
+            gl_Vertex2f( X,     Y );
           end;
 
       if not b2d_Started Then
@@ -198,7 +203,7 @@ begin
     end;
 end;
 
-procedure pr2d_Circle( const X, Y, Radius : Single; const Color : LongWord; const Alpha : Byte = 255; const Quality : Word = 32; const FX : LongWord = 0 );
+procedure pr2d_Circle( X, Y, Radius : Single; Color : LongWord; Alpha : Byte = 255; Quality : Word = 32; FX : LongWord = 0 );
   var
     i : Integer;
     k : Single;
@@ -276,7 +281,7 @@ begin
       end;
 end;
 
-procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : LongWord; const Alpha : Byte = 255; const Quality : Word = 32; const FX : LongWord = 0 );
+procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; Color : LongWord; Alpha : Byte = 255; Quality : Word = 32; FX : LongWord = 0 );
   var
     i : Integer;
     k : Single;
@@ -354,7 +359,7 @@ begin
       end;
 end;
 
-procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : LongWord = $FFFFFF; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure pr2d_TriList( Texture : zglPTexture; TriList, TexCoords : zglPPoints2D; iLo, iHi : Integer; Color : LongWord = $FFFFFF; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     i    : Integer;
     w, h : Single;

@@ -29,7 +29,7 @@ uses
 
 procedure log_Init;
 procedure log_Close;
-procedure log_Add( const Message : AnsiString; const Timings : Boolean = TRUE );
+procedure log_Add( const Message : AnsiString; Timings : Boolean = TRUE );
 procedure log_Flush;
 function  log_Timing : AnsiString;
 
@@ -71,7 +71,7 @@ begin
     file_Close( log );
 end;
 
-procedure log_Add( const Message : AnsiString; const Timings : Boolean = TRUE );
+procedure log_Add( const Message : AnsiString; Timings : Boolean = TRUE );
   var
     str : AnsiString;
 begin
