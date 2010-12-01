@@ -235,7 +235,6 @@ _exit:
   begin
     SetLength( tgaData, 0 );
     SetLength( tgaPalette, 0 );
-    mem_Free( tgaMem );
   end;
 end;
 
@@ -243,14 +242,14 @@ procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, 
 begin
   mem_LoadFromFile( tgaMem, FileName );
   tga_Load( Data, W, H );
+  mem_Free( tgaMem );
 end;
 
 procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 begin
-  tgaMem.Size := Memory.Size;
-  zgl_GetMem( tgaMem.Memory, Memory.Size );
+  tgaMem.Size     := Memory.Size;
+  tgaMem.Memory   := Memory.Memory;
   tgaMem.Position := Memory.Position;
-  Move( Memory.Memory^, tgaMem.Memory^, Memory.Size );
   tga_Load( Data, W, H );
 end;
 

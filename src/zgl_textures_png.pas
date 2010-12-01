@@ -516,7 +516,6 @@ begin
 
 _exit:
   begin
-    mem_Free( pngMem );
     pngFail     := FALSE;
     pngHasIDAT  := FALSE;
     pngHastRNS  := FALSE;
@@ -532,14 +531,14 @@ procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, 
 begin
   mem_LoadFromFile( pngMem, FileName );
   png_Load( Data, W, H );
+  mem_Free( pngMem );
 end;
 
 procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 begin
-  pngMem.Size := Memory.Size;
-  zgl_GetMem( pngMem.Memory, Memory.Size );
+  pngMem.Size     := Memory.Size;
+  pngMem.Memory   := Memory.Memory;
   pngMem.Position := Memory.Position;
-  Move( Memory.Memory^, pngMem.Memory^, Memory.Size );
   png_Load( Data, W, H );
 end;
 

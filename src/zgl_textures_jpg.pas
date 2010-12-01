@@ -417,7 +417,6 @@ _exit:
     jpgData.Buffer := nil;
     jpgData.Stream := nil;
   {$ENDIF}
-    mem_Free( jpgMem );
   end;
 end;
 
@@ -425,14 +424,14 @@ procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, 
 begin
   mem_LoadFromFile( jpgMem, FileName );
   jpg_Load( Data, W, H );
+  mem_Free( jpgMem );
 end;
 
 procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 begin
-  jpgMem.Size := Memory.Size;
-  zgl_GetMem( jpgMem.Memory, Memory.Size );
+  jpgMem.Size     := Memory.Size;
+  jpgMem.Memory   := Memory.Memory;
   jpgMem.Position := Memory.Position;
-  Move( Memory.Memory^, jpgMem.Memory^, Memory.Size );
   jpg_Load( Data, W, H );
 end;
 
