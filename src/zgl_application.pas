@@ -473,6 +473,7 @@ begin
       begin
         wnd_X := PRect( lParam ).Left;
         wnd_Y := PRect( lParam ).Top;
+        timer_Reset();
       end;
     WM_SETCURSOR:
       begin
