@@ -49,7 +49,8 @@ end;
 
 procedure Update( dt : Double );
 begin
-  //
+  // RU: Эта функция наземенима для реализация плавного движения чего-либо, т.к. таймеры зачастую ограничены FPS.
+  // EN: This function is the best way to implement smooth moving of something, because timers are restricted by FPS.
 end;
 
 procedure Timer;
