@@ -120,22 +120,20 @@ begin
           mem_Seek( wavMemory, skip, FSM_CUR );
         end;
   until wavMemory.Position >= wavMemory.Size;
-
-  mem_Free( wavMemory );
 end;
 
 procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
 begin
   mem_LoadFromFile( wavMemory, FileName );
   wav_Load( Data, Size, Format, Frequency );
+  mem_Free( wavMemory );
 end;
 
 procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 begin
-  wavMemory.Size := Memory.Size;
-  zgl_GetMem( wavMemory.Memory, Memory.Size );
+  wavMemory.Size     := Memory.Size;
+  wavMemory.Memory   := Memory.Memory;
   wavMemory.Position := Memory.Position;
-  Move( Memory.Memory^, wavMemory.Memory^, Memory.Size );
   wav_Load( Data, Size, Format, Frequency );
 end;
 

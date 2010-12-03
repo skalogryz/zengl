@@ -23,14 +23,18 @@ unit zgl_particles_2d;
 {$I zgl_config.cfg}
 
 interface
-
 uses
   zgl_textures,
-  zgl_math_2d;
+  zgl_math_2d,
+  zgl_file,
+  zgl_memory;
 
 const
+  ZGL_EMITTER_2D : array[ 0..14 ] of AnsiChar = ( 'Z', 'G', 'L', '_', 'E', 'M', 'I', 'T', 'T', 'E', 'R', '_', '2', 'D', #0 );
+
   EMITTER_MAX_PARTICLES = 1024;
 
+  EMITTER_NONE      = 0;
   EMITTER_POINT     = 1;
   EMITTER_LINE      = 2;
   EMITTER_RECTANGLE = 3;
@@ -194,6 +198,13 @@ type
     List  : array of zglPEmitter2D;
   end;
 
+type
+  zglPEmitterManager2D = ^zglTEmitterManager2D;
+  zglTEmitterManager2D = record
+    Count : LongWord;
+    List  : array of zglPEmitter2D;
+end;
+
 procedure pengine2d_Set( PEngine : zglPPEngine2D );
 function  pengine2d_Get : zglPPEngine2D;
 procedure pengine2d_Draw;
@@ -205,25 +216,38 @@ procedure pengine2d_ClearAll;
 procedure pengine2d_Sort( iLo, iHi : Integer );
 procedure pengine2d_SortID( iLo, iHi : Integer );
 
+function  emitter2d_Add : zglPEmitter2D;
+procedure emitter2d_Del( var Emitter : zglPEmitter2D );
+
+function emitter2d_Load : zglPEmitter2D;
+function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
+function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
+
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
-procedure emitter2d_Free( Emitter : zglPEmitter2D );
+procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 procedure emitter2d_Draw( Emitter : zglPEmitter2D );
 procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
 procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
 
 procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
 
+var
+  managerEmitter2D : zglTEmitterManager2D;
+
 implementation
 uses
   zgl_main,
+  zgl_log,
   zgl_opengl,
   zgl_opengl_all,
   zgl_fx,
   zgl_render_2d;
 
 var
-  _pengine  : zglTPEngine2D;
-  pengine2d : zglPPEngine2D;
+  _pengine     : zglTPEngine2D;
+  pengine2d    : zglPPEngine2D;
+  emitter2dMem : zglTMemory;
+  emitter2dID  : array[ 0..14 ] of AnsiChar;
 
 procedure pengine2d_Set( PEngine : zglPPEngine2D );
 begin
@@ -307,7 +331,7 @@ begin
   if pengine2d.Count.Emitters + 1 > length( pengine2d.List ) Then
     SetLength( pengine2d.List, length( pengine2d.List ) + 16384 );
 
-  zgl_GetMem( Pointer( new ), SizeOf( zglTEmitter2D ) );
+  GetMem( new, SizeOf( zglTEmitter2D ) );
   pengine2d.List[ pengine2d.Count.Emitters ] := new;
   INC( pengine2d.Count.Emitters );
 
@@ -393,7 +417,7 @@ begin
   if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) or ( pengine2d.Count.Emitters = 0 ) Then exit;
 
   emitter2d_Free( pengine2d.List[ ID ] );
-  FreeMem( pengine2d.List[ ID ] );
+  pengine2d.List[ ID ] := nil;
   for i := ID to pengine2d.Count.Emitters - 2 do
     begin
       pengine2d.List[ i ]    := pengine2d.List[ i + 1 ];
@@ -408,10 +432,7 @@ procedure pengine2d_ClearAll;
     i : Integer;
 begin
   for i := 0 to pengine2d.Count.Emitters - 1 do
-    begin
-      emitter2d_Free( pengine2d.List[ i ] );
-      FreeMem( pengine2d.List[ i ] );
-    end;
+    emitter2d_Free( pengine2d.List[ i ] );
   SetLength( pengine2d.List, 0 );
   pengine2d.Count.Emitters := 0;
 end;
@@ -470,6 +491,70 @@ begin
   if lo < iHi Then pengine2d_SortID( lo, iHi );
 end;
 
+function emitter2d_Add : zglPEmitter2D;
+begin
+  if managerEmitter2D.Count + 1 > length( managerEmitter2D.List ) Then
+    SetLength( managerEmitter2D.List, length( managerEmitter2D.List ) + 128 );
+
+  zgl_GetMem( Pointer( Result ), SizeOf( zglTEmitter2D ) );
+  managerEmitter2D.List[ managerEmitter2D.Count ] := Result;
+  INC( managerEmitter2D.Count );
+
+  emitter2d_Init( Result );
+end;
+
+procedure emitter2d_Del( var Emitter : zglPEmitter2D );
+  var
+    i, j : Integer;
+begin
+  for i := 0 to managerEmitter2D.Count - 1 do
+    if managerEmitter2D.List[ i ] = Emitter Then
+      begin
+        emitter2d_Free( Emitter );
+        managerEmitter2D.List[ i ] := nil;
+        for j := i to managerEmitter2D.Count - 2 do
+          managerEmitter2D.List[ i ] := managerEmitter2D.List[ i + 1 ];
+      end;
+end;
+
+function emitter2d_Load : zglPEmitter2D;
+begin
+  Result := emitter2d_Add();
+end;
+
+function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
+begin
+  Result := nil;
+  if not file_Exists( FileName ) Then
+    begin
+      log_Add( 'Cannot read "' + FileName + '"' );
+      exit;
+    end;
+
+  mem_LoadFromFile( emitter2dMem, FileName );
+  mem_Read( emitter2dMem, emitter2dID, 14 );
+  if emitter2dID <> ZGL_EMITTER_2D Then
+    log_Add( FileName + ' - it''s not a ZenGL Emitter 2D file' )
+  else
+    Result := emitter2d_Load();
+  mem_Free( emitter2dMem );
+end;
+
+function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
+begin
+  emitter2dMem.Size     := Memory.Size;
+  emitter2dMem.Memory   := Memory.Memory;
+  emitter2dMem.Position := Memory.Position;
+
+  mem_Read( emitter2dMem, emitter2dID, 14 );
+  if emitter2dID <> ZGL_EMITTER_2D Then
+    begin
+      Result := nil;
+      log_Add( 'Unable to determinate ZenGL Emitter 2D: From Memory' );
+    end else
+      Result := emitter2d_Load();
+end;
+
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
   var
     i : Integer;
@@ -482,7 +567,7 @@ begin
       end;
 end;
 
-procedure emitter2d_Free( Emitter : zglPEmitter2D );
+procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 begin
   with Emitter.ParParams do
     begin
@@ -494,6 +579,8 @@ begin
       SetLength( aVelocityD, 0 );
       SetLength( SpinD, 0 );
     end;
+  FreeMem( Emitter );
+  Emitter := nil;
 end;
 
 procedure emitter2d_Draw( Emitter : zglPEmitter2D );

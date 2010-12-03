@@ -131,6 +131,15 @@ uses
   {$ENDIF}
   zgl_render_target,
   zgl_font,
+  {$IFDEF USE_SENGINE}
+  zgl_sengine_2d,
+  {$ENDIF}
+  {$IFDEF USE_PARTICLES}
+  zgl_particles_2d,
+  {$ENDIF}
+  {$IFDEF USE_GUI}
+  zgl_gui_main,
+  {$ENDIF}
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -208,14 +217,16 @@ begin
 
   app_PExit();
 
-  log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
+  if managerTimer.Count <> 0 Then
+    log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 0 do
     begin
       p := managerTimer.First.next;
       timer_Del( zglPTimer( p ) );
     end;
 
-  log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
+  if managerRTarget.Count <> 0 Then
+    log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 0 do
     begin
       p := managerRTarget.First.next;
@@ -223,7 +234,8 @@ begin
     end;
 
   {$IFDEF USE_TEXTURE_ATLAS}
-  log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
+  if managerAtlas.Count <> 0 Then
+    log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
   while managerAtlas.Count > 0 do
     begin
       p := managerAtlas.First.next;
@@ -231,22 +243,40 @@ begin
     end;
   {$ENDIF}
 
-  log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
+  if managerTexture.Count.Items <> 0 Then
+    log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 0 do
     begin
       p := managerTexture.First.next;
       tex_Del( zglPTexture( p ) );
     end;
 
-  log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
+  if managerFont.Count <> 0 Then
+    log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
   while managerFont.Count > 0 do
     begin
       p := managerFont.First.next;
       font_Del( zglPFont( p ) );
     end;
 
+  {$IFDEF USE_SENGINE}
+  sengine2d_Set( nil );
+  sengine2d_ClearAll();
+  {$ENDIF}
+
+  {$IFDEF USE_PARTICLES}
+  if managerEmitter2D.Count <> 0 Then
+    log_Add( 'Emitters2D to free: ' + u_IntToStr( managerEmitter2D.Count ) );
+  for i := 0 to managerEmitter2D.Count - 1 do
+    emitter2d_Free( managerEmitter2D.List[ i ] );
+  SetLength( managerEmitter2D.List, 0 );
+  pengine2d_Set( nil );
+  pengine2d_ClearAll();
+  {$ENDIF}
+
   {$IFDEF USE_SOUND}
-  log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
+  if managerSound.Count.Items <> 0 Then
+    log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
   while managerSound.Count.Items > 0 do
     begin
       p := managerSound.First.next;

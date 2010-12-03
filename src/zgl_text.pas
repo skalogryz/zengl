@@ -179,9 +179,9 @@ begin
 
       quad[ 0 ].X := X + ( charDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
       quad[ 0 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - charDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
-      quad[ 1 ].X := X + ( charDesc.ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale;
+      quad[ 1 ].X := X + ( charDesc.ShiftX + charDesc.Width + Font.Padding[ 2 ] ) * textScale;
       quad[ 1 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - charDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
-      quad[ 2 ].X := X + ( charDesc.ShiftX + charDesc.Width ) * textScale + Font.Padding[ 2 ];
+      quad[ 2 ].X := X + ( charDesc.ShiftX + charDesc.Width + Font.Padding[ 2 ] ) * textScale;
       quad[ 2 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - charDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
       quad[ 3 ].X := X + ( charDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
       quad[ 3 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - charDesc.Height ) + Font.Padding[ 3 ] ) * textScale;

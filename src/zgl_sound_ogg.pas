@@ -562,21 +562,20 @@ begin
           ov_clear( _vf );
         end;
     end;
-  mem_Free( oggMemory );
 end;
 
 procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
 begin
   mem_LoadFromFile( oggMemory, FileName );
   ogg_Load( Data, Size, Format, Frequency );
+  mem_Free( oggMemory );
 end;
 
 procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 begin
-  oggMemory.Size := Memory.Size;
-  zgl_GetMem( oggMemory.Memory, Memory.Size );
+  oggMemory.Size     := Memory.Size;
+  oggMemory.Memory   := Memory.Memory;
   oggMemory.Position := Memory.Position;
-  Move( Memory.Memory^, oggMemory.Memory^, Memory.Size );
   ogg_Load( Data, Size, Format, Frequency );
 end;
 
