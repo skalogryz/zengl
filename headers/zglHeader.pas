@@ -550,7 +550,7 @@ var
   tex_LoadFromFile   : function( const FileName : String; TransparentColor, Flags : LongWord ) : zglPTexture;
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
-  tex_SetMask        : function( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
+  tex_SetMask        : function( var Texture : zglPTexture; Mask : zglPTexture ) : zglPTexture;
   tex_SetData        : procedure( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
   tex_GetData        : procedure( Texture : zglPTexture; var pData : Pointer );
   tex_Filter         : procedure( Texture : zglPTexture; Flags : LongWord );
