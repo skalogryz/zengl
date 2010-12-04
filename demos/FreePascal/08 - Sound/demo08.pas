@@ -29,7 +29,7 @@ uses
                     //
                     // EN: Enabling support of ogg.
                     // For decoding ogg-files will be needed libogg.dll, libvorbis.dll and libvorbisfile.dll.
-                    // Or not, if static linking will be used. All needed files can be find here:
+                    // Or not, if static linking will be used. All needed files can be found here:
                     // http://andru-kun.inf.ua/zengl_extra.html
   zgl_math_2d,
   zgl_collision_2d,

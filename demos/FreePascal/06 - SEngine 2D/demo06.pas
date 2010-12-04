@@ -4,7 +4,7 @@
 //
 // EN: This example use standard procedural sprite engine that can be used for
 // simple tasks or for anything if you like plain-style code as me :)
-// This example with classes can be find in this demo - "07 - SEngine 2D(OOP)"
+// This example with classes can be found in this demo - "07 - SEngine 2D(OOP)"
 program demo06;
 
 {$DEFINE STATIC}
