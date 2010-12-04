@@ -126,7 +126,7 @@ const
   VIEWPORT_WIDTH     = 11; // LongWord
   VIEWPORT_HEIGHT    = 12; // LongWord
   VIEWPORT_OFFSET_X  = 13; // LongWord
-  VIEWPORT_OFFSET_X  = 14; // LongWord
+  VIEWPORT_OFFSET_Y  = 14; // LongWord
   DESKTOP_WIDTH      = 15; // LongWord
   DESKTOP_HEIGHT     = 16; // LongWord
   RESOLUTION_LIST    = 17; // PResolutionList
