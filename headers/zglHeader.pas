@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2010.11.30          }
+{ date:     2010.12.04          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -112,26 +112,31 @@ var
   zgl_Reg : procedure( What : LongWord; UserData : Pointer );
 
 const
-  SYS_FPS         = 1;  // LongWord,  := zgl_Get( SYS_FPS )
-  APP_PAUSED      = 2;  // Boolean
-  APP_DIRECTORY   = 3;  // PAnsiChar
-  APP_WND_HANDLE  = 4;  // TWindow(GNU/Linux), HWND(Windows), WindowRef(MacOS X)
-  APP_OGL_CONTEXT = 5;  // GLXContext(GNU/Linux), HGLRC(Windows), TAGLContext(MacOS X)
-  APP_D3D_DEVICE  = 5;  // For ZenGL with Direct3D render only
-  USR_HOMEDIR     = 6;  // PAnsiChar
-  LOG_FILENAME    = 7;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
-  ZGL_VERSION     = 8;  // LongWord
-  SCR_ADD_X       = 9;  // LongWord
-  SCR_ADD_Y       = 10; // LongWord
-  DESKTOP_WIDTH   = 11; // LongWord
-  DESKTOP_HEIGHT  = 12; // LongWord
-  RESOLUTION_LIST = 13; // PResolutionList
-  MANAGER_TIMER   = 14; // zglPTimerManager
-  MANAGER_TEXTURE = 15; // zglPTextureManager
-  MANAGER_ATLAS   = 16; // zglPAtlasManager
-  MANAGER_FONT    = 17; // zglPFontManager
-  MANAGER_RTARGET = 18; // zglTRenderTargetManager
-  MANAGER_SOUND   = 19; // zglPSoundManager
+  SYS_FPS            = 1;  // LongWord,  := zgl_Get( SYS_FPS )
+  APP_PAUSED         = 2;  // Boolean
+  APP_DIRECTORY      = 3;  // PAnsiChar
+  APP_WND_HANDLE     = 4;  // TWindow(GNU/Linux), HWND(Windows), WindowRef(MacOS X)
+  APP_OGL_CONTEXT    = 5;  // GLXContext(GNU/Linux), HGLRC(Windows), TAGLContext(MacOS X)
+  APP_D3D_DEVICE     = 5;  // For ZenGL with Direct3D render only
+  USR_HOMEDIR        = 6;  // PAnsiChar
+  LOG_FILENAME       = 7;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
+  ZGL_VERSION        = 8;  // LongWord
+  ZGL_VERSION_STRING = 9;  // PAnsiChar
+  ZGL_VERSION_DATE   = 10; // PAnsiChar
+  VIEWPORT_WIDTH     = 11; // LongWord
+  VIEWPORT_HEIGHT    = 12; // LongWord
+  VIEWPORT_OFFSET_X  = 13; // LongWord
+  VIEWPORT_OFFSET_X  = 14; // LongWord
+  DESKTOP_WIDTH      = 15; // LongWord
+  DESKTOP_HEIGHT     = 16; // LongWord
+  RESOLUTION_LIST    = 17; // PResolutionList
+  MANAGER_TIMER      = 18; // zglPTimerManager
+  MANAGER_TEXTURE    = 19; // zglPTextureManager
+  MANAGER_ATLAS      = 20; // zglPAtlasManager
+  MANAGER_FONT       = 21; // zglPFontManager
+  MANAGER_RTARGET    = 22; // zglTRenderTargetManager
+  MANAGER_SOUND      = 23; // zglPSoundManager
+  MANAGER_EMITTER2D  = 24; // zglPEmitter2DManager
 
 var
   zgl_Get       : function( What : LongWord ) : Ptr;
@@ -616,6 +621,7 @@ const
   RT_USE_DEPTH    = $02;
   RT_CLEAR_COLOR  = $04;
   RT_CLEAR_DEPTH  = $08;
+  RT_SAVE_CONTENT = $10; // Direct3D only!
 
 var
   rtarget_Add    : function( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
@@ -923,18 +929,29 @@ type
     List  : array of zglPEmitter2D;
   end;
 
+type
+  zglPEmitter2DManager = ^zglTEmitter2DManager;
+  zglTEmitter2DManager = record
+    Count : LongWord;
+    List  : array of zglPEmitter2D;
+end;
+
 var
-  pengine2d_Set        : procedure( PEngine : zglPPEngine2D );
-  pengine2d_Get        : function : zglPPEngine2D;
-  pengine2d_Draw       : procedure;
-  pengine2d_Proc       : procedure( dt : Double );
-  pengine2d_AddEmitter : function( Emitter : zglPEmitter2D ) : zglPEmitter2D;
-  pengine2d_DelEmitter : procedure( ID : Integer );
-  pengine2d_ClearAll   : procedure;
-  emitter2d_Init       : procedure( Emitter : zglPEmitter2D );
-  emitter2d_Free       : procedure( Emitter : zglPEmitter2D );
-  emitter2d_Draw       : procedure( Emitter : zglPEmitter2D );
-  emitter2d_Proc       : procedure( Emitter : zglPEmitter2D; dt : Double );
+  pengine2d_Set            : procedure( PEngine : zglPPEngine2D );
+  pengine2d_Get            : function : zglPPEngine2D;
+  pengine2d_Draw           : procedure;
+  pengine2d_Proc           : procedure( dt : Double );
+  pengine2d_AddEmitter     : function( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
+  pengine2d_DelEmitter     : procedure( ID : Integer );
+  pengine2d_ClearAll       : procedure;
+  emitter2d_Add            : function : zglPEmitter2D;
+  emitter2d_Del            : procedure( var Emitter : zglPEmitter2D );
+  emitter2d_LoadFromFile   : function( const FileName : String ) : zglPEmitter2D;
+  emitter2d_LoadFromMemory : function( const Memory : zglTMemory ) : zglPEmitter2D;
+  emitter2d_Init           : procedure( Emitter : zglPEmitter2D );
+  emitter2d_Free           : procedure( var Emitter : zglPEmitter2D );
+  emitter2d_Draw           : procedure( Emitter : zglPEmitter2D );
+  emitter2d_Proc           : procedure( Emitter : zglPEmitter2D; dt : Double );
 
 // Text
 type
@@ -1465,6 +1482,10 @@ begin
       pengine2d_AddEmitter := dlsym( zglLib, 'pengine2d_AddEmitter' );
       pengine2d_DelEmitter := dlsym( zglLib, 'pengine2d_DelEmitter' );
       pengine2d_ClearAll := dlsym( zglLib, 'pengine2d_ClearAll' );
+      emitter2d_Add := dlsym( zglLib, 'emitter2d_Add' );
+      emitter2d_Del := dlsym( zglLib, 'emitter2d_Del' );
+      emitter2d_LoadFromFile := dlsym( zglLib, 'emitter2d_LoadFromFile' );
+      emitter2d_LoadFromMemory := dlsym( zglLib, 'emitter2d_LoadFromMemory' );
       emitter2d_Init := dlsym( zglLib, 'emitter2d_Init' );
       emitter2d_Free := dlsym( zglLib, 'emitter2d_Free' );
       emitter2d_Draw := dlsym( zglLib, 'emitter2d_Draw' );

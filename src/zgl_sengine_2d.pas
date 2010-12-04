@@ -120,6 +120,7 @@ begin
     sengine2d.List[ ID ].OnFree( sengine2d.List[ ID ] );
 
   FreeMemory( sengine2d.List[ ID ] );
+  sengine2d.List[ ID ] := nil;
   for i := ID to sengine2d.Count - 2 do
     begin
       sengine2d.List[ i ]    := sengine2d.List[ i + 1 ];

@@ -57,10 +57,10 @@ begin
   file_Open( log, logFile, FOM_CREATE );
   // crazy code :)
   es := '';
-  for i := 0 to length( cs_ZenGL ) + 7 do
+  for i := 0 to length( cs_ZenGL + ' (' + cs_Date + ')' ) + 7 do
     es := es + '=';
   log_Add( es, FALSE );
-  log_Add( '=== ' + cs_ZenGL + ' ===', FALSE );
+  log_Add( '=== ' + cs_ZenGL + ' (' + cs_Date + ') ===', FALSE );
   log_Add( es, FALSE );
   log_Add( 'Begin' );
 end;

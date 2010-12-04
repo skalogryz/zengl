@@ -36,7 +36,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.2 RC6';
+  cs_ZenGL    = 'ZenGL 0.2 RC6';
+  cs_Date     = '2010.12.04';
+  cv_major    = 0;
+  cv_minor    = 2;
+  cv_revision = 0;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -62,26 +66,30 @@ const
   WIDGET_ONFREEDATA      = $000035;
 
   // zgl_Get
-  SYS_FPS         = 1;
-  APP_PAUSED      = 2;
-  APP_DIRECTORY   = 3;
-  APP_WND_HANDLE  = 4;
-  APP_OGL_CONTEXT = 5;
-  USR_HOMEDIR     = 6;
-  LOG_FILENAME    = 7;
-  ZGL_VERSION     = 8;
-  SCR_ADD_X       = 9;
-  SCR_ADD_Y       = 10;
-  DESKTOP_WIDTH   = 11;
-  DESKTOP_HEIGHT  = 12;
-  RESOLUTION_LIST = 13;
-  MANAGER_TIMER   = 14;
-  MANAGER_TEXTURE = 15;
-  MANAGER_ATLAS   = 16;
-  MANAGER_FONT    = 17;
-  MANAGER_RTARGET = 18;
-  MANAGER_SOUND   = 19;
-  MANAGER_GUI     = 20;
+  SYS_FPS            = 1;
+  APP_PAUSED         = 2;
+  APP_DIRECTORY      = 3;
+  APP_WND_HANDLE     = 4;
+  APP_OGL_CONTEXT    = 5;
+  USR_HOMEDIR        = 6;
+  LOG_FILENAME       = 7;
+  ZGL_VERSION        = 8;
+  ZGL_VERSION_STRING = 9;
+  ZGL_VERSION_DATE   = 10;
+  VIEWPORT_WIDTH     = 11;
+  VIEWPORT_HEIGHT    = 12;
+  VIEWPORT_OFFSET_X  = 13;
+  VIEWPORT_OFFSET_Y  = 14;
+  DESKTOP_WIDTH      = 15;
+  DESKTOP_HEIGHT     = 16;
+  RESOLUTION_LIST    = 17;
+  MANAGER_TIMER      = 18;
+  MANAGER_TEXTURE    = 19;
+  MANAGER_ATLAS      = 20;
+  MANAGER_FONT       = 21;
+  MANAGER_RTARGET    = 22;
+  MANAGER_SOUND      = 23;
+  MANAGER_EMITTER2D  = 24;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR    = $000001;
@@ -405,9 +413,13 @@ begin
     APP_OGL_CONTEXT: Result := Ptr( ogl_Context );
     USR_HOMEDIR: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
     LOG_FILENAME: Result := Ptr( @logfile );
-    //ZGL_VERSION: Result := cv_version;
-    SCR_ADD_X: Result := scr_AddCX;
-    SCR_ADD_Y: Result := scr_AddCY;
+    ZGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
+    ZGL_VERSION_STRING: Result := Ptr( PAnsiChar( cs_ZenGL ) );
+    ZGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
+    VIEWPORT_WIDTH: Result := ogl_Width - scr_SubCX;
+    VIEWPORT_HEIGHT: Result := ogl_Height - scr_SubCY;
+    VIEWPORT_OFFSET_X: Result := scr_AddCX;
+    VIEWPORT_OFFSET_Y: Result := scr_AddCY;
     DESKTOP_WIDTH:
     {$IFDEF LINUX}
       Result := PXRRScreenSize( scr_ModeList + scr_Desktop * SizeOf( PXRRScreenSize ) ).width;
@@ -431,16 +443,21 @@ begin
     RESOLUTION_LIST: Result := Ptr( @scr_ResList );
 
     // Managers
-    MANAGER_TIMER:   Result := Ptr( @managerTimer );
-    MANAGER_TEXTURE: Result := Ptr( @managerTexture );
+    MANAGER_TIMER:     Result := Ptr( @managerTimer );
+    MANAGER_TEXTURE:   Result := Ptr( @managerTexture );
     {$IFDEF USE_TEXTURE_ATLAS}
-    MANAGER_ATLAS:   Result := Ptr( @managerAtlas );
+    MANAGER_ATLAS:     Result := Ptr( @managerAtlas );
     {$ENDIF}
-    MANAGER_FONT:    Result := Ptr( @managerFont );
-    MANAGER_RTARGET: Result := Ptr( @managerRTarget );
+    MANAGER_FONT:      Result := Ptr( @managerFont );
+    MANAGER_RTARGET:   Result := Ptr( @managerRTarget );
     {$IFDEF USE_SOUND}
-    MANAGER_SOUND:   Result := Ptr( @managerSound );
+    MANAGER_SOUND:     Result := Ptr( @managerSound );
     {$ENDIF}
+    {$IFDEF USE_PARTICLES}
+    MANAGER_EMITTER2D: Result := Ptr( @managerEmitter2D );
+    {$ENDIF}
+  else
+    Result := 0;
   end;
 end;
 
