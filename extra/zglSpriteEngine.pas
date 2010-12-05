@@ -129,7 +129,7 @@ begin
   Result := FList[ ID ];
 end;
 
-procedure zglCSEngine2D.SetSprite( ID : LongWord; const Sprite : zglCSprite2D );
+procedure zglCSEngine2D.SetSprite( ID : LongWord; Sprite : zglCSprite2D );
 begin
   FList[ ID ] := Sprite;
 end;
@@ -153,7 +153,7 @@ begin
   Result.OnInit( Texture, Layer );
 end;
 
-procedure zglCSEngine2D.DelSprite( const ID : Integer );
+procedure zglCSEngine2D.DelSprite( ID : Integer );
   var
     i : Integer;
 begin

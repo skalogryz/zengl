@@ -38,7 +38,7 @@ type
   protected
     FSpeed : zglTPoint2D;
   public
-    procedure OnInit( const _Texture : zglPTexture; const _Layer : Integer ); override;
+    procedure OnInit( _Texture : zglPTexture; _Layer : Integer ); override;
     procedure OnDraw; override;
     procedure OnProc; override;
     procedure OnFree; override;
@@ -53,7 +53,7 @@ var
   sengine2d : zglCSEngine2D;
 
 // Miku
-procedure CMiku.OnInit( const _Texture : zglPTexture; const _Layer : Integer );
+procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
 begin
   // RU: Укажем свою текстуру и слой для спрайта, заодно установятся стандартные
   // параметры вроде ширины и высоты на основе данных о кадре в текстуре.
