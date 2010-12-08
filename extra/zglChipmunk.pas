@@ -141,6 +141,8 @@ type
     y : cpFloat;
   end;
 
+  cpVectArray = array of cpVect;
+
 // BB
   cpBB = record
     l, b, r, t : cpFloat;
@@ -317,11 +319,11 @@ type
 
     // Vertex and axis lists.
     numVerts : Integer;
-    verts : array of cpVect;
+    verts : cpVectArray;
     axes : array of cpPolyShapeAxis;
 
     // Transformed vertex and axis lists.
-    tVerts : array of cpVect;
+    tVerts : cpVectArray;
     tAxes : array of cpPolyShapeAxis;
   end;
 
@@ -1417,7 +1419,7 @@ end;
 // POLYSHAPE
 function cpPolyShapeValueOnAxis( poly : PcpPolyShape; n : cpVect; d : cpFloat ) : cpFloat;
   var
-    verts : array of cpVect;
+    verts : cpVectArray;
     min   : cpFloat;
     i     : Integer;
 begin
