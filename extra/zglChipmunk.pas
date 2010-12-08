@@ -1600,6 +1600,7 @@ end;
 
 function cpLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
+  Result := FALSE;
   {$IFDEF DARWIN}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
@@ -1795,7 +1796,6 @@ begin
     end else
       if Error Then
         begin
-          Result := FALSE;
           {$IFDEF LINUX}
           WriteLn( 'Error while loading Chipmunk' );
           {$ENDIF}
