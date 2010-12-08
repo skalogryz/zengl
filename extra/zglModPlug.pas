@@ -1,6 +1,7 @@
 unit zglModPlug;
 
-// Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
+// RU: Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
+// EN: If project doesn't compile statically with ZenGL then comment define below
 {$DEFINE STATIC}
 
 interface
