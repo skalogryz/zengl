@@ -313,6 +313,8 @@ type
     d : cpFloat;
   end;
 
+  cpPolyShapeAxisArray = array of cpPolyShapeAxis;
+
   // Convex polygon shape structure.
   cpPolyShape = record
     shape : cpShape;
@@ -320,11 +322,11 @@ type
     // Vertex and axis lists.
     numVerts : Integer;
     verts : cpVectArray;
-    axes : array of cpPolyShapeAxis;
+    axes : cpPolyShapeAxisArray;
 
     // Transformed vertex and axis lists.
     tVerts : cpVectArray;
-    tAxes : array of cpPolyShapeAxis;
+    tAxes : cpPolyShapeAxisArray;
   end;
 
 // BODY
@@ -1434,7 +1436,7 @@ end;
 
 function cpPolyShapeContainsVert( poly : PcpPolyShape; v : cpVect ) : cpBool;
   var
-    axes : array of cpPolyShapeAxis;
+    axes : cpPolyShapeAxisArray;
     i    : Integer;
     dist : cpFloat;
 begin
@@ -1455,7 +1457,7 @@ end;
 
 function cpPolyShapeContainsVertPartial( poly : PcpPolyShape; v : cpVect; n : cpVect ) : cpBool;
   var
-    axes : array of cpPolyShapeAxis;
+    axes : cpPolyShapeAxisArray;
     i    : Integer;
     dist : cpFloat;
 begin
