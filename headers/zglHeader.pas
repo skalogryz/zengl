@@ -83,7 +83,7 @@ var
   mainPath : AnsiString;
 {$ENDIF}
 
-function zglLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure zglFree;
 
 var
@@ -1310,7 +1310,7 @@ begin
 end;
 
 
-function zglLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
   {$IFDEF DARWIN}
   mainBundle  := CFBundleGetMainBundle;
