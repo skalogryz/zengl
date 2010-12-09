@@ -32,7 +32,7 @@ unit zglChipmunk;
 {$DEFINE STATIC}
 
 {$IFDEF FPC}
-  {.$DEFINE CHIPMUNK_STATIC}
+  {$DEFINE CHIPMUNK_STATIC}
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
@@ -44,10 +44,21 @@ unit zglChipmunk;
   {$PACKRECORDS C}
   {$IFDEF LINUX}
     {$DEFINE LINUX_OR_DARWIN}
+    {$IFDEF CHIPMUNK_STATIC}
+      {$IFDEF cpui386}
+        {$LINKLIB libchipmunk_linux_x86/libchipmunk.a}
+      {$ELSE}
+        {$LINKLIB libchipmunk_linux_x86_64/libchipmunk.a}
+      {$ENDIF}
+    {$ENDIF}
   {$ENDIF}
   {$IFDEF WINDOWS}
-    {$LINKLIB libchipmunk_win32/chipmunk.a}
-    {$LINKLIB libchipmunk_win32/libmsvcrt.a}
+    {$IFDEF CHIPMUNK_STATIC}
+      {$IFDEF cpui386}
+        {$LINKLIB libchipmunk_win32/chipmunk.a}
+        {$LINKLIB libchipmunk_win32/libmsvcrt.a}
+      {$ENDIF}
+    {$ENDIF}
   {$ENDIF}
   {$IFDEF DARWIN}
     {$DEFINE LINUX_OR_DARWIN}
