@@ -73,7 +73,22 @@ var
 implementation
 
 procedure mp_Init;
+  var
+    i : Integer;
 begin
+  for i := 0 to MAX_FORMATS - 1 do
+    begin
+      Decoders[ i ].Ext   := FORMATS[ i ];
+      Decoders[ i ].Open  := mp_DecoderOpen;
+      Decoders[ i ].Read  := mp_DecoderRead;
+      Decoders[ i ].Loop  := mp_DecoderLoop;
+      Decoders[ i ].Close := mp_DecoderClose;
+      zgl_Reg( SND_FORMAT_EXTENSION, PChar( FORMATS[ i ] ) );
+      zgl_Reg( SND_FORMAT_FILE_LOADER, nil );
+      zgl_Reg( SND_FORMAT_MEM_LOADER,  nil );
+      zgl_Reg( SND_FORMAT_DECODER, @Decoders[ i ] );
+    end;
+
   mpLibrary := dlopen( libmodplug {$IFNDEF WIN32}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   if mpLibrary = LIB_ERROR Then
@@ -150,21 +165,7 @@ begin
   Stream._data := nil;
 end;
 
-var
-  i : Integer;
 initialization
-  for i := 0 to MAX_FORMATS - 1 do
-    begin
-      Decoders[ i ].Ext   := FORMATS[ i ];
-      Decoders[ i ].Open  := mp_DecoderOpen;
-      Decoders[ i ].Read  := mp_DecoderRead;
-      Decoders[ i ].Loop  := mp_DecoderLoop;
-      Decoders[ i ].Close := mp_DecoderClose;
-      zgl_Reg( SND_FORMAT_EXTENSION, PChar( FORMATS[ i ] ) );
-      zgl_Reg( SND_FORMAT_FILE_LOADER, nil );
-      zgl_Reg( SND_FORMAT_MEM_LOADER,  nil );
-      zgl_Reg( SND_FORMAT_DECODER, @Decoders[ i ] );
-    end;
 
 finalization
   if mpInit Then
