@@ -11,7 +11,7 @@
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
 { header version:    0.99 beta 1             }
-{ date:              2010.12.08              }
+{ date:              2010.12.09              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -620,8 +620,8 @@ type
     // Linked list ring of contact buffers.
     // Head is the newest buffer, and each buffer points to a newer buffer.
     // Head wraps around and points to the oldest (tail) buffer.
-    contactBuffersHead : Pointer; //cpContactBufferHeader*
-    _contactBuffersTail : Pointer; //cpContactBufferHeader*
+    contactBuffersHead : PcpContactBufferHeader;
+    _contactBuffersTail : PcpContactBufferHeader;
 
     // List of buffers to be free()ed when destroying the space.
     allocatedBuffers : PcpArray;
