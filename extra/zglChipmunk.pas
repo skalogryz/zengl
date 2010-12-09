@@ -80,7 +80,7 @@ uses
 
 const
 {$IFDEF LINUX}
-  libChipmunk = 'libchipmunk.so.5.1';
+  libChipmunk = 'libchipmunk.so.5.3';
 {$ENDIF}
 {$IFDEF WINDOWS}
   libChipmunk = 'chipmunk.dll';
