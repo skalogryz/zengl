@@ -10,7 +10,7 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 1             }
+{ header version:    0.99 beta 2             }
 { date:              2010.12.09              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
@@ -32,18 +32,26 @@ unit zglChipmunk;
 {$DEFINE STATIC}
 
 {$IFDEF FPC}
+  {.$DEFINE CHIPMUNK_STATIC}
+{$ENDIF}
+
+{$IFDEF MSWINDOWS}
+  {$DEFINE WINDOWS}
+{$ENDIF}
+
+{$IFDEF FPC}
   {$MODE DELPHI}
   {$PACKRECORDS C}
   {$IFDEF LINUX}
     {$DEFINE LINUX_OR_DARWIN}
   {$ENDIF}
+  {$IFDEF WINDOWS}
+    {$LINKLIB libchipmunk_win32/chipmunk.a}
+    {$LINKLIB libchipmunk_win32/libmsvcrt.a}
+  {$ENDIF}
   {$IFDEF DARWIN}
     {$DEFINE LINUX_OR_DARWIN}
   {$ENDIF}
-{$ENDIF}
-
-{$IFDEF MSWINDOWS}
-  {$DEFINE WINDOWS}
 {$ENDIF}
 
 interface
@@ -70,8 +78,10 @@ const
   libChipmunk = 'chipmunk.dylib';
 {$ENDIF}
 
+{$IFNDEF CHIPMUNK_STATIC}
 function  cpLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure cpFree;
+{$ENDIF}
 
 type
   cpHashValue     = LongWord;
@@ -755,6 +765,7 @@ const
   INFINITY                    = 1e1000;
   CP_MAX_CONTACTS_PER_ARBITER = 6;
 
+{$IFNDEF CHIPMUNK_STATIC}
 var
   cpInitChipmunk : procedure; cdecl;
   cpMomentForCircle : function( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl;
@@ -851,9 +862,6 @@ var
   cpSegmentShapeNew : function( body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpShape; cdecl;
 
   cpResetShapeIdCounter : procedure; cdecl;
-
-  // Directed segment queries against individual shapes.
-  cpSegmentQueryInfoPrint : procedure( info : PcpSegmentQueryInfo ); cdecl;
 
   cpShapeSegmentQuery : function( shape : PcpShape; a : cpVect; b : cpVect; info : PcpSegmentQueryInfo ) : cpBool; cdecl;
 
@@ -1075,7 +1083,170 @@ var
   // which should be at least CP_MAX_CONTACTS_PER_ARBITER in length.
   // This function was very lonely in cpCollision.h :)
   cpCollideShapes : function( a : PcpShape; b : PcpShape; arr : PcpContact ) : Integer; cdecl;
-
+{$ELSE}
+  procedure cpInitChipmunk; cdecl; external;
+  function cpMomentForCircle( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl; external;
+  function cpMomentForSegment( m : cpFloat; a : cpVect; b : cpVect ) : cpFloat; cdecl; external;
+  function cpMomentForPoly( m : cpFloat; numVerts : Integer; verts : PcpVect; offset : cpVect ) : cpFloat; cdecl; external;
+  function cpMomentForBox( m : cpFloat; width : cpFloat; height : cpFloat ) : cpFloat; cdecl; external;
+  function cpvlength( v : cpVect ) : cpFloat; cdecl; external;
+  function cpvslerp ( v1 : cpVect; v2 : cpVect; t : cpFloat ) : cpVect; cdecl; external;
+  function cpvslerpconst( v1 : cpVect; v2 : cpVect; a : cpFloat ) : cpVect; cdecl; external;
+  function cpvforangle( a : cpFloat ) : cpVect; cdecl; external;
+  function cpvtoangle( v : cpVect ) : cpFloat; cdecl; external;
+  function cpBBClampVect( bb : cpBB; v : cpVect ) : cpVect; cdecl; external;
+  function cpBBWrapVect( bb : cpBB; v : cpVect ) : cpVect; cdecl; external;
+  function cpArrayAlloc : PcpArray; cdecl; external;
+  function cpArrayInit( arr : PcpArray; size : Integer ) : PcpArray; cdecl; external;
+  function cpArrayNew( size : Integer ) : PcpArray; cdecl; external;
+  procedure cpArrayDestroy( arr : PcpArray); cdecl; external;
+  procedure cpArrayFree( arr : PcpArray ); cdecl; external;
+  procedure cpArrayClear( arr : PcpArray ); cdecl; external;
+  procedure cpArrayPush( arr : PcpArray; _object : Pointer ); cdecl; external;
+  function cpArrayPop( arr : PcpArray ) : Pointer; cdecl; external;
+  procedure cpArrayDeleteIndex( arr : PcpArray; idx : Integer ); cdecl; external;
+  procedure cpArrayDeleteObj( arr : PcpArray; obj : Pointer ); cdecl; external;
+  procedure cpArrayAppend( arr : PcpArray; other : PcpArray ); cdecl; external;
+  procedure cpArrayEach( arr : PcpArray; iterFunc : cpArrayIter; data : Pointer ); cdecl; external;
+  function cpArrayContains( arr : PcpArray; ptr : Pointer ) : cpBool; cdecl; external;
+  function cpContactInit( con : PcpContact; p : cpVect; n : cpVect; dist : cpFloat; hasg : cpHashValue ) : PcpContact; cdecl; external;
+  function cpArbiterInit( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : cpArbiter; cdecl; external;
+  procedure cpArbiterUpdate( arb : PcpArbiter; contacts : PcpContact; numContacts : Integer; handler : PcpCollisionHandler; a : PcpShape; b : PcpShape ); cdecl; external;
+  procedure cpArbiterPreStep( arb : PcpArbiter; dt_inv : cpFloat ); cdecl; external;
+  procedure cpArbiterApplyCachedImpulse( arb : PcpArbiter ); cdecl; external;
+  procedure cpArbiterApplyImpulse( arb : PcpArbiter; eCoef : cpFloat ); cdecl; external;
+  function cpArbiterTotalImpulse( arb : PcpArbiter ) : cpVect; cdecl; external;
+  function cpArbiterTotalImpulseWithFriction( arb : PcpArbiter ) : cpVect; cdecl; external;
+  procedure cpArbiterIgnore( arb : PcpArbiter ); external;
+  function cpShapeInit( shape : PcpShape; klass : PcpShapeClass; body : PcpBody ) : PcpShape; cdecl; external;
+  procedure cpShapeDestroy( shape : PcpShape ); cdecl; external;
+  procedure cpShapeFree( shape : PcpShape ); cdecl; external;
+  function cpShapeCacheBB( shape : PcpShape ) : cpBB; cdecl; external;
+  function cpShapePointQuery( shape : cpShape; p : cpVect ) : cpBool; cdecl; external;
+  function cpCircleShapeAlloc : cpCircleShape; cdecl; external;
+  function cpCircleShapeInit( circle : PcpCircleShape; body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpCircleShape; cdecl; external;
+  function cpCircleShapeNew( body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpShape; cdecl; external;
+  function cpSegmentShapeAlloc : PcpSegmentShape; cdecl; external;
+  function cpSegmentShapeInit( seg : PcpSegmentShape; body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpSegmentShape; cdecl; external;
+  function cpSegmentShapeNew( body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpShape; cdecl; external;
+  procedure cpResetShapeIdCounter; cdecl; external;
+  function cpShapeSegmentQuery( shape : PcpShape; a : cpVect; b : cpVect; info : PcpSegmentQueryInfo ) : cpBool; cdecl; external;
+  function cpPolyShapeAlloc : PcpPolyShape; cdecl; external;
+  function cpPolyShapeInit ( poly : PcpPolyShape; body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpPolyShape; cdecl; external;
+  function cpPolyShapeNew( body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpShape; cdecl; external;
+  function cpBoxShapeInit( poly : cpPolyShape; body : cpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl; external;
+  function cpBoxShapeNew( body : PcpBody; width : cpFloat; height : cpFloat ) : PcpShape; cdecl; external;
+  function cpPolyValidate( verts : PcpVect; numVerts : Integer ) : cpBool; cdecl; external;
+  function cpPolyShapeGetNumVerts( shape : PcpShape ) : Integer; cdecl; external;
+  function cpPolyShapeGetVert( shape : PcpShape; idx : Integer ) : cpVect; cdecl; external;
+  function cpBodyAlloc : PcpBody; cdecl; external;
+  function cpBodyInit( body : PcpBody; m : cpFloat; i : cpFloat ) : PcpBody; cdecl; external;
+  function cpBodyNew( m : cpFloat; i : cpFloat ) : PcpBody; cdecl; external;
+  procedure cpBodyDestroy( body : PcpBody ); cdecl; external;
+  procedure cpBodyFree( body : PcpBody ); cdecl; external;
+  procedure cpBodyActivate( body : PcpBody ); cdecl; external;
+  procedure cpBodySleep( body : PcpBody ); cdecl; external;
+  procedure cpBodySetMass( body : PcpBody; m : cpFloat ); cdecl; external;
+  procedure cpBodySetMoment( body : PcpBody; i : cpFloat ); cdecl; external;
+  procedure cpBodySetAngle( body : PcpBody; a : cpFloat ); cdecl; external;
+  procedure cpBodySlew( body : PcpBody; pos : cpVect; dt : cpFloat ); cdecl; external;
+  procedure cpBodyUpdateVelocity( body : PcpBody; gravity : cpVect; damping : cpFloat; dt : cpFloat ); cdecl; external;
+  procedure cpBodyUpdatePosition( body : PcpBody; dt : cpFloat ); cdecl; external;
+  procedure cpBodyResetForces( body : PcpBody ); cdecl; external;
+  procedure cpBodyApplyForce( body : PcpBody; f : cpVect; r : cpVect ); cdecl; external;
+  procedure cpApplyDampedSpring( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; rlen : cpFloat; k : cpFloat; dmp : cpFloat; dt : cpFloat ); cdecl; external;
+  procedure cpConstraintDestroy( constraint : PcpConstraint ); cdecl; external;
+  procedure cpConstraintFree( constraint : PcpConstraint ); cdecl; external;
+  function cpPinJointAlloc : PcpPinJoint; cdecl; external;
+  function cpPinJointInit( joint : PcpPinJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : cpPinJoint; cdecl; external;
+  function cpPinJointNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl; external;
+  function cpSlideJointAlloc : PcpSlideJoint; cdecl; external;
+  function cpSlideJointInit( joint : PcpSlideJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpSlideJoint; cdecl; external;
+  function cpSlideJointNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpPivotJointAlloc : PcpPivotJoint; cdecl; external;
+  function cpPivotJointInit( joint : PcpPivotJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpPivotJoint; cdecl; external;
+  function cpPivotJointNew( a : PcpBody; b : PcpBody; pivot : cpVect ) : PcpConstraint; cdecl; external;
+  function cpPivotJointNew2( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl; external;
+  function cpGrooveJointAlloc : PcpGrooveJoint; cdecl; external;
+  function cpGrooveJointInit( joint : PcpGrooveJoint; a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpGrooveJoint; cdecl; external;
+  function cpGrooveJointNew( a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl; external;
+  procedure cpGrooveJointSetGrooveA( constraint : PcpConstraint; value : cpVect ); cdecl; external;
+  procedure cpGrooveJointSetGrooveB( constraint : PcpConstraint; value : cpVect ); cdecl; external;
+  function cpDampedSpringAlloc : PcpDampedSpring; cdecl; external;
+  function cpDampedSpringInit( joint : cpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl; external;
+  function cpDampedSpringNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpDampedRotarySpringAlloc : PcpDampedRotarySpring; cdecl; external;
+  function cpDampedRotarySpringInit( joint : PcpDampedRotarySpring; a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedRotarySpring; cdecl; external;
+  function cpDampedRotarySpringNew( a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpRotaryLimitJointAlloc : PcpRotaryLimitJoint; cdecl; external;
+  function cpRotaryLimitJointInit( joint : PcpRotaryLimitJoint; a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpRotaryLimitJoint; cdecl; external;
+  function cpRotaryLimitJointNew( a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpRatchetJointAlloc : PcpRatchetJoint; cdecl; external;
+  function cpRatchetJointInit( joint : PcpRatchetJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpRatchetJoint; cdecl; external;
+  function cpRatchetJointNew( a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpGearJointAlloc : PcpGearJoint; cdecl; external;
+  function cpGearJointInit( joint : PcpGearJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpGearJoint; cdecl; external;
+  function cpGearJointNew( a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpSimpleMotorAlloc : PcpSimpleMotor; cdecl; external;
+  function cpSimpleMotorInit( joint : PcpSimpleMotor; a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpSimpleMotor; cdecl; external;
+  function cpSimpleMotorNew( a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpConstraint; cdecl; external;
+  function cpSpaceAlloc : PcpSpace; cdecl; external;
+  function cpSpaceInit( space : PcpSpace ) : PcpSpace; cdecl; external;
+  function cpSpaceNew : PcpSpace; cdecl; external;
+  procedure cpSpaceDestroy( space : cpSpace ); cdecl; external;
+  procedure cpSpaceFree( space : PcpSpace ); cdecl; external;
+  procedure cpSpaceFreeChildren( space : PcpSpace ); cdecl; external;
+  procedure cpSpaceSetDefaultCollisionHandler( space : PcpSpace; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc; separate : cpCollisionSeparateFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceAddCollisionHandler( space : PcpSpace; a : cpCollisionType; b : cpCollisionType; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc;  separate : cpCollisionSeparateFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceRemoveCollisionHandler( space : PcpSpace; a : cpCollisionType; b : cpCollisionType ); cdecl; external;
+  function cpSpaceAddShape( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl; external;
+  function cpSpaceAddStaticShape( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl; external;
+  function cpSpaceAddBody( space : PcpSpace; body : PcpBody ) : PcpBody; cdecl; external;
+  function cpSpaceAddConstraint( space : PcpSpace; constraint : PcpConstraint ) : PcpConstraint; cdecl; external;
+  procedure cpSpaceRemoveShape( space : PcpSpace; shape : PcpShape ); cdecl; external;
+  procedure cpSpaceRemoveStaticShape( space : PcpSpace; shape : PcpShape ); cdecl; external;
+  procedure cpSpaceRemoveBody( space : PcpSpace; body : PcpBody ); cdecl; external;
+  procedure cpSpaceRemoveConstraint( space : PcpSpace; constraint : PcpConstraint );  cdecl; external;
+  procedure cpSpaceAddPostStepCallback( space : PcpSpace; func : cpPostStepFunc; obj : Pointer; data : Pointer ); cdecl; external;
+  procedure cpSpacePointQuery( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup; func : cpSpacePointQueryFunc; data : Pointer ); cdecl; external;
+  function cpSpacePointQueryFirst( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup ) : PcpShape; cdecl; external;
+  procedure cpSpaceSegmentQuery( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; func : cpSpaceSegmentQueryFunc; data : Pointer ); cdecl; external;
+  function cpSpaceSegmentQueryFirst( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; out info : cpSegmentQueryInfo ) : PcpShape; cdecl; external;
+  procedure cpSpaceBBQuery( space : PcpSpace; bb : cpBB; layers : cpLayers; group : cpGroup; func : cpSpaceBBQueryFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceEachBody( space : PcpSpace; func : cpSpaceBodyIterator; data : Pointer ); cdecl; external;
+  procedure cpSpaceResizeStaticHash( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl; external;
+  procedure cpSpaceResizeActiveHash( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl; external;
+  procedure cpSpaceRehashStatic( space : PcpSpace ); cdecl; external;
+  procedure cpSpaceRehashShape( space : PcpSpace; shape : PcpShape ); cdecl; external;
+  procedure cpSpaceStep( space : PcpSpace; dt : cpFloat ); cdecl; external;
+  procedure cpHashSetDestroy( _set : PcpHashSet ); cdecl; external;
+  procedure cpHashSetFree( _set : PcpHashSet ); cdecl; external;
+  function cpHashSetAlloc : PcpHashSet; cdecl; external;
+  function cpHashSetInit( _set : PcpHashSet; size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl; external;
+  function cpHashSetNew( size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl; external;
+  function cpHashSetInsert( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer; data : Pointer ) : Pointer; cdecl; external;
+  function cpHashSetRemove( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer ) : Pointer; cdecl; external;
+  function cpHashSetFind( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer ) : Pointer; cdecl; external;
+  procedure cpHashSetEach( _set : PcpHashSet; func : cpHashSetIterFunc; data : Pointer ); cdecl; external;
+  procedure cpHashSetFilter( _set : PcpHashSet; func : cpHashSetIterFunc; data : Pointer ); cdecl; external;
+  function cpSpaceHashAlloc : PcpSpaceHash; cdecl; external;
+  function cpSpaceHashInit( hash : PcpSpaceHash; clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl; external;
+  function cpSpaceHashNew( clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl; external;
+  procedure cpSpaceHashDestroy( hash : PcpSpaceHash ); cdecl; external;
+  procedure cpSpaceHashFree( hash : PcpSpaceHash ); cdecl; external;
+  procedure cpSpaceHashResize( hash : PcpSpaceHash; celldim : cpFloat; numcells : Integer ); cdecl; external;
+  procedure cpSpaceHashInsert( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue; _deprecated_ignored : cpBB ); cdecl; external;
+  procedure cpSpaceHashRemove( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl; external;
+  procedure cpSpaceHashEach( hash : PcpSpaceHash; func : cpSpaceHashIterator; data : Pointer ); cdecl; external;
+  procedure cpSpaceHashRehash( hash : PcpSpaceHash ); cdecl; external;
+  procedure cpSpaceHashRehashObject( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl; external;
+  procedure cpSpaceHashPointQuery( hash : PcpSpaceHash; point : cpVect; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceHashQuery( hash : PcpSpaceHash; obj : Pointer; bb : cpBB; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceHashQueryInsert( hash : PcpSpaceHash; obj : Pointer; bb : cpBB; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceHashQueryRehash( hash : PcpSpaceHash; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
+  procedure cpSpaceHashSegmentQuery( hash : PcpSpaceHash; obj : Pointer; a : cpVect; b : cpVect; t_exit : cpFloat; func : cpSpaceHashSegmentQueryFunc; data : Pointer ); cdecl; external;
+  function cpCollideShapes( a : PcpShape; b : PcpShape; arr : PcpContact ) : Integer; cdecl; external;
+{$ENDIF}
 
 //
 function cpfmin( a, b : cpFloat ) : cpFloat;
@@ -1598,6 +1769,7 @@ begin
     cpArrayEach( space.arbiters, cpDrawCollision, @cpColorCollision );
 end;
 
+{$IFNDEF CHIPMUNK_STATIC}
 function cpLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
   Result := FALSE;
@@ -1669,7 +1841,6 @@ begin
       cpSegmentShapeNew := dlsym( cpLib, 'cpSegmentShapeNew' );
 
       cpResetShapeIdCounter := dlsym( cpLib, 'cpResetShapeIdCounter' );
-      cpSegmentQueryInfoPrint := dlsym( cpLib, 'cpSegmentQueryInfoPrint' );
       cpShapeSegmentQuery := dlsym( cpLib, 'cpShapeSegmentQuery' );
 
       cpPolyShapeAlloc := dlsym( cpLib, 'cpPolyShapeAlloc' );
@@ -1812,5 +1983,6 @@ procedure cpFree;
 begin
   dlclose( cpLib );
 end;
+{$ENDIF}
 
 end.
