@@ -132,18 +132,7 @@ begin
 end;
 
 procedure app_Init;
-  {$IFDEF WINDOWS}
-  var
-    sysInfo : _SYSTEM_INFO;
-  {$ENDIF}
 begin
-  {$IFDEF WINDOWS}
-  // Багнутое MS-поделко требует патча :)
-  // Вешаем все на одно ядро
-  GetSystemInfo( sysInfo );
-  SetProcessAffinityMask( GetCurrentProcess(), sysInfo.dwActiveProcessorMask );
-  {$ENDIF}
-
   scr_Clear();
   app_PLoad();
   scr_Flush();
