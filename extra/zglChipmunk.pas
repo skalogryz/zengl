@@ -90,7 +90,7 @@ const
 {$ENDIF}
 
 {$IFNDEF CHIPMUNK_STATIC}
-function  cpLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+function  cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure cpFree;
 {$ENDIF}
 
@@ -1781,7 +1781,7 @@ begin
 end;
 
 {$IFNDEF CHIPMUNK_STATIC}
-function cpLoad( const LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+function cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
   Result := FALSE;
   {$IFDEF DARWIN}
