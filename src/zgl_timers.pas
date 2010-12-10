@@ -157,6 +157,7 @@ function timer_GetTicks : Double;
   {$IFDEF WINDOWS}
   var
     t : int64;
+    m : LongWord;
   {$ENDIF}
   {$IFDEF DARWIN}
   var
@@ -171,8 +172,10 @@ begin
   {$Q+}
 {$ENDIF}
 {$IFDEF WINDOWS}
+  m := SetThreadAffinityMask( GetCurrentThread(), 1 );
   QueryPerformanceCounter( t );
   Result := 1000 * T * t_freq - t_start;
+  SetThreadAffinityMask( GetCurrentThread(), m );
 {$ENDIF}
 {$IFDEF DARWIN}
   Microseconds( t );
