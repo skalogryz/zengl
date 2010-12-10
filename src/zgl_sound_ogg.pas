@@ -42,9 +42,30 @@ unit zgl_sound_ogg;
       {$ENDIF}
     {$ENDIF}
     {$IFDEF WINDOWS}
-      {$LINKLIB libogg_win32/libogg.a}
-      {$LINKLIB libogg_win32/libvorbis.a}
-      {$LINKLIB libogg_win32/libvorbisfile.a}
+      {$L libogg_win32/bitwise}
+      {$L libogg_win32/framing}
+      {$L libogg_win32/analysis}
+      {$L libogg_win32/bitrate}
+      {$L libogg_win32/block}
+      {$L libogg_win32/codebook}
+      {$L libogg_win32/envelope}
+      {$L libogg_win32/floor0}
+      {$L libogg_win32/floor1}
+      {$L libogg_win32/info}
+      {$L libogg_win32/lookup}
+      {$L libogg_win32/lpc}
+      {$L libogg_win32/lsp}
+      {$L libogg_win32/mapping0}
+      {$L libogg_win32/mdct}
+      {$L libogg_win32/psy}
+      {$L libogg_win32/registry}
+      {$L libogg_win32/res0}
+      {$L libogg_win32/sharedbook}
+      {$L libogg_win32/smallft}
+      {$L libogg_win32/synthesis}
+      {$L libogg_win32/vorbisfile}
+      {$L libogg_win32/window}
+      {$LINKLIB libogg_win32/libgcc.a}
       {$LINKLIB libogg_win32/libmsvcrt.a}
     {$ENDIF}
     {$IFDEF DARWIN}
