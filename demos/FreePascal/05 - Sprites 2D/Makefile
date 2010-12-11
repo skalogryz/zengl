@@ -1,7 +1,7 @@
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers/ -Fu../../../src/ -Fu../../../extra/ -Fu../../../lib/ -Fu../../../lib/PasJPEG
+INCLUDE = -Fu../../../headers/ -Fu../../../extra/ -Fu../../../src/ -Fu../../../lib/ -Fu../../../lib/PasJPEG
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo05.pas

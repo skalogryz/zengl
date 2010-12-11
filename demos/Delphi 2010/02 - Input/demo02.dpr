@@ -24,7 +24,7 @@ uses
   ;
 
 var
-  dirRes     : String = '../../res/';
+  dirRes     : String = 'data/';
   fullScreen : Boolean;
   fnt        : zglPFont;
   something  : String;

@@ -24,14 +24,12 @@ uses
   zgl_sound_wav,    // RU: Включает поддержку wav.
                     // EN: Enabling support of wav.
   zgl_sound_ogg,    // RU: Включает поддержку ogg.
-                    // Для декодирования ogg-файлов понадобятся libogg.dll, libvorbis.dll и libvorbisfile.dll.
-                    // Но можно обойтись и статической сборкой. Все нужные файлы можно найти тут:
-                    // http://andru-kun.inf.ua/zengl_extra.html
+                    // Для декодирования ogg-файлов понадобятся библиотеки libogg, libvorbis и libvorbisfile.
+                    // Но можно обойтись и статической сборкой(доступно только в FreePascal).
                     //
                     // EN: Enabling support of ogg.
                     // For decoding ogg-files will be needed libogg.dll, libvorbis.dll and libvorbisfile.dll.
-                    // Or not, if static linking will be used. All needed files can be found here:
-                    // http://andru-kun.inf.ua/zengl_extra.html
+                    // Or not, if static linking will be used(available only with FreePascal).
   zgl_math_2d,
   zgl_collision_2d,
   zgl_utils
@@ -43,7 +41,7 @@ const
   SCREEN_HEIGHT = 600;
 
 var
-  dirRes : String = '../../res/';
+  dirRes : String = 'data/';
   fnt    : zglPFont;
   icon   : array[ 0..1 ] of zglPTexture;
   sound  : zglPSound;
