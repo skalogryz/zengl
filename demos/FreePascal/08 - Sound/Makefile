@@ -1,8 +1,8 @@
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers/ -Fu../../../src/ -Fu../../../lib/ -Fu../../../lib/PasJPEG
-OUTPUT  = ../bin/
+INCLUDE = -Fu../../../headers/ -Fu../../../src/ -Fu../../../extra/ -Fu../../../lib/ -Fu../../../lib/PasJPEG
+OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo08.pas
 TARGET  = demo08
@@ -15,7 +15,7 @@ all: clean
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
+	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
 	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -WG

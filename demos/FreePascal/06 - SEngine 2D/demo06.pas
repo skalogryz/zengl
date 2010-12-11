@@ -34,7 +34,7 @@ uses
   ;
 
 var
-  dirRes    : String = '../../res/';
+  dirRes    : String = 'data/';
   fntMain   : zglPFont;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
