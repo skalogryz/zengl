@@ -110,9 +110,12 @@ const
   libvorbisfile3 = 'libvorbisfile.so.3';
 {$ENDIF}
 {$IFDEF WINDOWS}
-  libogg        = 'libogg.dll';
-  libvorbis     = 'libvorbis.dll';
-  libvorbisfile = 'libvorbisfile.dll';
+  libogg         = 'libogg.dll';
+  libvorbis      = 'libvorbis.dll';
+  libvorbisfile  = 'libvorbisfile.dll';
+  libogg0        = 'libogg-0.dll';
+  libvorbis0     = 'libvorbis-0.dll';
+  libvorbisfile3 = 'libvorbisfile-3.dll';
 {$ENDIF}
 {$IFDEF DARWIN}
   libogg        = 'libogg.0.5.3.dylib';
@@ -402,6 +405,14 @@ begin
       ogg_Library        := dlopen( libogg0, $001 );
       vorbis_Library     := dlopen( libvorbis0, $001 );
       vorbisfile_Library := dlopen( libvorbisfile3, $001 );
+    end;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  if ( ogg_Library = LIB_ERROR ) and ( vorbis_Library = LIB_ERROR ) and ( vorbisfile_Library = LIB_ERROR ) Then
+    begin
+      ogg_Library        := dlopen( libogg0 );
+      vorbis_Library     := dlopen( libvorbis0 );
+      vorbisfile_Library := dlopen( libvorbisfile3 );
     end;
   {$ENDIF}
   {$IFDEF DARWIN}
