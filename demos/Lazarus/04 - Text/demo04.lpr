@@ -26,7 +26,7 @@ uses
   ;
 
 var
-  dirRes : String = 'data/';
+  dirRes : String = '../data/';
   fnt    : zglPFont;
 
 procedure Init;

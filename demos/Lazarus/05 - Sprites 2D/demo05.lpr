@@ -35,7 +35,7 @@ type
 end;
 
 var
-  dirRes      : String = 'data/';
+  dirRes      : String = '../data/';
   fntMain     : zglPFont;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;

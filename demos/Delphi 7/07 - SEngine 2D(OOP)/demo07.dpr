@@ -45,7 +45,7 @@ type
   end;
 
 var
-  dirRes    : String = 'data/';
+  dirRes    : String = '../data/';
   fntMain   : zglPFont;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
@@ -135,10 +135,6 @@ procedure Init;
   var
     i : Integer;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png', $FF000000, TEX_DEFAULT_2D );
 
   texMiku := tex_LoadFromFile( dirRes + 'miku.png', $FF000000, TEX_DEFAULT_2D );

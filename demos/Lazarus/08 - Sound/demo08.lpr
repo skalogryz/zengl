@@ -41,7 +41,7 @@ const
   SCREEN_HEIGHT = 600;
 
 var
-  dirRes : String = 'data/';
+  dirRes : String = '../data/';
   fnt    : zglPFont;
   icon   : array[ 0..1 ] of zglPTexture;
   sound  : zglPSound;

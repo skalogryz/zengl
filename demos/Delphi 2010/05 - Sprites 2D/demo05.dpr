@@ -35,7 +35,7 @@ type
 end;
 
 var
-  dirRes      : String = 'data/';
+  dirRes      : String = '../data/';
   fntMain     : zglPFont;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
@@ -50,10 +50,6 @@ procedure Init;
   var
     i : Integer;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует для масштаба установить 1.
   // EN: Zoom must be set to 1, because camera structure is zero-filled by default.
   camMain.Zoom.X := 1;

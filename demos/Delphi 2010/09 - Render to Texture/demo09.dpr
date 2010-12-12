@@ -26,17 +26,13 @@ uses
   ;
 
 var
-  dirRes  : String = 'data/';
+  dirRes  : String = '../data/';
   fntMain : zglPFont;
   texTux  : zglPTexture;
   rtarget : zglPRenderTarget;
 
 procedure Init;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   texTux := tex_LoadFromFile( dirRes + 'tux_stand.png', $FF000000, TEX_DEFAULT_2D );
   tex_SetFrameSize( textux, 64, 64 );
 
