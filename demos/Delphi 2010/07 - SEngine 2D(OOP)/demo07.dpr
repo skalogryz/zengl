@@ -1,5 +1,5 @@
 // RU: Этот пример аналогичен предыдущему, за исключением того, что использует
-// спрайтовый менеджер на основе классов из директории extra(модуль zglSpriteEngine.pas)
+// спрайтовый менеджер на основе классов из каталога extra(модуль zglSpriteEngine.pas)
 //
 // EN: This example is equal to previous one, but this example use object oriented
 // sprite engine from directory "extra"(unit zglSpriteEngine.pas)
@@ -9,7 +9,7 @@ program demo07;
 {$DEFINE STATIC}
 
 uses
-  zglSpriteEngine, // RU: Этот модуль лежит в директории extra. В нем так же есть дефайн STATIC необходимый для смены режима сборки.
+  zglSpriteEngine, // RU: Этот модуль лежит в каталоге extra. В нем так же есть дефайн STATIC необходимый для смены режима сборки.
                    // EN: This unit can be found in "extra" directory. There is also define STATIC in it, that needed for changing build mode.
   {$IFNDEF STATIC}
   zglHeader,

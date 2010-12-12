@@ -32,7 +32,7 @@ uses
   ;
 
 var
-  dirRes      : String = 'data/';
+  dirRes      : String = '../data/';
   fntMain     : zglPFont;
   texBack     : zglPTexture;
   texParticle : zglPTexture;

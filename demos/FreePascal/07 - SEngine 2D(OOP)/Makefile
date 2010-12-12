@@ -1,3 +1,11 @@
+# Get current platform
+ifeq ($(shell uname -m), x86_64)
+  ARCH  = x86_64
+else
+  ARCH  = i386
+endif
+
+# Variables
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
@@ -10,15 +18,16 @@ TARGETW = demo07.exe
 TARGETM = demo07
 BUNDLE  = $(OUTPUT)$(TARGETM).app
 
+# Targets
 all: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
-	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
+	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)$(ARCH)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
+	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
+	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -WG
+	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -WG
 
 macos: clean
 	rm -Rf $(BUNDLE)

@@ -70,7 +70,7 @@ Begin
     {$IFDEF LINUX}
     // RU: ¬ Linux все библиотеки прин€то хранить в /usr/lib, поэтому libZenGL.so должна
     // быть предварительно установлена. ≈сли же нужно грузить библиотеку из
-    // директории с исполн€емым файлом то следует вписать './libZenGL.so'
+    // каталога с исполн€емым файлом, то следует вписать './libZenGL.so'
     //
     // EN: Under GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be
     // installed before it will be used. If you want to load library from directory with
@@ -81,9 +81,9 @@ Begin
     zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF DARWIN}
-    // RU: libZenGL.dylib следует предварительно поместить в директорию
+    // RU: libZenGL.dylib следует предварительно поместить в каталог
     // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложени€.
-    // “акже следует упом€нуть, что лог-файл будет создаватьс€ в корневой директории,
+    // “акже следует упом€нуть, что лог-файл будет создаватьс€ в корневом каталоге,
     // поэтому либо отключайте его, либо указывайте свой путь и им€, как описано в справке.
     //
     // EN: libZenGL.dylib must be placed into this directory
@@ -96,7 +96,7 @@ Begin
   {$ENDIF}
 
   // RU: ƒл€ загрузки/создани€ каких-то своих настроек/профилей/etc. можно получить путь к
-  // домашеней директории пользовател€, или к исполн€емому файлу(не работает дл€ GNU/Linux).
+  // домашенему каталогу пользовател€, или к исполн€емому файлу(не работает дл€ GNU/Linux).
   //
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home
   // directory, or to executable file(not works for GNU/Linux).
