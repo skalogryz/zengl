@@ -35,11 +35,11 @@ macos: clean
 	$(FPC_MAC)386 $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
 	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
-	cp ../../res/font* $(BUNDLE)/Contents/Resources/
-	cp ../../res/zengl.png $(BUNDLE)/Contents/Resources/
-	cp ../../res/back01.jpg $(BUNDLE)/Contents/Resources/
-	cp ../../res/ground.png $(BUNDLE)/Contents/Resources/
-	cp ../../res/tux* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/zengl.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/back01.jpg $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/ground.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/tux* $(BUNDLE)/Contents/Resources/
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
 clean:

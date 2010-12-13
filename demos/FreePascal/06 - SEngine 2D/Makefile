@@ -35,9 +35,9 @@ macos: clean
 	$(FPC_MAC)386 $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
 	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
-	cp ../../res/font* $(BUNDLE)/Contents/Resources/
-	cp ../../res/zengl.png $(BUNDLE)/Contents/Resources/
-	cp ../../res/miku.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/zengl.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/miku.png $(BUNDLE)/Contents/Resources/
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
 clean:

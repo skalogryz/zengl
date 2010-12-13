@@ -35,10 +35,10 @@ macos: clean
 	$(FPC_MAC)386 $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
 	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
-	cp ../../res/font* $(BUNDLE)/Contents/Resources/
-	cp ../../res/click.wav $(BUNDLE)/Contents/Resources/
-	cp ../../res/music.ogg $(BUNDLE)/Contents/Resources/
-	cp ../../res/audio* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/click.wav $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/music.ogg $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/audio* $(BUNDLE)/Contents/Resources/
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
 clean:
