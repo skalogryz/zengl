@@ -152,6 +152,39 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
     pbufferdAttr : array[ 0..31 ] of LongWord;
     pixelFormat  : TAGLPixelFormat;
 {$ENDIF}
+  procedure FreePBuffer( var Target : zglPRenderTarget; Stage : Integer );
+  begin
+    ogl_CanPBuffer := FALSE;
+    FreeMem( Target.next.Handle );
+    FreeMem( Target.next );
+  {$IFDEF LINUX}
+    if Stage = 4 Then
+      case ogl_PBufferMode of
+        1: glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+        2: glXDestroyGLXPbufferSGIX( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+      end;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+    if Stage = 2 Then
+      wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+    if Stage = 2 Then
+      aglDestroyPixelFormat( pixelFormat );
+    if Stage = 3 Then
+      aglDestroyContext( zglPPBuffer( Target.Handle ).Context );
+  {$ENDIF}
+    Target := nil;
+  end;
+  procedure FreeFBO( var Target : zglPRenderTarget; Stage : Integer );
+  begin
+    ogl_CanFBO := FALSE;
+    FreeMem( Target.next.Handle );
+    FreeMem( Target.next );
+    if Stage = 2 Then
+      glDeleteRenderbuffersEXT( 1, @zglPFBO( Target.Handle ).RenderBuffer );
+    Target := nil;
+  end;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.next ) do
@@ -172,6 +205,46 @@ begin
       exit;
 
   case _type of
+    RT_TYPE_FBO:
+      begin
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
+        pFBO := Result.next.Handle;
+
+        glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
+        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
+        if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_FALSE Then
+          begin
+            log_Add( 'FBO: Gen FrameBuffer - Error' );
+            FreeFBO( Result, 1 );
+            Result := rtarget_Add( Surface, Flags );
+            exit;
+          end;
+
+        glGenRenderbuffersEXT( 1, @pFBO.RenderBuffer );
+        glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+        if glIsRenderBufferEXT( pFBO.RenderBuffer ) = GL_FALSE Then
+          begin
+            log_Add( 'FBO: Gen RenderBuffer - Error' );
+            FreeFBO( Result, 2 );
+            Result := rtarget_Add( Surface, Flags );
+            exit;
+          end;
+
+        glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+        if Flags and RT_USE_DEPTH > 0 Then
+          begin
+            case ogl_zDepth of
+              24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+              32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+            else
+              glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+            end;
+            glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
+          end;
+
+        glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
+        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
+      end;
     {$IFDEF LINUX}
     RT_TYPE_PBUFFER:
       begin
@@ -213,7 +286,7 @@ begin
         if not Assigned( fbconfig ) Then
           begin
             log_Add( 'PBuffer: failed to choose GLXFBConfig' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 1 );
             exit;
           end else
             pPBuffer.Handle := PInteger( fbconfig )^;
@@ -246,7 +319,7 @@ begin
         if pPBuffer.PBuffer = 0 Then
           begin
             log_Add( 'PBuffer: failed to create GLXPBuffer' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 2 );
             exit;
           end;
 
@@ -254,7 +327,7 @@ begin
         if not Assigned( visualinfo ) Then
           begin
             log_Add( 'PBuffer: failed to choose Visual' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 3 );
             exit;
           end;
 
@@ -264,7 +337,7 @@ begin
         if pPBuffer.Context = nil Then
           begin
             log_Add( 'PBuffer: failed to create GLXContext' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 4 );
             exit;
           end;
 
@@ -325,14 +398,14 @@ begin
             if pPBuffer.RC = 0 Then
               begin
                 log_Add( 'PBuffer: RC create - Error' );
-                ogl_CanPBuffer := FALSE;
+                FreePBuffer( Result, 2 );
                 exit;
               end;
             wglShareLists( ogl_Context, pPBuffer.RC );
           end else
             begin
               log_Add( 'PBuffer: wglCreatePbufferARB - failed' );
-              ogl_CanPBuffer := FALSE;
+              FreePBuffer( Result, 1 );
               exit;
             end;
         wglMakeCurrent( pPBuffer.DC, pPBuffer.RC );
@@ -383,7 +456,7 @@ begin
         if not Assigned( pixelFormat ) Then
           begin
             log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 1 );
             exit;
           end;
 
@@ -391,7 +464,7 @@ begin
         if not Assigned( pPBuffer.Context ) Then
           begin
             log_Add( 'PBuffer: aglCreateContext - failed' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 2 );
             exit;
           end;
         aglDestroyPixelFormat( pixelFormat );
@@ -399,47 +472,11 @@ begin
         if aglCreatePBuffer( Surface.Width, Surface.Height, GL_TEXTURE_2D, GL_RGBA, 0, @pPBuffer.PBuffer ) = GL_FALSE Then
           begin
             log_Add( 'PBuffer: aglCreatePBuffer - failed' );
-            ogl_CanPBuffer := FALSE;
+            FreePBuffer( Result, 3 );
             exit;
           end;
       end;
     {$ENDIF}
-    RT_TYPE_FBO:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
-        pFBO := Result.next.Handle;
-
-        glGenFramebuffersEXT( 1, @pFBO.FrameBuffer );
-        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, pFBO.FrameBuffer );
-        if glIsFrameBufferEXT( pFBO.FrameBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'FBO: Gen FrameBuffer - Error' );
-            exit;
-          end;
-
-        glGenRenderbuffersEXT( 1, @pFBO.RenderBuffer );
-        glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
-        if glIsRenderBufferEXT( pFBO.RenderBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'FBO: Gen RenderBuffer - Error' );
-            exit;
-          end;
-
-        glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        if Flags and RT_USE_DEPTH > 0 Then
-          begin
-            case ogl_zDepth of
-              24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-              32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            else
-              glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            end;
-            glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, pFBO.RenderBuffer );
-          end;
-
-        glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, 0, 0 );
-        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
-      end;
   end;
   Result.next._type   := _type;
   Result.next.Surface := Surface;
@@ -494,8 +531,8 @@ begin
     Target.next.prev := Target.prev;
 
   if Assigned( Target.Handle ) Then
-    FreeMemory( Target.Handle );
-  FreeMemory( Target );
+    FreeMem( Target.Handle );
+  FreeMem( Target );
   Target := nil;
 
   DEC( managerRTarget.Count );
