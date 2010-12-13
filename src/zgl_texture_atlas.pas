@@ -310,7 +310,7 @@ begin
   Result.FramesY := tex.FramesY;
   atals_InsertDataToNode( Result, pData, tex.Width, tex.Width, tex.Height );
 
-  FreeMemory( pData );
+  FreeMem( pData );
 end;
 
 function atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
@@ -351,7 +351,7 @@ begin
   Result.FramesY := tex.FramesY;
   atals_InsertDataToNode( Result, pData, tex.Width, tex.Width, tex.Height );
 
-  FreeMemory( pData );
+  FreeMem( pData );
 end;
 
 procedure atals_InsertDataToNode( var Node : zglPAtlasNode; pData : Pointer; RowLength, Width, Height : Word );

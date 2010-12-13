@@ -112,7 +112,7 @@ begin
     Timer.prev.next := Timer.next;
   if Assigned( Timer.next ) Then
     Timer.next.prev := Timer.prev;
-  FreeMemory( Timer );
+  FreeMem( Timer );
   Timer := nil;
 
   DEC( managerTimer.Count );

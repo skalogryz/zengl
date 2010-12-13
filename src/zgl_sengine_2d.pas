@@ -119,7 +119,7 @@ begin
   if Assigned( sengine2d.List[ ID ].OnFree ) Then
     sengine2d.List[ ID ].OnFree( sengine2d.List[ ID ] );
 
-  FreeMemory( sengine2d.List[ ID ] );
+  FreeMem( sengine2d.List[ ID ] );
   sengine2d.List[ ID ] := nil;
   for i := ID to sengine2d.Count - 2 do
     begin
@@ -140,7 +140,7 @@ begin
       s := sengine2d.List[ i ];
       if Assigned( s.OnFree ) Then
         sengine2d.List[ i ].OnFree( s );
-      FreeMemory( s );
+      FreeMem( s );
     end;
   SetLength( sengine2d.List, 0 );
   sengine2d.Count := 0;

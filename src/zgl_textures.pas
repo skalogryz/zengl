@@ -153,7 +153,7 @@ begin
   if Assigned( Texture.next ) Then
     Texture.next.prev := Texture.prev;
   SetLength( Texture.FramesCoord, 0 );
-  FreeMemory( Texture );
+  FreeMem( Texture );
   Texture := nil;
 
   DEC( managerTexture.Count.Items );
@@ -225,7 +225,7 @@ begin
   Result.Flags   := Flags;
   tex_Create( Result^, pData );
 
-  FreeMemory( pData );
+  FreeMem( pData );
 end;
 
 function tex_LoadFromFile( const FileName : String; TransparentColor, Flags : LongWord ) : zglPTexture;
@@ -275,7 +275,7 @@ begin
 
   log_Add( 'Texture loaded: "' + FileName + '"' );
 
-  FreeMemory( pData );
+  FreeMem( pData );
 end;
 
 function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPTexture;
@@ -313,7 +313,7 @@ begin
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
-  FreeMemory( pData );
+  FreeMem( pData );
 end;
 
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );

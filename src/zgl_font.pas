@@ -129,13 +129,13 @@ begin
 
   for i := 0 to 65535 do
     if Assigned( Font.CharDesc[ i ] ) Then
-      FreeMemory( Font.CharDesc[ i ] );
+      FreeMem( Font.CharDesc[ i ] );
   if Assigned( Font.prev ) Then
     Font.prev.next := Font.next;
   if Assigned( Font.next ) Then
     Font.next.prev := Font.prev;
   SetLength( Font.Pages, 0 );
-  FreeMemory( Font );
+  FreeMem( Font );
   Font := nil;
 
   DEC( managerFont.Count );
