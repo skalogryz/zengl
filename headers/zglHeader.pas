@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2010.12.04          }
+{ date:     2010.12.13          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -13,7 +13,7 @@
 {                               }
 { mail: dr.andru@gmail.com      }
 { JID:  dr.andru@googlemail.com }
-{ ICQ:  496-929-849             }
+{ ICQ:  496929849               }
 { www:  http://andru-kun.inf.ua }
 {                               }
 {-------------------------------}
@@ -757,10 +757,10 @@ var
   ssprite2d_Draw : procedure( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   asprite2d_Draw : procedure( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   csprite2d_Draw : procedure( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-  tiles2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; const Tiles : zglTTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-  sgrid2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-  agrid2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; Frame : Integer; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-  cgrid2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; const Grid : zglTGrid2D; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+  tiles2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+  sgrid2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; Grid : zglPGrid2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+  agrid2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; Grid : zglPGrid2D; Frame : Integer; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+  cgrid2d_Draw   : procedure( Texture : zglPTexture; X, Y : Single; Grid : zglPGrid2D; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 
 // Particles
 const

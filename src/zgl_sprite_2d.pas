@@ -46,7 +46,7 @@ procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTP
 procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; const Tiles : zglTTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 
 implementation
 uses
@@ -833,12 +833,12 @@ begin
     end;
 end;
 
-procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; const Tiles : zglTTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     w, h, tX, tY, tU, tV, u, v   : Single;
     i, j, aI, aJ, bI, bJ, tI, tJ : Integer;
 begin
-  if not Assigned( Texture ) Then exit;
+  if ( not Assigned( Texture ) ) or ( not Assigned( Tiles ) ) Then exit;
 
   i  := Round( Tiles.Size.W );
   j  := Round( Tiles.Size.H );
