@@ -33,7 +33,7 @@ var
 
 procedure Init;
 begin
-  texTux := tex_LoadFromFile( dirRes + 'tux_stand.png', $FF000000, TEX_DEFAULT_2D );
+  texTux := tex_LoadFromFile( dirRes + 'tux_stand.png' );
   tex_SetFrameSize( textux, 64, 64 );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
@@ -47,7 +47,7 @@ begin
   // rtarget.Surface to another zglPTexture, the only requirement - the same size of textures, that was
   // set in tex_CreateZero. Also target use flag RT_FULL_SCREEN that responsible for rendering whole
   // content of screen to target, not only region 512x512(like with flag RT_DEFAULT).
-  rtarget := rtarget_Add( tex_CreateZero( 512, 512, $00000000, TEX_DEFAULT_2D ), RT_FULL_SCREEN );
+  rtarget := rtarget_Add( tex_CreateZero( 512, 512 ), RT_FULL_SCREEN );
 end;
 
 procedure Draw;

@@ -123,9 +123,9 @@ procedure Init;
   var
     i : Integer;
 begin
-  texLogo := tex_LoadFromFile( dirRes + 'zengl.png', $FF000000, TEX_DEFAULT_2D );
+  texLogo := tex_LoadFromFile( dirRes + 'zengl.png' );
 
-  texMiku := tex_LoadFromFile( dirRes + 'miku.png', $FF000000, TEX_DEFAULT_2D );
+  texMiku := tex_LoadFromFile( dirRes + 'miku.png' );
   tex_SetFrameSize( texMiku, 128, 128 );
 
   // RU: Устанавливаем текущим менеджером спрайтов свой.

@@ -8,12 +8,11 @@
         <Filename Value="demo05.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="demo05"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="0" Y="0"/>
-        <UsageCount Value="20"/>
+        <TopLine Value="10"/>
+        <CursorPos X="15" Y="20"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
@@ -22,4 +21,12 @@
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Source Value="../../../src/zgl_textures_jpg.pas"/>
+        <Line Value="337"/>
+      </Item1>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

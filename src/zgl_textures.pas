@@ -90,9 +90,9 @@ function  tex_Add : zglPTexture;
 procedure tex_Del( var Texture : zglPTexture );
 
 procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
-function  tex_CreateZero( Width, Height : Word; Color, Flags : LongWord ) : zglPTexture;
-function  tex_LoadFromFile( const FileName : String; TransparentColor, Flags : LongWord ) : zglPTexture;
-function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPTexture;
+function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 function  tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture ) : zglPTexture;
 procedure tex_CalcTexCoords( var Texture : zglTTexture );

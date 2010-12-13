@@ -546,9 +546,9 @@ var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
   tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
-  tex_CreateZero     : function( Width, Height : Word; Color, Flags : LongWord ) : zglPTexture;
-  tex_LoadFromFile   : function( const FileName : String; TransparentColor, Flags : LongWord ) : zglPTexture;
-  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPTexture;
+  tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+  tex_LoadFromFile   : function( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
   tex_SetMask        : function( var Texture : zglPTexture; Mask : zglPTexture ) : zglPTexture;
   tex_SetData        : procedure( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );

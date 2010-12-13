@@ -47,7 +47,7 @@ procedure Init;
   var
     i, j : Integer;
 begin
-  texBack := tex_LoadFromFile( dirRes + 'back02.png', $FF000000, TEX_DEFAULT_2D );
+  texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 

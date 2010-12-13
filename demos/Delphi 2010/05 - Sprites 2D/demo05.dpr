@@ -64,16 +64,16 @@ begin
   // TEX_DEFAULT_2D - complex of flags that needed for 2D sprites. Description can be found in help.
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png', $FF000000, TEX_DEFAULT_2D );
 
-  texBack := tex_LoadFromFile( dirRes + 'back01.jpg', $FF000000, TEX_DEFAULT_2D );
+  texBack := tex_LoadFromFile( dirRes + 'back01.jpg' );
 
-  texGround := tex_LoadFromFile( dirRes + 'ground.png', $FF000000, TEX_DEFAULT_2D );
+  texGround := tex_LoadFromFile( dirRes + 'ground.png' );
   // RU: Указываем размер кадра в текстуре.
   // EN: Set the size of single frame for texture.
   tex_SetFrameSize( texGround, 32, 32 );
 
-  texTuxWalk := tex_LoadFromFile( dirRes + 'tux_walking.png', $FF000000, TEX_DEFAULT_2D );
+  texTuxWalk := tex_LoadFromFile( dirRes + 'tux_walking.png' );
   tex_SetFrameSize( texTuxWalk, 64, 64 );
-  texTuxStand := tex_LoadFromFile( dirRes + 'tux_stand.png', $FF000000, TEX_DEFAULT_2D );
+  texTuxStand := tex_LoadFromFile( dirRes + 'tux_stand.png' );
   tex_SetFrameSize( texTuxStand, 64, 64 );
 
   for i := 0 to 9 do

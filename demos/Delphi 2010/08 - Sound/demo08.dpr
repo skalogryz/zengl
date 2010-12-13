@@ -77,8 +77,8 @@ begin
 
   // RU: Загружаем текстуры, которые будут индикаторами.
   // EN: Load the textures, that will be indicators.
-  icon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png', $FF000000, TEX_DEFAULT_2D );
-  icon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png', $FF000000, TEX_DEFAULT_2D );
+  icon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png' );
+  icon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png' );
 
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );
 end;
