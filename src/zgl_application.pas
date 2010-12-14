@@ -234,7 +234,7 @@ begin
           if ( event.xclient.message_type = wnd_Protocols ) and ( event.xclient.data.l[ 0 ] = wnd_DestroyAtom ) Then app_Work := FALSE;
 
         Expose:
-          if app_Work Then
+          if app_Work and app_AutoPause Then
             app_Draw();
         FocusIn:
           begin
