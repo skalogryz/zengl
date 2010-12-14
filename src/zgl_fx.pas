@@ -44,7 +44,7 @@ const
   FX_BLEND        = $100000;
   FX_COLOR        = $200000;
 
-procedure fx_SetBlendMode( Mode : Byte );
+procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
 procedure fx_SetColorMode( Mode : Byte );
 procedure fx_SetColorMask( R, G, B, Alpha : Boolean );
 
@@ -79,15 +79,15 @@ uses
   zgl_opengl_all,
   zgl_render_2d;
 
-procedure fx_SetBlendMode( Mode : Byte );
+procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
   var
     srcBlend : LongWord;
     dstBlend : LongWord;
 begin
-  if b2d_Started and ( Mode <> b2dcur_Blend ) Then
+  if b2d_Started and ( Mode + LongWord( SeparateAlpha ) shl 8 <> b2dcur_Blend ) Then
     batch2d_Flush();
 
-  b2dcur_Blend := Mode;
+  b2dcur_Blend := Mode + LongWord( SeparateAlpha ) shl 8;
   case Mode of
     FX_BLEND_NORMAL:
       begin
@@ -120,7 +120,7 @@ begin
         dstBlend := GL_SRC_COLOR;
       end;
   end;
-  if ogl_Separate Then
+  if SeparateAlpha and ogl_Separate Then
     glBlendFuncSeparateEXT( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
   else
     glBlendFunc( srcBlend, dstBlend );

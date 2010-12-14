@@ -661,7 +661,7 @@ const
   FX_COLOR        = $200000;
 
 var
-  fx_SetBlendMode : procedure( Mode : Byte );
+  fx_SetBlendMode : procedure( Mode : Byte; SeparateAlpha : Boolean = TRUE );
   fx_SetColorMode : procedure( Mode : Byte );
   fx_SetColorMask : procedure( R, G, B, Alpha : Boolean );
 

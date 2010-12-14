@@ -463,7 +463,7 @@ begin
     GAPI_CAN_BLEND_SEPARATE: Result := Ptr( ogl_Separate );
 
     RENDER_FPS: Result := app_FPS;
-    RENDER_BATCHES_2D: Result := b2d_Batches;
+    RENDER_BATCHES_2D: Result := b2d_Batches + 1;
 
     VIEWPORT_WIDTH: Result := ogl_Width - scr_SubCX;
     VIEWPORT_HEIGHT: Result := ogl_Height - scr_SubCY;
