@@ -32,7 +32,7 @@ var
 procedure Init;
 begin
   {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
+  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
   {$ENDIF}
 
   // RU: Загрузка шрифта и вывод текста освещен в "04 - Text".

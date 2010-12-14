@@ -50,7 +50,7 @@ procedure Init;
     i : Integer;
 begin
   {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
+  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
   {$ENDIF}
 
   // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует для масштаба установить 1.

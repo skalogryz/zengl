@@ -48,7 +48,7 @@ procedure Init;
     i, j : Integer;
 begin
   {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
+  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
   {$ENDIF}
 
   texBack := tex_LoadFromFile( dirRes + 'back02.png' );

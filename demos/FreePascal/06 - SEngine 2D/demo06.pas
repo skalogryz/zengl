@@ -123,7 +123,7 @@ procedure Init;
     i : Integer;
 begin
   {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( APP_DIRECTORY ) ) + 'Contents/Resources/';
+  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
   {$ENDIF}
 
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png' );
