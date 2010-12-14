@@ -39,14 +39,14 @@ var
   render2d_Clip    : Boolean;
   b2d_Started      : Boolean;
   b2d_New          : Boolean;
-  b2d_Batches      : Integer;
+  b2d_Batches      : LongWord;
   b2dcur_Mode      : LongWord;
   b2dcur_FX        : LongWord;
   b2dcur_Blend     : LongWord;
   b2dcur_Color     : LongWord;
   b2dcur_ColorMask : LongWord;
   b2dcur_Tex       : zglPTexture;
-  b2dcur_Smooth    : Integer;
+  b2dcur_Smooth    : LongWord;
   sprite2d_InScreen : function( X, Y, W, H, Angle : Single ) : Boolean;
 
 implementation

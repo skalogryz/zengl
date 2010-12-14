@@ -92,7 +92,7 @@ begin
 
   // RU: Выводим количество FPS в правом углу, используя text_GetWidth.
   // EN: Render frames per second in the top right corner using text_GetWidth.
-  s := 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) );
+  s := 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) );
   text_Draw( fnt, 800 - text_GetWidth( fnt, s ), 0, s );
   batch2d_End();
 end;

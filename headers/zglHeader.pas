@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2010.12.13          }
+{ date:     2010.12.14          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -112,31 +112,47 @@ var
   zgl_Reg : procedure( What : LongWord; UserData : Pointer );
 
 const
-  SYS_FPS            = 1;  // LongWord,  := zgl_Get( SYS_FPS )
-  APP_PAUSED         = 2;  // Boolean
-  APP_DIRECTORY      = 3;  // PAnsiChar
-  APP_WND_HANDLE     = 4;  // TWindow(GNU/Linux), HWND(Windows), WindowRef(MacOS X)
-  APP_OGL_CONTEXT    = 5;  // GLXContext(GNU/Linux), HGLRC(Windows), TAGLContext(MacOS X)
-  APP_D3D_DEVICE     = 5;  // For ZenGL with Direct3D render only
-  USR_HOMEDIR        = 6;  // PAnsiChar
-  LOG_FILENAME       = 7;  // PPChar, := Pointer( zgl_Get( LOG_FILENAME ) )
-  ZGL_VERSION        = 8;  // LongWord
-  ZGL_VERSION_STRING = 9;  // PAnsiChar
-  ZGL_VERSION_DATE   = 10; // PAnsiChar
-  VIEWPORT_WIDTH     = 11; // LongWord
-  VIEWPORT_HEIGHT    = 12; // LongWord
-  VIEWPORT_OFFSET_X  = 13; // LongWord
-  VIEWPORT_OFFSET_Y  = 14; // LongWord
-  DESKTOP_WIDTH      = 15; // LongWord
-  DESKTOP_HEIGHT     = 16; // LongWord
-  RESOLUTION_LIST    = 17; // PResolutionList
-  MANAGER_TIMER      = 18; // zglPTimerManager
-  MANAGER_TEXTURE    = 19; // zglPTextureManager
-  MANAGER_ATLAS      = 20; // zglPAtlasManager
-  MANAGER_FONT       = 21; // zglPFontManager
-  MANAGER_RTARGET    = 22; // zglTRenderTargetManager
-  MANAGER_SOUND      = 23; // zglPSoundManager
-  MANAGER_EMITTER2D  = 24; // zglPEmitter2DManager
+  ZENGL_VERSION           = 1; // Major shr 16, ( Minor and $FF00 ) shr 8, Revision and $FF
+  ZENGL_VERSION_STRING    = 2; // PAnsiChar
+  ZENGL_VERSION_DATE      = 3; // PAnsiChar
+
+  DIRECTORY_APPLICATION   = 101; // PAnsiChar
+  DIRECTORY_HOME          = 102; // PAnsiChar
+
+  LOG_FILENAME            = 203; // PPAnsiChar
+
+  DESKTOP_WIDTH           = 300;
+  DESKTOP_HEIGHT          = 301;
+  RESOLUTION_LIST         = 302; // zglPResolutionList
+
+  WINDOW_HANDLE           = 400; // TWindow(GNU/Linux), HWND(Windows), WindowRef(MacOS X)
+  WINDOW_X                = 401;
+  WINDOW_Y                = 402;
+  WINDOW_WIDTH            = 403;
+  WINDOW_HEIGHT           = 404;
+
+  GAPI_CONTEXT            = 500; // GLXContext(GNU/Linux), HGLRC(Windows), TAGLContext(MacOS X)
+  GAPI_DEVICE             = 500; // For ZenGL with Direct3D render only
+  GAPI_MAX_TEXTURE_SIZE   = 501;
+  GAPI_MAX_TEXTURE_UNITS  = 502;
+  GAPI_MAX_ANISOTROPY     = 503;
+  GAPI_CAN_BLEND_SEPARATE = 504; // Boolean
+
+  VIEWPORT_WIDTH          = 600;
+  VIEWPORT_HEIGHT         = 601;
+  VIEWPORT_OFFSET_X       = 602;
+  VIEWPORT_OFFSET_Y       = 603;
+
+  RENDER_FPS              = 700;
+  RENDER_BATCHES_2D       = 701;
+
+  MANAGER_TIMER           = 800; // zglPTimerManager
+  MANAGER_TEXTURE         = 801; // zglPTextureManager
+  MANAGER_ATLAS           = 802; // zglPAtlasManager
+  MANAGER_FONT            = 803; // zglPFontManager
+  MANAGER_RTARGET         = 804; // zglPRenderTargetManager
+  MANAGER_SOUND           = 805; // zglPSoundManager
+  MANAGER_EMITTER2D       = 806; // zglPEmitter2DManager
 
 var
   zgl_Get       : function( What : LongWord ) : Ptr;

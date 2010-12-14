@@ -404,7 +404,7 @@ begin
   fx_SetBlendMode( FX_BLEND_NORMAL );
   fx_SetColorMode( FX_COLOR_MIX );
 
-  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( count ) );
   text_Draw( fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr( debug ) );
   batch2d_End;

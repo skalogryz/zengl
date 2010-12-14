@@ -229,7 +229,7 @@ begin
       end;
 
   if time > 255 Then
-    text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+    text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   batch2d_End();
 end;
 

@@ -175,7 +175,7 @@ begin
   if time > 255 Then
     begin
       pr2d_Rect( 0, 0, 256, 64, $000000, 200, PR2D_FILL );
-      text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+      text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
       text_Draw( fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)' );
     end;

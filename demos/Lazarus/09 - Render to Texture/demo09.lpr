@@ -72,7 +72,7 @@ begin
   // EN: Render content of RenderTarget.
   ssprite2d_Draw( rtarget.Surface, ( 800 - 512 ) / 2, ( 600 - 512 ) / 2, 512, 512, 0 );
 
-  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) );
+  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
 end;
 
 procedure Timer;

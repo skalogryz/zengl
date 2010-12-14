@@ -81,7 +81,7 @@ var
   ogl_MaxLights     : Integer;
   ogl_MaxTexSize    : Integer;
   ogl_MaxAnisotropy : Integer;
-  ogl_MaxTexLevels  : Integer;
+  ogl_MaxTexUnits   : Integer;
   ogl_Separate      : Boolean;
 
   {$IFDEF LINUX}
@@ -467,8 +467,8 @@ begin
   // Multitexturing
   gl_TexCoord2f  := @glTexCoord2f;
   gl_TexCoord2fv := @glTexCoord2fv;
-  glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @ogl_MaxTexLevels );
-  log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( ogl_MaxTexLevels ) );
+  glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @ogl_MaxTexUnits );
+  log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( ogl_MaxTexUnits ) );
   glMultiTexCoord2fARB := gl_GetProc( 'glMultiTexCoord2f' );
   if Assigned( glMultiTexCoord2fARB ) Then
     begin

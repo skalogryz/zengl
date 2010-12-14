@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC6';
-  cs_Date     = '2010.12.04';
+  cs_Date     = '2010.12.14';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -66,30 +66,46 @@ const
   WIDGET_ONFREEDATA      = $000035;
 
   // zgl_Get
-  SYS_FPS            = 1;
-  APP_PAUSED         = 2;
-  APP_DIRECTORY      = 3;
-  APP_WND_HANDLE     = 4;
-  APP_OGL_CONTEXT    = 5;
-  USR_HOMEDIR        = 6;
-  LOG_FILENAME       = 7;
-  ZGL_VERSION        = 8;
-  ZGL_VERSION_STRING = 9;
-  ZGL_VERSION_DATE   = 10;
-  VIEWPORT_WIDTH     = 11;
-  VIEWPORT_HEIGHT    = 12;
-  VIEWPORT_OFFSET_X  = 13;
-  VIEWPORT_OFFSET_Y  = 14;
-  DESKTOP_WIDTH      = 15;
-  DESKTOP_HEIGHT     = 16;
-  RESOLUTION_LIST    = 17;
-  MANAGER_TIMER      = 18;
-  MANAGER_TEXTURE    = 19;
-  MANAGER_ATLAS      = 20;
-  MANAGER_FONT       = 21;
-  MANAGER_RTARGET    = 22;
-  MANAGER_SOUND      = 23;
-  MANAGER_EMITTER2D  = 24;
+  ZENGL_VERSION           = 1;
+  ZENGL_VERSION_STRING    = 2;
+  ZENGL_VERSION_DATE      = 3;
+
+  DIRECTORY_APPLICATION   = 101;
+  DIRECTORY_HOME          = 102;
+
+  LOG_FILENAME            = 203;
+
+  DESKTOP_WIDTH           = 300;
+  DESKTOP_HEIGHT          = 301;
+  RESOLUTION_LIST         = 302;
+
+  WINDOW_HANDLE           = 400;
+  WINDOW_X                = 401;
+  WINDOW_Y                = 402;
+  WINDOW_WIDTH            = 403;
+  WINDOW_HEIGHT           = 404;
+
+  GAPI_CONTEXT            = 500;
+  GAPI_MAX_TEXTURE_SIZE   = 501;
+  GAPI_MAX_TEXTURE_UNITS  = 502;
+  GAPI_MAX_ANISOTROPY     = 503;
+  GAPI_CAN_BLEND_SEPARATE = 504;
+
+  VIEWPORT_WIDTH          = 600;
+  VIEWPORT_HEIGHT         = 601;
+  VIEWPORT_OFFSET_X       = 602;
+  VIEWPORT_OFFSET_Y       = 603;
+
+  RENDER_FPS              = 700;
+  RENDER_BATCHES_2D       = 701;
+
+  MANAGER_TIMER           = 800;
+  MANAGER_TEXTURE         = 801;
+  MANAGER_ATLAS           = 802;
+  MANAGER_FONT            = 803;
+  MANAGER_RTARGET         = 804;
+  MANAGER_SOUND           = 805;
+  MANAGER_EMITTER2D       = 806;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR    = $000001;
@@ -144,9 +160,6 @@ uses
   {$ENDIF}
   {$IFDEF USE_PARTICLES}
   zgl_particles_2d,
-  {$ENDIF}
-  {$IFDEF USE_GUI}
-  zgl_gui_main,
   {$ENDIF}
   {$IFDEF USE_SOUND}
   zgl_sound,
@@ -399,27 +412,22 @@ end;
 
 function zgl_Get( What : LongWord ) : Ptr;
 begin
-  if ( What = APP_DIRECTORY ) or ( What = USR_HOMEDIR ) Then
+  if ( What = DIRECTORY_APPLICATION ) or ( What = DIRECTORY_HOME ) Then
     if not app_GetSysDirs Then zgl_GetSysDir();
 
   if ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) Then
     if not scr_Initialized Then scr_Init();
 
   case What of
-    SYS_FPS: Result := app_FPS;
-    APP_PAUSED: Result := Byte( app_Pause );
-    APP_DIRECTORY: Result := Ptr( PAnsiChar( app_WorkDir ) );
-    APP_WND_HANDLE: Result := Ptr( wnd_Handle );
-    APP_OGL_CONTEXT: Result := Ptr( ogl_Context );
-    USR_HOMEDIR: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
+    ZENGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
+    ZENGL_VERSION_STRING: Result := Ptr( PAnsiChar( cs_ZenGL ) );
+    ZENGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
+
+    DIRECTORY_APPLICATION: Result := Ptr( PAnsiChar( app_WorkDir ) );
+    DIRECTORY_HOME: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
+
     LOG_FILENAME: Result := Ptr( @logfile );
-    ZGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
-    ZGL_VERSION_STRING: Result := Ptr( PAnsiChar( cs_ZenGL ) );
-    ZGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
-    VIEWPORT_WIDTH: Result := ogl_Width - scr_SubCX;
-    VIEWPORT_HEIGHT: Result := ogl_Height - scr_SubCY;
-    VIEWPORT_OFFSET_X: Result := scr_AddCX;
-    VIEWPORT_OFFSET_Y: Result := scr_AddCY;
+
     DESKTOP_WIDTH:
     {$IFDEF LINUX}
       Result := PXRRScreenSize( scr_ModeList + scr_Desktop * SizeOf( PXRRScreenSize ) ).width;
@@ -441,6 +449,26 @@ begin
       Result := scr_DesktopH;
     {$ENDIF}
     RESOLUTION_LIST: Result := Ptr( @scr_ResList );
+
+    WINDOW_HANDLE: Result := Ptr( wnd_Handle );
+    WINDOW_X: Result := Ptr( wnd_X );
+    WINDOW_Y: Result := Ptr( wnd_Y );
+    WINDOW_WIDTH: Result := Ptr( wnd_Width );
+    WINDOW_HEIGHT: Result := Ptr( wnd_Height );
+
+    GAPI_CONTEXT: Result := Ptr( ogl_Context );
+    GAPI_MAX_TEXTURE_SIZE: Result := ogl_MaxTexSize;
+    GAPI_MAX_TEXTURE_UNITS: Result := ogl_MaxTexUnits;
+    GAPI_MAX_ANISOTROPY: Result := ogl_MaxAnisotropy;
+    GAPI_CAN_BLEND_SEPARATE: Result := Ptr( ogl_Separate );
+
+    RENDER_FPS: Result := app_FPS;
+    RENDER_BATCHES_2D: Result := b2d_Batches;
+
+    VIEWPORT_WIDTH: Result := ogl_Width - scr_SubCX;
+    VIEWPORT_HEIGHT: Result := ogl_Height - scr_SubCY;
+    VIEWPORT_OFFSET_X: Result := scr_AddCX;
+    VIEWPORT_OFFSET_Y: Result := scr_AddCY;
 
     // Managers
     MANAGER_TIMER:     Result := Ptr( @managerTimer );

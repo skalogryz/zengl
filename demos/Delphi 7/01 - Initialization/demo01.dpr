@@ -57,7 +57,7 @@ procedure Timer;
 begin
   // RU: Будем в заголовке показывать количество кадров в секунду.
   // EN: Caption will show the frames per second.
-  wnd_SetCaption( '01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) + ' ]' );
+  wnd_SetCaption( '01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) + ' ]' );
 end;
 
 procedure Quit;

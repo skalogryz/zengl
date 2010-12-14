@@ -80,7 +80,7 @@ end;
 
 procedure Timer;
 begin
-  wnd_SetCaption( '03 - Primitives 2D[ FPS: ' + u_IntToStr( zgl_Get( SYS_FPS ) ) + ' ]' );
+  wnd_SetCaption( '03 - Primitives 2D[ FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) + ' ]' );
 end;
 
 procedure Proc;
