@@ -9,7 +9,7 @@ endif
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers/ -Fu../../../extra/ -Fu../../../src/ -Fu../../../lib/ -Fu../../../lib/PasJPEG
+INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src -Fu../../../lib/ -Fu../../../lib/PasJPEG
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo07.pas
@@ -27,7 +27,7 @@ win32: clean
 	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -WG
+	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
 
 macos: clean
 	rm -Rf $(BUNDLE)

@@ -46,22 +46,32 @@ unit zglChipmunk;
     {$DEFINE LINUX_OR_DARWIN}
     {$IFDEF CHIPMUNK_STATIC}
       {$IFDEF cpui386}
-        {$LINKLIB libchipmunk_linux_x86/libchipmunk.a}
+        {$LINKLIB chipmunk/linux_i386/libchipmunk.a}
       {$ELSE}
-        {$LINKLIB libchipmunk_linux_x86_64/libchipmunk.a}
+        {$LINKLIB chipmunk/linux_x86_64/libchipmunk.a}
       {$ENDIF}
     {$ENDIF}
   {$ENDIF}
   {$IFDEF WINDOWS}
     {$IFDEF CHIPMUNK_STATIC}
       {$IFDEF cpui386}
-        {$LINKLIB libchipmunk_win32/chipmunk.a}
-        {$LINKLIB libchipmunk_win32/libmsvcrt.a}
+        {$LINKLIB chipmunk/win32/libchipmunk.a}
+        {$LINKLIB chipmunk/win32/libmsvcrt.a}
+      {$ELSE}
+        {$LINKLIB chipmunk/win64/libchipmunk.a}
+        {$LINKLIB chipmunk/win64/libmsvcrt.a}
       {$ENDIF}
     {$ENDIF}
   {$ENDIF}
   {$IFDEF DARWIN}
     {$DEFINE LINUX_OR_DARWIN}
+    {$IFDEF CHIPMUNK_STATIC}
+      {$IFDEF cpui386}
+        {$LINKLIB chipmunk/macos_i386/libchipmunk.a}
+      {$ELSE}
+        {$LINKLIB chipmunk/macos_ppc/libchipmunk.a}
+      {$ENDIF}
+    {$ENDIF}
   {$ENDIF}
 {$ENDIF}
 

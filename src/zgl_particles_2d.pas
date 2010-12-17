@@ -682,7 +682,6 @@ end;
 
 procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : String );
   var
-    i : Integer;
     c : LongWord;
     f : zglTFile;
     chunk : Word;

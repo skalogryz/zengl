@@ -1,7 +1,7 @@
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XdsX -CX -Sd
-INCLUDE =  -Fu../lib -Fu../lib/PasJPEG
+INCLUDE =  -Fu../lib -Fu../lib/ogg -Fu../lib/zlib -Fu../lib/PasJPEG
 OUTPUT  = ./
 DESTDIR = /usr
 TMP     = -FUtmp
@@ -20,10 +20,10 @@ macos: clean
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
 win32: clean
-	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -WG
+	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
-	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -WG
+	$(FPC) ZenGL.pas $(INCLUDE) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
 
 clean:
 	rm -f *.*~

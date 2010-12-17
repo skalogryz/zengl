@@ -22,8 +22,8 @@ unit zgl_sound_ogg;
 
 {$I zgl_config.cfg}
 
-{$IFDEF FPC}
-  {$IFDEF USE_OGG_STATIC}
+{$IFDEF USE_OGG_STATIC}
+  {$IFDEF FPC}
     {$IFDEF LINUX}
       {$IFDEF USE_OGG_FROM_SYSTEM}
         {$LINKLIB libogg.a}
@@ -31,55 +31,107 @@ unit zgl_sound_ogg;
         {$LINKLIB libvorbisfile.a}
       {$ELSE}
         {$IFDEF cpui386}
-          {$LINKLIB libogg_linux_x86/libogg.a}
-          {$LINKLIB libogg_linux_x86/libvorbis.a}
-          {$LINKLIB libogg_linux_x86/libvorbisfile.a}
+          {$LINKLIB ogg/linux_i386/libogg.a}
+          {$LINKLIB ogg/linux_i386/libvorbis.a}
+          {$LINKLIB ogg/linux_i386/libvorbisfile.a}
         {$ELSE}
-          {$LINKLIB libogg_linux_x86_64/libogg.a}
-          {$LINKLIB libogg_linux_x86_64/libvorbis.a}
-          {$LINKLIB libogg_linux_x86_64/libvorbisfile.a}
+          {$LINKLIB ogg/linux_x86_64/libogg.a}
+          {$LINKLIB ogg/linux_x86_64/libvorbis.a}
+          {$LINKLIB ogg/linux_x86_64/libvorbisfile.a}
         {$ENDIF}
       {$ENDIF}
     {$ENDIF}
     {$IFDEF WINDOWS}
-      {$L libogg_win32/bitwise}
-      {$L libogg_win32/framing}
-      {$L libogg_win32/analysis}
-      {$L libogg_win32/bitrate}
-      {$L libogg_win32/block}
-      {$L libogg_win32/codebook}
-      {$L libogg_win32/envelope}
-      {$L libogg_win32/floor0}
-      {$L libogg_win32/floor1}
-      {$L libogg_win32/info}
-      {$L libogg_win32/lookup}
-      {$L libogg_win32/lpc}
-      {$L libogg_win32/lsp}
-      {$L libogg_win32/mapping0}
-      {$L libogg_win32/mdct}
-      {$L libogg_win32/psy}
-      {$L libogg_win32/registry}
-      {$L libogg_win32/res0}
-      {$L libogg_win32/sharedbook}
-      {$L libogg_win32/smallft}
-      {$L libogg_win32/synthesis}
-      {$L libogg_win32/vorbisfile}
-      {$L libogg_win32/window}
-      {$LINKLIB libogg_win32/libgcc.a}
-      {$LINKLIB libogg_win32/libmsvcrt.a}
+      {$IFDEF cpui386}
+        {$L ogg/win32/bitwise}
+        {$L ogg/win32/framing}
+        {$L ogg/win32/analysis}
+        {$L ogg/win32/bitrate}
+        {$L ogg/win32/block}
+        {$L ogg/win32/codebook}
+        {$L ogg/win32/envelope}
+        {$L ogg/win32/floor0}
+        {$L ogg/win32/floor1}
+        {$L ogg/win32/info}
+        {$L ogg/win32/lookup}
+        {$L ogg/win32/lpc}
+        {$L ogg/win32/lsp}
+        {$L ogg/win32/mapping0}
+        {$L ogg/win32/mdct}
+        {$L ogg/win32/psy}
+        {$L ogg/win32/registry}
+        {$L ogg/win32/res0}
+        {$L ogg/win32/sharedbook}
+        {$L ogg/win32/smallft}
+        {$L ogg/win32/synthesis}
+        {$L ogg/win32/vorbisfile}
+        {$L ogg/win32/window}
+        {$LINKLIB ogg/win32/libgcc.a}
+        {$LINKLIB ogg/win32/libmsvcrt.a}
+      {$ELSE}
+        {$L ogg/win64/bitwise}
+        {$L ogg/win64/framing}
+        {$L ogg/win64/analysis}
+        {$L ogg/win64/bitrate}
+        {$L ogg/win64/block}
+        {$L ogg/win64/codebook}
+        {$L ogg/win64/envelope}
+        {$L ogg/win64/floor0}
+        {$L ogg/win64/floor1}
+        {$L ogg/win64/info}
+        {$L ogg/win64/lookup}
+        {$L ogg/win64/lpc}
+        {$L ogg/win64/lsp}
+        {$L ogg/win64/mapping0}
+        {$L ogg/win64/mdct}
+        {$L ogg/win64/psy}
+        {$L ogg/win64/registry}
+        {$L ogg/win64/res0}
+        {$L ogg/win64/sharedbook}
+        {$L ogg/win64/smallft}
+        {$L ogg/win64/synthesis}
+        {$L ogg/win64/vorbisfile}
+        {$L ogg/win64/window}
+        {$LINKLIB ogg/win64/libgcc.a}
+        {$LINKLIB ogg/win64/libmsvcrt.a}
+      {$ENDIF}
     {$ENDIF}
     {$IFDEF DARWIN}
       {$IFDEF cpui386}
-        {$L libogg_macos_i386/libogg-i386-master}
-        {$L libogg_macos_i386/libvorbis-i386-master}
-        {$L libogg_macos_i386/libvorbisfile-i386-master}
+        {$L ogg/macos_i386/libogg-i386-master}
+        {$L ogg/macos_i386/libvorbis-i386-master}
+        {$L ogg/macos_i386/libvorbisfile-i386-master}
       {$ELSE}
-        {$L libogg_macos_ppc/libogg-ppc-master}
-        {$L libogg_macos_ppc/libvorbis-ppc-master}
-        {$L libogg_macos_ppc/libvorbisfile-ppc-master}
+        {$L ogg/macos_ppc/libogg-ppc-master}
+        {$L ogg/macos_ppc/libvorbis-ppc-master}
+        {$L ogg/macos_ppc/libvorbisfile-ppc-master}
       {$ENDIF}
       {$LINKLIB libgcc.a}
     {$ENDIF}
+  {$ELSE}
+    {$L ogg/delphi/bitwise.obj}
+    {$L ogg/delphi/framing.obj}
+    {$L ogg/delphi/analysis.obj}
+    {$L ogg/delphi/bitrate.obj}
+    {$L ogg/delphi/block.obj}
+    {$L ogg/delphi/codebook.obj}
+    {$L ogg/delphi/envelope.obj}
+    {$L ogg/delphi/floor0.obj}
+    {$L ogg/delphi/floor1.obj}
+    {$L ogg/delphi/info.obj}
+    {$L ogg/delphi/lookup.obj}
+    {$L ogg/delphi/lpc.obj}
+    {$L ogg/delphi/lsp.obj}
+    {$L ogg/delphi/mapping0.obj}
+    {$L ogg/delphi/mdct.obj}
+    {$L ogg/delphi/psy.obj}
+    {$L ogg/delphi/registry.obj}
+    {$L ogg/delphi/res0.obj}
+    {$L ogg/delphi/sharedbook.obj}
+    {$L ogg/delphi/smallft.obj}
+    {$L ogg/delphi/synthesis.obj}
+    {$L ogg/delphi/vorbisfile.obj}
+    {$L ogg/delphi/window.obj}
   {$ENDIF}
 {$ENDIF}
 
@@ -128,35 +180,7 @@ const
   BIG_ENDIAN = FALSE;
 {$ENDIF}
 
-{***********************************************************************}
-{                       POSIX TYPE DEFINITIONS                          }
-{***********************************************************************}
 type
-  cint8   = shortint; pcint8   = ^cint8;
-  cuint8  = byte;     pcuint8  = ^cuint8;
-  cchar   = cint8;    pcchar   = ^cchar;
-  cschar  = cint8;    pcschar  = ^cschar;
-  cuchar  = cuint8;   pcuchar  = ^cuchar;
-  cint32  = longint;  pcint32  = ^cint32;
-  cuint32 = longword; pcuint32 = ^cuint32;
-  cint    = cint32;   pcint    = ^cint;
-  csint   = cint32;   pcsint   = ^csint;
-  cuint   = cuint32;  pcuint   = ^cuint;
-  cint64  = int64;    pcint64  = ^cint64;
-  cbool   = longbool; pcbool   = ^cbool;
-{$ifdef cpu64}
-  clong   = int64;    pclong   = ^clong;
-  cslong  = int64;    pcslong  = ^cslong;
-  culong  = qword;    pculong  = ^culong;
-{$else}
-  clong   = longint;  pclong   = ^clong;
-  cslong  = longint;  pcslong  = ^cslong;
-  culong  = cardinal; pculong  = ^culong;
-{$endif}
-  cfloat  = single;   pcfloat  = ^cfloat;
-  cdouble = double;   pcdouble = ^cdouble;
-
-  csize_t      = culong;
   ppcfloat     = ^pcfloat;
   ogg_int64_t  = cint64;
   pogg_int64_t = ^ogg_int64_t;

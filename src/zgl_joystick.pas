@@ -327,8 +327,10 @@ begin
 end;
 
 procedure joy_Close;
+  {$IFDEF LINUX}
   var
     i : Integer;
+  {$ENDIF}
 begin
   {$IFDEF LINUX}
   for i := 0 to joyCount - 1 do

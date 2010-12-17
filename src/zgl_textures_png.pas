@@ -22,15 +22,49 @@ unit zgl_textures_png;
 
 {$I zgl_config.cfg}
 
+{$IFDEF FPC}
+  {$IFDEF LINUX}
+    {$IFDEF USE_ZLIB_FROM_SYSTEM}
+      {$LINKLIB libz.a}
+    {$ELSE}
+      {$IFDEF cpui386}
+        {$LINKLIB zlib/linux_i386/libz.a}
+      {$ELSE}
+        {$LINKLIB zlib/linux_x86_64/libz.a}
+      {$ENDIF}
+    {$ENDIF}
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+    {$IFDEF cpui386}
+      {$LINKLIB zlib/win32/libz.a}
+      {$LINKLIB zlib/win32/libmsvcrt.a}
+    {$ELSE}
+      {$LINKLIB zlib/win64/libz.a}
+      {$LINKLIB zlib/win64/libmsvcrt.a}
+    {$ENDIF}
+  {$ENDIF}
+  {$IFDEF DARWIN}
+    {$IFDEF cpui386}
+      {$LINKLIB zlib/macos_i386/libz.a}
+    {$ELSE}
+      {$LINKLIB zlib/macos_ppc/libz.a}
+    {$ENDIF}
+  {$ENDIF}
+{$ELSE}
+  {$L zlib/delphi/deflate.obj}
+  {$L zlib/delphi/inflate.obj}
+  {$L zlib/delphi/inftrees.obj}
+  {$L zlib/delphi/infback.obj}
+  {$L zlib/delphi/inffast.obj}
+  {$L zlib/delphi/trees.obj}
+  {$L zlib/delphi/compress.obj}
+  {$L zlib/delphi/adler32.obj}
+  {$L zlib/delphi/crc32.obj}
+{$ENDIF}
+
 interface
 uses
-  {$IFDEF FPC}
-  zbase,
-  paszlib,
-  {$ELSE}
-  zlibpas,
-  {$ENDIF}
-
+  zgl_types,
   zgl_file,
   zgl_memory;
 
@@ -50,6 +84,20 @@ const
   PNG_COLOR_GRAYSCALEALPHA = 4;
   PNG_COLOR_RGBALPHA       = 6;
 
+  ZLIB_VERSION = '1.2.5';
+
+  _z_errmsg: array[ 0..9 ] of PAnsiChar = (
+    '',                     // Z_OK             (0)
+    'need dictionary',      // Z_NEED_DICT      (2)
+    'stream end',           // Z_STREAM_END     (1)
+    'file error',           // Z_ERRNO          (-1)
+    'stream error',         // Z_STREAM_ERROR   (-2)
+    'data error',           // Z_DATA_ERROR     (-3)
+    'insufficient memory',  // Z_MEM_ERROR      (-4)
+    'buffer error',         // Z_BUF_ERROR      (-5)
+    'incompatible version', // Z_VERSION_ERROR  (-6)
+    ''
+  );
 
 type
   zglTPNGChunkName = array[ 0..3 ] of AnsiChar;
@@ -75,13 +123,37 @@ type
     R, G, B, A : Byte;
   end;
 
+type
+  TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
+  TFree = procedure( AppData, Block : Pointer ); cdecl;
+
+  z_stream_s = record
+    next_in   : PByte;     // next input byte
+    avail_in  : cuint;     // number of bytes available at next_in
+    total_in  : clong;     // total nb of input bytes read so far
+
+    next_out  : PByte;     // next output byte should be put here
+    avail_out : cuint;     // remaining free space at next_out
+    total_out : clong;     // total nb of bytes output so far
+
+    msg       : PAnsiChar; // last error message, NULL if no error
+    state     : Pointer;   // not visible by applications
+
+    zalloc    : TAlloc;    // used to allocate the internal state
+    zfree     : TFree;     // used to free the internal state
+    opaque    : Pointer;   // private data object passed to zalloc and zfree
+
+    data_type : Integer;   //  best guess about the data type: ascii or binary
+    adler     : culong;    // adler32 value of the uncompressed data
+    reserved  : culong;    // reserved for future use
+  end;
+
 procedure png_Load( var Data : Pointer; var W, H : Word );
 procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 
 implementation
 uses
-  zgl_types,
   zgl_main,
   zgl_log;
 
@@ -97,7 +169,7 @@ var
   pngPalette      : array[ 0..255, 0..2 ] of Byte;
   pngPaletteAlpha : Byte;
 
-  pngZStream      : TZStream;
+  pngZStream      : z_stream_s;
   pngZData        : Pointer;
 
   pngRowUsed      : Boolean = TRUE;
@@ -106,6 +178,10 @@ var
   pngOffset       : LongWord;
 
   pngIDATEnd      : LongWord;
+
+function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
+function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
+function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
 
 procedure png_GetPixelInfo;
 begin
@@ -327,11 +403,11 @@ begin
               next_in := pngZData;
             end;
 
-          Result := Inflate( pngZStream, 0 );
+          Result := inflate( pngZStream, 0 );
 
           if Result < 0 Then
             begin
-              log_Add( 'PNG - ZLib error: ' + {$IFDEF FPC} zError( Result ) {$ELSE} _z_errmsg[ Result ] {$ENDIF} );
+              log_Add( 'PNG - ZLib error: ' + _z_errmsg[ abs( Result ) + 2 ] );
               pngFail := TRUE;
               exit;
             end else
@@ -431,7 +507,7 @@ end;
 procedure png_ReadIDAT( var Data : Pointer );
 begin
   zgl_GetMem( pngZData, 65535 );
-  InflateInit_( pngZStream, zlib_version, SizeOf( TZStream ) );
+  inflateInit_( pngZStream, ZLIB_VERSION, SizeOf( z_stream_s ) );
 
   png_GetPixelInfo;
   pngIDATEnd := pngMem.Position + pngChunk.Size;
@@ -441,7 +517,7 @@ begin
 
   png_DecodeNonInterlaced( Data );
 
-  InflateEnd( pngZStream );
+  inflateEnd( pngZStream );
   FreeMem( pngZData, 65535 );
 
   FreeMem( pngRowBuffer[ FALSE ] );

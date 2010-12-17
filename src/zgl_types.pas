@@ -40,6 +40,36 @@ type
     Items : array of String;
 end;
 
+{***********************************************************************}
+{                       POSIX TYPE DEFINITIONS                          }
+{***********************************************************************}
+type
+  cint8   = shortint; pcint8   = ^cint8;
+  cuint8  = byte;     pcuint8  = ^cuint8;
+  cchar   = cint8;    pcchar   = ^cchar;
+  cschar  = cint8;    pcschar  = ^cschar;
+  cuchar  = cuint8;   pcuchar  = ^cuchar;
+  cint32  = longint;  pcint32  = ^cint32;
+  cuint32 = longword; pcuint32 = ^cuint32;
+  cint    = cint32;   pcint    = ^cint;
+  csint   = cint32;   pcsint   = ^csint;
+  cuint   = cuint32;  pcuint   = ^cuint;
+  cint64  = int64;    pcint64  = ^cint64;
+  cbool   = longbool; pcbool   = ^cbool;
+{$ifdef cpu64}
+  clong   = int64;    pclong   = ^clong;
+  cslong  = int64;    pcslong  = ^cslong;
+  culong  = qword;    pculong  = ^culong;
+{$else}
+  clong   = longint;  pclong   = ^clong;
+  cslong  = longint;  pcslong  = ^cslong;
+  culong  = cardinal; pculong  = ^culong;
+{$endif}
+  cfloat  = single;   pcfloat  = ^cfloat;
+  cdouble = double;   pcdouble = ^cdouble;
+
+  csize_t      = culong;
+
 implementation
 
 end.

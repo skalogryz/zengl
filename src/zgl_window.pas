@@ -361,7 +361,7 @@ end;
 procedure wnd_SetCaption( const NewCaption : String );
   {$IFDEF WINDOWS}
   var
-    i, len : Integer;
+    len : Integer;
   {$ENDIF}
 begin
   wnd_Caption := NewCaption + #0;

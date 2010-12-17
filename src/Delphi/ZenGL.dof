@@ -98,7 +98,7 @@ OutputDir=
 UnitOutputDir=../tmp
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=../;../../lib/PasZLib
+SearchPath=../;../../lib/;../../lib/ogg;../../lib/zlib;../../lib/PasJPEG/
 Packages=vcl;rtl;vclx;vclactnband;dbrtl;adortl;vcldb;bdertl;vcldbx;visualclx;visualdbclx;dss;teeui;teedb;tee;ibxpress;dsnap;dsnapcon
 Conditionals=
 DebugSourceDirs=
@@ -137,18 +137,3 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-
-[HistoryLists\hlUnitAliases]
-Count=1
-Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
-
-[HistoryLists\hlSearchPath]
-Count=3
-Item0=../;../PasZLib
-Item1=../PasZLib
-Item2=PasZLib
-
-[HistoryLists\hlUnitOutputDirectory]
-Count=2
-Item0=../tmp
-Item1=tmp
