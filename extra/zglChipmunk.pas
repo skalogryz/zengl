@@ -1794,6 +1794,10 @@ end;
 function cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
   Result := FALSE;
+  {$IFDEF LINUX}
+  cpLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
+  if not Assigned( cpLib ) Then
+  {$ENDIF}
   {$IFDEF DARWIN}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );

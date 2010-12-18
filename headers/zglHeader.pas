@@ -1329,6 +1329,10 @@ end;
 function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
   Result := FALSE;
+  {$IFDEF LINUX}
+  zglLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
+  if not Assigned( zglLib ) Then
+  {$ENDIF}
   {$IFDEF DARWIN}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
