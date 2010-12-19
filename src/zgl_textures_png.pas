@@ -27,27 +27,30 @@ unit zgl_textures_png;
     {$IFDEF USE_ZLIB_FROM_SYSTEM}
       {$LINKLIB libz.a}
     {$ELSE}
-      {$IFDEF cpui386}
+      {$IFDEF CPUi386}
         {$LINKLIB zlib/linux_i386/libz.a}
-      {$ELSE}
+      {$ENDIF}
+      {$IFDEF CPUx86_64}
         {$LINKLIB zlib/linux_x86_64/libz.a}
       {$ENDIF}
     {$ENDIF}
   {$ENDIF}
   {$IFDEF WINDOWS}
-    {$IFDEF cpui386}
+    {$IFDEF CPUi386}
       {$LINKLIB zlib/win32/libz.a}
       {$LINKLIB zlib/win32/libmsvcrt.a}
-    {$ELSE}
+    {$ENDIF}
+    {$IFDEF CPUx86_64}
       {$LINKLIB zlib/win64/libz.a}
       {$LINKLIB zlib/win64/libmsvcrt.a}
     {$ENDIF}
   {$ENDIF}
   {$IFDEF DARWIN}
-    {$IFDEF cpui386}
+    {$IFDEF CPUi386}
       {$LINKLIB zlib/macos_i386/libz.a}
-    {$ELSE}
-      {$LINKLIB zlib/macos_ppc/libz.a}
+    {$ENDIF}
+    {$IFDEF CPUPOWERPC32}
+      {$LINKLIB zlib/macos_ppc32/libz.a}
     {$ENDIF}
   {$ENDIF}
 {$ELSE}

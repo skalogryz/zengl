@@ -30,11 +30,12 @@ unit zgl_sound_ogg;
         {$LINKLIB libvorbis.a}
         {$LINKLIB libvorbisfile.a}
       {$ELSE}
-        {$IFDEF cpui386}
+        {$IFDEF CPUi386}
           {$LINKLIB ogg/linux_i386/libogg.a}
           {$LINKLIB ogg/linux_i386/libvorbis.a}
           {$LINKLIB ogg/linux_i386/libvorbisfile.a}
-        {$ELSE}
+        {$ENDIF}
+        {$IFDEF CPUx86_64}
           {$LINKLIB ogg/linux_x86_64/libogg.a}
           {$LINKLIB ogg/linux_x86_64/libvorbis.a}
           {$LINKLIB ogg/linux_x86_64/libvorbisfile.a}
@@ -42,7 +43,7 @@ unit zgl_sound_ogg;
       {$ENDIF}
     {$ENDIF}
     {$IFDEF WINDOWS}
-      {$IFDEF cpui386}
+      {$IFDEF CPUi386}
         {$L ogg/win32/bitwise}
         {$L ogg/win32/framing}
         {$L ogg/win32/analysis}
@@ -67,7 +68,8 @@ unit zgl_sound_ogg;
         {$L ogg/win32/vorbisfile}
         {$L ogg/win32/window}
         {$LINKLIB ogg/win32/libmsvcrt.a}
-      {$ELSE}
+      {$ENDIF}
+      {$IFDEF CPUx86_64}
         {$L ogg/win64/bitwise}
         {$L ogg/win64/framing}
         {$L ogg/win64/analysis}
@@ -95,11 +97,12 @@ unit zgl_sound_ogg;
       {$ENDIF}
     {$ENDIF}
     {$IFDEF DARWIN}
-      {$IFDEF cpui386}
+      {$IFDEF CPUi386}
         {$L ogg/macos_i386/libogg-i386-master}
         {$L ogg/macos_i386/libvorbis-i386-master}
         {$L ogg/macos_i386/libvorbisfile-i386-master}
-      {$ELSE}
+      {$ENDIF}
+      {$IFDEF CPUPOWERPC32}
         {$L ogg/macos_ppc/libogg-ppc-master}
         {$L ogg/macos_ppc/libvorbis-ppc-master}
         {$L ogg/macos_ppc/libvorbisfile-ppc-master}
