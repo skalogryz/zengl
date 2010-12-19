@@ -9,7 +9,7 @@ endif
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src -Fu../../../lib/ -Fu../../../lib/PasJPEG
+INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src -Fu../../../lib/
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo02.pas

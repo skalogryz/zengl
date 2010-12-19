@@ -69,12 +69,12 @@ Begin
   {$IFNDEF STATIC}
     {$IFDEF LINUX}
     // RU: ¬ Linux все библиотеки прин€то хранить в /usr/lib, поэтому libZenGL.so должна
-    // быть предварительно установлена. ≈сли же нужно грузить библиотеку из
-    // каталога с исполн€емым файлом, то следует вписать './libZenGL.so'
+    // быть предварительно установлена. Ќо zglLoad сначала проверить есть ли libZenGL.so
+    // р€дом с исполн€емым файлом.
     //
     // EN: Under GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be
-    // installed before it will be used. If you want to load library from directory with
-    // executable file you can write below './libZenGL.so' instead of libZenGL
+    // installed before it will be used. But zglLoad will check first if there is
+    // libZenGL.so near executable file.
     zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF WIN32}

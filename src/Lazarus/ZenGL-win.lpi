@@ -267,7 +267,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
-      <OtherUnitFiles Value="../../lib/;../../lib/ogg;../../lib/zlib;../../lib/PasJPEG/"/>
+      <OtherUnitFiles Value="../../lib/"/>
       <UnitOutputDirectory Value="../tmp"/>
     </SearchPaths>
     <Parsing>

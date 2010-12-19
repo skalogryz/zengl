@@ -25,45 +25,60 @@ unit zgl_textures_jpg;
 interface
 
 uses
-  {$IFDEF USE_PASJPEG}
-  jmorecfg,
-  jpeglib,
-  jerror,
-  jdeferr,
-  jdapimin,
-  jdapistd,
-  jdmarker,
-  jdmaster,
-  {$ELSE}
+  {$IFNDEF USE_JPEGTURBO}
   Windows,
   {$ENDIF}
-
+  zgl_types,
   zgl_memory;
 
 const
   JPG_EXTENSION  : array[ 0..3 ] of Char = ( 'J', 'P', 'G', #0 );
 
-{$IFDEF USE_PASJPEG}
-const
-  INPUT_BUF_SIZE = 4096;
-
-type
-  zglPJPGDecoder = ^zglTJPGDecoder;
-  zglTJPGDecoder = record
-    mgr    : jpeg_source_mgr;
-    field  : JOCTET_FIELD_PTR;
-end;
+{$IFDEF USE_JPEGTURBO}
+  {$IFDEF FPC}
+    {$IFDEF LINUX}
+      {$IFDEF cpui386}
+        {$L jpegturbo/linux_i386/wrapper.o}
+        {$LINKLIB jpegturbo/linux_i386/libturbojpeg.a}
+      {$ELSE}
+        {$L jpegturbo/linux_x86_64/wrapper.o}
+        {$LINKLIB jpegturbo/linux_x86_64/libturbojpeg.a}
+      {$ENDIF}
+    {$ENDIF}
+    {$IFDEF WINDOWS}
+      {$IFDEF cpui386}
+        {$L jpegturbo/win32/wrapper.o}
+        {$LINKLIB jpegturbo/win32/libturbojpeg.a}
+        {$LINKLIB jpegturbo/win32/libmsvcrt.a}
+      {$ELSE}
+        {$L jpegturbo/win64/wrapper.o}
+        {$LINKLIB jpegturbo/win64/libjpeg.a} // Waiting for better times :)
+        {$LINKLIB jpegturbo/win64/libmsvcrt.a}
+      {$ENDIF}
+    {$ENDIF}
+    {$IFDEF DARWIN}
+      {$IFDEF cpui386}
+        {$L jpegturbo/macos_i386/wrapper.o}
+        {$LINKLIB jpegturbo/macos_i386/libturbojpeg.a}
+      {$ELSE}
+        {$L jpegturbo/macos_ppc/wrapper.o}
+        {$LINKLIB jpegturbo/macos_ppc/libturbojpeg.a}
+      {$ENDIF}
+    {$ENDIF}
+  {$ELSE}
+  {$ENDIF}
 
 type
   zglPJPGData = ^zglTJPGData;
   zglTJPGData = record
-    Buffer    : JSAMPARRAY;
-    Data      : array of Byte;
-    Width     : Word;
-    Height    : Word;
-    sWidth    : JDIMENSION; // Scanline width
-    Grayscale : Boolean;
-end;
+    Memory  : Pointer;
+    MemSize : LongWord;
+    Width   : Word;
+    Height  : Word;
+    GetMem  : function( Size : Integer ) : PByte; cdecl;
+  end;
+
+  procedure jpgturbo_Load( var jpgData : zglTJPGData; var Data : Pointer ); cdecl; external;
 {$ELSE}
 type
   OLE_HANDLE = LongWord;
@@ -156,10 +171,9 @@ type
   zglTJPGData = record
     Buffer    : IPicture;
     Stream    : IStream;
-    Data      : array of Byte;
     Width     : Word;
     Height    : Word;
-end;
+  end;
 {$ENDIF}
 
 procedure jpg_Load( var Data : Pointer; var W, H : Word );
@@ -168,89 +182,15 @@ procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var
 
 implementation
 uses
-  zgl_types,
   zgl_main,
   zgl_log;
 
 var
-  jpgMem     : zglTMemory;
-  {$IFDEF USE_PASJPEG}
-  jpgDecoder : zglPJPGDecoder;
-  jpgCInfo   : jpeg_decompress_struct;
-  jpgData    : zglTJPGData;
-  {$ELSE}
-  jpgData    : zglTJPGData;
-  {$ENDIF}
+  jpgMem  : zglTMemory;
+  jpgData : zglTJPGData;
 
-{$IFDEF USE_PASJPEG}
-procedure jpeg_output_message( cinfo : j_common_ptr ); register;
-  var
-    str : String;
-begin
-  cInfo.err.format_message( cinfo, str );
-  log_Add( 'JPEG - ' + str );
-end;
-
-function jpeg_error( var err : jpeg_error_mgr ) : jpeg_error_mgr_ptr; register;
-begin
-  jpeg_std_error( err );
-  err.output_message := jpeg_output_message;
-  Result := @err;
-end;
-
-procedure Decoder_Init( cinfo : j_decompress_ptr ); register;
-begin
-end;
-
-procedure Decoder_Term( cinfo : j_decompress_ptr ); register;
-begin
-end;
-
-function Decoder_FillInputData( cinfo : j_decompress_ptr ) : Boolean; register;
-  var
-    decoder   : zglPJPGDecoder;
-    bytesRead : Integer;
-begin
-  decoder := zglPJPGDecoder( cinfo.src );
-  bytesRead := mem_Read( jpgMem, decoder.field^, INPUT_BUF_SIZE );
-  if bytesRead <= 0 Then
-    begin
-      WARNMS( j_common_ptr( cinfo ), JWRN_JPEG_EOF );
-
-      decoder.field[ 0 ] := JOCTET( $FF );
-      decoder.field[ 1 ] := JOCTET( JPEG_EOI );
-      bytesRead := 2;
-    end;
-
-  decoder.mgr.next_input_byte := JOCTETptr( decoder.field );
-  decoder.mgr.bytes_in_buffer := bytesRead;
-  Result := TRUE;
-end;
-
-procedure Decoder_SkipInputData( cinfo : j_decompress_ptr; BytesToSkip : Long ); register;
-  var
-    decoder : zglPJPGDecoder;
-begin
-  decoder := zglPJPGDecoder( cInfo.src );
-  if BytesToSkip > 0 Then
-    begin
-      while BytesToSkip > Decoder.mgr.bytes_in_buffer do
-        begin
-          DEC( BytesToSkip, decoder.mgr.bytes_in_buffer );
-          Decoder_FillInputData( cInfo );
-        end;
-      INC( decoder.mgr.next_input_byte, size_t( BytesToSkip ) );
-      DEC( decoder.mgr.bytes_in_buffer, size_t( BytesToSkip ) );
-    end;
-end;
-{$ENDIF}
-
-procedure jpg_FillData;
-  {$IFDEF USE_PASJPEG}
-  var
-    i, j  : JDIMENSION;
-    color : JSAMPLE_PTR;
-  {$ELSE}
+{$IFNDEF USE_JPEGTURBO}
+procedure jpg_FillData( var Data : Pointer );
   var
     bi   : BITMAPINFO;
     bmp  : HBITMAP;
@@ -258,35 +198,7 @@ procedure jpg_FillData;
     p    : Pointer;
     W, H : Longint;
     i    : Integer;
-    t    : Byte;
-  {$ENDIF}
 begin
-{$IFDEF USE_PASJPEG}
-  color := JSAMPLE_PTR( jpgData.Buffer[ 0 ] );
-  if not jpgData.Grayscale Then
-    begin
-     for i := 0 to jpgData.Width - 1 do
-        begin
-          j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
-          jpgData.Data[ j + 0 ] := PByte( Ptr( color ) + i * 3 + 0 )^;
-          jpgData.Data[ j + 1 ] := PByte( Ptr( color ) + i * 3 + 1 )^;
-          jpgData.Data[ j + 2 ] := PByte( Ptr( color ) + i * 3 + 2 )^;
-          jpgData.Data[ j + 3 ] := 255;
-        end;
-    end else
-      begin
-        for i := 0 to jpgData.Width - 1 do
-          begin
-            j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
-            jpgData.Data[ j + 0 ] := color^;
-            jpgData.Data[ j + 1 ] := color^;
-            jpgData.Data[ j + 2 ] := color^;
-            jpgData.Data[ j + 3 ] := 255;
-
-            INC( color );
-          end;
-      end;
-{$ELSE}
   DC := CreateCompatibleDC( GetDC( 0 ) );
   jpgData.Buffer.get_Width ( W );
   jpgData.Buffer.get_Height( H );
@@ -304,89 +216,41 @@ begin
   SelectObject( DC, bmp );
   jpgData.Buffer.Render( DC, 0, 0, jpgData.Width, jpgData.Height, 0, H, W, -H, nil );
 
+  GetMem( Data, jpgData.Width * jpgData.Height * 4 );
+
   for i := 0 to jpgData.Width * jpgData.Height - 1 do
     begin
-      t := PByte( Ptr( p ) + i * 4 + 2 )^;
-      PByte( Ptr( p ) + i * 4 + 2 )^ := PByte( Ptr( p ) + i * 4 + 0 )^;
-      PByte( Ptr( p ) + i * 4 + 0 )^ := t;
-      PByte( Ptr( p ) + i * 4 + 3 )^ := 255;
+      PByte( Ptr( Data ) + i * 4 + 0 )^ := PByte( Ptr( p ) + i * 4 + 2 )^;
+      PByte( Ptr( Data ) + i * 4 + 1 )^ := PByte( Ptr( p ) + i * 4 + 1 )^;
+      PByte( Ptr( Data ) + i * 4 + 2 )^ := PByte( Ptr( p ) + i * 4 + 0 )^;
+      PByte( Ptr( Data ) + i * 4 + 3 )^ := 255;
     end;
-
-  SetLength( jpgData.Data, jpgData.Width * jpgData.Height * 4 );
-  Move( p^, Pointer( jpgData.Data )^, jpgData.Width * jpgData.Height * 4 );
 
   DeleteObject( bmp );
   DeleteDC    ( DC );
-{$ENDIF}
 end;
+{$ENDIF}
+
+{$IFDEF USE_JPEGTURBO}
+function getmem_f( Size : Integer ) : PByte; cdecl;
+begin
+  GetMem( Pointer( Result ), Size );
+end;
+{$ENDIF}
 
 procedure jpg_Load( var Data : Pointer; var W, H : Word );
   label _exit;
-  {$IFDEF USE_PASJPEG}
-  var
-    jerr : jpeg_error_mgr;
-  {$ELSE}
+  {$IFNDEF USE_JPEGTURBO}
   var
     m : Pointer;
     g : HGLOBAL;
   {$ENDIF}
 begin
-{$IFDEF USE_PASJPEG}
-  jpgCInfo.err := jpeg_error( jerr );
-  jpeg_create_decompress( @jpgCInfo );
-
-  if not Assigned( jpgCInfo.src ) Then
-    begin
-      jpgCInfo.src := jpeg_source_mgr_ptr( jpgCInfo.mem.alloc_small( j_common_ptr( @jpgCInfo ), JPOOL_PERMANENT, SizeOf( zglTJPGDecoder ) ) );
-      jpgDecoder := zglPJPGDecoder( jpgCInfo.src );
-      jpgDecoder.field := JOCTET_FIELD_PTR( jpgCInfo.Mem.Alloc_small( j_common_ptr( @jpgCInfo ), JPOOL_PERMANENT, INPUT_BUF_SIZE * SizeOf( JOCTET ) ) );
-    end;
-
-  jpgDecoder                       := zglPJPGDecoder( jpgCInfo.src );
-  jpgDecoder.mgr.init_source       := Decoder_Init;
-  jpgDecoder.mgr.fill_input_buffer := Decoder_FillInputData;
-  jpgDecoder.mgr.skip_input_data   := Decoder_SkipInputData;
-  jpgDecoder.mgr.term_source       := Decoder_Term;
-  jpgDecoder.mgr.resync_to_restart := jpeg_resync_to_restart;
-  jpgDecoder.mgr.bytes_in_buffer   := 0;
-  jpgDecoder.mgr.next_input_byte   := nil;
-
-  jpgCInfo.dither_mode         := JDITHER_NONE;
-  jpgCInfo.dct_method          := JDCT_FASTEST;
-  jpgCInfo.two_pass_quantize   := FALSE;
-  jpgCInfo.do_fancy_upsampling := FALSE;
-  jpgCInfo.do_block_smoothing  := FALSE;
-
-  jpeg_read_header( @jpgCInfo, TRUE );
-
-  jpeg_calc_output_dimensions( @jpgCInfo );
-  jpgData.sWidth := jpgCInfo.output_width * jpgCInfo.output_Components;
-  SetLength( jpgData.Data, jpgCInfo.output_width * jpgCInfo.output_height * 4 );
-  jpgData.Width  := jpgCInfo.output_width;
-  jpgData.Height := jpgCInfo.output_height;
-
-  if jpgCInfo.out_color_space = JCS_GRAYSCALE Then
-    jpgData.Grayscale := TRUE
-  else
-    if jpgCInfo.out_color_space = JCS_RGB Then
-      if jpgCInfo.quantize_colors Then
-        jpgData.Grayscale := TRUE
-      else
-        jpgData.Grayscale := FALSE
-    else
-      begin
-        log_Add( 'JPG - Unsupported ColorType' );
-        goto _exit;
-      end;
-  jpgData.buffer := jpgCInfo.mem.alloc_sarray( j_common_ptr( @jpgCInfo ), JPOOL_IMAGE, jpgData.sWidth, 1 );
-
-  jpeg_start_decompress( @jpgCInfo );
-
-  while jpgCInfo.Output_Scanline < jpgCInfo.Output_Height do
-    begin
-      jpeg_read_scanlines( @jpgCInfo, jpgData.buffer, 1 );
-      jpg_FillData;
-    end;
+{$IFDEF USE_JPEGTURBO}
+  jpgData.Memory  := jpgMem.Memory;
+  jpgData.MemSize := jpgMem.Size;
+  jpgData.GetMem  := getmem_f;
+  jpgturbo_Load( jpgData, Data );
 {$ELSE}
   g := 0;
   try
@@ -395,25 +259,18 @@ begin
     mem_Read( jpgMem, m^, jpgMem.Size );
     GlobalUnlock( g );
     if CreateStreamOnHGlobal( Ptr( m ), FALSE, jpgData.Stream ) = S_OK Then
-      if OleLoadPicture( jpgData.Stream, 0, FALSE, IPicture, jpgData.Buffer ) = S_OK Then jpg_FillData;
+      if OleLoadPicture( jpgData.Stream, 0, FALSE, IPicture, jpgData.Buffer ) = S_OK Then jpg_FillData( Data );
   finally
     if g <> 0 Then GlobalFree( g );
   end;
 {$ENDIF}
 
-  zgl_GetMem( Data, jpgData.Width * jpgData.Height * 4 );
-  Move( Pointer( jpgData.Data )^, Data^, jpgData.Width * jpgData.Height * 4 );
   W := jpgData.Width;
   H := jpgData.Height;
 
 _exit:
   begin
-  {$IFDEF USE_PASJPEG}
-    SetLength( jpgData.Data, 0 );
-    jpeg_finish_decompress ( @jpgCInfo );
-    jpeg_destroy_decompress( @jpgCInfo );
-  {$ELSE}
-    SetLength( jpgData.Data, 0 );
+  {$IFNDEF USE_JPEGTURBO}
     jpgData.Buffer := nil;
     jpgData.Stream := nil;
   {$ENDIF}

@@ -66,7 +66,6 @@ unit zgl_sound_ogg;
         {$L ogg/win32/synthesis}
         {$L ogg/win32/vorbisfile}
         {$L ogg/win32/window}
-        {$LINKLIB ogg/win32/libgcc.a}
         {$LINKLIB ogg/win32/libmsvcrt.a}
       {$ELSE}
         {$L ogg/win64/bitwise}
@@ -92,7 +91,6 @@ unit zgl_sound_ogg;
         {$L ogg/win64/synthesis}
         {$L ogg/win64/vorbisfile}
         {$L ogg/win64/window}
-        {$LINKLIB ogg/win64/libgcc.a}
         {$LINKLIB ogg/win64/libmsvcrt.a}
       {$ENDIF}
     {$ENDIF}
