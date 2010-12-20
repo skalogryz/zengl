@@ -103,9 +103,9 @@ unit zgl_sound_ogg;
         {$L ogg/macos_i386/libvorbisfile-i386-master}
       {$ENDIF}
       {$IFDEF CPUPOWERPC32}
-        {$L ogg/macos_ppc/libogg-ppc-master}
-        {$L ogg/macos_ppc/libvorbis-ppc-master}
-        {$L ogg/macos_ppc/libvorbisfile-ppc-master}
+        {$L ogg/macos_ppc32/libogg-ppc-master}
+        {$L ogg/macos_ppc32/libvorbis-ppc-master}
+        {$L ogg/macos_ppc32/libvorbisfile-ppc-master}
       {$ENDIF}
       {$LINKLIB libgcc.a}
     {$ENDIF}

@@ -37,32 +37,35 @@ const
 {$IFDEF USE_JPEGTURBO}
   {$IFDEF FPC}
     {$IFDEF LINUX}
-      {$IFDEF cpui386}
+      {$IFDEF CPUi386}
         {$L jpegturbo/linux_i386/wrapper.o}
         {$LINKLIB jpegturbo/linux_i386/libturbojpeg.a}
-      {$ELSE}
+      {$ENDIF}
+      {$IFDEF CPUx86_64}
         {$L jpegturbo/linux_x86_64/wrapper.o}
         {$LINKLIB jpegturbo/linux_x86_64/libturbojpeg.a}
       {$ENDIF}
     {$ENDIF}
     {$IFDEF WINDOWS}
-      {$IFDEF cpui386}
+      {$IFDEF CPUi386}
         {$L jpegturbo/win32/wrapper.o}
         {$LINKLIB jpegturbo/win32/libturbojpeg.a}
         {$LINKLIB jpegturbo/win32/libmsvcrt.a}
-      {$ELSE}
+      {$ENDIF}
+      {$IFDEF CPUx86_64}
         {$L jpegturbo/win64/wrapper.o}
         {$LINKLIB jpegturbo/win64/libjpeg.a} // Waiting for better times :)
         {$LINKLIB jpegturbo/win64/libmsvcrt.a}
       {$ENDIF}
     {$ENDIF}
     {$IFDEF DARWIN}
-      {$IFDEF cpui386}
+      {$IFDEF CPUi386}
         {$L jpegturbo/macos_i386/wrapper.o}
         {$LINKLIB jpegturbo/macos_i386/libturbojpeg.a}
-      {$ELSE}
-        {$L jpegturbo/macos_ppc/wrapper.o}
-        {$LINKLIB jpegturbo/macos_ppc/libturbojpeg.a}
+      {$ENDIF}
+      {$IFDEF CPUPOWERPC32}
+        {$L jpegturbo/macos_ppc32/wrapper.o}
+        {$LINKLIB jpegturbo/macos_ppc32/libturbojpeg.a}
       {$ENDIF}
     {$ENDIF}
   {$ELSE}
