@@ -25,7 +25,7 @@ unit zgl_textures_jpg;
 interface
 
 uses
-  {$IFNDEF USE_JPEGTURBO}
+  {$IFNDEF USE_LIBJPEG}
   Windows,
   {$ENDIF}
   zgl_types,
@@ -34,38 +34,38 @@ uses
 const
   JPG_EXTENSION  : array[ 0..3 ] of Char = ( 'J', 'P', 'G', #0 );
 
-{$IFDEF USE_JPEGTURBO}
+{$IFDEF USE_LIBJPEG}
   {$IFDEF FPC}
     {$IFDEF LINUX}
       {$IFDEF CPUi386}
-        {$L jpegturbo/linux_i386/wrapper.o}
-        {$LINKLIB jpegturbo/linux_i386/libturbojpeg.a}
+        {$L jpeg/linux_i386/wrapper.o}
+        {$LINKLIB jpeg/linux_i386/libjpeg.a}
       {$ENDIF}
       {$IFDEF CPUx86_64}
-        {$L jpegturbo/linux_x86_64/wrapper.o}
-        {$LINKLIB jpegturbo/linux_x86_64/libturbojpeg.a}
+        {$L jpeg/linux_x86_64/wrapper.o}
+        {$LINKLIB jpeg/linux_x86_64/libjpeg.a}
       {$ENDIF}
     {$ENDIF}
     {$IFDEF WINDOWS}
       {$IFDEF CPUi386}
-        {$L jpegturbo/win32/wrapper.o}
-        {$LINKLIB jpegturbo/win32/libturbojpeg.a}
-        {$LINKLIB jpegturbo/win32/libmsvcrt.a}
+        {$L jpeg/win32/wrapper.o}
+        {$LINKLIB jpeg/win32/libjpeg.a}
+        {$LINKLIB jpeg/win32/libmsvcrt.a}
       {$ENDIF}
       {$IFDEF CPUx86_64}
-        {$L jpegturbo/win64/wrapper.o}
-        {$LINKLIB jpegturbo/win64/libjpeg.a} // Waiting for better times :)
-        {$LINKLIB jpegturbo/win64/libmsvcrt.a}
+        {$L jpeg/win64/wrapper.o}
+        {$LINKLIB jpeg/win64/libjpeg.a}
+        {$LINKLIB jpeg/win64/libmsvcrt.a}
       {$ENDIF}
     {$ENDIF}
     {$IFDEF DARWIN}
       {$IFDEF CPUi386}
-        {$L jpegturbo/macos_i386/wrapper.o}
-        {$LINKLIB jpegturbo/macos_i386/libturbojpeg.a}
+        {$L jpeg/macos_i386/wrapper.o}
+        {$LINKLIB jpeg/macos_i386/libjpeg.a}
       {$ENDIF}
       {$IFDEF CPUPOWERPC32}
-        {$L jpegturbo/macos_ppc32/wrapper.o}
-        {$LINKLIB jpegturbo/macos_ppc32/libturbojpeg.a}
+        {$L jpeg/macos_ppc32/wrapper.o}
+        {$LINKLIB jpeg/macos_ppc32/libjpeg.a}
       {$ENDIF}
     {$ENDIF}
   {$ELSE}
@@ -192,7 +192,7 @@ var
   jpgMem  : zglTMemory;
   jpgData : zglTJPGData;
 
-{$IFNDEF USE_JPEGTURBO}
+{$IFNDEF USE_LIBJPEG}
 procedure jpg_FillData( var Data : Pointer );
   var
     bi   : BITMAPINFO;
@@ -234,7 +234,7 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF USE_JPEGTURBO}
+{$IFDEF USE_LIBJPEG}
 function getmem_f( Size : Integer ) : PByte; cdecl;
 begin
   GetMem( Pointer( Result ), Size );
@@ -243,13 +243,13 @@ end;
 
 procedure jpg_Load( var Data : Pointer; var W, H : Word );
   label _exit;
-  {$IFNDEF USE_JPEGTURBO}
+  {$IFNDEF USE_LIBJPEG}
   var
     m : Pointer;
     g : HGLOBAL;
   {$ENDIF}
 begin
-{$IFDEF USE_JPEGTURBO}
+{$IFDEF USE_LIBJPEG}
   jpgData.Memory  := jpgMem.Memory;
   jpgData.MemSize := jpgMem.Size;
   jpgData.GetMem  := getmem_f;
@@ -273,7 +273,7 @@ begin
 
 _exit:
   begin
-  {$IFNDEF USE_JPEGTURBO}
+  {$IFNDEF USE_LIBJPEG}
     jpgData.Buffer := nil;
     jpgData.Stream := nil;
   {$ENDIF}

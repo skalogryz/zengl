@@ -1,15 +1,12 @@
-libjpeg-turbo note:  This file is mostly taken from the libjpeg v8b README
-file, and it is included only for reference.  Some parts of it may not apply to
-libjpeg-turbo.  Please see README-turbo.txt for information specific to the
-turbo version.
-
-
 The Independent JPEG Group's JPEG software
 ==========================================
 
-This distribution contains a release of the Independent JPEG Group's free JPEG
-software.  You are welcome to redistribute this software and to use it for any
-purpose, subject to the conditions under LEGAL ISSUES, below.
+README for release 8b of 16-May-2010
+====================================
+
+This distribution contains the eighth public release of the Independent JPEG
+Group's free JPEG software.  You are welcome to redistribute this software and
+to use it for any purpose, subject to the conditions under LEGAL ISSUES, below.
 
 This software is the work of Tom Lane, Guido Vollbeding, Philip Gladstone,
 Bill Allombert, Jim Boucher, Lee Crocker, Bob Friesenhahn, Ben Jackson,
@@ -28,6 +25,7 @@ OVERVIEW            General description of JPEG and the IJG software.
 LEGAL ISSUES        Copyright, lack of warranty, terms of distribution.
 REFERENCES          Where to learn more about JPEG.
 ARCHIVE LOCATIONS   Where to find newer versions of this software.
+ACKNOWLEDGMENTS     Special thanks.
 FILE FORMAT WARS    Software *not* to get.
 TO DO               Plans for future IJG releases.
 
@@ -61,19 +59,7 @@ OVERVIEW
 
 This package contains C software to implement JPEG image encoding, decoding,
 and transcoding.  JPEG (pronounced "jay-peg") is a standardized compression
-method for full-color and gray-scale images.  JPEG's strong suit is compressing
-photographic images or other types of images which have smooth color and
-brightness transitions between neighboring pixels.  Images with sharp lines or
-other abrupt features may not compress well with JPEG, and a higher JPEG
-quality may have to be used to avoid visible compression artifacts with such
-images.
-
-JPEG is lossy, meaning that the output pixels are not necessarily identical to
-the input pixels.  However, on photographic content and other "smooth" images,
-very good compression ratios can be obtained with no visible compression
-artifacts, and extremely high compression ratios are possible if you are
-willing to sacrifice image quality (by reducing the "quality" setting in the
-compressor.)
+method for full-color and gray-scale images.
 
 This software implements JPEG baseline, extended-sequential, and progressive
 compression processes.  Provision is made for supporting all variants of these
@@ -219,6 +205,14 @@ Image Data Compression Standard" by William B. Pennebaker and Joan L.
 Mitchell, published by Van Nostrand Reinhold, 1993, ISBN 0-442-01272-1.
 Price US$59.95, 638 pp.  The book includes the complete text of the ISO JPEG
 standards (DIS 10918-1 and draft DIS 10918-2).
+Although this is by far the most detailed and comprehensive exposition of
+JPEG publicly available, we point out that it is still missing an explanation
+of the most essential properties and algorithms of the underlying DCT
+technology.
+If you think that you know about DCT-based JPEG after reading this book,
+then you are in delusion.  The real fundamentals and corresponding potential
+of DCT-based JPEG are not publicly known so far, and that is the reason for
+all the mistaken developments taking place in the image coding domain.
 
 The original JPEG standard is divided into two parts, Part 1 being the actual
 specification, while Part 2 covers compliance testing methods.  Part 1 is
@@ -227,6 +221,10 @@ Part 1: Requirements and guidelines" and has document numbers ISO/IEC IS
 10918-1, ITU-T T.81.  Part 2 is titled "Digital Compression and Coding of
 Continuous-tone Still Images, Part 2: Compliance testing" and has document
 numbers ISO/IEC IS 10918-2, ITU-T T.83.
+IJG JPEG 8 introduces an implementation of the JPEG SmartScale extension
+which is specified in a contributed document at ITU and ISO with title "ITU-T
+JPEG-Plus Proposal for Extending ITU-T T.81 for Advanced Image Coding", April
+2006, Geneva, Switzerland.  The latest version of the document is Revision 3.
 
 The JPEG standard does not specify all details of an interchangeable file
 format.  For the omitted details we follow the "JFIF" conventions, revision
@@ -270,12 +268,47 @@ with body
 	send usenet/news.answers/jpeg-faq/part2
 
 
+ACKNOWLEDGMENTS
+===============
+
+Thank to Juergen Bruder for providing me with a copy of the common DCT
+algorithm article, only to find out that I had come to the same result
+in a more direct and comprehensible way with a more generative approach.
+
+Thank to Istvan Sebestyen and Joan L. Mitchell for inviting me to the
+ITU JPEG (Study Group 16) meeting in Geneva, Switzerland.
+
+Thank to Thomas Wiegand and Gary Sullivan for inviting me to the
+Joint Video Team (MPEG & ITU) meeting in Geneva, Switzerland.
+
+Thank to John Korejwa and Massimo Ballerini for inviting me to
+fruitful consultations in Boston, MA and Milan, Italy.
+
+Thank to Hendrik Elstner, Roland Fassauer, Simone Zuck, Guenther
+Maier-Gerber, Walter Stoeber, and Fred Schmitz for corresponding
+business development.
+
+Thank to Nico Zschach and Dirk Stelling of the technical support team
+at the Digital Images company in Halle for providing me with extra
+equipment for configuration tests.
+
+Thank to Richard F. Lyon (then of Foveon Inc.) for fruitful
+communication about JPEG configuration in Sigma Photo Pro software.
+
+Thank to Andrew Finkenstadt for hosting the ijg.org site.
+
+Last but not least special thank to Thomas G. Lane for the original
+design and development of this singular software package.
+
+
 FILE FORMAT WARS
 ================
 
 The ISO JPEG standards committee actually promotes different formats like
 "JPEG 2000" or "JPEG XR" which are incompatible with original DCT-based
-JPEG.  IJG therefore does not support these formats (see REFERENCES).  Indeed,
+JPEG and which are based on faulty technologies.  IJG therefore does not
+and will not support such momentary mistakes (see REFERENCES).
+We have little or no sympathy for the promotion of these formats.  Indeed,
 one of the original reasons for developing this free software was to help
 force convergence on common, interoperable format standards for JPEG files.
 Don't use an incompatible file format!
@@ -285,5 +318,9 @@ image files indefinitely.)
 
 TO DO
 =====
+
+Version 8 is the first release of a new generation JPEG standard
+to overcome the limitations of the original JPEG specification.
+More features are being prepared for coming releases...
 
 Please send bug reports, offers of help, etc. to jpeg-info@uc.ag.
