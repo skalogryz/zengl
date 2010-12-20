@@ -93,6 +93,7 @@ unit zgl_sound_ogg;
         {$L ogg/win64/synthesis}
         {$L ogg/win64/vorbisfile}
         {$L ogg/win64/window}
+        {$LINKLIB ogg/win64/libmingwex.a} // needed only for pow... >_<
         {$LINKLIB ogg/win64/libmsvcrt.a}
       {$ENDIF}
     {$ENDIF}
