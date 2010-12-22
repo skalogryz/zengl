@@ -57,6 +57,8 @@ function  u_Length( const Str : String ) : Integer;
 function  u_Words( const Str : String; D : Char = ' ' ) : Integer;
 function  u_GetWord( const Str : String; N : Integer; D : Char = ' ' ) : String;
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
+//
+function u_Hash( const Str : AnsiString ) : LongWord;
 
 procedure u_Error( const ErrStr : String );
 procedure u_Warning( const ErrStr : String );
@@ -250,6 +252,64 @@ begin
 
   if hi > iLo Then u_SortList( List, iLo, hi );
   if lo < iHi Then u_SortList( List, lo, iHi );
+end;
+
+function u_Hash( const Str : AnsiString ) : LongWord;
+  var
+    data      : PAnsiChar;
+    hash, tmp : LongWord;
+    rem, len  : Integer;
+begin
+  Result := 0;
+  if Str = '' Then exit;
+  len  := length( Str );
+  hash := len;
+  data := @Str[ 1 ];
+
+  rem := len and 3;
+  len := len shr 2;
+
+  while len > 0 do
+    begin
+      hash := hash + PWord( data )^;
+      INC( data, 2 );
+      tmp  := ( PWord( data )^ shl 11 ) xor hash;
+      hash := ( hash shl 16 ) xor tmp;
+      INC( data, 2 );
+      hash := hash + ( hash shr 11 );
+      dec( len );
+    end;
+
+  case rem of
+    3:
+      begin
+        hash := hash + PWord( data )^;
+        hash := hash xor ( hash shl 16 );
+        hash := hash xor ( Byte( data[ 2 ] ) shl 18 );
+        hash := hash + ( hash shr 11 );
+      end;
+    2:
+      begin
+        hash := hash + PWord( data )^;
+        hash := hash xor ( hash shl 11 );
+        hash := hash + ( hash shr 17 );
+      end;
+    1:
+      begin
+        hash := hash + PByte( data )^;
+        hash := hash xor ( hash shl 10 );
+        hash := hash + ( hash shr 1 );
+      end;
+  end;
+
+  hash := hash xor ( hash shl 3 );
+  hash := hash +   ( hash shr 5 );
+  hash := hash xor ( hash shl 4 );
+  hash := hash +   ( hash shr 17 );
+  hash := hash xor ( hash shl 25 );
+  hash := hash +   ( hash shr 6 );
+
+  Result := hash;
 end;
 
 procedure u_Error( const ErrStr : String );

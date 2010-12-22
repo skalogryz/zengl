@@ -29,6 +29,7 @@ uses
 type
   zglPINIKey = ^zglTINIKey;
   zglTINIKey = record
+    Hash  : LongWord;
     Name  : AnsiString;
     Value : AnsiString;
 end;
@@ -36,6 +37,7 @@ end;
 type
   zglPINISection = ^zglTINISection;
   zglTINISection = record
+    Hash : LongWord;
     Name : AnsiString;
     Keys : LongWord;
     Key  : array of zglTINIKey;
@@ -116,9 +118,10 @@ begin
       s := iniRec.Sections - 1;
 
       SetLength( iniRec.Section, iniRec.Sections );
-      for i := 2 to len - 1 do
-        iniRec.Section[ s ].Name := iniRec.Section[ s ].Name + str[ i ];
+
+      iniRec.Section[ s ].Name := iniRec.Section[ s ].Name + Copy( str, 2, len - 2 );
       iniRec.Section[ s ].Name := delSpaces( iniRec.Section[ s ].Name );
+      iniRec.Section[ s ].Hash := u_Hash( iniRec.Section[ s ].Name );
     end else
       begin
         s := iniRec.Sections - 1;
@@ -136,6 +139,7 @@ begin
               break;
             end;
         iniRec.Section[ s ].Key[ k ].Name := delSpaces( iniRec.Section[ s ].Key[ k ].Name );
+        iniRec.Section[ s ].Key[ k ].Hash := u_Hash( iniRec.Section[ s ].Key[ k ].Name );
 
         for i := j + 1 to len do
           iniRec.Section[ s ].Key[ k ].Value := iniRec.Section[ s ].Key[ k ].Value + str[ i ];
@@ -175,7 +179,7 @@ begin
       if i = iniRec.Sections - 1 Then break;
         begin
           s := #13#10;
-          file_Write( f, s[ 1 ], 1 );
+          file_Write( f, s[ 1 ], 2 );
         end;
     end;
   file_Close( f );
@@ -197,6 +201,7 @@ begin
       ns := iniRec.Sections - 1;
 
       SetLength( iniRec.Section, iniRec.Sections );
+      iniRec.Section[ ns ].Hash := u_Hash( s );
       iniRec.Section[ ns ].Name := s;
     end;
 
@@ -206,6 +211,7 @@ begin
       nk := iniRec.Section[ ns ].Keys - 1;
 
       SetLength( iniRec.Section[ ns ].Key, iniRec.Section[ ns ].Keys );
+      iniRec.Section[ ns ].Key[ nk ].Hash := u_Hash( k );
       iniRec.Section[ ns ].Key[ nk ].Name := k;
     end;
 end;
@@ -266,7 +272,7 @@ begin
   s := Section;
 
   i := -1;
-  INI_GetID( s, '', i, j );
+  ini_GetID( s, '', i, j );
   Result := i <> -1;
 end;
 
@@ -278,7 +284,7 @@ begin
   s := Section;
   k := Key;
 
-  Result := INI_GetID( s, k, i, j );
+  Result := ini_GetID( s, k, i, j );
 end;
 
 procedure ini_ReadKeyStr( const Section, Key : AnsiString; var Result : AnsiString );
@@ -415,6 +421,7 @@ end;
 
 procedure ini_CopyKey( var k1, k2 : zglTINIKey );
 begin
+  k1.Hash  := k2.Hash;
   k1.Name  := k2.Name;
   k1.Value := k2.Value;
 end;
@@ -423,6 +430,7 @@ procedure ini_CopySection( var s1, s2 : zglTINISection );
   var
     i : Integer;
 begin
+  s1.Hash := s2.Hash;
   s1.Name := s2.Name;
   s1.Keys := s2.Keys;
   SetLength( s1.Key, s1.Keys );
@@ -432,33 +440,28 @@ end;
 
 function ini_GetID( const S, K : AnsiString; var idS, idK : Integer ) : Boolean;
   var
-    s1, s2 : AnsiString;
+    h1, h2 : LongWord;
     i, j   : Integer;
 begin
   idS := -1;
   idK := -1;
-  s2  := u_StrUp( s );
+  h1  := u_Hash( S );
+  h2  := u_Hash( K );
+
   Result := FALSE;
   for i := 0 to iniRec.Sections - 1 do
-    begin
-      s1 := u_StrUp( iniRec.Section[ i ].Name );
-      if s1 = s2 Then
-        begin
-          idS := i;
-          s2  := u_StrUp( k );
-          for j := 0 to iniRec.Section[ i ].Keys - 1 do
+    if h1 = iniRec.Section[ i ].Hash Then
+      begin
+        idS := i;
+        for j := 0 to iniRec.Section[ i ].Keys - 1 do
+          if h2 = iniRec.Section[ i ].Key[ j ].Hash Then
             begin
-              s1 := u_StrUp( iniRec.Section[ i ].Key[ j ].Name );
-              if s1 = s2 Then
-                begin
-                  idK := j;
-                  Result := TRUE;
-                  exit;
-                end;
+              idK := j;
+              Result := TRUE;
+              exit;
             end;
-          exit;
-        end;
-    end;
+        exit;
+      end;
 end;
 
 procedure ini_Process;

@@ -55,28 +55,33 @@ const
   EMITTER_CIRCLE    = 4;
 
 type
-  PDiagramByte = ^TDiagramByte;
+  PDiagramByte         = ^TDiagramByte;
+  PDiagramLW           = ^TDiagramLW;
+  PDiagramSingle       = ^TDiagramSingle;
+  zglPParticle2D       = ^zglTParticle2D;
+  zglPEmitterPoint     = ^zglTEmitterPoint;
+  zglPEmitterLine      = ^zglTEmitterLine;
+  zglPEmitterRect      = ^zglTEmitterRect;
+  zglPParticleParams   = ^zglTParticleParams;
+  zglPEmitter2D        = ^zglTEmitter2D;
+  zglPPEngine2D        = ^zglTPEngine2D;
+  zglPEmitter2DManager = ^zglTEmitter2DManager;
+
   TDiagramByte = record
     Life  : Single;
     Value : Byte;
   end;
 
-type
-  PDiagramLW = ^TDiagramLW;
   TDiagramLW = record
     Life  : Single;
     Value : LongWord;
   end;
 
-type
-  PDiagramSingle = ^TDiagramSingle;
   TDiagramSingle = record
     Life  : Single;
     Value : Single;
   end;
 
-type
-  zglPParticle2D = ^zglTParticle2D;
   zglTParticle2D = record
     _lColorID     : Integer;
     _lAlphaID     : Integer;
@@ -108,15 +113,11 @@ type
     Spin          : Single;
   end;
 
-type
-  zglPEmitterPoint = ^zglTEmitterPoint;
   zglTEmitterPoint = record
     Direction : Single;
     Spread    : Single;
   end;
 
-type
-  zglPEmitterLine = ^zglTEmitterLine;
   zglTEmitterLine = record
     Direction : Single;
     Spread    : Single;
@@ -124,21 +125,16 @@ type
     TwoSide   : Boolean;
   end;
 
-type
-  zglPEmitterRect = ^zglTEmitterRect;
   zglTEmitterRect = record
     Rect : zglTRect;
   end;
 
-type
   zglPEmitterCircle = ^zglTEmitterCircle;
   zglTEmitterCircle = record
     cX, cY : Single;
     Radius : Single;
   end;
 
-type
-  zglPParticleParams = ^zglTParticleParams;
   zglTParticleParams = record
     Texture    : zglPTexture;
     BlendMode  : Byte;
@@ -168,13 +164,14 @@ type
     SpinD      : array of TDiagramSingle;
   end;
 
-type
-  zglPEmitter2D = ^zglTEmitter2D;
   zglTEmitter2D = record
     _type       : Byte;
+    _pengine    : zglPPEngine2D;
     _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
     _parCreated : LongWord;
+    _texFile    : AnsiString;
+    _texHash    : LongWord;
 
     ID          : Integer;
     Params      : record
@@ -202,8 +199,6 @@ type
       EMITTER_CIRCLE: ( AsCircle : zglTEmitterCircle );
   end;
 
-type
-  zglPPEngine2D = ^zglTPEngine2D;
   zglTPEngine2D = record
     Count : record
       Emitters  : LongWord;
@@ -212,12 +207,10 @@ type
     List  : array of zglPEmitter2D;
   end;
 
-type
-  zglPEmitter2DManager = ^zglTEmitter2DManager;
   zglTEmitter2DManager = record
     Count : LongWord;
     List  : array of zglPEmitter2D;
-end;
+  end;
 
 procedure pengine2d_Set( PEngine : zglPPEngine2D );
 function  pengine2d_Get : zglPPEngine2D;
@@ -226,6 +219,7 @@ procedure pengine2d_Proc( dt : Double );
 function  pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
+function  pengine2d_LoadTexture( const FileName : AnsiString ) : zglPTexture;
 
 procedure pengine2d_Sort( iLo, iHi : Integer );
 procedure pengine2d_SortID( iLo, iHi : Integer );
@@ -257,7 +251,8 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_fx,
-  zgl_render_2d;
+  zgl_render_2d,
+  zgl_utils;
 
 var
   _pengine     : zglTPEngine2D;
@@ -355,7 +350,10 @@ begin
   with Result^ do
     begin
       _type       := Emitter._type;
+      _pengine    := pengine2d;
       _parCreated := Emitter._parCreated;
+      _texFile    := Emitter._texFile;
+      _texHash    := Emitter._texHash;
       ID          := pengine2d.Count.Emitters - 1;
       Params      := Emitter.Params;
       Life        := Emitter.Life;
@@ -457,6 +455,24 @@ begin
     emitter2d_Free( pengine2d.List[ i ] );
   SetLength( pengine2d.List, 0 );
   pengine2d.Count.Emitters := 0;
+end;
+
+function pengine2d_LoadTexture( const FileName : AnsiString ) : zglPTexture;
+  var
+    i    : Integer;
+    hash : LongWord;
+begin
+  Result := nil;
+  hash   := u_Hash( FileName );
+  for i := 0 to pengine2d.Count.Emitters - 1 do
+    if pengine2d.List[ i ]._texHash = hash Then
+      begin
+        Result := pengine2d.List[ i ].ParParams.Texture;
+        break;
+      end;
+
+  if not Assigned( Result ) Then
+    Result := tex_LoadFromFile( FileName );
 end;
 
 procedure pengine2d_Sort( iLo, iHi : Integer );
@@ -566,6 +582,14 @@ begin
           ZEF_CHUNK_PARAMS:
             begin
               mem_Read( emitter2dMem, Params, size );
+            end;
+          ZEF_CHUNK_TEXTURE:
+            begin
+              mem_Read( emitter2dMem, Params, size );
+              SetLength( _texFile, size );
+              mem_Read( emitter2dMem, _texFile[ 1 ], size );
+              _texHash := u_Hash( _texFile );
+              ParParams.Texture := pengine2d_LoadTexture( _texFile );
             end;
           ZEF_CHUNK_BLENDMODE:
             begin
@@ -717,6 +741,14 @@ begin
 
       with ParParams do
         begin
+          // ZEF_CHUNK_TEXTURE
+          chunk := ZEF_CHUNK_TEXTURE;
+          size  := length( Emitter._texFile );
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, Emitter._texFile[ 1 ], size );
+
           // ZEF_CHUNK_BLENDMODE
           chunk := ZEF_CHUNK_BLENDMODE;
           size  := 1;
@@ -850,6 +882,7 @@ end;
 
 procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 begin
+  Emitter._texFile := '';
   with Emitter.ParParams do
     begin
       SetLength( Color, 0 );

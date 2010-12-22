@@ -782,34 +782,40 @@ var
 const
   EMITTER_MAX_PARTICLES = 1024;
 
+  EMITTER_NONE      = 0;
   EMITTER_POINT     = 1;
   EMITTER_LINE      = 2;
   EMITTER_RECTANGLE = 3;
   EMITTER_CIRCLE    = 4;
 
 type
-  PDiagramByte = ^TDiagramByte;
+  PDiagramByte         = ^TDiagramByte;
+  PDiagramLW           = ^TDiagramLW;
+  PDiagramSingle       = ^TDiagramSingle;
+  zglPParticle2D       = ^zglTParticle2D;
+  zglPEmitterPoint     = ^zglTEmitterPoint;
+  zglPEmitterLine      = ^zglTEmitterLine;
+  zglPEmitterRect      = ^zglTEmitterRect;
+  zglPParticleParams   = ^zglTParticleParams;
+  zglPEmitter2D        = ^zglTEmitter2D;
+  zglPPEngine2D        = ^zglTPEngine2D;
+  zglPEmitter2DManager = ^zglTEmitter2DManager;
+
   TDiagramByte = record
     Life  : Single;
     Value : Byte;
   end;
 
-type
-  PDiagramLW = ^TDiagramLW;
   TDiagramLW = record
     Life  : Single;
     Value : LongWord;
   end;
 
-type
-  PDiagramSingle = ^TDiagramSingle;
   TDiagramSingle = record
     Life  : Single;
     Value : Single;
   end;
 
-type
-  zglPParticle2D = ^zglTParticle2D;
   zglTParticle2D = record
     _lColorID     : Integer;
     _lAlphaID     : Integer;
@@ -841,15 +847,11 @@ type
     Spin          : Single;
   end;
 
-type
-  zglPEmitterPoint = ^zglTEmitterPoint;
   zglTEmitterPoint = record
     Direction : Single;
     Spread    : Single;
   end;
 
-type
-  zglPEmitterLine = ^zglTEmitterLine;
   zglTEmitterLine = record
     Direction : Single;
     Spread    : Single;
@@ -857,21 +859,16 @@ type
     TwoSide   : Boolean;
   end;
 
-type
-  zglPEmitterRect = ^zglTEmitterRect;
   zglTEmitterRect = record
     Rect : zglTRect;
   end;
 
-type
   zglPEmitterCircle = ^zglTEmitterCircle;
   zglTEmitterCircle = record
     cX, cY : Single;
     Radius : Single;
   end;
 
-type
-  zglPParticleParams = ^zglTParticleParams;
   zglTParticleParams = record
     Texture    : zglPTexture;
     BlendMode  : Byte;
@@ -901,13 +898,14 @@ type
     SpinD      : array of TDiagramSingle;
   end;
 
-type
-  zglPEmitter2D = ^zglTEmitter2D;
   zglTEmitter2D = record
     _type       : Byte;
+    _pengine    : zglPPEngine2D;
     _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
     _parCreated : LongWord;
+    _texFile    : AnsiString;
+    _texHash    : LongWord;
 
     ID          : Integer;
     Params      : record
@@ -935,8 +933,6 @@ type
       EMITTER_CIRCLE: ( AsCircle : zglTEmitterCircle );
   end;
 
-type
-  zglPPEngine2D = ^zglTPEngine2D;
   zglTPEngine2D = record
     Count : record
       Emitters  : LongWord;
@@ -945,8 +941,6 @@ type
     List  : array of zglPEmitter2D;
   end;
 
-type
-  zglPEmitter2DManager = ^zglTEmitter2DManager;
   zglTEmitter2DManager = record
     Count : LongWord;
     List  : array of zglPEmitter2D;
