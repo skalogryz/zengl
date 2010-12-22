@@ -100,8 +100,7 @@ begin
     else
       break;
 
-  for i := b to e do
-    Result := Result + str[ i ];
+  Result := copy( str, b, e - b + 1 );
 end;
 
 procedure addData( const str : AnsiString );
@@ -119,7 +118,7 @@ begin
 
       SetLength( iniRec.Section, iniRec.Sections );
 
-      iniRec.Section[ s ].Name := iniRec.Section[ s ].Name + Copy( str, 2, len - 2 );
+      iniRec.Section[ s ].Name := copy( str, 2, len - 2 );
       iniRec.Section[ s ].Name := delSpaces( iniRec.Section[ s ].Name );
       iniRec.Section[ s ].Hash := u_Hash( iniRec.Section[ s ].Name );
     end else
@@ -131,18 +130,16 @@ begin
 
         SetLength( iniRec.Section[ s ].Key, iniRec.Section[ s ].Keys );
         for i := 1 to len do
-          if str[ i ] <> '=' Then
-            iniRec.Section[ s ].Key[ k ].Name := iniRec.Section[ s ].Key[ k ].Name + str[ i ]
-          else
+          if str[ i ] = '=' Then
             begin
+              iniRec.Section[ s ].Key[ k ].Name := copy( str, 1, i - 1 );
               j := i;
               break;
             end;
         iniRec.Section[ s ].Key[ k ].Name := delSpaces( iniRec.Section[ s ].Key[ k ].Name );
         iniRec.Section[ s ].Key[ k ].Hash := u_Hash( iniRec.Section[ s ].Key[ k ].Name );
 
-        for i := j + 1 to len do
-          iniRec.Section[ s ].Key[ k ].Value := iniRec.Section[ s ].Key[ k ].Value + str[ i ];
+        iniRec.Section[ s ].Key[ k ].Value := copy( str, j + 1, len - j );
         iniRec.Section[ s ].Key[ k ].Value := delSpaces( iniRec.Section[ s ].Key[ k ].Value );
       end;
 end;
