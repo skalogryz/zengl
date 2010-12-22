@@ -314,6 +314,7 @@ exports
   snd_Stop                 name prefix + 'snd_Stop',
   snd_SetPos               name prefix + 'snd_SetPos',
   snd_SetVolume            name prefix + 'snd_SetVolume',
+  snd_Get                  name prefix + 'snd_Get',
   snd_SetSpeed             name prefix + 'snd_SetSpeed',
   snd_PlayFile             name prefix + 'snd_PlayFile',
   snd_PauseFile            name prefix + 'snd_PauseFile',
