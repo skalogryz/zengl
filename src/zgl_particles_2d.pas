@@ -170,7 +170,7 @@ type
     _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
     _parCreated : LongWord;
-    _texFile    : AnsiString;
+    _texFile    : String;
     _texHash    : LongWord;
 
     ID          : Integer;
@@ -219,7 +219,7 @@ procedure pengine2d_Proc( dt : Double );
 function  pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
-function  pengine2d_LoadTexture( const FileName : AnsiString ) : zglPTexture;
+function  pengine2d_LoadTexture( const FileName : String ) : zglPTexture;
 
 procedure pengine2d_Sort( iLo, iHi : Integer );
 procedure pengine2d_SortID( iLo, iHi : Integer );
@@ -457,7 +457,7 @@ begin
   pengine2d.Count.Emitters := 0;
 end;
 
-function pengine2d_LoadTexture( const FileName : AnsiString ) : zglPTexture;
+function pengine2d_LoadTexture( const FileName : String ) : zglPTexture;
   var
     i    : Integer;
     hash : LongWord;
@@ -560,6 +560,7 @@ function emitter2d_Load : zglPEmitter2D;
     c     : LongWord;
     chunk : Word;
     size  : LongWord;
+    dir   : String;
 begin
   Result := emitter2d_Add();
   with Result^ do
@@ -589,7 +590,8 @@ begin
               SetLength( _texFile, size );
               mem_Read( emitter2dMem, _texFile[ 1 ], size );
               _texHash := u_Hash( _texFile );
-              ParParams.Texture := pengine2d_LoadTexture( _texFile );
+              file_GetDirectory( FileName, dir );
+              ParParams.Texture := pengine2d_LoadTexture( dir + _texFile );
             end;
           ZEF_CHUNK_BLENDMODE:
             begin
