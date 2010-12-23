@@ -296,7 +296,6 @@
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-Cg"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
