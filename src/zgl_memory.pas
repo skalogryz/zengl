@@ -117,9 +117,9 @@ begin
   {$IFDEF ENDIAN_BIG}
   if forceNoSwap Then
     begin
-    Result := mem_Read( Memory, Buffer, Bytes );
-    exit;
-  end;
+      Result := mem_Read( Memory, Buffer, Bytes );
+      exit;
+    end;
   {$ENDIF}
   if Bytes > 0 Then
     begin
