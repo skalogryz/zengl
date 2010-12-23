@@ -155,11 +155,10 @@ const
   MANAGER_EMITTER2D       = 806; // zglPEmitter2DManager
 
 var
-  zgl_Get       : function( What : LongWord ) : Ptr;
-  zgl_GetSysDir : procedure;
-  zgl_GetMem    : procedure( var Mem : Pointer; Size : LongWord );
-  zgl_FreeMem   : procedure( var Mem : Pointer );
-  zgl_FreeStr   : procedure( var Str : String );
+  zgl_Get     : function( What : LongWord ) : Ptr;
+  zgl_GetMem  : procedure( var Mem : Pointer; Size : LongWord );
+  zgl_FreeMem : procedure( var Mem : Pointer );
+  zgl_FreeStr : procedure( var Str : String );
 
 const
   COLOR_BUFFER_CLEAR    = $000001;
@@ -1345,7 +1344,6 @@ begin
       zgl_Exit := dlsym( zglLib, 'zgl_Exit' );
       zgl_Reg := dlsym( zglLib, 'zgl_Reg' );
       zgl_Get := dlsym( zglLib, 'zgl_Get' );
-      zgl_GetSysDir := dlsym( zglLib, 'zgl_GetSysDir' );
       zgl_GetMem := dlsym( zglLib, 'zgl_GetMem' );
       zgl_FreeMem := dlsym( zglLib, 'zgl_FreeMem' );
       zgl_FreeStr := dlsym( zglLib, 'zgl_FreeStr' );

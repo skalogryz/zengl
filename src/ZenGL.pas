@@ -100,7 +100,6 @@ exports
   zgl_Exit                 name prefix + 'zgl_Exit',
   zgl_Reg                  name prefix + 'zgl_Reg',
   zgl_Get                  name prefix + 'zgl_Get',
-  zgl_GetSysDir            name prefix + 'zgl_GetSysDir',
   zgl_GetMem               name prefix + 'zgl_GetMem',
   zgl_FreeMem              name prefix + 'zgl_FreeMem',
   zgl_FreeStr              name prefix + 'zgl_FreeStr',
