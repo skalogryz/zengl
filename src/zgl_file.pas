@@ -56,7 +56,7 @@ const
 procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
 function  file_MakeDir( const Directory : String ) : Boolean;
 function  file_Exists( const FileName : String ) : Boolean;
-function  file_Seek( FileHandle : zglTFile; Offset, Mode : LongWord ) : LongWord;
+function  file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 function  file_GetPos( FileHandle : zglTFile ) : LongWord;
 function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
 function  file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
@@ -139,7 +139,7 @@ begin
 {$ENDIF}
 end;
 
-function file_Seek( FileHandle : zglTFile; Offset, Mode : LongWord ) : LongWord;
+function file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   case Mode of

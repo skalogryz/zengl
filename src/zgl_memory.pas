@@ -36,7 +36,7 @@ end;
 
 procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
 procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
-function  mem_Seek( var Memory : zglTMemory; Offset, Mode : LongWord ) : LongWord;
+function  mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
 function  mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 function  mem_Write( var Memory : zglTMemory; const Buffer; Bytes : LongWord ) : LongWord;
@@ -76,7 +76,7 @@ begin
   file_Close( f );
 end;
 
-function mem_Seek( var Memory : zglTMemory; Offset, Mode : LongWord ) : LongWord;
+function mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
 begin
   case Mode of
     FSM_SET: Memory.Position := Offset;

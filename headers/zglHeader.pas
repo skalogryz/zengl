@@ -1182,7 +1182,7 @@ const
 var
   file_Open         : procedure( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
   file_Exists       : function( const FileName : String ) : Boolean;
-  file_Seek         : function( FileHandle : zglTFile; Offset, Mode : LongWord ) : LongWord;
+  file_Seek         : function( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
   file_GetPos       : function( FileHandle : zglTFile ) : LongWord;
   file_Read         : function( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
   file_Write        : function( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
@@ -1198,7 +1198,7 @@ var
 var
   mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
   mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : String );
-  mem_Seek         : function( var Memory : zglTMemory; Offset, Mode : LongWord ) : LongWord;
+  mem_Seek         : function( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
   mem_Read         : function( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
   mem_Write        : function( var Memory : zglTMemory; const Buffer; Bytes : LongWord ) : LongWord;
   mem_SetSize      : procedure( var Memory : zglTMemory; Size : LongWord );
