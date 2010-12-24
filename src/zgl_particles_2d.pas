@@ -227,7 +227,7 @@ procedure pengine2d_SortID( iLo, iHi : Integer );
 function  emitter2d_Add : zglPEmitter2D;
 procedure emitter2d_Del( var Emitter : zglPEmitter2D );
 
-function emitter2d_Load : zglPEmitter2D;
+function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
 function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
 function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
 
@@ -555,7 +555,7 @@ begin
       end;
 end;
 
-function emitter2d_Load : zglPEmitter2D;
+function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
   var
     c     : LongWord;
     chunk : Word;
@@ -590,8 +590,11 @@ begin
               SetLength( _texFile, size );
               mem_Read( emitter2dMem, _texFile[ 1 ], size );
               _texHash := u_Hash( _texFile );
-              file_GetDirectory( FileName, dir );
-              ParParams.Texture := pengine2d_LoadTexture( dir + _texFile );
+              if FileName <> '' Then
+                begin
+                  file_GetDirectory( FileName, dir );
+                  ParParams.Texture := pengine2d_LoadTexture( dir + _texFile );
+                end;
             end;
           ZEF_CHUNK_BLENDMODE:
             begin
@@ -687,7 +690,7 @@ begin
   if emitter2dID <> ZGL_EMITTER_2D Then
     log_Add( FileName + ' - it''s not a ZenGL Emitter 2D file' )
   else
-    Result := emitter2d_Load();
+    Result := emitter2d_Load( FileName );
   mem_Free( emitter2dMem );
 end;
 
@@ -703,7 +706,7 @@ begin
       Result := nil;
       log_Add( 'Unable to determinate ZenGL Emitter 2D: From Memory' );
     end else
-      Result := emitter2d_Load();
+      Result := emitter2d_Load( '' );
 end;
 
 procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : String );

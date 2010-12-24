@@ -43,7 +43,7 @@ uses
   {$ENDIF}
 
   zgl_textures,
-  zgl_textures_jpg,
+  //zgl_textures_jpg,
   zgl_textures_png,
   zgl_textures_tga,
 
@@ -55,7 +55,7 @@ uses
   {$IFDEF USE_SOUND}
   zgl_sound,
   zgl_sound_wav,
-  zgl_sound_ogg,
+  //zgl_sound_ogg,
   {$ENDIF}
 
   zgl_fx,
