@@ -545,6 +545,8 @@ procedure emitter2d_Del( var Emitter : zglPEmitter2D );
   var
     i, j : Integer;
 begin
+  if not Assigned( Emitter ) Then exit;
+
   for i := 0 to managerEmitter2D.Count - 1 do
     if managerEmitter2D.List[ i ] = Emitter Then
       begin
@@ -877,6 +879,8 @@ procedure emitter2d_Init( Emitter : zglPEmitter2D );
   var
     i : Integer;
 begin
+  if not Assigned( Emitter ) Then exit;
+
   for i := 0 to EMITTER_MAX_PARTICLES - 1 do
     with Emitter^ do
       begin
@@ -887,6 +891,8 @@ end;
 
 procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 begin
+  if not Assigned( Emitter ) Then exit;
+
   Emitter._texFile := '';
   with Emitter.ParParams do
     begin
@@ -914,6 +920,8 @@ procedure emitter2d_Draw( Emitter : zglPEmitter2D );
     cX, cY : Single;
     c, s   : Single;
 begin
+  if not Assigned( Emitter ) Then exit;
+
   with Emitter.BBox do
     if not sprite2d_InScreen( MinX, MinY, MaxX - MinX, MaxY - MinY, 0 ) Then exit;
 
@@ -1079,6 +1087,8 @@ procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
     parCount : LongWord;
     size     : Single;
 begin
+  if not Assigned( Emitter ) Then exit;
+
   with Emitter^ do
     begin
       BBox.MinX := Params.Position.X;
@@ -1204,6 +1214,8 @@ procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
     lo, hi, mid : Integer;
     t           : zglPParticle2D;
 begin
+  if not Assigned( Emitter ) Then exit;
+
   lo   := iLo;
   hi   := iHi;
   mid  := Emitter._list[ ( lo + hi ) shr 1 ].ID;
