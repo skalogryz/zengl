@@ -49,7 +49,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib;../../../lib/jpegturbo"/>
+      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
