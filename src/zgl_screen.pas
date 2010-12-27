@@ -386,7 +386,7 @@ begin
   XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Desktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Desktop, 0, CDS_FULLSCREEN, nil );
+  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
 {$IFDEF DARWIN}
   CGDisplaySwitchToMode( scr_Display, scr_Desktop );
