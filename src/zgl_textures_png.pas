@@ -63,6 +63,7 @@ unit zgl_textures_png;
   {$L zlib/delphi/compress.obj}
   {$L zlib/delphi/adler32.obj}
   {$L zlib/delphi/crc32.obj}
+  {$L zlib/delphi/zutil.obj}
 {$ENDIF}
 
 interface
@@ -185,6 +186,16 @@ var
 function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
 function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
 function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
+function deflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
+function deflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
+function deflateInit_( var strm : z_stream_s; level : Integer; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
+
+{$IFNDEF FPC}
+function memcpy( dest : Pointer; src : Pointer; count : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
+function memset( dest : Pointer; c : Integer; count : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
+function malloc( size : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
+procedure free( memblock : Pointer ); cdecl; external 'msvcrt.dll';
+{$ENDIF}
 
 procedure png_GetPixelInfo;
 begin
