@@ -100,8 +100,8 @@ Begin
   //
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home
   // directory, or to executable file(not works for GNU/Linux).
-  DirApp  := PChar( zgl_Get( APP_DIRECTORY ) );
-  DirHome := PChar( zgl_Get( USR_HOMEDIR ) );
+  DirApp  := PChar( zgl_Get( DIRECTORY_APPLICATION ) );
+  DirHome := PChar( zgl_Get( DIRECTORY_HOME ) );
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.

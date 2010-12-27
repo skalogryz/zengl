@@ -22,6 +22,10 @@ unit zgl_sound_ogg;
 
 {$I zgl_config.cfg}
 
+{$IFNDEF FPC}
+  {$UNDEF USE_OGG_STATIC}
+{$ENDIF}
+
 {$IFDEF USE_OGG_STATIC}
   {$IFDEF FPC}
     {$IFDEF LINUX}

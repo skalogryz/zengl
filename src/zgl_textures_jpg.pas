@@ -22,6 +22,10 @@ unit zgl_textures_jpg;
 
 {$I zgl_config.cfg}
 
+{$IFNDEF FPC}
+  {$UNDEF USE_LIBJPEG}
+{$ENDIF}
+
 interface
 
 uses

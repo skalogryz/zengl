@@ -364,7 +364,7 @@ procedure wnd_SetCaption( const NewCaption : String );
     len : Integer;
   {$ENDIF}
 begin
-  wnd_Caption := NewCaption + #0;
+  wnd_Caption := NewCaption;
 {$IFDEF LINUX}
   if wnd_Handle <> 0 Then
     begin
@@ -387,11 +387,12 @@ begin
   if len = 1 Then
     begin
       if app_Flags and APP_USE_UTF8 = 0 Then
-        wnd_Caption := AnsiToUtf8( NewCaption ) + #0;
+        wnd_Caption := AnsiToUtf8( NewCaption );
       len := MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), nil, 0 );
       if Assigned( wnd_CaptionW ) Then
         FreeMem( wnd_CaptionW );
-      GetMem( wnd_CaptionW, len * 2 );
+      GetMem( wnd_CaptionW, len * 2 + 2 );
+      wnd_CaptionW[ len ] := #0;
       MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), wnd_CaptionW, len );
       if app_Flags and APP_USE_UTF8 = 0 Then
         wnd_Caption := wnd_CaptionW;
