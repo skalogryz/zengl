@@ -460,11 +460,11 @@ const
 
 var
   joy_Init       : function : Byte;
-  joy_GetInfo    : function ( JoyID : Byte ) : zglPJoyInfo;
-  joy_AxisPos    : function ( JoyID, Axis : Byte ) : Single;
-  joy_Down       : function ( JoyID, Button : Byte ) : Boolean;
-  joy_Up         : function ( JoyID, Button : Byte ) : Boolean;
-  joy_Press      : function ( JoyID, Button : Byte ) : Boolean;
+  joy_GetInfo    : function( JoyID : Byte ) : zglPJoyInfo;
+  joy_AxisPos    : function( JoyID, Axis : Byte ) : Single;
+  joy_Down       : function( JoyID, Button : Byte ) : Boolean;
+  joy_Up         : function( JoyID, Button : Byte ) : Boolean;
+  joy_Press      : function( JoyID, Button : Byte ) : Boolean;
   joy_ClearState : procedure;
 
 // 2D
