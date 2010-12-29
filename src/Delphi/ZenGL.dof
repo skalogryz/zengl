@@ -1,7 +1,5 @@
-
 [FileVersion]
 Version=7.0
-
 [Compiler]
 A=8
 B=0
@@ -81,7 +79,6 @@ PrivatePropAccessor=1
 UnsafeType=0
 UnsafeCode=0
 UnsafeCast=0
-
 [Linker]
 MapFile=0
 OutputObjs=0
@@ -92,25 +89,26 @@ MinStackSize=16384
 MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
-
 [Directories]
 OutputDir=
 UnitOutputDir=../tmp
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=../;../../lib/
+SearchPath=../;../../lib/zlib/delphi
 Packages=vcl;rtl;vclx;vclactnband;dbrtl;adortl;vcldb;bdertl;vcldbx;visualclx;visualdbclx;dss;teeui;teedb;tee;ibxpress;dsnap;dsnapcon
 Conditionals=
 DebugSourceDirs=
 UsePackages=0
-
 [Parameters]
 RunParams=
 HostApplication=
 Launcher=
 UseLauncher=0
 DebugCWD=
-
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
 [Version Info]
 IncludeVerInfo=0
 AutoIncBuild=0
@@ -125,7 +123,6 @@ Private=0
 DLL=0
 Locale=1049
 CodePage=1251
-
 [Version Info Keys]
 CompanyName=
 FileDescription=
