@@ -259,8 +259,8 @@
       <Filename Value="./libZenGL"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir)/"/>
-      <OtherUnitFiles Value="../../lib/"/>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp"/>
     </SearchPaths>
     <Parsing>

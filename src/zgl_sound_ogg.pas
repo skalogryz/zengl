@@ -27,122 +27,36 @@ unit zgl_sound_ogg;
 {$ENDIF}
 
 {$IFDEF USE_OGG_STATIC}
-  {$IFDEF FPC}
-    {$IFDEF LINUX}
-      {$IFDEF USE_OGG_FROM_SYSTEM}
-        {$LINKLIB libogg.a}
-        {$LINKLIB libvorbis.a}
-        {$LINKLIB libvorbisfile.a}
-      {$ELSE}
-        {$IFDEF CPUi386}
-          {$LINKLIB ogg/linux_i386/libogg.a}
-          {$LINKLIB ogg/linux_i386/libvorbis.a}
-          {$LINKLIB ogg/linux_i386/libvorbisfile.a}
-        {$ENDIF}
-        {$IFDEF CPUx86_64}
-          {$LINKLIB ogg/linux_x86_64/libogg.a}
-          {$LINKLIB ogg/linux_x86_64/libvorbis.a}
-          {$LINKLIB ogg/linux_x86_64/libvorbisfile.a}
-        {$ENDIF}
-      {$ENDIF}
-    {$ENDIF}
-    {$IFDEF WINDOWS}
-      {$IFDEF CPUi386}
-        {$L ogg/win32/bitwise}
-        {$L ogg/win32/framing}
-        {$L ogg/win32/analysis}
-        {$L ogg/win32/bitrate}
-        {$L ogg/win32/block}
-        {$L ogg/win32/codebook}
-        {$L ogg/win32/envelope}
-        {$L ogg/win32/floor0}
-        {$L ogg/win32/floor1}
-        {$L ogg/win32/info}
-        {$L ogg/win32/lookup}
-        {$L ogg/win32/lpc}
-        {$L ogg/win32/lsp}
-        {$L ogg/win32/mapping0}
-        {$L ogg/win32/mdct}
-        {$L ogg/win32/psy}
-        {$L ogg/win32/registry}
-        {$L ogg/win32/res0}
-        {$L ogg/win32/sharedbook}
-        {$L ogg/win32/smallft}
-        {$L ogg/win32/synthesis}
-        {$L ogg/win32/vorbisfile}
-        {$L ogg/win32/window}
-        {$LINKLIB ogg/win32/libmsvcrt.a}
-      {$ENDIF}
-      {$IFDEF CPUx86_64}
-        {$L ogg/win64/bitwise}
-        {$L ogg/win64/framing}
-        {$L ogg/win64/analysis}
-        {$L ogg/win64/bitrate}
-        {$L ogg/win64/block}
-        {$L ogg/win64/codebook}
-        {$L ogg/win64/envelope}
-        {$L ogg/win64/floor0}
-        {$L ogg/win64/floor1}
-        {$L ogg/win64/info}
-        {$L ogg/win64/lookup}
-        {$L ogg/win64/lpc}
-        {$L ogg/win64/lsp}
-        {$L ogg/win64/mapping0}
-        {$L ogg/win64/mdct}
-        {$L ogg/win64/psy}
-        {$L ogg/win64/registry}
-        {$L ogg/win64/res0}
-        {$L ogg/win64/sharedbook}
-        {$L ogg/win64/smallft}
-        {$L ogg/win64/synthesis}
-        {$L ogg/win64/vorbisfile}
-        {$L ogg/win64/window}
-        {$LINKLIB ogg/win64/libmingwex.a} // needed only for pow... >_<
-        {$LINKLIB ogg/win64/libmsvcrt.a}
-      {$ENDIF}
-    {$ENDIF}
-    {$IFDEF DARWIN}
-      {$IFDEF CPUi386}
-        {$L ogg/macos_i386/libogg-i386-master}
-        {$L ogg/macos_i386/libvorbis-i386-master}
-        {$L ogg/macos_i386/libvorbisfile-i386-master}
-      {$ENDIF}
-      {$IFDEF CPUPOWERPC32}
-        {$L ogg/macos_ppc32/libogg-ppc-master}
-        {$L ogg/macos_ppc32/libvorbis-ppc-master}
-        {$L ogg/macos_ppc32/libvorbisfile-ppc-master}
-      {$ENDIF}
-      {$LINKLIB libgcc.a}
-    {$ENDIF}
-  {$ELSE}
-    {$L ogg/delphi/bitwise.obj}
-    {$L ogg/delphi/framing.obj}
-    {$L ogg/delphi/analysis.obj}
-    {$L ogg/delphi/bitrate.obj}
-    {$L ogg/delphi/block.obj}
-    {$L ogg/delphi/codebook.obj}
-    {$L ogg/delphi/envelope.obj}
-    {$L ogg/delphi/floor0.obj}
-    {$L ogg/delphi/floor1.obj}
-    {$L ogg/delphi/info.obj}
-    {$L ogg/delphi/lookup.obj}
-    {$L ogg/delphi/lpc.obj}
-    {$L ogg/delphi/lsp.obj}
-    {$L ogg/delphi/mapping0.obj}
-    {$L ogg/delphi/mdct.obj}
-    {$L ogg/delphi/psy.obj}
-    {$L ogg/delphi/registry.obj}
-    {$L ogg/delphi/res0.obj}
-    {$L ogg/delphi/sharedbook.obj}
-    {$L ogg/delphi/smallft.obj}
-    {$L ogg/delphi/synthesis.obj}
-    {$L ogg/delphi/vorbisfile.obj}
-    {$L ogg/delphi/window.obj}
-  {$ENDIF}
+  {$L bitwise}
+  {$L framing}
+  {$L analysis}
+  {$L bitrate}
+  {$L block}
+  {$L codebook}
+  {$L envelope}
+  {$L floor0}
+  {$L floor1}
+  {$L info}
+  {$L lookup}
+  {$L lpc}
+  {$L lsp}
+  {$L mapping0}
+  {$L mdct}
+  {$L psy}
+  {$L registry}
+  {$L res0}
+  {$L sharedbook}
+  {$L smallft}
+  {$L synthesis}
+  {$L vorbisfile}
+  {$L window}
 {$ENDIF}
 
 interface
 uses
+  {$IFDEF WINDOWS}
+  zgl_msvcrt,
+  {$ENDIF}
   zgl_main,
   zgl_types,
   zgl_application,

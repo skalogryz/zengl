@@ -32,6 +32,9 @@ uses
   {$IFNDEF USE_LIBJPEG}
   Windows,
   {$ENDIF}
+  {$IFDEF WINDOWS}
+  zgl_msvcrt,
+  {$ENDIF}
   zgl_types,
   zgl_memory;
 
@@ -39,41 +42,33 @@ const
   JPG_EXTENSION  : array[ 0..3 ] of Char = ( 'J', 'P', 'G', #0 );
 
 {$IFDEF USE_LIBJPEG}
-  {$IFDEF FPC}
-    {$IFDEF LINUX}
-      {$IFDEF CPUi386}
-        {$L jpeg/linux_i386/wrapper.o}
-        {$LINKLIB jpeg/linux_i386/libjpeg.a}
-      {$ENDIF}
-      {$IFDEF CPUx86_64}
-        {$L jpeg/linux_x86_64/wrapper.o}
-        {$LINKLIB jpeg/linux_x86_64/libjpeg.a}
-      {$ENDIF}
-    {$ENDIF}
-    {$IFDEF WINDOWS}
-      {$IFDEF CPUi386}
-        {$L jpeg/win32/wrapper.o}
-        {$LINKLIB jpeg/win32/libjpeg.a}
-        {$LINKLIB jpeg/win32/libmsvcrt.a}
-      {$ENDIF}
-      {$IFDEF CPUx86_64}
-        {$L jpeg/win64/wrapper.o}
-        {$LINKLIB jpeg/win64/libjpeg.a}
-        {$LINKLIB jpeg/win64/libmsvcrt.a}
-      {$ENDIF}
-    {$ENDIF}
-    {$IFDEF DARWIN}
-      {$IFDEF CPUi386}
-        {$L jpeg/macos_i386/wrapper.o}
-        {$LINKLIB jpeg/macos_i386/libjpeg.a}
-      {$ENDIF}
-      {$IFDEF CPUPOWERPC32}
-        {$L jpeg/macos_ppc32/wrapper.o}
-        {$LINKLIB jpeg/macos_ppc32/libjpeg.a}
-      {$ENDIF}
-    {$ENDIF}
-  {$ELSE}
-  {$ENDIF}
+  {$L jaricom}
+  {$L jcomapi}
+  {$L jdapimin}
+  {$L jdapistd}
+  {$L jdarith}
+  {$L jdatasrc}
+  {$L jdcoefct}
+  {$L jdcolor}
+  {$L jddctmgr}
+  {$L jdhuff}
+  {$L jdinput}
+  {$L jdmainct}
+  {$L jdmarker}
+  {$L jdmaster}
+  {$L jdmerge}
+  {$L jdpostct}
+  {$L jdsample}
+  {$L jerror}
+  {$L jidctflt}
+  {$L jidctfst}
+  {$L jidctint}
+  {$L jmemmgr}
+  {$L jmemnobs}
+  {$L jquant1}
+  {$L jquant2}
+  {$L jutils}
+  {$L wrapper}
 
 type
   zglPJPGData = ^zglTJPGData;

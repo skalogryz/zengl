@@ -22,52 +22,21 @@ unit zgl_textures_png;
 
 {$I zgl_config.cfg}
 
-{$IFDEF FPC}
-  {$IFDEF LINUX}
-    {$IFDEF USE_ZLIB_FROM_SYSTEM}
-      {$LINKLIB libz.a}
-    {$ELSE}
-      {$IFDEF CPUi386}
-        {$LINKLIB zlib/linux_i386/libz.a}
-      {$ENDIF}
-      {$IFDEF CPUx86_64}
-        {$LINKLIB zlib/linux_x86_64/libz.a}
-      {$ENDIF}
-    {$ENDIF}
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-    {$IFDEF CPUi386}
-      {$LINKLIB zlib/win32/libz.a}
-      {$LINKLIB zlib/win32/libmsvcrt.a}
-    {$ENDIF}
-    {$IFDEF CPUx86_64}
-      {$LINKLIB zlib/win64/libz.a}
-      {$LINKLIB zlib/win64/libmsvcrt.a}
-    {$ENDIF}
-  {$ENDIF}
-  {$IFDEF DARWIN}
-    {$IFDEF CPUi386}
-      {$LINKLIB zlib/macos_i386/libz.a}
-    {$ENDIF}
-    {$IFDEF CPUPOWERPC32}
-      {$LINKLIB zlib/macos_ppc32/libz.a}
-    {$ENDIF}
-  {$ENDIF}
-{$ELSE}
-  {$L zlib/delphi/deflate.obj}
-  {$L zlib/delphi/inflate.obj}
-  {$L zlib/delphi/inftrees.obj}
-  {$L zlib/delphi/infback.obj}
-  {$L zlib/delphi/inffast.obj}
-  {$L zlib/delphi/trees.obj}
-  {$L zlib/delphi/compress.obj}
-  {$L zlib/delphi/adler32.obj}
-  {$L zlib/delphi/crc32.obj}
-  {$L zlib/delphi/zutil.obj}
+{$L infback}
+{$L inffast}
+{$L inflate}
+{$L inftrees}
+{$L zutil}
+{$IFDEF WINDOWS}
+  {$L adler32}
+  {$L crc32}
 {$ENDIF}
 
 interface
 uses
+  {$IFDEF WINDOWS}
+  zgl_msvcrt,
+  {$ENDIF}
   zgl_types,
   zgl_file,
   zgl_memory;
@@ -186,16 +155,6 @@ var
 function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
 function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
 function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
-function deflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
-function deflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
-function deflateInit_( var strm : z_stream_s; level : Integer; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
-
-{$IFNDEF FPC}
-function memcpy( dest : Pointer; src : Pointer; count : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
-function memset( dest : Pointer; c : Integer; count : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
-function malloc( size : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
-procedure free( memblock : Pointer ); cdecl; external 'msvcrt.dll';
-{$ENDIF}
 
 procedure png_GetPixelInfo;
 begin

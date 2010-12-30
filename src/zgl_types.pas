@@ -56,15 +56,15 @@ type
   cuint   = cuint32;  pcuint   = ^cuint;
   cint64  = int64;    pcint64  = ^cint64;
   cbool   = longbool; pcbool   = ^cbool;
-{$ifdef cpu64}
+{$IFDEF CPUx86_64}
   clong   = int64;    pclong   = ^clong;
   cslong  = int64;    pcslong  = ^cslong;
   culong  = qword;    pculong  = ^culong;
-{$else}
+{$ELSE}
   clong   = longint;  pclong   = ^clong;
   cslong  = longint;  pcslong  = ^cslong;
   culong  = cardinal; pculong  = ^culong;
-{$endif}
+{$ENDIF}
   cfloat  = single;   pcfloat  = ^cfloat;
   cdouble = double;   pcdouble = ^cdouble;
 
