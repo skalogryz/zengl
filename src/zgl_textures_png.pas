@@ -27,10 +27,8 @@ unit zgl_textures_png;
 {$L inflate}
 {$L inftrees}
 {$L zutil}
-{$IFDEF WINDOWS}
-  {$L adler32}
-  {$L crc32}
-{$ENDIF}
+{$L adler32}
+{$L crc32}
 
 interface
 uses

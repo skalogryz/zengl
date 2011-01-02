@@ -16,7 +16,7 @@ endif
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE =  -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS)
+INCLUDE = -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS)
 OUTPUT  = ./
 DESTDIR = /usr
 TMP     = -FUtmp

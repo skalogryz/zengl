@@ -5,11 +5,19 @@ else
   ARCH  = i386
 endif
 
+# Get current OS
+ifeq ($(shell uname), Linux)
+  OS    = linux
+else ifeq ($(shell uname), Darwin)
+  OS    = darwin
+endif
+
 # Variables
 FPC     = fpc
 FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src -Fu../../../lib/
+INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src
+LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS)
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo08.pas
@@ -20,20 +28,30 @@ BUNDLE  = $(OUTPUT)$(TARGETM).app
 
 # Targets
 all: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)$(ARCH)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT)$(ARCH)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
 	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/i386-win32 \
+	-Fu../../../lib/msvcrt/i386 \
+	-Fu../../../lib/ogg/i386-win32 \
+	-Fu../../../lib/zlib/i386-win32 \
+	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
-	$(FPC) $(UNIT) $(INCLUDE) -FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/x86_64-win64 \
+	-Fu../../../lib/msvcrt/x86_64 \
+	-Fu../../../lib/ogg/x86_64-win64 \
+	-Fu../../../lib/zlib/x86_64-win64 \
+	-FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
 
 macos: clean
 	rm -Rf $(BUNDLE)
 	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
-	$(FPC_MAC)386 $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
-	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
+	$(FPC_MAC)386 $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
+	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
 	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
 	cp $(OUTPUT)data/click.wav $(BUNDLE)/Contents/Resources/

@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 3             }
-{ date:              2010.12.19              }
+{ header version:    0.99 beta 4             }
+{ date:              2011.01.02              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -44,36 +44,39 @@ unit zglChipmunk;
   {$PACKRECORDS C}
   {$IFDEF LINUX}
     {$DEFINE LINUX_OR_DARWIN}
-    {$IFDEF CHIPMUNK_STATIC}
-      {$IFDEF CPUi386}
-        {$LINKLIB chipmunk/linux_i386/libchipmunk.a}
-      {$ENDIF}
-      {$IFDEF CPUx86_64}
-        {$LINKLIB chipmunk/linux_x86_64/libchipmunk.a}
-      {$ENDIF}
-    {$ENDIF}
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-    {$IFDEF CHIPMUNK_STATIC}
-      {$IFDEF CPUi386}
-        {$LINKLIB chipmunk/win32/libchipmunk.a}
-        {$LINKLIB chipmunk/win32/libmsvcrt.a}
-      {$ENDIF}
-      {$IFDEF CPUx86_64}
-        {$LINKLIB chipmunk/win64/libchipmunk.a}
-        {$LINKLIB chipmunk/win64/libmsvcrt.a}
-      {$ENDIF}
-    {$ENDIF}
   {$ENDIF}
   {$IFDEF DARWIN}
     {$DEFINE LINUX_OR_DARWIN}
-    {$IFDEF CHIPMUNK_STATIC}
-      {$IFDEF CPUi386}
-        {$LINKLIB chipmunk/macos_i386/libchipmunk.a}
-      {$ENDIF}
-      {$IFDEF CPUPOWERPC32}
-        {$LINKLIB chipmunk/macos_ppc32/libchipmunk.a}
-      {$ENDIF}
+  {$ENDIF}
+  {$IFDEF CHIPMUNK_STATIC}
+    {$L chipmunk}
+    {$L cpArbiter}
+    {$L cpArray}
+    {$L cpBB}
+    {$L cpBody}
+    {$L cpCollision}
+    {$L cpConstraint}
+    {$L cpDampedRotarySpring}
+    {$L cpDampedSpring}
+    {$L cpGearJoint}
+    {$L cpGrooveJoint}
+    {$L cpHashSet}
+    {$L cpPinJoint}
+    {$L cpPivotJoint}
+    {$L cpPolyShape}
+    {$L cpRatchetJoint}
+    {$L cpRotaryLimitJoint}
+    {$L cpShape}
+    {$L cpSimpleMotor}
+    {$L cpSlideJoint}
+    {$L cpSpace}
+    {$L cpSpaceComponent}
+    {$L cpSpaceHash}
+    {$L cpSpaceQuery}
+    {$L cpSpaceStep}
+    {$L cpVect}
+    {$IFNDEF STATIC}
+      {$LINKLIB libmsvcrt.a}
     {$ENDIF}
   {$ENDIF}
 {$ENDIF}
@@ -86,6 +89,7 @@ uses
   {$IFNDEF STATIC}
   zglHeader
   {$ELSE}
+  zgl_msvcrt,
   zgl_types,
   zgl_primitives_2d
   {$ENDIF}
@@ -1388,6 +1392,7 @@ function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : Lo
 
 implementation
 
+{$IFNDEF CHIPMUNK_STATIC}
 var
   cpLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
   {$IFDEF DARWIN}
@@ -1398,6 +1403,7 @@ var
   tmpPath      : array[ 0..8191 ] of Char;
   outItemHit   : SInt16;
   {$ENDIF}
+{$ENDIF}
 
 // VECT
 function cpfmin( a, b : cpFloat ) : cpFloat;
