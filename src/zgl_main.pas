@@ -424,7 +424,7 @@ begin
     ZENGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
 
     DIRECTORY_APPLICATION: Result := Ptr( PAnsiChar( app_WorkDir ) );
-    DIRECTORY_HOME: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
+    DIRECTORY_HOME: Result := Ptr( PAnsiChar( app_HomeDir ) );
 
     LOG_FILENAME: Result := Ptr( @logfile );
 
@@ -493,8 +493,7 @@ procedure zgl_GetSysDir;
 {$IFDEF LINUX}
 begin
   app_WorkDir := './';
-
-  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
+  app_HomeDir := FpGetEnv( 'HOME' ) + '/.config/';
 {$ENDIF}
 {$IFDEF WINDOWS}
 var
@@ -512,8 +511,8 @@ begin
   app_WorkDir := PAnsiChar( s );
 
   GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
-  app_UsrHomeDir := t;
-  app_UsrHomeDir := app_UsrHomeDir + '\';
+  app_HomeDir := t;
+  app_HomeDir := app_HomeDir + '\';
 
   FreeMem( buffer );
   FreeMem( fn );
@@ -530,8 +529,7 @@ begin
   appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   app_WorkDir := appPath + '/';
-
-  app_UsrHomeDir := FpGetEnv( 'HOME' ) + '/';
+  app_HomeDir := '/Library/Application Support/';
 {$ENDIF}
   app_GetSysDirs := TRUE;
 end;

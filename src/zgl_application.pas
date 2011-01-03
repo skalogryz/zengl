@@ -64,7 +64,7 @@ var
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
   app_WorkDir      : AnsiString;
-  app_UsrHomeDir   : AnsiString;
+  app_HomeDir      : AnsiString;
 
   // call-back
   app_PInit     : procedure = app_Init;
