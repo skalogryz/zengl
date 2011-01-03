@@ -23,14 +23,14 @@ type
     FCount : LongWord;
     FList  : array of zglCSprite2D;
 
-    destructor Destroy; override;
-
     procedure SortByLayer( iLo, iHi : Integer );
     procedure SortByID( iLo, iHi : Integer );
 
     function  GetSprite( ID : LongWord ) : zglCSprite2D;
     procedure SetSprite( ID : LongWord; Sprite : zglCSprite2D );
   public
+    destructor Destroy; override;
+
     function  AddSprite : Integer; overload;
     function  AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D; overload;
     procedure DelSprite( ID : Integer );
@@ -45,8 +45,6 @@ type
 
   zglCSprite2D = class
   protected
-    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
-    destructor  Destroy; override;
   public
     ID      : Integer;
     Manager : zglCSEngine2D;
@@ -59,6 +57,9 @@ type
     Frame   : Single;
     Alpha   : Integer;
     FxFlags : LongWord;
+
+    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
+    destructor  Destroy; override;
 
     procedure OnInit( _Texture : zglPTexture; _Layer : Integer ); virtual;
     procedure OnDraw; virtual;
