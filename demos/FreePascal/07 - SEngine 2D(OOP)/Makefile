@@ -14,7 +14,6 @@ endif
 
 # Variables
 FPC     = fpc
-FPC_MAC = /usr/local/bin/ppc
 FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src
 LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS)
@@ -50,8 +49,8 @@ win64: clean
 macos: clean
 	rm -Rf $(BUNDLE)
 	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
-	$(FPC_MAC)386 $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386
-	$(FPC_MAC)ppc $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min 10.4"
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
 	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
 	cp $(OUTPUT)data/zengl.png $(BUNDLE)/Contents/Resources/
