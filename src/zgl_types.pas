@@ -68,7 +68,7 @@ type
   cfloat  = single;   pcfloat  = ^cfloat;
   cdouble = double;   pcdouble = ^cdouble;
 
-  csize_t      = culong;
+  csize_t = culong;
 
 implementation
 

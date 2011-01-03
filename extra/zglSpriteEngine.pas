@@ -23,6 +23,8 @@ type
     FCount : LongWord;
     FList  : array of zglCSprite2D;
 
+    destructor Destroy; override;
+
     procedure SortByLayer( iLo, iHi : Integer );
     procedure SortByID( iLo, iHi : Integer );
 
@@ -43,11 +45,13 @@ type
 
   zglCSprite2D = class
   protected
+    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
+    destructor  Destroy; override;
   public
     ID      : Integer;
     Manager : zglCSEngine2D;
     Texture : zglPTexture;
-    Destroy : Boolean;
+    Kill    : Boolean;
     Layer   : LongWord;
     X, Y    : Single;
     W, H    : Single;
@@ -55,9 +59,6 @@ type
     Frame   : Single;
     Alpha   : Integer;
     FxFlags : LongWord;
-
-    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
-    destructor  Free;
 
     procedure OnInit( _Texture : zglPTexture; _Layer : Integer ); virtual;
     procedure OnDraw; virtual;
@@ -72,6 +73,11 @@ uses
   zgl_fx,
   zgl_sprite_2d;
 {$ENDIF}
+
+destructor zglCSEngine2D.Destroy;
+begin
+  ClearAll();
+end;
 
 procedure zglCSEngine2D.SortByLayer( iLo, iHi : Integer );
   var
@@ -192,7 +198,7 @@ begin
       s := FList[ i ];
       s.OnDraw();
 
-      if s.Destroy Then
+      if s.Kill Then
         DelSprite( s.ID )
       else
         INC( i );
@@ -210,7 +216,7 @@ begin
       s := FList[ i ];
       s.OnProc();
 
-      if s.Destroy Then
+      if s.Kill Then
         DelSprite( s.ID )
       else
         INC( i );
@@ -257,9 +263,9 @@ begin
   OnInit( nil, 0 );
 end;
 
-destructor zglCSprite2D.Free;
+destructor zglCSprite2D.Destroy;
 begin
-  OnFree;
+  OnFree();
 end;
 
 procedure zglCSprite2D.OnInit( _Texture : zglPTexture; _Layer : Integer );

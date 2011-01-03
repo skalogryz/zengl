@@ -90,8 +90,8 @@ begin
   if X < -128 Then sengine2d.DelSprite( ID );
   // RU: Если спрайт выходит за пределы по Y, ставим его в очередь на удаление
   // EN: Add sprite to queue for delete if it goes beyond Y.
-  if Y < -128 Then Destroy := TRUE;
-  if Y > 600  Then Destroy := TRUE;
+  if Y < -128 Then Kill := TRUE;
+  if Y > 600  Then Kill := TRUE;
 end;
 
 procedure CMiku.OnFree;
@@ -201,7 +201,6 @@ procedure Quit;
 begin
   // RU: Очищаем память от созданных спрайтов.
   // EN: Free allocated memory for sprites.
-  sengine2d.ClearAll();
   sengine2d.Destroy();
 end;
 
