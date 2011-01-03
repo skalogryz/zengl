@@ -645,7 +645,8 @@ begin
           end;
         kEventWindowClosed:
           begin
-            wnd_Handle := nil;
+            if app_Work Then // O_o
+              wnd_Handle := nil;
             app_Work   := FALSE;
           end;
         kEventWindowBoundsChanged:

@@ -363,8 +363,12 @@ procedure wnd_SetCaption( const NewCaption : String );
   var
     len : Integer;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  var
+    str : CFStringRef;
+  {$ENDIF}
 begin
-  wnd_Caption := NewCaption;
+  wnd_Caption := PChar( @NewCaption[ 1 ] );
 {$IFDEF LINUX}
   if wnd_Handle <> 0 Then
     begin
@@ -404,7 +408,12 @@ begin
 {$IFDEF DARWIN}
   if Assigned( wnd_Handle ) Then
     begin
-      SetWTitle( wnd_Handle, wnd_Caption );
+      if app_Flags and APP_USE_UTF8 = 0 Then
+        str := CFStringCreateWithPascalString( nil, wnd_Caption, kCFStringEncodingASCII )
+      else
+        str := CFStringCreateWithPascalString( nil, wnd_Caption, kCFStringEncodingUTF8 );
+      SetWindowTitleWithCFString( wnd_Handle, str );
+      CFRelease( str );
       wnd_Select();
     end;
 {$ENDIF}
