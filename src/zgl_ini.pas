@@ -146,12 +146,12 @@ end;
 
 procedure ini_LoadFromFile( const FileName : String );
 begin
-  ini_Free;
+  ini_Free();
   if not file_Exists( FileName ) Then exit;
   iniRec.FileName := FileName;
 
   mem_LoadFromFile( iniMem, FileName );
-  ini_Process;
+  ini_Process();
   mem_Free( iniMem );
 end;
 
