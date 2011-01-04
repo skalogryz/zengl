@@ -529,7 +529,7 @@ begin
   appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   app_WorkDir := appPath + '/';
-  app_HomeDir := '/Library/Application Support/';
+  app_HomeDir := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
 {$ENDIF}
   app_GetSysDirs := TRUE;
 end;
