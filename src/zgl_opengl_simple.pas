@@ -52,7 +52,7 @@ var
 procedure Set2DMode;
 begin
   ogl_Mode := 2;
-  if cam2dApply Then cam2d_Apply( nil );
+  batch2d_Flush();
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
@@ -68,13 +68,16 @@ begin
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   scr_SetViewPort();
+
+  if ( cam2dApply ) and ( ogl_Target = TARGET_SCREEN ) Then
+    cam2d_Apply( cam2dGlobal );
 end;
 
 procedure Set3DMode( FOVY : Single = 45 );
 begin
   ogl_Mode := 3;
   ogl_FOVY := FOVY;
-  if cam2dApply Then cam2d_Apply( nil );
+  batch2d_Flush();
 
   glColor4ub( 255, 255, 255, 255 );
 
@@ -103,15 +106,15 @@ end;
 
 procedure zbuffer_Clear;
 begin
+  batch2d_Flush();
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 
 procedure scissor_Begin( X, Y, Width, Height : Integer );
 begin
-  if b2d_Started Then
-    batch2d_Flush();
-  if ( Width < 0 ) or ( Height < 0 ) Then
-    exit;
+  batch2d_Flush();
+
+  if ( Width < 0 ) or ( Height < 0 ) Then exit;
   if cam2DGlobal <> @constCamera2D Then
     begin
       X      := Trunc( ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width  / 2 ) - ( ogl_Width  / 2 ) * cam2dGlobal.Zoom.X ) );
@@ -144,10 +147,9 @@ end;
 
 procedure scissor_End;
 begin
-  if b2d_Started Then
-    batch2d_Flush();
-  if tSCount - 1 < 0 Then
-    exit;
+  batch2d_Flush();
+
+  if tSCount - 1 < 0 Then exit;
   DEC( tSCount );
   ogl_ClipX := tScissor[ tSCount ][ 0 ];
   ogl_ClipY := tScissor[ tSCount ][ 1 ];

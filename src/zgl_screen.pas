@@ -396,12 +396,14 @@ end;
 
 procedure scr_Clear;
 begin
+  batch2d_Flush();
   glClear( GL_COLOR_BUFFER_BIT * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
            GL_STENCIL_BUFFER_BIT * Byte( app_Flags and STENCIL_BUFFER_CLEAR > 0 ) );
 end;
 
 procedure scr_Flush;
 begin
+  batch2d_Flush();
 {$IFDEF LINUX}
   glXSwapBuffers( scr_Display, wnd_Handle );
 {$ENDIF}

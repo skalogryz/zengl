@@ -84,7 +84,7 @@ procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
     srcBlend : LongWord;
     dstBlend : LongWord;
 begin
-  if b2d_Started and ( Mode + LongWord( SeparateAlpha ) shl 8 <> b2dcur_Blend ) Then
+  if Mode + LongWord( SeparateAlpha ) shl 8 <> b2dcur_Blend Then
     batch2d_Flush();
 
   b2dcur_Blend := Mode + LongWord( SeparateAlpha ) shl 8;
@@ -128,7 +128,7 @@ end;
 
 procedure fx_SetColorMode( Mode : Byte );
 begin
-  if b2d_Started and ( Mode <> b2dcur_Color ) Then
+  if Mode <> b2dcur_Color Then
     batch2d_Flush();
 
   b2dcur_Color := Mode;
@@ -151,7 +151,7 @@ procedure fx_SetColorMask( R, G, B, Alpha : Boolean );
     mask : Integer;
 begin
   mask := Byte( R ) + Byte( G ) shl 1 + Byte( B ) shl 2 + Byte( Alpha ) shl 3;
-  if b2d_Started and ( mask <> b2dcur_ColorMask ) Then
+  if mask <> b2dcur_ColorMask Then
     batch2d_Flush();
 
   b2dcur_ColorMask := mask;

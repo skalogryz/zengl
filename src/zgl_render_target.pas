@@ -565,7 +565,7 @@ begin
             {$IFDEF DARWIN}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
             aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
-            SetCurrentMode;
+            SetCurrentMode();
             {$ENDIF}
           end;
         RT_TYPE_FBO:
@@ -624,20 +624,18 @@ begin
           end;
 
           ogl_Target := TARGET_SCREEN;
-          if lRTarget.Flags and RT_FULL_SCREEN > 0 Then
-            scr_SetViewPort()
-          else
+          ogl_Width  := lGLW;
+          ogl_Height := lGLH;
+          if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
             begin
-              ogl_Width  := lGLW;
-              ogl_Height := lGLH;
-              ogl_ClipW  := lClipW;
-              ogl_ClipH  := lClipH;
-              scr_ResCX  := lResCX;
-              scr_ResCY  := lResCY;
-              SetCurrentMode();
+              ogl_ClipW := lClipW;
+              ogl_ClipH := lClipH;
+              scr_ResCX := lResCX;
+              scr_ResCY := lResCY;
             end;
 
           lRTarget := nil;
+          SetCurrentMode();
       end;
 end;
 
@@ -660,7 +658,6 @@ begin
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE );
         RenderCallback( Data );
-        batch2d_Flush();
 
         rtarget_Set( nil );
 

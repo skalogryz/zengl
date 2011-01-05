@@ -417,6 +417,8 @@ end;
 
 procedure tex_Filter( Texture : zglPTexture; Flags : LongWord );
 begin
+  batch2d_Flush();
+
   Texture.Flags := Flags;
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
@@ -652,14 +654,9 @@ end;
 
 procedure tex_SetData( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
 begin
-  if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then
-    exit;
+  batch2d_Flush();
 
-  if b2d_Started Then
-    begin
-      batch2d_Flush();
-      b2d_New := TRUE;
-    end;
+  if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then exit;
 
   glEnable( GL_TEXTURE_2D );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, Stride );
@@ -671,16 +668,12 @@ end;
 
 procedure tex_GetData( Texture : zglPTexture; var pData : Pointer );
 begin
+  batch2d_Flush();
+
   if not Assigned( Texture ) Then
     begin
       pData := nil;
       exit;
-    end;
-
-  if b2d_Started Then
-    begin
-      batch2d_Flush();
-      b2d_New := TRUE;
     end;
 
   GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * 4 );
