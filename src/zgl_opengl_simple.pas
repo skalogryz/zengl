@@ -70,7 +70,9 @@ begin
   scr_SetViewPort();
 
   if ( cam2dApply ) and ( ogl_Target = TARGET_SCREEN ) Then
-    cam2d_Apply( cam2dGlobal );
+    cam2d_Apply( cam2dGlobal )
+  else
+    sprite2d_InScreen := sprite2d_InScreenSimple;
 end;
 
 procedure Set3DMode( FOVY : Single = 45 );
