@@ -76,7 +76,9 @@ unit zglChipmunk;
     {$L cpSpaceStep}
     {$L cpVect}
     {$IFNDEF STATIC}
-      {$LINKLIB libmsvcrt.a}
+      {$IFDEF WINDOWS}
+        {$LINKLIB libmsvcrt.a}
+      {$ENDIF}
     {$ENDIF}
   {$ENDIF}
 {$ENDIF}
