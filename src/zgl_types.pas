@@ -25,7 +25,7 @@ unit zgl_types;
 interface
 
 type
-  Ptr = {$IFDEF CPU64} QWORD {$ELSE} LongWord {$ENDIF};
+  Ptr = {$IFDEF CPUx86_64} QWORD {$ELSE} LongWord {$ENDIF};
 
   PByteArray = ^TByteArray;
   TByteArray = array[ 0..65535 ] of Byte;

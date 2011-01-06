@@ -20,6 +20,8 @@
 }
 unit zgl_msvcrt;
 
+{$I zgl_config.cfg}
+
 interface
 uses
   zgl_types;
