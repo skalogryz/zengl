@@ -80,6 +80,9 @@ var
   app_XIM    : PXIM;
   app_XIC    : PXIC;
   {$ENDIF}
+  {$IFDEF WINDOWS}
+  app_Timer : LongWord;
+  {$ENDIF}
   app_ShowCursor : Boolean;
 
   app_dt : Double;
@@ -115,10 +118,10 @@ procedure zeroa; begin end;
 
 procedure app_Draw;
 begin
-  SetCurrentMode;
-  scr_Clear;
-  app_PDraw;
-  scr_Flush;
+  SetCurrentMode();
+  scr_Clear();
+  app_PDraw();
+  scr_Flush();
   if not app_Pause Then
     INC( app_FPSCount );
 end;
@@ -458,12 +461,30 @@ begin
         if ( not app_Focus ) and ( Result = HTCAPTION ) Then
           Result := HTCLIENT;
       end;
+    WM_ENTERSIZEMOVE:
+      begin
+        if not app_AutoPause Then
+          app_Timer := SetTimer( wnd_Handle, 1, 1, nil );
+      end;
+    WM_EXITSIZEMOVE:
+      begin
+        if app_Timer > 0 Then
+          begin
+            KillTimer( wnd_Handle, app_Timer );
+            app_Timer := 0;
+          end;
+      end;
     WM_MOVING:
       begin
         wnd_X := PRect( lParam ).Left;
         wnd_Y := PRect( lParam ).Top;
         if app_AutoPause Then
           timer_Reset();
+      end;
+    WM_TIMER:
+      begin
+        timer_MainLoop();
+        app_Draw();
       end;
     WM_SETCURSOR:
       begin

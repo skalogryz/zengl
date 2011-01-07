@@ -53,6 +53,7 @@ procedure Set2DMode;
 begin
   ogl_Mode := 2;
   batch2d_Flush();
+  if cam2dApply Then glPopMatrix();
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
@@ -70,7 +71,7 @@ begin
   scr_SetViewPort();
 
   if ( cam2dApply ) and ( ogl_Target = TARGET_SCREEN ) Then
-    cam2d_Apply( cam2dGlobal )
+    cam2d_Set( cam2dGlobal )
   else
     sprite2d_InScreen := sprite2d_InScreenSimple;
 end;
@@ -80,6 +81,7 @@ begin
   ogl_Mode := 3;
   ogl_FOVY := FOVY;
   batch2d_Flush();
+  if cam2dApply Then glPopMatrix();
 
   glColor4ub( 255, 255, 255, 255 );
 
@@ -117,7 +119,7 @@ begin
   batch2d_Flush();
 
   if ( Width < 0 ) or ( Height < 0 ) Then exit;
-  if cam2DGlobal <> @constCamera2D Then
+  if not cam2dOnlyXY Then
     begin
       X      := Trunc( ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width  / 2 ) - ( ogl_Width  / 2 ) * cam2dGlobal.Zoom.X ) );
       Y      := Trunc( ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y ) );

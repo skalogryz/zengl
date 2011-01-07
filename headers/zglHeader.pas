@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2011.01.02          }
+{ date:     2011.01.07          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -690,7 +690,6 @@ end;
 var
   cam2d_Set   : procedure( Camera : zglPCamera2D );
   cam2d_Get   : function : zglPCamera2D;
-  cam2d_Apply : procedure( Camera : zglPCamera2D );
 
 // Render 2D
   batch2d_Begin : procedure;
@@ -1459,7 +1458,6 @@ begin
 
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );
       cam2d_Get := dlsym( zglLib, 'cam2d_Get' );
-      cam2d_Apply := dlsym( zglLib, 'cam2d_Apply' );
 
       batch2d_Begin := dlsym( zglLib, 'batch2d_Begin' );
       batch2d_End := dlsym( zglLib, 'batch2d_End' );

@@ -50,12 +50,6 @@ procedure FreeAGL;
 function gl_GetProc( const Proc : AnsiString ) : Pointer;
 function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
 
-var
-  gl_TexCoord2f  : procedure( U, V : Single ); stdcall;
-  gl_TexCoord2fv : procedure( Coord : PSingle ); stdcall;
-  gl_Vertex2f    : procedure( X, Y : Single ); stdcall;
-  gl_Vertex2fv   : procedure( v : PSingle ); stdcall;
-
 const
   {$IFDEF LINUX}
   libGL  = 'libGL.so.1';

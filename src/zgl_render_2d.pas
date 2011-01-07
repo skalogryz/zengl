@@ -129,26 +129,15 @@ end;
 
 function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
   var
-    cx, cy, crad : Single;
     sx, sy, srad : Single;
 begin
-  if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) or ( cam2dGlobal.Angle <> 0 ) Then
+  if not cam2dOnlyXY Then
     begin
-      if ( cam2dZoomX <> cam2dGlobal.Zoom.X ) or ( cam2dZoomY <> cam2dGlobal.Zoom.Y ) Then
-        begin
-          cam2dZoomX := cam2dGlobal.Zoom.X;
-          cam2dZoomY := cam2dGlobal.Zoom.Y;
-          ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / scr_ResCX / cam2dZoomX ) + sqr( ogl_ClipH / scr_ResCY / cam2dZoomY ) ) ) div 2;
-        end;
-      cx   := ogl_ClipX + cam2dGlobal.X + ( ogl_ClipW / scr_ResCX ) / 2;
-      cy   := ogl_ClipY + cam2dGlobal.Y + ( ogl_ClipH / scr_ResCY ) / 2;
-      crad := ogl_ClipR;
-
       sx   := X + W / 2;
       sy   := Y + H / 2;
       srad := ( W + H ) / 2;
 
-      Result := sqr( sx - cx ) + sqr( sy - cy ) < sqr( srad + crad );
+      Result := sqr( sx - cam2dCX ) + sqr( sy - cam2dCY ) < sqr( srad + ogl_ClipR );
     end else
       if Angle <> 0 Then
         Result := ( ( X + W + H / 2 > ogl_ClipX + cam2dGlobal.X ) and ( X - W - H / 2 < ogl_ClipX + ogl_ClipW / scr_ResCX + cam2dGlobal.X ) and

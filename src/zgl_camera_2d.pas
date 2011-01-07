@@ -21,9 +21,6 @@
 unit zgl_camera_2d;
 
 {$I zgl_config.cfg}
-{$IFDEF LINUX_OR_DARWIN}
-  {$DEFINE stdcall := cdecl}
-{$ENDIF}
 
 interface
 uses
@@ -39,22 +36,16 @@ end;
 
 procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
-procedure cam2d_Apply( Camera : zglPCamera2D );
-
-procedure cam2d_Vertex2f( X, Y : Single ); stdcall;
-procedure cam2d_Vertex2fv( V : Pointer ); stdcall;
 
 var
-  cam2dApply    : Boolean;
-  cam2dZoomX    : Single;
-  cam2dZoomY    : Single;
-  cam2dAngle    : Single;
-  cam2dCos      : Single;
-  cam2dSin      : Single;
   cam2dGlobal   : zglPCamera2D = nil;
   constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
-  cam2dSX       : Integer = 0;
-  cam2dSY       : Integer = 0;
+  cam2dApply    : Boolean;
+  cam2dOnlyXY   : Boolean;
+  cam2dCX       : Single;
+  cam2dCY       : Single;
+  cam2dZoomX    : Single;
+  cam2dZoomY    : Single;
 
 implementation
 uses
@@ -66,28 +57,6 @@ uses
 
 procedure cam2d_Set( Camera : zglPCamera2D );
 begin
-  cam2dGlobal := Camera;
-  if Camera = nil Then
-    begin
-      cam2dGlobal  := @constCamera2D;
-      gl_Vertex2f  := @glVertex2f;
-      gl_Vertex2fv := @glVertex2fv;
-      sprite2d_InScreen := sprite2d_InScreenSimple;
-    end else
-      begin
-        gl_Vertex2f  := @cam2d_Vertex2f;
-        gl_Vertex2fv := @cam2d_Vertex2fv;
-        sprite2d_InScreen := sprite2d_InScreenCamera;
-      end;
-end;
-
-function cam2d_Get : zglPCamera2D;
-begin
-  Result := cam2dGlobal;
-end;
-
-procedure cam2d_Apply( Camera : zglPCamera2D );
-begin
   batch2d_Flush();
 
   if cam2dApply Then
@@ -95,11 +64,18 @@ begin
 
   if Assigned( Camera ) Then
     begin
-      cam2dApply  := TRUE;
       cam2dGlobal := Camera;
+      cam2dApply  := TRUE;
+      cam2dOnlyXY := ( cam2dGlobal.Angle = 0 ) and ( cam2dGlobal.Zoom.X = 1 ) and ( cam2dGlobal.Zoom.Y = 1 );
+      if ( cam2dZoomX <> cam2dGlobal.Zoom.X ) or ( cam2dZoomY <> cam2dGlobal.Zoom.Y ) Then
+        ogl_ClipR := Round( sqrt( sqr( ogl_Width / scr_ResCX / cam2dGlobal.Zoom.X ) + sqr( ogl_Height / scr_ResCY / cam2dGlobal.Zoom.Y ) ) ) div 2;
+      cam2dCX     := cam2dGlobal.X + ( ogl_Width / scr_ResCX ) / 2;
+      cam2dCY     := cam2dGlobal.Y + ( ogl_Height / scr_ResCY ) / 2;
+      cam2dZoomX  := cam2dGlobal.Zoom.X;
+      cam2dZoomY  := cam2dGlobal.Zoom.Y;
 
       glPushMatrix();
-      if ( Camera.Angle <> 0 ) or ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
+      if not cam2dOnlyXY Then
         begin
           glTranslatef( ogl_Width / 2 - scr_AddCX / scr_ResCX, ogl_Height / 2 - scr_AddCY / scr_ResCY, 0 );
           if ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
@@ -114,67 +90,15 @@ begin
       sprite2d_InScreen := sprite2d_InScreenCamera;
     end else
       begin
-        cam2dApply  := FALSE;
         cam2dGlobal := @constCamera2D;
+        cam2dApply  := FALSE;
         sprite2d_InScreen := sprite2d_InScreenSimple;
       end;
 end;
 
-procedure cam2d_Vertex2f( X, Y : Single ); stdcall;
-  var
-    xa, ya : Single;
+function cam2d_Get : zglPCamera2D;
 begin
-  if cam2dGlobal.Zoom.X = 1 Then
-    X := X - cam2dGlobal.X
-  else
-    X := ( X - cam2dGlobal.X + cam2dSX ) * cam2dGlobal.Zoom.X - cam2dSX;
-
-  if cam2dGlobal.Zoom.Y = 1 Then
-    Y := Y - cam2dGlobal.Y
-  else
-    Y := ( Y - cam2dGlobal.Y + cam2dSY ) * cam2dGlobal.Zoom.Y - cam2dSY;
-
-  if cam2dGlobal.Angle <> 0 Then
-    begin
-      if cam2dGlobal.Angle <> cam2dAngle Then
-        begin
-          cam2dAngle := cam2dGlobal.Angle;
-          m_SinCos( cam2dGlobal.Angle * deg2rad, cam2dSin, cam2dCos );
-        end;
-      xa := ogl_Width  / 2 + ( X + cam2dSX ) * cam2dCos - ( Y + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
-      ya := ogl_Height / 2 + ( X + cam2dSX ) * cam2dSin + ( Y + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
-      glVertex2f( xa, ya );
-    end else
-      glVertex2f( X, Y );
-end;
-
-procedure cam2d_Vertex2fv( V : Pointer ); stdcall;
-  var
-    v2  : array[ 0..1 ] of Single;
-    v2a : array[ 0..1 ] of Single;
-begin
-  if cam2dGlobal.Zoom.X = 1 Then
-    v2[ 0 ] := PSingle( Ptr( V ) + 0 )^ - cam2dGlobal.X
-  else
-    v2[ 0 ] := ( PSingle( Ptr( V ) + 0 )^ - cam2dGlobal.X + cam2dSX ) * cam2dGlobal.Zoom.X - cam2dSX;
-
-  if cam2dGlobal.Zoom.Y = 1 Then
-    v2[ 1 ] := PSingle( Ptr( V ) + 4 )^ - cam2dGlobal.Y
-  else
-    v2[ 1 ] := ( PSingle( Ptr( V ) + 4 )^ - cam2dGlobal.Y + cam2dSY ) * cam2dGlobal.Zoom.Y - cam2dSY;
-
-  if cam2dGlobal.Angle <> 0 Then
-    begin
-      if cam2dGlobal.Angle <> cam2dAngle Then
-        begin
-          cam2dAngle := cam2dGlobal.Angle;
-          m_SinCos( cam2dGlobal.Angle * deg2rad, cam2dSin, cam2dCos );
-        end;
-      v2a[ 0 ] := ogl_Width  / 2 + ( v2[ 0 ] + cam2dSX ) * cam2dCos - ( v2[ 1 ] + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
-      v2a[ 1 ] := ogl_Height / 2 + ( v2[ 0 ] + cam2dSX ) * cam2dSin + ( v2[ 1 ] + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
-      glVertex2fv( @v2a[ 0 ] );
-    end else
-      glVertex2fv( @v2[ 0 ] );
+  Result := cam2dGlobal;
 end;
 
 initialization

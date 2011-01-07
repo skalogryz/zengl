@@ -466,6 +466,8 @@ begin
   scr_Changing   := TRUE;
   ogl_Width      := Width;
   ogl_Height     := Height;
+  ogl_TargetW    := Width;
+  ogl_TargetH    := Height;
   wnd_Width      := Width;
   wnd_Height     := Height;
   wnd_FullScreen := FullScreen;
@@ -622,19 +624,12 @@ begin
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
   SetCurrentMode();
-
-  cam2dZoomX := cam2dGlobal.Zoom.X;
-  cam2dZoomY := cam2dGlobal.Zoom.Y;
-  ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / scr_ResCX / cam2dZoomX ) + sqr( ogl_ClipH / scr_ResCY / cam2dZoomY ) ) ) div 2;
 end;
 
 procedure scr_SetViewPort;
 begin
   if ogl_Target = TARGET_SCREEN Then
     begin
-      cam2dSX := Round( -ogl_Width / 2 + scr_AddCX / scr_ResCX );
-      cam2dSY := Round( -ogl_Height / 2 + scr_AddCY / scr_ResCY );
-
       if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
         begin
           ogl_ClipX := 0;
@@ -652,13 +647,11 @@ begin
           end;
     end else
       begin
-        cam2dSX   := Round( -ogl_Width / 2 );
-        cam2dSY   := Round( -ogl_Height / 2 );
         ogl_ClipX := 0;
         ogl_ClipY := 0;
         ogl_ClipW := ogl_Width;
         ogl_ClipH := ogl_Height;
-        glViewPort( 0, 0, ogl_ClipW, ogl_ClipH );
+        glViewPort( 0, 0, ogl_TargetW, ogl_TargetH );
       end;
 end;
 

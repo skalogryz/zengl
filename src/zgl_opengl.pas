@@ -56,8 +56,10 @@ var
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of LongWord;
 
-  ogl_Mode   : Integer = 3; // 2D/3D Modes
-  ogl_Target : Integer = TARGET_SCREEN;
+  ogl_Mode    : Integer = 2; // 2D/3D Modes
+  ogl_Target  : Integer = TARGET_SCREEN;
+  ogl_TargetW : Integer;
+  ogl_TargetH : Integer;
 
   ogl_Width  : Integer;
   ogl_Height : Integer;
@@ -461,12 +463,7 @@ begin
   ogl_CanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', ogl_Extensions );
   log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( ogl_CanCompressE ) );
 
-  gl_Vertex2f  := @glVertex2f;
-  gl_Vertex2fv := @glVertex2fv;
-
   // Multitexturing
-  gl_TexCoord2f  := @glTexCoord2f;
-  gl_TexCoord2fv := @glTexCoord2fv;
   glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @ogl_MaxTexUnits );
   log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( ogl_MaxTexUnits ) );
   glMultiTexCoord2fARB := gl_GetProc( 'glMultiTexCoord2f' );

@@ -551,7 +551,6 @@ begin
       lClipH     := ogl_ClipH;
       lResCX     := scr_ResCX;
       lResCY     := scr_ResCY;
-      ogl_Target := TARGET_TEXTURE;
 
       case Target._type of
         RT_TYPE_PBUFFER:
@@ -565,7 +564,6 @@ begin
             {$IFDEF DARWIN}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
             aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
-            SetCurrentMode();
             {$ENDIF}
           end;
         RT_TYPE_FBO:
@@ -575,20 +573,24 @@ begin
           end;
       end;
 
+      ogl_Target  := TARGET_TEXTURE;
+      ogl_TargetW := Target.Surface.Width;
+      ogl_TargetH := Target.Surface.Height;
       if Target.Flags and RT_FULL_SCREEN > 0 Then
-        glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height )
-      else
         begin
-          ogl_Width  := Target.Surface.Width;
-          ogl_Height := Target.Surface.Height;
-          ogl_ClipX  := 0;
-          ogl_ClipY  := 0;
-          ogl_ClipW  := ogl_Width;
-          ogl_ClipH  := ogl_Height;
-          scr_ResCX  := 1;
-          scr_ResCY  := 1;
-          SetCurrentMode();
-        end;
+          if app_Flags and CORRECT_RESOLUTION > 0 Then
+            begin
+              ogl_Width  := scr_ResW;
+              ogl_Height := scr_ResH;
+            end;
+        end else
+          begin
+            ogl_Width  := Target.Surface.Width;
+            ogl_Height := Target.Surface.Height;
+            scr_ResCX  := 1;
+            scr_ResCY  := 1;
+          end;
+      SetCurrentMode();
 
       if Target.Flags and RT_CLEAR_COLOR > 0 Then
         glClear( GL_COLOR_BUFFER_BIT );
@@ -623,9 +625,11 @@ begin
               end;
           end;
 
-          ogl_Target := TARGET_SCREEN;
-          ogl_Width  := lGLW;
-          ogl_Height := lGLH;
+          ogl_Target  := TARGET_SCREEN;
+          ogl_Width   := lGLW;
+          ogl_Height  := lGLH;
+          ogl_TargetW := ogl_Width;
+          ogl_TargetH := ogl_Height;
           if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
             begin
               ogl_ClipW := lClipW;

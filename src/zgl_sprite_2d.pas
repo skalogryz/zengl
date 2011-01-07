@@ -202,40 +202,40 @@ begin
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 1 ] ] );
-      gl_Vertex2fv( @quad[ 1 ] );
+      glVertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
-      gl_Vertex2fv( @quad[ 3 ] );
+      glVertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-        gl_Vertex2fv( @quad[ 0 ] );
+        glVertex2fv( @quad[ 0 ] );
 
         glTexCoord2fv( @TexCoord[ tci[ 1 ] ] );
-        gl_Vertex2fv( @quad[ 1 ] );
+        glVertex2fv( @quad[ 1 ] );
 
         glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-        gl_Vertex2fv( @quad[ 2 ] );
+        glVertex2fv( @quad[ 2 ] );
 
         glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
-        gl_Vertex2fv( @quad[ 3 ] );
+        glVertex2fv( @quad[ 3 ] );
       end;
 
   if not b2d_Started Then
@@ -392,40 +392,40 @@ begin
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 1 ] ] );
-      gl_Vertex2fv( @quad[ 1 ] );
+      glVertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 3 ] ] );
-      gl_Vertex2fv( @quad[ 3 ] );
+      glVertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2fv( @tc[ tci[ 0 ] ] );
-        gl_Vertex2fv( @quad[ 0 ] );
+        glVertex2fv( @quad[ 0 ] );
 
         glTexCoord2fv( @tc[ tci[ 1 ] ] );
-        gl_Vertex2fv( @quad[ 1 ] );
+        glVertex2fv( @quad[ 1 ] );
 
         glTexCoord2fv( @tc[ tci[ 2 ] ] );
-        gl_Vertex2fv( @quad[ 2 ] );
+        glVertex2fv( @quad[ 2 ] );
 
         glTexCoord2fv( @tc[ tci[ 3 ] ] );
-        gl_Vertex2fv( @quad[ 3 ] );
+        glVertex2fv( @quad[ 3 ] );
       end;
 
   if not b2d_Started Then
@@ -589,40 +589,40 @@ begin
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 1 ] ] );
-      gl_Vertex2fv( @quad[ 1 ] );
+      glVertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 3 ] ] );
-      gl_Vertex2fv( @quad[ 3 ] );
+      glVertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2fv( @tc[ tci[ 0 ] ] );
-        gl_Vertex2fv( @quad[ 0 ] );
+        glVertex2fv( @quad[ 0 ] );
 
         glTexCoord2fv( @tc[ tci[ 1 ] ] );
-        gl_Vertex2fv( @quad[ 1 ] );
+        glVertex2fv( @quad[ 1 ] );
 
         glTexCoord2fv( @tc[ tci[ 2 ] ] );
-        gl_Vertex2fv( @quad[ 2 ] );
+        glVertex2fv( @quad[ 2 ] );
 
         glTexCoord2fv( @tc[ tci[ 3 ] ] );
-        gl_Vertex2fv( @quad[ 3 ] );
+        glVertex2fv( @quad[ 3 ] );
       end;
 
   if not b2d_Started Then
@@ -787,40 +787,40 @@ begin
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2f( tW - tU, tY + tV );
-      gl_Vertex2fv( @quad[ 1 ] );
+      glVertex2fv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
-      gl_Vertex2fv( @quad[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2f( tX + tU, tH - tV );
-      gl_Vertex2fv( @quad[ 3 ] );
+      glVertex2fv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
-      gl_Vertex2fv( @quad[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2f( tX + tU, tY + tV );
-        gl_Vertex2fv( @quad[ 0 ] );
+        glVertex2fv( @quad[ 0 ] );
 
         glTexCoord2f( tW - tU, tY + tV );
-        gl_Vertex2fv( @quad[ 1 ] );
+        glVertex2fv( @quad[ 1 ] );
 
         glTexCoord2f( tW - tU, tH - tV );
-        gl_Vertex2fv( @quad[ 2 ] );
+        glVertex2fv( @quad[ 2 ] );
 
         glTexCoord2f( tX + tU, tH - tV );
-        gl_Vertex2fv( @quad[ 3 ] );
+        glVertex2fv( @quad[ 3 ] );
       end;
 
   if not b2d_Started Then
@@ -865,17 +865,10 @@ begin
         bJ := Round( ogl_ClipH / scr_ResCY ) div j - Round( tY ) div j;
       end;
 
-  if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) or ( cam2dGlobal.Angle <> 0 ) Then
+  if not cam2dOnlyXY Then
     begin
-      if ( cam2dZoomX <> cam2dGlobal.Zoom.X ) or ( cam2dZoomY <> cam2dGlobal.Zoom.Y ) Then
-        begin
-          cam2dZoomX := cam2dGlobal.Zoom.X;
-          cam2dZoomY := cam2dGlobal.Zoom.Y;
-          ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / cam2dZoomX ) + sqr( ogl_ClipH / cam2dZoomY ) ) ) div 2;
-        end;
-
-      tI := ogl_ClipR div i - Round( ogl_ClipW / scr_ResCX ) div i div 2 + 3;
-      tJ := ogl_ClipR div j - Round( ogl_ClipH / scr_ResCY ) div j div 2 + 3;
+      tI := ogl_ClipR div i - Round( ogl_Width / scr_ResCX ) div i div 2 + 3;
+      tJ := ogl_ClipR div j - Round( ogl_Height / scr_ResCY ) div j div 2 + 3;
       DEC( aI, tI );
       INC( bI, tI );
       DEC( aJ, tJ );
@@ -941,16 +934,16 @@ begin
         tY := tY * v;
 
         glTexCoord2f( tX - u + tU, tY - tV );
-        gl_Vertex2f( x + i * w, y + j * h );
+        glVertex2f( x + i * w, y + j * h );
 
         glTexCoord2f( tX - tU, tY - tV );
-        gl_Vertex2f( x + i * w + w, y + j * h );
+        glVertex2f( x + i * w + w, y + j * h );
 
         glTexCoord2f( tX - tU, tY - v + tV );
-        gl_Vertex2f( x + i * w + w, y + j * h + h );
+        glVertex2f( x + i * w + w, y + j * h + h );
 
         glTexCoord2f( tX - u + tU, tY - v + tV );
-        gl_Vertex2f( x + i * w, y + j * h + h );
+        glVertex2f( x + i * w, y + j * h + h );
       end;
 
   if not b2d_Started Then

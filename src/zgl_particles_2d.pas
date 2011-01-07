@@ -993,16 +993,16 @@ begin
               glColor4ubv( @fx2dColor[ 0 ] );
 
               glTexCoord2fv( @tc[ 0 ] );
-              gl_Vertex2fv( @quad[ 0 ] );
+              glVertex2fv( @quad[ 0 ] );
 
               glTexCoord2fv( @tc[ 1 ] );
-              gl_Vertex2fv( @quad[ 1 ] );
+              glVertex2fv( @quad[ 1 ] );
 
               glTexCoord2fv( @tc[ 2 ] );
-              gl_Vertex2fv( @quad[ 2 ] );
+              glVertex2fv( @quad[ 2 ] );
 
               glTexCoord2fv( @tc[ 3 ] );
-              gl_Vertex2fv( @quad[ 3 ] );
+              glVertex2fv( @quad[ 3 ] );
             end;
         end else
           for i := 0 to Particles - 1 do
@@ -1057,16 +1057,16 @@ begin
               glColor4ubv( @fx2dColor[ 0 ] );
 
               glTexCoord2fv( @tc[ 0 ] );
-              gl_Vertex2fv( @quad[ 0 ] );
+              glVertex2fv( @quad[ 0 ] );
 
               glTexCoord2fv( @tc[ 1 ] );
-              gl_Vertex2fv( @quad[ 1 ] );
+              glVertex2fv( @quad[ 1 ] );
 
               glTexCoord2fv( @tc[ 2 ] );
-              gl_Vertex2fv( @quad[ 2 ] );
+              glVertex2fv( @quad[ 2 ] );
 
               glTexCoord2fv( @tc[ 3 ] );
-              gl_Vertex2fv( @quad[ 3 ] );
+              glVertex2fv( @quad[ 3 ] );
             end;
 
       if not b2d_Started Then

@@ -53,7 +53,7 @@ begin
     end;
 
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-  gl_Vertex2f( X + 0.5, Y + 0.5 );
+  glVertex2f( X + 0.5, Y + 0.5 );
 
   if not b2d_Started Then
     begin
@@ -79,14 +79,14 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      gl_Vertex2f( X1 + 0.5, Y1 + 0.5 );
+      glVertex2f( X1 + 0.5, Y1 + 0.5 );
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      gl_Vertex2f( X2 + 0.5, Y2 + 0.5 );
+      glVertex2f( X2 + 0.5, Y2 + 0.5 );
     end else
       begin
         glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-        gl_Vertex2f( X1 + 0.5, Y1 + 0.5 );
-        gl_Vertex2f( X2 + 0.5, Y2 + 0.5 );
+        glVertex2f( X1 + 0.5, Y1 + 0.5 );
+        glVertex2f( X2 + 0.5, Y2 + 0.5 );
       end;
 
   if not b2d_Started Then
@@ -115,31 +115,31 @@ begin
       if FX and FX2D_VCA > 0 Then
         begin
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          gl_Vertex2f( X,     Y );
+          glVertex2f( X,     Y );
 
           glColor4ubv( @fx2dVCA2[ 0 ] );
-          gl_Vertex2f( X + W, Y );
+          glVertex2f( X + W, Y );
 
           glColor4ubv( @fx2dVCA3[ 0 ] );
-          gl_Vertex2f( X + W, Y + H );
+          glVertex2f( X + W, Y + H );
 
           glColor4ubv( @fx2dVCA3[ 0 ] );
-          gl_Vertex2f( X + W, Y + H );
+          glVertex2f( X + W, Y + H );
 
           glColor4ubv( @fx2dVCA4[ 0 ] );
-          gl_Vertex2f( X,     Y + H );
+          glVertex2f( X,     Y + H );
 
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          gl_Vertex2f( X,     Y );
+          glVertex2f( X,     Y );
         end else
           begin
             glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-            gl_Vertex2f( X,     Y );
-            gl_Vertex2f( X + W, Y );
-            gl_Vertex2f( X + W, Y + H );
-            gl_Vertex2f( X + W, Y + H );
-            gl_Vertex2f( X,     Y + H );
-            gl_Vertex2f( X,     Y );
+            glVertex2f( X,     Y );
+            glVertex2f( X + W, Y );
+            glVertex2f( X + W, Y + H );
+            glVertex2f( X + W, Y + H );
+            glVertex2f( X,     Y + H );
+            glVertex2f( X,     Y );
           end;
 
       if not b2d_Started Then
@@ -163,36 +163,36 @@ begin
       if FX and FX2D_VCA > 0 Then
         begin
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          gl_Vertex2f( X,     Y );
+          glVertex2f( X,     Y );
 
           glColor4ubv( @fx2dVCA2[ 0 ] );
-          gl_Vertex2f( X + W, Y );
+          glVertex2f( X + W, Y );
 
-          gl_Vertex2f( X + W, Y );
+          glVertex2f( X + W, Y );
           glColor4ubv( @fx2dVCA3[ 0 ] );
-          gl_Vertex2f( X + W, Y + H );
+          glVertex2f( X + W, Y + H );
 
-          gl_Vertex2f( X + W, Y + H );
+          glVertex2f( X + W, Y + H );
           glColor4ubv( @fx2dVCA4[ 0 ] );
-          gl_Vertex2f( X,     Y + H );
+          glVertex2f( X,     Y + H );
 
-          gl_Vertex2f( X,     Y + H );
+          glVertex2f( X,     Y + H );
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          gl_Vertex2f( X,     Y );
+          glVertex2f( X,     Y );
         end else
           begin
             glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-            gl_Vertex2f( X,     Y );
-            gl_Vertex2f( X + W, Y );
+            glVertex2f( X,     Y );
+            glVertex2f( X + W, Y );
 
-            gl_Vertex2f( X + W, Y );
-            gl_Vertex2f( X + W, Y + H );
+            glVertex2f( X + W, Y );
+            glVertex2f( X + W, Y + H );
 
-            gl_Vertex2f( X + W, Y + H );
-            gl_Vertex2f( X,     Y + H );
+            glVertex2f( X + W, Y + H );
+            glVertex2f( X,     Y + H );
 
-            gl_Vertex2f( X,     Y + H );
-            gl_Vertex2f( X,     Y );
+            glVertex2f( X,     Y + H );
+            glVertex2f( X,     Y );
           end;
 
       if not b2d_Started Then
@@ -230,8 +230,8 @@ begin
       glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
-          gl_Vertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
+          glVertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
+          glVertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
         end;
 
       if not b2d_Started Then
@@ -262,9 +262,9 @@ begin
         glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
         for i := 0 to Quality - 1 do
           begin
-            gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
-            gl_Vertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
+            glVertex2f( X, Y );
+            glVertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
+            glVertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
           end;
 
         if not b2d_Started Then
@@ -308,8 +308,8 @@ begin
       glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
       for i := 0 to Quality - 1 do
         begin
-          gl_Vertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
-          gl_Vertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
+          glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
+          glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
         end;
 
       if not b2d_Started Then
@@ -340,9 +340,9 @@ begin
         glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
         for i := 0 to Quality - 1 do
           begin
-            gl_Vertex2f( X, Y );
-            gl_Vertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
-            gl_Vertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
+            glVertex2f( X, Y );
+            glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
+            glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
           end;
 
         if not b2d_Started Then
@@ -401,34 +401,34 @@ begin
           for i := iLo to iHi do
             begin
               glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
-              gl_Vertex2fv( @TriList[ i ] );
+              glVertex2fv( @TriList[ i ] );
             end;
         end else
           for i := iLo to iHi do
             begin
               glTexCoord2fv( @TexCoords[ i ] );
-              gl_Vertex2fv( @TriList[ i ] );
+              glVertex2fv( @TriList[ i ] );
             end;
     end else
       if Mode = GL_TRIANGLES Then
         begin
           for i := iLo to iHi do
-            gl_Vertex2fv( @TriList[ i ] );
+            glVertex2fv( @TriList[ i ] );
         end else
           begin
             i := iLo;
             while i < iHi do
               begin
-                gl_Vertex2fv( @TriList[ i ] );
-                gl_Vertex2fv( @TriList[ i + 1 ] );
+                glVertex2fv( @TriList[ i ] );
+                glVertex2fv( @TriList[ i + 1 ] );
                 INC( i );
 
-                gl_Vertex2fv( @TriList[ i ] );
-                gl_Vertex2fv( @TriList[ i + 1 ] );
+                glVertex2fv( @TriList[ i ] );
+                glVertex2fv( @TriList[ i + 1 ] );
                 INC( i );
 
-                gl_Vertex2fv( @TriList[ i ] );
-                gl_Vertex2fv( @TriList[ i - 2 ] );
+                glVertex2fv( @TriList[ i ] );
+                glVertex2fv( @TriList[ i - 2 ] );
                 INC( i );
               end;
           end;

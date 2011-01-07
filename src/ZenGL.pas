@@ -234,7 +234,6 @@ exports
   // Camera 2D
   cam2d_Set                name prefix + 'cam2d_Set',
   cam2d_Get                name prefix + 'cam2d_Get',
-  cam2d_Apply              name prefix + 'cam2d_Apply',
 
   // Render 2D
   batch2d_Begin            name prefix + 'batch2d_Begin',

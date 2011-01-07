@@ -117,16 +117,16 @@ begin
           quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
 
           glTexCoord2f( iU * u, Texture^.V - jV * v );
-          gl_Vertex2fv( @quad[ 0 ] );
+          glVertex2fv( @quad[ 0 ] );
 
           glTexCoord2f( ( iU + iiU ) * u, Texture^.V - jV * v );
-          gl_Vertex2fv( @quad[ 1 ] );
+          glVertex2fv( @quad[ 1 ] );
 
           glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
-          gl_Vertex2fv( @quad[ 2 ] );
+          glVertex2fv( @quad[ 2 ] );
 
           glTexCoord2f( iU * u, Texture^.V - ( jV + ijV ) * v );
-          gl_Vertex2fv( @quad[ 3 ] );
+          glVertex2fv( @quad[ 3 ] );
 
           INC( jV, ijV );
         end;
@@ -218,16 +218,16 @@ begin
           quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
 
           glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-          gl_Vertex2fv( @quad[ 0 ] );
+          glVertex2fv( @quad[ 0 ] );
 
           glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - jV * v - tY );
-          gl_Vertex2fv( @quad[ 1 ] );
+          glVertex2fv( @quad[ 1 ] );
 
           glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-          gl_Vertex2fv( @quad[ 2 ] );
+          glVertex2fv( @quad[ 2 ] );
 
           glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-          gl_Vertex2fv( @quad[ 3 ] );
+          glVertex2fv( @quad[ 3 ] );
 
           INC( jV, ijV );
         end;
@@ -317,16 +317,16 @@ begin
           quad[ 3 ].Y := Y + Grid.Grid[ i, j + 1 ].Y;
 
           glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-          gl_Vertex2fv( @quad[ 0 ] );
+          glVertex2fv( @quad[ 0 ] );
 
           glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - jV * v - tY );
-          gl_Vertex2fv( @quad[ 1 ] );
+          glVertex2fv( @quad[ 1 ] );
 
           glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-          gl_Vertex2fv( @quad[ 2 ] );
+          glVertex2fv( @quad[ 2 ] );
 
           glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-          gl_Vertex2fv( @quad[ 3 ] );
+          glVertex2fv( @quad[ 3 ] );
 
           INC( jV, ijV );
         end;

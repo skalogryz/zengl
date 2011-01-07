@@ -190,40 +190,40 @@ begin
         begin
           glColor4ubv( @fx2dVCA1[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-          gl_Vertex2fv( @quad[ 0 ] );
+          glVertex2fv( @quad[ 0 ] );
 
           glColor4ubv( @fx2dVCA2[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 1 ] );
-          gl_Vertex2fv( @quad[ 1 ] );
+          glVertex2fv( @quad[ 1 ] );
 
           glColor4ubv( @fx2dVCA3[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-          gl_Vertex2fv( @quad[ 2 ] );
+          glVertex2fv( @quad[ 2 ] );
 
           glColor4ubv( @fx2dVCA3[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-          gl_Vertex2fv( @quad[ 2 ] );
+          glVertex2fv( @quad[ 2 ] );
 
           glColor4ubv( @fx2dVCA4[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
-          gl_Vertex2fv( @quad[ 3 ] );
+          glVertex2fv( @quad[ 3 ] );
 
           glColor4ubv( @fx2dVCA1[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-          gl_Vertex2fv( @quad[ 0 ] );
+          glVertex2fv( @quad[ 0 ] );
         end else
           begin
             glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-            gl_Vertex2fv( @quad[ 0 ] );
+            glVertex2fv( @quad[ 0 ] );
 
             glTexCoord2fv( @charDesc.TexCoords[ 1 ] );
-            gl_Vertex2fv( @quad[ 1 ] );
+            glVertex2fv( @quad[ 1 ] );
 
             glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-            gl_Vertex2fv( @quad[ 2 ] );
+            glVertex2fv( @quad[ 2 ] );
 
             glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
-            gl_Vertex2fv( @quad[ 3 ] );
+            glVertex2fv( @quad[ 3 ] );
           end;
 
       X := X + ( charDesc.ShiftP + textStep ) * textScale;
