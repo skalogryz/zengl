@@ -69,6 +69,9 @@ const
   {$L jquant2}
   {$L jutils}
   {$L wrapper}
+  {$IFDEF DARWIN}
+    {$LINKLIB libgcc.a}
+  {$ENDIF}
 
 type
   zglPJPGData = ^zglTJPGData;
