@@ -17,6 +17,7 @@ FPC     = fpc
 FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src
 LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS)
+LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS)
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo05.pas
@@ -50,7 +51,7 @@ macos: clean
 	rm -Rf $(BUNDLE)
 	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
 	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
-	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min 10.4"
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBSPPC) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min 10.4"
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
 	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
 	cp $(OUTPUT)data/zengl.png $(BUNDLE)/Contents/Resources/

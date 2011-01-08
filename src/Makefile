@@ -15,7 +15,8 @@ endif
 # Variables
 FPC     = fpc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS)
+LIBS    = -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS)
+LIBSPPC = -Fu../lib/jpeg/powerpc-$(OS) -Fu../lib/ogg/powerpc-$(OS) -Fu../lib/zlib/powerpc-$(OS)
 OUTPUT  = ./
 DESTDIR = /usr
 TMP     = -FUtmp
@@ -25,7 +26,7 @@ TARGETM = libZenGL.dylib
 
 # Targets
 all: clean
-	$(FPC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX -P$(ARCH)
+	$(FPC) ZenGL.pas $(LIBS) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX -P$(ARCH)
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
@@ -35,8 +36,8 @@ win64: clean
 	$(FPC) ZenGL.pas -Fu../lib/jpeg/x86_64-win64 -Fu../lib/msvcrt/x86_64 -Fu../lib/ogg/x86_64-win64 -Fu../lib/zlib/x86_64-win64 $(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
 
 macos: clean
-	$(FPC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-no_order_inits" -k"-no_order_data" -k"-macosx_version_min 10.4"
-	$(FPC) ZenGL.pas $(INCLUDE) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-no_order_inits" -k"-no_order_data" -k"-macosx_version_min 10.4"
+	$(FPC) ZenGL.pas $(LIBS) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-no_order_inits" -k"-no_order_data" -k"-macosx_version_min 10.4"
+	$(FPC) ZenGL.pas $(LIBSPPC) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-no_order_inits" -k"-no_order_data" -k"-macosx_version_min 10.4"
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(OUTPUT)$(TARGETM)
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
 
