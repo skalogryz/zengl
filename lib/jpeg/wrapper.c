@@ -1,6 +1,5 @@
 #include "stdio.h"
 #include <jconfig.h>
-#include <jmorecfg.h>
 #include <jpeglib.h>
 
 typedef unsigned char* (*getmem_func)( int Size );
