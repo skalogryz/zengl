@@ -496,7 +496,11 @@ begin
 
   if not sndInitialized Then exit;
 
+  {$IFDEF DARWIN}
+  if not file_Exists( darwin_GetRes( FileName ) ) Then
+  {$ELSE}
   if not file_Exists( FileName ) Then
+  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -507,7 +511,11 @@ begin
     begin
       file_GetExtension( FileName, ext );
       if u_StrUp( ext ) = managerSound.Formats[ i ].Extension Then
+        {$IFDEF DARWIN}
+        managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, f, Result.Frequency );
+        {$ELSE}
         managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, f, Result.Frequency );
+        {$ENDIF}
     end;
 
   if not Assigned( Result.Data ) Then

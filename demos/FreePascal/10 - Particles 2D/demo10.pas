@@ -32,7 +32,7 @@ uses
   ;
 
 var
-  dirRes      : String = '../data/';
+  dirRes      : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fntMain     : zglPFont;
   texBack     : zglPTexture;
   texParticle : zglPTexture;
@@ -46,10 +46,6 @@ procedure Init;
   var
     i, j : Integer;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );

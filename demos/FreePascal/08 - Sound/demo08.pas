@@ -40,7 +40,7 @@ const
   SCREEN_HEIGHT = 600;
 
 var
-  dirRes : String = '../data/';
+  dirRes : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fnt    : zglPFont;
   icon   : array[ 0..1 ] of zglPTexture;
   sound  : zglPSound;
@@ -63,10 +63,6 @@ procedure Init;
   var
     i : Integer;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   // RU: Инициализируем звуковую подсистему.
   // Для Windows можно сделать выбор между DirectSound и OpenAL глянув файл zgl_config.cfg
   //

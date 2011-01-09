@@ -192,13 +192,21 @@ function font_LoadFromFile( const FileName : String ) : zglPFont;
     tmp  : String;
 begin
   Result := nil;
+  {$IFDEF DARWIN}
+  if not file_Exists( darwin_GetRes( FileName ) ) Then
+  {$ELSE}
   if not file_Exists( FileName ) Then
+  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
     end;
 
+  {$IFDEF DARWIN}
+  mem_LoadFromFile( fntMem, darwin_GetRes( FileName ) );
+  {$ELSE}
   mem_LoadFromFile( fntMem, FileName );
+  {$ENDIF}
   mem_Read( fntMem, fntID, 13 );
   if fntID <> ZGL_FONT_INFO Then
     begin
@@ -215,7 +223,11 @@ begin
     for j := managerTexture.Count.Formats - 1 downto 0 do
       begin
         tmp := dir + name + '-page' + u_IntToStr( i ) + '.' + u_StrDown( managerTexture.Formats[ j ].Extension );
+        {$IFDEF DARWIN}
+        if file_Exists( darwin_GetRes( tmp ) ) Then
+        {$ELSE}
         if file_Exists( tmp ) Then
+        {$ENDIF}
           begin
             Result.Pages[ i ] := tex_LoadFromFile( tmp, $FF000000, TEX_DEFAULT_2D );
             break;

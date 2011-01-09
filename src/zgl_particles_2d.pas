@@ -681,13 +681,21 @@ end;
 function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
 begin
   Result := nil;
+  {$IFDEF DARWIN}
+  if not file_Exists( darwin_GetRes( FileName ) ) Then
+  {$ELSE}
   if not file_Exists( FileName ) Then
+  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
     end;
 
+  {$IFDEF DARWIN}
+  mem_LoadFromFile( emitter2dMem, darwin_GetRes( FileName ) );
+  {$ELSE}
   mem_LoadFromFile( emitter2dMem, FileName );
+  {$ENDIF}
   mem_Read( emitter2dMem, emitter2dID, 14 );
   if emitter2dID <> ZGL_EMITTER_2D Then
     log_Add( FileName + ' - it''s not a ZenGL Emitter 2D file' )

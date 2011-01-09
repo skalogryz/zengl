@@ -69,6 +69,10 @@ procedure file_GetExtension( const FileName : String; var Result : String );
 procedure file_GetDirectory( const FileName : String; var Result : String );
 procedure file_SetPath( const Path : String );
 
+{$IFDEF DARWIN}
+function darwin_GetRes( const FileName : String ) : String;
+{$ENDIF}
+
 {$IFDEF LINUX_OR_DARWIN}
 const
   { read/write search permission for everyone }
@@ -89,6 +93,9 @@ function free( ptr : Pointer ):longint;cdecl;external 'libc' name 'free';
 
 implementation
 uses
+  {$IFDEF DARWIN}
+  zgl_application,
+  {$ENDIF}
   zgl_utils;
 
 var
@@ -345,5 +352,18 @@ begin
   else
     filePath := PChar( @Path[ 1 ] );
 end;
+
+{$IFDEF DARWIN}
+function darwin_GetRes( const FileName : String ) : String;
+  var
+    len : Integer;
+begin
+  len := length( FileName );
+  if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
+    Result := app_WorkDir + '../Resources/' + FileName
+  else
+    Result := FileName;
+end;
+{$ENDIF}
 
 end.

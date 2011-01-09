@@ -26,17 +26,13 @@ uses
   ;
 
 var
-  dirRes : String = '../data/';
+  dirRes : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fnt    : zglPFont;
 
 procedure Init;
   var
     i : Integer;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );

@@ -24,7 +24,7 @@ uses
   ;
 
 var
-  dirRes     : String = '../data/';
+  dirRes     : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fullScreen : Boolean;
   fnt        : zglPFont;
   something  : String;
@@ -32,10 +32,6 @@ var
 
 procedure Init;
 begin
-  {$IFDEF DARWIN}
-  dirRes := PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/';
-  {$ENDIF}
-
   // RU: Загрузка шрифта и вывод текста освещен в "04 - Text".
   // EN: Font loading and text rendering will be described in this demo - "04 - Text".
   fnt := font_LoadFromFile( dirRes + 'font.zfi' );
