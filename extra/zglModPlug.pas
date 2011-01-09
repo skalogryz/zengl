@@ -91,12 +91,11 @@ begin
 
   mpLibrary := dlopen( libmodplug {$IFNDEF WIN32}, $001 {$ENDIF} );
   {$IFDEF LINUX}
-  if mpLibrary = LIB_ERROR Then
-    mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
+  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
+  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.1' ), $001 );
   {$ENDIF}
   {$IFDEF DARWIN}
-  if mpLibrary = LIB_ERROR Then
-    mpLibrary := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libmodplug ), $001 );
+  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libmodplug ), $001 );
   {$ENDIF}
 
   if mpLibrary <> LIB_ERROR Then
