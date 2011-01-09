@@ -132,7 +132,7 @@ begin
   Result := not Boolean( FpAccess( filePath + FileName, F_OK ) );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  file_Open( fileHandle, FileName, FOM_OPENR );
+  file_Open( fileHandle, filePath + FileName, FOM_OPENR );
   Result := fileHandle <> INVALID_HANDLE_VALUE;
   if Result Then
     file_Close( fileHandle );
@@ -336,8 +336,14 @@ begin
 end;
 
 procedure file_SetPath( const Path : String );
+  var
+    len : Integer;
 begin
-  filePath := Path;
+  len := length( Path );
+  if ( len > 0 ) and ( Path[ len ] <> '/' ) and ( Path[ len ] <> '\' ) Then
+    filePath := Path + '/'
+  else
+    filePath := PChar( @Path[ 1 ] );
 end;
 
 end.
