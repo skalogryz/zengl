@@ -66,7 +66,7 @@ end;
 
 function col2d_PointInRect( X, Y : Single; const Rect : zglTRect ) : Boolean;
 begin
-  Result := ( X > Rect.X ) and ( X < Rect.X + Rect.W ) and ( Y > Rect.Y ) and ( Y < Rect.Y + Rect.H );
+  Result := ( X >= Rect.X ) and ( X < Rect.X + Rect.W ) and ( Y >= Rect.Y ) and ( Y < Rect.Y + Rect.H );
 end;
 
 function col2d_PointInTriangle( X, Y : Single; const P1, P2, P3 : zglTPoint2D ) : Boolean;

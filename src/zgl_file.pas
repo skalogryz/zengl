@@ -53,9 +53,9 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
+function  file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 function  file_MakeDir( const Directory : String ) : Boolean;
-function  file_Exists( const FileName : String ) : Boolean;
+function  file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
 function  file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 function  file_GetPos( FileHandle : zglTFile ) : LongWord;
 function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -101,7 +101,7 @@ uses
 var
   filePath : String = '';
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
+function file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 begin
 {$IFDEF LINUX_OR_DARWIN}
   case Mode of
@@ -117,6 +117,7 @@ begin
     FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
 {$ENDIF}
+  Result := FileHandle <> FILE_ERROR;
 end;
 
 function file_MakeDir( const Directory : String ) : Boolean;
@@ -129,20 +130,33 @@ begin
 {$ENDIF}
 end;
 
-function file_Exists( const FileName : String ) : Boolean;
-  {$IFDEF WINDOWS}
+function file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
   var
+  {$IFDEF LINUX_OR_DARWIN}
+    status : Stat;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
     fileHandle : zglTFile;
+    attr       : LongWord;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  Result := not Boolean( FpAccess( filePath + FileName, F_OK ) );
+  if not Directory Then
+    Result := not Boolean( FpAccess( filePath + FileName, F_OK ) )
+  else
+    Result := FpStat( filePath + FileName, status ) = 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  file_Open( fileHandle, filePath + FileName, FOM_OPENR );
-  Result := fileHandle <> INVALID_HANDLE_VALUE;
-  if Result Then
-    file_Close( fileHandle );
+  if not Directory Then
+    begin
+      Result := file_Open( fileHandle, filePath + FileName, FOM_OPENR );
+      if Result Then
+        file_Close( fileHandle );
+    end else
+      begin
+        attr   := GetFileAttributes( PChar( filePath + FileName ) );
+        Result := ( attr <> $FFFFFFFF ) and ( attr and FILE_ATTRIBUTE_DIRECTORY <> 0 );
+      end;
 {$ENDIF}
 end;
 

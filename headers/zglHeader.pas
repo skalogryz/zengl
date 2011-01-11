@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2011.01.07          }
+{ date:     2011.01.10          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -233,7 +233,7 @@ var
   scissor_End   : procedure;
 
 // INI
-  ini_LoadFromFile  : procedure( const FileName : String );
+  ini_LoadFromFile  : function( const FileName : String ) : Boolean;
   ini_SaveToFile    : procedure( const FileName : String );
   ini_Add           : procedure( const Section, Key : AnsiString );
   ini_Del           : procedure( const Section, Key : AnsiString );
@@ -1178,8 +1178,9 @@ const
   FILE_ERROR = {$IFNDEF WINDOWS} -1 {$ELSE} 0 {$ENDIF};
 
 var
-  file_Open         : procedure( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
-  file_Exists       : function( const FileName : String ) : Boolean;
+  file_Open         : function( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
+  file_MakeDir      : function( const Directory : String ) : Boolean;
+  file_Exists       : function( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
   file_Seek         : function( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
   file_GetPos       : function( FileHandle : zglTFile ) : LongWord;
   file_Read         : function( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -1559,6 +1560,7 @@ begin
       col2d_CircleInRect := dlsym( zglLib, 'col2d_CircleInRect' );
 
       file_Open := dlsym( zglLib, 'file_Open' );
+      file_MakeDir := dlsym( zglLib, 'file_MakeDir' );
       file_Exists := dlsym( zglLib, 'file_Exists' );
       file_Seek := dlsym( zglLib, 'file_Seek' );
       file_GetPos := dlsym( zglLib, 'file_GetPos' );

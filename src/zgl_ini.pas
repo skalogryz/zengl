@@ -51,7 +51,7 @@ type
     Section  : array of zglTINISection;
 end;
 
-procedure ini_LoadFromFile( const FileName : String );
+function  ini_LoadFromFile( const FileName : String ) : Boolean;
 procedure ini_SaveToFile( const FileName : String );
 procedure ini_Add( const Section, Key : AnsiString );
 procedure ini_Del( const Section, Key : AnsiString );
@@ -144,8 +144,9 @@ begin
       end;
 end;
 
-procedure ini_LoadFromFile( const FileName : String );
+function ini_LoadFromFile( const FileName : String ) : Boolean;
 begin
+  Result := FALSE;
   ini_Free();
   if not file_Exists( FileName ) Then exit;
   iniRec.FileName := FileName;
@@ -153,6 +154,7 @@ begin
   mem_LoadFromFile( iniMem, FileName );
   ini_Process();
   mem_Free( iniMem );
+  Result := TRUE;
 end;
 
 procedure ini_SaveToFile( const FileName : String );
