@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC6';
-  cs_Date     = '2011.01.10';
+  cs_Date     = '2011.01.11';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -58,12 +58,6 @@ const
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_DECODER     = $000023;
-  WIDGET_TYPE_ID         = $000030;
-  WIDGET_FILL_DESC       = $000031;
-  WIDGET_ONDRAW          = $000032;
-  WIDGET_ONPROC          = $000033;
-  WIDGET_ONFREEDESC      = $000034;
-  WIDGET_ONFREEDATA      = $000035;
 
   // zgl_Get
   ZENGL_VERSION           = 1;
@@ -146,6 +140,9 @@ uses
   zgl_opengl,
   zgl_opengl_all,
   zgl_opengl_simple,
+  {$IFDEF LINUX}
+  zgl_file,
+  {$ENDIF}
   zgl_timers,
   zgl_log,
   zgl_render_2d,
@@ -494,6 +491,9 @@ procedure zgl_GetSysDir;
 begin
   app_WorkDir := './';
   app_HomeDir := FpGetEnv( 'HOME' ) + '/.config/';
+  // for some old distros
+  if not file_Exists( app_HomeDir, TRUE ) Then
+    file_MakeDir( app_HomeDir );
 {$ENDIF}
 {$IFDEF WINDOWS}
 var
