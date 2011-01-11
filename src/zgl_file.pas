@@ -366,7 +366,7 @@ begin
   if ( len > 0 ) and ( Path[ len ] <> '/' ) and ( Path[ len ] <> '\' ) Then
     filePath := Path + '/'
   else
-    filePath := PChar( @Path[ 1 ] );
+    filePath := Path + #0;
 end;
 
 {$IFDEF DARWIN}
@@ -378,7 +378,7 @@ begin
   if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := app_WorkDir + '../Resources/' + FileName
   else
-    Result := FileName;
+    Result := FileName + #0;
 end;
 {$ENDIF}
 

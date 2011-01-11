@@ -149,7 +149,7 @@ begin
   Result := FALSE;
   ini_Free();
   if not file_Exists( FileName ) Then exit;
-  iniRec.FileName := FileName;
+  iniRec.FileName := FileName + #0;
 
   mem_LoadFromFile( iniMem, FileName );
   ini_Process();
@@ -189,8 +189,8 @@ procedure ini_Add( const Section, Key : AnsiString );
     s, k   : AnsiString;
     ns, nk : Integer;
 begin
-  s := Section;
-  k := Key;
+  s := Section + #0;
+  k := Key + #0;
 
   ini_GetID( s, k, ns, nk );
 
@@ -348,7 +348,7 @@ begin
 
   if ini_GetID( s, k, i, j ) Then
     begin
-      iniRec.Section[ i ].Key[ j ].Value := Value;
+      iniRec.Section[ i ].Key[ j ].Value := Value + #0;
       Result := TRUE;
     end else
       begin
