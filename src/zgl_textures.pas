@@ -438,7 +438,9 @@ begin
   else if Texture.Flags and TEX_FILTER_TRILINEAR > 0 Then
     currentFilter := TEX_FILTER_TRILINEAR
   else if Texture.Flags and TEX_FILTER_ANISOTROPY > 0 Then
-    currentFilter := TEX_FILTER_ANISOTROPY;
+    currentFilter := TEX_FILTER_ANISOTROPY
+  else
+    currentFilter := 0;
   Texture.Flags := Texture.Flags xor currentFilter;
 
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
