@@ -424,10 +424,23 @@ begin
 end;
 
 procedure tex_Filter( Texture : zglPTexture; Flags : LongWord );
+  var
+    currentFilter : LongWord;
 begin
   batch2d_Flush();
 
-  Texture.Flags := Flags;
+  if Texture.Flags and TEX_FILTER_NEAREST > 0 Then
+    currentFilter := TEX_FILTER_NEAREST
+  else if Texture.Flags and TEX_FILTER_LINEAR > 0 Then
+    currentFilter := TEX_FILTER_LINEAR
+  else if Texture.Flags and TEX_FILTER_BILINEAR > 0 Then
+    currentFilter := TEX_FILTER_BILINEAR
+  else if Texture.Flags and TEX_FILTER_TRILINEAR > 0 Then
+    currentFilter := TEX_FILTER_TRILINEAR
+  else if Texture.Flags and TEX_FILTER_ANISOTROPY > 0 Then
+    currentFilter := TEX_FILTER_ANISOTROPY;
+  Texture.Flags := Texture.Flags xor currentFilter;
+
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
   if Flags and TEX_CLAMP > 0 Then
@@ -444,26 +457,31 @@ begin
     begin
       if Flags and TEX_FILTER_NEAREST > 0 Then
         begin
+          Texture.Flags := Texture.Flags or TEX_FILTER_NEAREST;
           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
         end else
           if Flags and TEX_FILTER_LINEAR > 0 Then
             begin
+              Texture.Flags := Texture.Flags or TEX_FILTER_LINEAR;
               glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
               glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
             end else
               if Flags and TEX_FILTER_BILINEAR > 0 Then
                 begin
+                  Texture.Flags := Texture.Flags or TEX_FILTER_BILINEAR;
                   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
                   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                 end else
                   if Flags and TEX_FILTER_TRILINEAR > 0 Then
                     begin
+                      Texture.Flags := Texture.Flags or TEX_FILTER_TRILINEAR;
                       glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
                       glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                     end else
                       if Flags and TEX_FILTER_ANISOTROPY > 0 Then
                         begin
+                          Texture.Flags := Texture.Flags or TEX_FILTER_ANISOTROPY;
                           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
                           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                           glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ogl_Anisotropy );
@@ -473,10 +491,12 @@ begin
         if ( Flags and TEX_FILTER_NEAREST > 0 ) or ( ( Flags and TEX_FILTER_LINEAR = 0 ) and ( Flags and TEX_FILTER_BILINEAR = 0 ) and
            ( Flags and TEX_FILTER_TRILINEAR = 0 ) and ( Flags and TEX_FILTER_ANISOTROPY = 0 ) ) Then
           begin
+            Texture.Flags := Texture.Flags or TEX_FILTER_NEAREST;
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
           end else
             begin
+              Texture.Flags := Texture.Flags or TEX_FILTER_LINEAR;
               glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
               glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
             end;
