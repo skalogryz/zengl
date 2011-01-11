@@ -37,7 +37,6 @@ uses
 
 const
   LIB_ERROR  = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
-  FILE_ERROR = {$IFDEF LINUX_OR_DARWIN}  -1 {$ELSE} 0 {$ENDIF};
 
 function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;

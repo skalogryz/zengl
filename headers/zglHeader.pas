@@ -1165,6 +1165,8 @@ var
   col2d_CircleInRect   : function( const Circle : zglTCircle; const Rect : zglTRect ) : Boolean;
 
 const
+  FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} LongWord( -1 ) {$ENDIF};
+
   // Open Mode
   FOM_CREATE = $01; // Create
   FOM_OPENR  = $02; // Read
@@ -1174,8 +1176,6 @@ const
   FSM_SET    = $01;
   FSM_CUR    = $02;
   FSM_END    = $03;
-
-  FILE_ERROR = {$IFNDEF WINDOWS} -1 {$ELSE} 0 {$ENDIF};
 
 var
   file_Open         : function( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;

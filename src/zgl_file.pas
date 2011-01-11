@@ -43,6 +43,8 @@ type zglTFile = THandle;
 type zglTFileList = zglTStringList;
 
 const
+  FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} LongWord( -1 ) {$ENDIF};
+
   // Open Mode
   FOM_CREATE = $01; // Create
   FOM_OPENR  = $02; // Read
