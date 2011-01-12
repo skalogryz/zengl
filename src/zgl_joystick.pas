@@ -224,7 +224,7 @@ function joy_Init : Byte;
 begin
   Result := 0;
 
-  {$IFDEF LINUX}
+{$IFDEF LINUX}
   for i := 0 to 15 do
     begin
       joyArray[ joyCount ].device := FpOpen( '/dev/input/js' + u_IntToStr( i ), O_RDONLY or O_NONBLOCK );
@@ -268,8 +268,8 @@ begin
         end else
           break;
     end;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+{$ENDIF}
+{$IFDEF WINDOWS}
   j := joyGetNumDevs();
   for i := 0 to j - 1 do
     if joyGetDevCaps( i, @joyArray[ i ].caps, SizeOf( TJOYCAPS ) ) = 0 Then
@@ -319,7 +319,7 @@ begin
         INC( joyCount );
       end else
         break;
-  {$ENDIF}
+{$ENDIF}
 
   Result := joyCount;
   if Result = 0 Then
@@ -356,7 +356,7 @@ procedure joy_Proc;
 begin
   if joyCount = 0 Then exit;
 
-  {$IFDEF LINUX}
+{$IFDEF LINUX}
   for i := 0 to joyCount - 1 do
     begin
       while FpRead( joyArray[ i ].device, event, 8 ) = 8 do
@@ -387,8 +387,8 @@ begin
             end;
         end;
     end;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+{$ENDIF}
+{$IFDEF WINDOWS}
   state.dwSize := SizeOf( TJOYINFOEX );
   for i := 0 to joyCount - 1 do
     begin
@@ -435,7 +435,7 @@ begin
             end;
         end;
     end;
-  {$ENDIF}
+{$ENDIF}
 end;
 
 function joy_GetInfo( JoyID : Byte ) : zglPJoyInfo;

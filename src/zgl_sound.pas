@@ -449,11 +449,11 @@ begin
 
   Result.SourceCount := SourceCount;
   SetLength( Result.Channel, SourceCount );
-  {$IFDEF USE_OPENAL}
+{$IFDEF USE_OPENAL}
   alGenBuffers( 1, @Result.Buffer );
   for i := 0 to SourceCount - 1 do
     FillChar( Result.Channel[ i ], SizeOf( zglTSoundChannel ), 0 );
-  {$ENDIF}
+{$ENDIF}
 
   INC( managerSound.Count.Items );
 end;
@@ -1131,11 +1131,11 @@ begin
   Result := 0;
   id := LongWord( data );
 
-  {$IFDEF USE_OPENAL}
+{$IFDEF USE_OPENAL}
   processed := 0;
   while ( processed < 1 ) and sfStream[ id ]._playing do
     alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
-  {$ENDIF}
+{$ENDIF}
   while app_Work and sfStream[ id ]._playing do
     begin
       if not sndInitialized Then break;
