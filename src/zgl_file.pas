@@ -376,7 +376,7 @@ function darwin_GetRes( const FileName : String ) : String;
 begin
   len := length( FileName );
   if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
-    Result := app_WorkDir + '../Resources/' + FileName
+    Result := app_WorkDir + 'Contents/Resources/' + FileName
   else
     Result := FileName + #0;
 end;
