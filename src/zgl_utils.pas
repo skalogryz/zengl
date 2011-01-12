@@ -45,6 +45,8 @@ function u_StrToFloat( const Value : String ) : Single;
 function u_BoolToStr( Value : Boolean ) : String;
 function u_StrToBool( const Value : String ) : Boolean;
 
+function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
+function u_CopyStr( const Str : String ) : String;
 // Только для английских символов попадающих в диапазон 0..127
 function u_StrUp( const Str : String ) : String;
 function u_StrDown( const Str : String ) : String;
@@ -130,6 +132,24 @@ begin
       Result := TRUE
     else
       Result := FALSE;
+end;
+
+function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  SetLength( Result, len );
+  Move( Str[ 1 ], Result[ 1 ], len );
+end;
+
+function u_CopyStr( const Str : String ) : String;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  SetLength( Result, len );
+  Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
 end;
 
 function u_StrUp( const Str : String ) : String;

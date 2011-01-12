@@ -242,7 +242,7 @@ end;
 
 procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
 begin
-  keysText    := Text + #0;
+  keysText    := u_CopyStr( Text );
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
 end;

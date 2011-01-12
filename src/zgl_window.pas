@@ -368,7 +368,7 @@ procedure wnd_SetCaption( const NewCaption : String );
     str : CFStringRef;
   {$ENDIF}
 begin
-  wnd_Caption := NewCaption + #0;
+  wnd_Caption := u_CopyStr( NewCaption );
 {$IFDEF LINUX}
   if wnd_Handle <> 0 Then
     begin
