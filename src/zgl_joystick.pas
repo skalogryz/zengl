@@ -206,6 +206,7 @@ procedure joy_ClearState;
 implementation
 uses
   zgl_types,
+  zgl_file,
   zgl_log,
   zgl_math_2d,
   zgl_utils;
