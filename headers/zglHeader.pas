@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2011.01.10          }
+{ date:     2011.01.13          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -1213,6 +1213,8 @@ function u_StrToBool( const Value : String ) : Boolean;
 // Только для английских символов попадающих в диапазон 0..127
 function u_StrUp( const str : String ) : String;
 function u_StrDown( const str : String ) : String;
+function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
+function u_CopyStr( const Str : String ) : String;
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
@@ -1287,6 +1289,24 @@ begin
       Result := FALSE;
 end;
 
+function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  SetLength( Result, len );
+  Move( Str[ 1 ], Result[ 1 ], len );
+end;
+
+function u_CopyStr( const Str : String ) : String;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  SetLength( Result, len );
+  Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
+end;
+
 function u_StrUp( const str : String ) : String;
   var
     i, l : Integer;
@@ -1311,11 +1331,6 @@ begin
       Result[ i ] := Char( Byte( Str[ i ] ) + 32 )
     else
       Result[ i ] := Str[ i ];
-end;
-
-procedure zglFree;
-begin
-  dlClose( zglLib );
 end;
 
 
@@ -1597,6 +1612,11 @@ begin
           StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading ZenGL', nil, outItemHit );
           {$ENDIF}
         end;
+end;
+
+procedure zglFree;
+begin
+  dlClose( zglLib );
 end;
 
 end.
