@@ -366,7 +366,7 @@ begin
   if ( len > 0 ) and ( Path[ len ] <> '/' ) and ( Path[ len ] <> '\' ) Then
     filePath := Path + '/'
   else
-    filePath := Path + #0;
+    filePath := u_CopyStr( Path );
 end;
 
 {$IFDEF DARWIN}
@@ -378,7 +378,7 @@ begin
   if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := app_WorkDir + 'Contents/Resources/' + FileName
   else
-    Result := FileName + #0;
+    Result := FileName;
 end;
 {$ENDIF}
 
