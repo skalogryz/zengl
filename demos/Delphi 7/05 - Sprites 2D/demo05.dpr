@@ -50,7 +50,7 @@ procedure Init;
   var
     i : Integer;
 begin
-    // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует для масштаба установить 1.
+  // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует для масштаба установить 1.
   // EN: Zoom must be set to 1, because camera structure is zero-filled by default.
   camMain.Zoom.X := 1;
   camMain.Zoom.Y := 1;
@@ -118,17 +118,9 @@ begin
       // EN: Render the background with size 800x600 and using texture "back".
       ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
-      // RU: "Применить" текущие параметры камеры.
-      // EN: Apply current camera parameters.
-      cam2d_Apply( @camMain );
-      // RU: Код ниже является более гибким вариантом. Он позволяет единажды вызвать установку камеры,
-      // и любое изменение параметров camMain тут же будет влиять на вывод чего-либо, но этот вариант
-      // уступает по быстродействию.
-      //
-      // EN: Code below is more flexible. One time camera was set, and any changes of camMain
-      // parameters will be used for rendering the scene, but this method is slow.
-      //
-      // cam2d_Set( @camMain );
+      // RU: Установить текущую камеру.
+      // EN: Set the current camera.
+      cam2d_Set( @camMain );
 
       // RU: Рисуем землю.
       // EN: Render the ground.
@@ -195,12 +187,9 @@ begin
               end else
                 asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 255, FX_BLEND or FX2D_FLIPX );
 
-      // RU: Применить стандартное положение.
+      // RU: Сбросить камеру.
       // EN: Reset the camera.
-      cam2d_Apply( nil );
-      // RU: Если же использовался вариант с cam2d_Set, то и сбрасывать следует этой же командой
-      // EN: If cam2d_Set was used, then this command must be used again
-      // cam2d_Set( nil );
+      cam2d_Set( nil );
 
       // RU: Рисуем учатоск земли по центру экрана.
       // EN: Render piece of ground in the center of screen.
