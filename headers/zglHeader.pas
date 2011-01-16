@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2011.01.13          }
+{ date:     2011.01.16          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -155,10 +155,11 @@ const
   MANAGER_EMITTER2D       = 806; // zglPEmitter2DManager
 
 var
-  zgl_Get     : function( What : LongWord ) : Ptr;
-  zgl_GetMem  : procedure( var Mem : Pointer; Size : LongWord );
-  zgl_FreeMem : procedure( var Mem : Pointer );
-  zgl_FreeStr : procedure( var Str : String );
+  zgl_Get         : function( What : LongWord ) : Ptr;
+  zgl_GetMem      : procedure( var Mem : Pointer; Size : LongWord );
+  zgl_FreeMem     : procedure( var Mem : Pointer );
+  zgl_FreeStr     : procedure( var Str : String );
+  zgl_FreeStrList : procedure( var List : zglTStringList );
 
 const
   COLOR_BUFFER_CLEAR    = $000001;
@@ -1362,6 +1363,7 @@ begin
       zgl_GetMem := dlsym( zglLib, 'zgl_GetMem' );
       zgl_FreeMem := dlsym( zglLib, 'zgl_FreeMem' );
       zgl_FreeStr := dlsym( zglLib, 'zgl_FreeStr' );
+      zgl_FreeStrList := dlsym( zglLib, 'zgl_FreeStrList' );
       zgl_Enable := dlsym( zglLib, 'zgl_Enable' );
       zgl_Disable := dlsym( zglLib, 'zgl_Disable' );
 

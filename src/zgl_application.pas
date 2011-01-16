@@ -205,19 +205,23 @@ end;
 function app_ProcessMessages;
   var
   {$IFDEF LINUX}
-    event  : TXEvent;
-    keysym : TKeySym;
-    status : TStatus;
+    event         : TXEvent;
+    keysym        : TKeySym;
+    status        : TStatus;
+    root_return   : TWindow;
+    child_return  : TWindow;
+    root_x_return : Integer;
+    root_y_return : Integer;
+    mask_return   : LongWord;
   {$ENDIF}
   {$IFDEF DARWIN}
     eClass  : UInt32;
     eKind   : UInt32;
     command : HICommand;
-    mPos    : HIPoint;
+    mPos    : Point;
     mButton : EventMouseButton;
     mWheel  : Integer;
     bounds  : HIRect;
-    where   : Point;
     SCAKey  : LongWord;
   {$ENDIF}
     i   : Integer;
@@ -227,6 +231,8 @@ function app_ProcessMessages;
     key : LongWord;
 begin
 {$IFDEF LINUX}
+  XQueryPointer( scr_Display, wnd_Handle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
+
   Result := 0;
   while XPending( scr_Display ) <> 0 do
     begin
@@ -243,7 +249,7 @@ begin
           begin
             app_Focus := TRUE;
             app_Pause := FALSE;
-            app_PActivate( TRUE );
+            if app_Work Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -253,7 +259,7 @@ begin
           begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
-            app_PActivate( FALSE );
+            if app_Work Then app_PActivate( FALSE );
           end;
         ConfigureNotify:
           begin
@@ -264,18 +270,6 @@ begin
               wnd_SetSize( wnd_Width, wnd_Height );
           end;
 
-        MotionNotify:
-          begin
-            if not mouseLock Then
-              begin
-                mouseX := event.xmotion.X;
-                mouseY := event.xmotion.Y;
-              end else
-                begin
-                  mouseX := event.xmotion.X - wnd_Width  div 2;
-                  mouseY := event.xmotion.Y - wnd_Height div 2;
-                end;
-          end;
         ButtonPress:
           begin
             case event.xbutton.button of
@@ -437,7 +431,7 @@ begin
         if app_Focus Then
           begin
             app_Pause := FALSE;
-            app_PActivate( TRUE );
+            if app_Work Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -447,7 +441,7 @@ begin
           end else
             begin
               if app_AutoPause Then app_Pause := TRUE;
-              app_PActivate( FALSE );
+              if app_Work Then app_PActivate( FALSE );
               if app_Work and ( wnd_FullScreen ) and ( not wnd_First ) Then
                 begin
                   scr_Reset();
@@ -618,6 +612,10 @@ begin
   end;
 {$ENDIF}
 {$IFDEF DARWIN}
+  GetGlobalMouse( mPos );
+  mouseX := mPos.X;
+  mouseY := mPos.Y;
+
   eClass := GetEventClass( inEvent );
   eKind  := GetEventKind( inEvent );
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
@@ -643,7 +641,7 @@ begin
           begin
             app_Focus := TRUE;
             app_Pause := FALSE;
-            app_PActivate( TRUE );
+            if app_Work Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -655,9 +653,8 @@ begin
           begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
-            app_PActivate( FALSE );
-            if wnd_FullScreen Then
-              scr_Reset();
+            if app_Work Then app_PActivate( FALSE );
+            if wnd_FullScreen Then scr_Reset();
           end;
         kEventWindowCollapsed:
           begin
@@ -779,19 +776,7 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            GetEventParameter( inEvent, kEventParamMouseLocation, typeHIPoint, nil, SizeOf( HIPoint ), nil, @mPos );
-
-            if not mouseLock Then
-              begin
-                mouseX := Round( mPos.X ) - wnd_X;
-                mouseY := Round( mPos.Y ) - wnd_Y;
-              end else
-                begin
-                  mouseX := Round( mPos.X - wnd_Width  / 2 );
-                  mouseY := Round( mPos.Y - wnd_Height / 2 );
-                end;
-
-            wnd_MouseIn := ( mPos.X > wnd_X ) and ( mPos.X < wnd_X + wnd_Width ) and ( mPos.Y > wnd_Y ) and ( mPos.Y < wnd_Y + wnd_Height );
+            wnd_MouseIn := ( mouseX > wnd_X ) and ( mouseX < wnd_X + wnd_Width ) and ( mouseY > wnd_Y ) and ( mouseY < wnd_Y + wnd_Height );
             if wnd_MouseIn Then
               begin
                 if ( not app_ShowCursor ) and ( CGCursorIsVisible = 1 ) Then

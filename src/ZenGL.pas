@@ -103,6 +103,7 @@ exports
   zgl_GetMem               name prefix + 'zgl_GetMem',
   zgl_FreeMem              name prefix + 'zgl_FreeMem',
   zgl_FreeStr              name prefix + 'zgl_FreeStr',
+  zgl_FreeStrList          name prefix + 'zgl_FreeStrList',
   zgl_Enable               name prefix + 'zgl_Enable',
   zgl_Disable              name prefix + 'zgl_Disable',
   log_Add                  name prefix + 'log_Add',

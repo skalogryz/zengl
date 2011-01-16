@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC6';
-  cs_Date     = '2011.01.11';
+  cs_Date     = '2011.01.16';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -129,6 +129,7 @@ procedure zgl_GetSysDir;
 procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
 procedure zgl_FreeMem( var Mem : Pointer );
 procedure zgl_FreeStr( var Str : String );
+procedure zgl_FreeStrList( var List : zglTStringList );
 procedure zgl_Enable( What : LongWord );
 procedure zgl_Disable( What : LongWord );
 
@@ -553,6 +554,16 @@ end;
 procedure zgl_FreeStr( var Str : String );
 begin
   Str := '';
+end;
+
+procedure zgl_FreeStrList( var List : zglTStringList );
+  var
+    i : Integer;
+begin
+  for i := 0 to List.Count - 1 do
+    List.Items[ i ] := '';
+  List.Count := 0;
+  SetLength( List.Items, 0 );
 end;
 
 procedure zgl_Enable( What : LongWord );

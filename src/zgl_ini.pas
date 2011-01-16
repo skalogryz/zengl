@@ -251,6 +251,17 @@ begin
 
   if s = '' Then
     begin
+      for ns := 0 to iniRec.Sections - 1 do
+        begin
+          iniRec.Section[ ns ].Name := '';
+          for nk := 0 to iniRec.Section[ ns ].Keys - 1 do
+            begin
+              iniRec.Section[ ns ].Key[ nk ].Name  := '';
+              iniRec.Section[ ns ].Key[ nk ].Value := '';
+            end;
+          iniRec.Section[ ns ].Keys := 0;
+          SetLength( iniRec.Section[ ns ].Key, 0 );
+        end;
       iniRec.Sections := 0;
       SetLength( iniRec.Section, 0 );
     end else
@@ -258,6 +269,11 @@ begin
         begin
           ini_GetID( s, '', ns, nk );
 
+          for nk := 0 to iniRec.Section[ ns ].Keys - 1 do
+            begin
+              iniRec.Section[ ns ].Key[ nk ].Name  := '';
+              iniRec.Section[ ns ].Key[ nk ].Value := '';
+            end;
           iniRec.Section[ ns ].Keys := 0;
           SetLength( iniRec.Section[ ns ].Key, 0 );
         end;
