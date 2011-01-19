@@ -112,7 +112,7 @@ begin
 
   // RU: "Считываем" в переменную введеный текст.
   // EN: "Read" the text to variable.
-  key_GetText( something );
+  something := key_GetText();
 
   // RU: Обязательно очищаем состояния.
   // EN: Necessarily clear all the states.

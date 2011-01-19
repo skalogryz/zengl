@@ -165,7 +165,7 @@ function  key_Up( KeyCode : Byte ) : Boolean;
 function  key_Press( KeyCode : Byte ) : Boolean;
 function  key_Last( KeyAction : Byte ) : Byte;
 procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
-procedure key_GetText( var Result : String );
+function  key_GetText : String;
 procedure key_EndReadText;
 procedure key_ClearState;
 
@@ -247,7 +247,7 @@ begin
   keysCanText := TRUE;
 end;
 
-procedure key_GetText( var Result : String );
+function key_GetText : String;
 begin
   Result := keysText;
 end;

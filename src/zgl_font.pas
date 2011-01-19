@@ -217,8 +217,8 @@ begin
       Result := font_Load();
   mem_Free( fntMem );
 
-  file_GetDirectory( FileName, dir );
-  file_GetName( FileName, name );
+  dir  := file_GetDirectory( FileName );
+  name := file_GetName( FileName );
   for i := 0 to Result.Count.Pages - 1 do
     for j := managerTexture.Count.Formats - 1 downto 0 do
       begin

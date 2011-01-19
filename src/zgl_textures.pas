@@ -254,8 +254,8 @@ begin
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     begin
-      file_GetExtension( FileName, ext );
-      if u_StrUp( ext ) = managerTexture.Formats[ i ].Extension Then
+      ext := u_StrUp( file_GetExtension( FileName ) );
+      if ext = managerTexture.Formats[ i ].Extension Then
         {$IFDEF DARWIN}
         managerTexture.Formats[ i ].FileLoader( darwin_GetRes( FileName ), pData, w, h );
         {$ELSE}

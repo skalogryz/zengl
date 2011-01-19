@@ -562,7 +562,6 @@ function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
     c     : LongWord;
     chunk : Word;
     size  : LongWord;
-    dir   : String;
 begin
   Result := emitter2d_Add();
   with Result^ do
@@ -593,10 +592,7 @@ begin
               mem_Read( emitter2dMem, _texFile[ 1 ], size );
               _texHash := u_Hash( _texFile );
               if FileName <> '' Then
-                begin
-                  file_GetDirectory( FileName, dir );
-                  ParParams.Texture := pengine2d_LoadTexture( dir + _texFile );
-                end;
+                ParParams.Texture := pengine2d_LoadTexture( file_GetDirectory( FileName ) + _texFile );
             end;
           ZEF_CHUNK_BLENDMODE:
             begin

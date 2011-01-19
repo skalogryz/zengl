@@ -66,9 +66,9 @@ function  file_GetSize( FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
 procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
-procedure file_GetName( const FileName : String; var Result : String );
-procedure file_GetExtension( const FileName : String; var Result : String );
-procedure file_GetDirectory( const FileName : String; var Result : String );
+function  file_GetName( const FileName : String ) : String;
+function  file_GetExtension( const FileName : String ) : String;
+function  file_GetDirectory( const FileName : String ) : String;
 procedure file_SetPath( const Path : String );
 
 {$IFDEF DARWIN}
@@ -331,7 +331,7 @@ begin
     Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
 end;
 
-procedure file_GetName( const FileName : String; var Result : String );
+function file_GetName( const FileName : String ) : String;
   var
     tmp : String;
 begin
@@ -344,12 +344,12 @@ begin
   Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
-procedure file_GetExtension( const FileName : String; var Result : String );
+function file_GetExtension( const FileName : String ) : String;
 begin
   GetStr( FileName, Result, '.', FALSE );
 end;
 
-procedure file_GetDirectory( const FileName : String; var Result : String );
+function file_GetDirectory( const FileName : String ) : String;
 begin
   GetStr( FileName, Result, '/', TRUE );
   {$IFDEF WINDOWS}

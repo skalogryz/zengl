@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2011.01.16          }
+{ date:     2011.01.19          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -241,7 +241,7 @@ var
   ini_Clear         : procedure( const Section : AnsiString );
   ini_IsSection     : function( const Section : AnsiString ) : Boolean;
   ini_IsKey         : function( const Section, Key : AnsiString ) : Boolean;
-  ini_ReadKeyStr    : procedure( const Section, Key : AnsiString; var Result : AnsiString );
+  _ini_ReadKeyStr   : function( const Section, Key : AnsiString ) : AnsiString;
   ini_ReadKeyInt    : function( const Section, Key : AnsiString ) : Integer;
   ini_ReadKeyFloat  : function( const Section, Key : AnsiString ) : Single;
   ini_ReadKeyBool   : function( const Section, Key : AnsiString ) : Boolean;
@@ -249,6 +249,8 @@ var
   ini_WriteKeyInt   : function( const Section, Key : AnsiString; Value : Integer ) : Boolean;
   ini_WriteKeyFloat : function( const Section, Key : AnsiString; Value : Single; Digits : Integer = 2 ) : Boolean;
   ini_WriteKeyBool  : function( const Section, Key : AnsiString; Value : Boolean ) : Boolean;
+
+  function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
 
 // TIMERS
 type
@@ -427,9 +429,11 @@ var
   key_Press         : function( KeyCode : Byte ) : Boolean;
   key_Last          : function( KeyAction : Byte ) : Byte;
   key_BeginReadText : procedure( const Text : String; MaxSymbols : Integer = -1 );
-  key_GetText       : procedure( var Result : String );
+  _key_GetText      : function : String;
   key_EndReadText   : procedure;
   key_ClearState    : procedure;
+
+  function key_GetText : String;
 
 // JOYSTICK
 type
@@ -1179,21 +1183,25 @@ const
   FSM_END    = $03;
 
 var
-  file_Open         : function( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
-  file_MakeDir      : function( const Directory : String ) : Boolean;
-  file_Exists       : function( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
-  file_Seek         : function( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
-  file_GetPos       : function( FileHandle : zglTFile ) : LongWord;
-  file_Read         : function( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
-  file_Write        : function( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
-  file_GetSize      : function( FileHandle : zglTFile ) : LongWord;
-  file_Flush        : procedure( const FileHandle : zglTFile );
-  file_Close        : procedure( var FileHandle : zglTFile );
-  file_Find         : procedure( const Directory : String; var List : zglTFileList; FindDir : Boolean );
-  file_GetName      : procedure( const FileName : String; var Result : String );
-  file_GetExtension : procedure( const FileName : String; var Result : String );
-  file_GetDirectory : procedure( const FileName : String; var Result : String );
-  file_SetPath      : procedure( const Path : String );
+  file_Open          : function( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
+  file_MakeDir       : function( const Directory : String ) : Boolean;
+  file_Exists        : function( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
+  file_Seek          : function( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
+  file_GetPos        : function( FileHandle : zglTFile ) : LongWord;
+  file_Read          : function( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
+  file_Write         : function( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
+  file_GetSize       : function( FileHandle : zglTFile ) : LongWord;
+  file_Flush         : procedure( const FileHandle : zglTFile );
+  file_Close         : procedure( var FileHandle : zglTFile );
+  file_Find          : procedure( const Directory : String; var List : zglTFileList; FindDir : Boolean );
+  _file_GetName      : function( const FileName : String ) : String;
+  _file_GetExtension : function( const FileName : String ) : String;
+  _file_GetDirectory : function( const FileName : String ) : String;
+  file_SetPath       : procedure( const Path : String );
+
+  function file_GetName( const FileName : String ) : String;
+  function file_GetExtension( const FileName : String ) : String;
+  function file_GetDirectory( const FileName : String ) : String;
 
 var
   mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
@@ -1244,6 +1252,51 @@ var
   tmpPath      : array[ 0..8191 ] of Char;
   outItemHit   : SInt16;
   {$ENDIF}
+
+function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
+  var
+    tmp : AnsiString;
+begin
+  tmp := _ini_ReadKeyStr( Section, Key );
+  Result := u_CopyAnsiStr( tmp );
+  // zgl_FreeStr( tmp );
+end;
+
+function key_GetText : String;
+  var
+    tmp : String;
+begin
+  tmp := _key_GetText();
+  Result := u_CopyStr( tmp );
+  zgl_FreeStr( tmp );
+end;
+
+function file_GetName( const FileName : String ) : String;
+  var
+    tmp : String;
+begin
+  tmp := _file_GetName( FileName );
+  Result := u_CopyStr( tmp );
+  zgl_FreeStr( tmp );
+end;
+
+function file_GetExtension( const FileName : String ) : String;
+  var
+    tmp : String;
+begin
+  tmp := _file_GetExtension( FileName );
+  Result := u_CopyStr( tmp );
+  zgl_FreeStr( tmp );
+end;
+
+function file_GetDirectory( const FileName : String ) : String;
+  var
+    tmp : String;
+begin
+  tmp := _file_GetDirectory( FileName );
+  Result := u_CopyStr( tmp );
+  zgl_FreeStr( tmp );
+end;
 
 function u_IntToStr( Value : Integer ) : String;
 begin
@@ -1389,7 +1442,7 @@ begin
       ini_Clear := dlsym( zglLib, 'ini_Clear' );
       ini_IsSection := dlsym( zglLib, 'ini_IsSection' );
       ini_IsKey := dlsym( zglLib, 'ini_IsKey' );
-      ini_ReadKeyStr := dlsym( zglLib, 'ini_ReadKeyStr' );
+      _ini_ReadKeyStr := dlsym( zglLib, 'ini_ReadKeyStr' );
       ini_ReadKeyInt := dlsym( zglLib, 'ini_ReadKeyInt' );
       ini_ReadKeyFloat := dlsym( zglLib, 'ini_ReadKeyFloat' );
       ini_ReadKeyBool := dlsym( zglLib, 'ini_ReadKeyBool' );
@@ -1420,7 +1473,7 @@ begin
       key_Press := dlsym( zglLib, 'key_Press' );
       key_Last := dlsym( zglLib, 'key_Last' );
       key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
-      key_GetText := dlsym( zglLib, 'key_GetText' );
+      _key_GetText := dlsym( zglLib, 'key_GetText' );
       key_EndReadText := dlsym( zglLib, 'key_EndReadText' );
       key_ClearState := dlsym( zglLib, 'key_ClearState' );
 
@@ -1587,9 +1640,9 @@ begin
       file_Flush := dlsym( zglLib, 'file_Flush' );
       file_Close := dlsym( zglLib, 'file_Close' );
       file_Find := dlsym( zglLib, 'file_Find' );
-      file_GetName := dlsym( zglLib, 'file_GetName' );
-      file_GetExtension := dlsym( zglLib, 'file_GetExtension' );
-      file_GetDirectory := dlsym( zglLib, 'file_GetDirectory' );
+      _file_GetName := dlsym( zglLib, 'file_GetName' );
+      _file_GetExtension := dlsym( zglLib, 'file_GetExtension' );
+      _file_GetDirectory := dlsym( zglLib, 'file_GetDirectory' );
       file_SetPath := dlsym( zglLib, 'file_SetPath' );
 
       mem_LoadFromFile := dlsym( zglLib, 'mem_LoadFromFile' );
