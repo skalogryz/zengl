@@ -21,7 +21,7 @@ uses
   ;
 
 const
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   libmodplug = 'libmodplug.dll';
 {$ENDIF}
 {$IFDEF LINUX}
@@ -50,6 +50,7 @@ type
   end;
 
 procedure mp_Init;
+procedure mp_Free;
 function  mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
 function  mp_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : DWORD; var _End : Boolean ) : DWORD;
 procedure mp_DecoderLoop( var Stream : zglTSoundStream );
@@ -75,6 +76,7 @@ implementation
 procedure mp_Init;
   var
     i : Integer;
+    LibraryName : String;
 begin
   for i := 0 to MAX_FORMATS - 1 do
     begin
@@ -89,14 +91,15 @@ begin
       zgl_Reg( SND_FORMAT_DECODER, @Decoders[ i ] );
     end;
 
-  mpLibrary := dlopen( libmodplug {$IFNDEF WIN32}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
   if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.1' ), $001 );
+  if mpLibrary = LIB_ERROR Then LibraryName := './' + libmodplug;
   {$ENDIF}
   {$IFDEF DARWIN}
-  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libmodplug ), $001 );
+  LibraryName := mainPath + 'Frameworks/' + libmodplug;
   {$ENDIF}
+  mpLibrary := dlopen( libmodplug {$IFNDEF WINDWOS}, $001 {$ENDIF} );
 
   if mpLibrary <> LIB_ERROR Then
     begin
@@ -115,6 +118,12 @@ begin
       end;
 
   mpLoad := TRUE;
+end;
+
+procedure mp_Free;
+begin
+  mpInit := FALSE;
+  dlclose( mpLibrary );
 end;
 
 function mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
@@ -168,6 +177,6 @@ initialization
 
 finalization
   if mpInit Then
-    dlclose( mpLibrary );
+    mp_Free();
 
 end.
