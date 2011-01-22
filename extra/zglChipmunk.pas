@@ -86,7 +86,7 @@ unit zglChipmunk;
 interface
 uses
   {$IFDEF DARWIN}
-  MacOSAll
+  MacOSAll,
   {$ENDIF}
   {$IFNDEF STATIC}
   zglHeader

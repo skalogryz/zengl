@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC6             }
-{ date:     2011.01.19          }
+{ date:     2011.01.21          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -1349,7 +1349,7 @@ function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
 begin
   len := length( Str );
   SetLength( Result, len );
-  Move( Str[ 1 ], Result[ 1 ], len );
+  System.Move( Str[ 1 ], Result[ 1 ], len );
 end;
 
 function u_CopyStr( const Str : String ) : String;
@@ -1358,7 +1358,7 @@ function u_CopyStr( const Str : String ) : String;
 begin
   len := length( Str );
   SetLength( Result, len );
-  Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
+  System.Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
 end;
 
 function u_StrUp( const str : String ) : String;

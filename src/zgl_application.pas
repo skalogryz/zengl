@@ -613,13 +613,14 @@ begin
 {$ENDIF}
 {$IFDEF DARWIN}
   GetGlobalMouse( mPos );
-  mouseX := mPos.X;
-  mouseY := mPos.Y;
+  mouseX := mPos.h - wnd_X;
+  mouseY := mPos.v - wnd_Y;
 
   eClass := GetEventClass( inEvent );
   eKind  := GetEventKind( inEvent );
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
 
+  if app_Work Then
   case eClass of
     kEventClassCommand:
       case eKind of
@@ -641,7 +642,7 @@ begin
           begin
             app_Focus := TRUE;
             app_Pause := FALSE;
-            if app_Work Then app_PActivate( TRUE );
+            app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -653,7 +654,7 @@ begin
           begin
             app_Focus := FALSE;
             if app_AutoPause Then app_Pause := TRUE;
-            if app_Work Then app_PActivate( FALSE );
+            app_PActivate( FALSE );
             if wnd_FullScreen Then scr_Reset();
           end;
         kEventWindowCollapsed:
@@ -663,8 +664,7 @@ begin
           end;
         kEventWindowClosed:
           begin
-            if app_Work Then // O_o
-              wnd_Handle := nil;
+            wnd_Handle := nil;
             app_Work   := FALSE;
           end;
         kEventWindowBoundsChanged:
@@ -672,8 +672,8 @@ begin
             if not wnd_FullScreen Then
               begin
                 GetEventParameter( inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
-                wnd_X := Round( bounds.origin.x );
-                wnd_Y := Round( bounds.origin.y );
+                wnd_X := Round( bounds.origin.x - ( bounds.size.width - wnd_Width ) / 2 );
+                wnd_Y := Round( bounds.origin.y - ( bounds.size.hright - wnd_Height ) / 2 );
               end else
                 begin
                   wnd_X := 0;
@@ -776,7 +776,7 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            wnd_MouseIn := ( mouseX > wnd_X ) and ( mouseX < wnd_X + wnd_Width ) and ( mouseY > wnd_Y ) and ( mouseY < wnd_Y + wnd_Height );
+            wnd_MouseIn := ( mPos.h > wnd_X ) and ( mPos.h < wnd_X + wnd_Width ) and ( mPos.v > wnd_Y ) and ( mPos.v < wnd_Y + wnd_Height );
             if wnd_MouseIn Then
               begin
                 if ( not app_ShowCursor ) and ( CGCursorIsVisible = 1 ) Then
