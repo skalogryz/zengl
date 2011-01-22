@@ -26,6 +26,11 @@ unit zgl_sound_ogg;
   {$UNDEF USE_OGG_STATIC}
 {$ENDIF}
 
+// Developers from xiph.org didn't include target wich build dylib's, so...
+{$IFDEF DARWIN}
+  {$DEFINE USE_OGG_STATIC}
+{$ENDIF}
+
 {$IFDEF USE_OGG_STATIC}
   {$L bitwise}
   {$L framing}
@@ -77,25 +82,19 @@ uses
 const
   OGG_EXTENSION : array[ 0..3 ] of Char = ( 'O', 'G', 'G', #0 );
 {$IFDEF LINUX}
-  libogg         = 'libogg.so';
-  libvorbis      = 'libvorbis.so';
-  libvorbisfile  = 'libvorbisfile.so';
-  libogg0        = 'libogg.so.0';
-  libvorbis0     = 'libvorbis.so.0';
-  libvorbisfile3 = 'libvorbisfile.so.3';
+  libogg        = 'libogg.so.0';
+  libvorbis     = 'libvorbis.so.0';
+  libvorbisfile = 'libvorbisfile.so.3';
 {$ENDIF}
 {$IFDEF WINDOWS}
-  libogg         = 'libogg.dll';
-  libvorbis      = 'libvorbis.dll';
-  libvorbisfile  = 'libvorbisfile.dll';
-  libogg0        = 'libogg-0.dll';
-  libvorbis0     = 'libvorbis-0.dll';
-  libvorbisfile3 = 'libvorbisfile-3.dll';
+  libogg        = 'libogg-0.dll';
+  libvorbis     = 'libvorbis-0.dll';
+  libvorbisfile = 'libvorbisfile-3.dll';
 {$ENDIF}
 {$IFDEF DARWIN}
-  libogg        = 'libogg.0.5.3.dylib';
-  libvorbis     = 'libvorbis.0.3.1.dylib';
-  libvorbisfile = 'libvorbisfile.3.1.1.dylib';
+  libogg        = 'libogg.0.dylib';
+  libvorbis     = 'libvorbis.0.dylib';
+  libvorbisfile = 'libvorbisfile.3.dylib';
 {$ENDIF}
 {$IFDEF ENDIAN_BIG}
   BIG_ENDIAN = TRUE;
@@ -343,32 +342,26 @@ begin
 {$IFDEF USE_OGG_STATIC}
   oggInit := TRUE;
 {$ELSE}
-  ogg_Library        := dlopen( libogg {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
-  vorbis_Library     := dlopen( libvorbis {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
-  vorbisfile_Library := dlopen( libvorbisfile {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   {$IFDEF LINUX}
-  if ( ogg_Library = LIB_ERROR ) and ( vorbis_Library = LIB_ERROR ) and ( vorbisfile_Library = LIB_ERROR ) Then
+  ogg_Library        := dlopen( PChar( './' + libogg ), $001 );
+  vorbis_Library     := dlopen( PChar( './' + libvorbis ), $001 );
+  vorbisfile_Library := dlopen( PChar( './' + libvorbisfile ), $001 );
+  if ( ogg_Library = LIB_ERROR ) or ( vorbis_Library = LIB_ERROR ) or ( vorbisfile_Library = LIB_ERROR ) Then
     begin
-      ogg_Library        := dlopen( libogg0, $001 );
-      vorbis_Library     := dlopen( libvorbis0, $001 );
-      vorbisfile_Library := dlopen( libvorbisfile3, $001 );
+      ogg_Library        := dlopen( libogg, $001 );
+      vorbis_Library     := dlopen( libvorbis, $001 );
+      vorbisfile_Library := dlopen( libvorbisfile, $001 );
     end;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  if ( ogg_Library = LIB_ERROR ) and ( vorbis_Library = LIB_ERROR ) and ( vorbisfile_Library = LIB_ERROR ) Then
-    begin
-      ogg_Library        := dlopen( libogg0 );
-      vorbis_Library     := dlopen( libvorbis0 );
-      vorbisfile_Library := dlopen( libvorbisfile3 );
-    end;
+  ogg_Library        := dlopen( libogg );
+  vorbis_Library     := dlopen( libvorbis );
+  vorbisfile_Library := dlopen( libvorbisfile );
   {$ENDIF}
   {$IFDEF DARWIN}
-  if ( ogg_Library = LIB_ERROR ) and ( vorbis_Library = LIB_ERROR ) and ( vorbisfile_Library = LIB_ERROR ) Then
-    begin
-      ogg_Library        := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libogg ), $001 );
-      vorbis_Library     := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbis ), $001 );
-      vorbisfile_Library := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbisfile ), $001 );
-    end;
+  ogg_Library        := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libogg ), $001 );
+  vorbis_Library     := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
+  vorbisfile_Library := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );
   {$ENDIF}
 
   if ( ogg_Library <> LIB_ERROR ) and ( vorbis_Library <> LIB_ERROR ) and ( vorbisfile_Library <> LIB_ERROR ) Then
