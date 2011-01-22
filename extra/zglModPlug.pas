@@ -92,9 +92,10 @@ begin
     end;
 
   {$IFDEF LINUX}
+  LibraryName := './' + libmodplug;
+  mpLibrary   := dlopen( PChar( libmodplug + '.1' ), $001 );
   if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
-  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.1' ), $001 );
-  if mpLibrary = LIB_ERROR Then LibraryName := './' + libmodplug;
+  if mpLibrary = LIB_ERROR Then
   {$ENDIF}
   {$IFDEF DARWIN}
   LibraryName := mainPath + 'Frameworks/' + libmodplug;
