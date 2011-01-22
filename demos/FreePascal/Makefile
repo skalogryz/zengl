@@ -8,6 +8,7 @@ DEMO07 = "07 - SEngine 2D(OOP)/"
 DEMO08 = "08 - Sound/"
 DEMO09 = "09 - Render to Texture/"
 DEMO10 = "10 - Particles 2D/"
+DEMO11 = "11 - Physics 2D/"
 
 all:
 	make -C $(DEMO01)
@@ -20,6 +21,7 @@ all:
 	make -C $(DEMO08)
 	make -C $(DEMO09)
 	make -C $(DEMO10)
+	make -C $(DEMO11)
 
 win32:
 	make -C $(DEMO01) win32
@@ -32,6 +34,7 @@ win32:
 	make -C $(DEMO08) win32
 	make -C $(DEMO09) win32
 	make -C $(DEMO10) win32
+	make -C $(DEMO11) win32
 
 win64:
 	make -C $(DEMO01) win64
@@ -44,6 +47,7 @@ win64:
 	make -C $(DEMO08) win64
 	make -C $(DEMO09) win64
 	make -C $(DEMO10) win64
+	make -C $(DEMO11) win64
 
 macos:
 	make -C $(DEMO01) macos
@@ -56,6 +60,7 @@ macos:
 	make -C $(DEMO08) macos
 	make -C $(DEMO09) macos
 	make -C $(DEMO10) macos
+	make -C $(DEMO11) macos
 
 clean:
 	make -C $(DEMO01) clean
@@ -68,3 +73,4 @@ clean:
 	make -C $(DEMO08) clean
 	make -C $(DEMO09) clean
 	make -C $(DEMO10) clean
+	make -C $(DEMO11) clean

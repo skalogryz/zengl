@@ -10,7 +10,7 @@ DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = demo01.exe demo02.exe demo03.exe demo04.exe demo05.exe demo06.exe \
-  demo07.exe demo08.exe demo09.exe demo10.exe
+  demo07.exe demo08.exe demo09.exe demo10.exe demo11.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -43,6 +43,9 @@ demo09.exe: 09 - Render to Texture\demo09.dpr
   $(DCC)
 
 demo10.exe: 10 - Particles 2D\demo10.dpr
+  $(DCC)
+
+demo11.exe: 11 - Physics 2D\demo11.dpr
   $(DCC)
 
 

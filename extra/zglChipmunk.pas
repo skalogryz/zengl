@@ -91,7 +91,9 @@ uses
   {$IFNDEF STATIC}
   zglHeader
   {$ELSE}
+  {$IFDEF WINDOWS}
   zgl_msvcrt,
+  {$ENDIF}
   zgl_types,
   zgl_primitives_2d
   {$ENDIF}
