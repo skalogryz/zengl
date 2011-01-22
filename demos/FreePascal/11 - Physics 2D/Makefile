@@ -57,6 +57,7 @@ macos: clean
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
 	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
+	cp $(OUTPUT)libchipmunk.5.3.2.dylib $(BUNDLE)/Contents/Frameworks/
 
 clean:
 	rm -f *.*~
