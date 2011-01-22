@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC6';
-  cs_Date     = '2011.01.21';
+  cs_Date     = '2011.01.22';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -531,6 +531,9 @@ begin
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   app_WorkDir := appPath + '/';
   app_HomeDir := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
+
+  if logFile = 'log.txt' Then
+    logFile := PChar( app_WorkDir + '../log.txt' );
 {$ENDIF}
   app_GetSysDirs := TRUE;
 end;

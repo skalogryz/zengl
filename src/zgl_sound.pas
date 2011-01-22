@@ -987,7 +987,11 @@ begin
         FreeMem( sfStream[ Result ]._data );
     end;
 
+  {$IFDEF DARWIN}
+  if not file_Exists( darwin_GetRes( FileName ) ) Then
+  {$ELSE}
   if not file_Exists( FileName ) Then
+  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -1004,7 +1008,11 @@ begin
     sfStream[ Result ].Loop := Loop;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or
+  {$IFDEF DARWIN}
+     ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], darwin_GetRes( FileName ) ) ) Then
+  {$ELSE}
      ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
+  {$ENDIF}
     begin
       sfStream[ Result ]._decoder := nil;
       log_Add( 'Cannot play: "' + FileName + '"' );

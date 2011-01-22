@@ -343,15 +343,9 @@ begin
   oggInit := TRUE;
 {$ELSE}
   {$IFDEF LINUX}
-  ogg_Library        := dlopen( PChar( './' + libogg ), $001 );
-  vorbis_Library     := dlopen( PChar( './' + libvorbis ), $001 );
-  vorbisfile_Library := dlopen( PChar( './' + libvorbisfile ), $001 );
-  if ( ogg_Library = LIB_ERROR ) or ( vorbis_Library = LIB_ERROR ) or ( vorbisfile_Library = LIB_ERROR ) Then
-    begin
-      ogg_Library        := dlopen( libogg, $001 );
-      vorbis_Library     := dlopen( libvorbis, $001 );
-      vorbisfile_Library := dlopen( libvorbisfile, $001 );
-    end;
+  ogg_Library        := dlopen( libogg, $001 );
+  vorbis_Library     := dlopen( libvorbis, $001 );
+  vorbisfile_Library := dlopen( libvorbisfile, $001 );
   {$ENDIF}
   {$IFDEF WINDOWS}
   ogg_Library        := dlopen( libogg );

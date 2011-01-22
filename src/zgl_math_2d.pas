@@ -25,7 +25,7 @@ unit zgl_math_2d;
 interface
 
 const
-  pi      = 3.1415926;
+  pi      = 3.141592654;
   rad2deg = 57.29578049;
   deg2rad = 0.017453292;
 
