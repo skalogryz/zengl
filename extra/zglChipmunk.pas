@@ -107,7 +107,7 @@ const
   libChipmunk = 'chipmunk.dll';
 {$ENDIF}
 {$IFDEF DARWIN}
-  libChipmunk = 'chipmunk.dylib';
+  libChipmunk = 'libchipmunk.5.3.2.dylib';
 {$ENDIF}
 
 {$IFNDEF CHIPMUNK_STATIC}

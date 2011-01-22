@@ -673,7 +673,7 @@ begin
               begin
                 GetEventParameter( inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
                 wnd_X := Round( bounds.origin.x - ( bounds.size.width - wnd_Width ) / 2 );
-                wnd_Y := Round( bounds.origin.y - ( bounds.size.hright - wnd_Height ) / 2 );
+                wnd_Y := Round( bounds.origin.y - ( bounds.size.height - wnd_Height ) / 2 );
               end else
                 begin
                   wnd_X := 0;
