@@ -865,7 +865,7 @@ begin
         bJ := Round( ogl_ClipH / scr_ResCY ) div j - Round( tY ) div j;
       end;
 
-  if not cam2dOnlyXY Then
+  if not cam2d.OnlyXY Then
     begin
       tI := ogl_ClipR div i - Round( ogl_Width / scr_ResCX ) div i div 2 + 3;
       tJ := ogl_ClipR div j - Round( ogl_Height / scr_ResCY ) div j div 2 + 3;
@@ -875,15 +875,15 @@ begin
       INC( bJ, tJ );
     end;
   if tX >= 0 Then
-    INC( aI, Round( ( cam2dGlobal.X - tX ) / i ) - 1 )
+    INC( aI, Round( ( cam2d.Global.X - tX ) / i ) - 1 )
   else
-    INC( aI, Round( cam2dGlobal.X / i ) - 1 );
-  INC( bI, Round( ( cam2dGlobal.X ) / i ) + 1 );
+    INC( aI, Round( cam2d.Global.X / i ) - 1 );
+  INC( bI, Round( ( cam2d.Global.X ) / i ) + 1 );
   if tY >= 0 Then
-    INC( aJ, Round( ( cam2dGlobal.Y - tY ) / j ) - 1 )
+    INC( aJ, Round( ( cam2d.Global.Y - tY ) / j ) - 1 )
   else
-    INC( aJ, Round( cam2dGlobal.Y / j ) - 1 );
-  INC( bJ, Round( cam2dGlobal.Y / j ) + 1 );
+    INC( aJ, Round( cam2d.Global.Y / j ) - 1 );
+  INC( bJ, Round( cam2d.Global.Y / j ) + 1 );
   if aI < 0 Then aI := 0;
   if aJ < 0 Then aJ := 0;
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;

@@ -32,20 +32,27 @@ type
     X, Y  : Single;
     Angle : Single;
     Zoom  : zglTPoint2D;
-end;
+  end;
+
+type
+  zglPCameraSystem = ^zglTCameraSystem;
+  zglTCameraSystem = record
+    Global : zglPCamera2D;
+    Apply  : Boolean;
+    OnlyXY : Boolean;
+    CX     : Single;
+    CY     : Single;
+    ZoomX  : Single;
+    ZoomY  : Single;
+  end;
 
 procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
 
 var
-  cam2dGlobal   : zglPCamera2D = nil;
   constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
-  cam2dApply    : Boolean;
-  cam2dOnlyXY   : Boolean;
-  cam2dCX       : Single;
-  cam2dCY       : Single;
-  cam2dZoomX    : Single;
-  cam2dZoomY    : Single;
+  cam2d         : zglPCameraSystem;
+  cam2dTarget   : array[ 1..2 ] of zglTCameraSystem;
 
 implementation
 uses
@@ -59,23 +66,23 @@ procedure cam2d_Set( Camera : zglPCamera2D );
 begin
   batch2d_Flush();
 
-  if cam2dApply Then
+  if cam2d.Apply Then
     glPopMatrix();
 
   if Assigned( Camera ) Then
     begin
-      cam2dGlobal := Camera;
-      cam2dApply  := TRUE;
-      cam2dOnlyXY := ( cam2dGlobal.Angle = 0 ) and ( cam2dGlobal.Zoom.X = 1 ) and ( cam2dGlobal.Zoom.Y = 1 );
-      if ( cam2dZoomX <> cam2dGlobal.Zoom.X ) or ( cam2dZoomY <> cam2dGlobal.Zoom.Y ) Then
-        ogl_ClipR := Round( sqrt( sqr( ogl_Width / scr_ResCX / cam2dGlobal.Zoom.X ) + sqr( ogl_Height / scr_ResCY / cam2dGlobal.Zoom.Y ) ) ) div 2;
-      cam2dCX     := cam2dGlobal.X + ( ogl_Width / scr_ResCX ) / 2;
-      cam2dCY     := cam2dGlobal.Y + ( ogl_Height / scr_ResCY ) / 2;
-      cam2dZoomX  := cam2dGlobal.Zoom.X;
-      cam2dZoomY  := cam2dGlobal.Zoom.Y;
+      cam2d.Global := Camera;
+      cam2d.Apply  := TRUE;
+      cam2d.OnlyXY := ( cam2d.Global.Angle = 0 ) and ( cam2d.Global.Zoom.X = 1 ) and ( cam2d.Global.Zoom.Y = 1 );
+      if ( cam2d.ZoomX <> cam2d.Global.Zoom.X ) or ( cam2d.ZoomY <> cam2d.Global.Zoom.Y ) Then
+        ogl_ClipR := Round( sqrt( sqr( ogl_Width / scr_ResCX / cam2d.Global.Zoom.X ) + sqr( ogl_Height / scr_ResCY / cam2d.Global.Zoom.Y ) ) ) div 2;
+      cam2d.CX     := cam2d.Global.X + ( ogl_Width / scr_ResCX ) / 2;
+      cam2d.CY     := cam2d.Global.Y + ( ogl_Height / scr_ResCY ) / 2;
+      cam2d.ZoomX  := cam2d.Global.Zoom.X;
+      cam2d.ZoomY  := cam2d.Global.Zoom.Y;
 
       glPushMatrix();
-      if not cam2dOnlyXY Then
+      if not cam2d.OnlyXY Then
         begin
           glTranslatef( ogl_Width / 2 - scr_AddCX / scr_ResCX, ogl_Height / 2 - scr_AddCY / scr_ResCY, 0 );
           if ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
@@ -90,18 +97,20 @@ begin
       sprite2d_InScreen := sprite2d_InScreenCamera;
     end else
       begin
-        cam2dGlobal := @constCamera2D;
-        cam2dApply  := FALSE;
+        cam2d.Global := @constCamera2D;
+        cam2d.Apply  := FALSE;
         sprite2d_InScreen := sprite2d_InScreenSimple;
       end;
 end;
 
 function cam2d_Get : zglPCamera2D;
 begin
-  Result := cam2dGlobal;
+  Result := cam2d.Global;
 end;
 
 initialization
-  cam2dGlobal := @constCamera2D;
+  cam2d := @cam2dTarget[ TARGET_SCREEN ];
+  cam2dTarget[ TARGET_SCREEN ].Global := @constCamera2D;
+  cam2dTarget[ TARGET_TEXTURE ].Global := @constCamera2D;
 
 end.
