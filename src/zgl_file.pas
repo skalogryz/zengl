@@ -71,6 +71,10 @@ function  file_GetExtension( const FileName : String ) : String;
 function  file_GetDirectory( const FileName : String ) : String;
 procedure file_SetPath( const Path : String );
 
+function _file_GetName( const FileName : String ) : PChar;
+function _file_GetExtension( const FileName : String ) : PChar;
+function _file_GetDirectory( const FileName : String ) : PChar;
+
 {$IFDEF DARWIN}
 function darwin_GetRes( const FileName : String ) : String;
 {$ENDIF}
@@ -282,6 +286,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
   {$ENDIF}
 begin
+  List.Count := 0;
 {$IFDEF LINUX_OR_DARWIN}
   if FindDir Then
     List.Count := scandir( PChar( Directory ), @FList, filter_dir, nil )
@@ -383,5 +388,20 @@ begin
     Result := FileName;
 end;
 {$ENDIF}
+
+function _file_GetName( const FileName : String ) : PChar;
+begin
+  Result := u_GetPChar( file_GetName( FileName ) );
+end;
+
+function _file_GetExtension( const FileName : String ) : PChar;
+begin
+  Result := u_GetPChar( file_GetExtension( FileName ) );
+end;
+
+function _file_GetDirectory( const FileName : String ) : PChar;
+begin
+  Result := u_GetPChar( file_GetDirectory( FileName ) );
+end;
 
 end.

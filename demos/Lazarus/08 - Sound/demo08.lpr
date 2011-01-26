@@ -1,6 +1,8 @@
 program demo08;
 
-{$R *.res}
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
 {$DEFINE STATIC}
 
 uses

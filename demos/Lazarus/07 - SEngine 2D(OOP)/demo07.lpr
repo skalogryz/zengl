@@ -5,7 +5,9 @@
 // sprite engine from directory "extra"(unit zglSpriteEngine.pas)
 program demo07;
 
-{$R *.res}
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
 {$DEFINE STATIC}
 
 uses

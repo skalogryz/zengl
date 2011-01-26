@@ -47,6 +47,8 @@ function u_StrToBool( const Value : String ) : Boolean;
 
 function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
 function u_CopyStr( const Str : String ) : String;
+function u_GetPAnsiChar( const Str : AnsiString ) : PAnsiChar;
+function u_GetPChar( const Str : String ) : PChar;
 // Только для английских символов попадающих в диапазон 0..127
 function u_StrUp( const Str : String ) : String;
 function u_StrDown( const Str : String ) : String;
@@ -150,6 +152,26 @@ begin
   len := length( Str );
   SetLength( Result, len );
   System.Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
+end;
+
+function u_GetPAnsiChar( const Str : AnsiString ) : PAnsiChar;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  GetMem( Result, len + 1 );
+  Result[ len ] := #0;
+  System.Move( Str[ 1 ], Result^, len );
+end;
+
+function u_GetPChar( const Str : String ) : PChar;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  GetMem( Result, ( len + 1 ) * SizeOf( Char ) );
+  Result[ len ] := #0;
+  System.Move( Str[ 1 ], Result^, len * SizeOf( Char ) );
 end;
 
 function u_StrUp( const Str : String ) : String;

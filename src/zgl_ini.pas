@@ -73,6 +73,8 @@ function  ini_GetID( const S, K : AnsiString; var idS, idK : Integer ) : Boolean
 procedure ini_Process;
 procedure ini_Free;
 
+function _ini_ReadKeyStr( const Section, Key : AnsiString ) : PAnsiChar;
+
 var
   iniRec : zglTINI;
   iniMem : zglTMemory;
@@ -504,6 +506,11 @@ procedure ini_Free;
 begin
   iniRec.Sections := 0;
   SetLength( iniRec.Section, 0 );
+end;
+
+function _ini_ReadKeyStr( const Section, Key : AnsiString ) : PAnsiChar;
+begin
+  Result := u_GetPAnsiChar( ini_ReadKeyStr( Section, Key ) );
 end;
 
 end.

@@ -4,6 +4,9 @@
 // EN: If you compile for 64-bit OS and use FreePascal 2.4.2 or lower, then this example won't work correct! Please, use FreePascal 2.5.1 from svn.
 program demo11;
 
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
 {$DEFINE STATIC}
 
 // RU: Дефайн ниже позволит скомпилировать проект статически с Chipmunk. Так же его надо объявить в zglChipmunk.pas.

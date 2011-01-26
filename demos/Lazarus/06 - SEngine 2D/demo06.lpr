@@ -7,7 +7,9 @@
 // This example with classes can be found in this demo - "07 - SEngine 2D(OOP)"
 program demo06;
 
-{$R *.res}
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
 {$DEFINE STATIC}
 
 uses

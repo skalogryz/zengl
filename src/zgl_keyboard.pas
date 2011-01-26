@@ -184,6 +184,8 @@ function mackey_to_scancode( MacKey : Integer ) : Byte;
 function  SCA( KeyCode : LongWord ) : LongWord;
 procedure doKeyPress( KeyCode : LongWord );
 
+function _key_GetText : PChar;
+
 {$IFDEF DARWIN}
 type
   zglTModifier = record
@@ -638,6 +640,11 @@ begin
       keysPress   [ KeyCode ] := TRUE;
       keysCanPress[ KeyCode ] := FALSE;
     end;
+end;
+
+function _key_GetText : PChar;
+begin
+  Result := u_GetPChar( key_GetText() );
 end;
 
 end.

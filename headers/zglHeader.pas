@@ -2,8 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 {                               }
-{ version:  0.2 RC6             }
-{ date:     2011.01.21          }
+{ version:  0.2 RC7             }
+{ date:     2011.01.26          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -158,7 +158,6 @@ var
   zgl_Get         : function( What : LongWord ) : Ptr;
   zgl_GetMem      : procedure( var Mem : Pointer; Size : LongWord );
   zgl_FreeMem     : procedure( var Mem : Pointer );
-  zgl_FreeStr     : procedure( var Str : String );
   zgl_FreeStrList : procedure( var List : zglTStringList );
 
 const
@@ -241,7 +240,7 @@ var
   ini_Clear         : procedure( const Section : AnsiString );
   ini_IsSection     : function( const Section : AnsiString ) : Boolean;
   ini_IsKey         : function( const Section, Key : AnsiString ) : Boolean;
-  _ini_ReadKeyStr   : function( const Section, Key : AnsiString ) : AnsiString;
+  _ini_ReadKeyStr   : function( const Section, Key : AnsiString ) : PAnsiChar;
   ini_ReadKeyInt    : function( const Section, Key : AnsiString ) : Integer;
   ini_ReadKeyFloat  : function( const Section, Key : AnsiString ) : Single;
   ini_ReadKeyBool   : function( const Section, Key : AnsiString ) : Boolean;
@@ -429,7 +428,7 @@ var
   key_Press         : function( KeyCode : Byte ) : Boolean;
   key_Last          : function( KeyAction : Byte ) : Byte;
   key_BeginReadText : procedure( const Text : String; MaxSymbols : Integer = -1 );
-  _key_GetText      : function : String;
+  _key_GetText      : function : PChar;
   key_EndReadText   : procedure;
   key_ClearState    : procedure;
 
@@ -1194,9 +1193,9 @@ var
   file_Flush         : procedure( const FileHandle : zglTFile );
   file_Close         : procedure( var FileHandle : zglTFile );
   file_Find          : procedure( const Directory : String; var List : zglTFileList; FindDir : Boolean );
-  _file_GetName      : function( const FileName : String ) : String;
-  _file_GetExtension : function( const FileName : String ) : String;
-  _file_GetDirectory : function( const FileName : String ) : String;
+  _file_GetName      : function( const FileName : String ) : PChar;
+  _file_GetExtension : function( const FileName : String ) : PChar;
+  _file_GetDirectory : function( const FileName : String ) : PChar;
   file_SetPath       : procedure( const Path : String );
 
   function file_GetName( const FileName : String ) : String;
@@ -1255,47 +1254,47 @@ var
 
 function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
   var
-    tmp : AnsiString;
+    tmp : PAnsiChar;
 begin
   tmp := _ini_ReadKeyStr( Section, Key );
   Result := u_CopyAnsiStr( tmp );
-  // zgl_FreeStr( tmp );
+  zgl_FreeMem( tmp );
 end;
 
 function key_GetText : String;
   var
-    tmp : String;
+    tmp : PChar;
 begin
   tmp := _key_GetText();
   Result := u_CopyStr( tmp );
-  zgl_FreeStr( tmp );
+  zgl_FreeMem( tmp );
 end;
 
 function file_GetName( const FileName : String ) : String;
   var
-    tmp : String;
+    tmp : PChar;
 begin
   tmp := _file_GetName( FileName );
   Result := u_CopyStr( tmp );
-  zgl_FreeStr( tmp );
+  zgl_FreeMem( tmp );
 end;
 
 function file_GetExtension( const FileName : String ) : String;
   var
-    tmp : String;
+    tmp : PChar;
 begin
   tmp := _file_GetExtension( FileName );
   Result := u_CopyStr( tmp );
-  zgl_FreeStr( tmp );
+  zgl_FreeMem( tmp );
 end;
 
 function file_GetDirectory( const FileName : String ) : String;
   var
-    tmp : String;
+    tmp : PChar;
 begin
   tmp := _file_GetDirectory( FileName );
   Result := u_CopyStr( tmp );
-  zgl_FreeStr( tmp );
+  zgl_FreeMem( tmp );
 end;
 
 function u_IntToStr( Value : Integer ) : String;
@@ -1415,7 +1414,6 @@ begin
       zgl_Get := dlsym( zglLib, 'zgl_Get' );
       zgl_GetMem := dlsym( zglLib, 'zgl_GetMem' );
       zgl_FreeMem := dlsym( zglLib, 'zgl_FreeMem' );
-      zgl_FreeStr := dlsym( zglLib, 'zgl_FreeStr' );
       zgl_FreeStrList := dlsym( zglLib, 'zgl_FreeStrList' );
       zgl_Enable := dlsym( zglLib, 'zgl_Enable' );
       zgl_Disable := dlsym( zglLib, 'zgl_Disable' );
