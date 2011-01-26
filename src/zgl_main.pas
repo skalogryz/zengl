@@ -128,7 +128,6 @@ function  zgl_Get( What : LongWord ) : Ptr;
 procedure zgl_GetSysDir;
 procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
 procedure zgl_FreeMem( var Mem : Pointer );
-procedure zgl_FreeStr( var Str : String );
 procedure zgl_FreeStrList( var List : zglTStringList );
 procedure zgl_Enable( What : LongWord );
 procedure zgl_Disable( What : LongWord );
@@ -552,11 +551,6 @@ procedure zgl_FreeMem( var Mem : Pointer );
 begin
   FreeMem( Mem );
   Mem := nil;
-end;
-
-procedure zgl_FreeStr( var Str : String );
-begin
-  Str := '';
 end;
 
 procedure zgl_FreeStrList( var List : zglTStringList );
