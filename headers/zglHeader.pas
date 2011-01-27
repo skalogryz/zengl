@@ -1258,7 +1258,7 @@ function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
 begin
   tmp := _ini_ReadKeyStr( Section, Key );
   Result := u_CopyAnsiStr( tmp );
-  zgl_FreeMem( tmp );
+  zgl_FreeMem( Pointer( tmp ) );
 end;
 
 function key_GetText : String;
@@ -1267,7 +1267,7 @@ function key_GetText : String;
 begin
   tmp := _key_GetText();
   Result := u_CopyStr( tmp );
-  zgl_FreeMem( tmp );
+  zgl_FreeMem( Pointer( tmp ) );
 end;
 
 function file_GetName( const FileName : String ) : String;
@@ -1276,7 +1276,7 @@ function file_GetName( const FileName : String ) : String;
 begin
   tmp := _file_GetName( FileName );
   Result := u_CopyStr( tmp );
-  zgl_FreeMem( tmp );
+  zgl_FreeMem( Pointer( tmp ) );
 end;
 
 function file_GetExtension( const FileName : String ) : String;
@@ -1285,7 +1285,7 @@ function file_GetExtension( const FileName : String ) : String;
 begin
   tmp := _file_GetExtension( FileName );
   Result := u_CopyStr( tmp );
-  zgl_FreeMem( tmp );
+  zgl_FreeMem( Pointer( tmp ) );
 end;
 
 function file_GetDirectory( const FileName : String ) : String;
@@ -1294,7 +1294,7 @@ function file_GetDirectory( const FileName : String ) : String;
 begin
   tmp := _file_GetDirectory( FileName );
   Result := u_CopyStr( tmp );
-  zgl_FreeMem( tmp );
+  zgl_FreeMem( Pointer( tmp ) );
 end;
 
 function u_IntToStr( Value : Integer ) : String;
