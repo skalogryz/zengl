@@ -20,27 +20,27 @@ type
 
   zglCSEngine2D = class
   protected
-    FCount : LongWord;
+    FCount : Integer;
     FList  : array of zglCSprite2D;
 
     procedure SortByLayer( iLo, iHi : Integer );
     procedure SortByID( iLo, iHi : Integer );
 
-    function  GetSprite( ID : LongWord ) : zglCSprite2D;
-    procedure SetSprite( ID : LongWord; Sprite : zglCSprite2D );
+    function  GetSprite( ID : Integer ) : zglCSprite2D;
+    procedure SetSprite( ID : Integer; Sprite : zglCSprite2D );
   public
     destructor Destroy; override;
 
-    function  AddSprite : Integer; overload;
-    function  AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D; overload;
-    procedure DelSprite( ID : Integer );
-    procedure ClearAll;
+    function  AddSprite : Integer; overload; virtual;
+    function  AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D; overload; virtual;
+    procedure DelSprite( ID : Integer ); virtual;
+    procedure ClearAll; virtual;
 
-    procedure Draw;
-    procedure Proc;
+    procedure Draw; virtual;
+    procedure Proc; virtual;
 
-    property Count: LongWord read FCount;
-    property List[ID : LongWord]: zglCSprite2D read GetSprite write SetSprite;
+    property Count: Integer read FCount;
+    property List[ID : Integer]: zglCSprite2D read GetSprite write SetSprite;
   end;
 
   zglCSprite2D = class
@@ -132,12 +132,12 @@ begin
   if lo < iHi Then SortByID( lo, iHi );
 end;
 
-function zglCSEngine2D.GetSprite( ID : LongWord ) : zglCSprite2D;
+function zglCSEngine2D.GetSprite( ID : Integer ) : zglCSprite2D;
 begin
   Result := FList[ ID ];
 end;
 
-procedure zglCSEngine2D.SetSprite( ID : LongWord; Sprite : zglCSprite2D );
+procedure zglCSEngine2D.SetSprite( ID : Integer; Sprite : zglCSprite2D );
 begin
   FList[ ID ] := Sprite;
 end;
@@ -183,7 +183,7 @@ procedure zglCSEngine2D.ClearAll;
     i : Integer;
 begin
   for i := 0 to FCount - 1 do
-    FList[ i ].Free;
+    FList[ i ].Destroy();
   SetLength( FList, 0 );
   FCount := 0;
 end;
