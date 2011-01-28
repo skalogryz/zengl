@@ -32,7 +32,7 @@ type
   zglPSEngine2D = ^zglTSEngine2D;
 
   zglTSEngine2D = record
-    Count : LongWord;
+    Count : Integer;
     List  : array of zglPSprite2D;
   end;
 
