@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.01.26          }
+{ date:     2011.01.29          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -113,11 +113,11 @@ var
 
 const
   ZENGL_VERSION           = 1; // Major shr 16, ( Minor and $FF00 ) shr 8, Revision and $FF
-  ZENGL_VERSION_STRING    = 2; // PAnsiChar
-  ZENGL_VERSION_DATE      = 3; // PAnsiChar
+  ZENGL_VERSION_STRING    = 2; // PChar
+  ZENGL_VERSION_DATE      = 3; // PChar
 
-  DIRECTORY_APPLICATION   = 101; // PAnsiChar
-  DIRECTORY_HOME          = 102; // PAnsiChar
+  DIRECTORY_APPLICATION   = 101; // PChar
+  DIRECTORY_HOME          = 102; // PChar
 
   LOG_FILENAME            = 203; // PPAnsiChar
 

@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC7';
-  cs_Date     = '2011.01.26';
+  cs_Date     = '2011.01.29';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -417,11 +417,11 @@ begin
 
   case What of
     ZENGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
-    ZENGL_VERSION_STRING: Result := Ptr( PAnsiChar( cs_ZenGL ) );
-    ZENGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
+    ZENGL_VERSION_STRING: Result := Ptr( PChar( cs_ZenGL ) );
+    ZENGL_VERSION_DATE: Result := Ptr( PChar( cs_Date ) );
 
-    DIRECTORY_APPLICATION: Result := Ptr( PAnsiChar( app_WorkDir ) );
-    DIRECTORY_HOME: Result := Ptr( PAnsiChar( app_HomeDir ) );
+    DIRECTORY_APPLICATION: Result := Ptr( PChar( app_WorkDir ) );
+    DIRECTORY_HOME: Result := Ptr( PChar( app_HomeDir ) );
 
     LOG_FILENAME: Result := Ptr( @logfile );
 
@@ -496,21 +496,19 @@ begin
     file_MakeDir( app_HomeDir );
 {$ENDIF}
 {$IFDEF WINDOWS}
-var
-  buffer : PAnsiChar;
-  fn, fp : PAnsiChar;
-  s      : AnsiString;
-  t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
+  var
+    buffer : PChar;
+    fn, fp : PChar;
+    t      : array[ 0..MAX_PATH - 1 ] of Char;
 begin
   wnd_INST := GetModuleHandle( nil );
   GetMem( buffer, 65535 );
   GetMem( fn, 65535 );
-  GetModuleFileNameA( wnd_INST, fn, 65535 );
-  GetFullPathNameA( fn, 65535, buffer, fp );
-  s := copy( AnsiString( buffer ), 1, length( buffer ) - length( fp ) );
-  app_WorkDir := PAnsiChar( s );
+  GetModuleFileName( wnd_INST, fn, 65535 );
+  GetFullPathName( fn, 65535, buffer, fp );
+  app_WorkDir := copy( String( buffer ), 1, length( buffer ) - length( fp ) );
 
-  GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
+  GetEnvironmentVariable( 'APPDATA', t, MAX_PATH );
   app_HomeDir := t;
   app_HomeDir := app_HomeDir + '\';
 
@@ -518,11 +516,11 @@ begin
   FreeMem( fn );
 {$ENDIF}
 {$IFDEF DARWIN}
-var
-  appBundle   : CFBundleRef;
-  appCFURLRef : CFURLRef;
-  appCFString : CFStringRef;
-  appPath     : array[ 0..8191 ] of AnsiChar;
+  var
+    appBundle   : CFBundleRef;
+    appCFURLRef : CFURLRef;
+    appCFString : CFStringRef;
+    appPath     : array[ 0..8191 ] of AnsiChar;
 begin
   appBundle   := CFBundleGetMainBundle();
   appCFURLRef := CFBundleCopyBundleURL( appBundle );

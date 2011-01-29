@@ -63,8 +63,8 @@ var
   app_Focus        : Boolean = TRUE;
   app_Log          : Boolean;
   app_InitToHandle : Boolean;
-  app_WorkDir      : AnsiString;
-  app_HomeDir      : AnsiString;
+  app_WorkDir      : String;
+  app_HomeDir      : String;
 
   // call-back
   app_PInit     : procedure = app_Init;
