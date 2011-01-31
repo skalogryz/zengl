@@ -84,6 +84,8 @@ procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : String; Flags 
     mode     : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
+  for i := 0 to Font.Count.Pages - 1 do
+    if not Assigned( Font.Pages[ i ] ) Then exit;
 
   glColor4ubv( @textRGBA[ 0 ] );
 
