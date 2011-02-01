@@ -353,6 +353,7 @@ exports
   // Utils
   file_Open                name prefix + 'file_Open',
   file_MakeDir             name prefix + 'file_MakeDir',
+  file_Remove              name prefix + 'file_Remove',
   file_Exists              name prefix + 'file_Exists',
   file_Seek                name prefix + 'file_Seek',
   file_GetPos              name prefix + 'file_GetPos',

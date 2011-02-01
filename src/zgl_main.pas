@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC7';
-  cs_Date     = '2011.01.29';
+  cs_Date     = '2011.02.01';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -492,7 +492,7 @@ begin
   app_WorkDir := './';
   app_HomeDir := FpGetEnv( 'HOME' ) + '/.config/';
   // for some old distros
-  if not file_Exists( app_HomeDir, TRUE ) Then
+  if not file_Exists( app_HomeDir ) Then
     file_MakeDir( app_HomeDir );
 {$ENDIF}
 {$IFDEF WINDOWS}

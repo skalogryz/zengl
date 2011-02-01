@@ -57,7 +57,8 @@ const
 
 function  file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 function  file_MakeDir( const Directory : String ) : Boolean;
-function  file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
+function  file_Remove( const Name : String ) : Boolean;
+function  file_Exists( const Name : String ) : Boolean;
 function  file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 function  file_GetPos( FileHandle : zglTFile ) : LongWord;
 function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -107,6 +108,17 @@ uses
 var
   filePath : String = '';
 
+function GetDir( const Path : String ) : String;
+  var
+    len : Integer;
+begin
+  len := length( Path );
+  if ( len > 0 ) and ( Path[ len ] <> '/' ) {$IFDEF WINDOWS} and ( Path[ len ] <> '\' ) {$ENDIF} Then
+    Result := Path + '/'
+  else
+    Result := u_CopyStr( Path );
+end;
+
 function file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 begin
 {$IFDEF LINUX_OR_DARWIN}
@@ -136,33 +148,75 @@ begin
 {$ENDIF}
 end;
 
-function file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
+function file_Remove( const Name : String ) : Boolean;
   var
   {$IFDEF LINUX_OR_DARWIN}
     status : Stat;
   {$ENDIF}
   {$IFDEF WINDOWS}
-    fileHandle : zglTFile;
-    attr       : LongWord;
+    attr   : LongWord;
+  {$ENDIF}
+    i    : Integer;
+    dir  : Boolean;
+    path : String;
+    list : zglTFileList;
+begin
+  if not file_Exists( Name ) Then
+    begin
+      Result := FALSE;
+      exit;
+    end;
+
+{$IFDEF LINUX_OR_DARWIN}
+  FpStat( filePath + Name, status );
+  dir := fpS_ISDIR( status.st_mode );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  attr := GetFileAttributes( PChar( filePath + Name ) );
+  dir  := attr and FILE_ATTRIBUTE_DIRECTORY > 0;
+{$ENDIF}
+
+  if dir Then
+    begin
+      path := GetDir( Name );
+
+      file_Find( path, list, FALSE );
+      for i := 0 to list.Count - 1 do
+        file_Remove( path + list.Items[ i ] );
+
+      file_Find( path, list, TRUE );
+      for i := 2 to list.Count - 1 do
+        file_Remove( path + list.Items[ i ] );
+
+      {$IFDEF LINUX_OR_DARWIN}
+      Result := FpRmdir( filePath + Name ) = 0;
+      {$ENDIF}
+      {$IFDEF WINDOWS}
+      Result := RemoveDirectory( PChar( filePath + Name ) );
+      {$ENDIF}
+    end else
+      {$IFDEF LINUX_OR_DARWIN}
+      Result := FpUnlink( filePath + Name ) = 0;
+      {$ENDIF}
+      {$IFDEF WINDOWS}
+      Result := DeleteFile( PChar( filePath + Name ) );
+      {$ENDIF}
+end;
+
+function file_Exists( const Name : String ) : Boolean;
+  var
+  {$IFDEF LINUX_OR_DARWIN}
+    status : Stat;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+    attr : LongWord;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}
-  if not Directory Then
-    Result := not Boolean( FpAccess( filePath + FileName, F_OK ) )
-  else
-    Result := FpStat( filePath + FileName, status ) = 0;
+  Result := FpStat( filePath + Name, status ) = 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if not Directory Then
-    begin
-      Result := file_Open( fileHandle, filePath + FileName, FOM_OPENR );
-      if Result Then
-        file_Close( fileHandle );
-    end else
-      begin
-        attr   := GetFileAttributes( PChar( filePath + FileName ) );
-        Result := ( attr <> $FFFFFFFF ) and ( attr and FILE_ATTRIBUTE_DIRECTORY <> 0 );
-      end;
+  Result := GetFileAttributes( PChar( filePath + Name ) ) <> $FFFFFFFF;
 {$ENDIF}
 end;
 
@@ -289,9 +343,9 @@ begin
   List.Count := 0;
 {$IFDEF LINUX_OR_DARWIN}
   if FindDir Then
-    List.Count := scandir( PChar( Directory ), @FList, filter_dir, nil )
+    List.Count := scandir( PChar( filePath + Directory ), @FList, filter_dir, nil )
   else
-    List.Count := scandir( PChar( Directory ), @FList, filter_file, nil );
+    List.Count := scandir( PChar( filePath + Directory ), @FList, filter_file, nil );
   if List.Count <> -1 Then
     begin
       SetLength( List.Items, List.Count );
@@ -304,7 +358,7 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  First := FindFirstFile( PChar( Directory + '*' ), FList );
+  First := FindFirstFile( PChar( GetDir( filePath + Directory ) + '*' ), FList );
   repeat
     if FindDir Then
       begin
@@ -315,9 +369,11 @@ begin
     List.Items[ List.Count ] := FList.cFileName;
     INC( List.Count );
   until not FindNextFile( First, FList );
+  FindClose( First );
 {$ENDIF}
 
-  u_SortList( List, 0, List.Count - 1 );
+  if List.Count > 2 Then
+    u_SortList( List, 0, List.Count - 1 );
 end;
 
 procedure GetStr( const Str : String; var Result : String; const d : Char; const b : Boolean );
@@ -366,14 +422,8 @@ begin
 end;
 
 procedure file_SetPath( const Path : String );
-  var
-    len : Integer;
 begin
-  len := length( Path );
-  if ( len > 0 ) and ( Path[ len ] <> '/' ) and ( Path[ len ] <> '\' ) Then
-    filePath := Path + '/'
-  else
-    filePath := u_CopyStr( Path );
+  filePath := GetDir( Path );
 end;
 
 {$IFDEF DARWIN}
