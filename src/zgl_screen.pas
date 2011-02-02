@@ -214,10 +214,6 @@ begin
 end;
 
 function scr_Create : Boolean;
-  {$IFDEF LINUX}
-  var
-    i, j : Integer;
-  {$ENDIF}
 begin
   Result := FALSE;
 {$IFDEF LINUX}
@@ -226,15 +222,9 @@ begin
   if DefaultDepth( scr_Display, scr_Default ) < 24 Then
     begin
       u_Error( 'DefaultDepth not set to 24-bit.' );
-      zgl_Exit;
+      zgl_Exit();
       exit;
     end;
-
-  if not glXQueryExtension( scr_Display, i, j ) Then
-    begin
-      u_Error( 'GLX Extension not found' );
-      exit;
-    end else log_Add( 'GLX Extension - ok' );
 
   app_XIM := XOpenIM( scr_Display, nil, nil, nil );
   if not Assigned( app_XIM ) Then
@@ -247,60 +237,6 @@ begin
     log_Add( 'XCreateIC - Fail' )
   else
     log_Add( 'XCreateIC - ok' );
-
-  ogl_zDepth := 24;
-  repeat
-    FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, None );
-    ogl_Attr[ 0  ] := GLX_RGBA;
-    ogl_Attr[ 1  ] := GL_TRUE;
-    ogl_Attr[ 2  ] := GLX_RED_SIZE;
-    ogl_Attr[ 3  ] := 8;
-    ogl_Attr[ 4  ] := GLX_GREEN_SIZE;
-    ogl_Attr[ 5  ] := 8;
-    ogl_Attr[ 6  ] := GLX_BLUE_SIZE;
-    ogl_Attr[ 7  ] := 8;
-    ogl_Attr[ 8  ] := GLX_ALPHA_SIZE;
-    ogl_Attr[ 9  ] := 8;
-    ogl_Attr[ 10 ] := GLX_DOUBLEBUFFER;
-    ogl_Attr[ 11 ] := GL_TRUE;
-    ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
-    ogl_Attr[ 13 ] := ogl_zDepth;
-    i := 14;
-    if ogl_Stencil > 0 Then
-      begin
-        ogl_Attr[ i     ] := GLX_STENCIL_SIZE;
-        ogl_Attr[ i + 1 ] := ogl_Stencil;
-        INC( i, 2 );
-      end;
-    if ogl_FSAA > 0 Then
-      begin
-        ogl_Attr[ i     ] := GLX_SAMPLES_SGIS;
-        ogl_Attr[ i + 1 ] := ogl_FSAA;
-      end;
-
-    log_Add( 'glXChooseVisual: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
-    ogl_VisualInfo := glXChooseVisual( scr_Display, scr_Default, @ogl_Attr[ 0 ] );
-    if ( not Assigned( ogl_VisualInfo ) and ( ogl_zDepth = 1 ) ) Then
-      begin
-        if ogl_FSAA = 0 Then
-          break
-        else
-          begin
-            ogl_zDepth := 24;
-            DEC( ogl_FSAA, 2 );
-          end;
-      end else
-        if not Assigned( ogl_VisualInfo ) Then DEC( ogl_zDepth, 8 );
-  if ogl_zDepth = 0 Then ogl_zDepth := 1;
-  until Assigned( ogl_VisualInfo );
-
-  if not Assigned( ogl_VisualInfo ) Then
-    begin
-      u_Error( 'Cannot choose pixel format.' );
-      exit;
-    end;
-
-  ogl_zDepth := ogl_VisualInfo.depth;
 {$ENDIF}
 {$IFDEF WINDOWS}
   scr_Init();
@@ -678,9 +614,8 @@ begin
   ogl_FSAA := FSAA;
 
 {$IFDEF LINUX}
-  XFree( scr_ModeList );
-  scr_Destroy();
-  scr_Create();
+  wnd_Destroy();
+  wnd_Create( wnd_Width, wnd_Height );
 {$ENDIF}
 
   gl_Destroy();
