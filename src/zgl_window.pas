@@ -359,12 +359,15 @@ begin
 end;
 
 procedure wnd_SetCaption( const NewCaption : String );
-  {$IFDEF WINDOWS}
   var
+  {$IFDEF LINUX}
+    err : Integer;
+    str : PChar;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
     len : Integer;
   {$ENDIF}
   {$IFDEF DARWIN}
-  var
     str : CFStringRef;
   {$ENDIF}
 begin
@@ -372,11 +375,19 @@ begin
 {$IFDEF LINUX}
   if wnd_Handle <> 0 Then
     begin
+      str := u_GetPChar( wnd_Caption );
       if app_Flags and APP_USE_UTF8 > 0 Then
-        Xutf8TextListToTextProperty( scr_Display, @wnd_Caption, 1, XUTF8StringStyle, @wnd_Title )
+        err := Xutf8TextListToTextProperty( scr_Display, @str, 1, XUTF8StringStyle, @wnd_Title )
       else
-        XStringListToTextProperty( @wnd_Caption, 1, @wnd_Title );
-      XSetWMName( scr_Display, wnd_Handle, @wnd_Title );
+        err := XStringListToTextProperty( @str, 1, @wnd_Title );
+
+      if err = 0 Then
+        begin
+          XSetWMName( scr_Display, wnd_Handle, @wnd_Title );
+          XSetWMIconName( scr_Display, wnd_Handle, @wnd_Title );
+        end;
+      FreeMem( str );
+      XFree( wnd_Title.value );
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
