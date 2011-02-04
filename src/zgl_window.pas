@@ -46,41 +46,41 @@ procedure wnd_ShowCursor( Show : Boolean );
 procedure wnd_Select;
 
 var
-  wnd_X          : Integer;
-  wnd_Y          : Integer;
-  wnd_Width      : Integer = 800;
-  wnd_Height     : Integer = 600;
-  wnd_FullScreen : Boolean;
-  wnd_Caption    : String;
+  wndX          : Integer;
+  wndY          : Integer;
+  wndWidth      : Integer = 800;
+  wndHeight     : Integer = 600;
+  wndFullScreen : Boolean;
+  wndCaption    : String;
 
   {$IFDEF LINUX}
-  wnd_Handle      : TWindow;
-  wnd_Root        : TWindow;
-  wnd_Class       : TXClassHint;
-  wnd_Attr        : TXSetWindowAttributes;
-  wnd_Title       : TXTextProperty;
-  wnd_ValueMask   : LongWord;
-  wnd_DestroyAtom : TAtom;
-  wnd_Protocols   : TAtom;
+  wndHandle      : TWindow;
+  wndRoot        : TWindow;
+  wndClass       : TXClassHint;
+  wndAttr        : TXSetWindowAttributes;
+  wndTitle       : TXTextProperty;
+  wndValueMask   : LongWord;
+  wndDestroyAtom : TAtom;
+  wndProtocols   : TAtom;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  wnd_First     : Boolean = TRUE; // Microsoft Sucks! :)
-  wnd_Handle    : HWND;
-  wnd_DC        : HDC;
-  wnd_INST      : HINST;
-  wnd_Class     : TWndClassExW;
-  wnd_ClassName : PWideChar = 'ZenGL';
-  wnd_Style     : LongWord;
-  wnd_CpnSize   : Integer;
-  wnd_BrdSizeX  : Integer;
-  wnd_BrdSizeY  : Integer;
-  wnd_CaptionW  : PWideChar;
+  wndFirst     : Boolean = TRUE; // Microsoft Sucks! :)
+  wndHandle    : HWND;
+  wndDC        : HDC;
+  wndINST      : HINST;
+  wndClass     : TWndClassExW;
+  wndClassName : PWideChar = 'ZenGL';
+  wndStyle     : LongWord;
+  wndCpnSize   : Integer;
+  wndBrdSizeX  : Integer;
+  wndBrdSizeY  : Integer;
+  wndCaptionW  : PWideChar;
   {$ENDIF}
   {$IFDEF DARWIN}
-  wnd_Handle  : WindowRef;
-  wnd_Attr    : WindowAttributes;
-  wnd_Events  : array[ 0..14 ] of EventTypeSpec;
-  wnd_MouseIn : Boolean;
+  wndHandle  : WindowRef;
+  wndAttr    : WindowAttributes;
+  wndEvents  : array[ 0..14 ] of EventTypeSpec;
+  wndMouseIn : Boolean;
   {$ENDIF}
 
 implementation
@@ -104,19 +104,19 @@ procedure wnd_SetHints( Initialized : Boolean = TRUE );
     sizehints : TXSizeHints;
 begin
   FillChar( sizehints, SizeOf( TXSizeHints ), 0 );
-  if wnd_FullScreen and Initialized Then
+  if wndFullScreen and Initialized Then
     sizehints.flags    := PBaseSize or PWinGravity
   else
     sizehints.flags    := PPosition or PSize or PMinSize or PMaxSize;
-  sizehints.x          := wnd_X;
-  sizehints.y          := wnd_Y;
-  sizehints.width      := wnd_Width;
-  sizehints.height     := wnd_Height;
-  sizehints.min_width  := wnd_Width;
-  sizehints.max_width  := wnd_Width;
-  sizehints.min_height := wnd_Height;
-  sizehints.max_height := wnd_Height;
-  XSetWMNormalHints( scr_Display, wnd_Handle, @sizehints );
+  sizehints.x          := wndX;
+  sizehints.y          := wndY;
+  sizehints.width      := wndWidth;
+  sizehints.height     := wndHeight;
+  sizehints.min_width  := wndWidth;
+  sizehints.max_width  := wndWidth;
+  sizehints.min_height := wndHeight;
+  sizehints.max_height := wndHeight;
+  XSetWMNormalHints( scrDisplay, wndHandle, @sizehints );
 end;
 {$ENDIF}
 
@@ -127,23 +127,22 @@ function wnd_Create( Width, Height : Integer ) : Boolean;
     status : OSStatus;
   {$ENDIF}
 begin
-  Result     := FALSE;
-  wnd_Width  := Width;
-  wnd_Height := Height;
+  Result    := FALSE;
+  wndWidth  := Width;
+  wndHeight := Height;
 
-  if app_Flags and WND_USE_AUTOCENTER > 0 Then
+  if appFlags and WND_USE_AUTOCENTER > 0 Then
     begin
-      wnd_X := ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2;
-      wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
+      wndX := ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2;
+      wndY := ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2;
     end;
 {$IFDEF LINUX}
-  FillChar( wnd_Attr, SizeOf( wnd_Attr ), 0 );
-  wnd_Attr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask or StructureNotifyMask;
-  wnd_ValueMask       := CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
-  wnd_Handle          := XCreateWindow( scr_Display, wnd_Root, wnd_X, wnd_Y, wnd_Width, wnd_Height, 0, CopyFromParent, InputOutput, CopyFromParent,
-                                        wnd_ValueMask, @wnd_Attr );
+  FillChar( wndAttr, SizeOf( wndAttr ), 0 );
+  wndAttr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask or StructureNotifyMask;
+  wndValueMask       := CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
+  wndHandle          := XCreateWindow( scrDisplay, wndRoot, wndX, wndY, wndWidth, wndHeight, 0, CopyFromParent, InputOutput, CopyFromParent, wndValueMask, @wndAttr );
 
-  if wnd_Handle = 0 Then
+  if wndHandle = 0 Then
     begin
       u_Error( 'Cannot create window' );
       exit;
@@ -151,64 +150,64 @@ begin
 
   wnd_Select();
 
-  wnd_Class.res_name  := 'ZenGL';
-  wnd_Class.res_class := 'ZenGL Class';
-  XSetClassHint( scr_Display, wnd_Handle, @wnd_Class );
+  wndClass.res_name  := 'ZenGL';
+  wndClass.res_class := 'ZenGL Class';
+  XSetClassHint( scrDisplay, wndHandle, @wndClass );
   wnd_SetHints( FALSE );
 
-  wnd_DestroyAtom := XInternAtom( scr_Display, 'WM_DELETE_WINDOW', FALSE );
-  wnd_Protocols   := XInternAtom( scr_Display, 'WM_PROTOCOLS', FALSE );
-  XSetWMProtocols( scr_Display, wnd_Handle, @wnd_DestroyAtom, 1 );
+  wndDestroyAtom := XInternAtom( scrDisplay, 'WM_DELETE_WINDOW', FALSE );
+  wndProtocols   := XInternAtom( scrDisplay, 'WM_PROTOCOLS', FALSE );
+  XSetWMProtocols( scrDisplay, wndHandle, @wndDestroyAtom, 1 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  wnd_CpnSize  := GetSystemMetrics( SM_CYCAPTION  );
-  wnd_BrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
-  wnd_BrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
+  wndCpnSize  := GetSystemMetrics( SM_CYCAPTION  );
+  wndBrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
+  wndBrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
 
-  with wnd_Class do
+  with wndClass do
     begin
       cbSize        := SizeOf( TWndClassExW );
       style         := CS_DBLCLKS or CS_OWNDC;
       lpfnWndProc   := @app_ProcessMessages;
       cbClsExtra    := 0;
       cbWndExtra    := 0;
-      hInstance     := wnd_INST;
-      hIcon         := LoadIconW  ( wnd_INST, 'MAINICON' );
-      hIconSm       := LoadIconW  ( wnd_INST, 'MAINICON' );
-      hCursor       := LoadCursorW( wnd_INST, PWideChar( IDC_ARROW ) );
+      hInstance     := wndINST;
+      hIcon         := LoadIconW  ( wndINST, 'MAINICON' );
+      hIconSm       := LoadIconW  ( wndINST, 'MAINICON' );
+      hCursor       := LoadCursorW( wndINST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
-      lpszClassName := wnd_ClassName;
+      lpszClassName := wndClassName;
     end;
 
-  if RegisterClassExW( wnd_Class ) = 0 Then
+  if RegisterClassExW( wndClass ) = 0 Then
     begin
       u_Error( 'Cannot register window class' );
       exit;
     end;
 
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     begin
-      wnd_X     := 0;
-      wnd_Y     := 0;
-      wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
+      wndX     := 0;
+      wndY     := 0;
+      wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
     end else
-      wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  if ogl_Format = 0 Then
-    wnd_Handle := CreateWindowExW( WS_EX_TOOLWINDOW, wnd_ClassName, wnd_CaptionW, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
+      wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+  if oglFormat = 0 Then
+    wndHandle := CreateWindowExW( WS_EX_TOOLWINDOW, wndClassName, wndCaptionW, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-    wnd_Handle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ), wnd_ClassName, wnd_CaptionW, wnd_Style, wnd_X, wnd_Y,
-                                   wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                   wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ), 0, 0, wnd_INST, nil );
+    wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
+                                  wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
+                                  wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );
 
-  if wnd_Handle = 0 Then
+  if wndHandle = 0 Then
     begin
       u_Error( 'Cannot create window' );
       exit;
     end;
 
-  wnd_DC := GetDC( wnd_Handle );
-  if wnd_DC = 0 Then
+  wndDC := GetDC( wndHandle );
+  if wndDC = 0 Then
     begin
       u_Error( 'Cannot get device context' );
       exit;
@@ -216,56 +215,56 @@ begin
   wnd_Select();
 {$ENDIF}
 {$IFDEF DARWIN}
-  size.Left   := wnd_X;
-  size.Top    := wnd_Y;
-  size.Right  := wnd_X + wnd_Width;
-  size.Bottom := wnd_Y + wnd_Height;
-  wnd_Attr    := kWindowCloseBoxAttribute or kWindowCollapseBoxAttribute or kWindowStandardHandlerAttribute;// or kWindowCompositingAttribute;
-  if wnd_FullScreen Then
-    wnd_Attr := wnd_Attr or kWindowNoTitleBarAttribute;
-  status      := CreateNewWindow( kDocumentWindowClass, wnd_Attr, size, wnd_Handle );
+  size.Left   := wndX;
+  size.Top    := wndY;
+  size.Right  := wndX + wndWidth;
+  size.Bottom := wndY + wndHeight;
+  wndAttr     := kWindowCloseBoxAttribute or kWindowCollapseBoxAttribute or kWindowStandardHandlerAttribute;// or kWindowCompositingAttribute;
+  if wndFullScreen Then
+    wndAttr := wndAttr or kWindowNoTitleBarAttribute;
+  status      := CreateNewWindow( kDocumentWindowClass, wndAttr, size, wndHandle );
 
-  if ( status <> noErr ) or ( wnd_Handle = nil ) Then
+  if ( status <> noErr ) or ( wndHandle = nil ) Then
     begin
       u_Error( 'Cannot create window' );
       exit;
     end;
 
   // Window
-  wnd_Events[ 0 ].eventClass := kEventClassWindow;
-  wnd_Events[ 0 ].eventKind  := kEventWindowClosed;
-  wnd_Events[ 1 ].eventClass := kEventClassWindow;
-  wnd_Events[ 1 ].eventKind  := kEventWindowActivated;
-  wnd_Events[ 2 ].eventClass := kEventClassWindow;
-  wnd_Events[ 2 ].eventKind  := kEventWindowDeactivated;
-  wnd_Events[ 3 ].eventClass := kEventClassWindow;
-  wnd_Events[ 3 ].eventKind  := kEventWindowCollapsed;
-  wnd_Events[ 4 ].eventClass := kEventClassWindow;
-  wnd_Events[ 4 ].eventKind  := kEventWindowBoundsChanged;
+  wndEvents[ 0 ].eventClass := kEventClassWindow;
+  wndEvents[ 0 ].eventKind  := kEventWindowClosed;
+  wndEvents[ 1 ].eventClass := kEventClassWindow;
+  wndEvents[ 1 ].eventKind  := kEventWindowActivated;
+  wndEvents[ 2 ].eventClass := kEventClassWindow;
+  wndEvents[ 2 ].eventKind  := kEventWindowDeactivated;
+  wndEvents[ 3 ].eventClass := kEventClassWindow;
+  wndEvents[ 3 ].eventKind  := kEventWindowCollapsed;
+  wndEvents[ 4 ].eventClass := kEventClassWindow;
+  wndEvents[ 4 ].eventKind  := kEventWindowBoundsChanged;
   // Keyboard
-  wnd_Events[ 5 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 5 ].eventKind  := kEventRawKeyDown;
-  wnd_Events[ 6 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 6 ].eventKind  := kEventRawKeyUp;
-  wnd_Events[ 7 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 7 ].eventKind  := kEventRawKeyRepeat;
-  wnd_Events[ 8 ].eventClass := kEventClassKeyboard;
-  wnd_Events[ 8 ].eventKind  := kEventRawKeyModifiersChanged;
+  wndEvents[ 5 ].eventClass := kEventClassKeyboard;
+  wndEvents[ 5 ].eventKind  := kEventRawKeyDown;
+  wndEvents[ 6 ].eventClass := kEventClassKeyboard;
+  wndEvents[ 6 ].eventKind  := kEventRawKeyUp;
+  wndEvents[ 7 ].eventClass := kEventClassKeyboard;
+  wndEvents[ 7 ].eventKind  := kEventRawKeyRepeat;
+  wndEvents[ 8 ].eventClass := kEventClassKeyboard;
+  wndEvents[ 8 ].eventKind  := kEventRawKeyModifiersChanged;
   // Mouse
-  wnd_Events[ 9 ].eventClass  := kEventClassMouse;
-  wnd_Events[ 9 ].eventKind   := kEventMouseMoved;
-  wnd_Events[ 10 ].eventClass := kEventClassMouse;
-  wnd_Events[ 10 ].eventKind  := kEventMouseDown;
-  wnd_Events[ 11 ].eventClass := kEventClassMouse;
-  wnd_Events[ 11 ].eventKind  := kEventMouseUp;
-  wnd_Events[ 12 ].eventClass := kEventClassMouse;
-  wnd_Events[ 12 ].eventKind  := kEventMouseWheelMoved;
-  wnd_Events[ 13 ].eventClass := kEventClassMouse;
-  wnd_Events[ 13 ].eventKind  := kEventMouseDragged;
+  wndEvents[ 9 ].eventClass  := kEventClassMouse;
+  wndEvents[ 9 ].eventKind   := kEventMouseMoved;
+  wndEvents[ 10 ].eventClass := kEventClassMouse;
+  wndEvents[ 10 ].eventKind  := kEventMouseDown;
+  wndEvents[ 11 ].eventClass := kEventClassMouse;
+  wndEvents[ 11 ].eventKind  := kEventMouseUp;
+  wndEvents[ 12 ].eventClass := kEventClassMouse;
+  wndEvents[ 12 ].eventKind  := kEventMouseWheelMoved;
+  wndEvents[ 13 ].eventClass := kEventClassMouse;
+  wndEvents[ 13 ].eventKind  := kEventMouseDragged;
   // Command
-  wnd_Events[ 14 ].eventClass := kEventClassCommand;
-  wnd_Events[ 14 ].eventKind  := kEventProcessCommand;
-  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wnd_Events[ 0 ], nil, nil );
+  wndEvents[ 14 ].eventClass := kEventClassCommand;
+  wndEvents[ 14 ].eventKind  := kEventProcessCommand;
+  InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wndEvents[ 0 ], nil, nil );
   wnd_Select();
 {$ENDIF}
   Result := TRUE;
@@ -274,29 +273,29 @@ end;
 procedure wnd_Destroy;
 begin
 {$IFDEF LINUX}
-  XDestroyWindow( scr_Display, wnd_Handle );
+  XDestroyWindow( scrDisplay, wndHandle );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if ( wnd_DC > 0 ) and ( ReleaseDC( wnd_Handle, wnd_DC ) = 0 ) Then
+  if ( wndDC > 0 ) and ( ReleaseDC( wndHandle, wndDC ) = 0 ) Then
     begin
       u_Error( 'Cannot release device context' );
-      wnd_DC := 0;
+      wndDC := 0;
     end;
 
-  if ( wnd_Handle <> 0 ) and ( not DestroyWindow( wnd_Handle ) ) Then
+  if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
     begin
       u_Error( 'Cannot destroy window' );
-      wnd_Handle := 0;
+      wndHandle := 0;
     end;
 
-  if not UnRegisterClassW( wnd_ClassName, wnd_INST ) Then
+  if not UnRegisterClassW( wndClassName, wndINST ) Then
     begin
       u_Error( 'Cannot unregister window class' );
-      wnd_INST := 0;
+      wndINST := 0;
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  ReleaseWindow( wnd_Handle );
+  ReleaseWindow( wndHandle );
 {$ENDIF}
 end;
 
@@ -311,50 +310,50 @@ procedure wnd_Update;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  XSync( scr_Display, X_TRUE );
+  XSync( scrDisplay, X_TRUE );
   wnd_SetHints();
 
   FillChar( event, SizeOf( TXEvent ), 0 );
   event._type                := ClientMessage;
   event.xclient._type        := ClientMessage;
   event.xclient.send_event   := X_TRUE;
-  event.xclient.window       := wnd_Handle;
-  event.xclient.message_type := XInternAtom( scr_Display, '_NET_WM_STATE', FALSE );
+  event.xclient.window       := wndHandle;
+  event.xclient.message_type := XInternAtom( scrDisplay, '_NET_WM_STATE', FALSE );
   event.xclient.format       := 32;
-  event.xclient.data.l[ 0 ]  := Integer( wnd_FullScreen );
-  event.xclient.data.l[ 1 ]  := XInternAtom( scr_Display, '_NET_WM_STATE_FULLSCREEN', FALSE );
-  XSendEvent( scr_Display, wnd_Root, False, SubstructureRedirectMask or SubstructureNotifyMask, @event );
+  event.xclient.data.l[ 0 ]  := Integer( wndFullScreen );
+  event.xclient.data.l[ 1 ]  := XInternAtom( scrDisplay, '_NET_WM_STATE_FULLSCREEN', FALSE );
+  XSendEvent( scrDisplay, wndRoot, False, SubstructureRedirectMask or SubstructureNotifyMask, @event );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if app_Focus Then
-    FullScreen := wnd_FullScreen
+  if appFocus Then
+    FullScreen := wndFullScreen
   else
     FullScreen := FALSE;
 
   if FullScreen Then
-    wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU
+    wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
   else
-    wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+    wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  SetWindowLongW( wnd_Handle, GWL_STYLE, wnd_Style );
-  SetWindowLongW( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
+  SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
+  SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if wnd_FullScreen Then
-    ChangeWindowAttributes( wnd_Handle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
+  if wndFullScreen Then
+    ChangeWindowAttributes( wndHandle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
   else
-    ChangeWindowAttributes( wnd_Handle, kWindowResizableAttribute, kWindowNoTitleBarAttribute );
+    ChangeWindowAttributes( wndHandle, kWindowResizableAttribute, kWindowNoTitleBarAttribute );
   // Какой индус из Apple придумал, что необходимо менять kWindowResizableAttribute вместе с kWindowNoTitleBarAttribute...
-  ChangeWindowAttributes( wnd_Handle, 0, kWindowResizableAttribute );
+  ChangeWindowAttributes( wndHandle, 0, kWindowResizableAttribute );
 
-  aglSetCurrentContext( ogl_Context );
+  aglSetCurrentContext( oglContext );
 {$ENDIF}
-  app_Work := TRUE;
-  wnd_SetCaption( wnd_Caption );
+  appWork := TRUE;
+  wnd_SetCaption( wndCaption );
 
-  if app_Flags and WND_USE_AUTOCENTER > 0 Then
-    wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2 );
-  wnd_SetSize( wnd_Width, wnd_Height );
+  if appFlags and WND_USE_AUTOCENTER > 0 Then
+    wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2 );
+  wnd_SetSize( wndWidth, wndHeight );
 end;
 
 procedure wnd_SetCaption( const NewCaption : String );
@@ -370,23 +369,23 @@ procedure wnd_SetCaption( const NewCaption : String );
     str : CFStringRef;
   {$ENDIF}
 begin
-  wnd_Caption := u_CopyStr( NewCaption );
+  wndCaption := u_CopyStr( NewCaption );
 {$IFDEF LINUX}
-  if wnd_Handle <> 0 Then
+  if wndHandle <> 0 Then
     begin
-      str := u_GetPChar( wnd_Caption );
-      if app_Flags and APP_USE_UTF8 > 0 Then
-        err := Xutf8TextListToTextProperty( scr_Display, @str, 1, XUTF8StringStyle, @wnd_Title )
+      str := u_GetPChar( wndCaption );
+      if appFlags and APP_USE_UTF8 > 0 Then
+        err := Xutf8TextListToTextProperty( scrDisplay, @str, 1, XUTF8StringStyle, @wndTitle )
       else
-        err := XStringListToTextProperty( @str, 1, @wnd_Title );
+        err := XStringListToTextProperty( @str, 1, @wndTitle );
 
       if err = 0 Then
         begin
-          XSetWMName( scr_Display, wnd_Handle, @wnd_Title );
-          XSetWMIconName( scr_Display, wnd_Handle, @wnd_Title );
+          XSetWMName( scrDisplay, wndHandle, @wndTitle );
+          XSetWMIconName( scrDisplay, wndHandle, @wndTitle );
         end;
       FreeMem( str );
-      XFree( wnd_Title.value );
+      XFree( wndTitle.value );
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -400,29 +399,29 @@ begin
   len := 1;
   if len = 1 Then
     begin
-      if app_Flags and APP_USE_UTF8 = 0 Then
-        wnd_Caption := AnsiToUtf8( wnd_Caption );
-      len := MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), nil, 0 );
-      if Assigned( wnd_CaptionW ) Then
-        FreeMem( wnd_CaptionW );
-      GetMem( wnd_CaptionW, len * 2 + 2 );
-      wnd_CaptionW[ len ] := #0;
-      MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), wnd_CaptionW, len );
-      if app_Flags and APP_USE_UTF8 = 0 Then
-        wnd_Caption := wnd_CaptionW;
+      if appFlags and APP_USE_UTF8 = 0 Then
+        wndCaption := AnsiToUtf8( wndCaption );
+      len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
+      if Assigned( wndCaptionW ) Then
+        FreeMem( wndCaptionW );
+      GetMem( wndCaptionW, len * 2 + 2 );
+      wndCaptionW[ len ] := #0;
+      MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
+      if appFlags and APP_USE_UTF8 = 0 Then
+        wndCaption := wndCaptionW;
     end;
 
-  if wnd_Handle <> 0 Then
-    SetWindowTextW( wnd_Handle, wnd_CaptionW );
+  if wndHandle <> 0 Then
+    SetWindowTextW( wndHandle, wndCaptionW );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if Assigned( wnd_Handle ) Then
+  if Assigned( wndHandle ) Then
     begin
-      if app_Flags and APP_USE_UTF8 = 0 Then
-        str := CFStringCreateWithPascalString( nil, wnd_Caption, kCFStringEncodingASCII )
+      if appFlags and APP_USE_UTF8 = 0 Then
+        str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingASCII )
       else
-        str := CFStringCreateWithPascalString( nil, wnd_Caption, kCFStringEncodingUTF8 );
-      SetWindowTitleWithCFString( wnd_Handle, str );
+        str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingUTF8 );
+      SetWindowTitleWithCFString( wndHandle, str );
       CFRelease( str );
       wnd_Select();
     end;
@@ -431,31 +430,31 @@ end;
 
 procedure wnd_SetSize( Width, Height : Integer );
 begin
-  wnd_Width  := Width;
-  wnd_Height := Height;
+  wndWidth  := Width;
+  wndHeight := Height;
 {$IFDEF LINUX}
-  if ( not app_InitToHandle ) and ( wnd_Handle <> 0 ) Then
+  if ( not appInitedToHandle ) and ( wndHandle <> 0 ) Then
     begin
       wnd_SetHints();
-      XResizeWindow( scr_Display, wnd_Handle, wnd_Width, wnd_Height );
+      XResizeWindow( scrDisplay, wndHandle, wndWidth, wndHeight );
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if not app_InitToHandle Then
-    wnd_SetPos( wnd_X, wnd_Y );
+  if not appInitedToHandle Then
+    wnd_SetPos( wndX, wndY );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if ( not app_InitToHandle ) and Assigned( wnd_Handle ) Then
+  if ( not appInitedToHandle ) and Assigned( wndHandle ) Then
     begin
-      SizeWindow( wnd_Handle, wnd_Width, wnd_Height, TRUE );
-      aglUpdateContext( ogl_Context );
+      SizeWindow( wndHandle, wndWidth, wndHeight, TRUE );
+      aglUpdateContext( oglContext );
       wnd_Select();
     end;
 {$ENDIF}
-  ogl_Width  := Width;
-  ogl_Height := Height;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
-    scr_CorrectResolution( scr_ResW, scr_ResH )
+  oglWidth  := Width;
+  oglHeight := Height;
+  if appFlags and CORRECT_RESOLUTION > 0 Then
+    scr_CorrectResolution( scrResW, scrResH )
   else
     SetCurrentMode();
 end;
@@ -466,33 +465,33 @@ procedure wnd_SetPos( X, Y : Integer );
     mode : LongWord;
   {$ENDIF}
 begin
-  wnd_X := X;
-  wnd_Y := Y;
+  wndX := X;
+  wndY := Y;
 {$IFDEF LINUX}
-  if wnd_Handle <> 0 Then
-    if not wnd_FullScreen Then
-      XMoveWindow( scr_Display, wnd_Handle, X, Y )
+  if wndHandle <> 0 Then
+    if not wndFullScreen Then
+      XMoveWindow( scrDisplay, wndHandle, X, Y )
     else
-      XMoveWindow( scr_Display, wnd_Handle, 0, 0 );
+      XMoveWindow( scrDisplay, wndHandle, 0, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if not app_Focus Then
+  if not appFocus Then
     mode := HWND_BOTTOM
   else
     mode := HWND_TOPMOST;
 
-  if wnd_Handle <> 0 Then
-    if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, mode, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
+  if wndHandle <> 0 Then
+    if ( not wndFullScreen ) or ( not appFocus ) Then
+      SetWindowPos( wndHandle, mode, wndX, wndY, wndWidth + ( wndBrdSizeX * 2 ), wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ), SWP_NOACTIVATE )
     else
-      SetWindowPos( wnd_Handle, mode, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
+      SetWindowPos( wndHandle, mode, 0, 0, wndWidth, wndHeight, SWP_NOACTIVATE );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if Assigned( wnd_Handle ) Then
-    if not wnd_FullScreen Then
-      MoveWindow( wnd_Handle, wnd_X, wnd_Y, TRUE )
+  if Assigned( wndHandle ) Then
+    if not wndFullScreen Then
+      MoveWindow( wndHandle, wndX, wndY, TRUE )
     else
-      MoveWindow( wnd_Handle, 0, 0, TRUE );
+      MoveWindow( wndHandle, 0, 0, TRUE );
 {$ENDIF}
 end;
 
@@ -502,52 +501,52 @@ procedure wnd_ShowCursor( Show : Boolean );
     mask   : TPixmap;
     xcolor : TXColor;
 begin
-  app_ShowCursor := Show;
+  appShowCursor := Show;
 
-  if wnd_Handle = 0 Then exit;
+  if wndHandle = 0 Then exit;
   if Show Then
     begin
-      if app_Cursor <> None Then
+      if appCursor <> None Then
         begin
-          XFreeCursor( scr_Display, app_Cursor );
-          app_Cursor := None;
-          XDefineCursor( scr_Display, wnd_Handle, app_Cursor );
+          XFreeCursor( scrDisplay, appCursor );
+          appCursor := None;
+          XDefineCursor( scrDisplay, wndHandle, appCursor );
         end;
     end else
       begin
-        mask := XCreatePixmap( scr_Display, wnd_Root, 1, 1, 1 );
+        mask := XCreatePixmap( scrDisplay, wndRoot, 1, 1, 1 );
         FillChar( xcolor, SizeOf( xcolor ), 0 );
-        app_Cursor := XCreatePixmapCursor( scr_Display, mask, mask, @xcolor, @xcolor, 0, 0 );
-        XDefineCursor( scr_Display, wnd_Handle, app_Cursor );
+        appCursor := XCreatePixmapCursor( scrDisplay, mask, mask, @xcolor, @xcolor, 0, 0 );
+        XDefineCursor( scrDisplay, wndHandle, appCursor );
       end;
 {$ENDIF}
 {$IFDEF WINDOWS}
 begin
-  app_ShowCursor := Show;
+  appShowCursor := Show;
 {$ENDIF}
 {$IFDEF DARWIN}
 begin
-  app_ShowCursor := Show;
+  appShowCursor := Show;
 {$ENDIF}
 end;
 
 procedure wnd_Select;
 begin
 {$IFDEF LINUX}
-  XMapWindow( scr_Display, wnd_Handle );
+  XMapWindow( scrDisplay, wndHandle );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  BringWindowToTop( wnd_Handle );
+  BringWindowToTop( wndHandle );
 {$ENDIF}
 {$IFDEF DARWIN}
-  SelectWindow( wnd_Handle );
-  ShowWindow( wnd_Handle );
-  if wnd_FullScreen Then
+  SelectWindow( wndHandle );
+  ShowWindow( wndHandle );
+  if wndFullScreen Then
     wnd_SetPos( 0, 0 );
 {$ENDIF}
 end;
 
 initialization
-  wnd_Caption := cs_ZenGL;
+  wndCaption := cs_ZenGL;
 
 end.

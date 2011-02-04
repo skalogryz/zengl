@@ -288,9 +288,9 @@ var
   oggBufferDesc : zglTBufferDesc;
   {$ENDIF}
 
-  ogg_Library        : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbis_Library     : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisfile_Library : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  oggLibrary        : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  vorbisLibrary     : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  vorbisfileLibrary : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
 
 implementation
 
@@ -343,29 +343,29 @@ begin
   oggInit := TRUE;
 {$ELSE}
   {$IFDEF LINUX}
-  ogg_Library        := dlopen( libogg, $001 );
-  vorbis_Library     := dlopen( libvorbis, $001 );
-  vorbisfile_Library := dlopen( libvorbisfile, $001 );
+  oggLibrary        := dlopen( libogg, $001 );
+  vorbisLibrary     := dlopen( libvorbis, $001 );
+  vorbisfileLibrary := dlopen( libvorbisfile, $001 );
   {$ENDIF}
   {$IFDEF WINDOWS}
-  ogg_Library        := dlopen( libogg );
-  vorbis_Library     := dlopen( libvorbis );
-  vorbisfile_Library := dlopen( libvorbisfile );
+  oggLibrary        := dlopen( libogg );
+  vorbisLibrary     := dlopen( libvorbis );
+  vorbisfileLibrary := dlopen( libvorbisfile );
   {$ENDIF}
   {$IFDEF DARWIN}
-  ogg_Library        := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libogg ), $001 );
-  vorbis_Library     := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
-  vorbisfile_Library := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );
+  oggLibrary        := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libogg ), $001 );
+  vorbisLibrary     := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
+  vorbisfileLibrary := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );
   {$ENDIF}
 
-  if ( ogg_Library <> LIB_ERROR ) and ( vorbis_Library <> LIB_ERROR ) and ( vorbisfile_Library <> LIB_ERROR ) Then
+  if ( oggLibrary <> LIB_ERROR ) and ( vorbisLibrary <> LIB_ERROR ) and ( vorbisfileLibrary <> LIB_ERROR ) Then
     begin
-      ov_clear          := dlsym( vorbisfile_Library, 'ov_clear' );
-      ov_open_callbacks := dlsym( vorbisfile_Library, 'ov_open_callbacks' );
-      ov_info           := dlsym( vorbisfile_Library, 'ov_info' );
-      ov_read           := dlsym( vorbisfile_Library, 'ov_read' );
-      ov_pcm_seek       := dlsym( vorbisfile_Library, 'ov_pcm_seek' );
-      ov_pcm_total      := dlsym( vorbisfile_Library, 'ov_pcm_total' );
+      ov_clear          := dlsym( vorbisfileLibrary, 'ov_clear' );
+      ov_open_callbacks := dlsym( vorbisfileLibrary, 'ov_open_callbacks' );
+      ov_info           := dlsym( vorbisfileLibrary, 'ov_info' );
+      ov_read           := dlsym( vorbisfileLibrary, 'ov_read' );
+      ov_pcm_seek       := dlsym( vorbisfileLibrary, 'ov_pcm_seek' );
+      ov_pcm_total      := dlsym( vorbisfileLibrary, 'ov_pcm_total' );
 
       log_Add( 'Ogg: Initialized'  );
       oggInit := TRUE;
@@ -539,9 +539,9 @@ finalization
 {$IFNDEF USE_OGG_STATIC}
   if oggInit Then
     begin
-      dlclose( ogg_Library );
-      dlclose( vorbis_Library );
-      dlclose( vorbisfile_Library );
+      dlclose( oggLibrary );
+      dlclose( vorbisLibrary );
+      dlclose( vorbisfileLibrary );
     end;
 {$ENDIF}
 

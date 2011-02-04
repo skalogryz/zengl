@@ -113,7 +113,7 @@ begin
     mode := GL_TRIANGLES
   else
     mode := GL_QUADS;
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       if Assigned( Font.CharDesc[ c ] ) Then
         begin
@@ -162,7 +162,7 @@ begin
         begin
           lastPage := charDesc.Page;
 
-          if ( not b2d_Started ) Then
+          if ( not b2dStarted ) Then
             begin
               glEnd();
 
@@ -231,7 +231,7 @@ begin
       X := X + ( charDesc.ShiftP + textStep ) * textScale;
     end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 

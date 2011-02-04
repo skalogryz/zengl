@@ -36,17 +36,17 @@ function sprite2d_InScreenSimple( X, Y, W, H, Angle : Single ) : Boolean;
 function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
 
 var
-  render2d_Clip    : Boolean;
-  b2d_Started      : Boolean;
-  b2d_New          : Boolean;
-  b2d_Batches      : LongWord;
-  b2dcur_Mode      : LongWord;
-  b2dcur_FX        : LongWord;
-  b2dcur_Blend     : LongWord;
-  b2dcur_Color     : LongWord;
-  b2dcur_ColorMask : LongWord;
-  b2dcur_Tex       : zglPTexture;
-  b2dcur_Smooth    : LongWord;
+  render2dClip      : Boolean;
+  b2dStarted        : Boolean;
+  b2dNew            : Boolean;
+  b2dBatches        : LongWord;
+  b2dCurMode        : LongWord;
+  b2dCurFX          : LongWord;
+  b2dCurBlend       : LongWord;
+  b2dCurColor       : LongWord;
+  b2dCurColorMask   : LongWord;
+  b2dCurTex         : zglPTexture;
+  b2dCurSmooth      : LongWord;
   sprite2d_InScreen : function( X, Y, W, H, Angle : Single ) : Boolean;
 
 implementation
@@ -59,37 +59,37 @@ uses
 
 procedure batch2d_Begin;
 begin
-  b2d_New     := TRUE;
-  b2d_Started := TRUE;
+  b2dNew     := TRUE;
+  b2dStarted := TRUE;
 end;
 
 procedure batch2d_End;
 begin
   batch2d_Flush();
-  b2d_Batches  := 0;
-  b2dcur_Mode  := 0;
-  b2dcur_FX    := 0;
-  b2dcur_Blend := 0;
-  b2dcur_Color := 0;
-  b2dcur_Tex   := nil;
-  b2d_Started  := FALSE;
+  b2dBatches  := 0;
+  b2dCurMode  := 0;
+  b2dCurFX    := 0;
+  b2dCurBlend := 0;
+  b2dCurColor := 0;
+  b2dCurTex   := nil;
+  b2dStarted  := FALSE;
 end;
 
 procedure batch2d_Flush;
 begin
-  if b2d_Started and ( not b2d_New ) Then
+  if b2dStarted and ( not b2dNew ) Then
     begin
-      INC( b2d_Batches );
-      b2d_New := TRUE;
+      INC( b2dBatches );
+      b2dNew := TRUE;
       glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_ALPHA_TEST );
       glDisable( GL_BLEND );
 
-      if b2dcur_Smooth > 0 Then
+      if b2dCurSmooth > 0 Then
         begin
-          b2dcur_Smooth := 0;
+          b2dCurSmooth := 0;
           glDisable( GL_LINE_SMOOTH    );
           glDisable( GL_POLYGON_SMOOTH );
         end;
@@ -98,33 +98,32 @@ end;
 
 function batch2d_Check( Mode, FX : LongWord; Texture : zglPTexture ) : Boolean;
 begin
-  if ( Mode <> b2dcur_Mode ) or ( Texture <> b2dcur_Tex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
-     ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
+  if ( Mode <> b2dCurMode ) or ( Texture <> b2dCurTex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dCurBlend <> 0 ) ) or ( b2dCurSmooth <> FX and PR2D_SMOOTH ) Then
     begin
-      if not b2d_New Then
+      if not b2dNew Then
         batch2d_Flush();
-      b2d_New := TRUE;
+      b2dNew := TRUE;
     end;
 
-  b2dcur_Mode   := Mode;
-  b2dcur_Tex    := Texture;
-  b2dcur_FX     := FX;
-  b2dcur_Smooth := FX and PR2D_SMOOTH;
+  b2dCurMode   := Mode;
+  b2dCurTex    := Texture;
+  b2dCurFX     := FX;
+  b2dCurSmooth := FX and PR2D_SMOOTH;
   if FX and FX_BLEND = 0 Then
-    b2dcur_Blend := 0;
+    b2dCurBlend := 0;
 
-  Result := b2d_New;
-  b2d_New := FALSE;
+  Result := b2dNew;
+  b2dNew := FALSE;
 end;
 
 function sprite2d_InScreenSimple( X, Y, W, H, Angle : Single ) : Boolean;
 begin
   if Angle <> 0 Then
-    Result := ( ( X + W + H / 2 > ogl_ClipX ) and ( X - W - H / 2 < ogl_ClipX + ogl_ClipW / scr_ResCX ) and
-                ( Y + H + W / 2 > ogl_ClipY ) and ( Y - W - H / 2 < ogl_ClipY + ogl_ClipH / scr_ResCY ) )
+    Result := ( ( X + W + H / 2 > oglClipX ) and ( X - W - H / 2 < oglClipX + oglClipW / scrResCX ) and
+                ( Y + H + W / 2 > oglClipY ) and ( Y - W - H / 2 < oglClipY + oglClipH / scrResCY ) )
   else
-    Result := ( ( X + W > ogl_ClipX ) and ( X < ogl_ClipX + ogl_ClipW / scr_ResCX ) and
-                ( Y + H > ogl_ClipY ) and ( Y < ogl_ClipY + ogl_ClipH / scr_ResCY ) );
+    Result := ( ( X + W > oglClipX ) and ( X < oglClipX + oglClipW / scrResCX ) and
+                ( Y + H > oglClipY ) and ( Y < oglClipY + oglClipH / scrResCY ) );
 end;
 
 function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
@@ -137,14 +136,14 @@ begin
       sy   := Y + H / 2;
       srad := ( W + H ) / 2;
 
-      Result := sqr( sx - cam2d.CX ) + sqr( sy - cam2d.CY ) < sqr( srad + ogl_ClipR );
+      Result := sqr( sx - cam2d.CX ) + sqr( sy - cam2d.CY ) < sqr( srad + oglClipR );
     end else
       if Angle <> 0 Then
-        Result := ( ( X + W + H / 2 > ogl_ClipX + cam2d.Global.X ) and ( X - W - H / 2 < ogl_ClipX + ogl_ClipW / scr_ResCX + cam2d.Global.X ) and
-                    ( Y + H + W / 2 > ogl_ClipY + cam2d.Global.Y ) and ( Y - W - H / 2 < ogl_ClipY + ogl_ClipH / scr_ResCY + cam2d.Global.Y ) )
+        Result := ( ( X + W + H / 2 > oglClipX + cam2d.Global.X ) and ( X - W - H / 2 < oglClipX + oglClipW / scrResCX + cam2d.Global.X ) and
+                    ( Y + H + W / 2 > oglClipY + cam2d.Global.Y ) and ( Y - W - H / 2 < oglClipY + oglClipH / scrResCY + cam2d.Global.Y ) )
       else
-        Result := ( ( X + W > ogl_ClipX + cam2d.Global.X ) and ( X < ogl_ClipX + ogl_ClipW / scr_ResCX + cam2d.Global.X ) and
-                    ( Y + H > ogl_ClipY + cam2d.Global.Y ) and ( Y < ogl_ClipY + ogl_ClipH / scr_ResCY + cam2d.Global.Y ) );
+        Result := ( ( X + W > oglClipX + cam2d.Global.X ) and ( X < oglClipX + oglClipW / scrResCX + cam2d.Global.X ) and
+                    ( Y + H > oglClipY + cam2d.Global.Y ) and ( Y < oglClipY + oglClipH / scrResCY + cam2d.Global.Y ) );
 end;
 
 initialization

@@ -75,21 +75,21 @@ begin
       cam2d.Apply  := TRUE;
       cam2d.OnlyXY := ( cam2d.Global.Angle = 0 ) and ( cam2d.Global.Zoom.X = 1 ) and ( cam2d.Global.Zoom.Y = 1 );
       if ( cam2d.ZoomX <> cam2d.Global.Zoom.X ) or ( cam2d.ZoomY <> cam2d.Global.Zoom.Y ) Then
-        ogl_ClipR := Round( sqrt( sqr( ogl_Width / scr_ResCX / cam2d.Global.Zoom.X ) + sqr( ogl_Height / scr_ResCY / cam2d.Global.Zoom.Y ) ) ) div 2;
-      cam2d.CX     := cam2d.Global.X + ( ogl_Width / scr_ResCX ) / 2;
-      cam2d.CY     := cam2d.Global.Y + ( ogl_Height / scr_ResCY ) / 2;
+        oglClipR := Round( sqrt( sqr( oglWidth / scrResCX / cam2d.Global.Zoom.X ) + sqr( oglHeight / scrResCY / cam2d.Global.Zoom.Y ) ) ) div 2;
+      cam2d.CX     := cam2d.Global.X + ( oglWidth / scrResCX ) / 2;
+      cam2d.CY     := cam2d.Global.Y + ( oglHeight / scrResCY ) / 2;
       cam2d.ZoomX  := cam2d.Global.Zoom.X;
       cam2d.ZoomY  := cam2d.Global.Zoom.Y;
 
       glPushMatrix();
       if not cam2d.OnlyXY Then
         begin
-          glTranslatef( ogl_Width / 2 - scr_AddCX / scr_ResCX, ogl_Height / 2 - scr_AddCY / scr_ResCY, 0 );
+          glTranslatef( oglWidth / 2 - scrAddCX / scrResCX, oglHeight / 2 - scrAddCY / scrResCY, 0 );
           if ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
             glScalef( Camera.Zoom.X, Camera.Zoom.Y, 1 );
           if Camera.Angle <> 0 Then
             glRotatef( Camera.Angle, 0, 0, 1 );
-          glTranslatef( -ogl_Width / 2 + scr_AddCX / scr_ResCX, -ogl_Height / 2 + scr_AddCY / scr_ResCY, 0 );
+          glTranslatef( -oglWidth / 2 + scrAddCX / scrResCX, -oglHeight / 2 + scrAddCY / scrResCY, 0 );
         end;
       if ( Camera.X <> 0 ) or ( Camera.Y <> 0 ) Then
         glTranslatef( -Camera.X, -Camera.Y, 0 );

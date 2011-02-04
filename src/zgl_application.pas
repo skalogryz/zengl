@@ -54,17 +54,17 @@ function app_ProcessMessages( inHandlerCallRef: EventHandlerCallRef; inEvent: Ev
 {$ENDIF}
 
 var
-  app_Initialized  : Boolean;
-  app_GetSysDirs   : Boolean;
-  app_Work         : Boolean;
-  app_WorkTime     : LongWord;
-  app_Pause        : Boolean;
-  app_AutoPause    : Boolean = TRUE;
-  app_Focus        : Boolean = TRUE;
-  app_Log          : Boolean;
-  app_InitToHandle : Boolean;
-  app_WorkDir      : String;
-  app_HomeDir      : String;
+  appInitialized    : Boolean;
+  appGotSysDirs     : Boolean;
+  appWork           : Boolean;
+  appWorkTime       : LongWord;
+  appPause          : Boolean;
+  appAutoPause      : Boolean = TRUE;
+  appFocus          : Boolean = TRUE;
+  appLog            : Boolean;
+  appInitedToHandle : Boolean;
+  appWorkDir        : String;
+  appHomeDir        : String;
 
   // call-back
   app_PInit     : procedure = app_Init;
@@ -76,22 +76,22 @@ var
   app_PActivate : procedure( activate : Boolean ) = zeroa;
 
   {$IFDEF LINUX}
-  app_Cursor : TCursor = None;
-  app_XIM    : PXIM;
-  app_XIC    : PXIC;
+  appCursor : TCursor = None;
+  appXIM    : PXIM;
+  appXIC    : PXIC;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  app_Timer : LongWord;
+  appTimer : LongWord;
   {$ENDIF}
-  app_ShowCursor : Boolean;
+  appShowCursor : Boolean;
 
-  app_dt : Double;
+  appdt : Double;
 
-  app_FPS      : LongWord;
-  app_FPSCount : LongWord;
-  app_FPSAll   : LongWord;
+  appFPS      : LongWord;
+  appFPSCount : LongWord;
+  appFPSAll   : LongWord;
 
-  app_Flags : LongWord;
+  appFlags : LongWord;
 
 implementation
 uses
@@ -122,16 +122,16 @@ begin
   scr_Clear();
   app_PDraw();
   scr_Flush();
-  if not app_Pause Then
-    INC( app_FPSCount );
+  if not appPause Then
+    INC( appFPSCount );
 end;
 
 procedure app_CalcFPS;
 begin
-  app_FPS      := app_FPSCount;
-  app_FPSAll   := app_FPSAll + app_FPSCount;
-  app_FPSCount := 0;
-  INC( app_WorkTime );
+  appFPS      := appFPSCount;
+  appFPSAll   := appFPSAll + appFPSCount;
+  appFPSCount := 0;
+  INC( appWorkTime );
 end;
 
 procedure app_Init;
@@ -140,7 +140,7 @@ begin
   app_PLoad();
   scr_Flush();
 
-  app_dt := timer_GetTicks();
+  appdt := timer_GetTicks();
   timer_Reset();
   timer_Add( @app_CalcFPS, 1000 );
 end;
@@ -149,7 +149,7 @@ procedure app_MainLoop;
   var
     t : Double;
 begin
-  while app_Work do
+  while appWork do
     begin
       app_ProcessOS();
       {$IFDEF USE_JOYSTICK}
@@ -159,18 +159,18 @@ begin
       snd_MainLoop();
       {$ENDIF}
 
-      if app_Pause Then
+      if appPause Then
         begin
           timer_Reset();
-          app_dt := timer_GetTicks();
+          appdt := timer_GetTicks();
           u_Sleep( 10 );
           continue;
         end else
           timer_MainLoop();
 
       t := timer_GetTicks();
-      app_PUpdate( timer_GetTicks() - app_dt );
-      app_dt := t;
+      app_PUpdate( timer_GetTicks() - appdt );
+      appdt := t;
 
       app_Draw();
     end;
@@ -231,25 +231,25 @@ function app_ProcessMessages;
     key : LongWord;
 begin
 {$IFDEF LINUX}
-  XQueryPointer( scr_Display, wnd_Handle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
+  XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
 
   Result := 0;
-  while XPending( scr_Display ) <> 0 do
+  while XPending( scrDisplay ) <> 0 do
     begin
-      XNextEvent( scr_Display, @event );
+      XNextEvent( scrDisplay, @event );
 
       case event._type of
         ClientMessage:
-          if ( event.xclient.message_type = wnd_Protocols ) and ( event.xclient.data.l[ 0 ] = wnd_DestroyAtom ) Then app_Work := FALSE;
+          if ( event.xclient.message_type = wndProtocols ) and ( event.xclient.data.l[ 0 ] = wndDestroyAtom ) Then appWork := FALSE;
 
         Expose:
-          if app_Work and app_AutoPause Then
+          if appWork and appAutoPause Then
             app_Draw();
         FocusIn:
           begin
-            app_Focus := TRUE;
-            app_Pause := FALSE;
-            if app_Work Then app_PActivate( TRUE );
+            appFocus := TRUE;
+            appPause := FALSE;
+            if appWork Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -257,17 +257,17 @@ begin
           end;
         FocusOut:
           begin
-            app_Focus := FALSE;
-            if app_AutoPause Then app_Pause := TRUE;
-            if app_Work Then app_PActivate( FALSE );
+            appFocus := FALSE;
+            if appAutoPause Then appPause := TRUE;
+            if appWork Then app_PActivate( FALSE );
           end;
         ConfigureNotify:
           begin
             // Для особо одаренных оконных менеджеров :)
-            if wnd_FullScreen and ( ( event.xconfigure.x <> 0 ) or ( event.xconfigure.y <> 0 ) ) Then
+            if wndFullScreen and ( ( event.xconfigure.x <> 0 ) or ( event.xconfigure.y <> 0 ) ) Then
               wnd_SetPos( 0, 0 );
-            if ( event.xconfigure.width <> wnd_Width ) or ( event.xconfigure.height <> wnd_Height ) Then
-              wnd_SetSize( wnd_Width, wnd_Height );
+            if ( event.xconfigure.width <> wndWidth ) or ( event.xconfigure.height <> wndHeight ) Then
+              wnd_SetSize( wndWidth, wndHeight );
           end;
 
         ButtonPress:
@@ -373,7 +373,7 @@ begin
               K_BACKSPACE: u_Backspace( keysText );
               K_TAB:       key_InputText( '  ' );
             else
-              len := Xutf8LookupString( app_XIC, @event, @c[ 0 ], 6, @keysym, @status );
+              len := Xutf8LookupString( appXIC, @event, @c[ 0 ], 6, @keysym, @status );
               str := '';
               for i := 0 to len - 1 do
                 str := str + c[ i ];
@@ -398,51 +398,51 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   Result := 0;
-  if ( not app_Work ) and ( Msg <> WM_ACTIVATE ) Then
+  if ( not appWork ) and ( Msg <> WM_ACTIVATE ) Then
     begin
       Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
       exit;
     end;
   case Msg of
     WM_CLOSE, WM_DESTROY, WM_QUIT:
-      app_Work := FALSE;
+      appWork := FALSE;
 
     WM_PAINT:
       begin
         app_Draw();
-        ValidateRect( wnd_Handle, nil );
+        ValidateRect( wndHandle, nil );
       end;
     WM_DISPLAYCHANGE:
       begin
-        if scr_Changing Then
+        if scrChanging Then
           begin
-            scr_Changing := FALSE;
+            scrChanging := FALSE;
             exit;
           end;
         scr_Init();
-        scr_Width  := scr_Desktop.dmPelsWidth;
-        scr_Height := scr_Desktop.dmPelsHeight;
-        if not wnd_FullScreen Then
+        scrWidth  := scrDesktop.dmPelsWidth;
+        scrHeight := scrDesktop.dmPelsHeight;
+        if not wndFullScreen Then
           wnd_Update();
       end;
     WM_ACTIVATE:
       begin
-        app_Focus := ( LOWORD( wParam ) <> WA_INACTIVE );
-        if app_Focus Then
+        appFocus := ( LOWORD( wParam ) <> WA_INACTIVE );
+        if appFocus Then
           begin
-            app_Pause := FALSE;
-            if app_Work Then app_PActivate( TRUE );
+            appPause := FALSE;
+            if appWork Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState();
-            if ( wnd_FullScreen ) and ( not wnd_First ) Then
-              scr_SetOptions( scr_Width, scr_Height, scr_Refresh, wnd_FullScreen, scr_VSync );
+            if ( wndFullScreen ) and ( not wndFirst ) Then
+              scr_SetOptions( scrWidth, scrHeight, scrRefresh, wndFullScreen, scrVSync );
           end else
             begin
-              if app_AutoPause Then app_Pause := TRUE;
-              if app_Work Then app_PActivate( FALSE );
-              if app_Work and ( wnd_FullScreen ) and ( not wnd_First ) Then
+              if appAutoPause Then appPause := TRUE;
+              if appWork Then app_PActivate( FALSE );
+              if appWork and ( wndFullScreen ) and ( not wndFirst ) Then
                 begin
                   scr_Reset();
                   wnd_Update();
@@ -452,27 +452,27 @@ begin
     WM_NCHITTEST:
       begin
         Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
-        if ( not app_Focus ) and ( Result = HTCAPTION ) Then
+        if ( not appFocus ) and ( Result = HTCAPTION ) Then
           Result := HTCLIENT;
       end;
     WM_ENTERSIZEMOVE:
       begin
-        if not app_AutoPause Then
-          app_Timer := SetTimer( wnd_Handle, 1, 1, nil );
+        if not appAutoPause Then
+          appTimer := SetTimer( wndHandle, 1, 1, nil );
       end;
     WM_EXITSIZEMOVE:
       begin
-        if app_Timer > 0 Then
+        if appTimer > 0 Then
           begin
-            KillTimer( wnd_Handle, app_Timer );
-            app_Timer := 0;
+            KillTimer( wndHandle, appTimer );
+            appTimer := 0;
           end;
       end;
     WM_MOVING:
       begin
-        wnd_X := PRect( lParam ).Left;
-        wnd_Y := PRect( lParam ).Top;
-        if app_AutoPause Then
+        wndX := PRect( lParam ).Left;
+        wndY := PRect( lParam ).Top;
+        if appAutoPause Then
           timer_Reset();
       end;
     WM_TIMER:
@@ -482,7 +482,7 @@ begin
       end;
     WM_SETCURSOR:
       begin
-        if ( app_Focus ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not app_ShowCursor ) Then
+        if ( appFocus ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not appShowCursor ) Then
           SetCursor( 0 )
         else
           SetCursor( LoadCursor( 0, IDC_ARROW ) );
@@ -566,7 +566,7 @@ begin
         doKeyPress( key );
 
         if ( Msg = WM_SYSKEYDOWN ) and ( key = K_F4 ) Then
-          app_Work := FALSE;
+          appWork := FALSE;
       end;
     WM_KEYUP, WM_SYSKEYUP:
       begin
@@ -586,7 +586,7 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          if app_Flags and APP_USE_UTF8 > 0 Then
+          if appFlags and APP_USE_UTF8 > 0 Then
             begin
               len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
               WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
@@ -613,14 +613,14 @@ begin
 {$ENDIF}
 {$IFDEF DARWIN}
   GetGlobalMouse( mPos );
-  mouseX := mPos.h - wnd_X;
-  mouseY := mPos.v - wnd_Y;
+  mouseX := mPos.h - wndX;
+  mouseY := mPos.v - wndY;
 
   eClass := GetEventClass( inEvent );
   eKind  := GetEventKind( inEvent );
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
 
-  if app_Work Then
+  if appWork Then
   case eClass of
     kEventClassCommand:
       case eKind of
@@ -640,44 +640,44 @@ begin
           end;
         kEventWindowActivated:
           begin
-            app_Focus := TRUE;
-            app_Pause := FALSE;
+            appFocus := TRUE;
+            appPause := FALSE;
             app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState();
-            if wnd_FullScreen Then
-              scr_SetOptions( scr_Width, scr_Height, scr_Refresh, wnd_FullScreen, scr_VSync );
+            if wndFullScreen Then
+              scr_SetOptions( scrWidth, scrHeight, scrRefresh, wndFullScreen, scrVSync );
           end;
         kEventWindowDeactivated:
           begin
-            app_Focus := FALSE;
-            if app_AutoPause Then app_Pause := TRUE;
+            appFocus := FALSE;
+            if appAutoPause Then appPause := TRUE;
             app_PActivate( FALSE );
-            if wnd_FullScreen Then scr_Reset();
+            if wndFullScreen Then scr_Reset();
           end;
         kEventWindowCollapsed:
           begin
-            app_Focus := FALSE;
-            app_Pause := TRUE;
+            appFocus := FALSE;
+            appPause := TRUE;
           end;
         kEventWindowClosed:
           begin
-            wnd_Handle := nil;
-            app_Work   := FALSE;
+            wndHandle := nil;
+            appWork   := FALSE;
           end;
         kEventWindowBoundsChanged:
           begin
-            if not wnd_FullScreen Then
+            if not wndFullScreen Then
               begin
                 GetEventParameter( inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf( bounds ), nil, @bounds );
-                wnd_X := Round( bounds.origin.x - ( bounds.size.width - wnd_Width ) / 2 );
-                wnd_Y := Round( bounds.origin.y - ( bounds.size.height - wnd_Height ) / 2 );
+                wndX := Round( bounds.origin.x - ( bounds.size.width - wndWidth ) / 2 );
+                wndY := Round( bounds.origin.y - ( bounds.size.height - wndHeight ) / 2 );
               end else
                 begin
-                  wnd_X := 0;
-                  wnd_Y := 0;
+                  wndX := 0;
+                  wndY := 0;
                 end;
           end;
       end;
@@ -776,16 +776,16 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            wnd_MouseIn := ( mPos.h > wnd_X ) and ( mPos.h < wnd_X + wnd_Width ) and ( mPos.v > wnd_Y ) and ( mPos.v < wnd_Y + wnd_Height );
-            if wnd_MouseIn Then
+            wndMouseIn := ( mPos.h > wndX ) and ( mPos.h < wndX + wndWidth ) and ( mPos.v > wndY ) and ( mPos.v < wndY + wndHeight );
+            if wndMouseIn Then
               begin
-                if ( not app_ShowCursor ) and ( CGCursorIsVisible = 1 ) Then
-                  CGDisplayHideCursor( scr_Display );
-                if ( app_ShowCursor ) and ( CGCursorIsVisible = 0 ) Then
-                  CGDisplayShowCursor( scr_Display );
+                if ( not appShowCursor ) and ( CGCursorIsVisible = 1 ) Then
+                  CGDisplayHideCursor( scrDisplay );
+                if ( appShowCursor ) and ( CGCursorIsVisible = 0 ) Then
+                  CGDisplayShowCursor( scrDisplay );
               end else
               if CGCursorIsVisible = 0 Then
-                CGDisplayShowCursor( scr_Display );
+                CGDisplayShowCursor( scrDisplay );
           end;
         kEventMouseDown:
           begin
@@ -878,6 +878,6 @@ begin
 end;
 
 initialization
-  app_Flags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
+  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
 
 end.

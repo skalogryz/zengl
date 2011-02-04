@@ -71,7 +71,7 @@ var
   fx2dVY1, fx2dVY2, fx2dVY3, fx2dVY4 : Single;
 
   // FX2D_SCALE
-  FX2D_SX, FX2D_SY : Single;
+  fx2dSX, fx2dSY : Single;
 
 implementation
 uses
@@ -84,10 +84,10 @@ procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
     srcBlend : LongWord;
     dstBlend : LongWord;
 begin
-  if Mode + LongWord( SeparateAlpha ) shl 8 <> b2dcur_Blend Then
+  if Mode + LongWord( SeparateAlpha ) shl 8 <> b2dCurBlend Then
     batch2d_Flush();
 
-  b2dcur_Blend := Mode + LongWord( SeparateAlpha ) shl 8;
+  b2dCurBlend := Mode + LongWord( SeparateAlpha ) shl 8;
   case Mode of
     FX_BLEND_NORMAL:
       begin
@@ -120,7 +120,7 @@ begin
         dstBlend := GL_SRC_COLOR;
       end;
   end;
-  if SeparateAlpha and ogl_Separate Then
+  if SeparateAlpha and oglSeparate Then
     glBlendFuncSeparateEXT( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
   else
     glBlendFunc( srcBlend, dstBlend );
@@ -128,10 +128,10 @@ end;
 
 procedure fx_SetColorMode( Mode : Byte );
 begin
-  if Mode <> b2dcur_Color Then
+  if Mode <> b2dCurColor Then
     batch2d_Flush();
 
-  b2dcur_Color := Mode;
+  b2dCurColor := Mode;
   case Mode of
     FX_COLOR_MIX:
       begin
@@ -151,10 +151,10 @@ procedure fx_SetColorMask( R, G, B, Alpha : Boolean );
     mask : Integer;
 begin
   mask := Byte( R ) + Byte( G ) shl 1 + Byte( B ) shl 2 + Byte( Alpha ) shl 3;
-  if mask <> b2dcur_ColorMask Then
+  if mask <> b2dCurColorMask Then
     batch2d_Flush();
 
-  b2dcur_ColorMask := mask;
+  b2dCurColorMask := mask;
 
   glColorMask( Byte( R ), Byte( G ), Byte( B ), Byte( Alpha ) );
 end;
@@ -203,8 +203,8 @@ end;
 
 procedure fx2d_SetScale( scaleX, scaleY : Single );
 begin
-  FX2D_SX := scaleX;
-  FX2D_SY := scaleY;
+  fx2dSX := scaleX;
+  fx2dSY := scaleY;
 end;
 
 initialization

@@ -78,13 +78,13 @@ begin
 
   if FX and FX2D_SCALE > 0 Then
     begin
-      X := X + ( W - W * FX2D_SX ) / 2;
-      Y := Y + ( H - H * FX2D_SY ) / 2;
-      W := W * FX2D_SX;
-      H := H * FX2D_SY;
+      X := X + ( W - W * fx2dSX ) / 2;
+      Y := Y + ( H - H * fx2dSY ) / 2;
+      W := W * fx2dSX;
+      H := H * fx2dSY;
     end;
 
-  if render2d_Clip Then
+  if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -176,7 +176,7 @@ begin
     mode := GL_TRIANGLES
   else
     mode := GL_QUADS;
-  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -238,7 +238,7 @@ begin
         glVertex2fv( @quad[ 3 ] );
       end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -267,13 +267,13 @@ begin
 
   if FX and FX2D_SCALE > 0 Then
     begin
-      X := X + ( W - W * FX2D_SX ) / 2;
-      Y := Y + ( H - H * FX2D_SY ) / 2;
-      W := W * FX2D_SX;
-      H := H * FX2D_SY;
+      X := X + ( W - W * fx2dSX ) / 2;
+      Y := Y + ( H - H * fx2dSY ) / 2;
+      W := W * fx2dSX;
+      H := H * fx2dSY;
     end;
 
-  if render2d_Clip Then
+  if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -366,7 +366,7 @@ begin
     mode := GL_TRIANGLES
   else
     mode := GL_QUADS;
-  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -428,7 +428,7 @@ begin
         glVertex2fv( @quad[ 3 ] );
       end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -458,13 +458,13 @@ begin
 
   if FX and FX2D_SCALE > 0 Then
     begin
-      X := X + ( W - W * FX2D_SX ) / 2;
-      Y := Y + ( H - H * FX2D_SY ) / 2;
-      W := W * FX2D_SX;
-      H := H * FX2D_SY;
+      X := X + ( W - W * fx2dSX ) / 2;
+      Y := Y + ( H - H * fx2dSY ) / 2;
+      W := W * fx2dSX;
+      H := H * fx2dSY;
     end;
 
-  if render2d_Clip Then
+  if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -563,7 +563,7 @@ begin
     mode := GL_TRIANGLES
   else
     mode := GL_QUADS;
-  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -625,7 +625,7 @@ begin
         glVertex2fv( @quad[ 3 ] );
       end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -654,13 +654,13 @@ begin
 
   if FX and FX2D_SCALE > 0 Then
     begin
-      X := X + ( W - W * FX2D_SX ) / 2;
-      Y := Y + ( H - H * FX2D_SY ) / 2;
-      W := W * FX2D_SX;
-      H := H * FX2D_SY;
+      X := X + ( W - W * fx2dSX ) / 2;
+      Y := Y + ( H - H * fx2dSY ) / 2;
+      W := W * fx2dSX;
+      H := H * fx2dSY;
     end;
 
-  if render2d_Clip Then
+  if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -761,7 +761,7 @@ begin
     mode := GL_TRIANGLES
   else
     mode := GL_QUADS;
-  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -823,7 +823,7 @@ begin
         glVertex2fv( @quad[ 3 ] );
       end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -848,27 +848,27 @@ begin
   if tX < 0 Then
     begin
       aI := Round( -tX ) div i;
-      bI := Round( ogl_ClipW / scr_ResCX ) div i + aI;
+      bI := Round( oglClipW / scrResCX ) div i + aI;
     end else
       begin
         aI := 0;
-        bI := Round( ogl_ClipW / scr_ResCX ) div i - Round( tX ) div i;
+        bI := Round( oglClipW / scrResCX ) div i - Round( tX ) div i;
       end;
 
   if tY < 0 Then
     begin
       aJ := Round( -tY ) div j;
-      bJ := Round( ogl_ClipH / scr_ResCY ) div j + aJ;
+      bJ := Round( oglClipH / scrResCY ) div j + aJ;
     end else
       begin
         aJ := 0;
-        bJ := Round( ogl_ClipH / scr_ResCY ) div j - Round( tY ) div j;
+        bJ := Round( oglClipH / scrResCY ) div j - Round( tY ) div j;
       end;
 
   if not cam2d.OnlyXY Then
     begin
-      tI := ogl_ClipR div i - Round( ogl_Width / scr_ResCX ) div i div 2 + 3;
-      tJ := ogl_ClipR div j - Round( ogl_Height / scr_ResCY ) div j div 2 + 3;
+      tI := oglClipR div i - Round( oglWidth / scrResCX ) div i div 2 + 3;
+      tJ := oglClipR div j - Round( oglHeight / scrResCY ) div j div 2 + 3;
       DEC( aI, tI );
       INC( bI, tI );
       DEC( aJ, tJ );
@@ -889,7 +889,7 @@ begin
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;
   if bJ >= Tiles.Count.Y Then bJ := Tiles.Count.Y - 1;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -946,7 +946,7 @@ begin
         glVertex2f( x + i * w, y + j * h + h );
       end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 

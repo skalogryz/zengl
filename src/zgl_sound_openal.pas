@@ -85,7 +85,7 @@ type
 end;
 
 var
-  oal_Library : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  oalLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
 
   alcGetString           : function(device: PALCdevice; param: LongInt): PAnsiChar; cdecl;
   alGetError             : function(device: PALCdevice): LongInt; cdecl;
@@ -117,19 +117,19 @@ var
   alDeleteBuffers        : procedure(n: LongInt; const buffers: PLongWord); cdecl;
   alBufferData           : procedure(bid: LongWord; format: LongInt; data: Pointer; size: LongInt; freq: LongInt); cdecl;
 
-  oal_Device  : PALCdevice  = nil;
-  oal_Context : PALCcontext = nil;
-  oal_Sources : array of LongWord;
-  oal_SrcPtrs : array of Pointer;
-  oal_SrcState: array of LongWord;
+  oalDevice  : PALCdevice  = nil;
+  oalContext : PALCcontext = nil;
+  oalSources : array of LongWord;
+  oalSrcPtrs : array of Pointer;
+  oalSrcState: array of LongWord;
 
   // Параметры слушателя
-  oal_Position    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
-  oal_Velocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 ); //движение
-  oal_Orientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
+  oalPosition    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
+  oalVelocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 ); //движение
+  oalOrientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
 
   // Форматы звука для количества каналов
-  oal_Format  : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
+  oalFormat  : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
 
 implementation
 uses
@@ -138,38 +138,38 @@ uses
 function InitOpenAL : Boolean;
 begin
   Result := FALSE;
-  oal_Library := dlopen( libopenal {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  oalLibrary := dlopen( libopenal {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   // Для надежности...
-  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.1' ), $001 );
-  if oal_Library = nil Then oal_Library := dlopen( PChar( libopenal + '.0' ), $001 );
+  if oalLibrary = nil Then oalLibrary := dlopen( PChar( libopenal + '.1' ), $001 );
+  if oalLibrary = nil Then oalLibrary := dlopen( PChar( libopenal + '.0' ), $001 );
   {$ENDIF}
 
-  if oal_Library <> LIB_ERROR Then
+  if oalLibrary <> LIB_ERROR Then
     begin
-      alcGetString           := dlsym( oal_Library, 'alcGetString' );
-      alcOpenDevice          := dlsym( oal_Library, 'alcOpenDevice' );
-      alcCloseDevice         := dlsym( oal_Library, 'alcCloseDevice' );
-      alcCreateContext       := dlsym( oal_Library, 'alcCreateContext' );
-      alcMakeContextCurrent  := dlsym( oal_Library, 'alcMakeContextCurrent' );
-      alcDestroyContext      := dlsym( oal_Library, 'alcDestroyContext' );
-      alGetError             := dlsym( oal_Library, 'alGetError' );
-      alListenerfv           := dlsym( oal_Library, 'alListenerfv' );
-      alGenSources           := dlsym( oal_Library, 'alGenSources' );
-      alDeleteSources        := dlsym( oal_Library, 'alDeleteSources' );
-      alSourcei              := dlsym( oal_Library, 'alSourcei' );
-      alSourcef              := dlsym( oal_Library, 'alSourcef' );
-      alSourcefv             := dlsym( oal_Library, 'alSourcefv' );
-      alGetSourcei           := dlsym( oal_Library, 'alGetSourcei' );
-      alSourcePlay           := dlsym( oal_Library, 'alSourcePlay' );
-      alSourcePause          := dlsym( oal_Library, 'alSourcePause' );
-      alSourceStop           := dlsym( oal_Library, 'alSourceStop' );
-      alSourceRewind         := dlsym( oal_Library, 'alSourceRewind' );
-      alSourceQueueBuffers   := dlsym( oal_Library, 'alSourceQueueBuffers' );
-      alSourceUnqueueBuffers := dlsym( oal_Library, 'alSourceUnqueueBuffers' );
-      alGenBuffers           := dlsym( oal_Library, 'alGenBuffers' );
-      alDeleteBuffers        := dlsym( oal_Library, 'alDeleteBuffers' );
-      alBufferData           := dlsym( oal_Library, 'alBufferData' );
+      alcGetString           := dlsym( oalLibrary, 'alcGetString' );
+      alcOpenDevice          := dlsym( oalLibrary, 'alcOpenDevice' );
+      alcCloseDevice         := dlsym( oalLibrary, 'alcCloseDevice' );
+      alcCreateContext       := dlsym( oalLibrary, 'alcCreateContext' );
+      alcMakeContextCurrent  := dlsym( oalLibrary, 'alcMakeContextCurrent' );
+      alcDestroyContext      := dlsym( oalLibrary, 'alcDestroyContext' );
+      alGetError             := dlsym( oalLibrary, 'alGetError' );
+      alListenerfv           := dlsym( oalLibrary, 'alListenerfv' );
+      alGenSources           := dlsym( oalLibrary, 'alGenSources' );
+      alDeleteSources        := dlsym( oalLibrary, 'alDeleteSources' );
+      alSourcei              := dlsym( oalLibrary, 'alSourcei' );
+      alSourcef              := dlsym( oalLibrary, 'alSourcef' );
+      alSourcefv             := dlsym( oalLibrary, 'alSourcefv' );
+      alGetSourcei           := dlsym( oalLibrary, 'alGetSourcei' );
+      alSourcePlay           := dlsym( oalLibrary, 'alSourcePlay' );
+      alSourcePause          := dlsym( oalLibrary, 'alSourcePause' );
+      alSourceStop           := dlsym( oalLibrary, 'alSourceStop' );
+      alSourceRewind         := dlsym( oalLibrary, 'alSourceRewind' );
+      alSourceQueueBuffers   := dlsym( oalLibrary, 'alSourceQueueBuffers' );
+      alSourceUnqueueBuffers := dlsym( oalLibrary, 'alSourceUnqueueBuffers' );
+      alGenBuffers           := dlsym( oalLibrary, 'alGenBuffers' );
+      alDeleteBuffers        := dlsym( oalLibrary, 'alDeleteBuffers' );
+      alBufferData           := dlsym( oalLibrary, 'alBufferData' );
 
       Result := TRUE;
     end else
@@ -178,7 +178,7 @@ end;
 
 procedure FreeOpenAL;
 begin
-  dlclose( oal_Library );
+  dlclose( oalLibrary );
 end;
 
 function oal_GetSource( Source : Pointer ) : LongWord;
@@ -186,15 +186,15 @@ function oal_GetSource( Source : Pointer ) : LongWord;
     i, state : Integer;
 begin
   Result := 0;
-  for i := 0 to length( oal_Sources ) - 1 do
+  for i := 0 to length( oalSources ) - 1 do
     begin
-      alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, state );
+      alGetSourcei( oalSources[ i ], AL_SOURCE_STATE, state );
       if state <> AL_PLAYING Then
         begin
-          if Assigned( oal_SrcPtrs[ i ] ) Then
-            LongWord( oal_SrcPtrs[ i ]^ ) := 0;
-          oal_SrcPtrs[ i ] := Source;
-          Result := oal_Sources[ i ];
+          if Assigned( oalSrcPtrs[ i ] ) Then
+            LongWord( oalSrcPtrs[ i ]^ ) := 0;
+          oalSrcPtrs[ i ] := Source;
+          Result := oalSources[ i ];
           break;
         end;
     end;

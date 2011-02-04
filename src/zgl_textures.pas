@@ -165,7 +165,7 @@ procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 begin
   tex_CalcFlags( Texture, pData );
   if Texture.Flags and TEX_COMPRESS >= 1 Then
-    if ( not ogl_CanCompressE ) and ( not ogl_CanCompressA ) Then
+    if ( not oglCanCompressE ) and ( not oglCanCompressA ) Then
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
   glEnable( GL_TEXTURE_2D );
@@ -174,7 +174,7 @@ begin
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-  if ogl_CanCompressE Then
+  if oglCanCompressE Then
     cformat := GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
   else
     cformat := GL_COMPRESSED_RGBA_ARB;
@@ -486,7 +486,7 @@ begin
                           Texture.Flags := Texture.Flags or TEX_FILTER_ANISOTROPY;
                           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
                           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-                          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ogl_Anisotropy );
+                          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, oglAnisotropy );
                         end;
     end else
       begin
@@ -507,10 +507,10 @@ end;
 
 procedure tex_SetAnisotropy( Level : Byte );
 begin
-  if Level > ogl_MaxAnisotropy Then
-    ogl_Anisotropy := ogl_MaxAnisotropy
+  if Level > oglMaxAnisotropy Then
+    oglAnisotropy := oglMaxAnisotropy
   else
-    ogl_Anisotropy := Level;
+    oglAnisotropy := Level;
 end;
 
 procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );

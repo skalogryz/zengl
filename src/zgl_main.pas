@@ -168,24 +168,24 @@ begin
   zgl_GetSysDir();
   log_Init();
 
-  ogl_FSAA    := FSAA;
-  ogl_Stencil := StencilBits;
+  oglFSAA    := FSAA;
+  oglStencil := StencilBits;
   if not scr_Create() Then exit;
 
-  app_Initialized := TRUE;
-  if wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) Then
-    wnd_FullScreen := TRUE;
+  appInitialized := TRUE;
+  if wndHeight >= zgl_Get( DESKTOP_HEIGHT ) Then
+    wndFullScreen := TRUE;
 
-  if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
+  if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Create() Then exit;
-  wnd_SetCaption( wnd_Caption );
-  app_Work := TRUE;
+  wnd_SetCaption( wndCaption );
+  appWork := TRUE;
 
   Set2DMode();
-  wnd_ShowCursor( app_ShowCursor );
+  wnd_ShowCursor( appShowCursor );
 
   {$IFDEF LINUX}
-  scr_SetOptions( wnd_Width, wnd_Height, scr_Refresh, wnd_FullScreen, scr_VSync );
+  scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
   {$ENDIF}
 
   app_PInit();
@@ -198,27 +198,27 @@ begin
   zgl_GetSysDir();
   log_Init();
 
-  ogl_FSAA    := FSAA;
-  ogl_Stencil := StencilBits;
+  oglFSAA    := FSAA;
+  oglStencil := StencilBits;
 
   if not scr_Create() Then exit;
-  app_InitToHandle := TRUE;
+  appInitedToHandle := TRUE;
   {$IFDEF LINUX}
-  wnd_Handle := TWindow( Handle );
+  wndHandle := TWindow( Handle );
   {$ENDIF}
   {$IFDEF DARWIN}
-  wnd_Handle := WindowRef( Handle );
+  wndHandle := WindowRef( Handle );
   {$ENDIF}
   {$IFDEF WINDOWS}
-  wnd_Handle := HWND( Handle );
-  wnd_DC     := GetDC( wnd_Handle );
+  wndHandle := HWND( Handle );
+  wndDC     := GetDC( wndHandle );
   {$ENDIF}
   if not gl_Create() Then exit;
-  wnd_SetCaption( wnd_Caption );
-  app_Work := TRUE;
+  wnd_SetCaption( wndCaption );
+  appWork := TRUE;
 
   Set2DMode();
-  wnd_ShowCursor( app_ShowCursor );
+  wnd_ShowCursor( appShowCursor );
 
   app_PInit();
   app_PLoop();
@@ -230,8 +230,8 @@ procedure zgl_Destroy;
     i : Integer;
     p : Pointer;
 begin
-  if app_WorkTime <> 0 Then
-    log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
+  if appWorkTime <> 0 Then
+    log_Add( 'Average FPS: ' + u_IntToStr( Round( appFPSAll / appWorkTime ) ) );
 
   app_PExit();
 
@@ -308,7 +308,7 @@ begin
 
   scr_Destroy();
   gl_Destroy();
-  if not app_InitToHandle Then wnd_Destroy();
+  if not appInitedToHandle Then wnd_Destroy();
 
   log_Add( 'End' );
   log_Close();
@@ -316,7 +316,7 @@ end;
 
 procedure zgl_Exit;
 begin
-  app_Work := FALSE;
+  appWork := FALSE;
 end;
 
 procedure zgl_Reg( What : LongWord; UserData : Pointer );
@@ -410,62 +410,62 @@ end;
 function zgl_Get( What : LongWord ) : Ptr;
 begin
   if ( What = DIRECTORY_APPLICATION ) or ( What = DIRECTORY_HOME ) Then
-    if not app_GetSysDirs Then zgl_GetSysDir();
+    if not appGotSysDirs Then zgl_GetSysDir();
 
   if ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) Then
-    if not scr_Initialized Then scr_Init();
+    if not scrInitialized Then scr_Init();
 
   case What of
     ZENGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
     ZENGL_VERSION_STRING: Result := Ptr( PChar( cs_ZenGL ) );
     ZENGL_VERSION_DATE: Result := Ptr( PChar( cs_Date ) );
 
-    DIRECTORY_APPLICATION: Result := Ptr( PChar( app_WorkDir ) );
-    DIRECTORY_HOME: Result := Ptr( PChar( app_HomeDir ) );
+    DIRECTORY_APPLICATION: Result := Ptr( PChar( appWorkDir ) );
+    DIRECTORY_HOME: Result := Ptr( PChar( appHomeDir ) );
 
     LOG_FILENAME: Result := Ptr( @logfile );
 
     DESKTOP_WIDTH:
     {$IFDEF LINUX}
-      Result := PXRRScreenSize( scr_ModeList + scr_Desktop * SizeOf( PXRRScreenSize ) ).width;
+      Result := PXRRScreenSize( scrModeList + scrDesktop * SizeOf( PXRRScreenSize ) ).width;
     {$ENDIF}
     {$IFDEF WINDOWS}
-      Result := scr_Desktop.dmPelsWidth;
+      Result := scrDesktop.dmPelsWidth;
     {$ENDIF}
     {$IFDEF DARWIN}
-      Result := scr_DesktopW;
+      Result := scrDesktopW;
     {$ENDIF}
     DESKTOP_HEIGHT:
     {$IFDEF LINUX}
-      Result := PXRRScreenSize( scr_ModeList + scr_Desktop * SizeOf( PXRRScreenSize ) ).height;
+      Result := PXRRScreenSize( scrModeList + scrDesktop * SizeOf( PXRRScreenSize ) ).height;
     {$ENDIF}
     {$IFDEF WINDOWS}
-      Result := scr_Desktop.dmPelsHeight;
+      Result := scrDesktop.dmPelsHeight;
     {$ENDIF}
     {$IFDEF DARWIN}
-      Result := scr_DesktopH;
+      Result := scrDesktopH;
     {$ENDIF}
-    RESOLUTION_LIST: Result := Ptr( @scr_ResList );
+    RESOLUTION_LIST: Result := Ptr( @scrResList );
 
-    WINDOW_HANDLE: Result := Ptr( wnd_Handle );
-    WINDOW_X: Result := Ptr( wnd_X );
-    WINDOW_Y: Result := Ptr( wnd_Y );
-    WINDOW_WIDTH: Result := Ptr( wnd_Width );
-    WINDOW_HEIGHT: Result := Ptr( wnd_Height );
+    WINDOW_HANDLE: Result := Ptr( wndHandle );
+    WINDOW_X: Result := Ptr( wndX );
+    WINDOW_Y: Result := Ptr( wndY );
+    WINDOW_WIDTH: Result := Ptr( wndWidth );
+    WINDOW_HEIGHT: Result := Ptr( wndHeight );
 
-    GAPI_CONTEXT: Result := Ptr( ogl_Context );
-    GAPI_MAX_TEXTURE_SIZE: Result := ogl_MaxTexSize;
-    GAPI_MAX_TEXTURE_UNITS: Result := ogl_MaxTexUnits;
-    GAPI_MAX_ANISOTROPY: Result := ogl_MaxAnisotropy;
-    GAPI_CAN_BLEND_SEPARATE: Result := Ptr( ogl_Separate );
+    GAPI_CONTEXT: Result := Ptr( oglContext );
+    GAPI_MAX_TEXTURE_SIZE: Result := oglMaxTexSize;
+    GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
+    GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
+    GAPI_CAN_BLEND_SEPARATE: Result := Ptr( oglSeparate );
 
-    RENDER_FPS: Result := app_FPS;
-    RENDER_BATCHES_2D: Result := b2d_Batches + 1;
+    RENDER_FPS: Result := appFPS;
+    RENDER_BATCHES_2D: Result := b2dBatches + 1;
 
-    VIEWPORT_WIDTH: Result := ogl_Width - scr_SubCX;
-    VIEWPORT_HEIGHT: Result := ogl_Height - scr_SubCY;
-    VIEWPORT_OFFSET_X: Result := scr_AddCX;
-    VIEWPORT_OFFSET_Y: Result := scr_AddCY;
+    VIEWPORT_WIDTH: Result := oglWidth - scrSubCX;
+    VIEWPORT_HEIGHT: Result := oglHeight - scrSubCY;
+    VIEWPORT_OFFSET_X: Result := scrAddCX;
+    VIEWPORT_OFFSET_Y: Result := scrAddCY;
 
     // Managers
     MANAGER_TIMER:     Result := Ptr( @managerTimer );
@@ -489,11 +489,11 @@ end;
 procedure zgl_GetSysDir;
 {$IFDEF LINUX}
 begin
-  app_WorkDir := './';
-  app_HomeDir := FpGetEnv( 'HOME' ) + '/.config/';
+  appWorkDir := './';
+  appHomeDir := FpGetEnv( 'HOME' ) + '/.config/';
   // for some old distros
-  if not file_Exists( app_HomeDir ) Then
-    file_MakeDir( app_HomeDir );
+  if not file_Exists( appHomeDir ) Then
+    file_MakeDir( appHomeDir );
 {$ENDIF}
 {$IFDEF WINDOWS}
   var
@@ -501,16 +501,16 @@ begin
     fn, fp : PChar;
     t      : array[ 0..MAX_PATH - 1 ] of Char;
 begin
-  wnd_INST := GetModuleHandle( nil );
+  wndINST := GetModuleHandle( nil );
   GetMem( buffer, 65535 );
   GetMem( fn, 65535 );
-  GetModuleFileName( wnd_INST, fn, 65535 );
+  GetModuleFileName( wndINST, fn, 65535 );
   GetFullPathName( fn, 65535, buffer, fp );
-  app_WorkDir := copy( String( buffer ), 1, length( buffer ) - length( fp ) );
+  appWorkDir := copy( String( buffer ), 1, length( buffer ) - length( fp ) );
 
   GetEnvironmentVariable( 'APPDATA', t, MAX_PATH );
-  app_HomeDir := t;
-  app_HomeDir := app_HomeDir + '\';
+  appHomeDir := t;
+  appHomeDir := appHomeDir + '\';
 
   FreeMem( buffer );
   FreeMem( fn );
@@ -526,13 +526,13 @@ begin
   appCFURLRef := CFBundleCopyBundleURL( appBundle );
   appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
-  app_WorkDir := appPath + '/';
-  app_HomeDir := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
+  appWorkDir  := appPath + '/';
+  appHomeDir  := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
 
   if logFile = 'log.txt' Then
-    logFile := PChar( app_WorkDir + '../log.txt' );
+    logFile := PChar( appWorkDir + '../log.txt' );
 {$ENDIF}
-  app_GetSysDirs := TRUE;
+  appGotSysDirs := TRUE;
 end;
 
 procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
@@ -563,7 +563,7 @@ end;
 
 procedure zgl_Enable( What : LongWord );
 begin
-  app_Flags := app_Flags or What;
+  appFlags := appFlags or What;
 
   if What and DEPTH_BUFFER > 0 Then
     glEnable( GL_DEPTH_TEST );
@@ -572,13 +572,13 @@ begin
     glDepthMask( GL_TRUE );
 
   if What and CORRECT_RESOLUTION > 0 Then
-    app_Flags := app_Flags or CORRECT_WIDTH or CORRECT_HEIGHT;
+    appFlags := appFlags or CORRECT_WIDTH or CORRECT_HEIGHT;
 
   if What and APP_USE_AUTOPAUSE > 0 Then
-    app_AutoPause := TRUE;
+    appAutoPause := TRUE;
 
   if What and APP_USE_LOG > 0 Then
-    app_Log := TRUE;
+    appLog := TRUE;
 
   if What and APP_USE_UTF8 > 0 Then
     begin
@@ -599,13 +599,13 @@ begin
   {$ENDIF}
 
   if What and CLIP_INVISIBLE > 0 Then
-    render2d_Clip := TRUE;
+    render2dClip := TRUE;
 end;
 
 procedure zgl_Disable( What : LongWord );
 begin
-  if app_Flags and What > 0 Then
-    app_Flags := app_Flags xor What;
+  if appFlags and What > 0 Then
+    appFlags := appFlags xor What;
 
   if What and DEPTH_BUFFER > 0 Then
     glDisable( GL_DEPTH_TEST );
@@ -615,19 +615,19 @@ begin
 
   if What and CORRECT_RESOLUTION > 0 Then
     begin
-      scr_ResCX := 1;
-      scr_ResCY := 1;
-      scr_AddCX := 0;
-      scr_AddCY := 0;
-      scr_SubCX := 0;
-      scr_SubCY := 0;
+      scrResCX := 1;
+      scrResCY := 1;
+      scrAddCX := 0;
+      scrAddCY := 0;
+      scrSubCX := 0;
+      scrSubCY := 0;
     end;
 
   if What and APP_USE_AUTOPAUSE > 0 Then
-    app_AutoPause := FALSE;
+    appAutoPause := FALSE;
 
   if What and APP_USE_LOG > 0 Then
-    app_Log := FALSE;
+    appLog := FALSE;
 
   if What and APP_USE_UTF8 > 0 Then
     font_GetCID := font_GetCP1251ID;
@@ -641,7 +641,7 @@ begin
   {$ENDIF}
 
   if What and CLIP_INVISIBLE > 0 Then
-    render2d_Clip := FALSE;
+    render2dClip := FALSE;
 end;
 
 end.

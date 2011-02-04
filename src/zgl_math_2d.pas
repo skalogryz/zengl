@@ -117,10 +117,12 @@ end;
 function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 {$IFDEF USE_ASM}
 asm
+{$IFDEF CPUi386}
   FLD Angle
   FSINCOS
   FSTP [EDX]
   FSTP [EAX]
+{$ENDIF}
 end;
 {$ELSE}
 begin

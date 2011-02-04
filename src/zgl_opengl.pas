@@ -45,66 +45,65 @@ procedure gl_ResetState;
 procedure gl_LoadEx;
 
 var
-  ogl_LoadEx     : Boolean;
-  ogl_zDepth     : Byte;
-  ogl_Stencil    : Byte;
-  ogl_FSAA       : Byte;
-  ogl_Anisotropy : Byte;
-  ogl_FOVY       : Single = 45;
-  ogl_zNear      : Single = 0.1;
-  ogl_zFar       : Single = 100;
-  ogl_MTexActive : array[ 0..8 ] of Boolean;
-  ogl_MTexture   : array[ 0..8 ] of LongWord;
+  oglzDepth     : Byte;
+  oglStencil    : Byte;
+  oglFSAA       : Byte;
+  oglAnisotropy : Byte;
+  oglFOVY       : Single = 45;
+  oglzNear      : Single = 0.1;
+  oglzFar       : Single = 100;
+  oglMTexActive : array[ 0..8 ] of Boolean;
+  oglMTexture   : array[ 0..8 ] of LongWord;
 
-  ogl_Mode    : Integer = 2; // 2D/3D Modes
-  ogl_Target  : Integer = TARGET_SCREEN;
-  ogl_TargetW : Integer;
-  ogl_TargetH : Integer;
+  oglMode    : Integer = 2; // 2D/3D Modes
+  oglTarget  : Integer = TARGET_SCREEN;
+  oglTargetW : Integer;
+  oglTargetH : Integer;
 
-  ogl_Width  : Integer;
-  ogl_Height : Integer;
-  ogl_ClipX  : Integer;
-  ogl_ClipY  : Integer;
-  ogl_ClipW  : Integer;
-  ogl_ClipH  : Integer;
-  ogl_ClipR  : Integer;
+  oglWidth  : Integer;
+  oglHeight : Integer;
+  oglClipX  : Integer;
+  oglClipY  : Integer;
+  oglClipW  : Integer;
+  oglClipH  : Integer;
+  oglClipR  : Integer;
 
-  ogl_Renderer      : AnsiString;
-  ogl_Extensions    : AnsiString;
-  ogl_3DAccelerator : Boolean;
-  ogl_CanVSync      : Boolean;
-  ogl_CanCompressA  : Boolean;
-  ogl_CanCompressE  : Boolean;
-  ogl_CanARB        : Boolean; // ARBvp/ARBfp шейдеры
-  ogl_CanGLSL       : Boolean; // GLSL шейдеры
-  ogl_CanVBO        : Boolean;
-  ogl_CanFBO        : Boolean;
-  ogl_CanPBuffer    : Boolean;
-  ogl_MaxLights     : Integer;
-  ogl_MaxTexSize    : Integer;
-  ogl_MaxAnisotropy : Integer;
-  ogl_MaxTexUnits   : Integer;
-  ogl_Separate      : Boolean;
+  oglRenderer      : AnsiString;
+  oglExtensions    : AnsiString;
+  ogl3DAccelerator : Boolean;
+  oglCanVSync      : Boolean;
+  oglCanCompressA  : Boolean;
+  oglCanCompressE  : Boolean;
+  oglCanARB        : Boolean; // ARBvp/ARBfp шейдеры
+  oglCanGLSL       : Boolean; // GLSL шейдеры
+  oglCanVBO        : Boolean;
+  oglCanFBO        : Boolean;
+  oglCanPBuffer    : Boolean;
+  oglMaxLights     : Integer;
+  oglMaxTexSize    : Integer;
+  oglMaxAnisotropy : Integer;
+  oglMaxTexUnits   : Integer;
+  oglSeparate      : Boolean;
 
   {$IFDEF LINUX}
-  oglx_Extensions : AnsiString;
-  ogl_PBufferMode : Integer;
-  ogl_Context     : GLXContext;
-  ogl_VisualInfo  : PXVisualInfo;
-  ogl_Attr        : array[ 0..31 ] of Integer;
+  oglXExtensions : AnsiString;
+  oglPBufferMode : Integer;
+  oglContext     : GLXContext;
+  oglVisualInfo  : PXVisualInfo;
+  oglAttr        : array[ 0..31 ] of Integer;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  ogl_Context : HGLRC;
-  ogl_fAttr   : array[ 0..1  ] of Single = ( 0, 0 );
-  ogl_iAttr   : array[ 0..31 ] of Integer;
-  ogl_Format  : Integer;
-  ogl_Formats : LongWord;
+  oglContext : HGLRC;
+  oglfAttr   : array[ 0..1  ] of Single = ( 0, 0 );
+  ogliAttr   : array[ 0..31 ] of Integer;
+  oglFormat  : Integer;
+  oglFormats : LongWord;
   {$ENDIF}
   {$IFDEF DARWIN}
-  ogl_Device   : GDHandle;
-  ogl_Context  : TAGLContext;
-  ogl_Format   : TAGLPixelFormat;
-  ogl_Attr     : array[ 0..31 ] of LongWord;
+  oglDevice   : GDHandle;
+  oglContext  : TAGLContext;
+  oglFormat   : TAGLPixelFormat;
+  oglAttr     : array[ 0..31 ] of LongWord;
   {$ENDIF}
 
 implementation
@@ -138,86 +137,86 @@ begin
     end;
 
 {$IFDEF LINUX}
-  if not glXQueryExtension( scr_Display, i, j ) Then
+  if not glXQueryExtension( scrDisplay, i, j ) Then
     begin
       u_Error( 'GLX Extension not found' );
       exit;
     end else log_Add( 'GLX Extension - ok' );
 
-  ogl_zDepth := 24;
+  oglzDepth := 24;
   repeat
-    FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, None );
-    ogl_Attr[ 0  ] := GLX_RGBA;
-    ogl_Attr[ 1  ] := GL_TRUE;
-    ogl_Attr[ 2  ] := GLX_RED_SIZE;
-    ogl_Attr[ 3  ] := 8;
-    ogl_Attr[ 4  ] := GLX_GREEN_SIZE;
-    ogl_Attr[ 5  ] := 8;
-    ogl_Attr[ 6  ] := GLX_BLUE_SIZE;
-    ogl_Attr[ 7  ] := 8;
-    ogl_Attr[ 8  ] := GLX_ALPHA_SIZE;
-    ogl_Attr[ 9  ] := 8;
-    ogl_Attr[ 10 ] := GLX_DOUBLEBUFFER;
-    ogl_Attr[ 11 ] := GL_TRUE;
-    ogl_Attr[ 12 ] := GLX_DEPTH_SIZE;
-    ogl_Attr[ 13 ] := ogl_zDepth;
+    FillChar( oglAttr[ 0 ], length( oglAttr ) * 4, None );
+    oglAttr[ 0  ] := GLX_RGBA;
+    oglAttr[ 1  ] := GL_TRUE;
+    oglAttr[ 2  ] := GLX_RED_SIZE;
+    oglAttr[ 3  ] := 8;
+    oglAttr[ 4  ] := GLX_GREEN_SIZE;
+    oglAttr[ 5  ] := 8;
+    oglAttr[ 6  ] := GLX_BLUE_SIZE;
+    oglAttr[ 7  ] := 8;
+    oglAttr[ 8  ] := GLX_ALPHA_SIZE;
+    oglAttr[ 9  ] := 8;
+    oglAttr[ 10 ] := GLX_DOUBLEBUFFER;
+    oglAttr[ 11 ] := GL_TRUE;
+    oglAttr[ 12 ] := GLX_DEPTH_SIZE;
+    oglAttr[ 13 ] := oglzDepth;
     i := 14;
-    if ogl_Stencil > 0 Then
+    if oglStencil > 0 Then
       begin
-        ogl_Attr[ i     ] := GLX_STENCIL_SIZE;
-        ogl_Attr[ i + 1 ] := ogl_Stencil;
+        oglAttr[ i     ] := GLX_STENCIL_SIZE;
+        oglAttr[ i + 1 ] := oglStencil;
         INC( i, 2 );
       end;
-    if ogl_FSAA > 0 Then
+    if oglFSAA > 0 Then
       begin
-        ogl_Attr[ i     ] := GLX_SAMPLES_SGIS;
-        ogl_Attr[ i + 1 ] := ogl_FSAA;
+        oglAttr[ i     ] := GLX_SAMPLES_SGIS;
+        oglAttr[ i + 1 ] := oglFSAA;
       end;
 
-    log_Add( 'glXChooseVisual: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
-    ogl_VisualInfo := glXChooseVisual( scr_Display, scr_Default, @ogl_Attr[ 0 ] );
-    if ( not Assigned( ogl_VisualInfo ) and ( ogl_zDepth = 1 ) ) Then
+    log_Add( 'glXChooseVisual: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil ) + '; ' + 'fsaa = ' + u_IntToStr( oglFSAA )  );
+    oglVisualInfo := glXChooseVisual( scrDisplay, scrDefault, @oglAttr[ 0 ] );
+    if ( not Assigned( oglVisualInfo ) and ( oglzDepth = 1 ) ) Then
       begin
-        if ogl_FSAA = 0 Then
+        if oglFSAA = 0 Then
           break
         else
           begin
-            ogl_zDepth := 24;
-            DEC( ogl_FSAA, 2 );
+            oglzDepth := 24;
+            DEC( oglFSAA, 2 );
           end;
       end else
-        if not Assigned( ogl_VisualInfo ) Then DEC( ogl_zDepth, 8 );
-  if ogl_zDepth = 0 Then ogl_zDepth := 1;
-  until Assigned( ogl_VisualInfo );
+        if not Assigned( oglVisualInfo ) Then DEC( oglzDepth, 8 );
+  if oglzDepth = 0 Then oglzDepth := 1;
+  until Assigned( oglVisualInfo );
 
-  if not Assigned( ogl_VisualInfo ) Then
+  if not Assigned( oglVisualInfo ) Then
     begin
       u_Error( 'Cannot choose visual info.' );
       exit;
     end;
 
-  ogl_Context := glXCreateContext( scr_Display, ogl_VisualInfo, 0, TRUE );
-  if not Assigned( ogl_Context ) Then
+  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, TRUE );
+  if not Assigned( oglContext ) Then
     begin
-      ogl_Context := glXCreateContext( scr_Display, ogl_VisualInfo, 0, FALSE );
-      if not Assigned( ogl_Context ) Then
+      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, FALSE );
+      if not Assigned( oglContext ) Then
         begin
           u_Error( 'Cannot create OpenGL context' );
           exit;
         end;
     end;
 
-  if not glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context ) Then
+  if not glXMakeCurrent( scrDisplay, wndHandle, oglContext ) Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if ogl_Context <> 0 Then
-    wglDeleteContext( ogl_Context );
+  if oglContext <> 0 Then
+    wglDeleteContext( oglContext );
 
-  if ogl_Format = 0 Then
+  if oglFormat = 0 Then
     begin
       FillChar( pixelFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
       with pixelFormatDesc do
@@ -228,114 +227,114 @@ begin
           iPixelType   := PFD_TYPE_RGBA;
           cColorBits   := 32;
           cDepthBits   := 24;
-          cStencilBits := ogl_Stencil;
+          cStencilBits := oglStencil;
           iLayerType   := PFD_MAIN_PLANE;
         end;
-      pixelFormat := ChoosePixelFormat( wnd_DC, @pixelFormatDesc );
+      pixelFormat := ChoosePixelFormat( wndDC, @pixelFormatDesc );
     end else
-      pixelFormat := ogl_Format;
+      pixelFormat := oglFormat;
 
-  if not SetPixelFormat( wnd_DC, pixelFormat, @pixelFormatDesc ) Then
+  if not SetPixelFormat( wndDC, pixelFormat, @pixelFormatDesc ) Then
     begin
       u_Error( 'Cannot set pixel format' );
       exit;
     end;
 
-  ogl_Context := wglCreateContext( wnd_DC );
-  if ( ogl_Context = 0 ) Then
+  oglContext := wglCreateContext( wndDC );
+  if ( oglContext = 0 ) Then
     begin
       u_Error( 'Cannot create OpenGL context' );
       exit;
     end;
-  if not wnd_First Then log_Add( 'Create OpenGL Context' );
+  if not wndFirst Then log_Add( 'Create OpenGL Context' );
 
-  if not wglMakeCurrent( wnd_DC, ogl_Context ) Then
+  if not wglMakeCurrent( wndDC, oglContext ) Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
-  if not wnd_First Then log_Add( 'Making current OpenGL context' );
+  if not wndFirst Then log_Add( 'Making current OpenGL context' );
 
-  if ogl_Format = 0 Then
+  if oglFormat = 0 Then
     wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormatARB' );
-  if ( not Assigned( wglChoosePixelFormatARB ) ) and ( ogl_Format = 0 ) Then
+  if ( not Assigned( wglChoosePixelFormatARB ) ) and ( oglFormat = 0 ) Then
     begin
-      wnd_First := FALSE;
-      ogl_Format := pixelFormat;
+      wndFirst  := FALSE;
+      oglFormat := pixelFormat;
       gl_Destroy();
       wnd_Destroy();
-      wnd_Create( wnd_Width, wnd_Height );
+      wnd_Create( wndWidth, wndHeight );
       Result := gl_Create();
       exit;
     end;
-  if ( ogl_Format = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not app_InitToHandle ) Then
+  if ( oglFormat = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not appInitedToHandle ) Then
     begin
-      ogl_zDepth := 24;
+      oglzDepth := 24;
 
       repeat
-        FillChar( ogl_iAttr[ 0 ], length( ogl_iAttr ) * 4, 0 );
-        ogl_iAttr[ 0  ] := WGL_ACCELERATION_ARB;
-        ogl_iAttr[ 1  ] := WGL_FULL_ACCELERATION_ARB;
-        ogl_iAttr[ 2  ] := WGL_DRAW_TO_WINDOW_ARB;
-        ogl_iAttr[ 3  ] := GL_TRUE;
-        ogl_iAttr[ 4  ] := WGL_SUPPORT_OPENGL_ARB;
-        ogl_iAttr[ 5  ] := GL_TRUE;
-        ogl_iAttr[ 6  ] := WGL_DOUBLE_BUFFER_ARB;
-        ogl_iAttr[ 7  ] := GL_TRUE;
-        ogl_iAttr[ 8  ] := WGL_PIXEL_TYPE_ARB;
-        ogl_iAttr[ 9  ] := WGL_TYPE_RGBA_ARB;
-        ogl_iAttr[ 10 ] := WGL_COLOR_BITS_ARB;
-        ogl_iAttr[ 11 ] := 24;
-        ogl_iAttr[ 12 ] := WGL_RED_BITS_ARB;
-        ogl_iAttr[ 13 ] := 8;
-        ogl_iAttr[ 14 ] := WGL_GREEN_BITS_ARB;
-        ogl_iAttr[ 15 ] := 8;
-        ogl_iAttr[ 16 ] := WGL_BLUE_BITS_ARB;
-        ogl_iAttr[ 17 ] := 8;
-        ogl_iAttr[ 18 ] := WGL_ALPHA_BITS_ARB;
-        ogl_iAttr[ 19 ] := 8;
-        ogl_iAttr[ 20 ] := WGL_DEPTH_BITS_ARB;
-        ogl_iAttr[ 21 ] := ogl_zDepth;
+        FillChar( ogliAttr[ 0 ], length( ogliAttr ) * 4, 0 );
+        ogliAttr[ 0  ] := WGL_ACCELERATION_ARB;
+        ogliAttr[ 1  ] := WGL_FULL_ACCELERATION_ARB;
+        ogliAttr[ 2  ] := WGL_DRAW_TO_WINDOW_ARB;
+        ogliAttr[ 3  ] := GL_TRUE;
+        ogliAttr[ 4  ] := WGL_SUPPORT_OPENGL_ARB;
+        ogliAttr[ 5  ] := GL_TRUE;
+        ogliAttr[ 6  ] := WGL_DOUBLE_BUFFER_ARB;
+        ogliAttr[ 7  ] := GL_TRUE;
+        ogliAttr[ 8  ] := WGL_PIXEL_TYPE_ARB;
+        ogliAttr[ 9  ] := WGL_TYPE_RGBA_ARB;
+        ogliAttr[ 10 ] := WGL_COLOR_BITS_ARB;
+        ogliAttr[ 11 ] := 24;
+        ogliAttr[ 12 ] := WGL_RED_BITS_ARB;
+        ogliAttr[ 13 ] := 8;
+        ogliAttr[ 14 ] := WGL_GREEN_BITS_ARB;
+        ogliAttr[ 15 ] := 8;
+        ogliAttr[ 16 ] := WGL_BLUE_BITS_ARB;
+        ogliAttr[ 17 ] := 8;
+        ogliAttr[ 18 ] := WGL_ALPHA_BITS_ARB;
+        ogliAttr[ 19 ] := 8;
+        ogliAttr[ 20 ] := WGL_DEPTH_BITS_ARB;
+        ogliAttr[ 21 ] := oglzDepth;
         i := 22;
-        if ogl_Stencil > 0 Then
+        if oglStencil > 0 Then
           begin
-            ogl_iAttr[ i     ] := WGL_STENCIL_BITS_ARB;
-            ogl_iAttr[ i + 1 ] := ogl_Stencil;
+            ogliAttr[ i     ] := WGL_STENCIL_BITS_ARB;
+            ogliAttr[ i + 1 ] := oglStencil;
             INC( i, 2 );
           end;
-        if ogl_FSAA > 0 Then
+        if oglFSAA > 0 Then
           begin
-            ogl_iAttr[ i     ] := WGL_SAMPLE_BUFFERS_ARB;
-            ogl_iAttr[ i + 1 ] := GL_TRUE;
-            ogl_iAttr[ i + 2 ] := WGL_SAMPLES_ARB;
-            ogl_iAttr[ i + 3 ] := ogl_FSAA;
+            ogliAttr[ i     ] := WGL_SAMPLE_BUFFERS_ARB;
+            ogliAttr[ i + 1 ] := GL_TRUE;
+            ogliAttr[ i + 2 ] := WGL_SAMPLES_ARB;
+            ogliAttr[ i + 3 ] := oglFSAA;
           end;
 
-        log_Add( 'wglChoosePixelFormatARB: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA )  );
-        wglChoosePixelFormatARB( wnd_DC, @ogl_iAttr, @ogl_fAttr, 1, @ogl_Format, @ogl_Formats );
-        if ( ogl_Format = 0 ) and ( ogl_zDepth < 16 ) Then
+        log_Add( 'wglChoosePixelFormatARB: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil ) + '; ' + 'fsaa = ' + u_IntToStr( oglFSAA )  );
+        wglChoosePixelFormatARB( wndDC, @ogliAttr, @oglfAttr, 1, @oglFormat, @oglFormats );
+        if ( oglFormat = 0 ) and ( oglzDepth < 16 ) Then
           begin
-            if ogl_FSAA <= 0 Then
+            if oglFSAA <= 0 Then
               break
             else
               begin
-                ogl_zDepth := 24;
-                DEC( ogl_FSAA, 2 );
+                oglzDepth := 24;
+                DEC( oglFSAA, 2 );
               end;
           end else
-            DEC( ogl_zDepth, 8 );
-      until ogl_Format <> 0;
+            DEC( oglzDepth, 8 );
+      until oglFormat <> 0;
 
-      if ogl_Format = 0 Then
+      if oglFormat = 0 Then
         begin
-          ogl_zDepth := 24;
-          log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil )  );
-          ogl_Format := PixelFormat;
+          oglzDepth := 24;
+          log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil )  );
+          oglFormat := PixelFormat;
         end;
-      wnd_First := FALSE;
+      wndFirst := FALSE;
       gl_Destroy();
       wnd_Destroy();
-      wnd_Create( wnd_Width, wnd_Height );
+      wnd_Create( wndWidth, wndHeight );
       Result := gl_Create();
       exit;
     end;
@@ -353,93 +352,93 @@ begin
       exit;
     end;
 
-  ogl_zDepth := 24;
+  oglzDepth := 24;
   repeat
-    FillChar( ogl_Attr[ 0 ], length( ogl_Attr ) * 4, AGL_NONE );
-    ogl_Attr[ 0  ] := AGL_RGBA;
-    ogl_Attr[ 1  ] := AGL_RED_SIZE;
-    ogl_Attr[ 2  ] := 8;
-    ogl_Attr[ 3  ] := AGL_GREEN_SIZE;
-    ogl_Attr[ 4  ] := 8;
-    ogl_Attr[ 5  ] := AGL_BLUE_SIZE;
-    ogl_Attr[ 6  ] := 8;
-    ogl_Attr[ 7  ] := AGL_ALPHA_SIZE;
-    ogl_Attr[ 8  ] := 8;
-    ogl_Attr[ 9  ] := AGL_DOUBLEBUFFER;
-    ogl_Attr[ 10 ] := AGL_DEPTH_SIZE;
-    ogl_Attr[ 11 ] := ogl_zDepth;
+    FillChar( oglAttr[ 0 ], length( oglAttr ) * 4, AGL_NONE );
+    oglAttr[ 0  ] := AGL_RGBA;
+    oglAttr[ 1  ] := AGL_RED_SIZE;
+    oglAttr[ 2  ] := 8;
+    oglAttr[ 3  ] := AGL_GREEN_SIZE;
+    oglAttr[ 4  ] := 8;
+    oglAttr[ 5  ] := AGL_BLUE_SIZE;
+    oglAttr[ 6  ] := 8;
+    oglAttr[ 7  ] := AGL_ALPHA_SIZE;
+    oglAttr[ 8  ] := 8;
+    oglAttr[ 9  ] := AGL_DOUBLEBUFFER;
+    oglAttr[ 10 ] := AGL_DEPTH_SIZE;
+    oglAttr[ 11 ] := oglzDepth;
     i := 12;
-    if ogl_Stencil > 0 Then
+    if oglStencil > 0 Then
       begin
-        ogl_Attr[ i     ] := AGL_STENCIL_SIZE;
-        ogl_Attr[ i + 1 ] := ogl_Stencil;
+        oglAttr[ i     ] := AGL_STENCIL_SIZE;
+        oglAttr[ i + 1 ] := oglStencil;
         INC( i, 2 );
       end;
-    if ogl_FSAA > 0 Then
+    if oglFSAA > 0 Then
       begin
-        ogl_Attr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
-        ogl_Attr[ i + 1 ] := 1;
-        ogl_Attr[ i + 2 ] := AGL_SAMPLES_ARB;
-        ogl_Attr[ i + 3 ] := ogl_FSAA;
+        oglAttr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
+        oglAttr[ i + 1 ] := 1;
+        oglAttr[ i + 2 ] := AGL_SAMPLES_ARB;
+        oglAttr[ i + 3 ] := oglFSAA;
         INC( i, 4 );
       end;
 
-    log_Add( 'aglChoosePixelFormat: zDepth = ' + u_IntToStr( ogl_zDepth ) + '; ' + 'stencil = ' + u_IntToStr( ogl_Stencil ) + '; ' + 'fsaa = ' + u_IntToStr( ogl_FSAA ) );
-    DMGetGDeviceByDisplayID( DisplayIDType( scr_Display ), ogl_Device, FALSE );
-    ogl_Format := aglChoosePixelFormat( @ogl_Device, 1, @ogl_Attr[ 0 ] );
-    if ( not Assigned( ogl_Format ) and ( ogl_zDepth = 1 ) ) Then
+    log_Add( 'aglChoosePixelFormat: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil ) + '; ' + 'fsaa = ' + u_IntToStr( oglFSAA ) );
+    DMGetGDeviceByDisplayID( DisplayIDType( scrDisplay ), oglDevice, FALSE );
+    oglFormat := aglChoosePixelFormat( @oglDevice, 1, @oglAttr[ 0 ] );
+    if ( not Assigned( oglFormat ) and ( oglzDepth = 1 ) ) Then
       begin
-        if ogl_FSAA = 0 Then
+        if oglFSAA = 0 Then
           break
         else
           begin
-            ogl_zDepth := 24;
-            DEC( ogl_FSAA, 2 );
+            oglzDepth := 24;
+            DEC( oglFSAA, 2 );
           end;
       end else
-        if not Assigned( ogl_Format ) Then DEC( ogl_zDepth, 8 );
-  if ogl_zDepth = 0 Then ogl_zDepth := 1;
-  until Assigned( ogl_Format );
+        if not Assigned( oglFormat ) Then DEC( oglzDepth, 8 );
+  if oglzDepth = 0 Then oglzDepth := 1;
+  until Assigned( oglFormat );
 
-  if not Assigned( ogl_Format ) Then
+  if not Assigned( oglFormat ) Then
     begin
       u_Error( 'Cannot choose pixel format.' );
       exit;
     end;
 
-  ogl_Context := aglCreateContext( ogl_Format, nil );
-  if not Assigned( ogl_Context ) Then
+  oglContext := aglCreateContext( oglFormat, nil );
+  if not Assigned( oglContext ) Then
     begin
       u_Error( 'Cannot create OpenGL context' );
       exit;
     end;
-  if aglSetDrawable( ogl_Context, GetWindowPort( wnd_Handle ) ) = GL_FALSE Then
+  if aglSetDrawable( oglContext, GetWindowPort( wndHandle ) ) = GL_FALSE Then
     begin
       u_Error( 'Cannot set Drawable' );
       exit;
     end;
-  if aglSetCurrentContext( ogl_Context ) = GL_FALSE Then
+  if aglSetCurrentContext( oglContext ) = GL_FALSE Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
 {$ENDIF}
 
-  ogl_Renderer := glGetString( GL_RENDERER );
+  oglRenderer := glGetString( GL_RENDERER );
 {$IFDEF LINUX}
-  ogl_3DAccelerator := ogl_Renderer <> 'Software Rasterizer';
+  ogl3DAccelerator := oglRenderer <> 'Software Rasterizer';
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ogl_3DAccelerator := ogl_Renderer <> 'GDI Generic';
+  ogl3DAccelerator := oglRenderer <> 'GDI Generic';
 {$ENDIF}
 {$IFDEF DARWIN}
-  ogl_3DAccelerator := ogl_Renderer <> 'Apple Software Renderer';
+  ogl3DAccelerator := oglRenderer <> 'Apple Software Renderer';
 {$ENDIF}
-  if not ogl_3DAccelerator Then
+  if not ogl3DAccelerator Then
     u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
 
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
-  log_Add( 'GL_RENDERER: ' + ogl_Renderer );
+  log_Add( 'GL_RENDERER: ' + oglRenderer );
 
   gl_LoadEx();
   gl_ResetState();
@@ -465,7 +464,7 @@ begin
   glAlphaFunc( GL_GREATER, 0 );
 
   glBlendEquationEXT( GL_FUNC_ADD_EXT );
-  if ogl_Separate Then
+  if oglSeparate Then
     glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 
   glDisable( GL_BLEND );
@@ -478,23 +477,23 @@ end;
 procedure gl_Destroy;
 begin
 {$IFDEF LINUX}
-  if not glXMakeCurrent( scr_Display, None, nil ) Then
+  if not glXMakeCurrent( scrDisplay, None, nil ) Then
     u_Error( 'Cannot release current OpenGL context');
 
-  glXDestroyContext( scr_Display, ogl_Context );
+  glXDestroyContext( scrDisplay, oglContext );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if not wglMakeCurrent( wnd_DC, 0 ) Then
+  if not wglMakeCurrent( wndDC, 0 ) Then
     u_Error( 'Cannot release current OpenGL context' );
 
-  wglDeleteContext( ogl_Context );
+  wglDeleteContext( oglContext );
 {$ENDIF}
 {$IFDEF DARWIN}
-  aglDestroyPixelFormat( ogl_Format );
+  aglDestroyPixelFormat( oglFormat );
   if aglSetCurrentContext( nil ) = GL_FALSE Then
     u_Error( 'Cannot release current OpenGL context' );
 
-  aglDestroyContext( ogl_Context );
+  aglDestroyContext( oglContext );
   FreeAGL();
 {$ENDIF}
 
@@ -507,25 +506,20 @@ procedure gl_LoadEx;
     i, j : Integer;
   {$ENDIF}
 begin
-  if ogl_LoadEx Then
-    exit
-  else
-    ogl_LoadEx := TRUE;
-
-  ogl_Extensions := glGetString( GL_EXTENSIONS );
+  oglExtensions := glGetString( GL_EXTENSIONS );
 
   // Texture size
-  glGetIntegerv( GL_MAX_TEXTURE_SIZE, @ogl_MaxTexSize );
-  log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
+  glGetIntegerv( GL_MAX_TEXTURE_SIZE, @oglMaxTexSize );
+  log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
 
-  ogl_CanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', ogl_Extensions );
-  log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( ogl_CanCompressA ) );
-  ogl_CanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', ogl_Extensions );
-  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( ogl_CanCompressE ) );
+  oglCanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', oglExtensions );
+  log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( oglCanCompressA ) );
+  oglCanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
+  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanCompressE ) );
 
   // Multitexturing
-  glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @ogl_MaxTexUnits );
-  log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( ogl_MaxTexUnits ) );
+  glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @oglMaxTexUnits );
+  log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( oglMaxTexUnits ) );
   glMultiTexCoord2fARB := gl_GetProc( 'glMultiTexCoord2f' );
   if Assigned( glMultiTexCoord2fARB ) Then
     begin
@@ -534,26 +528,26 @@ begin
       glClientActiveTextureARB := gl_GetProc( 'glClientActiveTexture' );
     end else
       begin
-        // Это конечно извращенство, но лень потом проверять везде "ogl_MaxTexLevels > 0" :)
+        // Это конечно извращенство, но лень потом проверять везде "oglMaxTexLevels > 0" :)
         glActiveTextureARB       := @glEnable;
         glClientActiveTextureARB := @glEnable;
       end;
 
   // Anisotropy
-  glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @ogl_MaxAnisotropy );
-  ogl_Anisotropy := ogl_MaxAnisotropy;
-  log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( ogl_MaxAnisotropy ) );
+  glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy );
+  oglAnisotropy := oglMaxAnisotropy;
+  log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( oglMaxAnisotropy ) );
 
   glBlendEquationEXT     := gl_GetProc( 'glBlendEquation' );
   glBlendFuncSeparateEXT := gl_GetProc( 'glBlendFuncSeparate' );
-  ogl_Separate := Assigned( glBlendEquationEXT ) and Assigned( glBlendFuncSeparateEXT ) and gl_IsSupported( 'GL_EXT_blend_func_separate', ogl_Extensions );
-  log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( ogl_Separate ) );
+  oglSeparate := Assigned( glBlendEquationEXT ) and Assigned( glBlendFuncSeparateEXT ) and gl_IsSupported( 'GL_EXT_blend_func_separate', oglExtensions );
+  log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( oglSeparate ) );
 
   // VBO
   glBindBufferARB := gl_GetProc( 'glBindBuffer' );
   if Assigned( glBindBufferARB ) Then
     begin
-      ogl_CanVBO                := TRUE;
+      oglCanVBO                 := TRUE;
       glDeleteBuffersARB        := gl_GetProc( 'glDeleteBuffers'        );
       glGenBuffersARB           := gl_GetProc( 'glGenBuffers'           );
       glIsBufferARB             := gl_GetProc( 'glIsBuffer'             );
@@ -563,14 +557,14 @@ begin
       glUnmapBufferARB          := gl_GetProc( 'glUnmapBuffer'          );
       glGetBufferParameterivARB := gl_GetProc( 'glGetBufferParameteriv' );
     end else
-      ogl_CanVBO := FALSE;
-  log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( ogl_CanVBO ) );
+      oglCanVBO := FALSE;
+  log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( oglCanVBO ) );
 
   // FBO
   glBindRenderbufferEXT := gl_GetProc( 'glBindRenderbuffer' );
   if Assigned( glBindRenderbufferEXT ) Then
     begin
-      ogl_CanFBO                   := TRUE;
+      oglCanFBO                    := TRUE;
       glIsRenderbufferEXT          := gl_GetProc( 'glIsRenderbuffer'          );
       glDeleteRenderbuffersEXT     := gl_GetProc( 'glDeleteRenderbuffers'     );
       glGenRenderbuffersEXT        := gl_GetProc( 'glGenRenderbuffers'        );
@@ -583,27 +577,27 @@ begin
       glFramebufferTexture2DEXT    := gl_GetProc( 'glFramebufferTexture2D'    );
       glFramebufferRenderbufferEXT := gl_GetProc( 'glFramebufferRenderbuffer' );
     end else
-      ogl_CanFBO := FALSE;
-   log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( ogl_CanFBO ) );
+      oglCanFBO := FALSE;
+   log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( oglCanFBO ) );
 
   // PBUFFER
 {$IFDEF LINUX}
-  oglx_Extensions := glXQueryServerString( scr_Display, scr_Default, GLX_EXTENSIONS );
-  glXQueryVersion( scr_Display, i, j );
+  oglxExtensions := glXQueryServerString( scrDisplay, scrDefault, GLX_EXTENSIONS );
+  glXQueryVersion( scrDisplay, i, j );
   if ( i * 10 + j >= 13 ) Then
-    ogl_PBufferMode := 1
+    oglPBufferMode := 1
   else
-    if gl_IsSupported( 'GLX_SGIX_fbconfig', oglx_Extensions ) and gl_IsSupported( 'GLX_SGIX_pbuffer', oglx_Extensions ) Then
-        ogl_PBufferMode := 2
+    if gl_IsSupported( 'GLX_SGIX_fbconfig', oglXExtensions ) and gl_IsSupported( 'GLX_SGIX_pbuffer', oglXExtensions ) Then
+        oglPBufferMode := 2
     else
-      ogl_PBufferMode := 0;
-  ogl_CanPBuffer := ogl_PbufferMode <> 0;
-  if ogl_PBufferMode = 2 Then
+      oglPBufferMode := 0;
+  oglCanPBuffer := oglPBufferMode <> 0;
+  if oglPBufferMode = 2 Then
     log_Add( 'GLX_SGIX_PBUFFER: TRUE' )
   else
-    log_Add( 'GLX_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+    log_Add( 'GLX_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 
-  case ogl_PBufferMode of
+  case oglPBufferMode of
     1:
       begin
         glXGetVisualFromFBConfig := gl_GetProc( 'glXGetVisualFromFBConfig' );
@@ -624,38 +618,38 @@ begin
   wglCreatePbufferARB := gl_GetProc( 'wglCreatePbuffer' );
   if Assigned( wglCreatePbufferARB ) and Assigned( wglChoosePixelFormatARB ) Then
     begin
-      ogl_CanPBuffer         := TRUE;
+      oglCanPBuffer          := TRUE;
       wglGetPbufferDCARB     := gl_GetProc( 'wglGetPbufferDC'     );
       wglReleasePbufferDCARB := gl_GetProc( 'wglReleasePbufferDC' );
       wglDestroyPbufferARB   := gl_GetProc( 'wglDestroyPbuffer'   );
     end else
-      ogl_CanPBuffer := FALSE;
-  log_Add( 'WGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+      oglCanPBuffer := FALSE;
+  log_Add( 'WGL_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 {$ENDIF}
 {$IFDEF DARWIN}
-  ogl_CanPBuffer := Assigned( aglCreatePBuffer );
-  log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( ogl_CanPBuffer ) );
+  oglCanPBuffer := Assigned( aglCreatePBuffer );
+  log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 {$ENDIF}
 
   // WaitVSync
 {$IFDEF LINUX}
   glXSwapIntervalSGI := gl_GetProc( 'glXSwapIntervalSGI' );
-  ogl_CanVSync       := Assigned( glXSwapIntervalSGI );
+  oglCanVSync        := Assigned( glXSwapIntervalSGI );
 {$ENDIF}
 {$IFDEF WINDOWS}
   wglSwapIntervalEXT := gl_GetProc( 'wglSwapInterval' );
-  ogl_CanVSync       := Assigned( wglSwapIntervalEXT );
+  oglCanVSync        := Assigned( wglSwapIntervalEXT );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then
-    ogl_CanVSync := TRUE
+  if aglSetInt( oglContext, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then
+    oglCanVSync := TRUE
   else
-    ogl_CanVSync := FALSE;
-  aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
+    oglCanVSync := FALSE;
+  aglSetInt( oglContext, AGL_SWAP_INTERVAL, Byte( scrVSync ) );
 {$ENDIF}
-  if ogl_CanVSync Then
-    scr_SetVSync( scr_VSync );
-  log_Add( 'Support WaitVSync: ' + u_BoolToStr( ogl_CanVSync ) );
+  if oglCanVSync Then
+    scr_SetVSync( scrVSync );
+  log_Add( 'Support WaitVSync: ' + u_BoolToStr( oglCanVSync ) );
 end;
 
 end.

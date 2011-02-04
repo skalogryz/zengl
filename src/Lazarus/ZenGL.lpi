@@ -13,6 +13,9 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
@@ -25,7 +28,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="45">
+    <Units Count="46">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -251,10 +254,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_joystick"/>
       </Unit44>
+      <Unit45>
+        <Filename Value="../zgl_render_2d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_render_2d"/>
+      </Unit45>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <Target>
       <Filename Value="./libZenGL"/>
     </Target>

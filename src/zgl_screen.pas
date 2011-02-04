@@ -86,47 +86,45 @@ type
 end;
 
 var
-  scr_Width   : Integer = 800;
-  scr_Height  : Integer = 600;
-  scr_Refresh : Integer;
-  scr_VSync   : Boolean;
-  scr_ResList : zglTResolutionList;
-  scr_Initialized : Boolean;
-  scr_Changing : Boolean;
+  scrWidth       : Integer = 800;
+  scrHeight      : Integer = 600;
+  scrRefresh     : Integer;
+  scrVSync       : Boolean;
+  scrResList     : zglTResolutionList;
+  scrInitialized : Boolean;
+  scrChanging    : Boolean;
 
   // Resolution Correct
-  scr_ResW  : Integer;
-  scr_ResH  : Integer;
-  scr_ResCX : Single  = 1;
-  scr_ResCY : Single  = 1;
-  scr_AddCX : Integer = 0;
-  scr_AddCY : Integer = 0;
-  scr_SubCX : Integer = 0;
-  scr_SubCY : Integer = 0;
+  scrResW  : Integer;
+  scrResH  : Integer;
+  scrResCX : Single  = 1;
+  scrResCY : Single  = 1;
+  scrAddCX : Integer = 0;
+  scrAddCY : Integer = 0;
+  scrSubCX : Integer = 0;
+  scrSubCY : Integer = 0;
 
   {$IFDEF LINUX}
-  scr_Display   : PDisplay;
-  scr_Default   : cint;
-  scr_Settings  : Pointer;
-  scr_Desktop   : LongInt;
-  scr_Current   : LongInt;
-  scr_ModeCount : LongInt;
-  scr_ModeList  : PXRRScreenSize;
+  scrDisplay   : PDisplay;
+  scrDefault   : cint;
+  scrSettings  : Pointer;
+  scrDesktop   : LongInt;
+  scrCurrent   : LongInt;
+  scrModeCount : LongInt;
+  scrModeList  : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  scr_Settings : DEVMODEW;
-  scr_Desktop  : DEVMODEW;
-  scr_Monitor  : HMONITOR;
-  scr_MonInfo  : MONITORINFOEX;
+  scrSettings : DEVMODEW;
+  scrDesktop  : DEVMODEW;
+  scrMonitor  : HMONITOR;
+  scrMonInfo  : MONITORINFOEX;
   {$ENDIF}
   {$IFDEF DARWIN}
-  scr_Display  : CGDirectDisplayID;
-  scr_Desktop  : CFDictionaryRef;
-  scr_DesktopW : Integer;
-  scr_DesktopH : Integer;
-  scr_Settings : CFDictionaryRef;
-  scr_EraseClr : RGBColor;
-  scr_Restore  : MacOSAll.Ptr;
+  scrDisplay  : CGDirectDisplayID;
+  scrDesktop  : CFDictionaryRef;
+  scrDesktopW : Integer;
+  scrDesktopH : Integer;
+  scrSettings : CFDictionaryRef;
   {$ENDIF}
 
 implementation
@@ -165,37 +163,37 @@ end;
 procedure scr_Init;
   {$IFDEF LINUX}
   var
-    Rotation : Word;
+    rotation : Word;
   {$ENDIF}
 begin
-  scr_Initialized := TRUE;
+  scrInitialized := TRUE;
 {$IFDEF LINUX}
-  log_Init;
+  log_Init();
 
-  if Assigned( scr_Display ) Then
-    XCloseDisplay( scr_Display );
+  if Assigned( scrDisplay ) Then
+    XCloseDisplay( scrDisplay );
 
-  scr_Display := XOpenDisplay( nil );
-  if not Assigned( scr_Display ) Then
+  scrDisplay := XOpenDisplay( nil );
+  if not Assigned( scrDisplay ) Then
     begin
       u_Error( 'Cannot connect to X server.' );
       exit;
     end;
 
-  scr_Default := DefaultScreen( scr_Display );
-  wnd_Root    := DefaultRootWindow( scr_Display );
+  scrDefault := DefaultScreen( scrDisplay );
+  wndRoot    := DefaultRootWindow( scrDisplay );
 
-  scr_ModeList := XRRSizes( scr_Display, XRRRootToScreen( scr_Display, wnd_Root ), @scr_ModeCount );
-  scr_Settings := XRRGetScreenInfo( scr_Display, wnd_Root );
-  scr_Desktop  := XRRConfigCurrentConfiguration( scr_Settings, @Rotation );
+  scrModeList := XRRSizes( scrDisplay, XRRRootToScreen( scrDisplay, wndRoot ), @scrModeCount );
+  scrSettings := XRRGetScreenInfo( scrDisplay, wndRoot );
+  scrDesktop  := XRRConfigCurrentConfiguration( scrSettings, @rotation );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  scr_Monitor := MonitorFromWindow( wnd_Handle, MONITOR_DEFAULTTOPRIMARY );
-  FillChar( scr_MonInfo, SizeOf( MONITORINFOEX ), 0 );
-  scr_MonInfo.cbSize := SizeOf( MONITORINFOEX );
-  GetMonitorInfoW( scr_Monitor, scr_MonInfo );
+  scrMonitor := MonitorFromWindow( wndHandle, MONITOR_DEFAULTTOPRIMARY );
+  FillChar( scrMonInfo, SizeOf( MONITORINFOEX ), 0 );
+  scrMonInfo.cbSize := SizeOf( MONITORINFOEX );
+  GetMonitorInfoW( scrMonitor, scrMonInfo );
 
-  with scr_Desktop do
+  with scrDesktop do
     begin
       dmSize             := SizeOf( DEVMODEW );
       dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
@@ -206,10 +204,10 @@ begin
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  scr_Display  := CGMainDisplayID();
-  scr_Desktop  := CGDisplayCurrentMode( scr_Display );
-  scr_DesktopW := CGDisplayPixelsWide( scr_Display );
-  scr_DesktopH := CGDisplayPixelsHigh( scr_Display );
+  scrDisplay  := CGMainDisplayID();
+  scrDesktop  := CGDisplayCurrentMode( scrDisplay );
+  scrDesktopW := CGDisplayPixelsWide( scrDisplay );
+  scrDesktopH := CGDisplayPixelsHigh( scrDisplay );
 {$ENDIF}
 end;
 
@@ -219,36 +217,36 @@ begin
 {$IFDEF LINUX}
   scr_Init();
 
-  if DefaultDepth( scr_Display, scr_Default ) < 24 Then
+  if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
     begin
       u_Error( 'DefaultDepth not set to 24-bit.' );
       zgl_Exit();
       exit;
     end;
 
-  app_XIM := XOpenIM( scr_Display, nil, nil, nil );
-  if not Assigned( app_XIM ) Then
+  appXIM := XOpenIM( scrDisplay, nil, nil, nil );
+  if not Assigned( appXIM ) Then
     log_Add( 'XOpenIM - Fail' )
   else
     log_Add( 'XOpenIM - ok' );
 
-  app_XIC := XCreateIC( app_XIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
-  if not Assigned( app_XIC ) Then
+  appXIC := XCreateIC( appXIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
+  if not Assigned( appXIC ) Then
     log_Add( 'XCreateIC - Fail' )
   else
     log_Add( 'XCreateIC - ok' );
 {$ENDIF}
 {$IFDEF WINDOWS}
   scr_Init();
-  if ( not wnd_FullScreen ) and ( scr_Desktop.dmBitsPerPel <> 32 ) Then
+  if ( not wndFullScreen ) and ( scrDesktop.dmBitsPerPel <> 32 ) Then
     scr_SetWindowedMode();
 {$ENDIF}
 {$IFDEF DARWIN}
   scr_Init();
-  if CGDisplayBitsPerPixel( scr_Display ) <> 32 Then
+  if CGDisplayBitsPerPixel( scrDisplay ) <> 32 Then
     begin
       u_Error( 'Desktop not set to 32-bit mode.' );
-      zgl_Exit;
+      zgl_Exit();
       exit;
     end;
 {$ENDIF}
@@ -261,46 +259,46 @@ procedure scr_GetResList;
   var
     i : Integer;
   {$IFDEF LINUX}
-    tmp_Settings : PXRRScreenSize;
+    tmpSettings : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
-    tmp_Settings : DEVMODEW;
+    tmpSettings : DEVMODEW;
   {$ENDIF}
   function Already( Width, Height : Integer ) : Boolean;
     var
       j : Integer;
   begin
     Result := FALSE;
-    for j := 0 to scr_ResList.Count - 1 do
-      if ( scr_ResList.Width[ j ] = Width ) and ( scr_ResList.Height[ j ] = Height ) Then Result := TRUE;
+    for j := 0 to scrResList.Count - 1 do
+      if ( scrResList.Width[ j ] = Width ) and ( scrResList.Height[ j ] = Height ) Then Result := TRUE;
   end;
 begin
 {$IFDEF LINUX}
-  tmp_Settings := scr_ModeList;
-  for i := 0 to scr_ModeCount - 1 do
+  tmpSettings := scrModeList;
+  for i := 0 to scrModeCount - 1 do
     begin
-      if not Already( tmp_Settings.Width, tmp_Settings.Height ) Then
+      if not Already( tmpSettings.Width, tmpSettings.Height ) Then
         begin
-          INC( scr_ResList.Count );
-          SetLength( scr_ResList.Width, scr_ResList.Count );
-          SetLength( scr_ResList.Height, scr_ResList.Count );
-          scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.Width;
-          scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.Height;
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.Width;
+          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.Height;
         end;
-      INC( tmp_Settings );
+      INC( tmpSettings );
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
   i := 0;
-  while EnumDisplaySettingsW( scr_MonInfo.szDevice, i, tmp_Settings ) <> FALSE do
+  while EnumDisplaySettingsW( scrMonInfo.szDevice, i, tmpSettings ) <> FALSE do
     begin
-      if not Already( tmp_Settings.dmPelsWidth, tmp_Settings.dmPelsHeight ) Then
+      if not Already( tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight ) Then
         begin
-          INC( scr_ResList.Count );
-          SetLength( scr_ResList.Width, scr_ResList.Count );
-          SetLength( scr_ResList.Height, scr_ResList.Count );
-          scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.dmPelsWidth;
-          scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.dmPelsHeight;
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.dmPelsWidth;
+          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.dmPelsHeight;
         end;
       INC( i );
     end;
@@ -311,43 +309,43 @@ procedure scr_Destroy;
 begin
   scr_Reset();
   {$IFDEF LINUX}
-  XRRFreeScreenConfigInfo( scr_Settings );
+  XRRFreeScreenConfigInfo( scrSettings );
   {$ENDIF}
 end;
 
 procedure scr_Reset;
 begin
-  scr_Changing := TRUE;
+  scrChanging := TRUE;
 {$IFDEF LINUX}
-  XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Desktop, 1, 0 );
+  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scr_MonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
+  ChangeDisplaySettingsExW( scrMonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
 {$IFDEF DARWIN}
-  CGDisplaySwitchToMode( scr_Display, scr_Desktop );
-  //CGDisplayRelease( scr_Display );
+  CGDisplaySwitchToMode( scrDisplay, scrDesktop );
+  //CGDisplayRelease( scrDisplay );
 {$ENDIF}
 end;
 
 procedure scr_Clear;
 begin
   batch2d_Flush();
-  glClear( GL_COLOR_BUFFER_BIT * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
-           GL_STENCIL_BUFFER_BIT * Byte( app_Flags and STENCIL_BUFFER_CLEAR > 0 ) );
+  glClear( GL_COLOR_BUFFER_BIT * Byte( appFlags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( appFlags and DEPTH_BUFFER_CLEAR > 0 ) or
+           GL_STENCIL_BUFFER_BIT * Byte( appFlags and STENCIL_BUFFER_CLEAR > 0 ) );
 end;
 
 procedure scr_Flush;
 begin
   batch2d_Flush();
 {$IFDEF LINUX}
-  glXSwapBuffers( scr_Display, wnd_Handle );
+  glXSwapBuffers( scrDisplay, wndHandle );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  SwapBuffers( wnd_DC );
+  SwapBuffers( wndDC );
 {$ENDIF}
 {$IFDEF DARWIN}
-  aglSwapBuffers( ogl_Context );
+  aglSwapBuffers( oglContext );
 {$ENDIF}
 end;
 
@@ -359,20 +357,20 @@ procedure scr_SetWindowedMode;
 begin
   {$IFDEF LINUX}
   scr_Reset();
-  XMapWindow( scr_Display, wnd_Handle );
+  XMapWindow( scrDisplay, wndHandle );
   {$ENDIF}
   {$IFDEF WINDOWS}
-  if scr_Desktop.dmBitsPerPel <> 32 Then
+  if scrDesktop.dmBitsPerPel <> 32 Then
     begin
-      settings              := scr_Desktop;
+      settings              := scrDesktop;
       settings.dmBitsPerPel := 32;
 
-      if ChangeDisplaySettingsExW( scr_MonInfo.szDevice, settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
+      if ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
           u_Error( 'Desktop doesn''t support 32-bit color mode.' );
-          zgl_Exit;
+          zgl_Exit();
         end else
-          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
+          ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
     end else
       scr_Reset();
   {$ENDIF}
@@ -393,77 +391,74 @@ procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boo
     r : Integer;
   {$ENDIF}
   {$IFDEF DARWIN}
-    b  : Integer;
-    dW : SInt16;
-    dH : SInt16;
-    nw : WindowRef;
+    b : Integer;
   {$ENDIF}
 begin
-  scr_Changing   := TRUE;
-  ogl_Width      := Width;
-  ogl_Height     := Height;
-  ogl_TargetW    := Width;
-  ogl_TargetH    := Height;
-  wnd_Width      := Width;
-  wnd_Height     := Height;
-  wnd_FullScreen := FullScreen;
-  scr_Vsync      := VSync;
+  scrChanging   := TRUE;
+  oglWidth      := Width;
+  oglHeight     := Height;
+  oglTargetW    := Width;
+  oglTargetH    := Height;
+  wndWidth      := Width;
+  wndHeight     := Height;
+  wndFullScreen := FullScreen;
+  scrVsync      := VSync;
 
   if Height >= zgl_Get( DESKTOP_HEIGHT ) Then
-    wnd_FullScreen := TRUE;
-  if wnd_FullScreen Then
+    wndFullScreen := TRUE;
+  if wndFullScreen Then
     begin
-      scr_Width  := Width;
-      scr_Height := Height;
+      scrWidth  := Width;
+      scrHeight := Height;
     end else
       begin
-        scr_Width  := zgl_Get( DESKTOP_WIDTH );
-        scr_Height := zgl_Get( DESKTOP_HEIGHT );
+        scrWidth  := zgl_Get( DESKTOP_WIDTH );
+        scrHeight := zgl_Get( DESKTOP_HEIGHT );
         {$IFDEF WINDOWS}
-        scr_Refresh := GetDisplayRefresh;
+        scrRefresh := GetDisplayRefresh();
         {$ENDIF}
       end;
 
-  if not app_Initialized Then exit;
-  scr_SetVSync( scr_VSync );
+  if not appInitialized Then exit;
+  scr_SetVSync( scrVSync );
 {$IFDEF LINUX}
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     begin
-      scr_Current := -1;
-      mode        := scr_ModeList;
+      scrCurrent := -1;
+      mode       := scrModeList;
 
-      for modeToSet := 0 to scr_ModeCount - 1 do
-        if ( mode.Width = scr_Width ) and ( mode.Height = scr_Height ) Then
+      for modeToSet := 0 to scrModeCount - 1 do
+        if ( mode.Width = scrWidth ) and ( mode.Height = scrHeight ) Then
           begin
-            scr_Current := modeToSet;
+            scrCurrent := modeToSet;
             break;
           end else
             INC( mode );
 
-      if scr_Current = -1 Then
+      if scrCurrent = -1 Then
         begin
           u_Warning( 'Cannot set fullscreen mode.' );
-          scr_Current    := scr_Desktop;
-          wnd_FullScreen := FALSE;
+          scrCurrent    := scrDesktop;
+          wndFullScreen := FALSE;
         end;
-      XRRSetScreenConfig( scr_Display, scr_Settings, wnd_Root, scr_Current, 1, 0 );
+      XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, 1, 0 );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     begin
       i := 0;
       r := 0;
-      while EnumDisplaySettingsW( scr_MonInfo.szDevice, i, scr_Settings ) <> FALSE do
-        with scr_Settings do
+      while EnumDisplaySettingsW( scrMonInfo.szDevice, i, scrSettings ) <> FALSE do
+        with scrSettings do
           begin
             dmSize   := SizeOf( DEVMODEW );
             dmFields := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
-            if ( dmPelsWidth = scr_Width  ) and ( dmPelsHeight = scr_Height ) and ( dmBitsPerPel = 32 ) and ( dmDisplayFrequency > r ) and
-               ( dmDisplayFrequency <= scr_Desktop.dmDisplayFrequency ) Then
+            if ( dmPelsWidth = scrWidth  ) and ( dmPelsHeight = scrHeight ) and ( dmBitsPerPel = 32 ) and ( dmDisplayFrequency > r ) and
+               ( dmDisplayFrequency <= scrDesktop.dmDisplayFrequency ) Then
               begin
-                if ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, CDS_TEST, nil ) = DISP_CHANGE_SUCCESSFUL Then
+                if ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_TEST, nil ) = DISP_CHANGE_SUCCESSFUL Then
                   r := dmDisplayFrequency
                 else
                   break;
@@ -471,158 +466,158 @@ begin
             INC( i );
           end;
 
-      with scr_Settings do
+      with scrSettings do
         begin
           dmSize := SizeOf( DEVMODEW );
-          if scr_Refresh = REFRESH_MAXIMUM Then scr_Refresh := r;
-          if scr_Refresh = REFRESH_DEFAULT Then scr_Refresh := 0;
+          if scrRefresh = REFRESH_MAXIMUM Then scrRefresh := r;
+          if scrRefresh = REFRESH_DEFAULT Then scrRefresh := 0;
 
-          dmPelsWidth        := scr_Width;
-          dmPelsHeight       := scr_Height;
+          dmPelsWidth        := scrWidth;
+          dmPelsHeight       := scrHeight;
           dmBitsPerPel       := 32;
-          dmDisplayFrequency := scr_Refresh;
+          dmDisplayFrequency := scrRefresh;
           dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
         end;
 
-      if ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
+      if ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
           u_Warning( 'Cannot set fullscreen mode.' );
-          wnd_FullScreen := FALSE;
+          wndFullScreen := FALSE;
         end else
-          ChangeDisplaySettingsExW( scr_MonInfo.szDevice, scr_Settings, 0, CDS_FULLSCREEN, nil );
+          ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_FULLSCREEN, nil );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
 {$IFDEF DARWIN}
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     begin
-      //CGDisplayCapture( scr_Display );
-      if scr_Refresh <> 0 Then
+      //CGDisplayCapture( scrDisplay );
+      if scrRefresh <> 0 Then
         begin
-          scr_Settings := CGDisplayBestModeForParametersAndRefreshRate( scr_Display, 32, scr_Width, scr_Height, scr_Refresh, b );
-          scr_Refresh  := b;
+          scrSettings := CGDisplayBestModeForParametersAndRefreshRate( scrDisplay, 32, scrWidth, scrHeight, scrRefresh, b );
+          scrRefresh  := b;
         end;
-      if scr_Refresh = 0 Then
-        scr_Settings := CGDisplayBestModeForParameters( scr_Display, 32, scr_Width, scr_Height, b );
+      if scrRefresh = 0 Then
+        scrSettings := CGDisplayBestModeForParameters( scrDisplay, 32, scrWidth, scrHeight, b );
 
       if b = 1 Then
-        CGDisplaySwitchToMode( scr_Display, scr_Settings )
+        CGDisplaySwitchToMode( scrDisplay, scrSettings )
       else
         begin
           u_Warning( 'Cannot set fullscreen mode.' );
-          wnd_FullScreen := FALSE;
+          wndFullScreen := FALSE;
         end;
 
       HideMenuBar();
     end else
       scr_SetWindowedMode();
 {$ENDIF}
-  if wnd_FullScreen Then
-    log_Add( 'Screen options changed to: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
+  if wndFullScreen Then
+    log_Add( 'Screen options changed to: ' + u_IntToStr( scrWidth ) + ' x ' + u_IntToStr( scrHeight ) + ' fullscreen' )
   else
-    log_Add( 'Screen options changed to: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
-  if app_Work Then
+    log_Add( 'Screen options changed to: ' + u_IntToStr( wndWidth ) + ' x ' + u_IntToStr( wndHeight ) + ' windowed' );
+  if appWork Then
     wnd_Update();
 end;
 
 procedure scr_CorrectResolution( Width, Height : Word );
 begin
-  scr_ResW  := Width;
-  scr_ResH  := Height;
-  scr_ResCX := wnd_Width  / Width;
-  scr_ResCY := wnd_Height / Height;
+  scrResW  := Width;
+  scrResH  := Height;
+  scrResCX := wndWidth  / Width;
+  scrResCY := wndHeight / Height;
 
-  if scr_ResCX < scr_ResCY Then
+  if scrResCX < scrResCY Then
     begin
-      scr_AddCX := 0;
-      scr_AddCY := Round( ( wnd_Height - Height * scr_ResCX ) / 2 );
-      scr_ResCY := scr_ResCX;
+      scrAddCX := 0;
+      scrAddCY := Round( ( wndHeight - Height * scrResCX ) / 2 );
+      scrResCY := scrResCX;
     end else
       begin
-        scr_AddCX := Round( ( wnd_Width - Width * scr_ResCY ) / 2 );
-        scr_AddCY := 0;
-        scr_ResCX := scr_ResCY;
+        scrAddCX := Round( ( wndWidth - Width * scrResCY ) / 2 );
+        scrAddCY := 0;
+        scrResCX := scrResCY;
       end;
 
-  if app_Flags and CORRECT_HEIGHT = 0 Then
+  if appFlags and CORRECT_HEIGHT = 0 Then
     begin
-      scr_ResCY := wnd_Height / Height;
-      scr_AddCY := 0;
+      scrResCY := wndHeight / Height;
+      scrAddCY := 0;
     end;
-  if app_Flags and CORRECT_WIDTH = 0 Then
+  if appFlags and CORRECT_WIDTH = 0 Then
     begin
-      scr_ResCX := wnd_Width / Width;
-      scr_AddCX := 0;
+      scrResCX := wndWidth / Width;
+      scrAddCX := 0;
     end;
 
-  ogl_Width  := Round( wnd_Width / scr_ResCX );
-  ogl_Height := Round( wnd_Height / scr_ResCY );
-  scr_SubCX  := ogl_Width - Width;
-  scr_SubCY  := ogl_Height - Height;
+  oglWidth  := Round( wndWidth / scrResCX );
+  oglHeight := Round( wndHeight / scrResCY );
+  scrSubCX  := oglWidth - Width;
+  scrSubCY  := oglHeight - Height;
   SetCurrentMode();
 end;
 
 procedure scr_SetViewPort;
 begin
-  if ogl_Target = TARGET_SCREEN Then
+  if oglTarget = TARGET_SCREEN Then
     begin
-      if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
+      if ( appFlags and CORRECT_RESOLUTION > 0 ) and ( oglMode = 2 ) Then
         begin
-          ogl_ClipX := 0;
-          ogl_ClipY := 0;
-          ogl_ClipW := wnd_Width - scr_AddCX * 2;
-          ogl_ClipH := wnd_Height - scr_AddCY * 2;
-          glViewPort( scr_AddCX, scr_AddCY, ogl_ClipW, ogl_ClipH );
+          oglClipX := 0;
+          oglClipY := 0;
+          oglClipW := wndWidth - scrAddCX * 2;
+          oglClipH := wndHeight - scrAddCY * 2;
+          glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
         end else
           begin
-            ogl_ClipX := 0;
-            ogl_ClipY := 0;
-            ogl_ClipW := wnd_Width;
-            ogl_ClipH := wnd_Height;
-            glViewPort( 0, 0, ogl_ClipW, ogl_ClipH );
+            oglClipX := 0;
+            oglClipY := 0;
+            oglClipW := wndWidth;
+            oglClipH := wndHeight;
+            glViewPort( 0, 0, oglClipW, oglClipH );
           end;
     end else
       begin
-        ogl_ClipX := 0;
-        ogl_ClipY := 0;
-        ogl_ClipW := ogl_Width;
-        ogl_ClipH := ogl_Height;
-        glViewPort( 0, 0, ogl_TargetW, ogl_TargetH );
+        oglClipX := 0;
+        oglClipY := 0;
+        oglClipW := oglWidth;
+        oglClipH := oglHeight;
+        glViewPort( 0, 0, oglTargetW, oglTargetH );
       end;
 end;
 
 procedure scr_SetVSync( VSync : Boolean );
 begin
-  scr_VSync := VSync;
+  scrVSync := VSync;
 {$IFDEF LINUX}
-  if ogl_CanVSync Then
-    glXSwapIntervalSGI( Integer( scr_VSync ) );
+  if oglCanVSync Then
+    glXSwapIntervalSGI( Integer( scrVSync ) );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if ogl_CanVSync Then
-    wglSwapIntervalEXT( Integer( scr_VSync ) );
+  if oglCanVSync Then
+    wglSwapIntervalEXT( Integer( scrVSync ) );
 {$ENDIF}
 {$IFDEF DARWIN}
-  if Assigned( ogl_Context ) Then
-    aglSetInt( ogl_Context, AGL_SWAP_INTERVAL, Byte( scr_VSync ) );
+  if Assigned( oglContext ) Then
+    aglSetInt( oglContext, AGL_SWAP_INTERVAL, Byte( scrVSync ) );
 {$ENDIF}
 end;
 
 procedure scr_SetFSAA( FSAA : Byte );
 begin
-  if ogl_FSAA = FSAA Then exit;
-  ogl_FSAA := FSAA;
+  if oglFSAA = FSAA Then exit;
+  oglFSAA := FSAA;
 
 {$IFDEF LINUX}
   wnd_Destroy();
-  wnd_Create( wnd_Width, wnd_Height );
+  wnd_Create( wndWidth, wndHeight );
 {$ENDIF}
 
   gl_Destroy();
   wnd_Update();
   gl_Create();
-  if ogl_FSAA <> 0 Then
-    log_Add( 'FSAA changed to: ' + u_IntToStr( ogl_FSAA ) + 'x' )
+  if oglFSAA <> 0 Then
+    log_Add( 'FSAA changed to: ' + u_IntToStr( oglFSAA ) + 'x' )
   else
     log_Add( 'FSAA changed to: off' );
 end;
@@ -631,7 +626,7 @@ procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );
-  glReadPixels( X, ogl_ClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+  glReadPixels( X, oglClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
 
 end.

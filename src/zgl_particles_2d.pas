@@ -934,7 +934,7 @@ begin
       fx_SetBlendMode( ParParams.BlendMode );
       fx_SetColorMode( ParParams.ColorMode );
 
-      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX_BLEND or FX_COLOR, ParParams.Texture ) Then
+      if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX_BLEND or FX_COLOR, ParParams.Texture ) Then
         begin
           glEnable( GL_BLEND );
           glEnable( GL_TEXTURE_2D );
@@ -1073,7 +1073,7 @@ begin
               glVertex2fv( @quad[ 3 ] );
             end;
 
-      if not b2d_Started Then
+      if not b2dStarted Then
         begin
           glEnd();
 

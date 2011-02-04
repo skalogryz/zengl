@@ -49,9 +49,9 @@ procedure log_Init;
     i  : Integer;
     es : String;
 begin
-  if ( app_Flags and APP_USE_LOG = 0 ) Then exit;
+  if ( appFlags and APP_USE_LOG = 0 ) Then exit;
   if log <> FILE_ERROR Then exit;
-  app_Log := TRUE;
+  appLog   := TRUE;
   logStart := Round( timer_GetTicks() );
 
   file_Open( log, logFile, FOM_CREATE );
@@ -75,9 +75,9 @@ procedure log_Add( const Message : AnsiString; Timings : Boolean = TRUE );
   var
     str : AnsiString;
 begin
-  if not app_Log Then exit;
+  if not appLog Then exit;
   {$IFDEF LINUX}
-  if ( app_Log ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
+  if ( appLog ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
     writeln( Message );
   {$ENDIF}
   if Timings Then

@@ -51,22 +51,22 @@ var
 
 procedure Set2DMode;
 begin
-  ogl_Mode := 2;
+  oglMode := 2;
   batch2d_Flush();
   if cam2d.Apply Then glPopMatrix();
-  cam2d := @cam2dTarget[ ogl_Target ];
+  cam2d := @cam2dTarget[ oglTarget ];
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  if ogl_Target = TARGET_SCREEN Then
+  if oglTarget = TARGET_SCREEN Then
     begin
-      if app_Flags and CORRECT_RESOLUTION > 0 Then
-        glOrtho( 0, Round( ogl_Width - scr_AddCX * 2 / scr_ResCX ), Round( ogl_Height - scr_AddCY * 2 / scr_ResCY ), 0, -1, 1 )
+      if appFlags and CORRECT_RESOLUTION > 0 Then
+        glOrtho( 0, Round( oglWidth - scrAddCX * 2 / scrResCX ), Round( oglHeight - scrAddCY * 2 / scrResCY ), 0, -1, 1 )
       else
-        glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
+        glOrtho( 0, wndWidth, wndHeight, 0, -1, 1 );
     end else
-      glOrtho( 0, ogl_Width, ogl_Height, 0, -1, 1 );
+      glOrtho( 0, oglWidth, oglHeight, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   scr_SetViewPort();
@@ -76,18 +76,18 @@ end;
 
 procedure Set3DMode( FOVY : Single = 45 );
 begin
-  ogl_Mode := 3;
-  ogl_FOVY := FOVY;
+  oglMode := 3;
+  oglFOVY := FOVY;
   batch2d_Flush();
   if cam2d.Apply Then glPopMatrix();
-  cam2d := @cam2dTarget[ ogl_Target ];
+  cam2d := @cam2dTarget[ oglTarget ];
 
   glColor4ub( 255, 255, 255, 255 );
 
   glEnable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
+  gluPerspective( oglFOVY, oglWidth / oglHeight, oglzNear, oglzFar );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   scr_SetViewPort();
@@ -95,16 +95,16 @@ end;
 
 procedure SetCurrentMode;
 begin
-  if ogl_Mode = 2 Then
+  if oglMode = 2 Then
     Set2DMode()
   else
-    Set3DMode( ogl_FOVY );
+    Set3DMode( oglFOVY );
 end;
 
 procedure zbuffer_SetDepth( zNear, zFar : Single );
 begin
-  ogl_zNear := zNear;
-  ogl_zFar  := zFar;
+  oglzNear := zNear;
+  oglzFar  := zFar;
 end;
 
 procedure zbuffer_Clear;
@@ -120,32 +120,32 @@ begin
   if ( Width < 0 ) or ( Height < 0 ) Then exit;
   if not cam2d.OnlyXY Then
     begin
-      X      := Trunc( ( X - cam2d.Global.X ) * cam2d.Global.Zoom.X + ( ( ogl_Width  / 2 ) - ( ogl_Width  / 2 ) * cam2d.Global.Zoom.X ) );
-      Y      := Trunc( ( Y - cam2d.Global.Y ) * cam2d.Global.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2d.Global.Zoom.Y ) );
+      X      := Trunc( ( X - cam2d.Global.X ) * cam2d.Global.Zoom.X + ( ( oglWidth  / 2 ) - ( oglWidth  / 2 ) * cam2d.Global.Zoom.X ) );
+      Y      := Trunc( ( Y - cam2d.Global.Y ) * cam2d.Global.Zoom.Y + ( ( oglHeight / 2 ) - ( oglHeight / 2 ) * cam2d.Global.Zoom.Y ) );
       Width  := Trunc( Width  * cam2D.Global.Zoom.X );
       Height := Trunc( Height * cam2D.Global.Zoom.Y );
     end;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
+  if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
-      X      := Round( X * scr_ResCX + scr_AddCX );
-      Y      := Round( Y * scr_ResCY + scr_AddCY );
-      Width  := Round( Width * scr_ResCX );
-      Height := Round( Height * scr_ResCY );
+      X      := Round( X * scrResCX + scrAddCX );
+      Y      := Round( Y * scrResCY + scrAddCY );
+      Width  := Round( Width * scrResCX );
+      Height := Round( Height * scrResCY );
     end;
   glEnable( GL_SCISSOR_TEST );
-  glScissor( X, wnd_Height - Y - Height, Width, Height );
+  glScissor( X, wndHeight - Y - Height, Width, Height );
 
   INC( tSCount );
   SetLength( tScissor, tSCount );
-  tScissor[ tSCount - 1 ][ 0 ] := ogl_ClipX;
-  tScissor[ tSCount - 1 ][ 1 ] := ogl_ClipY;
-  tScissor[ tSCount - 1 ][ 2 ] := ogl_ClipW;
-  tScissor[ tSCount - 1 ][ 3 ] := ogl_ClipH;
+  tScissor[ tSCount - 1 ][ 0 ] := oglClipX;
+  tScissor[ tSCount - 1 ][ 1 ] := oglClipY;
+  tScissor[ tSCount - 1 ][ 2 ] := oglClipW;
+  tScissor[ tSCount - 1 ][ 3 ] := oglClipH;
 
-  ogl_ClipX := X;
-  ogl_ClipY := Y;
-  ogl_ClipW := Width;
-  ogl_ClipH := Height;
+  oglClipX := X;
+  oglClipY := Y;
+  oglClipW := Width;
+  oglClipH := Height;
 end;
 
 procedure scissor_End;
@@ -154,16 +154,16 @@ begin
 
   if tSCount - 1 < 0 Then exit;
   DEC( tSCount );
-  ogl_ClipX := tScissor[ tSCount ][ 0 ];
-  ogl_ClipY := tScissor[ tSCount ][ 1 ];
-  ogl_ClipW := tScissor[ tSCount ][ 2 ];
-  ogl_ClipH := tScissor[ tSCount ][ 3 ];
+  oglClipX := tScissor[ tSCount ][ 0 ];
+  oglClipY := tScissor[ tSCount ][ 1 ];
+  oglClipW := tScissor[ tSCount ][ 2 ];
+  oglClipH := tScissor[ tSCount ][ 3 ];
   SetLength( tScissor, tSCount );
 
   if tSCount > 0 Then
     begin
       glEnable( GL_SCISSOR_TEST );
-      glScissor( ogl_ClipX, wnd_Height - ogl_ClipY - ogl_ClipH, ogl_ClipW, ogl_ClipH );
+      glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH );
     end else
       glDisable( GL_SCISSOR_TEST );
 end;

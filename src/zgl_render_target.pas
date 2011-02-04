@@ -154,14 +154,14 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
 {$ENDIF}
   procedure FreePBuffer( var Target : zglPRenderTarget; Stage : Integer );
   begin
-    ogl_CanPBuffer := FALSE;
+    oglCanPBuffer := FALSE;
     FreeMem( Target.next.Handle );
     FreeMem( Target.next );
   {$IFDEF LINUX}
     if Stage = 4 Then
-      case ogl_PBufferMode of
-        1: glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
-        2: glXDestroyGLXPbufferSGIX( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+      case oglPBufferMode of
+        1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
+        2: glXDestroyGLXPbufferSGIX( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
       end;
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -178,7 +178,7 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
   end;
   procedure FreeFBO( var Target : zglPRenderTarget; Stage : Integer );
   begin
-    ogl_CanFBO := FALSE;
+    oglCanFBO := FALSE;
     FreeMem( Target.next.Handle );
     FreeMem( Target.next );
     if Stage = 2 Then
@@ -195,11 +195,11 @@ begin
   _type := RT_TYPE_FBO;
 
   // GeForce FX sucks: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
-  if gl_IsSupported( 'GeForce FX', ogl_Renderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
+  if gl_IsSupported( 'GeForce FX', oglRenderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
     _type := RT_TYPE_PBUFFER;
 
-  if not ogl_CanFBO Then
-    if ogl_CanPBuffer Then
+  if not oglCanFBO Then
+    if oglCanPBuffer Then
       _type := RT_TYPE_PBUFFER
     else
       exit;
@@ -233,7 +233,7 @@ begin
         glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
         if Flags and RT_USE_DEPTH > 0 Then
           begin
-            case ogl_zDepth of
+            case oglzDepth of
               24: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
               32: glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
             else
@@ -268,21 +268,21 @@ begin
         fbconfigAttr[ 12 ] := GLX_ALPHA_SIZE;
         fbconfigAttr[ 13 ] := 8;
         fbconfigAttr[ 14 ] := GLX_DEPTH_SIZE;
-        fbconfigAttr[ 15 ] := ogl_zDepth;
+        fbconfigAttr[ 15 ] := oglzDepth;
         i := 16;
-        if ogl_Stencil > 0 Then
+        if oglStencil > 0 Then
           begin
             fbconfigAttr[ i     ] := GLX_STENCIL_SIZE;
-            fbconfigAttr[ i + 1 ] := ogl_Stencil;
+            fbconfigAttr[ i + 1 ] := oglStencil;
             INC( i, 2 );
           end;
-        if ogl_FSAA > 0 Then
+        if oglFSAA > 0 Then
           begin
             fbconfigAttr[ i     ] := GLX_SAMPLES_SGIS;
-            fbconfigAttr[ i + 1 ] := ogl_FSAA;
+            fbconfigAttr[ i + 1 ] := oglFSAA;
           end;
 
-        fbconfig := glXChooseFBConfig( scr_Display, scr_Default, @fbconfigAttr[ 0 ], @n );
+        fbconfig := glXChooseFBConfig( scrDisplay, scrDefault, @fbconfigAttr[ 0 ], @n );
         if not Assigned( fbconfig ) Then
           begin
             log_Add( 'PBuffer: failed to choose GLXFBConfig' );
@@ -291,7 +291,7 @@ begin
           end else
             pPBuffer.Handle := PInteger( fbconfig )^;
 
-        case ogl_PBufferMode of
+        case oglPBufferMode of
           1:
             begin
               pbufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
@@ -303,7 +303,7 @@ begin
               pbufferiAttr[ 6 ] := GLX_LARGEST_PBUFFER;
               pbufferiAttr[ 7 ] := GL_TRUE;
 
-              pPBuffer.PBuffer := glXCreatePbuffer( scr_Display, pPBuffer.Handle, @pbufferiAttr[ 0 ] );
+              pPBuffer.PBuffer := glXCreatePbuffer( scrDisplay, pPBuffer.Handle, @pbufferiAttr[ 0 ] );
             end;
           2:
             begin
@@ -312,7 +312,7 @@ begin
               pbufferiAttr[ 2 ] := GLX_LARGEST_PBUFFER;
               pbufferiAttr[ 3 ] := GL_TRUE;
 
-              pPBuffer.PBuffer := glXCreateGLXPbufferSGIX( scr_Display, pPBuffer.Handle, Surface.Width, Surface.Height, @pbufferiAttr[ 0 ] );
+              pPBuffer.PBuffer := glXCreateGLXPbufferSGIX( scrDisplay, pPBuffer.Handle, Surface.Width, Surface.Height, @pbufferiAttr[ 0 ] );
             end;
         end;
 
@@ -323,7 +323,7 @@ begin
             exit;
           end;
 
-        visualinfo := glXGetVisualFromFBConfig( scr_Display, pPBuffer.Handle );
+        visualinfo := glXGetVisualFromFBConfig( scrDisplay, pPBuffer.Handle );
         if not Assigned( visualinfo ) Then
           begin
             log_Add( 'PBuffer: failed to choose Visual' );
@@ -331,7 +331,7 @@ begin
             exit;
           end;
 
-        pPBuffer.Context := glXCreateContext( scr_Display, visualinfo, ogl_Context, TRUE );
+        pPBuffer.Context := glXCreateContext( scrDisplay, visualinfo, oglContext, TRUE );
         XFree( fbconfig );
         XFree( visualinfo );
         if pPBuffer.Context = nil Then
@@ -341,12 +341,12 @@ begin
             exit;
           end;
 
-        glXMakeCurrent( scr_Display, pPBuffer.PBuffer, pPBuffer.Context );
+        glXMakeCurrent( scrDisplay, pPBuffer.PBuffer, pPBuffer.Context );
         gl_ResetState();
         Set2DMode();
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
-        ssprite2d_Draw( Surface, 0, ogl_Height - Surface.Height, ogl_Width - ( ogl_Width - Surface.Width ), ogl_Height - ( ogl_Height - Surface.Height ), 0, 255 );
-        glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
+        ssprite2d_Draw( Surface, 0, oglHeight - Surface.Height, oglWidth - ( oglWidth - Surface.Width ), oglHeight - ( oglHeight - Surface.Height ), 0, 255 );
+        glXMakeCurrent( scrDisplay, wndHandle, oglContext );
       end;
     {$ENDIF}
     {$IFDEF WINDOWS}
@@ -372,25 +372,25 @@ begin
         pbufferiAttr[ 12 ] := WGL_ALPHA_BITS_ARB;
         pbufferiAttr[ 13 ] := 8;
         pbufferiAttr[ 14 ] := WGL_DEPTH_BITS_ARB;
-        pbufferiAttr[ 15 ] := ogl_zDepth;
+        pbufferiAttr[ 15 ] := oglzDepth;
         i := 16;
-        if ogl_Stencil > 0 Then
+        if oglStencil > 0 Then
           begin
             pbufferiAttr[ i     ] := WGL_STENCIL_BITS_ARB;
-            pbufferiAttr[ i + 1 ] := ogl_Stencil;
+            pbufferiAttr[ i + 1 ] := oglStencil;
             INC( i, 2 );
           end;
-        if ogl_FSAA > 0 Then
+        if oglFSAA > 0 Then
           begin
             pbufferiAttr[ i     ] := WGL_SAMPLE_BUFFERS_ARB;
             pbufferiAttr[ i + 1 ] := GL_TRUE;
             pbufferiAttr[ i + 2 ] := WGL_SAMPLES_ARB;
-            pbufferiAttr[ i + 3 ] := ogl_FSAA;
+            pbufferiAttr[ i + 3 ] := oglFSAA;
           end;
 
-        wglChoosePixelFormatARB( wnd_DC, @pbufferiAttr[ 0 ], @pbufferfAttr[ 0 ], 64, @pixelFormat, @nPixelFormat );
+        wglChoosePixelFormatARB( wndDC, @pbufferiAttr[ 0 ], @pbufferfAttr[ 0 ], 64, @pixelFormat, @nPixelFormat );
 
-        pPBuffer.Handle := wglCreatePbufferARB( wnd_DC, pixelFormat[ 0 ], Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), nil );
+        pPBuffer.Handle := wglCreatePbufferARB( wndDC, pixelFormat[ 0 ], Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), nil );
         if pPBuffer.Handle <> 0 Then
           begin
             pPBuffer.DC := wglGetPbufferDCARB( pPBuffer.Handle );
@@ -401,7 +401,7 @@ begin
                 FreePBuffer( Result, 2 );
                 exit;
               end;
-            wglShareLists( ogl_Context, pPBuffer.RC );
+            wglShareLists( oglContext, pPBuffer.RC );
           end else
             begin
               log_Add( 'PBuffer: wglCreatePbufferARB - failed' );
@@ -412,8 +412,8 @@ begin
         gl_ResetState();
         Set2DMode();
         glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
-        ssprite2d_Draw( Surface, 0, ogl_Height - Surface.Height, ogl_Width - ( ogl_Width - Surface.Width ), ogl_Height - ( ogl_Height - Surface.Height ), 0, 255 );
-        wglMakeCurrent( wnd_DC, ogl_Context );
+        ssprite2d_Draw( Surface, 0, oglHeight - Surface.Height, oglWidth - ( oglWidth - Surface.Width ), oglHeight - ( oglHeight - Surface.Height ), 0, 255 );
+        wglMakeCurrent( wndDC, oglContext );
       end;
     {$ENDIF}
     {$IFDEF DARWIN}
@@ -435,24 +435,24 @@ begin
         pbufferdAttr[ 9  ] := AGL_ALPHA_SIZE;
         pbufferdAttr[ 10 ] := 8;
         pbufferdAttr[ 11 ] := AGL_DEPTH_SIZE;
-        pbufferdAttr[ 12 ] := ogl_zDepth;
+        pbufferdAttr[ 12 ] := oglzDepth;
         i := 13;
-        if ogl_Stencil > 0 Then
+        if oglStencil > 0 Then
           begin
             pbufferdAttr[ i     ] := AGL_STENCIL_SIZE;
-            pbufferdAttr[ i + 1 ] := ogl_Stencil;
+            pbufferdAttr[ i + 1 ] := oglStencil;
             INC( i, 2 );
           end;
-        if ogl_FSAA > 0 Then
+        if oglFSAA > 0 Then
           begin
             pbufferdAttr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
             pbufferdAttr[ i + 1 ] := 1;
             pbufferdAttr[ i + 2 ] := AGL_SAMPLES_ARB;
-            pbufferdAttr[ i + 3 ] := ogl_FSAA;
+            pbufferdAttr[ i + 3 ] := oglFSAA;
           end;
 
-        DMGetGDeviceByDisplayID( DisplayIDType( scr_Display ), ogl_Device, FALSE );
-        pixelFormat := aglChoosePixelFormat( @ogl_Device, 1, @pbufferdAttr[ 0 ] );
+        DMGetGDeviceByDisplayID( DisplayIDType( scrDisplay ), oglDevice, FALSE );
+        pixelFormat := aglChoosePixelFormat( @oglDevice, 1, @pbufferdAttr[ 0 ] );
         if not Assigned( pixelFormat ) Then
           begin
             log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
@@ -460,7 +460,7 @@ begin
             exit;
           end;
 
-        pPBuffer.Context := aglCreateContext( pixelFormat, ogl_Context );
+        pPBuffer.Context := aglCreateContext( pixelFormat, oglContext );
         if not Assigned( pPBuffer.Context ) Then
           begin
             log_Add( 'PBuffer: aglCreateContext - failed' );
@@ -505,9 +505,9 @@ begin
     RT_TYPE_PBUFFER:
       begin
         {$IFDEF LINUX}
-        case ogl_PBufferMode of
-          1: glXDestroyPbuffer( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
-          2: glXDestroyGLXPbufferSGIX( scr_Display, zglPPBuffer( Target.Handle ).PBuffer );
+        case oglPBufferMode of
+          1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
+          2: glXDestroyGLXPbufferSGIX( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
         end;
         {$ENDIF}
         {$IFDEF WINDOWS}
@@ -545,25 +545,25 @@ begin
   if Assigned( Target ) Then
     begin
       lRTarget   := Target;
-      lGLW       := ogl_Width;
-      lGLH       := ogl_Height;
-      lClipW     := ogl_ClipW;
-      lClipH     := ogl_ClipH;
-      lResCX     := scr_ResCX;
-      lResCY     := scr_ResCY;
+      lGLW       := oglWidth;
+      lGLH       := oglHeight;
+      lClipW     := oglClipW;
+      lClipH     := oglClipH;
+      lResCX     := scrResCX;
+      lResCY     := scrResCY;
 
       case Target._type of
         RT_TYPE_PBUFFER:
           begin
             {$IFDEF LINUX}
-            glXMakeCurrent( scr_Display, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
+            glXMakeCurrent( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
             {$ENDIF}
             {$IFDEF WINDOWS}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
             {$ENDIF}
             {$IFDEF DARWIN}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
-            aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( ogl_Context ) );
+            aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( oglContext ) );
             {$ENDIF}
           end;
         RT_TYPE_FBO:
@@ -573,22 +573,22 @@ begin
           end;
       end;
 
-      ogl_Target  := TARGET_TEXTURE;
-      ogl_TargetW := Target.Surface.Width;
-      ogl_TargetH := Target.Surface.Height;
+      oglTarget  := TARGET_TEXTURE;
+      oglTargetW := Target.Surface.Width;
+      oglTargetH := Target.Surface.Height;
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
-          if app_Flags and CORRECT_RESOLUTION > 0 Then
+          if appFlags and CORRECT_RESOLUTION > 0 Then
             begin
-              ogl_Width  := scr_ResW;
-              ogl_Height := scr_ResH;
+              oglWidth  := scrResW;
+              oglHeight := scrResH;
             end;
         end else
           begin
-            ogl_Width  := Target.Surface.Width;
-            ogl_Height := Target.Surface.Height;
-            scr_ResCX  := 1;
-            scr_ResCY  := 1;
+            oglWidth  := Target.Surface.Width;
+            oglHeight := Target.Surface.Height;
+            scrResCX  := 1;
+            scrResCY  := 1;
           end;
       SetCurrentMode();
 
@@ -608,14 +608,14 @@ begin
                 glDisable( GL_TEXTURE_2D );
 
                 {$IFDEF LINUX}
-                glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
+                glXMakeCurrent( scrDisplay, wndHandle, oglContext );
                 {$ENDIF}
                 {$IFDEF WINDOWS}
-                wglMakeCurrent( wnd_DC, ogl_Context );
+                wglMakeCurrent( wndDC, oglContext );
                 {$ENDIF}
                 {$IFDEF DARWIN}
                 aglSwapBuffers( zglPPBuffer( lRTarget.Handle ).Context );
-                aglSetCurrentContext( ogl_Context );
+                aglSetCurrentContext( oglContext );
                 {$ENDIF}
               end;
             RT_TYPE_FBO:
@@ -625,17 +625,17 @@ begin
               end;
           end;
 
-          ogl_Target  := TARGET_SCREEN;
-          ogl_Width   := lGLW;
-          ogl_Height  := lGLH;
-          ogl_TargetW := ogl_Width;
-          ogl_TargetH := ogl_Height;
+          oglTarget  := TARGET_SCREEN;
+          oglWidth   := lGLW;
+          oglHeight  := lGLH;
+          oglTargetW := oglWidth;
+          oglTargetH := oglHeight;
           if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
             begin
-              ogl_ClipW := lClipW;
-              ogl_ClipH := lClipH;
-              scr_ResCX := lResCX;
-              scr_ResCY := lResCY;
+              oglClipW := lClipW;
+              oglClipH := lClipH;
+              scrResCX := lResCX;
+              scrResCY := lResCY;
             end;
 
           lRTarget := nil;
@@ -645,7 +645,7 @@ end;
 
 procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
 begin
-  if ogl_Separate Then
+  if oglSeparate Then
     begin
       rtarget_Set( Target );
       RenderCallback( Data );

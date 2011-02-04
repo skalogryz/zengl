@@ -46,7 +46,7 @@ uses
 
 procedure pr2d_Pixel( X, Y : Single; Color : LongWord; Alpha : Byte = 255 );
 begin
-  if ( not b2d_Started ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
     begin
       glEnable( GL_BLEND );
       glBegin( GL_POINTS );
@@ -55,7 +55,7 @@ begin
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
   glVertex2f( X + 0.5, Y + 0.5 );
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
       glDisable( GL_BLEND );
@@ -64,7 +64,7 @@ end;
 
 procedure pr2d_Line( X1, Y1, X2, Y2 : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
-  if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -89,7 +89,7 @@ begin
         glVertex2f( X2 + 0.5, Y2 + 0.5 );
       end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -106,7 +106,7 @@ procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; 
 begin
  if FX and PR2D_FILL > 0 Then
    begin
-      if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
+      if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_TRIANGLES );
@@ -142,7 +142,7 @@ begin
             glVertex2f( X,     Y );
           end;
 
-      if not b2d_Started Then
+      if not b2dStarted Then
         begin
           glEnd();
           glDisable( GL_BLEND );
@@ -154,7 +154,7 @@ begin
       W := W - 0.5;
       H := H - 0.5;
 
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+      if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_LINES );
@@ -195,7 +195,7 @@ begin
             glVertex2f( X,     Y );
           end;
 
-      if not b2d_Started Then
+      if not b2dStarted Then
         begin
           glEnd();
           glDisable( GL_BLEND );
@@ -215,7 +215,7 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+      if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -234,7 +234,7 @@ begin
           glVertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
         end;
 
-      if not b2d_Started Then
+      if not b2dStarted Then
         begin
           glEnd();
 
@@ -247,7 +247,7 @@ begin
         end;
     end else
       begin
-        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
+        if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -267,7 +267,7 @@ begin
             glVertex2f( X + Radius * cosTable[ Round( ( i + 1 ) * k ) ], Y + Radius * sinTable[ Round( ( i + 1 ) * k ) ] );
           end;
 
-        if not b2d_Started Then
+        if not b2dStarted Then
           begin
             glEnd();
 
@@ -293,7 +293,7 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+      if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -312,7 +312,7 @@ begin
           glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
         end;
 
-      if not b2d_Started Then
+      if not b2dStarted Then
         begin
           glEnd();
 
@@ -325,7 +325,7 @@ begin
         end;
     end else
       begin
-        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
+        if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -345,7 +345,7 @@ begin
             glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
           end;
 
-        if not b2d_Started Then
+        if not b2dStarted Then
           begin
             glEnd();
 
@@ -369,7 +369,7 @@ begin
     mode := GL_TRIANGLES
   else
     mode := GL_LINES;
-  if ( not b2d_Started ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -433,7 +433,7 @@ begin
               end;
           end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 

@@ -81,7 +81,7 @@ begin
   u := Texture^.U / ( Grid.Cols - 1 );
   v := Texture^.V / ( Grid.Rows - 1 );
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -134,7 +134,7 @@ begin
       DEC( jV, ijV * ( Grid.Rows - 1 ) );
   end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -182,7 +182,7 @@ begin
   u := u / ( Grid.Cols - 1 );
   v := v / ( Grid.Rows - 1 );
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -235,7 +235,7 @@ begin
       DEC( jV, ijV * ( Grid.Rows - 1 ) );
     end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 
@@ -281,7 +281,7 @@ begin
   u  := u * ( CutRect.W / Texture.U ) / ( Grid.Cols - 1 );
   v  := v * ( CutRect.H / Texture.V ) / ( Grid.Rows - 1 );
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -334,7 +334,7 @@ begin
       DEC( jV, ijV * ( Grid.Rows - 1 ) );
     end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 

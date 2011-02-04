@@ -140,13 +140,13 @@ function  dsu_CalcPos( X, Y, Z : Single; var Volume : Single ) : Integer;
 function  dsu_CalcVolume( Volume : Single ) : Integer;
 
 var
-  dsound_Library    : HMODULE;
+  dsoundLibrary     : HMODULE;
   DirectSoundCreate : function (lpGuid: PGUID; out ppDS: IDirectSound; pUnkOuter: IUnknown): HResult; stdcall;
 
-  ds_Device      : IDirectSound;
-  ds_Position    : array[ 0..2 ] of Single;
-  ds_Plane       : array[ 0..2 ] of Single;
-  ds_Orientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 );
+  dsDevice      : IDirectSound;
+  dsPosition    : array[ 0..2 ] of Single;
+  dsPlane       : array[ 0..2 ] of Single;
+  dsOrientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 );
 
 implementation
 uses
@@ -161,14 +161,14 @@ procedure CoUninitialize; stdcall; external 'ole32.dll' name 'CoUninitialize';
 function InitDSound : Boolean;
 begin
   CoInitialize( nil );
-  dsound_Library    := dlopen( 'DSound.dll' );
-  DirectSoundCreate := dlsym( dsound_Library, 'DirectSoundCreate' );
-  Result            := dsound_Library <> 0;
+  dsoundLibrary     := dlopen( 'DSound.dll' );
+  DirectSoundCreate := dlsym( dsoundLibrary, 'DirectSoundCreate' );
+  Result            := dsoundLibrary <> 0;
 end;
 
 procedure FreeDSound;
 begin
-  dlclose( dsound_Library );
+  dlclose( dsoundLibrary );
   CoUninitialize();
 end;
 
@@ -186,7 +186,7 @@ begin
       lpwfxFormat   := Format;
     end;
 
-  ds_Device.CreateSoundBuffer( bufferDesc, Buffer, nil );
+  dsDevice.CreateSoundBuffer( bufferDesc, Buffer, nil );
 end;
 
 procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; DataSize : LongWord; Pos : LongWord = 0 );
@@ -204,15 +204,15 @@ function dsu_CalcPos( X, Y, Z : Single; var Volume : Single ) : Integer;
   var
     dist, angle : Single;
 begin
-  ds_Plane[ 0 ] := ds_Orientation[ 1 ] * ds_Orientation[ 5 ] - ds_Orientation[ 2 ] * ds_Orientation[ 4 ];
-  ds_Plane[ 1 ] := ds_Orientation[ 2 ] * ds_Orientation[ 3 ] - ds_Orientation[ 0 ] * ds_Orientation[ 5 ];
-  ds_Plane[ 2 ] := ds_Orientation[ 0 ] * ds_Orientation[ 4 ] - ds_Orientation[ 1 ] * ds_Orientation[ 3 ];
+  dsPlane[ 0 ] := dsOrientation[ 1 ] * dsOrientation[ 5 ] - dsOrientation[ 2 ] * dsOrientation[ 4 ];
+  dsPlane[ 1 ] := dsOrientation[ 2 ] * dsOrientation[ 3 ] - dsOrientation[ 0 ] * dsOrientation[ 5 ];
+  dsPlane[ 2 ] := dsOrientation[ 0 ] * dsOrientation[ 4 ] - dsOrientation[ 1 ] * dsOrientation[ 3 ];
 
-  dist := sqrt( sqr( X - ds_Position[ 0 ] ) + sqr( Y - ds_Position[ 1 ] ) + sqr( Z - ds_Position[ 2 ] ) );
+  dist := sqrt( sqr( X - dsPosition[ 0 ] ) + sqr( Y - dsPosition[ 1 ] ) + sqr( Z - dsPosition[ 2 ] ) );
   if dist = 0 then
     angle := 0
   else
-    angle := ( ds_Plane[ 0 ] * ( X - ds_Position[ 0 ] ) + ds_Plane[ 1 ] * ( Y - ds_Position[ 1 ] ) + ds_Plane[ 2 ] * ( Z - ds_Position[ 2 ] ) ) * dist;
+    angle := ( dsPlane[ 0 ] * ( X - dsPosition[ 0 ] ) + dsPlane[ 1 ] * ( Y - dsPosition[ 1 ] ) + dsPlane[ 2 ] * ( Z - dsPosition[ 2 ] ) ) * dist;
   Result := Trunc( 10000 * angle );
   if Result < -10000 Then Result := -10000;
   if Result > 10000  Then Result := 10000;

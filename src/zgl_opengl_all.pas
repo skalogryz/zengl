@@ -565,9 +565,9 @@ var
 {$ENDIF}
 
 var
-  ogl_Library : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  oglLibrary : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
   {$IFDEF DARWIN}
-  agl_Library : Pointer;
+  aglLibrary : Pointer;
   {$ENDIF}
 
 implementation
@@ -594,17 +594,17 @@ begin
     Set8087CW($133F);
   {$ENDIF}
 
-  ogl_Library := dlopen( libGL {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  oglLibrary := dlopen( libGL {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   glXGetProcAddressARB := gl_GetProc( 'glXGetProcAddress' );
   {$ENDIF}
 
-  Result := ogl_Library <> LIB_ERROR;
+  Result := oglLibrary <> LIB_ERROR;
 end;
 
 procedure FreeGL;
 begin
-  dlclose( ogl_Library );
+  dlclose( oglLibrary );
 end;
 
 {$IFDEF DARWIN}
@@ -618,24 +618,24 @@ end;
 
 function InitAGL : Boolean;
 begin
-  agl_Library := dlopen( libAGL, $001 );
-  if agl_Library <> nil Then
+  aglLibrary := dlopen( libAGL, $001 );
+  if aglLibrary <> nil Then
     begin
-      aglChoosePixelFormat  := dlsym( agl_Library, 'aglChoosePixelFormat' );
-      aglDestroyPixelFormat := dlsym( agl_Library, 'aglDestroyPixelFormat' );
-      aglCreateContext      := dlsym( agl_Library, 'aglCreateContext' );
-      aglDestroyContext     := dlsym( agl_Library, 'aglDestroyContext' );
-      aglUpdateContext      := dlsym( agl_Library, 'aglUpdateContext' );
-      aglSetCurrentContext  := dlsym( agl_Library, 'aglSetCurrentContext' );
-      aglSetDrawable        := dlsym( agl_Library, 'aglSetDrawable' );
-      aglGetDrawable        := dlsym( agl_Library, 'aglGetDrawable' );
-      aglSetFullScreen      := dlsym( agl_Library, 'aglSetFullScreen' );
-      aglSwapBuffers        := dlsym( agl_Library, 'aglSwapBuffers' );
-      aglSetInteger         := dlsym( agl_Library, 'aglSetInteger' );
-      aglCreatePBuffer      := dlsym( agl_Library, 'aglCreatePBuffer' );
-      aglDestroyPBuffer     := dlsym( agl_Library, 'aglDestroyPBuffer' );
-      aglSetPBuffer         := dlsym( agl_Library, 'aglSetPBuffer' );
-      aglGetVirtualScreen   := dlsym( agl_Library, 'aglGetVirtualScreen' );
+      aglChoosePixelFormat  := dlsym( aglLibrary, 'aglChoosePixelFormat' );
+      aglDestroyPixelFormat := dlsym( aglLibrary, 'aglDestroyPixelFormat' );
+      aglCreateContext      := dlsym( aglLibrary, 'aglCreateContext' );
+      aglDestroyContext     := dlsym( aglLibrary, 'aglDestroyContext' );
+      aglUpdateContext      := dlsym( aglLibrary, 'aglUpdateContext' );
+      aglSetCurrentContext  := dlsym( aglLibrary, 'aglSetCurrentContext' );
+      aglSetDrawable        := dlsym( aglLibrary, 'aglSetDrawable' );
+      aglGetDrawable        := dlsym( aglLibrary, 'aglGetDrawable' );
+      aglSetFullScreen      := dlsym( aglLibrary, 'aglSetFullScreen' );
+      aglSwapBuffers        := dlsym( aglLibrary, 'aglSwapBuffers' );
+      aglSetInteger         := dlsym( aglLibrary, 'aglSetInteger' );
+      aglCreatePBuffer      := dlsym( aglLibrary, 'aglCreatePBuffer' );
+      aglDestroyPBuffer     := dlsym( aglLibrary, 'aglDestroyPBuffer' );
+      aglSetPBuffer         := dlsym( aglLibrary, 'aglSetPBuffer' );
+      aglGetVirtualScreen   := dlsym( aglLibrary, 'aglGetVirtualScreen' );
       Result := TRUE;
     end else
       Result := FALSE;
@@ -643,7 +643,7 @@ end;
 
 procedure FreeAGL;
 begin
-  dlclose( agl_Library );
+  dlclose( aglLibrary );
 end;
 {$ENDIF}
 
@@ -656,11 +656,11 @@ begin
   if Result = nil Then
     Result := wglGetProcAddress( PAnsiChar( Proc + 'EXT' ) );
   {$ELSE}
-  Result := dlsym( ogl_Library, PAnsiChar( Proc ) );
+  Result := dlsym( oglLibrary, PAnsiChar( Proc ) );
   if Result = nil Then
-    Result := dlsym( ogl_Library, PAnsiChar( Proc + 'ARB' ) );
+    Result := dlsym( oglLibrary, PAnsiChar( Proc + 'ARB' ) );
   if Result = nil Then
-    Result := dlsym( ogl_Library, PAnsiChar( Proc + 'EXT' ) );
+    Result := dlsym( oglLibrary, PAnsiChar( Proc + 'EXT' ) );
 
   {$IFDEF LINUX}
   if ( Result = nil ) and Assigned( glXGetProcAddressARB ) Then

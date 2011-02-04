@@ -87,12 +87,12 @@ begin
       getcurpos := FALSE;
       GetCursorPos( cursorpos );
     end;
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     Result := cursorpos.X
   else
-    Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
+    Result := cursorpos.X - wndX - wndBrdSizeX;
 {$ENDIF}
-  Result := Round( ( Result - scr_AddCX ) / scr_ResCX );
+  Result := Round( ( Result - scrAddCX ) / scrResCX );
 end;
 
 function mouse_Y : Integer;
@@ -106,12 +106,12 @@ begin
       getcurpos := FALSE;
       GetCursorPos( cursorpos );
     end;
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     Result := cursorpos.Y
   else
-    Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
+    Result := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
 {$ENDIF}
-  Result := Round( ( Result - scr_AddCY ) / scr_ResCY );
+  Result := Round( ( Result - scrAddCY ) / scrResCY );
 end;
 
 function mouse_DX : Integer;
@@ -119,7 +119,7 @@ begin
   {$IFDEF WINDOWS}
   getcurpos := TRUE;
   {$ENDIF}
-  Result := mouse_X() - wnd_Width div 2;
+  Result := mouse_X() - wndWidth div 2;
 end;
 
 function mouse_DY : Integer;
@@ -127,7 +127,7 @@ begin
   {$IFDEF WINDOWS}
   getcurpos := TRUE;
   {$ENDIF}
-  Result := mouse_Y() - wnd_Height div 2;
+  Result := mouse_Y() - wndHeight div 2;
 end;
 
 function mouse_Down( Button : Byte ) : Boolean;
@@ -183,17 +183,17 @@ procedure mouse_Lock;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
-  XWarpPointer( scr_display, None, wnd_Handle, 0, 0, 0, 0, wnd_Width div 2, wnd_Height div 2 );
+  XWarpPointer( scrDisplay, None, wndHandle, 0, 0, 0, 0, wndWidth div 2, wndHeight div 2 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if wnd_FullScreen Then
-    SetCursorPos( wnd_Width div 2, wnd_Height div 2 )
+  if wndFullScreen Then
+    SetCursorPos( wndWidth div 2, wndHeight div 2 )
   else
-    SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
+    SetCursorPos( wndX + wndBrdSizeX + wndWidth div 2, wndY + wndBrdSizeY + wndCpnSize + wndHeight div 2 );
 {$ENDIF}
 {$IFDEF DARWIN}
-  Point.X := wnd_X + wnd_Width / 2;
-  Point.Y := wnd_Y + wnd_Height / 2;
+  Point.X := wndX + wndWidth / 2;
+  Point.Y := wndY + wndHeight / 2;
   CGWarpMouseCursorPosition( Point );
 {$ENDIF}
 end;
