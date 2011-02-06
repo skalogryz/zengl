@@ -393,7 +393,7 @@ begin
   if SizeOf( Char ) = 2 Then
     begin
       len := 2;
-      wnd_CaptionW := PWideChar( wnd_Caption );
+      wndCaptionW := PWideChar( wndCaption );
     end else
   {$ENDIF}
   len := 1;
