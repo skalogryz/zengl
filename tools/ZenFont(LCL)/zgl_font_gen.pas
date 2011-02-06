@@ -438,7 +438,7 @@ procedure fontgen_BuildFont( var Font : zglPFont; const FontName : String );
     sn       : zglPSymbolNode;
     sr       : zglTRect;
     {$IFDEF LINUX}
-    scr_Visual : PVisual;
+    scrVisual  : PVisual;
     Family     : array[ 0..255 ] of Char;
     Pattern    : PFcPattern;
     XFont      : PXftFont;
@@ -492,7 +492,7 @@ begin
       end;
 
 {$IFDEF LINUX}
-  scr_Visual := DefaultVisual( scr_Display, scr_Default );
+  scrVisual := DefaultVisual( scrDisplay, scrDefault );
 
   Family  := FontName;
 
@@ -504,16 +504,16 @@ begin
   FcPatternAddInteger( Pattern, FC_SLANT, ( FC_SLANT_ITALIC * Byte( fg_FontItalic ) ) or ( FC_SLANT_ROMAN * Byte( not fg_FontItalic ) ) );
   FcPatternAddBool( Pattern, FC_ANTIALIAS, fg_FontAA );
 
-  XFontMatch := XftFontMatch( scr_Display, scr_Default, Pattern, @FcResult );
-  XFont := XftFontOpenPattern( scr_Display, XFontMatch );
+  XFontMatch := XftFontMatch( scrDisplay, scrDefault, Pattern, @FcResult );
+  XFont := XftFontOpenPattern( scrDisplay, XFontMatch );
 
-  XftColorAllocValue( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @cWhite, @rWhite );
-  XftColorAllocValue( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @cBlack, @rBlack );
+  XftColorAllocValue( scrDisplay, scrVisual, DefaultColormap( scrDisplay, scrDefault ), @cWhite, @rWhite );
+  XftColorAllocValue( scrDisplay, scrVisual, DefaultColormap( scrDisplay, scrDefault ), @cBlack, @rBlack );
 
   for i := 0 to Font.Count.Chars - 1 do
-    if XftCharExists( scr_Display, XFont, fg_CharsUID[ i ] ) Then
+    if XftCharExists( scrDisplay, XFont, fg_CharsUID[ i ] ) Then
       begin
-        XftTextExtents16( scr_Display, XFont, @fg_CharsUID[ i ], 1, @XGlyphInfo );
+        XftTextExtents16( scrDisplay, XFont, @fg_CharsUID[ i ], 1, @XGlyphInfo );
 
         cx := XGlyphInfo.width;
         cy := XGlyphInfo.height;
@@ -531,21 +531,21 @@ begin
 
         if ( sx = 0 ) or ( sy = 0 ) Then continue;
 
-        pixmap := XCreatePixmap( scr_Display, wnd_Root, sx, sy, DefaultDepth( scr_Display, scr_Default ) );
-        draw   := XftDrawCreate( scr_Display, pixmap, scr_Visual, DefaultColormap( scr_Display, scr_Default ) );
+        pixmap := XCreatePixmap( scrDisplay, wndRoot, sx, sy, DefaultDepth( scrDisplay, scrDefault ) );
+        draw   := XftDrawCreate( scrDisplay, pixmap, scrVisual, DefaultColormap( scrDisplay, scrDefault ) );
 
         XftDrawRect( draw, @rBlack, 0, 0, sx, sy );
         XftDrawString16( draw, @rWhite, XFont, XGlyphInfo.x, XGlyphInfo.y, @fg_CharsUID[ i ], 1 );
-        image := XGetImage( scr_Display, pixmap, 0, 0, sx, sy, AllPlanes, ZPixmap );
+        image := XGetImage( scrDisplay, pixmap, 0, 0, sx, sy, AllPlanes, ZPixmap );
         SetLength( fg_CharsImage[ i ], cx * cy );
 
         for sx := 0 to cx - 1 do
           for sy := 0 to cy - 1 do
             begin
               color := image.f.get_pixel( image, sx, sy );
-              r := color and scr_Visual.red_mask;
-              g := color and scr_Visual.green_mask;
-              b := color and scr_Visual.blue_mask;
+              r := color and scrVisual.red_mask;
+              g := color and scrVisual.green_mask;
+              b := color and scrVisual.blue_mask;
               while r > $FF do r := r shr 8;
               while g > $FF do g := g shr 8;
               while b > $FF do b := b shr 8;
@@ -554,13 +554,13 @@ begin
         image.f.destroy_image( image );
 
         XftDrawDestroy( draw );
-        XFreePixmap( scr_Display, pixmap );
+        XFreePixmap( scrDisplay, pixmap );
       end;
 
-  XftColorFree( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @rWhite );
-  XftColorFree( scr_Display, scr_Visual, DefaultColormap( scr_Display, scr_Default ), @rBlack );
+  XftColorFree( scrDisplay, scrVisual, DefaultColormap( scrDisplay, scrDefault ), @rWhite );
+  XftColorFree( scrDisplay, scrVisual, DefaultColormap( scrDisplay, scrDefault ), @rBlack );
 
-  XftFontClose( scr_Display, XFont );
+  XftFontClose( scrDisplay, XFont );
   FcPatternDestroy( Pattern );
 {$ENDIF}
 {$IFDEF WIN32}
