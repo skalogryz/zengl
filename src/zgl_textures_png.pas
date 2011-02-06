@@ -22,18 +22,24 @@ unit zgl_textures_png;
 
 {$I zgl_config.cfg}
 
-{$L infback}
-{$L inffast}
-{$L inflate}
-{$L inftrees}
-{$L zutil}
-{$L adler32}
-{$L crc32}
+{$IFNDEF USE_PASZLIB}
+  {$L infback}
+  {$L inffast}
+  {$L inflate}
+  {$L inftrees}
+  {$L zutil}
+  {$L adler32}
+  {$L crc32}
+{$ENDIF}
 
 interface
 uses
   {$IFDEF WINDOWS}
   zgl_msvcrt,
+  {$ENDIF}
+  {$IFDEF USE_PASZLIB}
+  zbase,
+  paszlib,
   {$ENDIF}
   zgl_types,
   zgl_file,
@@ -94,6 +100,7 @@ type
     R, G, B, A : Byte;
   end;
 
+{$IFNDEF USE_PASZLIB}
 type
   TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
   TFree = procedure( AppData, Block : Pointer ); cdecl;
@@ -118,6 +125,9 @@ type
     adler     : culong;    // adler32 value of the uncompressed data
     reserved  : culong;    // reserved for future use
   end;
+{$ELSE}
+type z_stream_s = TZStream;
+{$ENDIF}
 
 procedure png_Load( var Data : Pointer; var W, H : Word );
 procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
@@ -150,9 +160,11 @@ var
 
   pngIDATEnd      : LongWord;
 
+{$IFNDEF USE_PASZLIB}
 function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
 function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
 function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
+{$ENDIF}
 
 procedure png_GetPixelInfo;
 begin
@@ -563,6 +575,12 @@ begin
 
 _exit:
   begin
+    if pngFail Then
+      begin
+        FreeMem( Data );
+        Data := nil;
+      end;
+
     pngFail     := FALSE;
     pngHasIDAT  := FALSE;
     pngHastRNS  := FALSE;
