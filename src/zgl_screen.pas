@@ -608,14 +608,14 @@ begin
   if oglFSAA = FSAA Then exit;
   oglFSAA := FSAA;
 
-{$IFDEF LINUX}
+  gl_Destroy();
+  log_Add( 'Start reinitialization of OpenGL' );
+
+  gl_Create();
   wnd_Destroy();
   wnd_Create( wndWidth, wndHeight );
-{$ENDIF}
-
-  gl_Destroy();
-  wnd_Update();
-  gl_Create();
+  wnd_SetCaption( wndCaption );
+  gl_Initialize();
   if oglFSAA <> 0 Then
     log_Add( 'FSAA changed to: ' + u_IntToStr( oglFSAA ) + 'x' )
   else
