@@ -87,15 +87,6 @@ const
                S_IWGRP or S_IRGRP or
                S_IWOTH or S_IROTH or
                S_IXUSR or S_IXGRP or S_IXOTH;
-
-type
-  PPDirEnt      = ^PDirEnt;
-  PPPDirEnt     = ^PPDirEnt;
-  TSelectorFunc = function(const p1: PDirEnt): Integer; cdecl;
-  TCompareFunc  = function(const p1, p2: Pointer): Integer; cdecl;
-
-function scandir(__dir:Pchar; __namelist:PPPdirent; __selector:TSelectorfunc; __cmp:TComparefunc):longint;cdecl;external 'libc' name 'scandir';
-function free( ptr : Pointer ):longint;cdecl;external 'libc' name 'free';
 {$ENDIF}
 
 implementation
@@ -317,22 +308,12 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF LINUX_OR_DARWIN}
-function filter_file( const p1 : Pdirent ) : Integer; cdecl;
-begin
-  Result := Byte( p1.d_type = 8 );
-end;
-function filter_dir( const p1 : Pdirent ) : Integer; cdecl;
-begin
-  Result := Byte( p1.d_type = 4 );
-end;
-{$ENDIF}
-
 procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
   {$IFDEF LINUX_OR_DARWIN}
   var
-    i     : Integer;
-    FList : array of Pdirent;
+    dir    : PDir;
+    dirent : PDirent;
+    _type  : Integer;
   {$ENDIF}
   {$IFDEF WINDOWS}
   var
@@ -343,19 +324,21 @@ begin
   List.Count := 0;
 {$IFDEF LINUX_OR_DARWIN}
   if FindDir Then
-    List.Count := scandir( PChar( filePath + Directory ), @FList, filter_dir, nil )
+    _type := 4
   else
-    List.Count := scandir( PChar( filePath + Directory ), @FList, filter_file, nil );
-  if List.Count <> -1 Then
-    begin
-      SetLength( List.Items, List.Count );
-      for i := 0 to List.Count - 1 do
-        begin
-          List.Items[ i ] := String( FList[ i ].d_name );
-          Free( FList[ i ] );
-        end;
-      SetLength( FList, 0 );
-    end;
+    _type := 8;
+
+  dir := FpOpenDir( filePath + Directory );
+  repeat
+    dirent := FpReadDir( dir^ );
+    if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
+      begin
+        SetLength( List.Items, List.Count + 1 );
+        List.Items[ List.Count ] := dirent^.d_name;
+        INC( List.Count );
+      end;
+  until not Assigned( dirent );
+  FpCloseDir( dir^ );
 {$ENDIF}
 {$IFDEF WINDOWS}
   First := FindFirstFile( PChar( GetDir( filePath + Directory ) + '*' ), FList );
