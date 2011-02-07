@@ -41,6 +41,7 @@ const
 
 function  gl_Create : Boolean;
 procedure gl_Destroy;
+function  gl_Initialize : Boolean;
 procedure gl_ResetState;
 procedure gl_LoadEx;
 
@@ -93,11 +94,12 @@ var
   oglAttr        : array[ 0..31 ] of Integer;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  oglContext : HGLRC;
-  oglfAttr   : array[ 0..1  ] of Single = ( 0, 0 );
-  ogliAttr   : array[ 0..31 ] of Integer;
-  oglFormat  : Integer;
-  oglFormats : LongWord;
+  oglContext    : HGLRC;
+  oglfAttr      : array[ 0..1  ] of Single = ( 0, 0 );
+  ogliAttr      : array[ 0..31 ] of Integer;
+  oglFormat     : Integer;
+  oglFormats    : LongWord;
+  oglFormatDesc : TPixelFormatDescriptor;
   {$ENDIF}
   {$IFDEF DARWIN}
   oglDevice   : GDHandle;
@@ -120,9 +122,8 @@ function gl_Create : Boolean;
     i, j : Integer;
   {$ENDIF}
   {$IFDEF WINDOWS}
-    i               : Integer;
-    pixelFormat     : Integer;
-    pixelFormatDesc : TPixelFormatDescriptor;
+    i           : Integer;
+    pixelFormat : Integer;
   {$ENDIF}
   {$IFDEF DARWIN}
     i : Integer;
@@ -194,47 +195,31 @@ begin
       u_Error( 'Cannot choose visual info.' );
       exit;
     end;
-
-  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, TRUE );
-  if not Assigned( oglContext ) Then
-    begin
-      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, FALSE );
-      if not Assigned( oglContext ) Then
-        begin
-          u_Error( 'Cannot create OpenGL context' );
-          exit;
-        end;
-    end;
-
-  if not glXMakeCurrent( scrDisplay, wndHandle, oglContext ) Then
-    begin
-      u_Error( 'Cannot set current OpenGL context' );
-      exit;
-    end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if oglContext <> 0 Then
-    wglDeleteContext( oglContext );
+  wnd_Create( wndWidth, wndHeight );
 
-  if oglFormat = 0 Then
+  FillChar( oglFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
+  with oglFormatDesc do
     begin
-      FillChar( pixelFormatDesc, SizeOf( TPixelFormatDescriptor ), 0 );
-      with pixelFormatDesc do
-        begin
-          nSize        := SizeOf( TPIXELFORMATDESCRIPTOR );
-          nVersion     := 1;
-          dwFlags      := PFD_DRAW_TO_WINDOW or PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER;
-          iPixelType   := PFD_TYPE_RGBA;
-          cColorBits   := 32;
-          cDepthBits   := 24;
-          cStencilBits := oglStencil;
-          iLayerType   := PFD_MAIN_PLANE;
-        end;
-      pixelFormat := ChoosePixelFormat( wndDC, @pixelFormatDesc );
-    end else
-      pixelFormat := oglFormat;
+      nSize        := SizeOf( TPIXELFORMATDESCRIPTOR );
+      nVersion     := 1;
+      dwFlags      := PFD_DRAW_TO_WINDOW or PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER;
+      iPixelType   := PFD_TYPE_RGBA;
+      cColorBits   := 32;
+      cDepthBits   := 24;
+      cStencilBits := oglStencil;
+      iLayerType   := PFD_MAIN_PLANE;
+    end;
 
-  if not SetPixelFormat( wndDC, pixelFormat, @pixelFormatDesc ) Then
+  pixelFormat := ChoosePixelFormat( wndDC, @oglFormatDesc );
+  if pixelFormat = 0 Then
+    begin
+      u_Error( 'Cannot choose pixel format' );
+      exit;
+    end;
+
+  if not SetPixelFormat( wndDC, pixelFormat, @oglFormatDesc ) Then
     begin
       u_Error( 'Cannot set pixel format' );
       exit;
@@ -246,28 +231,15 @@ begin
       u_Error( 'Cannot create OpenGL context' );
       exit;
     end;
-  if not wndFirst Then log_Add( 'Create OpenGL Context' );
 
   if not wglMakeCurrent( wndDC, oglContext ) Then
     begin
       u_Error( 'Cannot set current OpenGL context' );
       exit;
     end;
-  if not wndFirst Then log_Add( 'Making current OpenGL context' );
 
-  if oglFormat = 0 Then
-    wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormatARB' );
-  if ( not Assigned( wglChoosePixelFormatARB ) ) and ( oglFormat = 0 ) Then
-    begin
-      wndFirst  := FALSE;
-      oglFormat := pixelFormat;
-      gl_Destroy();
-      wnd_Destroy();
-      wnd_Create( wndWidth, wndHeight );
-      Result := gl_Create();
-      exit;
-    end;
-  if ( oglFormat = 0 ) and ( Assigned( wglChoosePixelFormatARB ) ) and ( not appInitedToHandle ) Then
+  wglChoosePixelFormatARB := gl_GetProc( 'wglChoosePixelFormatARB' );
+  if Assigned( wglChoosePixelFormatARB ) Then
     begin
       oglzDepth := 24;
 
@@ -324,26 +296,20 @@ begin
           end else
             DEC( oglzDepth, 8 );
       until oglFormat <> 0;
-
-      if oglFormat = 0 Then
-        begin
-          oglzDepth := 24;
-          log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil )  );
-          oglFormat := PixelFormat;
-        end;
-      wndFirst := FALSE;
-      gl_Destroy();
-      wnd_Destroy();
-      wnd_Create( wndWidth, wndHeight );
-      Result := gl_Create();
-      exit;
     end;
 
-  if pixelFormat = 0 Then
+  if oglFormat = 0 Then
     begin
-      u_Error( 'Cannot choose pixel format' );
-      exit;
+      oglzDepth := 24;
+      oglFSAA   := 0;
+      oglFormat := pixelFormat;
+      log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil )  );
     end;
+
+  wndFirst := FALSE;
+  wglMakeCurrent( wndDC, 0 );
+  wglDeleteContext( oglContext );
+  wnd_Destroy();
 {$ENDIF}
 {$IFDEF DARWIN}
   if not InitAGL() Then
@@ -405,7 +371,76 @@ begin
       u_Error( 'Cannot choose pixel format.' );
       exit;
     end;
+{$ENDIF}
 
+  Result := TRUE;
+end;
+
+procedure gl_Destroy;
+begin
+{$IFDEF LINUX}
+  if not glXMakeCurrent( scrDisplay, None, nil ) Then
+    u_Error( 'Cannot release current OpenGL context');
+
+  glXDestroyContext( scrDisplay, oglContext );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  if not wglMakeCurrent( wndDC, 0 ) Then
+    u_Error( 'Cannot release current OpenGL context' );
+
+  wglDeleteContext( oglContext );
+{$ENDIF}
+{$IFDEF DARWIN}
+  aglDestroyPixelFormat( oglFormat );
+  if aglSetCurrentContext( nil ) = GL_FALSE Then
+    u_Error( 'Cannot release current OpenGL context' );
+
+  aglDestroyContext( oglContext );
+  FreeAGL();
+{$ENDIF}
+
+  FreeGL();
+end;
+
+function gl_Initialize : Boolean;
+begin
+{$IFDEF LINUX}
+  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, TRUE );
+  if not Assigned( oglContext ) Then
+    begin
+      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, FALSE );
+      if not Assigned( oglContext ) Then
+        begin
+          u_Error( 'Cannot create OpenGL context' );
+          exit;
+        end;
+    end;
+  if not glXMakeCurrent( scrDisplay, wndHandle, oglContext ) Then
+    begin
+      u_Error( 'Cannot set current OpenGL context' );
+      exit;
+    end;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  if not SetPixelFormat( wndDC, oglFormat, @oglFormatDesc ) Then
+    begin
+      u_Error( 'Cannot set pixel format' );
+      exit;
+    end;
+
+  oglContext := wglCreateContext( wndDC );
+  if ( oglContext = 0 ) Then
+    begin
+      u_Error( 'Cannot create OpenGL context' );
+      exit;
+    end;
+  if not wglMakeCurrent( wndDC, oglContext ) Then
+    begin
+      u_Error( 'Cannot set current OpenGL context' );
+      exit;
+    end;
+{$ENDIF}
+{$IFDEF DARWIN}
   oglContext := aglCreateContext( oglFormat, nil );
   if not Assigned( oglContext ) Then
     begin
@@ -425,6 +460,9 @@ begin
 {$ENDIF}
 
   oglRenderer := glGetString( GL_RENDERER );
+  log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
+  log_Add( 'GL_RENDERER: ' + oglRenderer );
+
 {$IFDEF LINUX}
   ogl3DAccelerator := oglRenderer <> 'Software Rasterizer';
 {$ENDIF}
@@ -436,9 +474,6 @@ begin
 {$ENDIF}
   if not ogl3DAccelerator Then
     u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
-
-  log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
-  log_Add( 'GL_RENDERER: ' + oglRenderer );
 
   gl_LoadEx();
   gl_ResetState();
@@ -472,32 +507,6 @@ begin
   glDisable( GL_DEPTH_TEST );
   glDisable( GL_TEXTURE_2D );
   glEnable ( GL_NORMALIZE );
-end;
-
-procedure gl_Destroy;
-begin
-{$IFDEF LINUX}
-  if not glXMakeCurrent( scrDisplay, None, nil ) Then
-    u_Error( 'Cannot release current OpenGL context');
-
-  glXDestroyContext( scrDisplay, oglContext );
-{$ENDIF}
-{$IFDEF WINDOWS}
-  if not wglMakeCurrent( wndDC, 0 ) Then
-    u_Error( 'Cannot release current OpenGL context' );
-
-  wglDeleteContext( oglContext );
-{$ENDIF}
-{$IFDEF DARWIN}
-  aglDestroyPixelFormat( oglFormat );
-  if aglSetCurrentContext( nil ) = GL_FALSE Then
-    u_Error( 'Cannot release current OpenGL context' );
-
-  aglDestroyContext( oglContext );
-  FreeAGL();
-{$ENDIF}
-
-  FreeGL();
 end;
 
 procedure gl_LoadEx;

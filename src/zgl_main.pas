@@ -171,13 +171,14 @@ begin
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
   if not scr_Create() Then exit;
-
   appInitialized := TRUE;
   if wndHeight >= zgl_Get( DESKTOP_HEIGHT ) Then
     wndFullScreen := TRUE;
 
-  if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Create() Then exit;
+  if not wnd_Create( wndWidth, wndHeight ) Then exit;
+  if not gl_Initialize() Then exit;
+
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
 
@@ -200,9 +201,10 @@ begin
 
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
-
   if not scr_Create() Then exit;
   appInitedToHandle := TRUE;
+
+  if not gl_Create() Then exit;
   {$IFDEF LINUX}
   wndHandle := TWindow( Handle );
   {$ENDIF}
@@ -213,7 +215,8 @@ begin
   wndHandle := HWND( Handle );
   wndDC     := GetDC( wndHandle );
   {$ENDIF}
-  if not gl_Create() Then exit;
+  if not gl_Initialize() Then exit;
+
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
 

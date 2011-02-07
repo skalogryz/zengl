@@ -138,9 +138,10 @@ begin
     end;
 {$IFDEF LINUX}
   FillChar( wndAttr, SizeOf( wndAttr ), 0 );
+  wndAttr.colormap   := XCreateColormap( scrDisplay, wndRoot, oglVisualInfo.visual, AllocNone );
   wndAttr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask or StructureNotifyMask;
-  wndValueMask       := CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
-  wndHandle          := XCreateWindow( scrDisplay, wndRoot, wndX, wndY, wndWidth, wndHeight, 0, CopyFromParent, InputOutput, CopyFromParent, wndValueMask, @wndAttr );
+  wndValueMask       := CWColormap or CWEventMask or CWOverrideRedirect or CWBorderPixel or CWBackPixel;
+  wndHandle          := XCreateWindow( scrDisplay, wndRoot, wndX, wndY, wndWidth, wndHeight, 0, oglVisualInfo.depth, InputOutput, oglVisualInfo.visual, wndValueMask, @wndAttr );
 
   if wndHandle = 0 Then
     begin
