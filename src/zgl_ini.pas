@@ -47,7 +47,7 @@ type
   zglPINI = ^zglTINI;
   zglTINI = record
     FileName : AnsiString;
-    Sections : LongWord;
+    Sections : Integer;
     Section  : array of zglTINISection;
 end;
 

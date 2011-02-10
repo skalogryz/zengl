@@ -79,7 +79,7 @@ end;
 type
   zglPFontManager = ^zglTFontManager;
   zglTFontManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTFont;
 end;
 

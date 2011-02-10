@@ -52,7 +52,7 @@ type
 type
   zglPAtlasManager = ^zglTAtlasManager;
   zglTAtlasManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTAtlas;
 end;
 

@@ -120,11 +120,13 @@ var
   scrMonInfo  : MONITORINFOEX;
   {$ENDIF}
   {$IFDEF DARWIN}
-  scrDisplay  : CGDirectDisplayID;
-  scrDesktop  : CFDictionaryRef;
-  scrDesktopW : Integer;
-  scrDesktopH : Integer;
-  scrSettings : CFDictionaryRef;
+  scrDisplay   : CGDirectDisplayID;
+  scrDesktop   : CFDictionaryRef;
+  scrDesktopW  : Integer;
+  scrDesktopH  : Integer;
+  scrSettings  : CFDictionaryRef;
+  scrModeCount : CFIndex;
+  scrModeList  : CFArrayRef;
   {$ENDIF}
 
 implementation
@@ -208,6 +210,9 @@ begin
   scrDesktop  := CGDisplayCurrentMode( scrDisplay );
   scrDesktopW := CGDisplayPixelsWide( scrDisplay );
   scrDesktopH := CGDisplayPixelsHigh( scrDisplay );
+
+  scrModeList  := CGDisplayAvailableModes( scrDisplay );
+  scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 end;
 
@@ -264,6 +269,10 @@ procedure scr_GetResList;
   {$IFDEF WINDOWS}
     tmpSettings : DEVMODEW;
   {$ENDIF}
+  {$IFDEF DARWIN}
+    tmpSettings   : UnivPtr;
+    width, height : Integer;
+  {$ENDIF}
   function Already( Width, Height : Integer ) : Boolean;
     var
       j : Integer;
@@ -301,6 +310,23 @@ begin
           scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.dmPelsHeight;
         end;
       INC( i );
+    end;
+{$ENDIF}
+{$IFDEF DARWIN}
+  tmpSettings := scrModeList;
+  for i := 0 to scrModeCount - 1 do
+    begin
+      tmpSettings := CFArrayGetValueAtIndex( scrModeList, i );
+      CFNumberGetValue( CFDictionaryGetValue( tmpSettings, CFSTRP('Width') ), kCFNumberIntType, @width );
+      CFNumberGetValue( CFDictionaryGetValue( tmpSettings, CFSTRP('Height') ), kCFNumberIntType, @height );
+      if not Already( width, height ) Then
+        begin
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := width;
+          scrResList.Height[ scrResList.Count - 1 ] := height;
+        end;
     end;
 {$ENDIF}
 end;

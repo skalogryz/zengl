@@ -79,8 +79,8 @@ type
   zglPTextureManager = ^zglTTextureManager;
   zglTTextureManager = record
     Count   : record
-      Items   : LongWord;
-      Formats : LongWord;
+      Items   : Integer;
+      Formats : Integer;
               end;
     First   : zglTTexture;
     Formats : array of zglTTextureFormat;

@@ -49,7 +49,7 @@ end;
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTTimer;
 end;
 

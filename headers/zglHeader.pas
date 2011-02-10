@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.02.01          }
+{ date:     2011.02.10          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -266,7 +266,7 @@ end;
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count   : LongWord;
+    Count   : Integer;
     First   : zglTTimer;
 end;
 
@@ -533,8 +533,8 @@ type
   zglPTextureManager = ^zglTTextureManager;
   zglTTextureManager = record
     Count   : record
-      Items   : LongWord;
-      Formats : LongWord;
+      Items   : Integer;
+      Formats : Integer;
               end;
     First   : zglTTexture;
     Formats : array of zglTTextureFormat;
@@ -600,7 +600,7 @@ type
 type
   zglPAtlasManager = ^zglTAtlasManager;
   zglTAtlasManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTAtlas;
 end;
 
@@ -627,7 +627,7 @@ end;
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTRenderTarget;
 end;
 
@@ -719,7 +719,7 @@ type
   zglPSEngine2D = ^zglTSEngine2D;
 
   zglTSEngine2D = record
-    Count : LongWord;
+    Count : Integer;
     List  : array of zglPSprite2D;
   end;
 
@@ -937,14 +937,14 @@ type
 
   zglTPEngine2D = record
     Count : record
-      Emitters  : LongWord;
-      Particles : LongWord;
+      Emitters  : Integer;
+      Particles : Integer;
             end;
     List  : array of zglPEmitter2D;
   end;
 
   zglTEmitter2DManager = record
-    Count : LongWord;
+    Count : Integer;
     List  : array of zglPEmitter2D;
 end;
 
@@ -998,7 +998,7 @@ end;
 type
   zglPFontManager = ^zglTFontManager;
   zglTFontManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTFont;
 end;
 
@@ -1101,8 +1101,8 @@ type
 
   zglTSoundManager = record
     Count   : record
-      Items   : LongWord;
-      Formats : LongWord;
+      Items   : Integer;
+      Formats : Integer;
               end;
     First   : zglTSound;
     Formats : array of zglTSoundFormat;

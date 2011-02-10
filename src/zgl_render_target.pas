@@ -95,7 +95,7 @@ end;
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
-    Count : LongWord;
+    Count : Integer;
     First : zglTRenderTarget;
 end;
 
