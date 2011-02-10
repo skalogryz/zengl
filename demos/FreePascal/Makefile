@@ -23,6 +23,19 @@ all:
 	make -C $(DEMO10)
 	make -C $(DEMO11)
 
+linux32:
+	make -C $(DEMO01) linux32
+	make -C $(DEMO02) linux32
+	make -C $(DEMO03) linux32
+	make -C $(DEMO04) linux32
+	make -C $(DEMO05) linux32
+	make -C $(DEMO06) linux32
+	make -C $(DEMO07) linux32
+	make -C $(DEMO08) linux32
+	make -C $(DEMO09) linux32
+	make -C $(DEMO10) linux32
+	make -C $(DEMO11) linux32
+
 win32:
 	make -C $(DEMO01) win32
 	make -C $(DEMO02) win32

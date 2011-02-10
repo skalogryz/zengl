@@ -31,6 +31,14 @@ all: clean
 	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT)$(ARCH)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
 	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
 
+linux32: clean
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/i386-linux \
+	-Fu../../../lib/ogg/i386-linux \
+	-Fu../../../lib/zlib/i386-linux \
+	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
+	strip $(OUTPUT)i386/$(TARGET) --strip-unneeded -R .comment -R .note
+
 win32: clean
 	$(FPC) $(UNIT) $(INCLUDE) \
 	-Fu../../../lib/chipmunk/i386-win32 \
