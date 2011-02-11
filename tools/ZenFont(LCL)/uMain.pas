@@ -5,11 +5,13 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, ComCtrls, Spin,
+  {$IFDEF LINUX}
   {$IFDEF LCLGTK}
   GLib, GTK, GDK,
   {$ENDIF}
   {$IFDEF LCLGTK2}
   GLib2, GTK2, GDK2, GDK2x,
+  {$ENDIF}
   {$ENDIF}
   zgl_main,
   zgl_screen,
@@ -19,6 +21,7 @@ uses
   zgl_sprite_2d,
   zgl_font,
   zgl_text,
+  zgl_file,
   zgl_font_gen;
 
 type
@@ -303,6 +306,8 @@ end;
 procedure TForm1.ButtonSaveFontClick(Sender: TObject);
   var
     style : String;
+    name  : String;
+    dir   : String;
 begin
   if fg_FontBold and fg_FontItalic Then
     style := 'BoldItalic'
@@ -319,7 +324,9 @@ begin
 
   if SaveFontDialog.Execute() Then
     begin
-      fontgen_SaveFont( fg_Font, UTF8ToAnsi( SaveFontDialog.FileName ) );
+      name := file_GetName( UTF8ToAnsi( SaveFontDialog.FileName ) );
+      dir  := file_GetDirectory( UTF8ToAnsi( SaveFontDialog.FileName ) );
+      fontgen_SaveFont( fg_Font, dir + name );
     end;
 end;
 

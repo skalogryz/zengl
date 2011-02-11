@@ -394,7 +394,7 @@ begin
 {$IFDEF WIN32}
   FillChar( LFont, SizeOf( LFont ), 0 );
   LFont.lfCharSet := DEFAULT_CHARSET;
-  EnumFontFamiliesEx( wnd_DC, LFont, @FontEnumProc, 0, 0 );
+  EnumFontFamiliesEx( wndDC, LFont, @FontEnumProc, 0, 0 );
 {$ENDIF}
 
   u_SortList( fg_FontList, 0, fg_FontList.Count - 1 );
@@ -568,7 +568,7 @@ begin
     cs := FW_BOLD
   else
     cs := FW_NORMAL;
-  WFont := CreateFont( -MulDiv( fg_FontSize, GetDeviceCaps( wnd_DC, LOGPIXELSY ), 72 ), 0, 0, 0,
+  WFont := CreateFont( -MulDiv( fg_FontSize, GetDeviceCaps( wndDC, LOGPIXELSY ), 72 ), 0, 0, 0,
                        cs, Byte( fg_FontItalic ), 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                        5 * Byte( fg_FontAA ) or ANTIALIASED_QUALITY * Byte( not fg_FontAA ),
                        DEFAULT_PITCH, PChar( FontName ) );
