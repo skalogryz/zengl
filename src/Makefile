@@ -29,6 +29,10 @@ all: clean
 	$(FPC) ZenGL.pas $(LIBS) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX -P$(ARCH)
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
+linux32: clean
+	$(FPC) ZenGL.pas -Fu../lib/jpeg/i386-linux -Fu../lib/ogg/i386-linux -Fu../lib/zlib/i386-linux -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
+	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
+
 win32: clean
 	$(FPC) ZenGL.pas -Fu../lib/jpeg/i386-win32 -Fu../lib/msvcrt/i386 -Fu../lib/ogg/i386-win32 -Fu../lib/zlib/i386-win32 $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 

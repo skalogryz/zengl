@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.02.10          }
+{ date:     2011.02.13          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -829,7 +829,7 @@ type
     ID            : Integer;
 
     Life          : Single;
-    LifeTime      : LongWord;
+    LifeTime      : Integer;
     Time          : Double;
 
     Frame         : Word;
@@ -876,11 +876,12 @@ type
     BlendMode  : Byte;
     ColorMode  : Byte;
 
-    LifeTimeS  : LongWord;
-    LifeTimeV  : LongWord;
-    Frame      : array[ 0..1 ] of LongWord;
+    LifeTimeS  : Integer;
+    LifeTimeV  : Integer;
+    Frame      : array[ 0..1 ] of Integer;
     Color      : array of TDiagramLW;
     Alpha      : array of TDiagramByte;
+    SizeXYBind : Boolean;
     SizeXS     : Single;
     SizeYS     : Single;
     SizeXV     : Single;
@@ -905,16 +906,16 @@ type
     _pengine    : zglPPEngine2D;
     _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
-    _parCreated : LongWord;
-    _texFile    : AnsiString;
+    _parCreated : Integer;
+    _texFile    : String;
     _texHash    : LongWord;
 
     ID          : Integer;
     Params      : record
-      Layer    : LongWord;
-      LifeTime : LongWord;
+      Layer    : Integer;
+      LifeTime : Integer;
       Loop     : Boolean;
-      Emission : LongWord;
+      Emission : Integer;
       Position : zglTPoint2D;
                   end;
     ParParams   : zglTParticleParams;
@@ -922,7 +923,7 @@ type
     Life        : Single;
     Time        : Double;
     LastSecond  : Double;
-    Particles   : LongWord;
+    Particles   : Integer;
     BBox        : record
       MinX, MaxX : Single;
       MinY, MaxY : Single;
@@ -946,7 +947,7 @@ type
   zglTEmitter2DManager = record
     Count : Integer;
     List  : array of zglPEmitter2D;
-end;
+  end;
 
 var
   pengine2d_Set            : procedure( PEngine : zglPPEngine2D );

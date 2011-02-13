@@ -93,7 +93,7 @@ type
     ID            : Integer;
 
     Life          : Single;
-    LifeTime      : LongWord;
+    LifeTime      : Integer;
     Time          : Double;
 
     Frame         : Word;
@@ -140,9 +140,9 @@ type
     BlendMode  : Byte;
     ColorMode  : Byte;
 
-    LifeTimeS  : LongWord;
-    LifeTimeV  : LongWord;
-    Frame      : array[ 0..1 ] of LongWord;
+    LifeTimeS  : Integer;
+    LifeTimeV  : Integer;
+    Frame      : array[ 0..1 ] of Integer;
     Color      : array of TDiagramLW;
     Alpha      : array of TDiagramByte;
     SizeXYBind : Boolean;
@@ -170,16 +170,16 @@ type
     _pengine    : zglPPEngine2D;
     _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
     _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
-    _parCreated : LongWord;
+    _parCreated : Integer;
     _texFile    : String;
     _texHash    : LongWord;
 
     ID          : Integer;
     Params      : record
-      Layer    : LongWord;
-      LifeTime : LongWord;
+      Layer    : Integer;
+      LifeTime : Integer;
       Loop     : Boolean;
-      Emission : LongWord;
+      Emission : Integer;
       Position : zglTPoint2D;
                   end;
     ParParams   : zglTParticleParams;
@@ -187,7 +187,7 @@ type
     Life        : Single;
     Time        : Double;
     LastSecond  : Double;
-    Particles   : LongWord;
+    Particles   : Integer;
     BBox        : record
       MinX, MaxX : Single;
       MinY, MaxY : Single;
@@ -276,10 +276,20 @@ end;
 
 procedure pengine2d_Draw;
   var
-    i : Integer;
+    i        : Integer;
+    oldBlend : Byte;
+    oldColor : Byte;
 begin
+  oldBlend := b2dCurBlend;
+  oldColor := b2dCurColor;
+
   for i := 0 to pengine2d.Count.Emitters - 1 do
     emitter2d_Draw( pengine2d.List[ i ] );
+
+  if oldBlend <> b2dCurBlend Then
+    fx_SetBlendMode( oldBlend );
+  if oldColor <> b2dCurColor Then
+    fx_SetColorMode( oldColor );
 end;
 
 procedure pengine2d_Proc( dt : Double );
@@ -1092,7 +1102,7 @@ procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
   var
     i        : Integer;
     p        : zglPParticle2D;
-    parCount : LongWord;
+    parCount : Integer;
     size     : Single;
 begin
   if not Assigned( Emitter ) Then exit;
