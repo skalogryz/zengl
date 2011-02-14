@@ -409,6 +409,7 @@ var
   glGetBufferParameterivARB:procedure(target:GLenum; pname:GLenum; params:PGLint); stdcall;
 
   // Triangulation
+  {$IFDEF USE_TRIANGULATION}
   procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
   function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
   function  gluNewTess: Integer; stdcall external libGLU;
@@ -418,6 +419,7 @@ var
   procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
   procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
   procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
+  {$ENDIF}
 
 {$IFDEF LINUX}
 type

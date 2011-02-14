@@ -329,9 +329,11 @@ exports
   m_Angle                  name prefix + 'm_Angle',
   m_Orientation            name prefix + 'm_Orientation',
 
+  {$IFDEF USE_TRIANGULATION}
   tess_Triangulate         name prefix + 'tess_Triangulate',
   tess_AddHole             name prefix + 'tess_AddHole',
   tess_GetData             name prefix + 'tess_GetData',
+  {$ENDIF}
 
   // Collision 2D
   col2d_PointInRect        name prefix + 'col2d_PointInRect',
