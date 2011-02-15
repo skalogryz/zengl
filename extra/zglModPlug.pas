@@ -76,7 +76,6 @@ implementation
 procedure mp_Init;
   var
     i : Integer;
-    LibraryName : String;
 begin
   for i := 0 to MAX_FORMATS - 1 do
     begin
@@ -92,15 +91,16 @@ begin
     end;
 
   {$IFDEF LINUX}
-  LibraryName := './' + libmodplug;
-  mpLibrary   := dlopen( PChar( libmodplug + '.1' ), $001 );
+  mpLibrary := dlopen( PChar( './' + libmodplug + '.1' ), $001 );
+  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.1' ), $001 );
   if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
-  if mpLibrary = LIB_ERROR Then
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  mpLibrary := dlopen( libmodplug );
   {$ENDIF}
   {$IFDEF DARWIN}
-  LibraryName := mainPath + 'Frameworks/' + libmodplug;
+  mpLibrary := dlopen( PChar( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Frameworks/' + libmodplug ), $001 );
   {$ENDIF}
-  mpLibrary := dlopen( libmodplug {$IFNDEF WINDWOS}, $001 {$ENDIF} );
 
   if mpLibrary <> LIB_ERROR Then
     begin

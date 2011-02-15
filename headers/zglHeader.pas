@@ -79,8 +79,6 @@ const
 {$ENDIF}
 {$IFDEF DARWIN}
   libZenGL = 'libZenGL.dylib';
-var
-  mainPath : AnsiString;
 {$ENDIF}
 
 function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
@@ -1252,6 +1250,7 @@ var
   tmpCFString  : CFStringRef;
   tmpPath      : array[ 0..8191 ] of Char;
   outItemHit   : SInt16;
+  mainPath     : AnsiString;
   {$ENDIF}
 
 function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
