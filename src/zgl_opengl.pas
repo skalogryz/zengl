@@ -82,6 +82,7 @@ var
   oglCanPBuffer    : Boolean;
   oglMaxLights     : Integer;
   oglMaxTexSize    : Integer;
+  oglMaxFBOSize    : Integer;
   oglMaxAnisotropy : Integer;
   oglMaxTexUnits   : Integer;
   oglSeparate      : Boolean;
@@ -585,6 +586,9 @@ begin
       glCheckFramebufferStatusEXT  := gl_GetProc( 'glCheckFramebufferStatus'  );
       glFramebufferTexture2DEXT    := gl_GetProc( 'glFramebufferTexture2D'    );
       glFramebufferRenderbufferEXT := gl_GetProc( 'glFramebufferRenderbuffer' );
+
+      glGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, @oglMaxFBOSize );
+      log_Add( 'GL_MAX_RENDERBUFFER_SIZE: ' + u_IntToStr( oglMaxFBOSize ) );
     end else
       oglCanFBO := FALSE;
    log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( oglCanFBO ) );

@@ -237,6 +237,7 @@ const
   GL_DEPTH_COMPONENT32              = $81A7;
   GL_COLOR_ATTACHMENT0_EXT          = $8CE0;
   GL_DEPTH_ATTACHMENT_EXT           = $8D00;
+  GL_MAX_RENDERBUFFER_SIZE          = $84E8;
 
   // Matrices
   GL_MODELVIEW_MATRIX               = $0BA6;

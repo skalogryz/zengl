@@ -198,6 +198,9 @@ begin
   if gl_IsSupported( 'GeForce FX', oglRenderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
     _type := RT_TYPE_PBUFFER;
 
+  if Surface.Width > oglMaxFBOSize Then
+    _type := RT_TYPE_PBUFFER;
+
   if not oglCanFBO Then
     if oglCanPBuffer Then
       _type := RT_TYPE_PBUFFER
