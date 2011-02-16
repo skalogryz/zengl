@@ -177,20 +177,41 @@ begin
 end;
 
 procedure app_ProcessOS;
-  {$IFDEF WINDOWS}
   var
-    m : tagMsg;
+  {$IFDEF LINUX}
+    root_return   : TWindow;
+    child_return  : TWindow;
+    root_x_return : Integer;
+    root_y_return : Integer;
+    mask_return   : LongWord;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+    m         : tagMsg;
+    cursorpos : TPoint;
   {$ENDIF}
   {$IFDEF DARWIN}
-  var
     event : EventRecord;
+    mPos  : Point;
   {$ENDIF}
 begin
 {$IFDEF LINUX}
+  XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
+
   app_ProcessMessages();
   keysRepeat := 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
+  GetCursorPos( cursorpos );
+  if wndFullScreen Then
+    begin
+      mouseX := cursorpos.X;
+      mouseY := cursorpos.Y;
+    end else
+      begin
+        mouseX := cursorpos.X - wndX - wndBrdSizeX;
+        mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
+      end;
+
   while PeekMessageW( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
       TranslateMessage( m );
@@ -198,6 +219,10 @@ begin
     end;
 {$ENDIF}
 {$IFDEF DARWIN}
+  GetGlobalMouse( mPos );
+  mouseX := mPos.h - wndX;
+  mouseY := mPos.v - wndY;
+
   while GetNextEvent( everyEvent, event ) do;
 {$ENDIF}
 end;
@@ -205,20 +230,14 @@ end;
 function app_ProcessMessages;
   var
   {$IFDEF LINUX}
-    event         : TXEvent;
-    keysym        : TKeySym;
-    status        : TStatus;
-    root_return   : TWindow;
-    child_return  : TWindow;
-    root_x_return : Integer;
-    root_y_return : Integer;
-    mask_return   : LongWord;
+    event  : TXEvent;
+    keysym : TKeySym;
+    status : TStatus;
   {$ENDIF}
   {$IFDEF DARWIN}
     eClass  : UInt32;
     eKind   : UInt32;
     command : HICommand;
-    mPos    : Point;
     mButton : EventMouseButton;
     mWheel  : Integer;
     bounds  : HIRect;
@@ -231,8 +250,6 @@ function app_ProcessMessages;
     key : LongWord;
 begin
 {$IFDEF LINUX}
-  XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
-
   Result := 0;
   while XPending( scrDisplay ) <> 0 do
     begin
@@ -612,10 +629,6 @@ begin
   end;
 {$ENDIF}
 {$IFDEF DARWIN}
-  GetGlobalMouse( mPos );
-  mouseX := mPos.h - wndX;
-  mouseY := mPos.v - wndY;
-
   eClass := GetEventClass( inEvent );
   eKind  := GetEventKind( inEvent );
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
@@ -776,7 +789,7 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            wndMouseIn := ( mPos.h > wndX ) and ( mPos.h < wndX + wndWidth ) and ( mPos.v > wndY ) and ( mPos.v < wndY + wndHeight );
+            wndMouseIn := ( mouseX > 0 ) and ( mouseX < wndWidth ) and ( mouseY > 0 ) and ( mouseY < wndHeight );
             if wndMouseIn Then
               begin
                 if ( not appShowCursor ) and ( CGCursorIsVisible = 1 ) Then

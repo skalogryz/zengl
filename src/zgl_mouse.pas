@@ -66,10 +66,6 @@ var
   mouseDblCInt  : Integer = 250;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
-  {$IFDEF WINDOWS}
-  cursorpos : TPoint;
-  getcurpos : Boolean;
-  {$ENDIF}
 
 implementation
 uses
@@ -78,55 +74,21 @@ uses
 
 function mouse_X : Integer;
 begin
-{$IFDEF LINUX_OR_DARWIN}
-  Result := mouseX;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  if getcurpos Then
-    begin
-      getcurpos := FALSE;
-      GetCursorPos( cursorpos );
-    end;
-  if wndFullScreen Then
-    Result := cursorpos.X
-  else
-    Result := cursorpos.X - wndX - wndBrdSizeX;
-{$ENDIF}
-  Result := Round( ( Result - scrAddCX ) / scrResCX );
+  Result := Round( ( mouseX - scrAddCX ) / scrResCX );
 end;
 
 function mouse_Y : Integer;
 begin
-{$IFDEF LINUX_OR_DARWIN}
-  Result := mouseY;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  if getcurpos Then
-    begin
-      getcurpos := FALSE;
-      GetCursorPos( cursorpos );
-    end;
-  if wndFullScreen Then
-    Result := cursorpos.Y
-  else
-    Result := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
-{$ENDIF}
-  Result := Round( ( Result - scrAddCY ) / scrResCY );
+  Result := Round( ( mouseY - scrAddCY ) / scrResCY );
 end;
 
 function mouse_DX : Integer;
 begin
-  {$IFDEF WINDOWS}
-  getcurpos := TRUE;
-  {$ENDIF}
   Result := mouse_X() - wndWidth div 2;
 end;
 
 function mouse_DY : Integer;
 begin
-  {$IFDEF WINDOWS}
-  getcurpos := TRUE;
-  {$ENDIF}
   Result := mouse_Y() - wndHeight div 2;
 end;
 
@@ -166,9 +128,6 @@ end;
 
 procedure mouse_ClearState;
 begin
-  {$IFDEF WINDOWS}
-  getcurpos := TRUE;
-  {$ENDIF}
   FillChar( mouseUp[ 0 ], 3, 0 );
   FillChar( mouseClick[ 0 ], 3, 0 );
   FillChar( mouseDblClick[ 0 ], 3, 0 );
