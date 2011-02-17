@@ -122,8 +122,8 @@ begin
     begin
       X      := Trunc( ( X - cam2d.Global.X ) * cam2d.Global.Zoom.X + ( ( oglWidth  / 2 ) - ( oglWidth  / 2 ) * cam2d.Global.Zoom.X ) );
       Y      := Trunc( ( Y - cam2d.Global.Y ) * cam2d.Global.Zoom.Y + ( ( oglHeight / 2 ) - ( oglHeight / 2 ) * cam2d.Global.Zoom.Y ) );
-      Width  := Trunc( Width  * cam2D.Global.Zoom.X );
-      Height := Trunc( Height * cam2D.Global.Zoom.Y );
+      Width  := Trunc( Width  * cam2d.Global.Zoom.X );
+      Height := Trunc( Height * cam2d.Global.Zoom.Y );
     end;
   if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
