@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.02.13          }
+{ date:     2011.02.17          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -1076,6 +1076,7 @@ type
     Buffer     : Pointer;
     BufferSize : LongWord;
 
+    Bits       : LongWord;
     Frequency  : LongWord;
     Channels   : LongWord;
     Length     : Double;

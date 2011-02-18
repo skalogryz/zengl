@@ -142,6 +142,7 @@ begin
     begin
       Result := TRUE;
 
+      Stream.Bits       := 16;
       Stream.Frequency  := 44100;
       Stream.Channels   := 2;
       Stream.Length     := ModPlug_GetLength( PModPlugFile( Stream._data ) );

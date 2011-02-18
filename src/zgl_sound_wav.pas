@@ -25,12 +25,8 @@ unit zgl_sound_wav;
 interface
 
 uses
-  {$IFDEF USE_OPENAL}
-  zgl_sound_openal,
-  {$ELSE}
-  zgl_sound_dsound,
-  {$ENDIF}
   zgl_types,
+  zgl_sound,
   zgl_file,
   zgl_memory;
 
@@ -79,26 +75,17 @@ begin
 
   Frequency := wavHeader.SampleRate;
 
-{$IFDEF USE_OPENAL}
   if wavHeader.ChannelNumber = 1 Then
     case WavHeader.BitsPerSample of
-      8:  format := AL_FORMAT_MONO8;
-      16: format := AL_FORMAT_MONO16;
+      8:  format := SND_FORMAT_MONO8;
+      16: format := SND_FORMAT_MONO16;
     end;
 
   if WavHeader.ChannelNumber = 2 then
     case WavHeader.BitsPerSample of
-      8:  format := AL_FORMAT_STEREO8;
-      16: format := AL_FORMAT_STEREO16;
+      8:  format := SND_FORMAT_STEREO8;
+      16: format := SND_FORMAT_STEREO16;
     end;
-{$ELSE}
-  with wavHeader do
-    begin
-      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
-      BytesPerSecond := SampleRate * BytesPerSample;
-    end;
-  Format := Ptr( @WavHeader.FormatCode );
-{$ENDIF}
 
   mem_Seek( wavMemory, ( 8 - 44 ) + 12 + 4 + wavHeader.FormatHeaderSize + 4, FSM_CUR );
   repeat

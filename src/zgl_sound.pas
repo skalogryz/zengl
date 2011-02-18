@@ -41,6 +41,11 @@ uses
   zgl_memory;
 
 const
+  SND_FORMAT_MONO8    = 1;
+  SND_FORMAT_MONO16   = 2;
+  SND_FORMAT_STEREO8  = 3;
+  SND_FORMAT_STEREO16 = 4;
+
   SND_ALL           = -2;
   SND_STREAM        = -3;
   SND_ERROR         = {$IFDEF USE_OPENAL} 0 {$ELSE} nil {$ENDIF};
@@ -98,6 +103,7 @@ type
     Buffer     : Pointer;
     BufferSize : LongWord;
 
+    Bits       : LongWord;
     Frequency  : LongWord;
     Channels   : LongWord;
     Length     : Double;
@@ -489,8 +495,11 @@ end;
 function snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
   var
     i   : Integer;
-    f   : LongWord;
+    fmt : LongWord;
     ext : String;
+  {$IFNDEF USE_OPENAL}
+    buffDesc : zglTBufferDesc;
+  {$ENDIF}
 begin
   Result := nil;
 
@@ -512,9 +521,9 @@ begin
       ext := u_StrUp( file_GetExtension( FileName ) );
       if ext = managerSound.Formats[ i ].Extension Then
         {$IFDEF DARWIN}
-        managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, f, Result.Frequency );
+        managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
         {$ELSE}
-        managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, f, Result.Frequency );
+        managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
         {$ENDIF}
     end;
 
@@ -525,11 +534,57 @@ begin
       exit;
     end;
 
+  case fmt of
+    {$IFDEF USE_OPENAL}
+    SND_FORMAT_MONO8: fmt := AL_FORMAT_MONO8;
+    SND_FORMAT_MONO16: fmt := AL_FORMAT_MONO16;
+    SND_FORMAT_STEREO8: fmt := AL_FORMAT_STEREO8;
+    SND_FORMAT_STEREO16: fmt := AL_FORMAT_STEREO16;
+    {$ELSE}
+    SND_FORMAT_MONO8:
+      begin
+        buffDesc.ChannelNumber := 1;
+        buffDesc.BitsPerSample := 8;
+      end;
+    SND_FORMAT_MONO16:
+      begin
+        buffDesc.ChannelNumber := 1;
+        buffDesc.BitsPerSample := 16;
+      end;
+    SND_FORMAT_STEREO8:
+      begin
+        buffDesc.ChannelNumber := 2;
+        buffDesc.BitsPerSample := 8;
+      end;
+    SND_FORMAT_STEREO16:
+      begin
+        buffDesc.ChannelNumber := 2;
+        buffDesc.BitsPerSample := 16;
+      end;
+    {$ENDIF}
+  else
+    begin
+      log_Add( 'Unable to determinate sound format: "' + FileName + '"' );
+      snd_Del( Result );
+      exit;
+    end;
+  end;
+
 {$IFDEF USE_OPENAL}
-  alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
+  alBufferData( Result.Buffer, fmt, Result.Data, Result.Size, Result.Frequency );
   FreeMem( Result.Data );
 {$ELSE}
-  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
+  with buffDesc do
+    begin
+      FormatCode     := 1;
+      SampleRate     := Result.Frequency;
+      BitsPerSample  := 16;
+      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
+      BytesPerSecond := SampleRate * BytesPerSample;
+      cbSize         := SizeOf( buffDesc );
+    end;
+
+  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, @buffDesc );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
   for i := 1 to Result.SourceCount - 1 do
     dsDevice.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
@@ -1043,13 +1098,13 @@ begin
       FormatCode     := 1;
       ChannelNumber  := sfStream[ Result ].Channels;
       SampleRate     := sfStream[ Result ].Frequency;
-      BitsPerSample  := 16;
+      BitsPerSample  := sfStream[ Result ].Bits;
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );
     end;
   if Assigned( sfSource[ Result ] ) Then sfSource[ Result ] := nil;
-  dsu_CreateBuffer( sfSource[ Result ], sfStream[ Result ].BufferSize, @buffDesc.FormatCode );
+  dsu_CreateBuffer( sfSource[ Result ], sfStream[ Result ].BufferSize, @buffDesc );
   bytesRead := sfStream[ Result ]._decoder.Read( sfStream[ Result ], sfStream[ Result ].Buffer, sfStream[ Result ].BufferSize, _end );
   dsu_FillData( sfSource[ Result ], sfStream[ Result ].Buffer, bytesRead );
 
