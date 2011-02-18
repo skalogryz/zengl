@@ -499,9 +499,11 @@ begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 
-  glBlendEquationEXT( GL_FUNC_ADD_EXT );
   if oglSeparate Then
-    glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    begin
+      glBlendEquationEXT( GL_FUNC_ADD_EXT );
+      glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    end;
 
   glDisable( GL_BLEND );
   glDisable( GL_ALPHA_TEST );
