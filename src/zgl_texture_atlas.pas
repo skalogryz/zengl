@@ -268,7 +268,6 @@ function atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : String; Trans
     pData : Pointer;
     tex   : zglTTexture;
     w, h  : Word;
-    ext   : String;
 begin
   Result := nil;
   pData  := nil;
@@ -280,11 +279,12 @@ begin
     end;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
-    begin
-      ext := u_StrUp( file_GetExtension( FileName ) );
-      if ext = managerTexture.Formats[ i ].Extension Then
-        managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
-    end;
+    if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
+      {$IFDEF DARWIN}
+      managerTexture.Formats[ i ].FileLoader( darwin_GetRes( FileName ), pData, w, h );
+      {$ELSE}
+      managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
+      {$ENDIF}
 
   if not Assigned( pData ) Then
     begin

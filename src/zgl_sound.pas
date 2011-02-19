@@ -496,7 +496,6 @@ function snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) 
   var
     i   : Integer;
     fmt : LongWord;
-    ext : String;
   {$IFNDEF USE_OPENAL}
     buffDesc : zglTBufferDesc;
   {$ENDIF}
@@ -517,15 +516,12 @@ begin
   Result := snd_Add( SourceCount );
 
   for i := managerSound.Count.Formats - 1 downto 0 do
-    begin
-      ext := u_StrUp( file_GetExtension( FileName ) );
-      if ext = managerSound.Formats[ i ].Extension Then
-        {$IFDEF DARWIN}
-        managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
-        {$ELSE}
-        managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
-        {$ENDIF}
-    end;
+    if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
+      {$IFDEF DARWIN}
+      managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
+      {$ELSE}
+      managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
+      {$ENDIF}
 
   if not Assigned( Result.Data ) Then
     begin
