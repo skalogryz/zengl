@@ -181,19 +181,10 @@ begin
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-  if Texture.Flags and TEX_MIPMAP = 0 Then
-    begin
-      if Texture.Flags and TEX_COMPRESS = 0 Then
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData )
-      else
-        glTexImage2D( GL_TEXTURE_2D, 0, cformat, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
-    end else
-      begin
-        if Texture.Flags and TEX_COMPRESS = 0 Then
-          gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, Texture.Width, Texture.Height, GL_RGBA, GL_UNSIGNED_BYTE, pData )
-        else
-          gluBuild2DMipmaps( GL_TEXTURE_2D, cformat, Texture.Width, Texture.Height, GL_RGBA, GL_UNSIGNED_BYTE, pData )
-      end;
+  if Texture.Flags and TEX_COMPRESS = 0 Then
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData )
+  else
+    glTexImage2D( GL_TEXTURE_2D, 0, cformat, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 
   glDisable( GL_TEXTURE_2D );
 
@@ -455,6 +446,9 @@ begin
       glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
       glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
     end;
+
+  // TODO: make some check for old videocards without GL_SGIS_generate_mipmap and GL_VERSION < 1.4?
+  glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, Byte( Flags and TEX_MIPMAP > 0 ) );
   if Flags and TEX_MIPMAP > 0 Then
     begin
       if Flags and TEX_FILTER_NEAREST > 0 Then

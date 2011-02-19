@@ -187,6 +187,9 @@ const
   // Texture Mag Filter
   GL_NEAREST                        = $2600;
   GL_LINEAR                         = $2601;
+  // Mipmaps
+  GL_GENERATE_MIPMAP                = $8191;
+  GL_GENERATE_MIPMAP_HINT           = $8192;
   // Texture Min Filter
   GL_NEAREST_MIPMAP_NEAREST         = $2700;
   GL_LINEAR_MIPMAP_NEAREST          = $2701;
@@ -230,13 +233,13 @@ const
   GL_TEXTURE_COORD_ARRAY            = $8078;
 
   // FBO
-  GL_FRAMEBUFFER_EXT                = $8D40;
-  GL_RENDERBUFFER_EXT               = $8D41;
+  GL_FRAMEBUFFER                    = $8D40;
+  GL_RENDERBUFFER                   = $8D41;
   GL_DEPTH_COMPONENT16              = $81A5;
   GL_DEPTH_COMPONENT24              = $81A6;
   GL_DEPTH_COMPONENT32              = $81A7;
-  GL_COLOR_ATTACHMENT0_EXT          = $8CE0;
-  GL_DEPTH_ATTACHMENT_EXT           = $8D00;
+  GL_COLOR_ATTACHMENT0              = $8CE0;
+  GL_DEPTH_ATTACHMENT               = $8D00;
   GL_MAX_RENDERBUFFER_SIZE          = $84E8;
 
   // Matrices
@@ -340,8 +343,8 @@ type
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;
   procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;
 var
-  glBlendEquationEXT: procedure(mode: GLenum); stdcall;
-  glBlendFuncSeparateEXT: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
+  glBlendEquation: procedure(mode: GLenum); stdcall;
+  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
   // Matrix
   procedure glPushMatrix; stdcall; external libGL;
   procedure glPopMatrix; stdcall; external libGL;
@@ -370,44 +373,27 @@ var
   procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGL;
   procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
-  function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; stdcall; external libGLU;
   // Normal
   procedure glNormalPointer(atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
   //
   procedure glDrawElements(mode: GLenum; count: GLsizei; atype: GLenum; const indices: Pointer); stdcall; external libGL;
-var
-  glActiveTextureARB: procedure(texture: GLenum); stdcall;
-  glClientActiveTextureARB: procedure(texture: GLenum); stdcall;
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
-  procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
 var
-  glMultiTexCoord2fARB: procedure(target: GLenum; s: GLfloat; t: GLfloat); stdcall;
-  glMultiTexCoord2fvARB: procedure(target: GLenum; const v: PGLfloat); stdcall;
   // FBO
-  glIsRenderbufferEXT: function(renderbuffer: GLuint): GLboolean; stdcall;
-  glBindRenderbufferEXT: procedure(target: GLenum; renderbuffer: GLuint); stdcall;
-  glDeleteRenderbuffersEXT: procedure(n: GLsizei; const renderbuffers: PGLuint); stdcall;
-  glGenRenderbuffersEXT: procedure(n: GLsizei; renderbuffers: PGLuint); stdcall;
-  glRenderbufferStorageEXT: procedure(target: GLenum; internalformat: GLenum; width: GLsizei; height: GLsizei); stdcall;
-  glIsFramebufferEXT: function(framebuffer: GLuint): GLboolean; stdcall;
-  glBindFramebufferEXT: procedure(target: GLenum; framebuffer: GLuint); stdcall;
-  glDeleteFramebuffersEXT: procedure(n: GLsizei; const framebuffers: PGLuint); stdcall;
-  glGenFramebuffersEXT: procedure(n: GLsizei; framebuffers: PGLuint); stdcall;
-  glCheckFramebufferStatusEXT: function(target: GLenum): GLenum; stdcall;
-  glFramebufferTexture2DEXT: procedure(target: GLenum; attachment: GLenum; textarget: GLenum; texture: GLuint; level: GLint); stdcall;
-  glFramebufferRenderbufferEXT: procedure(target: GLenum; attachment: GLenum; renderbuffertarget: GLenum; renderbuffer: GLuint); stdcall;
-  // VBO
-  glBindBufferARB : procedure(target : GLenum; buffer: GLuint); stdcall;
-  glDeleteBuffersARB : procedure(n : GLsizei; buffers : PGLuint); stdcall;
-  glGenBuffersARB : procedure(n : GLsizei; buffers : PGLuint); stdcall;
-  glIsBufferARB : function (buffer : GLuint) :GLboolean; stdcall;
-  glBufferDataARB : procedure(target : GLenum; size:GLsizei; data:PGLvoid;usage: GLenum); stdcall;
-  glBufferSubDataARB : procedure(target : GLenum; offset :GLint; size : GLsizei; data: PGLvoid); stdcall;
-  glMapBufferARB : function (target :GLenum; access: GLenum) : PGLvoid; stdcall;
-  glUnmapBufferARB : function (target :GLenum) :GLboolean; stdcall;
-  glGetBufferParameterivARB:procedure(target:GLenum; pname:GLenum; params:PGLint); stdcall;
+  glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
+  glBindRenderbuffer: procedure(target: GLenum; renderbuffer: GLuint); stdcall;
+  glDeleteRenderbuffers: procedure(n: GLsizei; const renderbuffers: PGLuint); stdcall;
+  glGenRenderbuffers: procedure(n: GLsizei; renderbuffers: PGLuint); stdcall;
+  glRenderbufferStorage: procedure(target: GLenum; internalformat: GLenum; width: GLsizei; height: GLsizei); stdcall;
+  glIsFramebuffer: function(framebuffer: GLuint): GLboolean; stdcall;
+  glBindFramebuffer: procedure(target: GLenum; framebuffer: GLuint); stdcall;
+  glDeleteFramebuffers: procedure(n: GLsizei; const framebuffers: PGLuint); stdcall;
+  glGenFramebuffers: procedure(n: GLsizei; framebuffers: PGLuint); stdcall;
+  glCheckFramebufferStatus: function(target: GLenum): GLenum; stdcall;
+  glFramebufferTexture2D: procedure(target: GLenum; attachment: GLenum; textarget: GLenum; texture: GLuint; level: GLint); stdcall;
+  glFramebufferRenderbuffer: procedure(target: GLenum; attachment: GLenum; renderbuffertarget: GLenum; renderbuffer: GLuint); stdcall;
 
   // Triangulation
   {$IFDEF USE_TRIANGULATION}
@@ -502,7 +488,7 @@ const
   function wglGetProcAddress(proc: PAnsiChar): Pointer; stdcall; external libGL;
 var
   wglChoosePixelFormatARB: function(hdc: HDC; const piAttribIList: PGLint; const pfAttribFList: PGLfloat; nMaxFormats: GLuint; piFormats: PGLint; nNumFormats: PGLuint): BOOL; stdcall;
-  wglSwapIntervalEXT: function(interval: GLint): BOOL; stdcall;
+  wglSwapInterval: function(interval: GLint): BOOL; stdcall;
   // PBuffer
   wglCreatePbufferARB: function(hDC: HDC; iPixelFormat: GLint; iWidth: GLint; iHeight: GLint; const piAttribList: PGLint): THandle; stdcall;
   wglGetPbufferDCARB: function(hPbuffer: THandle): HDC; stdcall;

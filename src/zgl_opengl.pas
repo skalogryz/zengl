@@ -501,8 +501,8 @@ begin
 
   if oglSeparate Then
     begin
-      glBlendEquationEXT( GL_FUNC_ADD_EXT );
-      glBlendFuncSeparateEXT( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+      glBlendEquation( GL_FUNC_ADD_EXT );
+      glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
     end;
 
   glDisable( GL_BLEND );
@@ -532,62 +532,33 @@ begin
   // Multitexturing
   glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @oglMaxTexUnits );
   log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( oglMaxTexUnits ) );
-  glMultiTexCoord2fARB := gl_GetProc( 'glMultiTexCoord2f' );
-  if Assigned( glMultiTexCoord2fARB ) Then
-    begin
-      glMultiTexCoord2fvARB    := gl_GetProc( 'glMultiTexCoord2fv'    );
-      glActiveTextureARB       := gl_GetProc( 'glActiveTexture'       );
-      glClientActiveTextureARB := gl_GetProc( 'glClientActiveTexture' );
-    end else
-      begin
-        // Это конечно извращенство, но лень потом проверять везде "oglMaxTexLevels > 0" :)
-        glActiveTextureARB       := @glEnable;
-        glClientActiveTextureARB := @glEnable;
-      end;
 
   // Anisotropy
   glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy );
   oglAnisotropy := oglMaxAnisotropy;
   log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( oglMaxAnisotropy ) );
 
-  glBlendEquationEXT     := gl_GetProc( 'glBlendEquation' );
-  glBlendFuncSeparateEXT := gl_GetProc( 'glBlendFuncSeparate' );
-  oglSeparate := Assigned( glBlendEquationEXT ) and Assigned( glBlendFuncSeparateEXT ) and gl_IsSupported( 'GL_EXT_blend_func_separate', oglExtensions );
+  glBlendEquation     := gl_GetProc( 'glBlendEquation' );
+  glBlendFuncSeparate := gl_GetProc( 'glBlendFuncSeparate' );
+  oglSeparate := Assigned( glBlendEquation ) and Assigned( glBlendFuncSeparate ) and gl_IsSupported( 'GL_EXT_blend_func_separate', oglExtensions );
   log_Add( 'GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr( oglSeparate ) );
 
-  // VBO
-  glBindBufferARB := gl_GetProc( 'glBindBuffer' );
-  if Assigned( glBindBufferARB ) Then
-    begin
-      oglCanVBO                 := TRUE;
-      glDeleteBuffersARB        := gl_GetProc( 'glDeleteBuffers'        );
-      glGenBuffersARB           := gl_GetProc( 'glGenBuffers'           );
-      glIsBufferARB             := gl_GetProc( 'glIsBuffer'             );
-      glBufferDataARB           := gl_GetProc( 'glBufferData'           );
-      glBufferSubDataARB        := gl_GetProc( 'glBufferSubData'        );
-      glMapBufferARB            := gl_GetProc( 'glMapBuffer'            );
-      glUnmapBufferARB          := gl_GetProc( 'glUnmapBuffer'          );
-      glGetBufferParameterivARB := gl_GetProc( 'glGetBufferParameteriv' );
-    end else
-      oglCanVBO := FALSE;
-  log_Add( 'GL_ARB_VERTEX_BUFFER_OBJECT: ' + u_BoolToStr( oglCanVBO ) );
-
   // FBO
-  glBindRenderbufferEXT := gl_GetProc( 'glBindRenderbuffer' );
-  if Assigned( glBindRenderbufferEXT ) Then
+  glBindRenderbuffer := gl_GetProc( 'glBindRenderbuffer' );
+  if Assigned( glBindRenderbuffer ) Then
     begin
-      oglCanFBO                    := TRUE;
-      glIsRenderbufferEXT          := gl_GetProc( 'glIsRenderbuffer'          );
-      glDeleteRenderbuffersEXT     := gl_GetProc( 'glDeleteRenderbuffers'     );
-      glGenRenderbuffersEXT        := gl_GetProc( 'glGenRenderbuffers'        );
-      glRenderbufferStorageEXT     := gl_GetProc( 'glRenderbufferStorage'     );
-      glIsFramebufferEXT           := gl_GetProc( 'glIsFramebuffer'           );
-      glBindFramebufferEXT         := gl_GetProc( 'glBindFramebuffer'         );
-      glDeleteFramebuffersEXT      := gl_GetProc( 'glDeleteFramebuffers'      );
-      glGenFramebuffersEXT         := gl_GetProc( 'glGenFramebuffers'         );
-      glCheckFramebufferStatusEXT  := gl_GetProc( 'glCheckFramebufferStatus'  );
-      glFramebufferTexture2DEXT    := gl_GetProc( 'glFramebufferTexture2D'    );
-      glFramebufferRenderbufferEXT := gl_GetProc( 'glFramebufferRenderbuffer' );
+      oglCanFBO                 := TRUE;
+      glIsRenderbuffer          := gl_GetProc( 'glIsRenderbuffer'          );
+      glDeleteRenderbuffers     := gl_GetProc( 'glDeleteRenderbuffers'     );
+      glGenRenderbuffers        := gl_GetProc( 'glGenRenderbuffers'        );
+      glRenderbufferStorage     := gl_GetProc( 'glRenderbufferStorage'     );
+      glIsFramebuffer           := gl_GetProc( 'glIsFramebuffer'           );
+      glBindFramebuffer         := gl_GetProc( 'glBindFramebuffer'         );
+      glDeleteFramebuffers      := gl_GetProc( 'glDeleteFramebuffers'      );
+      glGenFramebuffers         := gl_GetProc( 'glGenFramebuffers'         );
+      glCheckFramebufferStatus  := gl_GetProc( 'glCheckFramebufferStatus'  );
+      glFramebufferTexture2D    := gl_GetProc( 'glFramebufferTexture2D'    );
+      glFramebufferRenderbuffer := gl_GetProc( 'glFramebufferRenderbuffer' );
 
       glGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, @oglMaxFBOSize );
       log_Add( 'GL_MAX_RENDERBUFFER_SIZE: ' + u_IntToStr( oglMaxFBOSize ) );
@@ -652,8 +623,8 @@ begin
   oglCanVSync        := Assigned( glXSwapIntervalSGI );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  wglSwapIntervalEXT := gl_GetProc( 'wglSwapInterval' );
-  oglCanVSync        := Assigned( wglSwapIntervalEXT );
+  wglSwapInterval := gl_GetProc( 'wglSwapInterval' );
+  oglCanVSync     := Assigned( wglSwapInterval );
 {$ENDIF}
 {$IFDEF DARWIN}
   if aglSetInt( oglContext, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then

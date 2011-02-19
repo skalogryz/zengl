@@ -621,7 +621,7 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   if oglCanVSync Then
-    wglSwapIntervalEXT( Integer( scrVSync ) );
+    wglSwapInterval( Integer( scrVSync ) );
 {$ENDIF}
 {$IFDEF DARWIN}
   if Assigned( oglContext ) Then

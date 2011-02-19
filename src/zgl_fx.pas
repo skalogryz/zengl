@@ -121,7 +121,7 @@ begin
       end;
   end;
   if SeparateAlpha and oglSeparate Then
-    glBlendFuncSeparateEXT( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
+    glBlendFuncSeparate( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
   else
     glBlendFunc( srcBlend, dstBlend );
 end;
