@@ -1026,6 +1026,11 @@ var
 
 // Sound
 const
+  SND_FORMAT_MONO8    = 1;
+  SND_FORMAT_MONO16   = 2;
+  SND_FORMAT_STEREO8  = 3;
+  SND_FORMAT_STEREO16 = 4;
+
   SND_ALL           = -2;
   SND_STREAM        = -3;
 
