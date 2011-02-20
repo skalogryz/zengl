@@ -208,7 +208,7 @@ begin
       dwFlags      := PFD_DRAW_TO_WINDOW or PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER;
       iPixelType   := PFD_TYPE_RGBA;
       cColorBits   := 24;
-      сAlphabits   := 8;
+      cAlphabits   := 8;
       cDepthBits   := 24;
       cStencilBits := oglStencil;
       iLayerType   := PFD_MAIN_PLANE;
