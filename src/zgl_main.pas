@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC7';
-  cs_Date     = '2011.02.20';
+  cs_Date     = '2011.02.21';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -84,6 +84,7 @@ const
   GAPI_MAX_TEXTURE_UNITS  = 502;
   GAPI_MAX_ANISOTROPY     = 503;
   GAPI_CAN_BLEND_SEPARATE = 504;
+  GAPI_CAN_AUTOGEN_MIPMAP = 505;
 
   VIEWPORT_WIDTH          = 600;
   VIEWPORT_HEIGHT         = 601;
@@ -461,6 +462,7 @@ begin
     GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
     GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
     GAPI_CAN_BLEND_SEPARATE: Result := Ptr( oglSeparate );
+    GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr( oglCanAutoMipMap );
 
     RENDER_FPS: Result := appFPS;
     RENDER_BATCHES_2D: Result := b2dBatches + 1;

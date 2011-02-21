@@ -75,6 +75,7 @@ var
   oglCanVSync      : Boolean;
   oglCanCompressA  : Boolean;
   oglCanCompressE  : Boolean;
+  oglCanAutoMipMap : Boolean;
   oglCanARB        : Boolean; // ARBvp/ARBfp шейдеры
   oglCanGLSL       : Boolean; // GLSL шейдеры
   oglCanVBO        : Boolean;
@@ -529,6 +530,9 @@ begin
   log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( oglCanCompressA ) );
   oglCanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
   log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanCompressE ) );
+
+  oglCanAutoMipMap := gl_IsSupported( 'GL_SGIS_generate_mipmap', oglExtensions );
+  log_Add( 'GL_SGIS_GENERATE_MIPMAP: ' + u_BoolToStr( oglCanAutoMipMap ) );
 
   // Multitexturing
   glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @oglMaxTexUnits );

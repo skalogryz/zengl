@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.02.17          }
+{ date:     2011.02.21          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -135,6 +135,7 @@ const
   GAPI_MAX_TEXTURE_UNITS  = 502;
   GAPI_MAX_ANISOTROPY     = 503;
   GAPI_CAN_BLEND_SEPARATE = 504; // Boolean
+  GAPI_CAN_AUTOGEN_MIPMAP = 505; // Boolean
 
   VIEWPORT_WIDTH          = 600;
   VIEWPORT_HEIGHT         = 601;

@@ -373,6 +373,7 @@ var
   procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGL;
   procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
+  function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; stdcall; external libGLU;
   // Normal
   procedure glNormalPointer(atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
   //
