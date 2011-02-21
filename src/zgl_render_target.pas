@@ -643,7 +643,7 @@ begin
 
           lRTarget := nil;
           SetCurrentMode();
-      end;
+        end;
 end;
 
 procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
