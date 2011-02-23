@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2 RC7';
-  cs_Date     = '2011.02.21';
+  cs_Date     = '2011.02.23';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -93,6 +93,8 @@ const
 
   RENDER_FPS              = 700;
   RENDER_BATCHES_2D       = 701;
+  RENDER_CURRENT_MODE     = 702;
+  RENDER_CURRENT_TARGET   = 703;
 
   MANAGER_TIMER           = 800;
   MANAGER_TEXTURE         = 801;
@@ -466,6 +468,8 @@ begin
 
     RENDER_FPS: Result := appFPS;
     RENDER_BATCHES_2D: Result := b2dBatches + 1;
+    RENDER_CURRENT_MODE: Result := oglMode;
+    RENDER_CURRENT_TARGET: Result := oglTarget;
 
     VIEWPORT_WIDTH: Result := oglWidth - scrSubCX;
     VIEWPORT_HEIGHT: Result := oglHeight - scrSubCY;

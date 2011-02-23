@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.02.21          }
+{ date:     2011.02.23          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -144,6 +144,8 @@ const
 
   RENDER_FPS              = 700;
   RENDER_BATCHES_2D       = 701;
+  RENDER_CURRENT_MODE     = 702;
+  RENDER_CURRENT_TARGET   = 703;
 
   MANAGER_TIMER           = 800; // zglPTimerManager
   MANAGER_TEXTURE         = 801; // zglPTextureManager
