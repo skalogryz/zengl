@@ -49,7 +49,7 @@ procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text :
 procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
 procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 function  text_GetWidth( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
-function  text_GetHeight( Font : zglPFont; const Rect : zglTRect; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+function  text_GetHeight( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
 procedure textFx_SetLength( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
 
 procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
@@ -328,10 +328,16 @@ begin
     Result := lResult;
 end;
 
-function text_GetHeight( Font : zglPFont; const Rect : zglTRect; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+function text_GetHeight( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+  var
+    Rect : zglTRect;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
 
+  Rect.X    := 0;
+  Rect.Y    := 0;
+  Rect.W    := Width;
+  Rect.H    := 0;
   textScale := Scale;
   textStep  := Step;
   text_CalcRect( Font, Rect, Text, TEXT_HALIGN_LEFT );

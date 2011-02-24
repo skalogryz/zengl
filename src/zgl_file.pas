@@ -195,12 +195,9 @@ begin
 end;
 
 function file_Exists( const Name : String ) : Boolean;
-  var
   {$IFDEF LINUX_OR_DARWIN}
+  var
     status : Stat;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-    attr : LongWord;
   {$ENDIF}
 begin
 {$IFDEF LINUX_OR_DARWIN}

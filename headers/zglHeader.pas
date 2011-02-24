@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.2 RC7             }
-{ date:     2011.02.23          }
+{ date:     2011.02.24          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -1024,7 +1024,7 @@ var
   text_DrawInRect     : procedure( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
   text_DrawInRectEx   : procedure( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
   text_GetWidth       : function( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
-  text_GetHeight      : function( Font : zglPFont; const Rect : zglTRect; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+  text_GetHeight      : function( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
   textFx_SetLength    : procedure( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
 
 // Sound

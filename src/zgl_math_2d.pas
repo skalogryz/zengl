@@ -66,7 +66,7 @@ end;
 function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 
-function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+procedure m_SinCos( Angle : Single; var s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
@@ -116,7 +116,7 @@ begin
   if a > b Then Result := a else Result := b;
 end;
 
-function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+procedure m_SinCos( Angle : Single; var s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 {$IFDEF USE_ASM}
 asm
 {$IFDEF CPUi386}
