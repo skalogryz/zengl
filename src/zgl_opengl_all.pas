@@ -303,9 +303,6 @@ type
 { GLvoid     = void; }        PGLvoid     = Pointer;
                               PPGLvoid    = ^PGLvoid;
 
-  procedure glFinish; stdcall; external libGL;
-  procedure glFlush; stdcall; external libGL;
-
   function  glGetString(name: GLenum): PAnsiChar; stdcall; external libGL;
   procedure glHint(target, mode: GLenum); stdcall; external libGL;
 
@@ -352,7 +349,6 @@ var
   procedure glLoadIdentity; stdcall; external libGL;
   procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); stdcall; external libGLU;
   procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGL;
-  procedure glMultMatrixf(const m: PGLfloat); stdcall; external libGL;
   procedure glRotatef(angle, x, y, z: GLfloat); stdcall; external libGL;
   procedure glScalef(x, y, z: GLfloat); stdcall; external libGL;
   procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGL;
@@ -374,10 +370,6 @@ var
   procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL;
   procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
   function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; stdcall; external libGLU;
-  // Normal
-  procedure glNormalPointer(atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
-  //
-  procedure glDrawElements(mode: GLenum; count: GLsizei; atype: GLenum; const indices: Pointer); stdcall; external libGL;
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
