@@ -557,7 +557,6 @@ uses
   {$IFDEF FPC}
   math,
   {$ENDIF}
-  zgl_log,
   zgl_utils;
 
 function InitGL : Boolean;

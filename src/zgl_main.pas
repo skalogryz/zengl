@@ -36,8 +36,8 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.2 RC7';
-  cs_Date     = '2011.02.24';
+  cs_ZenGL    = 'ZenGL 0.2';
+  cs_Date     = '2011.02.27';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
