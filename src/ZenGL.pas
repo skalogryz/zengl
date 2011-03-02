@@ -28,7 +28,11 @@ uses
 
   zgl_screen,
   zgl_window,
+  {$IFNDEF USE_GLES}
   zgl_opengl,
+  {$ELSE}
+  zgl_opengles,
+  {$ENDIF}
   zgl_opengl_simple,
 
   zgl_timers,

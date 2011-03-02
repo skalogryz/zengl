@@ -121,8 +121,13 @@ uses
   zgl_types,
   zgl_main,
   zgl_screen,
+  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  {$ELSE}
+  zgl_opengles,
+  zgl_opengles_all,
+  {$ENDIF}
   zgl_render_2d,
   zgl_file,
   zgl_log,
@@ -174,10 +179,12 @@ begin
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
+  {$IFNDEF USE_GLES}
   if oglCanCompressE Then
     cformat := GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
   else
     cformat := GL_COMPRESSED_RGBA_ARB;
+  {$ENDIF}
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
@@ -475,7 +482,7 @@ begin
                   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
                   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                 end else
-                  if Flags and TEX_FILTER_TRILINEAR > 0 Then
+                  if ( Flags and TEX_FILTER_TRILINEAR > 0 ) or ( ( not oglCanAnisotropy ) and ( Flags and TEX_FILTER_ANISOTROPY > 0 ) ) Then
                     begin
                       Texture.Flags := Texture.Flags or TEX_FILTER_TRILINEAR;
                       glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
@@ -701,12 +708,14 @@ begin
 
   if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then exit;
 
+  {$IFNDEF USE_GLES}
   glEnable( GL_TEXTURE_2D );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, Stride );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glTexSubImage2D( GL_TEXTURE_2D, 0, X, Texture.Height - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
   glDisable( GL_TEXTURE_2D );
+  {$ENDIF}
 end;
 
 procedure tex_GetData( Texture : zglPTexture; var pData : Pointer );
@@ -721,10 +730,12 @@ begin
 
   GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * 4 );
 
+  {$IFNDEF USE_GLES}
   glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glDisable( GL_TEXTURE_2D );
+  {$ENDIF}
 end;
 
 end.

@@ -134,8 +134,13 @@ uses
   zgl_main,
   zgl_application,
   zgl_window,
+  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  {$ELSE}
+  zgl_opengles,
+  zgl_opengles_all,
+  {$ENDIF}
   zgl_opengl_simple,
   zgl_render_2d,
   zgl_camera_2d,
@@ -364,14 +369,18 @@ end;
 procedure scr_Flush;
 begin
   batch2d_Flush();
-{$IFDEF LINUX}
+{$IFNDEF USE_GLES}
+  {$IFDEF LINUX}
   glXSwapBuffers( scrDisplay, wndHandle );
-{$ENDIF}
-{$IFDEF WINDOWS}
+  {$ENDIF}
+  {$IFDEF WINDOWS}
   SwapBuffers( wndDC );
-{$ENDIF}
-{$IFDEF DARWIN}
+  {$ENDIF}
+  {$IFDEF DARWIN}
   aglSwapBuffers( oglContext );
+  {$ENDIF}
+{$ELSE}
+  eglSwapBuffers( oglDisplay, oglSurface );
 {$ENDIF}
 end;
 
@@ -615,17 +624,22 @@ end;
 procedure scr_SetVSync( VSync : Boolean );
 begin
   scrVSync := VSync;
-{$IFDEF LINUX}
+{$IFNDEF USE_GLES}
+  {$IFDEF LINUX}
   if oglCanVSync Then
     glXSwapIntervalSGI( Integer( scrVSync ) );
-{$ENDIF}
-{$IFDEF WINDOWS}
+  {$ENDIF}
+  {$IFDEF WINDOWS}
   if oglCanVSync Then
     wglSwapInterval( Integer( scrVSync ) );
-{$ENDIF}
-{$IFDEF DARWIN}
+  {$ENDIF}
+  {$IFDEF DARWIN}
   if Assigned( oglContext ) Then
     aglSetInt( oglContext, AGL_SWAP_INTERVAL, Byte( scrVSync ) );
+  {$ENDIF}
+{$ELSE}
+  if oglCanVSync Then
+    eglSwapInterval( oglDisplay, Integer( scrVSync ) );
 {$ENDIF}
 end;
 

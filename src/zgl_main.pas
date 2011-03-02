@@ -36,8 +36,8 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.2';
-  cs_Date     = '2011.02.27';
+  cs_ZenGL    = 'ZenGL 0.3';
+  cs_Date     = '2011.03.02';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -140,8 +140,13 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
+  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  {$ELSE}
+  zgl_opengles,
+  zgl_opengles_all,
+  {$ENDIF}
   zgl_opengl_simple,
   {$IFDEF LINUX}
   zgl_file,

@@ -88,8 +88,13 @@ uses
   zgl_main,
   zgl_application,
   zgl_screen,
+  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  {$ELSE}
+  zgl_opengles,
+  zgl_opengles_all,
+  {$ENDIF}
   zgl_opengl_simple,
   zgl_utils;
 
@@ -193,9 +198,11 @@ begin
     wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
   else
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+  {$IFNDEF USE_GLES}
   if oglFormat = 0 Then
     wndHandle := CreateWindowExW( WS_EX_TOOLWINDOW, wndClassName, wndCaptionW, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
+  {$ENDIF}
     wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
                                   wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
                                   wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );

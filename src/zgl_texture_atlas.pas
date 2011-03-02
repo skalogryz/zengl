@@ -76,7 +76,11 @@ implementation
 uses
   zgl_main,
   zgl_log,
+  {$IFNDEF USE_GLES}
   zgl_opengl_all,
+  {$ELSE}
+  zgl_opengles_all,
+  {$ENDIF}
   zgl_file,
   zgl_utils;
 
@@ -356,12 +360,14 @@ end;
 
 procedure atals_InsertDataToNode( var Node : zglPAtlasNode; pData : Pointer; RowLength, Width, Height : Word );
 begin
+  {$IFNDEF USE_GLES}
   glEnable( GL_TEXTURE_2D );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, RowLength );
   glBindTexture( GL_TEXTURE_2D, Node.Texture.ID );
   glTexSubImage2D( GL_TEXTURE_2D, 0, Trunc( Node.Rect.X ), Trunc( Node.Rect.Y ), Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
   glDisable( GL_TEXTURE_2D );
+  {$ENDIF}
 end;
 
 end.

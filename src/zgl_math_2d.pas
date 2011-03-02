@@ -89,7 +89,12 @@ var
 implementation
 uses
   zgl_main,
-  zgl_opengl_all;
+  {$IFNDEF USE_GLES}
+  zgl_opengl_all
+  {$ELSE}
+  zgl_opengles_all
+  {$ENDIF}
+  ;
 
 var
   tess        : Integer;

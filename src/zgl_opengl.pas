@@ -73,6 +73,7 @@ var
   oglExtensions    : AnsiString;
   ogl3DAccelerator : Boolean;
   oglCanVSync      : Boolean;
+  oglCanAnisotropy : Boolean;
   oglCanCompressA  : Boolean;
   oglCanCompressE  : Boolean;
   oglCanAutoMipMap : Boolean;
@@ -539,8 +540,14 @@ begin
   log_Add( 'GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr( oglMaxTexUnits ) );
 
   // Anisotropy
-  glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy );
-  oglAnisotropy := oglMaxAnisotropy;
+  oglCanAnisotropy := gl_IsSupported( 'GL_EXT_texture_filter_anisotropic', oglExtensions );
+  if oglCanAnisotropy Then
+    begin
+      glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy );
+      oglAnisotropy := oglMaxAnisotropy;
+    end else
+      oglAnisotropy := 0;
+  log_Add( 'GL_EXT_TEXTURE_FILTER_ANISOTROPIC: ' + u_BoolToStr( oglCanAnisotropy ) );
   log_Add( 'GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr( oglMaxAnisotropy ) );
 
   glBlendEquation     := gl_GetProc( 'glBlendEquation' );
