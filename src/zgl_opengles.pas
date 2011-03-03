@@ -21,6 +21,9 @@
 unit zgl_opengles;
 
 {$I zgl_config.cfg}
+{$IF ( DEFINED(WINDOWS) or DEFINED(DARWIN) ) and not DEFINED(USE_GLES_ON_DESKTOP)}
+  {$ERROR Are you seriously want to compile embedded OpenGL ES code for Windows/MacOS X? :)}
+{$IFEND}
 
 interface
 uses
@@ -122,9 +125,6 @@ begin
   oglDisplay := eglGetDisplay( scrDisplay );
   {$ENDIF}
   {$IFDEF WINDOWS}
-  oglFormat := 1;
-  wndFirst  := FALSE;
-
   oglDisplay := eglGetDisplay( EGL_DEFAULT_DISPLAY );
   {$ENDIF}
 
@@ -224,6 +224,8 @@ begin
 
 {$IFDEF LINUX}
   ogl3DAccelerator := oglRenderer <> 'Software Rasterizer';
+{$ELSE}
+  ogl3DAccelerator := TRUE;
 {$ENDIF}
   if not ogl3DAccelerator Then
     u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
@@ -266,7 +268,6 @@ end;
 procedure gl_LoadEx;
 begin
   oglExtensions := glGetString( GL_EXTENSIONS );
-  log_Add( oglExtensions );
 
   // Texture size
   glGetIntegerv( GL_MAX_TEXTURE_SIZE, @oglMaxTexSize );
@@ -275,10 +276,9 @@ begin
   {oglCanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', oglExtensions );
   log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( oglCanCompressA ) );
   oglCanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
-  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanCompressE ) );
+  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanCompressE ) );}
 
-  oglCanAutoMipMap := gl_IsSupported( 'GL_SGIS_generate_mipmap', oglExtensions );
-  log_Add( 'GL_SGIS_GENERATE_MIPMAP: ' + u_BoolToStr( oglCanAutoMipMap ) );}
+  oglCanAutoMipMap := TRUE;
 
   // Multitexturing
   glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, @oglMaxTexUnits );

@@ -27,6 +27,7 @@ unit zgl_opengles_all;
 
 interface
 uses
+  math,
   {$IFDEF LINUX}
   X, XLib
   {$ENDIF}
@@ -215,6 +216,7 @@ const
   // Vertex Array
   GL_VERTEX_ARRAY                   = $8074;
   GL_NORMAL_ARRAY                   = $8075;
+  GL_COLOR_ARRAY                    = $8076;
   GL_TEXTURE_COORD_ARRAY            = $8078;
 
   // FBO
@@ -334,6 +336,7 @@ type
   procedure glEnableClientState(aarray: GLenum); stdcall; external libGLES;
   procedure glDisable(cap: GLenum); stdcall; external libGLES;
   procedure glDisableClientState(aarray: GLenum); stdcall; external libGLES;
+  function  glIsEnabled(cap: GLenum): GLboolean; stdcall; external libGLES;
   // Viewport
   procedure glViewport(x, y: GLint; width, height: GLsizei); stdcall; external libGLES;
   {$IFDEF USE_GLES_ON_DESKTOP}
@@ -346,10 +349,11 @@ type
   procedure glDepthFunc(func: GLenum); stdcall; external libGLES;
   procedure glDepthMask(flag: GLboolean); stdcall; external libGLES;
   // Color
-  procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGLES;
-  procedure glColor4ubv(v: PGLubyte);
-  procedure glColor4f(red, green, blue, alpha: GLfloat); stdcall; external libGLES;
+  procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
+  procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
+  procedure glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}
   procedure glColorMask(red, green, blue, alpha: GLboolean); stdcall; external libGLES;
+  procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGLES;
   // Alpha
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGLES;
   procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGLES;
@@ -383,10 +387,12 @@ var
   procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGLES;
   procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGLES;
   procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGLES;
-  function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer;
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat);
   procedure glTexCoord2fv(v: PGLfloat);
+  procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGLES;
+  //
+  procedure glDrawArrays(mode: GLenum; first: GLint; count: GLsizei); stdcall; external libGLES;
 var
   // FBO
   glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
@@ -442,20 +448,20 @@ const
   EGL_OPENGL_ES_BIT   = $0001;
   EGL_OPENGL_ES2_BIT  = $0004;
 
-  function eglGetProcAddress( name: PAnsiChar ) : Pointer; cdecl; external libEGL;
+  function eglGetProcAddress( name: PAnsiChar ) : Pointer; stdcall; external libEGL;
 {$IFDEF USE_PowerVR_SDK}
-  function eglGetError : GLint; cdecl; external libEGL;
-  function eglGetDisplay( display_id : EGLNativeDisplayType ) : EGLDisplay; cdecl; external libEGL;
-  function eglInitialize( dpy : EGLDisplay; major : PEGLint; minor : PEGLint ) : EGLBoolean; cdecl; external libEGL;
-  function eglTerminate( dpy : EGLDisplay ) : EGLBoolean; cdecl; external libEGL;
-  function eglChooseConfig( dpy : EGLDisplay; attrib_list : PEGLint; configs : PEGLConfig; config_size : EGLint; num_config : PEGLint ) : EGLBoolean; cdecl; external libEGL;
-  function eglCreateWindowSurface( dpy : EGLDisplay; config : EGLConfig; win : EGLNativeWindowType; attrib_list : PEGLint ) : EGLSurface; cdecl; external libEGL;
-  function eglDestroySurface( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; cdecl; external libEGL;
-  function eglSwapInterval( dpy : EGLDisplay; interval : EGLint ) : EGLBoolean; cdecl; external libEGL;
-  function eglCreateContext( dpy : EGLDisplay; config : EGLConfig; share_context : EGLContext; attrib_list : PEGLint ) : EGLContext; cdecl; external libEGL;
-  function eglDestroyContext( dpy : EGLDisplay; ctx : EGLContext ) : EGLBoolean; cdecl; external libEGL;
-  function eglMakeCurrent( dpy : EGLDisplay; draw : EGLSurface; read : EGLSurface; ctx : EGLContext ) : EGLBoolean; cdecl; external libEGL;
-  function eglSwapBuffers( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; cdecl; external libEGL;
+  function eglGetError : GLint; stdcall; external libEGL;
+  function eglGetDisplay( display_id : EGLNativeDisplayType ) : EGLDisplay; stdcall; external libEGL;
+  function eglInitialize( dpy : EGLDisplay; major : PEGLint; minor : PEGLint ) : EGLBoolean; stdcall; external libEGL;
+  function eglTerminate( dpy : EGLDisplay ) : EGLBoolean; stdcall; external libEGL;
+  function eglChooseConfig( dpy : EGLDisplay; attrib_list : PEGLint; configs : PEGLConfig; config_size : EGLint; num_config : PEGLint ) : EGLBoolean; stdcall; external libEGL;
+  function eglCreateWindowSurface( dpy : EGLDisplay; config : EGLConfig; win : EGLNativeWindowType; attrib_list : PEGLint ) : EGLSurface; stdcall; external libEGL;
+  function eglDestroySurface( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall; external libEGL;
+  function eglSwapInterval( dpy : EGLDisplay; interval : EGLint ) : EGLBoolean; stdcall; external libEGL;
+  function eglCreateContext( dpy : EGLDisplay; config : EGLConfig; share_context : EGLContext; attrib_list : PEGLint ) : EGLContext; stdcall; external libEGL;
+  function eglDestroyContext( dpy : EGLDisplay; ctx : EGLContext ) : EGLBoolean; stdcall; external libEGL;
+  function eglMakeCurrent( dpy : EGLDisplay; draw : EGLSurface; read : EGLSurface; ctx : EGLContext ) : EGLBoolean; stdcall; external libEGL;
+  function eglSwapBuffers( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall; external libEGL;
 {$ELSE}
 var
   eglGetError            : function : GLint; stdcall;
@@ -474,8 +480,22 @@ var
 
 implementation
 uses
-  zgl_log,
+  zgl_math_2d,
+  zgl_types,
   zgl_utils;
+
+var
+  RenderMode     : LongWord;
+  RenderQuad     : Boolean;
+  RenderTextured : Boolean;
+  // Buffers
+  newTriangle  : Boolean;
+  newTriangleC : Integer;
+  bColor       : LongWord;
+  bVertices    : array of array[ 0..3 ] of Single;
+  bTexCoords   : array of zglTPoint2D;
+  bColors      : array of LongWord;
+  bSize        : Integer;
 
 function InitGLES : Boolean;
 begin
@@ -492,18 +512,6 @@ begin
   eglDestroyContext      := eglGetProcAddress( 'eglDestroyContext' );
   eglMakeCurrent         := eglGetProcAddress( 'eglMakeCurrent' );
   eglSwapBuffers         := eglGetProcAddress( 'eglSwapBuffers' );
-  log_Add( 'eglGetError: ' + u_BoolToStr( Assigned( eglGetError ) ) );
-  log_Add( 'eglGetDisplay: ' + u_BoolToStr( Assigned( eglGetDisplay ) ) );
-  log_Add( 'eglInitialize: ' + u_BoolToStr( Assigned( eglInitialize ) ) );
-  log_Add( 'eglTerminate: ' + u_BoolToStr( Assigned( eglTerminate ) ) );
-  log_Add( 'eglChooseConfig: ' + u_BoolToStr( Assigned( eglChooseConfig ) ) );
-  log_Add( 'eglCreateWindowSurface: ' + u_BoolToStr( Assigned( eglCreateWindowSurface ) ) );
-  log_Add( 'eglDestroySurface: ' + u_BoolToStr( Assigned( eglDestroySurface ) ) );
-  log_Add( 'eglSwapInterval: ' + u_BoolToStr( Assigned( eglSwapInterval ) ) );
-  log_Add( 'eglCreateContext: ' + u_BoolToStr( Assigned( eglCreateContext ) ) );
-  log_Add( 'eglDestroyContext: ' + u_BoolToStr( Assigned( eglDestroyContext ) ) );
-  log_Add( 'eglMakeCurrent: ' + u_BoolToStr( Assigned( eglMakeCurrent ) ) );
-  log_Add( 'eglSwapBuffers: ' + u_BoolToStr( Assigned( eglSwapBuffers ) ) );
 
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and
@@ -536,42 +544,421 @@ end;
 
 procedure glBegin(mode: GLenum);
 begin
+  bSize := 0;
+  RenderTextured := glIsEnabled( GL_TEXTURE_2D ) > 0;
+
+  if Mode = GL_QUADS Then
+    begin
+      RenderQuad   := TRUE;
+      newTriangle  := FALSE;
+      newTriangleC := 0;
+      RenderMode   := GL_TRIANGLES;
+    end else
+      begin
+        RenderQuad := FALSE;
+        RenderMode := Mode;
+      end;
 end;
 
 procedure glEnd;
 begin
+  if RenderQuad Then
+    begin
+      if RenderTextured Then
+        begin
+          INC( bSize );
+          if bSize + 1 > length( bVertices ) Then
+            begin
+              SetLength( bVertices, bSize + 1 );
+              SetLength( bTexCoords, bSize + 1 );
+              SetLength( bColors, bSize + 1 );
+            end;
+          bVertices[ bSize - 1 ] := bVertices[ 0 ];
+          bTexCoords[ bSize - 1 ] := bTexCoords[ 0 ];
+          bColors[ bSize - 1 ] := bColors[ 0 ];
+        end else
+          begin
+            INC( bSize );
+            if bSize + 1 > length( bVertices ) Then
+              begin
+                SetLength( bVertices, bSize + 1 );
+                SetLength( bTexCoords, bSize + 1 );
+                SetLength( bColors, bSize + 1 );
+              end;
+            bVertices[ bSize - 1 ] := bVertices[ 0 ];
+            bTexCoords[ bSize - 1 ] := bTexCoords[ 0 ];
+            bColors[ bSize - 1 ] := bColors[ 0 ];
+          end;
+    end;
+
+  if bSize = 0 Then exit;
+
+  if RenderTextured Then
+    begin
+      glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+      glTexCoordPointer( 2, GL_FLOAT, 0, @bTexCoords[ 0 ] );
+    end;
+
+  glEnableClientState( GL_COLOR_ARRAY );
+  glColorPointer( 4, GL_UNSIGNED_BYTE, 0, @bColors[ 0 ] );
+
+  glEnableClientState( GL_VERTEX_ARRAY );
+  glVertexPointer( 3, GL_FLOAT, 0, @bVertices[ 0, 0 ] );
+
+  glDrawArrays( RenderMode, 0, bSize );
+
+  glDisableClientState( GL_VERTEX_ARRAY );
+  glDisableClientState( GL_COLOR_ARRAY );
+  if RenderTextured Then
+    glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+end;
+
+procedure glColor4ub(red, green, blue, alpha: GLubyte);
+begin
+  PByte( Ptr( @bColor ) + 0 )^ := red;
+  PByte( Ptr( @bColor ) + 1 )^ := green;
+  PByte( Ptr( @bColor ) + 2 )^ := blue;
+  PByte( Ptr( @bColor ) + 3 )^ := alpha;
 end;
 
 procedure glColor4ubv(v: PGLubyte);
 begin
+  bColor := PLongWord( v )^;
+end;
+
+procedure glColor4f(red, green, blue, alpha: GLfloat);
+begin
+  PByte( Ptr( @bColor ) + 0 )^ := Round( red * 255 );
+  PByte( Ptr( @bColor ) + 1 )^ := Round( green * 255 );
+  PByte( Ptr( @bColor ) + 2 )^ := Round( blue * 255 );
+  PByte( Ptr( @bColor ) + 3 )^ := Round( alpha * 255 );
 end;
 
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
+  var
+    m : array[ 1..4, 1..4 ] of Single;
+    f : Single;
 begin
+  f := 1 / tan( FOVY * pi / 360 );
+
+  m[ 1, 1 ] := f / aspect;
+  m[ 1, 2 ] := 0;
+  m[ 1, 3 ] := 0;
+  m[ 1, 4 ] := 0;
+
+  m[ 2, 1 ] := 0;
+  m[ 2, 2 ] := f;
+  m[ 2, 3 ] := 0;
+  m[ 2, 4 ] := 0;
+
+  m[ 3, 1 ] := 0;
+  m[ 3, 2 ] := 0;
+  m[ 3, 3 ] := ( zFar + zNear ) / ( zNear - zFar );
+  m[ 3, 4 ] := -1;
+
+  m[ 4, 1 ] := 0;
+  m[ 4, 2 ] := 0;
+  m[ 4, 3 ] := 2 * zFar * zNear / ( zNear - zFar );
+  m[ 4, 4 ] := 0;
+
+  glLoadMatrixf( @m[ 0, 0 ] );
 end;
 
 procedure glVertex2f(x, y: GLfloat);
 begin
+  if RenderTextured Then
+    begin
+      bVertices[ bSize - 1, 0 ] := x;
+      bVertices[ bSize - 1, 1 ] := y;
+      bVertices[ bSize - 1, 2 ] := 0;
+      bColors[ bSize - 1 ]      := bColor;
+      if RenderQuad Then
+        begin
+          if newTriangle Then
+            begin
+              INC( bSize );
+              if bSize + 1 > length( bVertices ) Then
+                begin
+                  SetLength( bVertices, bSize + 1 );
+                  SetLength( bTexCoords, bSize + 1 );
+                  SetLength( bColors, bSize + 1 );
+                end;
+              bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
+              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
+              bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
+              newTriangle := FALSE;
+            end else
+          if newTriangleC = 4 Then
+            begin
+              newTriangleC := 0;
+              INC( bSize );
+              if bSize + 1 > length( bVertices ) Then
+                begin
+                  SetLength( bVertices, bSize + 1 );
+                  SetLength( bTexCoords, bSize + 1 );
+                  SetLength( bColors, bSize + 1 );
+                end;
+              bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
+              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
+              bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+            end;
+        end;
+    end else
+      begin
+        if bSize + 1 > length( bVertices ) Then
+          begin
+            SetLength( bVertices, bSize + 1 );
+            SetLength( bTexCoords, bSize + 1 );
+            SetLength( bColors, bSize + 1 );
+          end;
+        bVertices[ bSize, 0 ] := x;
+        bVertices[ bSize, 1 ] := y;
+        bVertices[ bSize, 2 ] := 0;
+        bColors[ bSize ]      := bColor;
+        INC( bSize );
+        if RenderQuad Then
+          begin
+            INC( newTriangleC );
+            if newTriangleC = 3 Then newTriangle := TRUE;
+            if newTriangle Then
+              begin
+                INC( bSize );
+                if bSize + 1 > length( bVertices ) Then
+                  begin
+                    SetLength( bVertices, bSize + 1 );
+                    SetLength( bTexCoords, bSize + 1 );
+                    SetLength( bColors, bSize + 1 );
+                  end;
+                bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
+                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
+                bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
+                newTriangle := FALSE;
+              end else
+            if newTriangleC = 4 Then
+              begin
+                newTriangleC := 0;
+                INC( bSize );
+                if bSize + 1 > length( bVertices ) Then
+                  begin
+                    SetLength( bVertices, bSize + 1 );
+                    SetLength( bTexCoords, bSize + 1 );
+                    SetLength( bColors, bSize + 1 );
+                  end;
+                bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
+                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
+                bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+              end;
+          end;
+      end;
 end;
 
 procedure glVertex2fv(v: PGLfloat);
 begin
+  if RenderTextured Then
+    begin
+      bVertices[ bSize - 1, 0 ] := zglPPoint2D( v ).X;
+      bVertices[ bSize - 1, 1 ] := zglPPoint2D( v ).Y;
+      bVertices[ bSize - 1, 2 ] := 0;
+      bColors[ bSize - 1 ]      := bColor;
+      if RenderQuad Then
+        begin
+          if newTriangle Then
+            begin
+              INC( bSize );
+              if bSize + 1 > length( bVertices ) Then
+                begin
+                  SetLength( bVertices, bSize + 1 );
+                  SetLength( bTexCoords, bSize + 1 );
+                  SetLength( bColors, bSize + 1 );
+                end;
+              bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
+              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
+              bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
+              newTriangle := FALSE;
+            end else
+          if newTriangleC = 4 Then
+            begin
+              newTriangleC := 0;
+              INC( bSize );
+              if bSize + 1 > length( bVertices ) Then
+                begin
+                  SetLength( bVertices, bSize + 1 );
+                  SetLength( bTexCoords, bSize + 1 );
+                  SetLength( bColors, bSize + 1 );
+                end;
+              bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
+              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
+              bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+            end;
+        end;
+    end else
+      begin
+        if bSize + 1 > length( bVertices ) Then
+          begin
+            SetLength( bVertices, bSize + 1 );
+            SetLength( bTexCoords, bSize + 1 );
+            SetLength( bColors, bSize + 1 );
+          end;
+        bVertices[ bSize, 0 ] := zglPPoint2D( v ).X;
+        bVertices[ bSize, 1 ] := zglPPoint2D( v ).Y;
+        bVertices[ bSize, 2 ] := 0;
+        bColors[ bSize ]      := bColor;
+        INC( bSize );
+        if RenderQuad Then
+          begin
+            INC( newTriangleC );
+            if newTriangleC = 3 Then newTriangle := TRUE;
+            if newTriangle Then
+              begin
+                INC( bSize );
+                if bSize + 1 > length( bVertices ) Then
+                  begin
+                    SetLength( bVertices, bSize + 1 );
+                    SetLength( bTexCoords, bSize + 1 );
+                    SetLength( bColors, bSize + 1 );
+                  end;
+                bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
+                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
+                bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
+                newTriangle := FALSE;
+              end else
+            if newTriangleC = 4 Then
+              begin
+                newTriangleC := 0;
+                INC( bSize );
+                if bSize + 1 > length( bVertices ) Then
+                  begin
+                    SetLength( bVertices, bSize + 1 );
+                    SetLength( bTexCoords, bSize + 1 );
+                    SetLength( bColors, bSize + 1 );
+                  end;
+                bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
+                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
+                bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+              end;
+          end;
+      end;
 end;
 
 procedure glVertex3f(x, y, z: GLfloat);
 begin
-end;
-
-function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer;
-begin
+  if RenderTextured Then
+    begin
+      bVertices[ bSize - 1, 0 ] := x;
+      bVertices[ bSize - 1, 1 ] := y;
+      bVertices[ bSize - 1, 2 ] := z;
+      bColors[ bSize - 1 ]      := bColor;
+      if RenderQuad Then
+        begin
+          if newTriangle Then
+            begin
+              INC( bSize );
+              if bSize + 1 > length( bVertices ) Then
+                begin
+                  SetLength( bVertices, bSize + 1 );
+                  SetLength( bTexCoords, bSize + 1 );
+                  SetLength( bColors, bSize + 1 );
+                end;
+              bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
+              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
+              bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
+              newTriangle := FALSE;
+            end else
+          if newTriangleC = 4 Then
+            begin
+              newTriangleC := 0;
+              INC( bSize );
+              if bSize + 1 > length( bVertices ) Then
+                begin
+                  SetLength( bVertices, bSize + 1 );
+                  SetLength( bTexCoords, bSize + 1 );
+                  SetLength( bColors, bSize + 1 );
+                end;
+              bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
+              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
+              bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+            end;
+        end;
+    end else
+      begin
+        if bSize + 1 > length( bVertices ) Then
+          begin
+            SetLength( bVertices, bSize + 1 );
+            SetLength( bTexCoords, bSize + 1 );
+            SetLength( bColors, bSize + 1 );
+          end;
+        bVertices[ bSize, 0 ] := x;
+        bVertices[ bSize, 1 ] := y;
+        bVertices[ bSize, 2 ] := z;
+        bColors[ bSize ]      := bColor;
+        INC( bSize );
+        if RenderQuad Then
+          begin
+            INC( newTriangleC );
+            if newTriangleC = 3 Then newTriangle := TRUE;
+            if newTriangle Then
+              begin
+                INC( bSize );
+                if bSize + 1 > length( bVertices ) Then
+                  begin
+                    SetLength( bVertices, bSize + 1 );
+                    SetLength( bTexCoords, bSize + 1 );
+                    SetLength( bColors, bSize + 1 );
+                  end;
+                bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
+                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
+                bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
+                newTriangle := FALSE;
+              end else
+            if newTriangleC = 4 Then
+              begin
+                newTriangleC := 0;
+                INC( bSize );
+                if bSize + 1 > length( bVertices ) Then
+                  begin
+                    SetLength( bVertices, bSize + 1 );
+                    SetLength( bTexCoords, bSize + 1 );
+                    SetLength( bColors, bSize + 1 );
+                  end;
+                bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
+                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
+                bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+              end;
+          end;
+      end;
 end;
 
 procedure glTexCoord2f(s, t: GLfloat);
 begin
+  if bSize + 1 > length( bVertices ) Then
+    begin
+      SetLength( bVertices, bSize + 1 );
+      SetLength( bTexCoords, bSize + 1 );
+      SetLength( bColors, bSize + 1 );
+    end;
+  bTexCoords[ bSize ].X := s;
+  bTexCoords[ bSize ].Y := t;
+  INC( bSize );
+  INC( newTriangleC );
+
+  if newTriangleC = 3 Then
+    newTriangle := TRUE;
 end;
 
 procedure glTexCoord2fv(v: PGLfloat);
 begin
+  if bSize + 1 > length( bVertices ) Then
+    begin
+      SetLength( bVertices, bSize + 1 );
+      SetLength( bTexCoords, bSize + 1 );
+      SetLength( bColors, bSize + 1 );
+    end;
+  bTexCoords[ bSize ] := zglPPoint2D( v )^;
+  INC( bSize );
+  INC( newTriangleC );
+
+  if newTriangleC = 3 Then
+    newTriangle := TRUE;
 end;
 
 end.

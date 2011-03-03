@@ -188,6 +188,7 @@ begin
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
+  {$IFNDEF USE_GLES}
   if ( not oglCanAutoMipMap ) and ( Texture.Flags and TEX_MIPMAP > 0 ) Then
     begin
       if Texture.Flags and TEX_COMPRESS = 0 Then
@@ -195,6 +196,7 @@ begin
       else
         gluBuild2DMipmaps( GL_TEXTURE_2D, cformat, Texture.Width, Texture.Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
     end else
+  {$ENDIF}
       begin
         if Texture.Flags and TEX_COMPRESS = 0 Then
           glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Texture.Width, Texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData )
