@@ -241,7 +241,6 @@ begin
   glHint( GL_LINE_SMOOTH_HINT,            GL_NICEST );
   glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
   glHint( GL_FOG_HINT,                    GL_DONT_CARE );
-  glHint( GL_SHADE_MODEL,                 GL_NICEST );
   glShadeModel( GL_SMOOTH );
 
   glClearColor( 0, 0, 0, 0 );
