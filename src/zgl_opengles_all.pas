@@ -321,7 +321,7 @@ type
   // Clear
   procedure glClear(mask: GLbitfield); stdcall; external libGLES;
   procedure glClearColor(red, green, blue, alpha: GLclampf); stdcall; external libGLES;
-  {$IFDEF USE_GLES_ON_DESKTOP}
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and not DEFINED(USE_PowerVR_SDK)}
   procedure glClearDepth(depth: GLclampd); stdcall; external libGLES;
   {$ELSE}
   procedure glClearDepth(depth: GLclampf); stdcall; external libGLES name 'glClearDepthf';
@@ -339,7 +339,7 @@ type
   function  glIsEnabled(cap: GLenum): GLboolean; stdcall; external libGLES;
   // Viewport
   procedure glViewport(x, y: GLint; width, height: GLsizei); stdcall; external libGLES;
-  {$IFDEF USE_GLES_ON_DESKTOP}
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and not DEFINED(USE_PowerVR_SDK)}
   procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble); stdcall; external libGLES;
   {$ELSE}
   procedure glOrtho(left, right, bottom, top, zNear, zFar: GLfloat); stdcall; external libGLES name 'glOrthof';
