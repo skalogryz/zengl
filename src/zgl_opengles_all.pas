@@ -492,7 +492,7 @@ var
   newTriangle  : Boolean;
   newTriangleC : Integer;
   bColor       : LongWord;
-  bVertices    : array of array[ 0..3 ] of Single;
+  bVertices    : array of array[ 0..2 ] of Single;
   bTexCoords   : array of zglTPoint2D;
   bColors      : array of LongWord;
   bSize        : Integer;
