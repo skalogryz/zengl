@@ -591,8 +591,11 @@ end;
 
 function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
   var
-    i : Integer;
-    f : LongWord;
+    i   : Integer;
+    fmt : LongWord;
+  {$IFNDEF USE_OPENAL}
+    buffDesc : zglTBufferDesc;
+  {$ENDIF}
 begin
   Result := nil;
 
@@ -602,7 +605,7 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerSound.Formats[ i ].Extension Then
-      managerSound.Formats[ i ].MemLoader( Memory, Result.Data, Result.Size, f, Result.Frequency );
+      managerSound.Formats[ i ].MemLoader( Memory, Result.Data, Result.Size, fmt, Result.Frequency );
 
   if not Assigned( Result.Data ) Then
     begin
@@ -611,11 +614,57 @@ begin
       exit;
     end;
 
+  case fmt of
+    {$IFDEF USE_OPENAL}
+    SND_FORMAT_MONO8: fmt := AL_FORMAT_MONO8;
+    SND_FORMAT_MONO16: fmt := AL_FORMAT_MONO16;
+    SND_FORMAT_STEREO8: fmt := AL_FORMAT_STEREO8;
+    SND_FORMAT_STEREO16: fmt := AL_FORMAT_STEREO16;
+    {$ELSE}
+    SND_FORMAT_MONO8:
+      begin
+        buffDesc.ChannelNumber := 1;
+        buffDesc.BitsPerSample := 8;
+      end;
+    SND_FORMAT_MONO16:
+      begin
+        buffDesc.ChannelNumber := 1;
+        buffDesc.BitsPerSample := 16;
+      end;
+    SND_FORMAT_STEREO8:
+      begin
+        buffDesc.ChannelNumber := 2;
+        buffDesc.BitsPerSample := 8;
+      end;
+    SND_FORMAT_STEREO16:
+      begin
+        buffDesc.ChannelNumber := 2;
+        buffDesc.BitsPerSample := 16;
+      end;
+    {$ENDIF}
+  else
+    begin
+      log_Add( 'Unable to determinate sound format: From memory' );
+      snd_Del( Result );
+      exit;
+    end;
+  end;
+
 {$IFDEF USE_OPENAL}
-  alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
+  alBufferData( Result.Buffer, fmt, Result.Data, Result.Size, Result.Frequency );
   FreeMem( Result.Data );
 {$ELSE}
-  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
+  with buffDesc do
+    begin
+      FormatCode     := 1;
+      SampleRate     := Result.Frequency;
+      BitsPerSample  := 16;
+      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
+      BytesPerSecond := SampleRate * BytesPerSample;
+      cbSize         := SizeOf( buffDesc );
+    end;
+
+  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, @buffDesc );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
   for i := 1 to Result.SourceCount - 1 do
     dsDevice.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
