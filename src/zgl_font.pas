@@ -327,11 +327,11 @@ end;
 
 initialization
   fntID[ 13 ] := #0;
-  if SizeOf( Char ) = 1 Then
-    font_GetCID := font_GetCP1251ID
   {$IFNDEF FPC}
+  if SizeOf( Char ) = 2 Then
+    font_GetCID := font_GetUTF16ID
   else
-    font_GetCID := font_GetUTF16ID;
   {$ENDIF}
+    font_GetCID := font_GetCP1251ID;
 
 end.

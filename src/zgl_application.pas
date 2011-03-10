@@ -98,7 +98,11 @@ uses
   zgl_main,
   zgl_screen,
   zgl_window,
+  {$IFNDEF USE_GLES}
   zgl_opengl,
+  {$ELSE}
+  zgl_opengles,
+  {$ENDIF}
   zgl_opengl_simple,
   zgl_mouse,
   zgl_keyboard,
@@ -605,14 +609,27 @@ begin
         else
           if appFlags and APP_USE_UTF8 > 0 Then
             begin
-              len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
-              WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
-              str := '';
-              for i := 0 to len - 1 do
-                str := str + c[ i ];
-              if str <> '' Then
-                key_InputText( str );
+              {$IFNDEF FPC}
+              if SizeOf( Char ) = 1 Then
+                begin
+              {$ENDIF}
+                  len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
+                  WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
+                  str := '';
+                  for i := 0 to len - 1 do
+                    str := str + c[ i ];
+                  if str <> '' Then
+                    key_InputText( str );
+              {$IFNDEF FPC}
+                end else
+                  key_InputText( Char( wParam ) );
+              {$ENDIF}
             end else
+            {$IFNDEF FPC}
+              if SizeOf( Char ) = 2 Then
+                key_InputText( Char( wParam ) )
+              else
+            {$ENDIF}
               if wParam < 128 Then
                 key_InputText( Char( CP1251_TO_UTF8[ wParam ] ) )
               else
