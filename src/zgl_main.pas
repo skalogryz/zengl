@@ -36,7 +36,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.2.1';
+  cs_ZenGL    = 'ZenGL 0.3';
   cs_Date     = '2011.03.10';
   cv_major    = 0;
   cv_minor    = 2;
@@ -599,8 +599,8 @@ begin
       {$IFNDEF FPC}
       if SizeOf( Char ) = 2 Then
         font_GetCID := font_GetUTF16ID
-      {$ENDIF}
       else
+      {$ENDIF}
         font_GetCID := font_GetUTF8ID;
     end;
 
