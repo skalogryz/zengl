@@ -172,10 +172,14 @@ begin
   {$Q+}
 {$ENDIF}
 {$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
   m := SetThreadAffinityMask( GetCurrentThread(), 1 );
+  {$ENDIF}
   QueryPerformanceCounter( t );
   Result := 1000 * T * t_freq - t_start;
+  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), m );
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF DARWIN}
   Microseconds( t );
@@ -198,7 +202,9 @@ end;
 
 initialization
 {$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), 1 );
+  {$ENDIF}
   QueryPerformanceFrequency( t_frequency );
   t_freq := 1 / t_frequency;
 {$ENDIF}

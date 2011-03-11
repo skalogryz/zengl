@@ -48,6 +48,14 @@ const
     libEGL  = 'libEGL.so';
     libGLES = 'libGLES_CM.so';
     {$ENDIF}
+    {$IFDEF WINDOWS}
+    libEGL  = 'libEGL.dll';
+    libGLES = 'libGLES_CM.dll';
+    {$ENDIF}
+    {$IFDEF DARWIN}
+    libEGL  = '';
+    libGLES = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
+    {$ENDIF}
   {$ELSE}
     {$IFDEF LINUX}
       {$IFDEF USE_PowerVR_SDK}
@@ -449,7 +457,7 @@ const
   EGL_OPENGL_ES2_BIT  = $0004;
 
   function eglGetProcAddress( name: PAnsiChar ) : Pointer; stdcall; external libEGL;
-{$IFDEF USE_PowerVR_SDK}
+{$IFNDEF USE_AMD_DRIVERS}
   function eglGetError : GLint; stdcall; external libEGL;
   function eglGetDisplay( display_id : EGLNativeDisplayType ) : EGLDisplay; stdcall; external libEGL;
   function eglInitialize( dpy : EGLDisplay; major : PEGLint; minor : PEGLint ) : EGLBoolean; stdcall; external libEGL;
@@ -499,7 +507,7 @@ var
 
 function InitGLES : Boolean;
 begin
-  {$IFNDEF USE_PowerVR_SDK}
+  {$IFDEF USE_AMD_DRIVERS}
   eglGetError            := eglGetProcAddress( 'eglGetError' );
   eglGetDisplay          := eglGetProcAddress( 'eglGetDisplay' );
   eglInitialize          := eglGetProcAddress( 'eglInitialize' );

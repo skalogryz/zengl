@@ -153,7 +153,7 @@ var
   pngZStream      : z_stream_s;
   pngZData        : Pointer;
 
-  pngRowUsed      : Boolean = TRUE;
+  pngRowUsed      : Boolean;
   pngRowSize      : LongWord;
   pngRowBuffer    : array[ Boolean ] of PByteArray;
   pngOffset       : LongWord;
@@ -519,6 +519,7 @@ begin
   {$IFDEF ENDIAN_BIG}
   forceNoSwap := TRUE;
   {$ENDIF}
+  pngRowUsed := TRUE;
   mem_Read( pngMem, pngSignature[ 0 ], 8 );
 
   if pngSignature <> PNG_SIGNATURE Then
@@ -585,7 +586,6 @@ _exit:
     pngHasIDAT  := FALSE;
     pngHastRNS  := FALSE;
     pngHeaderOk := FALSE;
-    pngRowUsed  := TRUE;
     {$IFDEF ENDIAN_BIG}
     forceNoSwap := FALSE;
     {$ENDIF}

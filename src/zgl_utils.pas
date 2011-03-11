@@ -77,15 +77,25 @@ function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 
 function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ):longint;cdecl;external 'libc';
 {$ENDIF}
-
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 {$ENDIF}
+{$IFDEF WINCE}
+function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
+function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
+function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
+
+function u_GetPWideChar( const Str : String ) : PWideChar;
+{$ENDIF}
 
 implementation
 uses
+  {$IFDEF WINCE}
+  zgl_application,
+  zgl_main,
+  {$ENDIF}
   zgl_font,
   zgl_log;
 
@@ -173,6 +183,24 @@ begin
   Result[ len ] := #0;
   System.Move( Str[ 1 ], Result^, len * SizeOf( Char ) );
 end;
+
+{$IFDEF WINCE}
+function u_GetPWideChar( const Str : String ) : PWideChar;
+  var
+    len    : Integer;
+    newStr : String;
+begin
+  if appFlags and APP_USE_UTF8 = 0 Then
+    newStr := AnsiToUtf8( Str )
+  else
+    newStr := Str;
+
+  len := MultiByteToWideChar( CP_UTF8, 0, @newStr[ 1 ], length( newStr ), nil, 0 );
+  GetMem( Result, len * 2 + 2 );
+  Result[ len ] := #0;
+  MultiByteToWideChar( CP_UTF8, 0, @newStr[ 1 ], length( newStr ), Result, len );
+end;
+{$ENDIF}
 
 function u_StrUp( const Str : String ) : String;
   var
@@ -358,12 +386,21 @@ procedure u_Error( const ErrStr : String );
   var
     outItemHit: SInt16;
   {$ENDIF}
+  {$IFDEF WINCE}
+  var
+    wideStr : PWideChar;
+  {$ENDIF}
 begin
 {$IFDEF LINUX}
   WriteLn( 'ERROR: ' + ErrStr );
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
   MessageBox( 0, PChar( ErrStr ), 'ERROR!', MB_OK or MB_ICONERROR );
+{$ENDIF}
+{$IFDEF WINCE}
+  //wideStr := u_GetPWideChar( ErrStr );
+  //MessageBox( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
+  //FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF DARWIN}
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
@@ -377,12 +414,21 @@ procedure u_Warning( const ErrStr : String );
   var
     outItemHit: SInt16;
   {$ENDIF}
+  {$IFDEF WINCE}
+  var
+    wideStr : PWideChar;
+  {$ENDIF}
 begin
 {$IFDEF LINUX}
   WriteLn( 'WARNING: ' + ErrStr );
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
   MessageBox( 0, PChar( ErrStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
+{$ENDIF}
+{$IFDEF WINCE}
+  //wideStr := u_GetPWideChar( ErrStr );
+  //MessageBox( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
+  //FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF DARWIN}
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );

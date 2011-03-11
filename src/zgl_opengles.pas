@@ -21,7 +21,7 @@
 unit zgl_opengles;
 
 {$I zgl_config.cfg}
-{$IF ( DEFINED(WINDOWS) or DEFINED(DARWIN) ) and not DEFINED(USE_GLES_ON_DESKTOP)}
+{$IF ( DEFINED(WIN32) or DEFINED(WIN64) or DEFINED(DARWIN) ) and not DEFINED(USE_GLES_ON_DESKTOP)}
   {$ERROR Are you seriously want to compile embedded OpenGL ES code for Windows/MacOS X? :)}
 {$IFEND}
 
@@ -29,6 +29,9 @@ interface
 uses
   {$IFDEF LINUX}
   X, XLib, XUtil,
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  windows,
   {$ENDIF}
   zgl_opengles_all;
 
@@ -130,7 +133,7 @@ begin
 
   if not eglInitialize( oglDisplay, @i, @j ) Then
     begin
-      log_Add( 'eglInitialize failed' + u_IntToStr( eglGetError() ) );
+      log_Add( 'eglInitialize failed: ' + u_IntToStr( eglGetError() ) );
       exit;
     end;
 

@@ -27,9 +27,11 @@ uses
   zgl_types;
 
 {$IFDEF FPC}
+  {$IFDEF WINDESKTOP}
   {$LINKLIB libmsvcrt.a}
 
   function pow( x : cdouble ) : cdouble; cdecl; external 'msvcrt.dll';
+  {$ENDIF}
 {$ELSE}
   function memcpy( dest : Pointer; src : Pointer; count : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';
   function memset( dest : Pointer; c : Integer; count : csize_t ) : Pointer; cdecl; external 'msvcrt.dll';

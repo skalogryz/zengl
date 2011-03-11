@@ -76,9 +76,9 @@ function _file_GetName( const FileName : String ) : PChar;
 function _file_GetExtension( const FileName : String ) : PChar;
 function _file_GetDirectory( const FileName : String ) : PChar;
 
-{$IFDEF DARWIN}
-function darwin_GetRes( const FileName : String ) : String;
-{$ENDIF}
+{$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+function platform_GetRes( const FileName : String ) : String;
+{$IFEND}
 
 {$IFDEF LINUX_OR_DARWIN}
 const
@@ -91,13 +91,16 @@ const
 
 implementation
 uses
-  {$IFDEF DARWIN}
+  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
   zgl_application,
-  {$ENDIF}
+  {$IFEND}
   zgl_utils;
 
 var
   filePath : String = '';
+  {$IFDEF WINCE}
+  wideStr : PWideChar;
+  {$ENDIF}
 
 function GetDir( const Path : String ) : String;
   var
@@ -119,12 +122,21 @@ begin
     FOM_OPENRW: FileHandle := FpOpen( filePath + FileName, O_RdWr );
   end;
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
   case Mode of
-    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
     FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
     FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
+{$ENDIF}
+{$IFDEF WINCE}
+  wideStr := u_GetPWideChar( platform_GetRes( filePath + FileName ) );
+  case Mode of
+    FOM_CREATE: FileHandle := CreateFile( wideStr, GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_OPENR:  FileHandle := CreateFile( wideStr, GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
+    FOM_OPENRW: FileHandle := CreateFile( wideStr, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+  end;
+  FreeMem( wideStr );
 {$ENDIF}
   Result := FileHandle <> FILE_ERROR;
 end;
@@ -134,8 +146,13 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := FpMkdir( Directory, MODE_MKDIR ) = FILE_ERROR;
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
   Result := CreateDirectory( PChar( Directory ), nil );
+{$ENDIF}
+{$IFDEF WINCE}
+  wideStr := u_GetPWideChar( platform_GetRes( Directory ) );
+  Result := CreateDirectory( wideStr, nil );
+  FreeMem( wideStr );
 {$ENDIF}
 end;
 
@@ -162,8 +179,14 @@ begin
   FpStat( filePath + Name, status );
   dir := fpS_ISDIR( status.st_mode );
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
+  {$IFNDEF WINCE}
   attr := GetFileAttributes( PChar( filePath + Name ) );
+  {$ELSE}
+  wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+  attr    := GetFileAttributes( wideStr );
+  FreeMem( wideStr );
+  {$ENDIF}
   dir  := attr and FILE_ATTRIBUTE_DIRECTORY > 0;
 {$ENDIF}
 
@@ -182,15 +205,20 @@ begin
       {$IFDEF LINUX_OR_DARWIN}
       Result := FpRmdir( filePath + Name ) = 0;
       {$ENDIF}
-      {$IFDEF WINDOWS}
+      {$IFDEF WINDESKTOP}
       Result := RemoveDirectory( PChar( filePath + Name ) );
       {$ENDIF}
     end else
       {$IFDEF LINUX_OR_DARWIN}
       Result := FpUnlink( filePath + Name ) = 0;
       {$ENDIF}
-      {$IFDEF WINDOWS}
+      {$IFDEF WINDESKTOP}
       Result := DeleteFile( PChar( filePath + Name ) );
+      {$ENDIF}
+      {$IFDEF WINCE}
+      wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+      Result  := DeleteFile( wideStr );
+      FreeMem( wideStr );
       {$ENDIF}
 end;
 
@@ -203,8 +231,13 @@ begin
 {$IFDEF LINUX_OR_DARWIN}
   Result := FpStat( filePath + Name, status ) = 0;
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDESKTOP}
   Result := GetFileAttributes( PChar( filePath + Name ) ) <> $FFFFFFFF;
+{$ENDIF}
+{$IFDEF WINCE}
+  wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+  Result  := GetFileAttributes( wideStr ) <> $FFFFFFFF;
+  FreeMem( wideStr )
 {$ENDIF}
 end;
 
@@ -315,7 +348,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
   {$IFDEF WINDOWS}
   var
     First : THandle;
-    FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
+    FList : WIN32_FIND_DATA;
   {$ENDIF}
 begin
   List.Count := 0;
@@ -338,7 +371,13 @@ begin
   FpCloseDir( dir^ );
 {$ENDIF}
 {$IFDEF WINDOWS}
+  {$IFNDEF WINCE}
   First := FindFirstFile( PChar( GetDir( filePath + Directory ) + '*' ), FList );
+  {$ELSE}
+  wideStr := u_GetPWideChar( platform_GetRes( filePath + Directory ) + '*' );
+  First   := FindFirstFile( wideStr, FList );
+  FreeMem( wideStr );
+  {$ENDIF}
   repeat
     if FindDir Then
       begin
@@ -408,13 +447,25 @@ begin
 end;
 
 {$IFDEF DARWIN}
-function darwin_GetRes( const FileName : String ) : String;
+function platform_GetRes( const FileName : String ) : String;
   var
     len : Integer;
 begin
   len := length( FileName );
   if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := appWorkDir + 'Contents/Resources/' + FileName
+  else
+    Result := FileName;
+end;
+{$ENDIF}
+{$IFDEF WINCE}
+function platform_GetRes( const FileName : String ) : String;
+  var
+    len : Integer;
+begin
+  len := length( FileName );
+  if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) and ( FileName[ 1 ] <> '\' ) Then
+    Result := appWorkDir + FileName
   else
     Result := FileName;
 end;

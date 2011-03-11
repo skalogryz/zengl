@@ -504,11 +504,11 @@ begin
 
   if not sndInitialized Then exit;
 
-  {$IFDEF DARWIN}
-  if not file_Exists( darwin_GetRes( FileName ) ) Then
+  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+  if not file_Exists( platform_GetRes( FileName ) ) Then
   {$ELSE}
   if not file_Exists( FileName ) Then
-  {$ENDIF}
+  {$IFEND}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -517,11 +517,11 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
-      {$IFDEF DARWIN}
-      managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
+      {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+      managerSound.Formats[ i ].FileLoader( platform_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
       {$ELSE}
       managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
-      {$ENDIF}
+      {$IFEND}
 
   if not Assigned( Result.Data ) Then
     begin
@@ -1087,11 +1087,11 @@ begin
         FreeMem( sfStream[ Result ]._data );
     end;
 
-  {$IFDEF DARWIN}
-  if not file_Exists( darwin_GetRes( FileName ) ) Then
+  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+  if not file_Exists( platform_GetRes( FileName ) ) Then
   {$ELSE}
   if not file_Exists( FileName ) Then
-  {$ENDIF}
+  {$IFEND}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -1108,11 +1108,11 @@ begin
     sfStream[ Result ].Loop := Loop;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or
-  {$IFDEF DARWIN}
-     ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], darwin_GetRes( FileName ) ) ) Then
+  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+     ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], platform_GetRes( FileName ) ) ) Then
   {$ELSE}
      ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
-  {$ENDIF}
+  {$IFEND}
     begin
       sfStream[ Result ]._decoder := nil;
       log_Add( 'Cannot play: "' + FileName + '"' );

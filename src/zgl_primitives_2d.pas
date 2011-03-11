@@ -112,8 +112,8 @@ end;
 
 procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
- if FX and PR2D_FILL > 0 Then
-   begin
+  if FX and PR2D_FILL > 0 Then
+    begin
       if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );

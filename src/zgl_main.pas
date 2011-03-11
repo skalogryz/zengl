@@ -148,9 +148,9 @@ uses
   zgl_opengles_all,
   {$ENDIF}
   zgl_opengl_simple,
-  {$IFDEF LINUX}
+  {$IF DEFINED(LINUX) or DEFINED(WINCE)}
   zgl_file,
-  {$ENDIF}
+  {$IFEND}
   zgl_timers,
   zgl_log,
   zgl_render_2d,
@@ -434,7 +434,9 @@ begin
     DIRECTORY_APPLICATION: Result := Ptr( PChar( appWorkDir ) );
     DIRECTORY_HOME: Result := Ptr( PChar( appHomeDir ) );
 
-    LOG_FILENAME: Result := Ptr( @logfile );
+    LOG_FILENAME:
+      if not appWork Then
+        Result := Ptr( @logfile );
 
     DESKTOP_WIDTH:
     {$IFDEF LINUX}
@@ -511,11 +513,17 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   var
+    {$IFDEF WINDESKTOP}
     buffer : PChar;
     fn, fp : PChar;
     t      : array[ 0..MAX_PATH - 1 ] of Char;
+    {$ELSE}
+    fn     : PWideChar;
+    len    : Integer;
+    {$ENDIF}
 begin
   wndINST := GetModuleHandle( nil );
+  {$IFDEF WINDESKTOP}
   GetMem( buffer, 65535 );
   GetMem( fn, 65535 );
   GetModuleFileName( wndINST, fn, 65535 );
@@ -527,6 +535,15 @@ begin
   appHomeDir := appHomeDir + '\';
 
   FreeMem( buffer );
+  {$ELSE}
+  GetMem( fn, 65535 * 2 );
+  GetModuleFileName( wndINST, fn, 65535 );
+
+  len := WideCharToMultiByte( CP_UTF8, 0, fn, 65535, nil, 0, nil, nil );
+  SetLength( appWorkDir, len );
+  WideCharToMultiByte( CP_UTF8, 0, fn, 65535, @appWorkDir[ 1 ], len, nil, nil );
+  appWorkDir := file_GetDirectory( appWorkDir );
+  {$ENDIF}
   FreeMem( fn );
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -542,9 +559,6 @@ begin
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   appWorkDir  := appPath + '/';
   appHomeDir  := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
-
-  if logFile = 'log.txt' Then
-    logFile := PChar( appWorkDir + '../log.txt' );
 {$ENDIF}
   appGotSysDirs := TRUE;
 end;
