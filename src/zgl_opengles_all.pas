@@ -528,10 +528,19 @@ begin
   if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLES_CM );
   if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1 );
 
+  {$IFDEF USE_GLES_SOFTWARE}
+  glesLibrary := dlopen( 'libGLES_CM_NoE.dll' );
+  {$ELSE}
   glesLibrary := dlopen( libGLES_CM );
   if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1 );
-  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( 'libGLES_CM_NoE.dll' );
   {$ENDIF}
+  {$ENDIF}
+
+  if ( eglLibrary = LIB_ERROR ) or ( glesLibrary = LIB_ERROR ) Then
+    begin
+      Result := FALSE;
+      exit;
+    end;
 
   eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
