@@ -390,7 +390,6 @@ var
   glPixelStorei       : procedure(pname: GLenum; param: GLint); stdcall;
   glTexImage2D        : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall;
   glTexSubImage2D     : procedure(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall;
-  glGetTexImage       : procedure(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall;
   glCopyTexSubImage2D : procedure(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall;
   glTexEnvi           : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
   // TexCoords
@@ -424,6 +423,8 @@ var
   procedure glVertex2f(x, y: GLfloat);
   procedure glVertex2fv(v: PGLfloat);
   procedure glVertex3f(x, y, z: GLfloat);
+  // Texture
+  procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat);
   procedure glTexCoord2fv(v: PGLfloat);
@@ -619,11 +620,16 @@ begin
   glPixelStorei        := dlsym( glesLibrary, 'glPixelStorei' );
   glTexImage2D         := dlsym( glesLibrary, 'glTexImage2D' );
   glTexSubImage2D      := dlsym( glesLibrary, 'glTexSubImage2D' );
-  glGetTexImage        := dlsym( glesLibrary, 'glGetTexImage' );
   glCopyTexSubImage2D  := dlsym( glesLibrary, 'glCopyTexSubImage2D' );
   glTexEnvi            := dlsym( glesLibrary, 'glTexEnvi' );
   glTexCoordPointer    := dlsym( glesLibrary, 'glTexCoordPointer' );
   glDrawArrays         := dlsym( glesLibrary, 'glDrawArrays' );
+
+  // OpenGL ES 1.0
+  if not Assigned( glTexParameteri ) Then
+    glTexParameteri    := dlsym( glesLibrary, 'glTexParameterx' );
+  if not Assigned( glTexEnvi ) Then
+    glTexEnvi          := dlsym( glesLibrary, 'glTexEnvx' );
 
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and
@@ -1059,6 +1065,10 @@ begin
               end;
           end;
       end;
+end;
+
+procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
+begin
 end;
 
 procedure glTexCoord2f(s, t: GLfloat);
