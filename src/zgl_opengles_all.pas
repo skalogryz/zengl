@@ -626,14 +626,34 @@ begin
 end;
 
 function gl_GetProc( const Proc : AnsiString ) : Pointer;
+  {$IFDEF WINCE}
+  var
+    wideStr : PWideChar;
+  {$ENDIF}
 begin
   Result := eglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := eglGetProcAddress( PAnsiChar( Proc + 'OES' ) );
+
+  {$IFNDEF WINCE}
   if Result = nil Then
     Result := dlsym( glesLibrary, PAnsiChar( Proc ) );
   if Result = nil Then
     Result := dlsym( glesLibrary, PAnsiChar( Proc + 'OES' ) );
+  {$ELSE}
+  if Result = nil Then
+    begin
+      wideStr := u_GetPWideChar( Proc );
+      Result  := dlsym( glesLibrary, wideStr );
+      FreeMem( wideStr );
+    end;
+  if Result = nil Then
+    begin
+      wideStr := u_GetPWideChar( Proc + 'OES' );
+      Result  := dlsym( glesLibrary, wideStr );
+      FreeMem( wideStr );
+    end;
+  {$ENDIF}
 end;
 
 function gl_IsSupported( const Extension, SearchIn: AnsiString ) : Boolean;
