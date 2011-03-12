@@ -45,12 +45,16 @@ function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
 const
   {$IFNDEF USE_GLES_ON_DESKTOP}
     {$IFDEF LINUX}
-    libEGL  = 'libEGL.so';
-    libGLES = 'libGLES_CM.so';
+    libEGL     = 'libEGL.so';
+    libGLES_CM = 'libGLES_CM.so';
+    libGLESv1  = 'libGLESv1.so';
+    libGLESv2  = 'libGLESv2.so';
     {$ENDIF}
     {$IFDEF WINDOWS}
-    libEGL  = 'libEGL.dll';
-    libGLES = 'libGLES_CM.dll';
+    libEGL     = 'libEGL.dll';
+    libGLES_CM = 'libGLES_CM.dll';
+    libGLESv1  = 'libGLESv1.dll';
+    libGLESv2  = 'libGLESv2.dll';
     {$ENDIF}
     {$IFDEF DARWIN}
     libEGL  = '';
@@ -58,17 +62,23 @@ const
     {$ENDIF}
   {$ELSE}
     {$IFDEF LINUX}
-      {$IFDEF USE_PowerVR_SDK}
-      libEGL  = 'libEGL.so';
-      libGLES = 'libGLES_CM.so';
+      {$IFNDEF USE_AMD_DRIVER}
+      libEGL     = 'libEGL.so';
+      libGLES_CM = 'libGLES_CM.so';
+      libGLESv1  = 'libGLESv1.so';
+      libGLESv2  = 'libGLESv2.so';
       {$ELSE}
-      libEGL  = 'libGL.so.1';
-      libGLES = 'libGL.so.1';
+      libEGL     = 'libGL.so.1';
+      libGLES_CM = 'libGL.so.1';
+      libGLESv1  = 'libGL.so.1';
+      libGLESv2  = 'libGL.so.1';
       {$ENDIF}
     {$ENDIF}
     {$IFDEF WINDOWS}
-    libEGL  = 'libEGL.dll';
-    libGLES = 'libGLES_CM.dll';
+    libEGL     = 'libEGL.dll';
+    libGLES_CM = 'libGLES_CM.dll';
+    libGLESv1  = 'libGLESv1.dll';
+    libGLESv2  = 'libGLESv2.dll';
     {$ENDIF}
   {$ENDIF}
 
@@ -319,102 +329,104 @@ type
 { GLvoid     = void; }        PGLvoid     = Pointer;
                               PPGLvoid    = ^PGLvoid;
 
-  function  glGetString(name: GLenum): PAnsiChar; stdcall; external libGLES;
-  procedure glHint(target, mode: GLenum); stdcall; external libGLES;
-
-  procedure glShadeModel(mode: GLenum); stdcall; external libGLES;
-
-  procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall; external libGLES;
-
+var
+  glGetString  : function(name: GLenum): PAnsiChar; stdcall;
+  glHint       : procedure(target, mode: GLenum); stdcall;
+  glShadeModel : procedure(mode: GLenum); stdcall;
+  glReadPixels : procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall;
   // Clear
-  procedure glClear(mask: GLbitfield); stdcall; external libGLES;
-  procedure glClearColor(red, green, blue, alpha: GLclampf); stdcall; external libGLES;
-  {$IF DEFINED(USE_GLES_ON_DESKTOP) and not DEFINED(USE_PowerVR_SDK)}
-  procedure glClearDepth(depth: GLclampd); stdcall; external libGLES;
+  glClear      : procedure(mask: GLbitfield); stdcall;
+  glClearColor : procedure(red, green, blue, alpha: GLclampf); stdcall;
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  glClearDepth : procedure(depth: GLclampd); stdcall;
   {$ELSE}
-  procedure glClearDepth(depth: GLclampf); stdcall; external libGLES name 'glClearDepthf';
+  glClearDepth : procedure(depth: GLclampf); stdcall;
   {$ENDIF}
   // Get
-  procedure glGetFloatv(pname: GLenum; params: PGLfloat); stdcall; external libGLES;
-  procedure glGetIntegerv(pname: GLenum; params: PGLint); stdcall; external libGLES;
+  glGetFloatv   : procedure(pname: GLenum; params: PGLfloat); stdcall;
+  glGetIntegerv : procedure(pname: GLenum; params: PGLint); stdcall;
+  // State
+  glEnable             : procedure(cap: GLenum); stdcall;
+  glEnableClientState  : procedure(aarray: GLenum); stdcall;
+  glDisable            : procedure(cap: GLenum); stdcall;
+  glDisableClientState : procedure(aarray: GLenum); stdcall;
+  glIsEnabled          : function(cap: GLenum): GLboolean; stdcall;
+  // Viewport
+  glViewport : procedure(x, y: GLint; width, height: GLsizei); stdcall;
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  glOrtho : procedure(left, right, bottom, top, zNear, zFar: GLdouble); stdcall;
+  {$ELSE}
+  glOrtho : procedure(left, right, bottom, top, zNear, zFar: GLfloat); stdcall;
+  {$ENDIF}
+  glScissor : procedure(x, y: GLint; width, height: GLsizei); stdcall;
+  // Depth
+  glDepthFunc : procedure(func: GLenum); stdcall;
+  glDepthMask : procedure(flag: GLboolean); stdcall;
+  // Color
+  glColorMask    : procedure(red, green, blue, alpha: GLboolean); stdcall;
+  glColorPointer : procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
+  // Alpha
+  glAlphaFunc         : procedure(func: GLenum; ref: GLclampf); stdcall;
+  glBlendFunc         : procedure(sfactor, dfactor: GLenum); stdcall;
+  glBlendEquation     : procedure(mode: GLenum); stdcall;
+  glBlendFuncSeparate : procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
+  // Matrix
+  glPushMatrix   : procedure; stdcall;
+  glPopMatrix    : procedure; stdcall;
+  glMatrixMode   : procedure(mode: GLenum); stdcall;
+  glLoadIdentity : procedure; stdcall;
+  glLoadMatrixf  : procedure(const m: PGLfloat); stdcall;
+  glRotatef      : procedure(angle, x, y, z: GLfloat); stdcall;
+  glScalef       : procedure(x, y, z: GLfloat); stdcall;
+  glTranslatef   : procedure(x, y, z: GLfloat); stdcall;
+  // Vertex
+  glVertexPointer : procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
+  // Texture
+  glBindTexture       : procedure(target: GLenum; texture: GLuint); stdcall;
+  glGenTextures       : procedure(n: GLsizei; textures: PGLuint); stdcall;
+  glDeleteTextures    : procedure(n: GLsizei; const textures: PGLuint); stdcall;
+  glTexParameterf     : procedure(target: GLenum; pname: GLenum; param: GLfloat); stdcall;
+  glTexParameteri     : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
+  glPixelStorei       : procedure(pname: GLenum; param: GLint); stdcall;
+  glTexImage2D        : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall;
+  glTexSubImage2D     : procedure(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall;
+  glGetTexImage       : procedure(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall;
+  glCopyTexSubImage2D : procedure(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall;
+  glTexEnvi           : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
+  // TexCoords
+  glTexCoordPointer : procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
+  //
+  glDrawArrays : procedure(mode: GLenum; first: GLint; count: GLsizei); stdcall;
+  // FBO
+  glIsRenderbuffer          : function(renderbuffer: GLuint): GLboolean; stdcall;
+  glBindRenderbuffer        : procedure(target: GLenum; renderbuffer: GLuint); stdcall;
+  glDeleteRenderbuffers     : procedure(n: GLsizei; const renderbuffers: PGLuint); stdcall;
+  glGenRenderbuffers        : procedure(n: GLsizei; renderbuffers: PGLuint); stdcall;
+  glRenderbufferStorage     : procedure(target: GLenum; internalformat: GLenum; width: GLsizei; height: GLsizei); stdcall;
+  glIsFramebuffer           : function(framebuffer: GLuint): GLboolean; stdcall;
+  glBindFramebuffer         : procedure(target: GLenum; framebuffer: GLuint); stdcall;
+  glDeleteFramebuffers      : procedure(n: GLsizei; const framebuffers: PGLuint); stdcall;
+  glGenFramebuffers         : procedure(n: GLsizei; framebuffers: PGLuint); stdcall;
+  glCheckFramebufferStatus  : function(target: GLenum): GLenum; stdcall;
+  glFramebufferTexture2D    : procedure(target: GLenum; attachment: GLenum; textarget: GLenum; texture: GLuint; level: GLint); stdcall;
+  glFramebufferRenderbuffer : procedure(target: GLenum; attachment: GLenum; renderbuffertarget: GLenum; renderbuffer: GLuint); stdcall;
+
   // State
   procedure glBegin(mode: GLenum);
   procedure glEnd;
-  procedure glEnable(cap: GLenum); stdcall; external libGLES;
-  procedure glEnableClientState(aarray: GLenum); stdcall; external libGLES;
-  procedure glDisable(cap: GLenum); stdcall; external libGLES;
-  procedure glDisableClientState(aarray: GLenum); stdcall; external libGLES;
-  function  glIsEnabled(cap: GLenum): GLboolean; stdcall; external libGLES;
-  // Viewport
-  procedure glViewport(x, y: GLint; width, height: GLsizei); stdcall; external libGLES;
-  {$IF DEFINED(USE_GLES_ON_DESKTOP) and not DEFINED(USE_PowerVR_SDK)}
-  procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble); stdcall; external libGLES;
-  {$ELSE}
-  procedure glOrtho(left, right, bottom, top, zNear, zFar: GLfloat); stdcall; external libGLES name 'glOrthof';
-  {$ENDIF}
-  procedure glScissor(x, y: GLint; width, height: GLsizei); stdcall; external libGLES;
-  // Depth
-  procedure glDepthFunc(func: GLenum); stdcall; external libGLES;
-  procedure glDepthMask(flag: GLboolean); stdcall; external libGLES;
   // Color
   procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
   procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
   procedure glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}
-  procedure glColorMask(red, green, blue, alpha: GLboolean); stdcall; external libGLES;
-  procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGLES;
-  // Alpha
-  procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGLES;
-  procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGLES;
-var
-  glBlendEquation: procedure(mode: GLenum); stdcall;
-  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
   // Matrix
-  procedure glPushMatrix; stdcall; external libGLES;
-  procedure glPopMatrix; stdcall; external libGLES;
-  procedure glMatrixMode(mode: GLenum); stdcall; external libGLES;
-  procedure glLoadIdentity; stdcall; external libGLES;
   procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
-  procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGLES;
-  procedure glRotatef(angle, x, y, z: GLfloat); stdcall; external libGLES;
-  procedure glScalef(x, y, z: GLfloat); stdcall; external libGLES;
-  procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGLES;
   // Vertex
   procedure glVertex2f(x, y: GLfloat);
   procedure glVertex2fv(v: PGLfloat);
   procedure glVertex3f(x, y, z: GLfloat);
-  procedure glVertexPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGLES;
-  // Texture
-  procedure glBindTexture(target: GLenum; texture: GLuint); stdcall; external libGLES;
-  procedure glGenTextures(n: GLsizei; textures: PGLuint); stdcall; external libGLES;
-  procedure glDeleteTextures(n: GLsizei; const textures: PGLuint); stdcall; external libGLES;
-  procedure glTexParameterf(target: GLenum; pname: GLenum; param: GLfloat); stdcall; external libGLES;
-  procedure glTexParameteri(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGLES;
-  procedure glPixelStorei(pname: GLenum; param: GLint); stdcall; external libGLES;
-  procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall; external libGLES;
-  procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall; external libGLES;
-  procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGLES;
-  procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGLES;
-  procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGLES;
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat);
   procedure glTexCoord2fv(v: PGLfloat);
-  procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGLES;
-  //
-  procedure glDrawArrays(mode: GLenum; first: GLint; count: GLsizei); stdcall; external libGLES;
-var
-  // FBO
-  glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
-  glBindRenderbuffer: procedure(target: GLenum; renderbuffer: GLuint); stdcall;
-  glDeleteRenderbuffers: procedure(n: GLsizei; const renderbuffers: PGLuint); stdcall;
-  glGenRenderbuffers: procedure(n: GLsizei; renderbuffers: PGLuint); stdcall;
-  glRenderbufferStorage: procedure(target: GLenum; internalformat: GLenum; width: GLsizei; height: GLsizei); stdcall;
-  glIsFramebuffer: function(framebuffer: GLuint): GLboolean; stdcall;
-  glBindFramebuffer: procedure(target: GLenum; framebuffer: GLuint); stdcall;
-  glDeleteFramebuffers: procedure(n: GLsizei; const framebuffers: PGLuint); stdcall;
-  glGenFramebuffers: procedure(n: GLsizei; framebuffers: PGLuint); stdcall;
-  glCheckFramebufferStatus: function(target: GLenum): GLenum; stdcall;
-  glFramebufferTexture2D: procedure(target: GLenum; attachment: GLenum; textarget: GLenum; texture: GLuint; level: GLint); stdcall;
-  glFramebufferRenderbuffer: procedure(target: GLenum; attachment: GLenum; renderbuffertarget: GLenum; renderbuffer: GLuint); stdcall;
 
 // Triangulation
   {$IFDEF USE_TRIANGULATION}
@@ -456,22 +468,8 @@ const
   EGL_OPENGL_ES_BIT   = $0001;
   EGL_OPENGL_ES2_BIT  = $0004;
 
-  function eglGetProcAddress( name: PAnsiChar ) : Pointer; stdcall; external libEGL;
-{$IFNDEF USE_AMD_DRIVERS}
-  function eglGetError : GLint; stdcall; external libEGL;
-  function eglGetDisplay( display_id : EGLNativeDisplayType ) : EGLDisplay; stdcall; external libEGL;
-  function eglInitialize( dpy : EGLDisplay; major : PEGLint; minor : PEGLint ) : EGLBoolean; stdcall; external libEGL;
-  function eglTerminate( dpy : EGLDisplay ) : EGLBoolean; stdcall; external libEGL;
-  function eglChooseConfig( dpy : EGLDisplay; attrib_list : PEGLint; configs : PEGLConfig; config_size : EGLint; num_config : PEGLint ) : EGLBoolean; stdcall; external libEGL;
-  function eglCreateWindowSurface( dpy : EGLDisplay; config : EGLConfig; win : EGLNativeWindowType; attrib_list : PEGLint ) : EGLSurface; stdcall; external libEGL;
-  function eglDestroySurface( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall; external libEGL;
-  function eglSwapInterval( dpy : EGLDisplay; interval : EGLint ) : EGLBoolean; stdcall; external libEGL;
-  function eglCreateContext( dpy : EGLDisplay; config : EGLConfig; share_context : EGLContext; attrib_list : PEGLint ) : EGLContext; stdcall; external libEGL;
-  function eglDestroyContext( dpy : EGLDisplay; ctx : EGLContext ) : EGLBoolean; stdcall; external libEGL;
-  function eglMakeCurrent( dpy : EGLDisplay; draw : EGLSurface; read : EGLSurface; ctx : EGLContext ) : EGLBoolean; stdcall; external libEGL;
-  function eglSwapBuffers( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall; external libEGL;
-{$ELSE}
 var
+  eglGetProcAddress      : function( name: PAnsiChar ) : Pointer; stdcall;
   eglGetError            : function : GLint; stdcall;
   eglGetDisplay          : function( display_id : EGLNativeDisplayType ) : EGLDisplay; stdcall;
   eglInitialize          : function( dpy : EGLDisplay; major : PEGLint; minor : PEGLint ) : EGLBoolean; stdcall;
@@ -484,7 +482,10 @@ var
   eglDestroyContext      : function( dpy : EGLDisplay; ctx : EGLContext ) : EGLBoolean; stdcall;
   eglMakeCurrent         : function( dpy : EGLDisplay; draw : EGLSurface; read : EGLSurface; ctx : EGLContext ) : EGLBoolean; stdcall;
   eglSwapBuffers         : function( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall;
-{$ENDIF}
+
+var
+  eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
 
 implementation
 uses
@@ -507,6 +508,32 @@ var
 
 function InitGLES : Boolean;
 begin
+  {$IFDEF LINUX}
+  eglLibrary := dlopen( libEGL, $001 );
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLES_CM, $001 );
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1, $001 );
+  // ./
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libEGL ), $001 );
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libGLES_CM ), $001 );
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
+
+  glesLibrary := dlopen( libGLES_CM, $001 );
+  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1, $001 );
+  // ./
+  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLES_CM ), $001 );
+  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  eglLibrary := dlopen( libEGL );
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLES_CM );
+  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1 );
+
+  glesLibrary := dlopen( libGLES_CM );
+  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1 );
+  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( 'libGLES_CM_NoE.dll' );
+  {$ENDIF}
+
+  eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
   eglGetError            := eglGetProcAddress( 'eglGetError' );
   eglGetDisplay          := eglGetProcAddress( 'eglGetDisplay' );
@@ -520,13 +547,78 @@ begin
   eglDestroyContext      := eglGetProcAddress( 'eglDestroyContext' );
   eglMakeCurrent         := eglGetProcAddress( 'eglMakeCurrent' );
   eglSwapBuffers         := eglGetProcAddress( 'eglSwapBuffers' );
+  {$ELSE}
+  eglGetError            := dlsym( eglLibrary, 'eglGetError' );
+  eglGetDisplay          := dlsym( eglLibrary, 'eglGetDisplay' );
+  eglInitialize          := dlsym( eglLibrary, 'eglInitialize' );
+  eglTerminate           := dlsym( eglLibrary, 'eglTerminate' );
+  eglChooseConfig        := dlsym( eglLibrary, 'eglChooseConfig' );
+  eglCreateWindowSurface := dlsym( eglLibrary, 'eglCreateWindowSurface' );
+  eglDestroySurface      := dlsym( eglLibrary, 'eglDestroySurface' );
+  eglSwapInterval        := dlsym( eglLibrary, 'eglSwapInterval' );
+  eglCreateContext       := dlsym( eglLibrary, 'eglCreateContext' );
+  eglDestroyContext      := dlsym( eglLibrary, 'eglDestroyContext' );
+  eglMakeCurrent         := dlsym( eglLibrary, 'eglMakeCurrent' );
+  eglSwapBuffers         := dlsym( eglLibrary, 'eglSwapBuffers' );
+  {$ENDIF}
+
+  glGetString          := dlsym( glesLibrary, 'glGetString' );
+  glHint               := dlsym( glesLibrary, 'glHint' );
+  glShadeModel         := dlsym( glesLibrary, 'glShadeModel' );
+  glReadPixels         := dlsym( glesLibrary, 'glReadPixels' );
+  glClear              := dlsym( glesLibrary, 'glClear' );
+  glClearColor         := dlsym( glesLibrary, 'glClearColor' );
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  glClearDepth         := dlsym( glesLibrary, 'glClearDepth' );
+  {$ELSE}
+  glClearDepth         := dlsym( glesLibrary, 'glClearDepthf' );
+  {$ENDIF}
+  glGetFloatv          := dlsym( glesLibrary, 'glGetFloatv' );
+  glGetIntegerv        := dlsym( glesLibrary, 'glGetIntegerv' );
+  glEnable             := dlsym( glesLibrary, 'glEnable' );
+  glEnableClientState  := dlsym( glesLibrary, 'glEnableClientState' );
+  glDisable            := dlsym( glesLibrary, 'glDisable' );
+  glDisableClientState := dlsym( glesLibrary, 'glDisableClientState' );
+  glIsEnabled          := dlsym( glesLibrary, 'glIsEnabled' );
+  glViewport           := dlsym( glesLibrary, 'glViewport' );
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  glOrtho              := dlsym( glesLibrary, 'glOrtho' );
+  {$ELSE}
+  glOrtho              := dlsym( glesLibrary, 'glOrthof' );
+  {$ENDIF}
+  glScissor            := dlsym( glesLibrary, 'glScissor' );
+  glDepthFunc          := dlsym( glesLibrary, 'glDepthFunc' );
+  glDepthMask          := dlsym( glesLibrary, 'glDepthMask' );
+  glColorMask          := dlsym( glesLibrary, 'glColorMask' );
+  glColorPointer       := dlsym( glesLibrary, 'glColorPointer' );
+  glAlphaFunc          := dlsym( glesLibrary, 'glAlphaFunc' );
+  glBlendFunc          := dlsym( glesLibrary, 'glBlendFunc' );
+  glPushMatrix         := dlsym( glesLibrary, 'glPushMatrix' );
+  glPopMatrix          := dlsym( glesLibrary, 'glPopMatrix' );
+  glMatrixMode         := dlsym( glesLibrary, 'glMatrixMode' );
+  glLoadIdentity       := dlsym( glesLibrary, 'glLoadIdentity' );
+  glLoadMatrixf        := dlsym( glesLibrary, 'glLoadMatrixf' );
+  glRotatef            := dlsym( glesLibrary, 'glRotatef' );
+  glScalef             := dlsym( glesLibrary, 'glScalef' );
+  glTranslatef         := dlsym( glesLibrary, 'glTranslatef' );
+  glVertexPointer      := dlsym( glesLibrary, 'glVertexPointer' );
+  glBindTexture        := dlsym( glesLibrary, 'glBindTexture' );
+  glGenTextures        := dlsym( glesLibrary, 'glGenTextures' );
+  glDeleteTextures     := dlsym( glesLibrary, 'glDeleteTextures' );
+  glTexParameterf      := dlsym( glesLibrary, 'glTexParameterf' );
+  glTexParameteri      := dlsym( glesLibrary, 'glTexParameteri' );
+  glPixelStorei        := dlsym( glesLibrary, 'glPixelStorei' );
+  glTexImage2D         := dlsym( glesLibrary, 'glTexImage2D' );
+  glTexSubImage2D      := dlsym( glesLibrary, 'glTexSubImage2D' );
+  glGetTexImage        := dlsym( glesLibrary, 'glGetTexImage' );
+  glCopyTexSubImage2D  := dlsym( glesLibrary, 'glCopyTexSubImage2D' );
+  glTexEnvi            := dlsym( glesLibrary, 'glTexEnvi' );
+  glTexCoordPointer    := dlsym( glesLibrary, 'glTexCoordPointer' );
+  glDrawArrays         := dlsym( glesLibrary, 'glDrawArrays' );
 
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and
             Assigned( eglMakeCurrent ) and Assigned( eglSwapBuffers );
-  {$ELSE}
-  Result := TRUE;
-  {$ENDIF}
 end;
 
 procedure FreeGLES;
@@ -538,6 +630,10 @@ begin
   Result := eglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := eglGetProcAddress( PAnsiChar( Proc + 'OES' ) );
+  if Result = nil Then
+    Result := dlsym( glesLibrary, PAnsiChar( Proc ) );
+  if Result = nil Then
+    Result := dlsym( glesLibrary, PAnsiChar( Proc + 'OES' ) );
 end;
 
 function gl_IsSupported( const Extension, SearchIn: AnsiString ) : Boolean;
