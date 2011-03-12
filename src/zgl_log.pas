@@ -55,10 +55,12 @@ begin
   logStart := Round( timer_GetTicks() );
 
   {$IFDEF LINUX}
-  logFile := u_GetPChar( logFile );
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( 'log.txt' );
   {$ENDIF}
   {$IFDEF WINDESKTOP}
-  logFile := u_GetPChar( logFile );
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( 'log.txt' );
   {$ENDIF}
   {$IFDEF DARWIN}
   if not Assigned( logFile ) Then
@@ -67,7 +69,10 @@ begin
     logFile := u_GetPChar( logFile );
   {$ENDIF}
   {$IFDEF WINCE}
-  logFile := u_GetPChar( platform_GetRes( logFile ) );
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( platform_GetRes( 'log.txt' ) )
+  else
+    logFile := u_GetPChar( logFile );
   {$ENDIF}
 
   file_Open( log, logFile, FOM_CREATE );
