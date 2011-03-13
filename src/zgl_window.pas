@@ -132,6 +132,8 @@ function wnd_Create( Width, Height : Integer ) : Boolean;
     status : OSStatus;
   {$ENDIF}
 begin
+  if wndHandle <> 0 Then exit;
+
   Result    := FALSE;
   wndX      := 0;
   wndY      := 0;

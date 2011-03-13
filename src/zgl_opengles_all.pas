@@ -462,7 +462,7 @@ const
 
   EGL_DEFAULT_DISPLAY = 0;
   EGL_NO_CONTEXT      = 0;
-  EGL_NO_DISPLAY      = 0;
+  EGL_NO_DISPLAY      = nil;
   EGL_NO_SURFACE      = 0;
 
   EGL_NONE            = $3038;
@@ -499,9 +499,9 @@ var
   eglSwapBuffers         : function( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall;
 
 var
-  eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
-  glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
-  glesVersion : Single;
+  eglLibrary    : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  glesLibrary   : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  glesVersion11 : Boolean;
 
 implementation
 uses
@@ -558,7 +558,7 @@ begin
       exit;
     end;
 
-  glesVersion := 1.1;
+  glesVersion11 := TRUE;
 
   eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
@@ -646,12 +646,12 @@ begin
   if not Assigned( glTexParameteri ) Then
     begin
       glTexParameteri := dlsym( glesLibrary, 'glTexParameterx' );
-      glesVersion     := 1.0;
+      glesVersion11   := FALSE;
     end;
   if not Assigned( glTexEnvi ) Then
     begin
-      glTexEnvi   := dlsym( glesLibrary, 'glTexEnvx' );
-      glesVersion := 1.0
+      glTexEnvi     := dlsym( glesLibrary, 'glTexEnvx' );
+      glesVersion11 := FALSE;
     end;
 
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and

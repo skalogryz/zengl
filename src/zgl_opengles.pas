@@ -150,12 +150,22 @@ begin
   oglDisplay := eglGetDisplay( scrDisplay );
   {$ENDIF}
   {$IFDEF WINDOWS}
-  oglDisplay := eglGetDisplay( EGL_DEFAULT_DISPLAY );
+  wnd_Create( wndWidth, wndHeight );
+  oglDisplay := eglGetDisplay( wndDC );
   {$ENDIF}
+
+  if oglDisplay = EGL_NO_DISPLAY Then
+    begin
+      log_Add( 'eglGetDisplay: EGL_DEFAULT_DISPLAY' );
+      oglDisplay := eglGetDisplay( EGL_DEFAULT_DISPLAY );
+    end;
 
   if not eglInitialize( oglDisplay, @i, @j ) Then
     begin
       u_Error( 'Failed to initialize EGL. Error code - ' + gles_GetErrorStr( eglGetError() ) );
+      {$IFDEF WINDOWS}
+      wnd_Destroy;
+      {$ENDIF}
       exit;
     end;
 
@@ -175,7 +185,7 @@ begin
     oglAttr[ 10 ] := EGL_DEPTH_SIZE;
     oglAttr[ 11 ] := oglzDepth;
     i := 12;
-    if glesVersion > 1.0 Then
+    if glesVersion11 Then
       begin
         oglAttr[ i     ] := EGL_RENDERABLE_TYPE;
         oglAttr[ i + 1 ] := EGL_OPENGL_ES_BIT;
