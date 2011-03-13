@@ -330,8 +330,9 @@ begin
   log_Add( 'GL_OES_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( oglCanFBO ) );
 
   // WaitVSync
-  oglCanVSync := TRUE;
-  scr_SetVSync( scrVSync );
+  oglCanVSync := Assigned( eglSwapInterval );
+  if oglCanVSync Then
+    scr_SetVSync( scrVSync );
   log_Add( 'Support WaitVSync: ' + u_BoolToStr( oglCanVSync ) );
 end;
 
