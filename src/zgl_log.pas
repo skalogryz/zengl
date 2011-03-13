@@ -88,7 +88,9 @@ end;
 
 procedure log_Close;
 begin
+  appLog := FALSE;
   FreeMem( logFile );
+  logFile := nil;
 
   if log <> FILE_ERROR Then
     file_Close( log );

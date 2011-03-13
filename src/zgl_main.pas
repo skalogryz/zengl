@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.03.10';
+  cs_Date     = '2011.03.13';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -320,6 +320,8 @@ begin
   scr_Destroy();
   gl_Destroy();
   if not appInitedToHandle Then wnd_Destroy();
+
+  appInitialized := FALSE;
 
   log_Add( 'End' );
   log_Close();

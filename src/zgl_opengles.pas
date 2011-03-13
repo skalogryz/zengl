@@ -109,15 +109,37 @@ uses
   zgl_log,
   zgl_utils;
 
+function gles_GetErrorStr( ErrorCode : LongWord ) : String;
+begin
+  case ErrorCode of
+    EGL_NOT_INITIALIZED: Result := 'EGL_NOT_INITIALIZED';
+    EGL_BAD_ACCESS: Result := 'EGL_BAD_ACCESS';
+    EGL_BAD_ALLOC: Result := 'EGL_BAD_ALLOC';
+    EGL_BAD_ATTRIBUTE: Result := 'EGL_BAD_ATTRIBUTE';
+    EGL_BAD_CONFIG: Result := 'EGL_BAD_CONFIG';
+    EGL_BAD_CONTEXT: Result := 'EGL_BAD_CONTEXT';
+    EGL_BAD_CURRENT_SURFACE: Result := 'EGL_BAD_CURRENT_SURFACE';
+    EGL_BAD_DISPLAY: Result := 'EGL_BAD_DISPLAY';
+    EGL_BAD_MATCH: Result := 'EGL_BAD_MATCH';
+    EGL_BAD_NATIVE_PIXMAP: Result := 'EGL_BAD_NATIVE_PIXMAP';
+    EGL_BAD_NATIVE_WINDOW: Result := 'EGL_BAD_NATIVE_WINDOW';
+    EGL_BAD_PARAMETER: Result := 'EGL_BAD_PARAMETER';
+    EGL_BAD_SURFACE: Result := 'EGL_BAD_SURFACE';
+    EGL_CONTEXT_LOST: Result := 'EGL_CONTEXT_LOST';
+  else
+    Result := 'Error code not recognized';
+  end;
+end;
+
 function gl_Create : Boolean;
   var
     i, j : EGLint;
 begin
-  Result := TRUE;
+  Result := FALSE;
 
   if not InitGLES() Then
     begin
-      log_Add( 'Cannot load GLES library' );
+      u_Error( 'Cannot load GLES libraries' );
       exit;
     end;
 
@@ -133,7 +155,7 @@ begin
 
   if not eglInitialize( oglDisplay, @i, @j ) Then
     begin
-      log_Add( 'eglInitialize failed: ' + u_IntToStr( eglGetError() ) );
+      u_Error( 'Failed to initialize EGL. Error code - ' + gles_GetErrorStr( eglGetError() ) );
       exit;
     end;
 
@@ -142,19 +164,23 @@ begin
   repeat
     oglAttr[ 0  ] := EGL_SURFACE_TYPE;
     oglAttr[ 1  ] := EGL_WINDOW_BIT;
-    oglAttr[ 2  ] := EGL_RENDERABLE_TYPE;
-    oglAttr[ 3  ] := EGL_OPENGL_ES_BIT;
-    oglAttr[ 4  ] := EGL_RED_SIZE;
+    oglAttr[ 2  ] := EGL_RED_SIZE;
+    oglAttr[ 3  ] := 8;
+    oglAttr[ 4  ] := EGL_GREEN_SIZE;
     oglAttr[ 5  ] := 8;
-    oglAttr[ 6  ] := EGL_GREEN_SIZE;
+    oglAttr[ 6  ] := EGL_BLUE_SIZE;
     oglAttr[ 7  ] := 8;
-    oglAttr[ 8  ] := EGL_BLUE_SIZE;
-    oglAttr[ 9  ] := 8;
-    oglAttr[ 10 ] := EGL_ALPHA_SIZE;
-    oglAttr[ 11 ] := 0;
-    oglAttr[ 12 ] := EGL_DEPTH_SIZE;
-    oglAttr[ 13 ] := oglzDepth;
-    i := 14;
+    oglAttr[ 8  ] := EGL_ALPHA_SIZE;
+    oglAttr[ 9  ] := 0;
+    oglAttr[ 10 ] := EGL_DEPTH_SIZE;
+    oglAttr[ 11 ] := oglzDepth;
+    i := 12;
+    if glesVersion > 1.0 Then
+      begin
+        oglAttr[ i     ] := EGL_RENDERABLE_TYPE;
+        oglAttr[ i + 1 ] := EGL_OPENGL_ES_BIT;
+        INC( i, 2 );
+      end;
     if oglStencil > 0 Then
       begin
         oglAttr[ i     ] := EGL_STENCIL_SIZE;
@@ -201,23 +227,28 @@ begin
 end;
 
 function gl_Initialize : Boolean;
+  var
+    err : LongWord;
 begin
   oglSurface := eglCreateWindowSurface( oglDisplay, oglConfig, wndHandle, nil );
-  if eglGetError() <> EGL_SUCCESS Then
+  err := eglGetError();
+  if err <> EGL_SUCCESS Then
     begin
-      log_Add( 'Cannot create Windows surface' );
+      u_Error( 'Cannot create Windows surface - ' + gles_GetErrorStr( err ) );
       exit;
     end;
   oglContext := eglCreateContext( oglDisplay, oglConfig, nil, nil );
-  if eglGetError() <> EGL_SUCCESS Then
+  err := eglGetError();
+  if err <> EGL_SUCCESS Then
     begin
-      log_Add( 'Cannot create OpenGL ES context' );
+      u_Error( 'Cannot create OpenGL ES context - ' + gles_GetErrorStr( err ) );
       exit;
     end;
   eglMakeCurrent( oglDisplay, oglSurface, oglSurface, oglContext );
-  if eglGetError() <> EGL_SUCCESS Then
+  err := eglGetError();
+  if err <> EGL_SUCCESS Then
     begin
-      log_Add( 'Cannot set current OpenGL ES context' );
+      u_Error( 'Cannot set current OpenGL ES context - ' + gles_GetErrorStr( err ) );
       exit;
     end;
 
@@ -225,13 +256,7 @@ begin
   log_Add( 'GL_VERSION: ' + glGetString( GL_VERSION ) );
   log_Add( 'GL_RENDERER: ' + oglRenderer );
 
-{$IFDEF LINUX}
-  ogl3DAccelerator := oglRenderer <> 'Software Rasterizer';
-{$ELSE}
   ogl3DAccelerator := TRUE;
-{$ENDIF}
-  if not ogl3DAccelerator Then
-    u_Warning( 'Cannot find 3D-accelerator! Application run in software-mode, it''s very slow' );
 
   gl_LoadEx();
   gl_ResetState();

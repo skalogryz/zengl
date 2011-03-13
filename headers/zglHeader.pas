@@ -2,8 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 {                               }
-{ version:  0.2                 }
-{ date:     2011.02.27          }
+{ version:  0.3                 }
+{ date:     2011.03.13          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -39,6 +39,10 @@ interface
 {$IFDEF DARWIN}
 uses
   MacOSAll;
+{$ENDIF}
+{$IFDEF WINCE}
+uses
+  Windows;
 {$ENDIF}
 
 type
@@ -1117,22 +1121,22 @@ type
   end;
 
 var
-  snd_Init              : function : Boolean;
-  snd_Free              : procedure;
-  snd_Add               : function( SourceCount : Integer ) : zglPSound;
-  snd_Del               : procedure( var Sound : zglPSound );
-  snd_LoadFromFile      : function( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
-  snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
-  snd_Play              : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
-  snd_Stop              : procedure( Sound : zglPSound; ID : Integer );
-  snd_SetPos            : procedure( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
-  snd_SetVolume         : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
-  snd_SetSpeed          : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
-  snd_Get               : function( Sound : zglPSound; ID, What : Integer ) : Integer;
-  snd_PlayFile          : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
-  snd_PauseFile         : procedure( ID : Integer );
-  snd_StopFile          : procedure( ID : Integer );
-  snd_ResumeFile        : procedure( ID : Integer );
+  snd_Init           : function : Boolean;
+  snd_Free           : procedure;
+  snd_Add            : function( SourceCount : Integer ) : zglPSound;
+  snd_Del            : procedure( var Sound : zglPSound );
+  snd_LoadFromFile   : function( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
+  snd_Play           : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
+  snd_Stop           : procedure( Sound : zglPSound; ID : Integer );
+  snd_SetPos         : procedure( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
+  snd_SetVolume      : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
+  snd_SetSpeed       : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
+  snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
+  snd_PlayFile       : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+  snd_PauseFile      : procedure( ID : Integer );
+  snd_StopFile       : procedure( ID : Integer );
+  snd_ResumeFile     : procedure( ID : Integer );
 
 // MATH
 const
@@ -1242,11 +1246,19 @@ function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 {$ENDIF}
 
 {$IFDEF WINDOWS}
+{$IFNDEF WINCE}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 
 function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
+{$ELSE}
+function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
+function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
+function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
+
+function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PWideChar; uType : LongWord) : Integer; stdcall; external 'coredll.dll' name 'MessageBoxW';
+{$ENDIF}
 {$ENDIF}
 
 implementation
@@ -1370,6 +1382,20 @@ begin
   System.Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
 end;
 
+{$IFDEF WINCE}
+function u_GetPWideChar( const Str : String ) : PWideChar;
+  var
+    len    : Integer;
+    newStr : String;
+begin
+  newStr := AnsiToUtf8( Str );
+  len := MultiByteToWideChar( CP_UTF8, 0, @newStr[ 1 ], length( newStr ), nil, 0 );
+  GetMem( Result, len * 2 + 2 );
+  Result[ len ] := #0;
+  MultiByteToWideChar( CP_UTF8, 0, @newStr[ 1 ], length( newStr ), Result, len );
+end;
+{$ENDIF}
+
 function u_StrUp( const str : String ) : String;
   var
     i, l : Integer;
@@ -1396,8 +1422,11 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-
 function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+  {$IFDEF WINCE}
+  var
+    lib : PWideChar;
+  {$ENDIF}
 begin
   Result := FALSE;
   {$IFDEF LINUX}
@@ -1412,7 +1441,13 @@ begin
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
   {$ENDIF}
+  {$IFDEF WINCE}
+  lib := u_GetPWideChar( LibraryName );
+  zglLib := dlopen( lib );
+  FreeMem( lib );
+  {$ELSE}
   zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  {$ENDIF}
 
   if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
     begin

@@ -444,7 +444,21 @@ var
 
 // EGL
 const
-  EGL_SUCCESS         = $3000;
+  EGL_SUCCESS             = $3000;
+  EGL_NOT_INITIALIZED     = $3001;
+  EGL_BAD_ACCESS          = $3002;
+  EGL_BAD_ALLOC           = $3003;
+  EGL_BAD_ATTRIBUTE       = $3004;
+  EGL_BAD_CONFIG          = $3005;
+  EGL_BAD_CONTEXT         = $3006;
+  EGL_BAD_CURRENT_SURFACE = $3007;
+  EGL_BAD_DISPLAY         = $3008;
+  EGL_BAD_MATCH           = $3009;
+  EGL_BAD_NATIVE_PIXMAP   = $300A;
+  EGL_BAD_NATIVE_WINDOW   = $300B;
+  EGL_BAD_PARAMETER       = $300C;
+  EGL_BAD_SURFACE         = $300D;
+  EGL_CONTEXT_LOST        = $300E;
 
   EGL_DEFAULT_DISPLAY = 0;
   EGL_NO_CONTEXT      = 0;
@@ -487,6 +501,7 @@ var
 var
   eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
   glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  glesVersion : Single;
 
 implementation
 uses
@@ -542,6 +557,8 @@ begin
       Result := FALSE;
       exit;
     end;
+
+  glesVersion := 1.1;
 
   eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
@@ -627,9 +644,15 @@ begin
 
   // OpenGL ES 1.0
   if not Assigned( glTexParameteri ) Then
-    glTexParameteri    := dlsym( glesLibrary, 'glTexParameterx' );
+    begin
+      glTexParameteri := dlsym( glesLibrary, 'glTexParameterx' );
+      glesVersion     := 1.0;
+    end;
   if not Assigned( glTexEnvi ) Then
-    glTexEnvi          := dlsym( glesLibrary, 'glTexEnvx' );
+    begin
+      glTexEnvi   := dlsym( glesLibrary, 'glTexEnvx' );
+      glesVersion := 1.0
+    end;
 
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and

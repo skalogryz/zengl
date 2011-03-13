@@ -314,6 +314,7 @@ begin
 {$IFDEF DARWIN}
   ReleaseWindow( wndHandle );
 {$ENDIF}
+  wndHandle := 0;
 end;
 
 procedure wnd_Update;

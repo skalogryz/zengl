@@ -57,7 +57,9 @@ procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 
 {$IFDEF LINUX}
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
+function XCloseIM(im : PXIM) : TStatus;cdecl;external;
 function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
+procedure XDestroyIC(ic : PXIC);cdecl;external;
 {$ENDIF}
 {$IFDEF WINDOWS}
 const
@@ -347,7 +349,16 @@ begin
   scr_Reset();
   {$IFDEF LINUX}
   XRRFreeScreenConfigInfo( scrSettings );
+
+  XDestroyIC( appXIC );
+  XCloseIM( appXIM );
   {$ENDIF}
+
+  scrResList.Count := 0;
+  SetLength( scrResList.Width, 0 );
+  SetLength( scrResList.Height, 0 );
+
+  scrInitialized := FALSE;
 end;
 
 procedure scr_Reset;
