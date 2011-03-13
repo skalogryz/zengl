@@ -46,6 +46,7 @@ procedure gl_ResetState;
 procedure gl_LoadEx;
 
 var
+  oglColor      : Byte;
   oglzDepth     : Byte;
   oglStencil    : Byte;
   oglFSAA       : Byte;
@@ -147,10 +148,15 @@ begin
   GetMem( oglVisualInfo, SizeOf( TXVisualInfo ) );
   XMatchVisualInfo( scrDisplay, scrDefault, DefaultDepth( scrDisplay, scrDefault ), TrueColor, oglVisualInfo );
 
+  oglColor := DefaultDepth( scrDisplay, scrDefault );
+
   oglDisplay := eglGetDisplay( scrDisplay );
   {$ENDIF}
   {$IFDEF WINDOWS}
   wnd_Create( wndWidth, wndHeight );
+
+  oglColor := scrDesktop.dmBitsPerPel;
+
   oglDisplay := eglGetDisplay( wndDC );
   {$ENDIF}
 
@@ -172,25 +178,32 @@ begin
   j := 0;
   oglzDepth := 24;
   repeat
-    oglAttr[ 0  ] := EGL_SURFACE_TYPE;
-    oglAttr[ 1  ] := EGL_WINDOW_BIT;
-    oglAttr[ 2  ] := EGL_RED_SIZE;
-    oglAttr[ 3  ] := 8;
-    oglAttr[ 4  ] := EGL_GREEN_SIZE;
-    oglAttr[ 5  ] := 8;
-    oglAttr[ 6  ] := EGL_BLUE_SIZE;
-    oglAttr[ 7  ] := 8;
-    oglAttr[ 8  ] := EGL_ALPHA_SIZE;
-    oglAttr[ 9  ] := 0;
-    oglAttr[ 10 ] := EGL_DEPTH_SIZE;
-    oglAttr[ 11 ] := oglzDepth;
-    i := 12;
-    if glesVersion11 Then
+    oglAttr[ 0 ] := EGL_SURFACE_TYPE;
+    oglAttr[ 1 ] := EGL_WINDOW_BIT;
+    oglAttr[ 2 ] := EGL_DEPTH_SIZE;
+    oglAttr[ 3 ] := oglzDepth;
+    if oglColor > 16 Then
       begin
-        oglAttr[ i     ] := EGL_RENDERABLE_TYPE;
-        oglAttr[ i + 1 ] := EGL_OPENGL_ES_BIT;
-        INC( i, 2 );
-      end;
+        oglAttr[ 4  ] := EGL_RED_SIZE;
+        oglAttr[ 5  ] := 8;
+        oglAttr[ 6  ] := EGL_GREEN_SIZE;
+        oglAttr[ 7  ] := 8;
+        oglAttr[ 8  ] := EGL_BLUE_SIZE;
+        oglAttr[ 9  ] := 8;
+        oglAttr[ 10 ] := EGL_ALPHA_SIZE;
+        oglAttr[ 11 ] := 0;
+      end else
+        begin
+          oglAttr[ 4  ] := EGL_RED_SIZE;
+          oglAttr[ 5  ] := 5;
+          oglAttr[ 6  ] := EGL_GREEN_SIZE;
+          oglAttr[ 7  ] := 6;
+          oglAttr[ 8  ] := EGL_BLUE_SIZE;
+          oglAttr[ 9  ] := 5;
+          oglAttr[ 10 ] := EGL_ALPHA_SIZE;
+          oglAttr[ 11 ] := 0;
+        end;
+    i := 12;
     if oglStencil > 0 Then
       begin
         oglAttr[ i     ] := EGL_STENCIL_SIZE;

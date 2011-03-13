@@ -499,9 +499,8 @@ var
   eglSwapBuffers         : function( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall;
 
 var
-  eglLibrary    : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
-  glesLibrary   : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
-  glesVersion11 : Boolean;
+  eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
 
 implementation
 uses
@@ -557,8 +556,6 @@ begin
       Result := FALSE;
       exit;
     end;
-
-  glesVersion11 := TRUE;
 
   eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
@@ -644,15 +641,9 @@ begin
 
   // OpenGL ES 1.0
   if not Assigned( glTexParameteri ) Then
-    begin
-      glTexParameteri := dlsym( glesLibrary, 'glTexParameterx' );
-      glesVersion11   := FALSE;
-    end;
+    glTexParameteri    := dlsym( glesLibrary, 'glTexParameterx' );
   if not Assigned( glTexEnvi ) Then
-    begin
-      glTexEnvi     := dlsym( glesLibrary, 'glTexEnvx' );
-      glesVersion11 := FALSE;
-    end;
+    glTexEnvi          := dlsym( glesLibrary, 'glTexEnvx' );
 
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and
