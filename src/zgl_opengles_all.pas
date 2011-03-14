@@ -715,35 +715,6 @@ end;
 
 procedure glEnd;
 begin
-  if RenderQuad Then
-    begin
-      if RenderTextured Then
-        begin
-          INC( bSize );
-          if bSize + 1 > length( bVertices ) Then
-            begin
-              SetLength( bVertices, bSize + 1 );
-              SetLength( bTexCoords, bSize + 1 );
-              SetLength( bColors, bSize + 1 );
-            end;
-          bVertices[ bSize - 1 ] := bVertices[ 0 ];
-          bTexCoords[ bSize - 1 ] := bTexCoords[ 0 ];
-          bColors[ bSize - 1 ] := bColors[ 0 ];
-        end else
-          begin
-            INC( bSize );
-            if bSize + 1 > length( bVertices ) Then
-              begin
-                SetLength( bVertices, bSize + 1 );
-                SetLength( bTexCoords, bSize + 1 );
-                SetLength( bColors, bSize + 1 );
-              end;
-            bVertices[ bSize - 1 ] := bVertices[ 0 ];
-            bTexCoords[ bSize - 1 ] := bTexCoords[ 0 ];
-            bColors[ bSize - 1 ] := bColors[ 0 ];
-          end;
-    end;
-
   if bSize = 0 Then exit;
 
   if RenderTextured Then
@@ -832,9 +803,9 @@ begin
               INC( bSize );
               if bSize + 1 > length( bVertices ) Then
                 begin
-                  SetLength( bVertices, bSize + 1 );
-                  SetLength( bTexCoords, bSize + 1 );
-                  SetLength( bColors, bSize + 1 );
+                  SetLength( bVertices, bSize + 1024 );
+                  SetLength( bTexCoords, bSize + 1024 );
+                  SetLength( bColors, bSize + 1024 );
                 end;
               bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
               bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
@@ -847,9 +818,9 @@ begin
               INC( bSize );
               if bSize + 1 > length( bVertices ) Then
                 begin
-                  SetLength( bVertices, bSize + 1 );
-                  SetLength( bTexCoords, bSize + 1 );
-                  SetLength( bColors, bSize + 1 );
+                  SetLength( bVertices, bSize + 1024 );
+                  SetLength( bTexCoords, bSize + 1024 );
+                  SetLength( bColors, bSize + 1024 );
                 end;
               bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
               bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
@@ -860,9 +831,9 @@ begin
       begin
         if bSize + 1 > length( bVertices ) Then
           begin
-            SetLength( bVertices, bSize + 1 );
-            SetLength( bTexCoords, bSize + 1 );
-            SetLength( bColors, bSize + 1 );
+            SetLength( bVertices, bSize + 1024 );
+            SetLength( bTexCoords, bSize + 1024 );
+            SetLength( bColors, bSize + 1024 );
           end;
         bVertices[ bSize, 0 ] := x;
         bVertices[ bSize, 1 ] := y;
@@ -878,9 +849,9 @@ begin
                 INC( bSize );
                 if bSize + 1 > length( bVertices ) Then
                   begin
-                    SetLength( bVertices, bSize + 1 );
-                    SetLength( bTexCoords, bSize + 1 );
-                    SetLength( bColors, bSize + 1 );
+                    SetLength( bVertices, bSize + 1024 );
+                    SetLength( bTexCoords, bSize + 1024 );
+                    SetLength( bColors, bSize + 1024 );
                   end;
                 bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
                 bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
@@ -893,9 +864,9 @@ begin
                 INC( bSize );
                 if bSize + 1 > length( bVertices ) Then
                   begin
-                    SetLength( bVertices, bSize + 1 );
-                    SetLength( bTexCoords, bSize + 1 );
-                    SetLength( bColors, bSize + 1 );
+                    SetLength( bVertices, bSize + 1024 );
+                    SetLength( bTexCoords, bSize + 1024 );
+                    SetLength( bColors, bSize + 1024 );
                   end;
                 bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
                 bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
@@ -920,9 +891,9 @@ begin
               INC( bSize );
               if bSize + 1 > length( bVertices ) Then
                 begin
-                  SetLength( bVertices, bSize + 1 );
-                  SetLength( bTexCoords, bSize + 1 );
-                  SetLength( bColors, bSize + 1 );
+                  SetLength( bVertices, bSize + 1024 );
+                  SetLength( bTexCoords, bSize + 1024 );
+                  SetLength( bColors, bSize + 1024 );
                 end;
               bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
               bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
@@ -935,9 +906,9 @@ begin
               INC( bSize );
               if bSize + 1 > length( bVertices ) Then
                 begin
-                  SetLength( bVertices, bSize + 1 );
-                  SetLength( bTexCoords, bSize + 1 );
-                  SetLength( bColors, bSize + 1 );
+                  SetLength( bVertices, bSize + 1024 );
+                  SetLength( bTexCoords, bSize + 1024 );
+                  SetLength( bColors, bSize + 1024 );
                 end;
               bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
               bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
@@ -948,9 +919,9 @@ begin
       begin
         if bSize + 1 > length( bVertices ) Then
           begin
-            SetLength( bVertices, bSize + 1 );
-            SetLength( bTexCoords, bSize + 1 );
-            SetLength( bColors, bSize + 1 );
+            SetLength( bVertices, bSize + 1024 );
+            SetLength( bTexCoords, bSize + 1024 );
+            SetLength( bColors, bSize + 1024 );
           end;
         bVertices[ bSize, 0 ] := zglPPoint2D( v ).X;
         bVertices[ bSize, 1 ] := zglPPoint2D( v ).Y;
@@ -966,9 +937,9 @@ begin
                 INC( bSize );
                 if bSize + 1 > length( bVertices ) Then
                   begin
-                    SetLength( bVertices, bSize + 1 );
-                    SetLength( bTexCoords, bSize + 1 );
-                    SetLength( bColors, bSize + 1 );
+                    SetLength( bVertices, bSize + 1024 );
+                    SetLength( bTexCoords, bSize + 1024 );
+                    SetLength( bColors, bSize + 1024 );
                   end;
                 bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
                 bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
@@ -981,9 +952,9 @@ begin
                 INC( bSize );
                 if bSize + 1 > length( bVertices ) Then
                   begin
-                    SetLength( bVertices, bSize + 1 );
-                    SetLength( bTexCoords, bSize + 1 );
-                    SetLength( bColors, bSize + 1 );
+                    SetLength( bVertices, bSize + 1024 );
+                    SetLength( bTexCoords, bSize + 1024 );
+                    SetLength( bColors, bSize + 1024 );
                   end;
                 bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
                 bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
@@ -1008,9 +979,9 @@ begin
               INC( bSize );
               if bSize + 1 > length( bVertices ) Then
                 begin
-                  SetLength( bVertices, bSize + 1 );
-                  SetLength( bTexCoords, bSize + 1 );
-                  SetLength( bColors, bSize + 1 );
+                  SetLength( bVertices, bSize + 1024 );
+                  SetLength( bTexCoords, bSize + 1024 );
+                  SetLength( bColors, bSize + 1024 );
                 end;
               bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
               bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
@@ -1023,9 +994,9 @@ begin
               INC( bSize );
               if bSize + 1 > length( bVertices ) Then
                 begin
-                  SetLength( bVertices, bSize + 1 );
-                  SetLength( bTexCoords, bSize + 1 );
-                  SetLength( bColors, bSize + 1 );
+                  SetLength( bVertices, bSize + 1024 );
+                  SetLength( bTexCoords, bSize + 1024 );
+                  SetLength( bColors, bSize + 1024 );
                 end;
               bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
               bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
@@ -1036,9 +1007,9 @@ begin
       begin
         if bSize + 1 > length( bVertices ) Then
           begin
-            SetLength( bVertices, bSize + 1 );
-            SetLength( bTexCoords, bSize + 1 );
-            SetLength( bColors, bSize + 1 );
+            SetLength( bVertices, bSize + 1024 );
+            SetLength( bTexCoords, bSize + 1024 );
+            SetLength( bColors, bSize + 1024 );
           end;
         bVertices[ bSize, 0 ] := x;
         bVertices[ bSize, 1 ] := y;
@@ -1054,9 +1025,9 @@ begin
                 INC( bSize );
                 if bSize + 1 > length( bVertices ) Then
                   begin
-                    SetLength( bVertices, bSize + 1 );
-                    SetLength( bTexCoords, bSize + 1 );
-                    SetLength( bColors, bSize + 1 );
+                    SetLength( bVertices, bSize + 1024 );
+                    SetLength( bTexCoords, bSize + 1024 );
+                    SetLength( bColors, bSize + 1024 );
                   end;
                 bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
                 bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
@@ -1069,9 +1040,9 @@ begin
                 INC( bSize );
                 if bSize + 1 > length( bVertices ) Then
                   begin
-                    SetLength( bVertices, bSize + 1 );
-                    SetLength( bTexCoords, bSize + 1 );
-                    SetLength( bColors, bSize + 1 );
+                    SetLength( bVertices, bSize + 1024 );
+                    SetLength( bTexCoords, bSize + 1024 );
+                    SetLength( bColors, bSize + 1024 );
                   end;
                 bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
                 bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
@@ -1089,9 +1060,9 @@ procedure glTexCoord2f(s, t: GLfloat);
 begin
   if bSize + 1 > length( bVertices ) Then
     begin
-      SetLength( bVertices, bSize + 1 );
-      SetLength( bTexCoords, bSize + 1 );
-      SetLength( bColors, bSize + 1 );
+      SetLength( bVertices, bSize + 1024 );
+      SetLength( bTexCoords, bSize + 1024 );
+      SetLength( bColors, bSize + 1024 );
     end;
   bTexCoords[ bSize ].X := s;
   bTexCoords[ bSize ].Y := t;
@@ -1106,9 +1077,9 @@ procedure glTexCoord2fv(v: PGLfloat);
 begin
   if bSize + 1 > length( bVertices ) Then
     begin
-      SetLength( bVertices, bSize + 1 );
-      SetLength( bTexCoords, bSize + 1 );
-      SetLength( bColors, bSize + 1 );
+      SetLength( bVertices, bSize + 1024 );
+      SetLength( bTexCoords, bSize + 1024 );
+      SetLength( bColors, bSize + 1024 );
     end;
   bTexCoords[ bSize ] := zglPPoint2D( v )^;
   INC( bSize );
