@@ -508,6 +508,12 @@ uses
   zgl_types,
   zgl_utils;
 
+// temporary type
+type
+  zglTPoint3D = record
+    X, Y, Z : Single;
+  end;
+
 var
   RenderMode     : LongWord;
   RenderQuad     : Boolean;
@@ -516,7 +522,7 @@ var
   newTriangle  : Boolean;
   newTriangleC : Integer;
   bColor       : LongWord;
-  bVertices    : array of array[ 0..2 ] of Single;
+  bVertices    : array of zglTPoint3D;
   bTexCoords   : array of zglTPoint2D;
   bColors      : array of LongWord;
   bSize        : Integer;
@@ -727,7 +733,7 @@ begin
   glColorPointer( 4, GL_UNSIGNED_BYTE, 0, @bColors[ 0 ] );
 
   glEnableClientState( GL_VERTEX_ARRAY );
-  glVertexPointer( 3, GL_FLOAT, 0, @bVertices[ 0, 0 ] );
+  glVertexPointer( 3, GL_FLOAT, 0, @bVertices[ 0 ] );
 
   glDrawArrays( RenderMode, 0, bSize );
 
@@ -792,10 +798,10 @@ procedure glVertex2f(x, y: GLfloat);
 begin
   if RenderTextured Then
     begin
-      bVertices[ bSize - 1, 0 ] := x;
-      bVertices[ bSize - 1, 1 ] := y;
-      bVertices[ bSize - 1, 2 ] := 0;
-      bColors[ bSize - 1 ]      := bColor;
+      bVertices[ bSize - 1 ].X := x;
+      bVertices[ bSize - 1 ].Y := y;
+      bVertices[ bSize - 1 ].Z := 0;
+      bColors[ bSize - 1 ]     := bColor;
       if RenderQuad Then
         begin
           if newTriangle Then
@@ -835,10 +841,10 @@ begin
             SetLength( bTexCoords, bSize + 1024 );
             SetLength( bColors, bSize + 1024 );
           end;
-        bVertices[ bSize, 0 ] := x;
-        bVertices[ bSize, 1 ] := y;
-        bVertices[ bSize, 2 ] := 0;
-        bColors[ bSize ]      := bColor;
+        bVertices[ bSize ].X := x;
+        bVertices[ bSize ].Y := y;
+        bVertices[ bSize ].Z := 0;
+        bColors[ bSize ]     := bColor;
         INC( bSize );
         if RenderQuad Then
           begin
@@ -880,10 +886,10 @@ procedure glVertex2fv(v: PGLfloat);
 begin
   if RenderTextured Then
     begin
-      bVertices[ bSize - 1, 0 ] := zglPPoint2D( v ).X;
-      bVertices[ bSize - 1, 1 ] := zglPPoint2D( v ).Y;
-      bVertices[ bSize - 1, 2 ] := 0;
-      bColors[ bSize - 1 ]      := bColor;
+      bVertices[ bSize - 1 ].X := zglPPoint2D( v ).X;
+      bVertices[ bSize - 1 ].Y := zglPPoint2D( v ).Y;
+      bVertices[ bSize - 1 ].Z := 0;
+      bColors[ bSize - 1 ]     := bColor;
       if RenderQuad Then
         begin
           if newTriangle Then
@@ -923,10 +929,10 @@ begin
             SetLength( bTexCoords, bSize + 1024 );
             SetLength( bColors, bSize + 1024 );
           end;
-        bVertices[ bSize, 0 ] := zglPPoint2D( v ).X;
-        bVertices[ bSize, 1 ] := zglPPoint2D( v ).Y;
-        bVertices[ bSize, 2 ] := 0;
-        bColors[ bSize ]      := bColor;
+        bVertices[ bSize ].X := zglPPoint2D( v ).X;
+        bVertices[ bSize ].Y := zglPPoint2D( v ).Y;
+        bVertices[ bSize ].Z := 0;
+        bColors[ bSize ]     := bColor;
         INC( bSize );
         if RenderQuad Then
           begin
@@ -968,10 +974,10 @@ procedure glVertex3f(x, y, z: GLfloat);
 begin
   if RenderTextured Then
     begin
-      bVertices[ bSize - 1, 0 ] := x;
-      bVertices[ bSize - 1, 1 ] := y;
-      bVertices[ bSize - 1, 2 ] := z;
-      bColors[ bSize - 1 ]      := bColor;
+      bVertices[ bSize - 1 ].X := x;
+      bVertices[ bSize - 1 ].Y := y;
+      bVertices[ bSize - 1 ].Z := z;
+      bColors[ bSize - 1 ]     := bColor;
       if RenderQuad Then
         begin
           if newTriangle Then
@@ -1011,10 +1017,10 @@ begin
             SetLength( bTexCoords, bSize + 1024 );
             SetLength( bColors, bSize + 1024 );
           end;
-        bVertices[ bSize, 0 ] := x;
-        bVertices[ bSize, 1 ] := y;
-        bVertices[ bSize, 2 ] := z;
-        bColors[ bSize ]      := bColor;
+        bVertices[ bSize ].X := x;
+        bVertices[ bSize ].Y := y;
+        bVertices[ bSize ].Z := z;
+        bColors[ bSize ]     := bColor;
         INC( bSize );
         if RenderQuad Then
           begin
