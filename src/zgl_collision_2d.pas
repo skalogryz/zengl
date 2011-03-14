@@ -280,7 +280,8 @@ end;
 
 function col2d_RectInCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
 begin
-  Result := col2d_PointInCircle( Rect.X, Rect.Y, Circle ) and col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle );
+  Result := col2d_PointInCircle( Rect.X, Rect.Y, Circle ) and col2d_PointInCircle( Rect.X + Rect.W, Rect.Y, Circle ) and
+            col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle ) and col2d_PointInCircle( Rect.X, Rect.Y + Rect.H, Circle );
 end;
 
 function col2d_RectVsCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
