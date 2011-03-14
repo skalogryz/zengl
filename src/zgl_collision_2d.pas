@@ -285,12 +285,10 @@ end;
 
 function col2d_RectVsCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
 begin
-  // бред сидого программера :)
   Result := ( col2d_PointInCircle( Rect.X, Rect.Y, Circle ) or col2d_PointInCircle( Rect.X + Rect.W, Rect.Y, Circle ) or
               col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle ) or col2d_PointInCircle( Rect.X, Rect.Y + Rect.H, Circle ) ) or
-            ( col2d_PointInRect( Circle.cX, Circle.cY - Circle.Radius, Rect ) or
-              col2d_PointInRect( Circle.cX + Circle.Radius, Circle.cY - Circle.Radius, Rect ) or
-              col2d_PointInRect( Circle.cX, Circle.cY + Circle.Radius, Rect ) or col2d_PointInRect( Circle.cX - Circle.Radius, Circle.cY, Rect ) );
+            ( col2d_PointInRect( Circle.cX - Circle.Radius, Circle.cY, Rect ) or col2d_PointInRect( Circle.cX + Circle.Radius, Circle.cY, Rect ) or
+              col2d_PointInRect( Circle.cX, Circle.cY - Circle.Radius, Rect ) or col2d_PointInRect( Circle.cX, Circle.cY + Circle.Radius, Rect ) );
 end;
 
 function col2d_Circle( const Circle1, Circle2 : zglTCircle ) : Boolean;
