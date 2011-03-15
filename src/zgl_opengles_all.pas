@@ -501,6 +501,7 @@ var
 var
   eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
   glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  separateEGL : Boolean;
 
 implementation
 uses
@@ -529,31 +530,60 @@ var
 
 function InitGLES : Boolean;
 begin
+  {$IFDEF FPC}
+    {$IF DEFINED(cpui386) or DEFINED(cpux86_64)}
+    SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
+    {$IFEND}
+  {$ELSE}
+    Set8087CW($133F);
+  {$ENDIF}
+
+  separateEGL := TRUE;
   {$IFDEF LINUX}
   eglLibrary := dlopen( libEGL, $001 );
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLES_CM, $001 );
+  if eglLibrary = LIB_ERROR Then
+    begin
+      separateEGL := FALSE;
+      eglLibrary  := dlopen( libGLES_CM, $001 );
+    end;
   if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1, $001 );
   // ./
   if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libEGL ), $001 );
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libGLES_CM ), $001 );
+  if eglLibrary = LIB_ERROR Then
+    begin
+      separateEGL := FALSE;
+      eglLibrary  := dlopen( PChar( './' + libGLES_CM ), $001 );
+    end;
   if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
 
-  glesLibrary := dlopen( libGLES_CM, $001 );
-  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1, $001 );
-  // ./
-  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLES_CM ), $001 );
-  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
+  if separateEGL Then
+    begin
+      glesLibrary := dlopen( libGLES_CM, $001 );
+      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1, $001 );
+      // ./
+      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLES_CM ), $001 );
+      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
+    end else
+      glesLibrary := eglLibrary;
   {$ENDIF}
   {$IFDEF WINDOWS}
   eglLibrary := dlopen( libEGL );
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLES_CM );
+  if eglLibrary = LIB_ERROR Then
+    begin
+      separateEGL := FALSE;
+      eglLibrary  := dlopen( libGLES_CM );
+    end;
   if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1 );
 
   {$IFDEF USE_GLES_SOFTWARE}
   glesLibrary := dlopen( 'libGLES_CM_NoE.dll' );
   {$ELSE}
-  glesLibrary := dlopen( libGLES_CM );
-  if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1 );
+  if separateEGL Then
+    begin
+      glesLibrary := dlopen( libGLES_CM );
+      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1 );
+    end else
+      glesLibrary := eglLibrary;
   {$ENDIF}
   {$ENDIF}
 
@@ -658,6 +688,9 @@ end;
 
 procedure FreeGLES;
 begin
+  if separateEGL Then
+    dlclose( glesLibrary );
+  dlclose( eglLibrary );
 end;
 
 function gl_GetProc( const Proc : AnsiString ) : Pointer;
@@ -791,271 +824,160 @@ begin
   m[ 4, 3 ] := 2 * zFar * zNear / ( zNear - zFar );
   m[ 4, 4 ] := 0;
 
-  glLoadMatrixf( @m[ 0, 0 ] );
+  glLoadMatrixf( @m[ 1, 1 ] );
 end;
 
 procedure glVertex2f(x, y: GLfloat);
 begin
-  if RenderTextured Then
+  if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
     begin
-      bVertices[ bSize - 1 ].X := x;
-      bVertices[ bSize - 1 ].Y := y;
-      bVertices[ bSize - 1 ].Z := 0;
-      bColors[ bSize - 1 ]     := bColor;
-      if RenderQuad Then
+      SetLength( bVertices, bSize + 1024 );
+      SetLength( bTexCoords, bSize + 1024 );
+      SetLength( bColors, bSize + 1024 );
+    end;
+
+  bVertices[ bSize ].X := x;
+  bVertices[ bSize ].Y := y;
+  bVertices[ bSize ].Z := 0;
+  bColors[ bSize ]     := bColor;
+  INC( bSize );
+  if RenderQuad Then
+    begin
+      INC( newTriangleC );
+      if newTriangleC = 3 Then newTriangle := TRUE;
+      if newTriangle Then
         begin
-          if newTriangle Then
+          if bSize = length( bVertices ) Then
             begin
-              INC( bSize );
-              if bSize + 1 > length( bVertices ) Then
-                begin
-                  SetLength( bVertices, bSize + 1024 );
-                  SetLength( bTexCoords, bSize + 1024 );
-                  SetLength( bColors, bSize + 1024 );
-                end;
-              bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
-              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
-              bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
-              newTriangle := FALSE;
-            end else
+              SetLength( bVertices, bSize + 1024 );
+              SetLength( bTexCoords, bSize + 1024 );
+              SetLength( bColors, bSize + 1024 );
+            end;
+          bVertices[ bSize ] := bVertices[ bSize - 1 ];
+          bTexCoords[ bSize ] := bTexCoords[ bSize - 1 ];
+          bColors[ bSize ] := bColors[ bSize - 1 ];
+
+          INC( bSize );
+          newTriangle := FALSE;
+        end else
           if newTriangleC = 4 Then
             begin
-              newTriangleC := 0;
-              INC( bSize );
-              if bSize + 1 > length( bVertices ) Then
+              if bSize = length( bVertices ) Then
                 begin
                   SetLength( bVertices, bSize + 1024 );
                   SetLength( bTexCoords, bSize + 1024 );
                   SetLength( bColors, bSize + 1024 );
                 end;
-              bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
-              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
-              bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+              bVertices[ bSize ] := bVertices[ bSize - 5 ];
+              bTexCoords[ bSize ] := bTexCoords[ bSize - 5 ];
+              bColors[ bSize ] := bColors[ bSize - 5 ];
+
+              INC( bSize );
+              newTriangleC := 0;
             end;
-        end;
-    end else
-      begin
-        if bSize + 1 > length( bVertices ) Then
-          begin
-            SetLength( bVertices, bSize + 1024 );
-            SetLength( bTexCoords, bSize + 1024 );
-            SetLength( bColors, bSize + 1024 );
-          end;
-        bVertices[ bSize ].X := x;
-        bVertices[ bSize ].Y := y;
-        bVertices[ bSize ].Z := 0;
-        bColors[ bSize ]     := bColor;
-        INC( bSize );
-        if RenderQuad Then
-          begin
-            INC( newTriangleC );
-            if newTriangleC = 3 Then newTriangle := TRUE;
-            if newTriangle Then
-              begin
-                INC( bSize );
-                if bSize + 1 > length( bVertices ) Then
-                  begin
-                    SetLength( bVertices, bSize + 1024 );
-                    SetLength( bTexCoords, bSize + 1024 );
-                    SetLength( bColors, bSize + 1024 );
-                  end;
-                bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
-                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
-                bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
-                newTriangle := FALSE;
-              end else
-            if newTriangleC = 4 Then
-              begin
-                newTriangleC := 0;
-                INC( bSize );
-                if bSize + 1 > length( bVertices ) Then
-                  begin
-                    SetLength( bVertices, bSize + 1024 );
-                    SetLength( bTexCoords, bSize + 1024 );
-                    SetLength( bColors, bSize + 1024 );
-                  end;
-                bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
-                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
-                bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
-              end;
-          end;
-      end;
+    end;
 end;
 
 procedure glVertex2fv(v: PGLfloat);
 begin
-  if RenderTextured Then
+  if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
     begin
-      bVertices[ bSize - 1 ].X := zglPPoint2D( v ).X;
-      bVertices[ bSize - 1 ].Y := zglPPoint2D( v ).Y;
-      bVertices[ bSize - 1 ].Z := 0;
-      bColors[ bSize - 1 ]     := bColor;
-      if RenderQuad Then
+      SetLength( bVertices, bSize + 1024 );
+      SetLength( bTexCoords, bSize + 1024 );
+      SetLength( bColors, bSize + 1024 );
+    end;
+
+  bVertices[ bSize ].X := zglPPoint2D( v ).X;
+  bVertices[ bSize ].Y := zglPPoint2D( v ).Y;
+  bVertices[ bSize ].Z := 0;
+  bColors[ bSize ]     := bColor;
+  INC( bSize );
+  if RenderQuad Then
+    begin
+      INC( newTriangleC );
+      if newTriangleC = 3 Then newTriangle := TRUE;
+      if newTriangle Then
         begin
-          if newTriangle Then
+          if bSize = length( bVertices ) Then
             begin
-              INC( bSize );
-              if bSize + 1 > length( bVertices ) Then
-                begin
-                  SetLength( bVertices, bSize + 1024 );
-                  SetLength( bTexCoords, bSize + 1024 );
-                  SetLength( bColors, bSize + 1024 );
-                end;
-              bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
-              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
-              bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
-              newTriangle := FALSE;
-            end else
+              SetLength( bVertices, bSize + 1024 );
+              SetLength( bTexCoords, bSize + 1024 );
+              SetLength( bColors, bSize + 1024 );
+            end;
+          bVertices[ bSize ] := bVertices[ bSize - 1 ];
+          bTexCoords[ bSize ] := bTexCoords[ bSize - 1 ];
+          bColors[ bSize ] := bColors[ bSize - 1 ];
+
+          INC( bSize );
+          newTriangle := FALSE;
+        end else
           if newTriangleC = 4 Then
             begin
-              newTriangleC := 0;
-              INC( bSize );
-              if bSize + 1 > length( bVertices ) Then
+              if bSize = length( bVertices ) Then
                 begin
                   SetLength( bVertices, bSize + 1024 );
                   SetLength( bTexCoords, bSize + 1024 );
                   SetLength( bColors, bSize + 1024 );
                 end;
-              bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
-              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
-              bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+              bVertices[ bSize ] := bVertices[ bSize - 5 ];
+              bTexCoords[ bSize ] := bTexCoords[ bSize - 5 ];
+              bColors[ bSize ] := bColors[ bSize - 5 ];
+
+              INC( bSize );
+              newTriangleC := 0;
             end;
-        end;
-    end else
-      begin
-        if bSize + 1 > length( bVertices ) Then
-          begin
-            SetLength( bVertices, bSize + 1024 );
-            SetLength( bTexCoords, bSize + 1024 );
-            SetLength( bColors, bSize + 1024 );
-          end;
-        bVertices[ bSize ].X := zglPPoint2D( v ).X;
-        bVertices[ bSize ].Y := zglPPoint2D( v ).Y;
-        bVertices[ bSize ].Z := 0;
-        bColors[ bSize ]     := bColor;
-        INC( bSize );
-        if RenderQuad Then
-          begin
-            INC( newTriangleC );
-            if newTriangleC = 3 Then newTriangle := TRUE;
-            if newTriangle Then
-              begin
-                INC( bSize );
-                if bSize + 1 > length( bVertices ) Then
-                  begin
-                    SetLength( bVertices, bSize + 1024 );
-                    SetLength( bTexCoords, bSize + 1024 );
-                    SetLength( bColors, bSize + 1024 );
-                  end;
-                bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
-                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
-                bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
-                newTriangle := FALSE;
-              end else
-            if newTriangleC = 4 Then
-              begin
-                newTriangleC := 0;
-                INC( bSize );
-                if bSize + 1 > length( bVertices ) Then
-                  begin
-                    SetLength( bVertices, bSize + 1024 );
-                    SetLength( bTexCoords, bSize + 1024 );
-                    SetLength( bColors, bSize + 1024 );
-                  end;
-                bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
-                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
-                bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
-              end;
-          end;
-      end;
+    end;
 end;
 
 procedure glVertex3f(x, y, z: GLfloat);
 begin
-  if RenderTextured Then
+  if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
     begin
-      bVertices[ bSize - 1 ].X := x;
-      bVertices[ bSize - 1 ].Y := y;
-      bVertices[ bSize - 1 ].Z := z;
-      bColors[ bSize - 1 ]     := bColor;
-      if RenderQuad Then
+      SetLength( bVertices, bSize + 1024 );
+      SetLength( bTexCoords, bSize + 1024 );
+      SetLength( bColors, bSize + 1024 );
+    end;
+
+  bVertices[ bSize ].X := x;
+  bVertices[ bSize ].Y := y;
+  bVertices[ bSize ].Z := z;
+  bColors[ bSize ]     := bColor;
+  INC( bSize );
+  if RenderQuad Then
+    begin
+      INC( newTriangleC );
+      if newTriangleC = 3 Then newTriangle := TRUE;
+      if newTriangle Then
         begin
-          if newTriangle Then
+          if bSize = length( bVertices ) Then
             begin
-              INC( bSize );
-              if bSize + 1 > length( bVertices ) Then
-                begin
-                  SetLength( bVertices, bSize + 1024 );
-                  SetLength( bTexCoords, bSize + 1024 );
-                  SetLength( bColors, bSize + 1024 );
-                end;
-              bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
-              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
-              bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
-              newTriangle := FALSE;
-            end else
+              SetLength( bVertices, bSize + 1024 );
+              SetLength( bTexCoords, bSize + 1024 );
+              SetLength( bColors, bSize + 1024 );
+            end;
+          bVertices[ bSize ] := bVertices[ bSize - 1 ];
+          bTexCoords[ bSize ] := bTexCoords[ bSize - 1 ];
+          bColors[ bSize ] := bColors[ bSize - 1 ];
+
+          INC( bSize );
+          newTriangle := FALSE;
+        end else
           if newTriangleC = 4 Then
             begin
-              newTriangleC := 0;
-              INC( bSize );
-              if bSize + 1 > length( bVertices ) Then
+              if bSize = length( bVertices ) Then
                 begin
                   SetLength( bVertices, bSize + 1024 );
                   SetLength( bTexCoords, bSize + 1024 );
                   SetLength( bColors, bSize + 1024 );
                 end;
-              bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
-              bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
-              bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
+              bVertices[ bSize ] := bVertices[ bSize - 5 ];
+              bTexCoords[ bSize ] := bTexCoords[ bSize - 5 ];
+              bColors[ bSize ] := bColors[ bSize - 5 ];
+
+              INC( bSize );
+              newTriangleC := 0;
             end;
-        end;
-    end else
-      begin
-        if bSize + 1 > length( bVertices ) Then
-          begin
-            SetLength( bVertices, bSize + 1024 );
-            SetLength( bTexCoords, bSize + 1024 );
-            SetLength( bColors, bSize + 1024 );
-          end;
-        bVertices[ bSize ].X := x;
-        bVertices[ bSize ].Y := y;
-        bVertices[ bSize ].Z := z;
-        bColors[ bSize ]     := bColor;
-        INC( bSize );
-        if RenderQuad Then
-          begin
-            INC( newTriangleC );
-            if newTriangleC = 3 Then newTriangle := TRUE;
-            if newTriangle Then
-              begin
-                INC( bSize );
-                if bSize + 1 > length( bVertices ) Then
-                  begin
-                    SetLength( bVertices, bSize + 1024 );
-                    SetLength( bTexCoords, bSize + 1024 );
-                    SetLength( bColors, bSize + 1024 );
-                  end;
-                bVertices[ bSize - 1 ] := bVertices[ bSize - 2 ];
-                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 2 ];
-                bColors[ bSize - 1 ] := bColors[ bSize - 2 ];
-                newTriangle := FALSE;
-              end else
-            if newTriangleC = 4 Then
-              begin
-                newTriangleC := 0;
-                INC( bSize );
-                if bSize + 1 > length( bVertices ) Then
-                  begin
-                    SetLength( bVertices, bSize + 1024 );
-                    SetLength( bTexCoords, bSize + 1024 );
-                    SetLength( bColors, bSize + 1024 );
-                  end;
-                bVertices[ bSize - 1 ] := bVertices[ bSize - 6 ];
-                bTexCoords[ bSize - 1 ] := bTexCoords[ bSize - 6 ];
-                bColors[ bSize - 1 ] := bColors[ bSize - 6 ];
-              end;
-          end;
-      end;
+    end;
 end;
 
 procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
@@ -1064,7 +986,7 @@ end;
 
 procedure glTexCoord2f(s, t: GLfloat);
 begin
-  if bSize + 1 > length( bVertices ) Then
+  if bSize = length( bVertices ) Then
     begin
       SetLength( bVertices, bSize + 1024 );
       SetLength( bTexCoords, bSize + 1024 );
@@ -1072,27 +994,17 @@ begin
     end;
   bTexCoords[ bSize ].X := s;
   bTexCoords[ bSize ].Y := t;
-  INC( bSize );
-  INC( newTriangleC );
-
-  if newTriangleC = 3 Then
-    newTriangle := TRUE;
 end;
 
 procedure glTexCoord2fv(v: PGLfloat);
 begin
-  if bSize + 1 > length( bVertices ) Then
+  if bSize = length( bVertices ) Then
     begin
       SetLength( bVertices, bSize + 1024 );
       SetLength( bTexCoords, bSize + 1024 );
       SetLength( bColors, bSize + 1024 );
     end;
   bTexCoords[ bSize ] := zglPPoint2D( v )^;
-  INC( bSize );
-  INC( newTriangleC );
-
-  if newTriangleC = 3 Then
-    newTriangle := TRUE;
 end;
 
 end.
