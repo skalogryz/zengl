@@ -520,13 +520,12 @@ var
   RenderQuad     : Boolean;
   RenderTextured : Boolean;
   // Buffers
-  newTriangle  : Boolean;
-  newTriangleC : Integer;
-  bColor       : LongWord;
-  bVertices    : array of zglTPoint3D;
-  bTexCoords   : array of zglTPoint2D;
-  bColors      : array of LongWord;
-  bSize        : Integer;
+  newTriangle : Integer;
+  bColor      : LongWord;
+  bVertices   : array of zglTPoint3D;
+  bTexCoords  : array of zglTPoint2D;
+  bColors     : array of LongWord;
+  bSize       : Integer;
 
 function InitGLES : Boolean;
 begin
@@ -741,10 +740,9 @@ begin
 
   if Mode = GL_QUADS Then
     begin
-      RenderQuad   := TRUE;
-      newTriangle  := FALSE;
-      newTriangleC := 0;
-      RenderMode   := GL_TRIANGLES;
+      RenderQuad  := TRUE;
+      newTriangle := 0;
+      RenderMode  := GL_TRIANGLES;
     end else
       begin
         RenderQuad := FALSE;
@@ -843,9 +841,8 @@ begin
   INC( bSize );
   if RenderQuad Then
     begin
-      INC( newTriangleC );
-      if newTriangleC = 3 Then newTriangle := TRUE;
-      if newTriangle Then
+      INC( newTriangle );
+      if newTriangle = 3 Then
         begin
           if bSize = length( bVertices ) Then
             begin
@@ -858,9 +855,8 @@ begin
           bColors[ bSize ] := bColors[ bSize - 1 ];
 
           INC( bSize );
-          newTriangle := FALSE;
         end else
-          if newTriangleC = 4 Then
+          if newTriangle = 4 Then
             begin
               if bSize = length( bVertices ) Then
                 begin
@@ -873,7 +869,7 @@ begin
               bColors[ bSize ] := bColors[ bSize - 5 ];
 
               INC( bSize );
-              newTriangleC := 0;
+              newTriangle := 0;
             end;
     end;
 end;
@@ -894,9 +890,8 @@ begin
   INC( bSize );
   if RenderQuad Then
     begin
-      INC( newTriangleC );
-      if newTriangleC = 3 Then newTriangle := TRUE;
-      if newTriangle Then
+      INC( newTriangle );
+      if newTriangle = 3 Then
         begin
           if bSize = length( bVertices ) Then
             begin
@@ -909,9 +904,8 @@ begin
           bColors[ bSize ] := bColors[ bSize - 1 ];
 
           INC( bSize );
-          newTriangle := FALSE;
         end else
-          if newTriangleC = 4 Then
+          if newTriangle = 4 Then
             begin
               if bSize = length( bVertices ) Then
                 begin
@@ -924,7 +918,7 @@ begin
               bColors[ bSize ] := bColors[ bSize - 5 ];
 
               INC( bSize );
-              newTriangleC := 0;
+              newTriangle := 0;
             end;
     end;
 end;
@@ -945,9 +939,8 @@ begin
   INC( bSize );
   if RenderQuad Then
     begin
-      INC( newTriangleC );
-      if newTriangleC = 3 Then newTriangle := TRUE;
-      if newTriangle Then
+      INC( newTriangle );
+      if newTriangle = 3 Then
         begin
           if bSize = length( bVertices ) Then
             begin
@@ -960,9 +953,8 @@ begin
           bColors[ bSize ] := bColors[ bSize - 1 ];
 
           INC( bSize );
-          newTriangle := FALSE;
         end else
-          if newTriangleC = 4 Then
+          if newTriangle = 4 Then
             begin
               if bSize = length( bVertices ) Then
                 begin
@@ -975,7 +967,7 @@ begin
               bColors[ bSize ] := bColors[ bSize - 5 ];
 
               INC( bSize );
-              newTriangleC := 0;
+              newTriangle := 0;
             end;
     end;
 end;
