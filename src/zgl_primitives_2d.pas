@@ -159,8 +159,8 @@ begin
     begin
       X := X + 0.5;
       Y := Y + 0.5;
-      W := W - 0.5;
-      H := H - 0.5;
+      W := W - 1;
+      H := H - 1;
 
       if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
