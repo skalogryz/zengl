@@ -350,7 +350,6 @@ var
   glEnableClientState  : procedure(aarray: GLenum); stdcall;
   glDisable            : procedure(cap: GLenum); stdcall;
   glDisableClientState : procedure(aarray: GLenum); stdcall;
-  glIsEnabled          : function(cap: GLenum): GLboolean; stdcall;
   // Viewport
   glViewport : procedure(x, y: GLint; width, height: GLsizei); stdcall;
   {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
@@ -638,7 +637,6 @@ begin
   glEnableClientState  := dlsym( glesLibrary, 'glEnableClientState' );
   glDisable            := dlsym( glesLibrary, 'glDisable' );
   glDisableClientState := dlsym( glesLibrary, 'glDisableClientState' );
-  glIsEnabled          := dlsym( glesLibrary, 'glIsEnabled' );
   glViewport           := dlsym( glesLibrary, 'glViewport' );
   {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
   glOrtho              := dlsym( glesLibrary, 'glOrtho' );
@@ -736,7 +734,7 @@ end;
 procedure glBegin(mode: GLenum);
 begin
   bSize := 0;
-  RenderTextured := glIsEnabled( GL_TEXTURE_2D ) > 0;
+  RenderTextured := FALSE;
 
   if Mode = GL_QUADS Then
     begin
@@ -978,6 +976,8 @@ end;
 
 procedure glTexCoord2f(s, t: GLfloat);
 begin
+  RenderTextured := TRUE;
+
   if bSize = length( bVertices ) Then
     begin
       SetLength( bVertices, bSize + 1024 );
@@ -990,6 +990,8 @@ end;
 
 procedure glTexCoord2fv(v: PGLfloat);
 begin
+  RenderTextured := TRUE;
+
   if bSize = length( bVertices ) Then
     begin
       SetLength( bVertices, bSize + 1024 );
