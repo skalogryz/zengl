@@ -536,53 +536,28 @@ begin
     Set8087CW($133F);
   {$ENDIF}
 
-  separateEGL := TRUE;
-  {$IFDEF LINUX}
-  eglLibrary := dlopen( libEGL, $001 );
+  eglLibrary := dlopen( libEGL {$IFDEF UNIX}, $001 {$ENDIF} );
   if eglLibrary = LIB_ERROR Then
     begin
       separateEGL := FALSE;
-      eglLibrary  := dlopen( libGLES_CM, $001 );
-    end;
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1, $001 );
-  // ./
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libEGL ), $001 );
-  if eglLibrary = LIB_ERROR Then
-    begin
-      separateEGL := FALSE;
-      eglLibrary  := dlopen( PChar( './' + libGLES_CM ), $001 );
-    end;
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
+      eglLibrary  := dlopen( libGLES_CM {$IFDEF UNIX}, $001 {$ENDIF} );
 
-  if separateEGL Then
-    begin
-      glesLibrary := dlopen( libGLES_CM, $001 );
-      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1, $001 );
-      // ./
-      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLES_CM ), $001 );
-      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( PChar( './' + libGLESv1 ), $001 );
+      if eglLibrary = LIB_ERROR Then
+        eglLibrary := dlopen( libGLESv1 {$IFDEF UNIX}, $001 {$ENDIF} );
     end else
-      glesLibrary := eglLibrary;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  eglLibrary := dlopen( libEGL );
-  if eglLibrary = LIB_ERROR Then
-    begin
-      separateEGL := FALSE;
-      eglLibrary  := dlopen( libGLES_CM );
-    end;
-  if eglLibrary = LIB_ERROR Then eglLibrary := dlopen( libGLESv1 );
+      separateEGL := TRUE;
 
   {$IFDEF USE_GLES_SOFTWARE}
   glesLibrary := dlopen( 'libGLES_CM_NoE.dll' );
   {$ELSE}
   if separateEGL Then
     begin
-      glesLibrary := dlopen( libGLES_CM );
-      if glesLibrary = LIB_ERROR Then glesLibrary := dlopen( libGLESv1 );
+      glesLibrary := dlopen( libGLES_CM {$IFDEF UNIX}, $001 {$ENDIF} );
+
+      if glesLibrary = LIB_ERROR Then
+        glesLibrary := dlopen( libGLESv1 {$IFDEF UNIX}, $001 {$ENDIF} );
     end else
       glesLibrary := eglLibrary;
-  {$ENDIF}
   {$ENDIF}
 
   if ( eglLibrary = LIB_ERROR ) or ( glesLibrary = LIB_ERROR ) Then
