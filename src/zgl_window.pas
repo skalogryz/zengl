@@ -22,6 +22,10 @@ unit zgl_window;
 
 {$I zgl_config.cfg}
 
+{$IFDEF WINCE}
+  {$R zgl_wince.rc}
+{$ENDIF}
+
 interface
 uses
   {$IFDEF LINUX}
