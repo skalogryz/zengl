@@ -302,6 +302,9 @@
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
