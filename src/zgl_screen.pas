@@ -208,6 +208,7 @@ begin
   scrMonInfo.cbSize := SizeOf( MONITORINFOEX );
   GetMonitorInfoW( scrMonitor, scrMonInfo );
 
+  FillChar( scrDesktop, SizeOf( DEVMODEW ), 0 );
   with scrDesktop do
     begin
       dmSize             := SizeOf( DEVMODEW );
@@ -312,6 +313,8 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   i := 0;
+  FillChar( tmpSettings, SizeOf( DEVMODEW ), 0 );
+  tmpSettings.dmSize := SizeOf( DEVMODEW );
   while EnumDisplaySettingsW( scrMonInfo.szDevice, i, tmpSettings ) <> FALSE do
     begin
       if not Already( tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight ) Then
@@ -502,10 +505,11 @@ begin
     begin
       i := 0;
       r := 0;
+      FillChar( scrSettings, SizeOf( DEVMODEW ), 0 );
+      scrSettings.dmSize := SizeOf( DEVMODEW );
       while EnumDisplaySettingsW( scrMonInfo.szDevice, i, scrSettings ) <> FALSE do
         with scrSettings do
           begin
-            dmSize   := SizeOf( DEVMODEW );
             dmFields := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
             if ( dmPelsWidth = scrWidth  ) and ( dmPelsHeight = scrHeight ) and ( dmBitsPerPel = 32 ) and ( dmDisplayFrequency > r ) and
                ( dmDisplayFrequency <= scrDesktop.dmDisplayFrequency ) Then
@@ -520,7 +524,6 @@ begin
 
       with scrSettings do
         begin
-          dmSize := SizeOf( DEVMODEW );
           if scrRefresh = REFRESH_MAXIMUM Then scrRefresh := r;
           if scrRefresh = REFRESH_DEFAULT Then scrRefresh := 0;
 
