@@ -47,7 +47,9 @@ uses
   {$ENDIF}
 
   zgl_textures,
+  {$IFNDEF WINCE}
   zgl_textures_jpg,
+  {$ENDIF}
   zgl_textures_png,
   zgl_textures_tga,
 
