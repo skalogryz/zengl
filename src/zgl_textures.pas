@@ -335,6 +335,8 @@ begin
 
   Texture.FramesX := Round( Texture.Width ) div FrameWidth;
   Texture.FramesY := Round( Texture.Height ) div FrameHeight;
+  if Texture.FramesX = 0 Then Texture.FramesX := 1;
+  if Texture.FramesY = 0 Then Texture.FramesY := 1;
   tex_CalcTexCoords( Texture^ );
 end;
 
