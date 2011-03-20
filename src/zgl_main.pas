@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.03.18';
+  cs_Date     = '2011.03.21';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -508,7 +508,11 @@ procedure zgl_GetSysDir;
 {$IFDEF LINUX}
 begin
   appWorkDir := './';
-  appHomeDir := FpGetEnv( 'HOME' ) + '/.config/';
+  appHomeDir := FpGetEnv( 'XDG_CONFIG_HOME' );
+  if appHomeDir = '' Then
+    appHomeDir := FpGetEnv( 'HOME' ) + '/.config/'
+  else
+    appHomeDir := appHomeDir + '/';
   // for some old distros
   if not file_Exists( appHomeDir ) Then
     file_MakeDir( appHomeDir );
