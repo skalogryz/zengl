@@ -62,13 +62,17 @@ begin
   if not Assigned( logFile ) Then
     logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   if not Assigned( logFile ) Then
     logFile := u_GetPChar( appWorkDir + '../log.txt' )
   {$ENDIF}
   {$IFDEF WINCE}
   if not Assigned( logFile ) Then
-    logFile := u_GetPChar( platform_GetRes( 'log.txt' ) )
+    logFile := u_GetPChar( 'log.txt' )
+  {$ENDIF}
+  {$IFDEF iOS}
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( appWorkDir + '../log.txt' )
   {$ENDIF}
   else
     logFile := u_GetPChar( logFile );
@@ -111,7 +115,7 @@ begin
   file_Write( log, str[ 1 ], length( str ) );
 
   {$IFDEF USE_LOG_FLUSH}
-  log_Flush;
+  log_Flush();
   {$ENDIF}
 end;
 

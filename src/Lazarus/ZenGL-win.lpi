@@ -34,7 +34,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="46">
+    <Units Count="49">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -265,6 +265,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_msvcrt"/>
       </Unit45>
+      <Unit46>
+        <Filename Value="../zgl_opengles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_opengles"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="../zgl_opengles_all.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_opengles_all"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="../zgl_resources.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_resources"/>
+      </Unit48>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

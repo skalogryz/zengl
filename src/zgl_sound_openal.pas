@@ -138,7 +138,7 @@ uses
 function InitOpenAL : Boolean;
 begin
   Result := FALSE;
-  oalLibrary := dlopen( libopenal {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  oalLibrary := dlopen( libopenal {$IFDEF UNIX}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   // Для надежности...
   if oalLibrary = nil Then oalLibrary := dlopen( PChar( libopenal + '.1' ), $001 );

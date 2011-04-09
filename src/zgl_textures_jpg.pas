@@ -69,7 +69,7 @@ const
   {$L jquant2}
   {$L jutils}
   {$L wrapper}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}
 
@@ -190,7 +190,7 @@ uses
   zgl_main,
   zgl_log;
 
-var
+threadvar
   jpgMem  : zglTMemory;
   jpgData : zglTJPGData;
 

@@ -55,7 +55,7 @@ unit zgl_sound_ogg;
   {$L synthesis}
   {$L vorbisfile}
   {$L window}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}
 {$ENDIF}
@@ -86,7 +86,7 @@ const
   libvorbis     = 'libvorbis-0.dll';
   libvorbisfile = 'libvorbisfile-3.dll';
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   libogg        = 'libogg.0.dylib';
   libvorbis     = 'libvorbis.0.dylib';
   libvorbisfile = 'libvorbisfile.3.dylib';
@@ -277,12 +277,14 @@ procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var
 var
   oggLoad    : Boolean;
   oggInit    : Boolean;
-  oggMemory  : zglTMemory;
   oggDecoder : zglTSoundDecoder;
 
-  oggLibrary        : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisLibrary     : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisfileLibrary : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  oggLibrary        : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  vorbisLibrary     : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  vorbisfileLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+
+threadvar
+  oggMemory : zglTMemory;
 
 implementation
 
@@ -344,7 +346,7 @@ begin
   vorbisLibrary     := dlopen( libvorbis );
   vorbisfileLibrary := dlopen( libvorbisfile );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   oggLibrary        := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libogg ), $001 );
   vorbisLibrary     := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
   vorbisfileLibrary := dlopen( PChar( app_WorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );

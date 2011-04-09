@@ -138,7 +138,7 @@ uses
   zgl_main,
   zgl_log;
 
-var
+threadvar
   pngMem          : zglTMemory;
   pngFail         : Boolean;
   pngHeader       : zglTPNGHeader;

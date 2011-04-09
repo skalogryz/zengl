@@ -62,7 +62,7 @@ uses
   zgl_main,
   zgl_log;
 
-var
+threadvar
   wavMemory : zglTMemory;
   wavHeader : zglTWAVHeader;
 

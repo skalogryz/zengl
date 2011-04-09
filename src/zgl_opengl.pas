@@ -30,7 +30,7 @@ uses
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll,
   {$ENDIF}
   zgl_opengl_all;
@@ -104,7 +104,7 @@ var
   oglFormats    : LongWord;
   oglFormatDesc : TPixelFormatDescriptor;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   oglDevice   : GDHandle;
   oglContext  : TAGLContext;
   oglFormat   : TAGLPixelFormat;
@@ -128,7 +128,7 @@ function gl_Create : Boolean;
     i           : Integer;
     pixelFormat : Integer;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     i : Integer;
   {$ENDIF}
 begin
@@ -315,7 +315,7 @@ begin
   wglDeleteContext( oglContext );
   wnd_Destroy();
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if not InitAGL() Then
     begin
       log_Add( 'Cannot load AGL library' );
@@ -394,7 +394,7 @@ begin
 
   wglDeleteContext( oglContext );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   aglDestroyPixelFormat( oglFormat );
   if aglSetCurrentContext( nil ) = GL_FALSE Then
     u_Error( 'Cannot release current OpenGL context' );
@@ -444,7 +444,7 @@ begin
       exit;
     end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   oglContext := aglCreateContext( oglFormat, nil );
   if not Assigned( oglContext ) Then
     begin
@@ -473,7 +473,7 @@ begin
 {$IFDEF WINDOWS}
   ogl3DAccelerator := oglRenderer <> 'GDI Generic';
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   ogl3DAccelerator := oglRenderer <> 'Apple Software Renderer';
 {$ENDIF}
   if not ogl3DAccelerator Then
@@ -623,7 +623,7 @@ begin
       oglCanPBuffer := FALSE;
   log_Add( 'WGL_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   oglCanPBuffer := Assigned( aglCreatePBuffer );
   log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 {$ENDIF}
@@ -637,7 +637,7 @@ begin
   wglSwapInterval := gl_GetProc( 'wglSwapInterval' );
   oglCanVSync     := Assigned( wglSwapInterval );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if aglSetInt( oglContext, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then
     oglCanVSync := TRUE
   else

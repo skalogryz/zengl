@@ -21,7 +21,7 @@
 unit zgl_opengles_all;
 
 {$I zgl_config.cfg}
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
 
@@ -33,6 +33,9 @@ uses
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll
   {$ENDIF}
   ;
 
@@ -56,9 +59,10 @@ const
     libGLESv1  = 'libGLESv1.dll';
     libGLESv2  = 'libGLESv2.dll';
     {$ENDIF}
-    {$IFDEF DARWIN}
-    libEGL  = '';
-    libGLES = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
+    {$IFDEF iOS}
+    libGLES_CM = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
+    libGLESv1  = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
+    libGLESv2  = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
     {$ENDIF}
   {$ELSE}
     {$IFDEF LINUX}
@@ -291,27 +295,6 @@ const
   GLU_TESS_COMBINE_DATA             = $1870F;}
 
 type
-  // EGL Types
-  {$IFDEF LINUX}
-  EGLNativeDisplayType = PDisplay;
-  EGLNativeWindowType  = TWindow;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  EGLNativeDisplayType = HDC;
-  EGLNativeWindowType  = HWND;
-  {$ENDIF}
-  EGLBoolean      = LongBool;
-  EGLint          = LongInt;
-  PEGLint         = ^EGLint;
-  EGLenum         = LongWord;
-  EGLConfig       = Pointer;
-  PEGLConfig      = ^EGLConfig;
-  EGLContext      = Pointer;
-  EGLDisplay      = Pointer;
-  EGLSurface      = Pointer;
-  EGLClientBuffer = Pointer;
-
-type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
   GLboolean  = Byte;          PGLboolean  = ^GLboolean;
   GLbitfield = Cardinal;      PGLbitfield = ^GLbitfield;
@@ -442,6 +425,28 @@ var
   {$ENDIF}
 
 // EGL
+{$IFNDEF iOS}
+// EGL Types
+type
+  {$IFDEF LINUX}
+  EGLNativeDisplayType = PDisplay;
+  EGLNativeWindowType  = TWindow;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  EGLNativeDisplayType = HDC;
+  EGLNativeWindowType  = HWND;
+  {$ENDIF}
+  EGLBoolean      = LongBool;
+  EGLint          = LongInt;
+  PEGLint         = ^EGLint;
+  EGLenum         = LongWord;
+  EGLConfig       = Pointer;
+  PEGLConfig      = ^EGLConfig;
+  EGLContext      = Pointer;
+  EGLDisplay      = Pointer;
+  EGLSurface      = Pointer;
+  EGLClientBuffer = Pointer;
+
 const
   EGL_SUCCESS             = $3000;
   EGL_NOT_INITIALIZED     = $3001;
@@ -496,11 +501,16 @@ var
   eglDestroyContext      : function( dpy : EGLDisplay; ctx : EGLContext ) : EGLBoolean; stdcall;
   eglMakeCurrent         : function( dpy : EGLDisplay; draw : EGLSurface; read : EGLSurface; ctx : EGLContext ) : EGLBoolean; stdcall;
   eglSwapBuffers         : function( dpy : EGLDisplay; surface : EGLSurface ) : EGLBoolean; stdcall;
+{$ENDIF}
 
 var
+  {$IFNDEF iOS}
   eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
   glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
   separateEGL : Boolean;
+  {$ELSE}
+  glesLibrary : Pointer;
+  {$ENDIF}
 
 implementation
 uses
@@ -536,6 +546,7 @@ begin
     Set8087CW($133F);
   {$ENDIF}
 
+{$IFNDEF iOS}
   eglLibrary := dlopen( libEGL {$IFDEF UNIX}, $001 {$ENDIF} );
   if eglLibrary = LIB_ERROR Then
     begin
@@ -559,13 +570,17 @@ begin
     end else
       glesLibrary := eglLibrary;
   {$ENDIF}
+{$ELSE}
+  glesLibrary := dlopen( libGLES_CM, $001 );
+{$ENDIF}
 
-  if ( eglLibrary = LIB_ERROR ) or ( glesLibrary = LIB_ERROR ) Then
+  if {$IFNDEF iOS}( eglLibrary = LIB_ERROR ) or{$ENDIF} ( glesLibrary = LIB_ERROR ) Then
     begin
       Result := FALSE;
       exit;
     end;
 
+{$IFNDEF iOS}
   eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
   eglGetError            := eglGetProcAddress( 'eglGetError' );
@@ -594,6 +609,7 @@ begin
   eglMakeCurrent         := dlsym( eglLibrary, 'eglMakeCurrent' );
   eglSwapBuffers         := dlsym( eglLibrary, 'eglSwapBuffers' );
   {$ENDIF}
+{$ENDIF}
 
   glGetString          := dlsym( glesLibrary, 'glGetString' );
   glHint               := dlsym( glesLibrary, 'glHint' );
@@ -653,16 +669,24 @@ begin
   if not Assigned( glTexEnvi ) Then
     glTexEnvi          := dlsym( glesLibrary, 'glTexEnvx' );
 
+{$IFNDEF iOS}
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and
             Assigned( eglMakeCurrent ) and Assigned( eglSwapBuffers );
+{$ELSE}
+  Result := TRUE;
+{$ENDIF}
 end;
 
 procedure FreeGLES;
 begin
+{$IFNDEF iOS}
   if separateEGL Then
     dlclose( glesLibrary );
   dlclose( eglLibrary );
+{$ELSE}
+  dlclose( glesLibrary );
+{$ENDIF}
 end;
 
 function gl_GetProc( const Proc : AnsiString ) : Pointer;
@@ -671,9 +695,13 @@ function gl_GetProc( const Proc : AnsiString ) : Pointer;
     wideStr : PWideChar;
   {$ENDIF}
 begin
+{$IFNDEF iOS}
   Result := eglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := eglGetProcAddress( PAnsiChar( Proc + 'OES' ) );
+{$ELSE}
+  Result := nil;
+{$ENDIF}
 
   {$IFNDEF WINCE}
   if Result = nil Then

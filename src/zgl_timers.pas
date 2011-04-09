@@ -24,14 +24,11 @@ unit zgl_timers;
 
 interface
 uses
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   Unix
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  MacOSAll
   {$ENDIF}
   ;
 
@@ -65,7 +62,7 @@ var
   canKillTimers : Boolean = TRUE;
   timersToKill  : Word = 0;
   aTimersToKill : array[ 0..1023 ] of zglPTimer;
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   t_tmr     : TimeVal;
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -159,12 +156,12 @@ function timer_GetTicks : Double;
     t : int64;
     m : LongWord;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   var
     t : UnsignedWide;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
+{$IFDEF UNIX}
   fpGetTimeOfDay( @t_tmr, nil );
   {$Q-}
   // FIXME: почему-то overflow вылетает с флагом -Co
@@ -180,10 +177,6 @@ begin
   {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), m );
   {$ENDIF}
-{$ENDIF}
-{$IFDEF DARWIN}
-  Microseconds( t );
-  Result := t.int / 1000 - t_start;
 {$ENDIF}
 end;
 

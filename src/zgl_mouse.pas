@@ -23,17 +23,15 @@ unit zgl_mouse;
 {$I zgl_config.cfg}
 
 interface
-uses
-  {$IFDEF LINUX}
-  X, XLib
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Windows
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  MacOSAll
-  {$ENDIF}
-  ;
+{$IFDEF LINUX}
+  uses X, XLib;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  uses Windows;
+{$ENDIF}
+{$IFDEF MACOSX}
+  uses MacOSAll;
+{$ENDIF}
 
 const
   M_BLEFT   = 0;
@@ -94,7 +92,7 @@ end;
 
 function mouse_Down( Button : Byte ) : Boolean;
 begin
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   Result := mouseDown[ Button ];
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -136,7 +134,7 @@ begin
 end;
 
 procedure mouse_Lock;
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   var
     Point : CGPoint;
   {$ENDIF}
@@ -150,7 +148,7 @@ begin
   else
     SetCursorPos( wndX + wndBrdSizeX + wndWidth div 2, wndY + wndBrdSizeY + wndCpnSize + wndHeight div 2 );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   Point.X := wndX + wndWidth / 2;
   Point.Y := wndY + wndHeight / 2;
   CGWarpMouseCursorPosition( Point );

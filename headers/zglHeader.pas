@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.3                 }
-{ date:     2011.03.18          }
+{ date:     2011.04.09          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -23,20 +23,21 @@ unit zglHeader;
   {$MODE DELPHI}
   {$MACRO ON}
   {$PACKRECORDS C}
-  {$IFDEF LINUX}
-    {$DEFINE LINUX_OR_DARWIN}
-  {$ENDIF}
-  {$IFDEF DARWIN}
-    {$DEFINE LINUX_OR_DARWIN}
-  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
   {$DEFINE WINDOWS}
 {$ENDIF}
+{$IFDEF DARWIN}
+{$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
+  {$DEFINE iOS}
+{$ELSE}
+  {$DEFINE MACOSX}
+{$IFEND}
+{$ENDIF}
 
 interface
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 uses
   MacOSAll;
 {$ENDIF}
@@ -81,7 +82,7 @@ const
 {$IFDEF WINDOWS}
   libZenGL = 'ZenGL.dll';
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   libZenGL = 'libZenGL.dylib';
 {$ENDIF}
 
@@ -507,6 +508,11 @@ type
     Radius : Single;
 end;
 
+// RESOURCES
+var
+  res_BeginQueue : procedure( QueueID : Byte );
+  res_EndQueue   : procedure;
+
 // TEXTURES
 type
   zglPTextureCoord = ^zglTTextureCoord;
@@ -569,7 +575,7 @@ const
 var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
-  tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
+  tex_Create         : procedure( var Texture : zglTTexture; pData : Pointer );
   tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromFile   : function( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
@@ -1239,7 +1245,7 @@ function u_CopyStr( const Str : String ) : String;
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
@@ -1264,8 +1270,8 @@ function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PWideChar; uType : Lo
 implementation
 
 var
-  zglLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF DARWIN}
+  zglLib : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  {$IFDEF MACOSX}
   mainBundle   : CFBundleRef;
   tmpCFURLRef  : CFURLRef;
   tmpCFString  : CFStringRef;
@@ -1433,7 +1439,7 @@ begin
   zglLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
   if not Assigned( zglLib ) Then
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
   tmpCFString := CFURLCopyFileSystemPath( tmpCFURLRef, kCFURLPOSIXPathStyle );
@@ -1446,10 +1452,10 @@ begin
   zglLib := dlopen( lib );
   FreeMem( lib );
   {$ELSE}
-  zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF UNIX}, $001 {$ENDIF} );
   {$ENDIF}
 
-  if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
+  if zglLib <> {$IFDEF UNIX} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
     begin
       Result := TRUE;
       zgl_Init := dlsym( zglLib, 'zgl_Init' );
@@ -1527,6 +1533,9 @@ begin
       joy_Up := dlsym( zglLib, 'joy_Up' );
       joy_Press := dlsym( zglLib, 'joy_Press' );
       joy_ClearState := dlsym( zglLib, 'joy_ClearState' );
+
+      res_BeginQueue := dlsym( zglLib, 'res_BeginQueue' );
+      res_EndQueue := dlsym( zglLib, 'res_EndQueue' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );
       tex_Del := dlsym( zglLib, 'tex_Del' );
@@ -1707,7 +1716,7 @@ begin
           {$IFDEF WINDOWS}
           MessageBoxA( 0, 'Error while loading ZenGL', 'Error', $00000010 );
           {$ENDIF}
-          {$IFDEF DARWIN}
+          {$IFDEF MACOSX}
           StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading ZenGL', nil, outItemHit );
           {$ENDIF}
         end;

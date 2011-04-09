@@ -21,6 +21,9 @@
 unit zgl_window;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 {$IFDEF WINCE}
   {$R zgl_wince.rc}
@@ -34,8 +37,11 @@ uses
   {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll, CGGeometry, CGAffineTransforms
   {$ENDIF}
   ;
 
@@ -80,11 +86,15 @@ var
   wndBrdSizeY  : Integer;
   wndCaptionW  : PWideChar;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   wndHandle  : WindowRef;
   wndAttr    : WindowAttributes;
   wndEvents  : array[ 0..14 ] of EventTypeSpec;
   wndMouseIn : Boolean;
+  {$ENDIF}
+  {$IFDEF iOS}
+  wndHandle   : UIWindow;
+  wndPortrait : Boolean;
   {$ENDIF}
 
 implementation
@@ -130,13 +140,17 @@ end;
 {$ENDIF}
 
 function wnd_Create( Width, Height : Integer ) : Boolean;
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   var
     size   : MacOSAll.Rect;
     status : OSStatus;
   {$ENDIF}
+  {$IFDEF iOS}
+  var
+    frame : CGRect;
+  {$ENDIF}
 begin
-  if wndHandle <> 0 Then exit;
+  if wndHandle <> {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF} Then exit;
 
   Result    := FALSE;
   wndX      := 0;
@@ -237,7 +251,7 @@ begin
     end;
   wnd_Select();
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   size.Left   := wndX;
   size.Top    := wndY;
   size.Right  := wndX + wndWidth;
@@ -290,6 +304,18 @@ begin
   InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wndEvents[ 0 ], nil, nil );
   wnd_Select();
 {$ENDIF}
+{$IFDEF iOS}
+  FillChar( frame, SizeOf( CGrect ), 0 );
+  frame.origin.x    := wndX;
+  frame.origin.y    := wndY;
+  frame.size.width  := Width;
+  frame.size.height := Height;
+
+  UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
+  wndHandle := UIWindow.alloc().initWithFrame( frame );
+
+  wnd_Select();
+{$ENDIF}
   Result := TRUE;
 end;
 
@@ -317,10 +343,10 @@ begin
       wndINST := 0;
     end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   ReleaseWindow( wndHandle );
 {$ENDIF}
-  wndHandle := 0;
+  wndHandle := {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF};
 end;
 
 procedure wnd_Update;
@@ -362,7 +388,7 @@ begin
   SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
   SetWindowLongW( wndHandle, GWL_EXSTYLE, {$IFDEF WINDESKTOP}WS_EX_APPWINDOW or{$ENDIF} WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if wndFullScreen Then
     ChangeWindowAttributes( wndHandle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
   else
@@ -371,6 +397,9 @@ begin
   ChangeWindowAttributes( wndHandle, 0, kWindowResizableAttribute );
 
   aglSetCurrentContext( oglContext );
+{$ENDIF}
+{$IFDEF iOS}
+  UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
 {$ENDIF}
   appWork := TRUE;
   wnd_SetCaption( wndCaption );
@@ -381,7 +410,9 @@ begin
 end;
 
 procedure wnd_SetCaption( const NewCaption : String );
+  {$IFNDEF iOS}
   var
+  {$ENDIF}
   {$IFDEF LINUX}
     err : Integer;
     str : PChar;
@@ -389,7 +420,7 @@ procedure wnd_SetCaption( const NewCaption : String );
   {$IFDEF WINDOWS}
     len : Integer;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     str : CFStringRef;
   {$ENDIF}
 begin
@@ -438,7 +469,7 @@ begin
   if wndHandle <> 0 Then
     SetWindowTextW( wndHandle, wndCaptionW );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if Assigned( wndHandle ) Then
     begin
       if appFlags and APP_USE_UTF8 = 0 Then
@@ -453,6 +484,10 @@ begin
 end;
 
 procedure wnd_SetSize( Width, Height : Integer );
+  {$IFDEF iOS}
+  var
+    bounds : CGRect;
+  {$ENDIF}
 begin
   wndWidth  := Width;
   wndHeight := Height;
@@ -467,12 +502,32 @@ begin
   if not appInitedToHandle Then
     wnd_SetPos( wndX, wndY );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if ( not appInitedToHandle ) and Assigned( wndHandle ) Then
     begin
       SizeWindow( wndHandle, wndWidth, wndHeight, TRUE );
       aglUpdateContext( oglContext );
       wnd_Select();
+    end;
+{$ENDIF}
+{$IFDEF iOS}
+  if ( not appInitedToHandle ) and Assigned( wndHandle ) Then
+    begin
+      FillChar( bounds, SizeOf( CGrect ), 0 );
+      bounds.origin.x    := wndX;
+      bounds.origin.y    := wndY;
+      bounds.size.width  := scrDesktopW;
+      bounds.size.height := scrDesktopH;
+      wndHandle.setBounds( bounds );
+
+      if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait Then
+        wndHandle.setTransform( CGAffineTransformMakeRotation( 0 ) );
+      if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown Then
+        wndHandle.setTransform( CGAffineTransformMakeRotation( pi ) );
+      if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeLeft Then
+        wndHandle.setTransform( CGAffineTransformMakeRotation( pi / 2 ) );
+      if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeRight Then
+        wndHandle.setTransform( CGAffineTransformMakeRotation( -pi / 2 ) );
     end;
 {$ENDIF}
   oglWidth  := Width;
@@ -510,12 +565,16 @@ begin
     else
       SetWindowPos( wndHandle, mode, 0, 0, wndWidth, wndHeight, SWP_NOACTIVATE );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if Assigned( wndHandle ) Then
     if not wndFullScreen Then
       MoveWindow( wndHandle, wndX, wndY, TRUE )
     else
       MoveWindow( wndHandle, 0, 0, TRUE );
+{$ENDIF}
+{$IFDEF iOS}
+  wndX := 0;
+  wndY := 0;
 {$ENDIF}
 end;
 
@@ -544,14 +603,10 @@ begin
         XDefineCursor( scrDisplay, wndHandle, appCursor );
       end;
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IF DEFINED(WINDOWS) or DEFINED(MACOSX) or DEFINED(iOS)}
 begin
   appShowCursor := Show;
-{$ENDIF}
-{$IFDEF DARWIN}
-begin
-  appShowCursor := Show;
-{$ENDIF}
+{$IFEND}
 end;
 
 procedure wnd_Select;
@@ -562,11 +617,14 @@ begin
 {$IFDEF WINDOWS}
   BringWindowToTop( wndHandle );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   SelectWindow( wndHandle );
   ShowWindow( wndHandle );
   if wndFullScreen Then
     wnd_SetPos( 0, 0 );
+{$ENDIF}
+{$IFDEF iOS}
+  wndHandle.makeKeyAndVisible();
 {$ENDIF}
 end;
 

@@ -30,7 +30,7 @@ uses
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll,
   {$ENDIF}
   {$IFNDEF USE_GLES}
@@ -71,7 +71,7 @@ type
     RC     : HGLRC;
 end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
@@ -156,7 +156,7 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
     pixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : LongWord;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     pbufferdAttr : array[ 0..31 ] of LongWord;
     pixelFormat  : TAGLPixelFormat;
   {$ENDIF}
@@ -176,7 +176,7 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
     if Stage = 2 Then
       wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     if Stage = 2 Then
       aglDestroyPixelFormat( pixelFormat );
     if Stage = 3 Then
@@ -389,7 +389,7 @@ begin
         wglMakeCurrent( wndDC, oglContext );
       end;
     {$ENDIF}
-    {$IFDEF DARWIN}
+    {$IFDEF MACOSX}
     RT_TYPE_PBUFFER:
       begin
         zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
@@ -540,7 +540,7 @@ begin
         if zglPPBuffer( Target.Handle ).Handle <> 0 Then
           wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
         {$ENDIF}
-        {$IFDEF DARWIN}
+        {$IFDEF MACOSX}
         aglDestroyContext( zglPPBuffer( Target.Handle ).Context );
         aglDestroyPBuffer( zglPPBuffer( Target.Handle ).PBuffer );
         {$ENDIF}
@@ -592,7 +592,7 @@ begin
             {$IFDEF WINDOWS}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
             {$ENDIF}
-            {$IFDEF DARWIN}
+            {$IFDEF MACOSX}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
             aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( oglContext ) );
             {$ENDIF}
@@ -646,7 +646,7 @@ begin
                 {$IFDEF WINDOWS}
                 wglMakeCurrent( wndDC, oglContext );
                 {$ENDIF}
-                {$IFDEF DARWIN}
+                {$IFDEF MACOSX}
                 aglSwapBuffers( zglPPBuffer( lRTarget.Handle ).Context );
                 aglSetCurrentContext( oglContext );
                 {$ENDIF}

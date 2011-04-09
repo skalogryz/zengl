@@ -23,17 +23,15 @@ unit zgl_keyboard;
 {$I zgl_config.cfg}
 
 interface
-uses
-  {$IFDEF LINUX}
-  X, Xlib, keysym
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Windows
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  MacOSAll
-  {$ENDIF}
-  ;
+{$IFDEF LINUX}
+  uses X, Xlib, keysym;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  uses Windows;
+{$ENDIF}
+{$IFDEF MACOSX}
+  uses MacOSAll;
+{$ENDIF}
 
 const
   K_SYSRQ      = $B7;
@@ -178,7 +176,7 @@ function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return 
 {$IFDEF WINDOWS}
 function winkey_to_scancode( WinKey : Integer ) : Byte;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
 {$ENDIF}
 function  SCA( KeyCode : LongWord ) : LongWord;
@@ -186,7 +184,7 @@ procedure doKeyPress( KeyCode : LongWord );
 
 function _key_GetText : PChar;
 
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 type
   zglTModifier = record
     bit : Integer;
@@ -498,7 +496,7 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
 begin
   case MacKey of

@@ -21,22 +21,28 @@
 unit zgl_utils;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 interface
 uses
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   Unix,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll,
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll, CFString,
   {$ENDIF}
   zgl_types;
 
 const
-  LIB_ERROR  = {$IFDEF LINUX_OR_DARWIN} nil {$ELSE} 0 {$ENDIF};
+  LIB_ERROR  = {$IFDEF UNIX} nil {$ELSE} 0 {$ENDIF};
 
 function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
@@ -70,7 +76,7 @@ function u_GetPOT( Value : Integer ) : Integer;
 
 procedure u_Sleep( Msec : LongWord );
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
@@ -88,6 +94,9 @@ function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.d
 function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
 
 function u_GetPWideChar( const Str : String ) : PWideChar;
+{$ENDIF}
+{$IFDEF iOS}
+function u_GetNSString( const Str : String ) : NSString;
 {$ENDIF}
 
 implementation
@@ -199,6 +208,13 @@ begin
   GetMem( Result, len * 2 + 2 );
   Result[ len ] := #0;
   MultiByteToWideChar( CP_UTF8, 0, @newStr[ 1 ], length( newStr ), Result, len );
+end;
+{$ENDIF}
+
+{$IFDEF iOS}
+function u_GetNSString( const Str : String ) : NSString;
+begin
+  Result := NSString( CFStr( PChar( Str ) ) );
 end;
 {$ENDIF}
 
@@ -382,7 +398,7 @@ begin
 end;
 
 procedure u_Error( const ErrStr : String );
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   var
     outItemHit: SInt16;
   {$ENDIF}
@@ -402,7 +418,7 @@ begin
   //MessageBox( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
   //FreeMem( wideStr );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
 {$ENDIF}
 
@@ -410,7 +426,7 @@ begin
 end;
 
 procedure u_Warning( const ErrStr : String );
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   var
     outItemHit: SInt16;
   {$ENDIF}
@@ -430,7 +446,7 @@ begin
   //MessageBox( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
   //FreeMem( wideStr );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
 {$ENDIF}
 
@@ -449,12 +465,12 @@ begin
 end;
 
 procedure u_Sleep( Msec : LongWord );
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   var
     tv : TimeVal;
   {$ENDIF}
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   tv.tv_sec  := Msec div 1000;
   tv.tv_usec := ( Msec mod 1000 ) * 1000;
   select( 0, nil, nil, nil, tv );

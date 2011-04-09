@@ -27,7 +27,7 @@ const
 {$IFDEF LINUX}
   libmodplug = 'libmodplug.so';
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   libmodplug = 'libmodplug.dylib';
 {$ENDIF}
   MAX_FORMATS = 22;
@@ -98,7 +98,7 @@ begin
   {$IFDEF WINDOWS}
   mpLibrary := dlopen( libmodplug );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   mpLibrary := dlopen( PChar( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Frameworks/' + libmodplug ), $001 );
   {$ENDIF}
 

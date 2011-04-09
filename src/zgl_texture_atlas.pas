@@ -284,11 +284,7 @@ begin
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
-      {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-      managerTexture.Formats[ i ].FileLoader( platform_GetRes( FileName ), pData, w, h );
-      {$ELSE}
       managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
-      {$IFEND}
 
   if not Assigned( pData ) Then
     begin
@@ -306,6 +302,8 @@ begin
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
   if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcAlpha( pData, TransparentColor, w, h )
+  else
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 
@@ -347,6 +345,8 @@ begin
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
   if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcAlpha( pData, TransparentColor, w, h )
+  else
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 

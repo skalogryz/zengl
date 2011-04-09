@@ -21,6 +21,9 @@
 unit zgl_screen;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 interface
 uses
@@ -30,8 +33,11 @@ uses
   {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll
   {$ENDIF}
   ;
 
@@ -127,7 +133,7 @@ var
   scrMonitor  : HMONITOR;
   scrMonInfo  : MONITORINFOEX;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   scrDisplay   : CGDirectDisplayID;
   scrDesktop   : CFDictionaryRef;
   scrDesktopW  : Integer;
@@ -135,6 +141,10 @@ var
   scrSettings  : CFDictionaryRef;
   scrModeCount : CFIndex;
   scrModeList  : CFArrayRef;
+  {$ENDIF}
+  {$IFDEF iOS}
+  scrDesktopW  : Integer;
+  scrDesktopH  : Integer;
   {$ENDIF}
 
 implementation
@@ -181,7 +191,6 @@ procedure scr_Init;
     rotation : Word;
   {$ENDIF}
 begin
-  scrInitialized := TRUE;
 {$IFDEF LINUX}
   log_Init();
 
@@ -219,7 +228,7 @@ begin
       dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
     end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   scrDisplay  := CGMainDisplayID();
   scrDesktop  := CGDisplayCurrentMode( scrDisplay );
   scrDesktopW := CGDisplayPixelsWide( scrDisplay );
@@ -228,14 +237,30 @@ begin
   scrModeList  := CGDisplayAvailableModes( scrDisplay );
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
+{$IFDEF iOS}
+  if ( UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait ) or
+     ( UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown ) or
+     ( UIDevice.currentDevice.orientation() = UIDeviceOrientationUnknown ) Then
+    begin
+      wndPortrait := TRUE;
+      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
+      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+    end else
+      begin
+        wndPortrait := FALSE;
+        scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
+        scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
+      end;
+{$ENDIF}
+  scrInitialized := TRUE;
 end;
 
 function scr_Create : Boolean;
 begin
   Result := FALSE;
-{$IFDEF LINUX}
-  scr_Init();
 
+  scr_Init();
+{$IFDEF LINUX}
   if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
     begin
       u_Error( 'DefaultDepth not set to 24-bit.' );
@@ -256,12 +281,10 @@ begin
     log_Add( 'XCreateIC - ok' );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  scr_Init();
   if ( not wndFullScreen ) and ( scrDesktop.dmBitsPerPel <> 32 ) Then
     scr_SetWindowedMode();
 {$ENDIF}
-{$IFDEF DARWIN}
-  scr_Init();
+{$IFDEF MACOSX}
   if CGDisplayBitsPerPixel( scrDisplay ) <> 32 Then
     begin
       u_Error( 'Desktop not set to 32-bit mode.' );
@@ -283,7 +306,7 @@ procedure scr_GetResList;
   {$IFDEF WINDOWS}
     tmpSettings : DEVMODEW;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     tmpSettings   : UnivPtr;
     width, height : Integer;
   {$ENDIF}
@@ -328,7 +351,7 @@ begin
       INC( i );
     end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   tmpSettings := scrModeList;
   for i := 0 to scrModeCount - 1 do
     begin
@@ -344,6 +367,13 @@ begin
           scrResList.Height[ scrResList.Count - 1 ] := height;
         end;
     end;
+{$ENDIF}
+{$IFDEF iOS}
+  scrResList.Count := 1;
+  SetLength( scrResList.Width, 1 );
+  SetLength( scrResList.Height, 1 );
+  scrResList.Width[ 0 ] := scrDesktopW;
+  scrResList.Height[ 0 ] := scrDesktopH;
 {$ENDIF}
 end;
 
@@ -373,7 +403,7 @@ begin
 {$IFDEF WINDOWS}
   ChangeDisplaySettingsExW( scrMonInfo.szDevice, {$IFDEF WINDESKTOP}DEVMODEW( nil^ ){$ELSE}scrDesktop{$ENDIF}, 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   CGDisplaySwitchToMode( scrDisplay, scrDesktop );
   //CGDisplayRelease( scrDisplay );
 {$ENDIF}
@@ -396,11 +426,15 @@ begin
   {$IFDEF WINDOWS}
   SwapBuffers( wndDC );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   aglSwapBuffers( oglContext );
   {$ENDIF}
 {$ELSE}
+  {$IFNDEF iOS}
   eglSwapBuffers( oglDisplay, oglSurface );
+  {$ELSE}
+  eglContext.presentRenderbuffer( GL_RENDERBUFFER );
+  {$ENDIF}
 {$ENDIF}
 end;
 
@@ -429,23 +463,25 @@ begin
     end else
       scr_Reset();
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   scr_Reset();
   ShowMenuBar();
   {$ENDIF}
 end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
-  var
   {$IFDEF LINUX}
+  var
     modeToSet : Integer;
     mode      : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
+  var
     i : Integer;
     r : Integer;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
+  var
     b : Integer;
   {$ENDIF}
 begin
@@ -543,7 +579,7 @@ begin
     end else
       scr_SetWindowedMode();
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   if wndFullScreen Then
     begin
       //CGDisplayCapture( scrDisplay );
@@ -620,16 +656,37 @@ begin
         begin
           oglClipX := 0;
           oglClipY := 0;
+          {$IFNDEF iOS}
           oglClipW := wndWidth - scrAddCX * 2;
           oglClipH := wndHeight - scrAddCY * 2;
           glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
+          {$ELSE}
+          if wndPortrait Then
+            begin
+              oglClipW := wndWidth - scrAddCX * 2;
+              oglClipH := wndHeight - scrAddCY * 2;
+              glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
+            end else
+              begin
+                oglClipW := wndWidth - scrAddCY * 2;
+                oglClipH := wndHeight - scrAddCX * 2;
+                glViewPort( scrAddCX, scrAddCY, oglClipH, oglClipW );
+              end;
+          {$ENDIF}
         end else
           begin
             oglClipX := 0;
             oglClipY := 0;
             oglClipW := wndWidth;
             oglClipH := wndHeight;
+            {$IFNDEF iOS}
             glViewPort( 0, 0, oglClipW, oglClipH );
+            {$ELSE}
+            if wndPortrait Then
+              glViewPort( 0, 0, oglClipW, oglClipH )
+            else
+              glViewPort( 0, 0, oglClipH, oglClipW );
+            {$ENDIF}
           end;
     end else
       begin
@@ -637,7 +694,14 @@ begin
         oglClipY := 0;
         oglClipW := oglWidth;
         oglClipH := oglHeight;
+        {$IFNDEF iOS}
         glViewPort( 0, 0, oglTargetW, oglTargetH );
+        {$ELSE}
+        if wndPortrait Then
+          glViewPort( 0, 0, oglTargetW, oglTargetH )
+        else
+          glViewPort( 0, 0, oglTargetH, oglTargetW );
+        {$ENDIF}
       end;
 end;
 
@@ -653,13 +717,16 @@ begin
   if oglCanVSync Then
     wglSwapInterval( Integer( scrVSync ) );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   if Assigned( oglContext ) Then
     aglSetInt( oglContext, AGL_SWAP_INTERVAL, Byte( scrVSync ) );
   {$ENDIF}
 {$ELSE}
+  {$IFNDEF iOS}
   if oglCanVSync Then
     eglSwapInterval( oglDisplay, Integer( scrVSync ) );
+  {$ELSE}
+  {$ENDIF}
 {$ENDIF}
 end;
 

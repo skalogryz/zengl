@@ -46,6 +46,8 @@ uses
   zgl_joystick,
   {$ENDIF}
 
+  zgl_resources,
+
   zgl_textures,
   {$IFNDEF WINCE}
   zgl_textures_jpg,
@@ -92,7 +94,7 @@ uses
 
 const
 // Ненавижу Apple! :)
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   prefix = '_';
   {$ELSE}
   prefix = '';
@@ -184,6 +186,9 @@ exports
   joy_Press                name prefix + 'joy_Press',
   joy_ClearState           name prefix + 'joy_ClearState',
   {$ENDIF}
+
+  res_BeginQueue           name prefix + 'res_BeginQueue',
+  res_EndQueue             name prefix + 'res_EndQueue',
 
   // Textures
   tex_Add                  name prefix + 'tex_Add',

@@ -21,23 +21,32 @@
 unit zgl_main;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 interface
 uses
+  {$IFDEF UNIX}
+  BaseUnix,
+  {$ENDIF}
   {$IFDEF LINUX}
-  BaseUnix, X, XRandr,
+  X, XRandr,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF DARWIN}
-  BaseUnix, MacOSAll,
+  {$IFDEF MACOSX}
+  MacOSAll,
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll,
   {$ENDIF}
   zgl_types;
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.04.07';
+  cs_Date     = '2011.04.09';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -148,12 +157,13 @@ uses
   zgl_opengles_all,
   {$ENDIF}
   zgl_opengl_simple,
-  {$IF DEFINED(LINUX) or DEFINED(WINCE)}
+  {$IF DEFINED(LINUX) or DEFINED(WINCE) or DEFINED(iOS)}
   zgl_file,
   {$IFEND}
   zgl_timers,
   zgl_log,
   zgl_render_2d,
+  zgl_resources,
   zgl_textures,
   {$IFDEF USE_TEXTURE_ATLAS}
   zgl_texture_atlas,
@@ -173,15 +183,24 @@ uses
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
 begin
+  oglFSAA    := FSAA;
+  oglStencil := StencilBits;
+
+  {$IFDEF iOS}
+  if not Assigned( appPool ) Then
+    begin
+      appPool := NSAutoreleasePool.alloc.init();
+      ExitCode := UIApplicationMain( argc, argv, nil, u_GetNSString( 'zglCAppDelegate' ) );
+      appPool.release();
+      exit;
+    end;
+  {$ENDIF}
+
   zgl_GetSysDir();
   log_Init();
 
-  oglFSAA    := FSAA;
-  oglStencil := StencilBits;
   if not scr_Create() Then exit;
   appInitialized := TRUE;
-  if wndHeight >= zgl_Get( DESKTOP_HEIGHT ) Then
-    wndFullScreen := TRUE;
 
   if not gl_Create() Then exit;
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
@@ -195,6 +214,10 @@ begin
 
   {$IFDEF LINUX}
   scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
+  {$ENDIF}
+  {$IFDEF iOS}
+  scr_Init();
+  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
   {$ENDIF}
 
   app_PInit();
@@ -216,7 +239,7 @@ begin
   {$IFDEF LINUX}
   wndHandle := TWindow( Handle );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   wndHandle := WindowRef( Handle );
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -245,6 +268,7 @@ begin
     log_Add( 'Average FPS: ' + u_IntToStr( Round( appFPSAll / appWorkTime ) ) );
 
   app_PExit();
+  res_Free();
 
   if managerTimer.Count <> 0 Then
     log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
@@ -462,13 +486,17 @@ begin
     {$ENDIF}
     RESOLUTION_LIST: Result := Ptr( @scrResList );
 
+    {$IFNDEF iOS}
     WINDOW_HANDLE: Result := Ptr( wndHandle );
+    {$ENDIF}
     WINDOW_X: Result := Ptr( wndX );
     WINDOW_Y: Result := Ptr( wndY );
     WINDOW_WIDTH: Result := Ptr( wndWidth );
     WINDOW_HEIGHT: Result := Ptr( wndHeight );
 
+    {$IFNDEF iOS}
     GAPI_CONTEXT: Result := Ptr( oglContext );
+    {$ENDIF}
     GAPI_MAX_TEXTURE_SIZE: Result := oglMaxTexSize;
     GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
     GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
@@ -552,7 +580,7 @@ begin
   {$ENDIF}
   FreeMem( fn );
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   var
     appBundle   : CFBundleRef;
     appCFURLRef : CFURLRef;
@@ -565,6 +593,11 @@ begin
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   appWorkDir  := appPath + '/';
   appHomeDir  := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
+{$ENDIF}
+{$IFDEF iOS}
+begin
+  appWorkDir := file_GetDirectory( ParamStr( 0 ) );
+  appHomeDir := FpGetEnv( 'HOME' );// + '/Library/Preferences/';
 {$ENDIF}
   appGotSysDirs := TRUE;
 end;

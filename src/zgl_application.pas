@@ -21,6 +21,9 @@
 unit zgl_application;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 interface
 uses
@@ -28,11 +31,13 @@ uses
   X, XLib
   {$ENDIF}
   {$IFDEF WINDOWS}
-  Windows,
-  Messages
+  Windows, Messages
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll, CFrunLoop
   {$ENDIF}
   ;
 
@@ -49,8 +54,19 @@ function app_ProcessMessages : LongWord;
 {$IFDEF WINDOWS}
 function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 function app_ProcessMessages( inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr ): OSStatus; cdecl;
+{$ENDIF}
+{$IFDEF iOS}
+type
+  zglCAppDelegate = objcclass(NSObject)
+    procedure EnterMainLoop; message 'EnterMainLoop';
+    procedure applicationDidFinishLaunching( application: UIApplication ); message 'applicationDidFinishLaunching:';
+    procedure applicationDidEnterBackground( application: UIApplication ); message 'applicationDidEnterBackground:';
+    procedure applicationWillTerminate( application: UIApplication ); message 'applicationWillTerminate:';
+    procedure applicationWillEnterForeground( application: UIApplication ); message 'applicationWillEnterForeground:';
+    procedure deviceOrientationDidChange; message 'deviceOrientationDidChange';
+  end;
 {$ENDIF}
 
 var
@@ -83,6 +99,9 @@ var
   {$IFDEF WINDOWS}
   appTimer : LongWord;
   {$ENDIF}
+  {$IFDEF iOS}
+  appPool : NSAutoreleasePool;
+  {$ENDIF}
   appShowCursor : Boolean;
 
   appdt : Double;
@@ -110,6 +129,7 @@ uses
   zgl_joystick,
   {$ENDIF}
   zgl_timers,
+  zgl_resources,
   zgl_font,
   {$IFDEF USE_SOUND}
   zgl_sound,
@@ -144,6 +164,8 @@ begin
   app_PLoad();
   scr_Flush();
 
+  res_Init();
+
   appdt := timer_GetTicks();
   timer_Reset();
   timer_Add( @app_CalcFPS, 1000 );
@@ -156,6 +178,7 @@ begin
   while appWork do
     begin
       app_ProcessOS();
+      res_MainLoop();
       {$IFDEF USE_JOYSTICK}
       joy_Proc();
       {$ENDIF}
@@ -181,8 +204,8 @@ begin
 end;
 
 procedure app_ProcessOS;
-  var
   {$IFDEF LINUX}
+  var
     root_return   : TWindow;
     child_return  : TWindow;
     root_x_return : Integer;
@@ -190,10 +213,12 @@ procedure app_ProcessOS;
     mask_return   : LongWord;
   {$ENDIF}
   {$IFDEF WINDOWS}
+  var
     m         : tagMsg;
     cursorpos : TPoint;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
+  var
     event : EventRecord;
     mPos  : Point;
   {$ENDIF}
@@ -222,15 +247,19 @@ begin
       DispatchMessageW( m );
     end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   GetGlobalMouse( mPos );
   mouseX := mPos.h - wndX;
   mouseY := mPos.v - wndY;
 
   while GetNextEvent( everyEvent, event ) do;
 {$ENDIF}
+{$IFDEF iOS}
+  while CFRunLoopRunInMode( kCFRunLoopDefaultMode, 0.01, TRUE ) = kCFRunLoopRunHandledSource do;
+{$ENDIF}
 end;
 
+{$IFNDEF iOS}
 function app_ProcessMessages;
   var
   {$IFDEF LINUX}
@@ -238,7 +267,7 @@ function app_ProcessMessages;
     keysym : TKeySym;
     status : TStatus;
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
     eClass  : UInt32;
     eKind   : UInt32;
     command : HICommand;
@@ -645,7 +674,7 @@ begin
     Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
   end;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   eClass := GetEventClass( inEvent );
   eKind  := GetEventKind( inEvent );
   Result := CallNextEventHandler( inHandlerCallRef, inEvent );
@@ -906,6 +935,45 @@ begin
   end;
 {$ENDIF}
 end;
+{$ELSE}
+procedure zglCAppDelegate.EnterMainLoop;
+begin
+  zgl_Init( oglFSAA, oglStencil );
+end;
+
+procedure zglCAppDelegate.applicationDidFinishLaunching( application: UIApplication );
+begin
+  UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications();
+
+  NSNotificationCenter.DefaultCenter.addObserver_selector_name_object( self, objcselector( 'deviceOrientationDidChange' ), u_GetNSString( 'UIDeviceOrientationDidChangeNotification' ), nil );
+  app_ProcessOS();
+
+  performSelector_withObject_afterDelay( objcselector( 'EnterMainLoop' ), nil, 0.2{magic} );
+end;
+
+procedure zglCAppDelegate.applicationDidEnterBackground( application: UIApplication );
+begin
+//  appWork := FALSE;
+end;
+
+procedure zglCAppDelegate.applicationWillTerminate( application: UIApplication );
+begin
+//  appWork := FALSE;
+end;
+
+procedure zglCAppDelegate.applicationWillEnterForeground( application: UIApplication );
+begin
+  timer_Reset();
+end;
+
+procedure zglCAppDelegate.deviceOrientationDidChange;
+begin
+  if not appWork Then exit;
+
+  scr_Init();
+  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
+end;
+{$ENDIF}
 
 initialization
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;

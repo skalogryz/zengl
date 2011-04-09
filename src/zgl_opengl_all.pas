@@ -21,10 +21,10 @@
 unit zgl_opengl_all;
 
 {$I zgl_config.cfg}
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   {$LINKFRAMEWORK OpenGL}
 {$ENDIF}
 
@@ -36,14 +36,14 @@ uses
   {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll
   {$ENDIF}
   ;
 
 function InitGL : Boolean;
 procedure FreeGL;
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
@@ -59,7 +59,7 @@ const
   libGL  = 'opengl32.dll';
   libGLU = 'glu32.dll';
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   libGL  = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
   libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
   libAGL = '/System/Library/Frameworks/AGL.framework/AGL';
@@ -488,7 +488,7 @@ var
   wglReleasePbufferDCARB: function(hPbuffer: THandle; hDC: HDC): GLint; stdcall;
   wglDestroyPbufferARB: function(hPbuffer: THandle): BOOL; stdcall;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 const
   AGL_NONE         = 0;
   AGL_BUFFER_SIZE  = 2;
@@ -547,8 +547,8 @@ var
 {$ENDIF}
 
 var
-  oglLibrary : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF DARWIN}
+  oglLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  {$IFDEF MACOSX}
   aglLibrary : Pointer;
   {$ENDIF}
 
@@ -575,7 +575,7 @@ begin
     Set8087CW($133F);
   {$ENDIF}
 
-  oglLibrary := dlopen( libGL {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  oglLibrary := dlopen( libGL {$IFDEF UNIX}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   glXGetProcAddressARB := gl_GetProc( 'glXGetProcAddress' );
   {$ENDIF}
@@ -588,7 +588,7 @@ begin
   dlclose( oglLibrary );
 end;
 
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
 function aglSetInt;
   var
     i : Integer;

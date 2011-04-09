@@ -235,7 +235,7 @@ end;
 
 // GLU Triangulation
 {$IFDEF USE_TRIANGULATION}
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
 

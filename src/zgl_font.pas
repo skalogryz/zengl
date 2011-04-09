@@ -104,7 +104,7 @@ uses
   zgl_log,
   zgl_utils;
 
-var
+threadvar
   fntMem : zglTMemory;
   fntID  : array[ 0..13 ] of AnsiChar;
 
@@ -192,21 +192,14 @@ function font_LoadFromFile( const FileName : String ) : zglPFont;
     tmp  : String;
 begin
   Result := nil;
-  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-  if not file_Exists( platform_GetRes( FileName ) ) Then
-  {$ELSE}
+
   if not file_Exists( FileName ) Then
-  {$IFEND}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
     end;
 
-  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-  mem_LoadFromFile( fntMem, platform_GetRes( FileName ) );
-  {$ELSE}
   mem_LoadFromFile( fntMem, FileName );
-  {$IFEND}
   mem_Read( fntMem, fntID, 13 );
   if fntID <> ZGL_FONT_INFO Then
     begin
@@ -223,11 +216,7 @@ begin
     for j := managerTexture.Count.Formats - 1 downto 0 do
       begin
         tmp := dir + name + '-page' + u_IntToStr( i ) + '.' + u_StrDown( managerTexture.Formats[ j ].Extension );
-        {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-        if file_Exists( platform_GetRes( tmp ) ) Then
-        {$ELSE}
         if file_Exists( tmp ) Then
-        {$IFEND}
           begin
             Result.Pages[ i ] := tex_LoadFromFile( tmp, $FF000000, TEX_DEFAULT_2D );
             break;

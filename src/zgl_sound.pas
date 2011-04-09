@@ -25,7 +25,7 @@ unit zgl_sound;
 interface
 
 uses
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   {$LINKLIB pthread}
   cthreads,
   {$ENDIF}
@@ -63,6 +63,9 @@ type
   zglPSoundDecoder = ^zglTSoundDecoder;
   zglPSoundFormat  = ^zglTSoundFormat;
   zglPSoundManager = ^zglTSoundManager;
+
+  zglTSoundFileLoader = procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+  zglTSoundMemLoader  = procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 
   zglTSoundChannel = record
     {$IFDEF USE_OPENAL}
@@ -122,8 +125,8 @@ type
   zglTSoundFormat = record
     Extension  : String;
     Decoder    : zglPSoundDecoder;
-    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+    FileLoader : zglTSoundFileLoader;
+    MemLoader  : zglTSoundMemLoader;
   end;
 
   zglTSoundManager = record
@@ -140,6 +143,7 @@ function  snd_Init : Boolean;
 procedure snd_Free;
 function  snd_Add( SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
+procedure snd_Create( var Sound : zglTSound; Format : LongWord );
 function  snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
 function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
 
@@ -191,10 +195,12 @@ var
 
 implementation
 uses
+  zgl_types,
   zgl_application,
   zgl_main,
   zgl_window,
   zgl_timers,
+  zgl_resources,
   zgl_log,
   zgl_utils;
 
@@ -492,50 +498,19 @@ begin
   DEC( managerSound.Count.Items );
 end;
 
-function snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
-  var
-    i   : Integer;
-    fmt : LongWord;
+procedure snd_Create( var Sound : zglTSound; Format : LongWord );
   {$IFNDEF USE_OPENAL}
+  var
+    i        : Integer;
     buffDesc : zglTBufferDesc;
   {$ENDIF}
 begin
-  Result := nil;
-
-  if not sndInitialized Then exit;
-
-  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-  if not file_Exists( platform_GetRes( FileName ) ) Then
-  {$ELSE}
-  if not file_Exists( FileName ) Then
-  {$IFEND}
-    begin
-      log_Add( 'Cannot read "' + FileName + '"' );
-      exit;
-    end;
-  Result := snd_Add( SourceCount );
-
-  for i := managerSound.Count.Formats - 1 downto 0 do
-    if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
-      {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-      managerSound.Formats[ i ].FileLoader( platform_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
-      {$ELSE}
-      managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
-      {$IFEND}
-
-  if not Assigned( Result.Data ) Then
-    begin
-      log_Add( 'Unable to load sound: "' + FileName + '"' );
-      snd_Del( Result );
-      exit;
-    end;
-
-  case fmt of
+  case Format of
     {$IFDEF USE_OPENAL}
-    SND_FORMAT_MONO8: fmt := AL_FORMAT_MONO8;
-    SND_FORMAT_MONO16: fmt := AL_FORMAT_MONO16;
-    SND_FORMAT_STEREO8: fmt := AL_FORMAT_STEREO8;
-    SND_FORMAT_STEREO16: fmt := AL_FORMAT_STEREO16;
+    SND_FORMAT_MONO8: Format := AL_FORMAT_MONO8;
+    SND_FORMAT_MONO16: Format := AL_FORMAT_MONO16;
+    SND_FORMAT_STEREO8: Format := AL_FORMAT_STEREO8;
+    SND_FORMAT_STEREO16: Format := AL_FORMAT_STEREO16;
     {$ELSE}
     SND_FORMAT_MONO8:
       begin
@@ -558,43 +533,75 @@ begin
         buffDesc.BitsPerSample := 16;
       end;
     {$ENDIF}
-  else
-    begin
-      log_Add( 'Unable to determinate sound format: "' + FileName + '"' );
-      snd_Del( Result );
-      exit;
-    end;
   end;
 
 {$IFDEF USE_OPENAL}
-  alBufferData( Result.Buffer, fmt, Result.Data, Result.Size, Result.Frequency );
-  FreeMem( Result.Data );
+  alBufferData( Sound.Buffer, Format, Sound.Data, Sound.Size, Sound.Frequency );
+  FreeMem( Sound.Data );
 {$ELSE}
   with buffDesc do
     begin
       FormatCode     := 1;
-      SampleRate     := Result.Frequency;
+      SampleRate     := Sound.Frequency;
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );
     end;
 
-  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, @buffDesc );
-  dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
-  for i := 1 to Result.SourceCount - 1 do
-    dsDevice.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
+  dsu_CreateBuffer( Sound.Channel[ 0 ].Source, Sound.Size, @buffDesc );
+  dsu_FillData( Sound.Channel[ 0 ].Source, Sound.Data, Sound.Size );
+  for i := 1 to Sound.SourceCount - 1 do
+    dsDevice.DuplicateSoundBuffer( Sound.Channel[ 0 ].Source, Sound.Channel[ i ].Source );
 {$ENDIF}
+end;
 
-  log_Add( 'Sound loaded: "' + FileName + '"' );
+function snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
+  var
+    i   : Integer;
+    fmt : LongWord;
+    res : zglTSoundResource;
+begin
+  Result := nil;
+
+  if not sndInitialized Then exit;
+
+  if not file_Exists( FileName ) Then
+    begin
+      log_Add( 'Cannot read "' + FileName + '"' );
+      exit;
+    end;
+  Result := snd_Add( SourceCount );
+
+  for i := managerSound.Count.Formats - 1 downto 0 do
+    if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
+      if resQueueState = QUEUE_STATE_START Then
+        begin
+          res.FileName   := FileName;
+          res.Sound      := Result;
+          res.FileLoader := managerSound.Formats[ i ].FileLoader;
+          res_AddToQueue( RES_SOUND, TRUE, @res );
+          exit;
+        end else
+          managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
+
+  if not Assigned( Result.Data ) Then
+    begin
+      log_Add( 'Unable to load sound: "' + FileName + '"' );
+      snd_Del( Result );
+      exit;
+    end;
+
+  snd_Create( Result^, fmt );
+
+  if Assigned( Result ) Then
+    log_Add( 'Sound loaded: "' + FileName + '"' );
 end;
 
 function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
   var
     i   : Integer;
     fmt : LongWord;
-  {$IFNDEF USE_OPENAL}
-    buffDesc : zglTBufferDesc;
-  {$ENDIF}
+    res : zglTSoundResource;
 begin
   Result := nil;
 
@@ -604,7 +611,15 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerSound.Formats[ i ].Extension Then
-      managerSound.Formats[ i ].MemLoader( Memory, Result.Data, Result.Size, fmt, Result.Frequency );
+      if resQueueState = QUEUE_STATE_START Then
+        begin
+          res.Memory    := Memory;
+          res.Sound     := Result;
+          res.MemLoader := managerSound.Formats[ i ].MemLoader;
+          res_AddToQueue( RES_SOUND, FALSE, @res );
+          exit;
+        end else
+          managerSound.Formats[ i ].MemLoader( Memory, Result.Data, Result.Size, fmt, Result.Frequency );
 
   if not Assigned( Result.Data ) Then
     begin
@@ -613,60 +628,7 @@ begin
       exit;
     end;
 
-  case fmt of
-    {$IFDEF USE_OPENAL}
-    SND_FORMAT_MONO8: fmt := AL_FORMAT_MONO8;
-    SND_FORMAT_MONO16: fmt := AL_FORMAT_MONO16;
-    SND_FORMAT_STEREO8: fmt := AL_FORMAT_STEREO8;
-    SND_FORMAT_STEREO16: fmt := AL_FORMAT_STEREO16;
-    {$ELSE}
-    SND_FORMAT_MONO8:
-      begin
-        buffDesc.ChannelNumber := 1;
-        buffDesc.BitsPerSample := 8;
-      end;
-    SND_FORMAT_MONO16:
-      begin
-        buffDesc.ChannelNumber := 1;
-        buffDesc.BitsPerSample := 16;
-      end;
-    SND_FORMAT_STEREO8:
-      begin
-        buffDesc.ChannelNumber := 2;
-        buffDesc.BitsPerSample := 8;
-      end;
-    SND_FORMAT_STEREO16:
-      begin
-        buffDesc.ChannelNumber := 2;
-        buffDesc.BitsPerSample := 16;
-      end;
-    {$ENDIF}
-  else
-    begin
-      log_Add( 'Unable to determinate sound format: From memory' );
-      snd_Del( Result );
-      exit;
-    end;
-  end;
-
-{$IFDEF USE_OPENAL}
-  alBufferData( Result.Buffer, fmt, Result.Data, Result.Size, Result.Frequency );
-  FreeMem( Result.Data );
-{$ELSE}
-  with buffDesc do
-    begin
-      FormatCode     := 1;
-      SampleRate     := Result.Frequency;
-      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
-      BytesPerSecond := SampleRate * BytesPerSample;
-      cbSize         := SizeOf( buffDesc );
-    end;
-
-  dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, @buffDesc );
-  dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
-  for i := 1 to Result.SourceCount - 1 do
-    dsDevice.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
-{$ENDIF}
+  snd_Create( Result^, fmt );
 end;
 
 function snd_Play( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
@@ -824,18 +786,16 @@ begin
     begin
       if Assigned( Sound ) Then
         begin
-          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
-          sfPositions[ LongWord( Sound ), 0 ] := X;
-          sfPositions[ LongWord( Sound ), 1 ] := Y;
-          sfPositions[ LongWord( Sound ), 2 ] := Z;
+          if sfSource[ Ptr( Sound ) ] = SND_ERROR Then exit;
+          sfPositions[ Ptr( Sound ), 0 ] := X;
+          sfPositions[ Ptr( Sound ), 1 ] := Y;
+          sfPositions[ Ptr( Sound ), 2 ] := Z;
 
           {$IFDEF USE_OPENAL}
-          alSourcefv( LongWord( Sound ), AL_POSITION, @sfPositions[ LongWord( Sound ), 0 ] );
+          alSourcefv( Ptr( Sound ), AL_POSITION, @sfPositions[ Ptr( Sound ), 0 ] );
           {$ELSE}
-          sfSource[ LongWord( Sound ) ].SetPan( dsu_CalcPos( sfPositions[ LongWord( Sound ), 0 ],
-                                                             sfPositions[ LongWord( Sound ), 1 ],
-                                                             sfPositions[ LongWord( Sound ), 2 ], vol ) );
-          sfSource[ LongWord( Sound ) ].SetVolume( dsu_CalcVolume( vol * sfVolumes[ LongWord( Sound ) ] ) );
+          sfSource[ Ptr( Sound ) ].SetPan( dsu_CalcPos( sfPositions[ Ptr( Sound ), 0 ], sfPositions[ Ptr( Sound ), 1 ], sfPositions[ Ptr( Sound ), 2 ], vol ) );
+          sfSource[ Ptr( Sound ) ].SetVolume( dsu_CalcVolume( vol * sfVolumes[ Ptr( Sound ) ] ) );
           {$ENDIF}
         end else
           for i := 1 to SND_MAX do
@@ -911,16 +871,14 @@ begin
     begin
       if Assigned( Sound ) Then
         begin
-          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
-          sfVolumes[ LongWord( Sound ) ] := Volume;
+          if sfSource[ Ptr( Sound ) ] = SND_ERROR Then exit;
+          sfVolumes[ Ptr( Sound ) ] := Volume;
 
           {$IFDEF USE_OPENAL}
-          alSourcef( sfSource[ LongWord( Sound ) ], AL_GAIN, Volume );
+          alSourcef( sfSource[ Ptr( Sound ) ], AL_GAIN, Volume );
           {$ELSE}
-          sfSource[ LongWord( Sound ) ].SetPan( dsu_CalcPos( sfPositions[ LongWord( Sound ), 0 ],
-                                                             sfPositions[ LongWord( Sound ), 1 ],
-                                                             sfPositions[ LongWord( Sound ), 2 ], vol ) );
-          sfSource[ LongWord( Sound ) ].SetVolume( dsu_CalcVolume( vol * sfVolumes[ LongWord( Sound ) ] ) );
+          sfSource[ Ptr( Sound ) ].SetPan( dsu_CalcPos( sfPositions[ Ptr( Sound ), 0 ], sfPositions[ Ptr( Sound ), 1 ], sfPositions[ Ptr( Sound ), 2 ], vol ) );
+          sfSource[ Ptr( Sound ) ].SetVolume( dsu_CalcVolume( vol * sfVolumes[ Ptr( Sound ) ] ) );
           {$ENDIF}
         end else
           for i := 1 to SND_MAX do
@@ -982,12 +940,12 @@ begin
     begin
       if Assigned( Sound ) Then
         begin
-          if sfSource[ LongWord( Sound ) ] = SND_ERROR Then exit;
+          if sfSource[ Ptr( Sound ) ] = SND_ERROR Then exit;
 
           {$IFDEF USE_OPENAL}
-          alSourcef( sfSource[ LongWord( Sound ) ], AL_PITCH, Speed );
+          alSourcef( sfSource[ Ptr( Sound ) ], AL_PITCH, Speed );
           {$ELSE}
-          sfSource[ LongWord( Sound ) ].SetFrequency( Round( sfStream[ LongWord( Sound ) ].Frequency * Speed ) );
+          sfSource[ Ptr( Sound ) ].SetFrequency( Round( sfStream[ Ptr( Sound ) ].Frequency * Speed ) );
           {$ENDIF}
         end else
           for i := 1 to SND_MAX do
@@ -1035,10 +993,10 @@ begin
   if ID = SND_STREAM Then
     begin
       case What of
-        SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ LongWord( Sound ) ] );
-        SND_STATE_TIME: Result := Round( sfStream[ LongWord( Sound ) ]._complete );
-        SND_STATE_PERCENT: Result := Round( 100 / sfStream[ LongWord( Sound ) ].Length * sfStream[ LongWord( Sound ) ]._complete );
-        SND_INFO_LENGTH: Result := Round( sfStream[ LongWord( Sound ) ].Length );
+        SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ Ptr( Sound ) ] );
+        SND_STATE_TIME: Result := Round( sfStream[ Ptr( Sound ) ]._complete );
+        SND_STATE_PERCENT: Result := Round( 100 / sfStream[ Ptr( Sound ) ].Length * sfStream[ Ptr( Sound ) ]._complete );
+        SND_INFO_LENGTH: Result := Round( sfStream[ Ptr( Sound ) ].Length );
       end;
     end else
       case What of
@@ -1085,11 +1043,7 @@ begin
         FreeMem( sfStream[ Result ]._data );
     end;
 
-  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-  if not file_Exists( platform_GetRes( FileName ) ) Then
-  {$ELSE}
   if not file_Exists( FileName ) Then
-  {$IFEND}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -1106,11 +1060,7 @@ begin
     sfStream[ Result ].Loop := Loop;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or
-  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-     ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], platform_GetRes( FileName ) ) ) Then
-  {$ELSE}
      ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
-  {$IFEND}
     begin
       sfStream[ Result ]._decoder := nil;
       log_Add( 'Cannot play: "' + FileName + '"' );
@@ -1262,7 +1212,7 @@ begin
 
           DEC( processed );
         end;
-      {$IFDEF LINUX_OR_DARWIN}
+      {$IFDEF UNIX}
       while sfStream[ id ]._paused do u_Sleep( 10 );
       {$ENDIF}
       {$ELSE}
