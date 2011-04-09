@@ -55,6 +55,8 @@ procedure mouse_Lock;
 var
   mouseX        : Integer;
   mouseY        : Integer;
+  mouseLX       : Integer;
+  mouseLY       : Integer;
   mouseDown     : array[ 0..2 ] of Boolean;
   mouseUp       : array[ 0..2 ] of Boolean;
   mouseClick    : array[ 0..2 ] of Boolean;
@@ -64,6 +66,12 @@ var
   mouseDblCInt  : Integer = 250;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
+
+  // callback
+  mouse_PMove    : procedure( X, Y : Integer );
+  mouse_PPress   : procedure( Button : Byte );
+  mouse_PRelease : procedure( Button : Byte );
+  mouse_PWheel   : procedure( Axis : Byte );
 
 implementation
 uses

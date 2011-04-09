@@ -214,6 +214,10 @@ var
   keysRepeat : Integer; // Костыль, да :)
   {$ENDIF}
 
+  // callback
+  key_PPress   : procedure( KeyCode : Byte );
+  key_PRelease : procedure( KeyCode : Byte );
+
 implementation
 uses
   zgl_application,
@@ -275,7 +279,7 @@ begin
   keysLast[ KA_UP   ] := 0;
 end;
 
-procedure key_InputText( Text : String );
+procedure key_InputText( const Text : String );
   var
     c : Char;
 begin

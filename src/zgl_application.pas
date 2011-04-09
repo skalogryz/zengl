@@ -225,6 +225,14 @@ procedure app_ProcessOS;
 begin
 {$IFDEF LINUX}
   XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
+  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+    begin
+      mouseLX := mouseX;
+      mouseLY := mouseY;
+
+      if Assigned( mouse_PMove ) Then
+        mouse_PMove( mouseX, mouseY );
+    end;
 
   app_ProcessMessages();
   keysRepeat := 0;
@@ -241,6 +249,15 @@ begin
         mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
       end;
 
+  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+    begin
+      mouseLX := mouseX;
+      mouseLY := mouseY;
+
+      if Assigned( mouse_PMove ) Then
+        mouse_PMove( mouseX, mouseY );
+    end;
+
   while PeekMessageW( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
       TranslateMessage( m );
@@ -251,6 +268,15 @@ begin
   GetGlobalMouse( mPos );
   mouseX := mPos.h - wndX;
   mouseY := mPos.v - wndY;
+
+  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+    begin
+      mouseLX := mouseX;
+      mouseLY := mouseY;
+
+      if Assigned( mouse_PMove ) Then
+        mouse_PMove( mouseX, mouseY );
+    end;
 
   while GetNextEvent( everyEvent, event ) do;
 {$ENDIF}
@@ -334,8 +360,11 @@ begin
                         mouseDblClick[ M_BLEFT ] := TRUE;
                       mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
                     end;
+
+                  if Assigned( mouse_PPress ) Then
+                    mouse_PPress( M_BLEFT );
                 end;
-              2: // Midle
+              2: // Middle
                 begin
                   mouseDown[ M_BMIDDLE ] := TRUE;
                   if mouseCanClick[ M_BMIDDLE ] Then
@@ -346,6 +375,9 @@ begin
                         mouseDblClick[ M_BMIDDLE ] := TRUE;
                       mouseDblCTime[ M_BMIDDLE ] := timer_GetTicks();
                     end;
+
+                  if Assigned( mouse_PPress ) Then
+                    mouse_PPress( M_BMIDDLE );
                 end;
               3: // Right
                 begin
@@ -358,6 +390,9 @@ begin
                         mouseDblClick[ M_BRIGHT ] := TRUE;
                       mouseDblCTime[ M_BRIGHT ] := timer_GetTicks();
                     end;
+
+                  if Assigned( mouse_PPress ) Then
+                    mouse_PPress( M_BRIGHT );
                 end;
             end;
           end;
@@ -369,26 +404,41 @@ begin
                   mouseDown[ M_BLEFT ]     := FALSE;
                   mouseUp  [ M_BLEFT ]     := TRUE;
                   mouseCanClick[ M_BLEFT ] := TRUE;
+
+                  if Assigned( mouse_PRelease ) Then
+                    mouse_PRelease( M_BLEFT );
                 end;
-              2: // Midle
+              2: // Middle
                 begin
                   mouseDown[ M_BMIDDLE ]     := FALSE;
                   mouseUp  [ M_BMIDDLE ]     := TRUE;
                   mouseCanClick[ M_BMIDDLE ] := TRUE;
+
+                  if Assigned( mouse_PRelease ) Then
+                    mouse_PRelease( M_BMIDDLE );
                 end;
               3: // Right
                 begin
                   mouseDown[ M_BRIGHT ]     := FALSE;
                   mouseUp  [ M_BRIGHT ]     := TRUE;
                   mouseCanClick[ M_BRIGHT ] := TRUE;
+
+                  if Assigned( mouse_PRelease ) Then
+                    mouse_PRelease( M_BRIGHT );
                 end;
               4: // Up Wheel
                 begin
                   mouseWheel[ M_WUP ] := TRUE;
+
+                  if Assigned( mouse_PWheel ) Then
+                    mouse_PWheel( M_WUP );
                 end;
               5: // Down Wheel
                 begin
                   mouseWheel[ M_WDOWN ] := TRUE;
+
+                  if Assigned( mouse_PWheel ) Then
+                    mouse_PWheel( M_WDOWN );
                 end;
             end;
           end;
@@ -406,6 +456,9 @@ begin
             keysDown[ key ] := TRUE;
             keysUp  [ key ] := FALSE;
             doKeyPress( key );
+
+            if Assigned( key_PPress ) Then
+              key_PPress( key );
 
             if keysCanText Then
             case key of
@@ -442,6 +495,9 @@ begin
             key := SCA( key );
             keysDown[ key ] := FALSE;
             keysUp  [ key ] := TRUE;
+
+            if Assigned( key_PRelease ) Then
+              key_PRelease( key );
           end;
       end
     end;
@@ -548,6 +604,9 @@ begin
           end;
         if Msg = WM_LBUTTONDBLCLK Then
           mouseDblClick[ M_BLEFT ] := TRUE;
+
+        if Assigned( mouse_PPress ) Then
+          mouse_PPress( M_BLEFT );
       end;
     WM_MBUTTONDOWN, WM_MBUTTONDBLCLK:
       begin
@@ -559,6 +618,9 @@ begin
           end;
         if Msg = WM_MBUTTONDBLCLK Then
           mouseDblClick[ M_BMIDDLE ] := TRUE;
+
+        if Assigned( mouse_PPress ) Then
+          mouse_PPress( M_BMIDDLE );
       end;
     WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
       begin
@@ -570,24 +632,36 @@ begin
           end;
         if Msg = WM_RBUTTONDBLCLK Then
           mouseDblClick[ M_BRIGHT ] := TRUE;
+
+        if Assigned( mouse_PPress ) Then
+          mouse_PPress( M_BRIGHT );
       end;
     WM_LBUTTONUP:
       begin
         mouseDown[ M_BLEFT ]     := FALSE;
         mouseUp  [ M_BLEFT ]     := TRUE;
         mouseCanClick[ M_BLEFT ] := TRUE;
+
+        if Assigned( mouse_PRelease ) Then
+          mouse_PRelease( M_BLEFT );
       end;
     WM_MBUTTONUP:
       begin
         mouseDown[ M_BMIDDLE ]     := FALSE;
         mouseUp  [ M_BMIDDLE ]     := TRUE;
         mouseCanClick[ M_BMIDDLE ] := TRUE;
+
+        if Assigned( mouse_PRelease ) Then
+          mouse_PRelease( M_BMIDDLE );
       end;
     WM_RBUTTONUP:
       begin
         mouseDown[ M_BRIGHT ]     := FALSE;
         mouseUp  [ M_BRIGHT ]     := TRUE;
         mouseCanClick[ M_BRIGHT ] := TRUE;
+
+        if Assigned( mouse_PRelease ) Then
+          mouse_PRelease( M_BRIGHT );
       end;
     WM_MOUSEWHEEL:
       begin
@@ -595,10 +669,16 @@ begin
           begin
             mouseWheel[ M_WUP   ] := TRUE;
             mouseWheel[ M_WDOWN ] := FALSE;
+
+            if Assigned( mouse_PWheel ) Then
+              mouse_PWheel( M_WUP );
           end else
             begin
               mouseWheel[ M_WUP   ] := FALSE;
               mouseWheel[ M_WDOWN ] := TRUE;
+
+              if Assigned( mouse_PWheel ) Then
+                mouse_PWheel( M_WDOWN );
             end;
       end;
 
@@ -615,6 +695,9 @@ begin
         keysUp  [ key ] := FALSE;
         doKeyPress( key );
 
+        if Assigned( key_PPress ) Then
+          key_PPress( key );
+
         if ( Msg = WM_SYSKEYDOWN ) and ( key = K_F4 ) Then
           appWork := FALSE;
       end;
@@ -628,6 +711,9 @@ begin
         key := SCA( key );
         keysDown[ key ] := FALSE;
         keysUp  [ key ] := TRUE;
+
+        if Assigned( key_PRelease ) Then
+          key_PRelease( key );
       end;
     WM_CHAR:
       begin
@@ -793,6 +879,9 @@ begin
               if eKind <> kEventRawKeyRepeat Then
                 doKeyPress( key );
 
+              if Assigned( key_PPress ) Then
+                key_PPress( key );
+
               if keysCanText Then
               case key of
                 K_SYSRQ, K_PAUSE,
@@ -827,6 +916,9 @@ begin
               key := SCA( key );
               keysDown[ key ] := FALSE;
               keysUp  [ key ] := TRUE;
+
+              if Assigned( key_Prelease ) Then
+                key_Prelease( key );
             end;
         end;
       end;
@@ -866,8 +958,11 @@ begin
                         mouseDblClick[ M_BLEFT ] := TRUE;
                       mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
                     end;
+
+                  if Assigned( mouse_PPress ) Then
+                    mouse_PPress( M_BLEFT );
                 end;
-              kEventMouseButtonTertiary: // Midle
+              kEventMouseButtonTertiary: // Middle
                 begin
                   mouseDown[ M_BMIDDLE ] := TRUE;
                   if mouseCanClick[ M_BMIDDLE ] Then
@@ -878,6 +973,9 @@ begin
                         mouseDblClick[ M_BMIDDLE ] := TRUE;
                       mouseDblCTime[ M_BMIDDLE ] := timer_GetTicks();
                     end;
+
+                  if Assigned( mouse_PPress ) Then
+                    mouse_PPress( M_BMIDDLE );
                 end;
               kEventMouseButtonSecondary: // Right
                 begin
@@ -890,6 +988,9 @@ begin
                         mouseDblClick[ M_BRIGHT ] := TRUE;
                       mouseDblCTime[ M_BRIGHT ] := timer_GetTicks();
                     end;
+
+                  if Assigned( mouse_PPress ) Then
+                    mouse_PPress( M_BRIGHT );
                 end;
             end;
           end;
@@ -907,18 +1008,27 @@ begin
                   mouseDown[ M_BLEFT ]     := FALSE;
                   mouseUp  [ M_BLEFT ]     := TRUE;
                   mouseCanClick[ M_BLEFT ] := TRUE;
+
+                  if Assigned( mouse_PRelease ) Then
+                    mouse_PRelease( M_BLEFT );
                 end;
-              kEventMouseButtonTertiary: // Midle
+              kEventMouseButtonTertiary: // Middle
                 begin
                   mouseDown[ M_BMIDDLE ]     := FALSE;
                   mouseUp  [ M_BMIDDLE ]     := TRUE;
                   mouseCanClick[ M_BMIDDLE ] := TRUE;
+
+                  if Assigned( mouse_PRelease ) Then
+                    mouse_PRelease( M_BMIDDLE );
                 end;
               kEventMouseButtonSecondary: // Right
                 begin
                   mouseDown[ M_BRIGHT ]     := FALSE;
                   mouseUp  [ M_BRIGHT ]     := TRUE;
                   mouseCanClick[ M_BRIGHT ] := TRUE;
+
+                  if Assigned( mouse_PRelease ) Then
+                    mouse_PRelease( M_BRIGHT );
                 end;
             end;
           end;
@@ -927,9 +1037,18 @@ begin
             GetEventParameter( inEvent, kEventParamMouseWheelDelta, typeSInt32, nil, 4, nil, @mWheel );
 
             if mWheel > 0 then
-              mouseWheel[ M_WUP ] := TRUE
-            else
-              mouseWheel[ M_WDOWN ] := TRUE;
+              begin
+                mouseWheel[ M_WUP ] := TRUE;
+
+                if Assigned( mouse_PWheel ) Then
+                  mouse_PWheel( M_WUP );
+              end else
+                begin
+                  mouseWheel[ M_WDOWN ] := TRUE;
+
+                  if Assigned( mouse_PWheel ) Then
+                    mouse_PWheel( M_WDOWN );
+                end;
           end;
       end;
   end;
