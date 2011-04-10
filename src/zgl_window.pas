@@ -511,24 +511,8 @@ begin
     end;
 {$ENDIF}
 {$IFDEF iOS}
-  if ( not appInitedToHandle ) and Assigned( wndHandle ) Then
-    begin
-      FillChar( bounds, SizeOf( CGrect ), 0 );
-      bounds.origin.x    := wndX;
-      bounds.origin.y    := wndY;
-      bounds.size.width  := scrDesktopW;
-      bounds.size.height := scrDesktopH;
-      wndHandle.setBounds( bounds );
-
-      if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait Then
-        wndHandle.setTransform( CGAffineTransformMakeRotation( 0 ) );
-      if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown Then
-        wndHandle.setTransform( CGAffineTransformMakeRotation( pi ) );
-      if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeLeft Then
-        wndHandle.setTransform( CGAffineTransformMakeRotation( pi / 2 ) );
-      if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeRight Then
-        wndHandle.setTransform( CGAffineTransformMakeRotation( -pi / 2 ) );
-    end;
+  wndWidth  := scrDesktopW;
+  wndHeight := scrDesktopH;
 {$ENDIF}
   oglWidth  := Width;
   oglHeight := Height;

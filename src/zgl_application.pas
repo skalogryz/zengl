@@ -1091,6 +1091,13 @@ begin
 
   scr_Init();
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
+
+  case scrAngle of
+    0:   UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortrait );
+    180: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortraitUpsideDown );
+    270: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeRight );
+    90:  UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeLeft );
+  end;
 end;
 {$ENDIF}
 

@@ -329,7 +329,6 @@ begin
   frame.size.width  := oglWidth;
   frame.size.height := oglHeight;
   eglView := zglCiOSEAGLView.alloc().initWithFrame( frame );
-  eglView.setAutoresizingMask( UIViewAutoresizingFlexibleWidth or UIViewAutoresizingFlexibleHeight );
 
   eglSurface := CAEAGLLayer( eglView.layer );
   eglSurface.setOpaque( TRUE );

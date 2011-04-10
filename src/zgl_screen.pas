@@ -145,6 +145,7 @@ var
   {$IFDEF iOS}
   scrDesktopW  : Integer;
   scrDesktopH  : Integer;
+  scrAngle     : Integer;
   {$ENDIF}
 
 implementation
@@ -238,6 +239,10 @@ begin
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 {$IFDEF iOS}
+  if ( ( UIDevice.currentDevice.orientation() = UIDeviceOrientationUnknown ) or
+       ( UIDevice.currentDevice.orientation() = UIDeviceOrientationFaceDown ) or
+       ( UIDevice.currentDevice.orientation() = UIDeviceOrientationFaceUp ) ) and ( appWork ) Then exit;
+
   if ( UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait ) or
      ( UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown ) or
      ( UIDevice.currentDevice.orientation() = UIDeviceOrientationUnknown ) Then
@@ -251,6 +256,15 @@ begin
         scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
         scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
       end;
+
+  if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait Then
+    scrAngle := 0;
+  if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown Then
+    scrAngle := 180;
+  if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeLeft Then
+    scrAngle := 270;
+  if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeRight Then
+    scrAngle := 90;
 {$ENDIF}
   scrInitialized := TRUE;
 end;
@@ -656,22 +670,15 @@ begin
         begin
           oglClipX := 0;
           oglClipY := 0;
-          {$IFNDEF iOS}
           oglClipW := wndWidth - scrAddCX * 2;
           oglClipH := wndHeight - scrAddCY * 2;
+          {$IFNDEF iOS}
           glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
           {$ELSE}
           if wndPortrait Then
-            begin
-              oglClipW := wndWidth - scrAddCX * 2;
-              oglClipH := wndHeight - scrAddCY * 2;
-              glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
-            end else
-              begin
-                oglClipW := wndWidth - scrAddCY * 2;
-                oglClipH := wndHeight - scrAddCX * 2;
-                glViewPort( scrAddCX, scrAddCY, oglClipH, oglClipW );
-              end;
+            glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH )
+          else
+            glViewPort( scrAddCY, scrAddCX, oglClipH, oglClipW );
           {$ENDIF}
         end else
           begin
