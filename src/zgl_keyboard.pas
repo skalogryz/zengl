@@ -167,7 +167,7 @@ function  key_GetText : String;
 procedure key_EndReadText;
 procedure key_ClearState;
 
-procedure key_InputText( Text : String );
+procedure key_InputText( const Text : String );
 function scancode_to_utf8( ScanCode : Byte ) : Byte;
 {$IFDEF LINUX}
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
