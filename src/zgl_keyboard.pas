@@ -215,8 +215,9 @@ var
   {$ENDIF}
 
   // callback
-  key_PPress   : procedure( KeyCode : Byte );
-  key_PRelease : procedure( KeyCode : Byte );
+  key_PPress     : procedure( KeyCode : Byte );
+  key_PRelease   : procedure( KeyCode : Byte );
+  key_PInputChar : procedure( Symbol : String );
 
 implementation
 uses
@@ -292,6 +293,17 @@ begin
             keysText := keysText + c;
         end else
           keysText := keysText + Text;
+    end;
+
+  if Assigned( key_PInputChar ) Then
+    begin
+      if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
+        begin
+          c := Char( scancode_to_utf8( keysLast[ 0 ] ) );
+          if c <> #0 Then
+            key_PInputChar( c );
+        end else
+          key_PInputChar( Text );
     end;
 end;
 

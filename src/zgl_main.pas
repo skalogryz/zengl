@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.04.09';
+  cs_Date     = '2011.04.13';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -66,6 +66,7 @@ const
   INPUT_MOUSE_WHEEL      = $000042;
   INPUT_KEY_PRESS        = $000044;
   INPUT_KEY_RELEASE      = $000045;
+  INPUT_KEY_CHAR         = $000046;
 
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
@@ -171,6 +172,8 @@ uses
   {$IFEND}
   zgl_timers,
   zgl_log,
+  zgl_mouse,
+  zgl_keyboard,
   zgl_render_2d,
   zgl_resources,
   zgl_textures,
@@ -405,6 +408,31 @@ begin
       begin
         app_PActivate := UserData;
         if not Assigned( UserData ) Then app_PActivate := zeroa;
+      end;
+    // Input events
+    INPUT_MOUSE_MOVE:
+      begin
+        mouse_PMove := UserData;
+      end;
+    INPUT_MOUSE_PRESS:
+      begin
+        mouse_PPress := UserData;
+      end;
+    INPUT_MOUSE_RELEASE:
+      begin
+        mouse_PRelease := UserData;
+      end;
+    INPUT_KEY_PRESS:
+      begin
+        key_PPress := UserData;
+      end;
+    INPUT_KEY_RELEASE:
+      begin
+        key_PRelease := UserData;
+      end;
+    INPUT_KEY_CHAR:
+      begin
+        key_PInputChar := UserData;
       end;
     // Textures
     TEX_FORMAT_EXTENSION:

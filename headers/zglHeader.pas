@@ -3,7 +3,7 @@
 {-------------------------------}
 {                               }
 { version:  0.3                 }
-{ date:     2011.04.09          }
+{ date:     2011.04.13          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -109,6 +109,7 @@ const
   INPUT_MOUSE_WHEEL      = $000042;
   INPUT_KEY_PRESS        = $000044;
   INPUT_KEY_RELEASE      = $000045;
+  INPUT_KEY_CHAR         = $000046;
 
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
@@ -706,12 +707,14 @@ var
 type
   zglPCamera2D = ^zglTCamera2D;
   zglTCamera2D = record
-    X, Y  : Single;
-    Angle : Single;
-    Zoom  : zglTPoint2D;
+    X, Y   : Single;
+    Angle  : Single;
+    Zoom   : zglTPoint2D;
+    Center : zglTPoint2D;
 end;
 
 var
+  cam2d_Init  : procedure( var Camera : zglTCamera2D );
   cam2d_Set   : procedure( Camera : zglPCamera2D );
   cam2d_Get   : function : zglPCamera2D;
 
@@ -1588,6 +1591,7 @@ begin
       fx2d_SetVertexes := dlsym( zglLib, 'fx2d_SetVertexes' );
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );
 
+      cam2d_Init := dlsym( zglLib, 'cam2d_Init' );
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );
       cam2d_Get := dlsym( zglLib, 'cam2d_Get' );
 

@@ -29,9 +29,10 @@ uses
 type
   zglPCamera2D = ^zglTCamera2D;
   zglTCamera2D = record
-    X, Y  : Single;
-    Angle : Single;
-    Zoom  : zglTPoint2D;
+    X, Y   : Single;
+    Angle  : Single;
+    Zoom   : zglTPoint2D;
+    Center : zglTPoint2D;
   end;
 
 type
@@ -46,6 +47,7 @@ type
     ZoomY  : Single;
   end;
 
+procedure cam2d_Init( var Camera : zglTCamera2D );
 procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
 
@@ -67,6 +69,14 @@ uses
   {$ENDIF}
   zgl_render_2d;
 
+procedure cam2d_Init( var Camera : zglTCamera2D );
+begin
+  Camera.Zoom.X   := 1;
+  Camera.Zoom.Y   := 1;
+  Camera.Center.X := oglWidth / 2;
+  Camera.Center.Y := oglHeight / 2;
+end;
+
 procedure cam2d_Set( Camera : zglPCamera2D );
 begin
   batch2d_Flush();
@@ -81,20 +91,20 @@ begin
       cam2d.OnlyXY := ( cam2d.Global.Angle = 0 ) and ( cam2d.Global.Zoom.X = 1 ) and ( cam2d.Global.Zoom.Y = 1 );
       if ( cam2d.ZoomX <> cam2d.Global.Zoom.X ) or ( cam2d.ZoomY <> cam2d.Global.Zoom.Y ) Then
         oglClipR := Round( sqrt( sqr( oglWidth / scrResCX / cam2d.Global.Zoom.X ) + sqr( oglHeight / scrResCY / cam2d.Global.Zoom.Y ) ) ) div 2;
-      cam2d.CX     := cam2d.Global.X + ( oglWidth / scrResCX ) / 2;
-      cam2d.CY     := cam2d.Global.Y + ( oglHeight / scrResCY ) / 2;
+      cam2d.CX     := cam2d.Global.X + Camera.Center.X;
+      cam2d.CY     := cam2d.Global.Y + Camera.Center.Y;
       cam2d.ZoomX  := cam2d.Global.Zoom.X;
       cam2d.ZoomY  := cam2d.Global.Zoom.Y;
 
       glPushMatrix();
       if not cam2d.OnlyXY Then
         begin
-          glTranslatef( oglWidth / 2 - scrAddCX / scrResCX, oglHeight / 2 - scrAddCY / scrResCY, 0 );
+          glTranslatef( Camera.Center.X, Camera.Center.Y, 0 );
           if ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
             glScalef( Camera.Zoom.X, Camera.Zoom.Y, 1 );
           if Camera.Angle <> 0 Then
             glRotatef( Camera.Angle, 0, 0, 1 );
-          glTranslatef( -oglWidth / 2 + scrAddCX / scrResCX, -oglHeight / 2 + scrAddCY / scrResCY, 0 );
+          glTranslatef( -Camera.Center.X, -Camera.Center.Y, 0 );
         end;
       if ( Camera.X <> 0 ) or ( Camera.Y <> 0 ) Then
         glTranslatef( -Camera.X, -Camera.Y, 0 );

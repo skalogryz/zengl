@@ -28,11 +28,6 @@ uses
 
   zgl_screen,
   zgl_window,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  {$ELSE}
-  zgl_opengles,
-  {$ENDIF}
   zgl_opengl_simple,
 
   zgl_timers,
@@ -243,6 +238,7 @@ exports
   fx2d_SetScale            name prefix + 'fx2d_SetScale',
 
   // Camera 2D
+  cam2d_Init               name prefix + 'cam2d_Init',
   cam2d_Set                name prefix + 'cam2d_Set',
   cam2d_Get                name prefix + 'cam2d_Get',
 
