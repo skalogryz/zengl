@@ -696,12 +696,14 @@ const
   FX2D_VCA      = $000004;
   FX2D_VCHANGE  = $000008;
   FX2D_SCALE    = $000010;
+  FX2D_RPIVOT   = $000020;
 
 var
-  fx2d_SetColor    : procedure( Color : LongWord );
-  fx2d_SetVCA      : procedure( c1, c2, c3, c4 : LongWord; a1, a2, a3, a4 : Byte );
-  fx2d_SetVertexes : procedure( x1, y1, x2, y2, x3, y3, x4, y4 : Single );
-  fx2d_SetScale    : procedure( scaleX, scaleY : Single );
+  fx2d_SetColor         : procedure( Color : LongWord );
+  fx2d_SetVCA           : procedure( c1, c2, c3, c4 : LongWord; a1, a2, a3, a4 : Byte );
+  fx2d_SetVertexes      : procedure( x1, y1, x2, y2, x3, y3, x4, y4 : Single );
+  fx2d_SetScale         : procedure( scaleX, scaleY : Single );
+  fx2d_SetRotatingPivot : procedure( X, Y : Single );
 
 // Camera 2D
 type
@@ -1590,6 +1592,7 @@ begin
       fx2d_SetVCA := dlsym( zglLib, 'fx2d_SetVCA' );
       fx2d_SetVertexes := dlsym( zglLib, 'fx2d_SetVertexes' );
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );
+      fx2d_SetRotatingPivot := dlsym( zglLib, 'fx2d_SetRotatingPivot' );
 
       cam2d_Init := dlsym( zglLib, 'cam2d_Init' );
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );

@@ -50,10 +50,9 @@ procedure Init;
   var
     i : Integer;
 begin
-  // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует для масштаба установить 1.
-  // EN: Zoom must be set to 1, because camera structure is zero-filled by default.
-  camMain.Zoom.X := 1;
-  camMain.Zoom.Y := 1;
+  // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует инициализировать её стандартными значениями.
+  // EN: Camera must be initialized, because camera structure is zero-filled by default.
+  cam2d_Init( camMain );
 
   // RU: Загружаем текстуру.
   // $FF000000 - указывает на то, что бы использовать альфа-канал из изображения.

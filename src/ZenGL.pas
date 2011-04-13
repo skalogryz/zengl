@@ -236,6 +236,7 @@ exports
   fx2d_SetVCA              name prefix + 'fx2d_SetVCA',
   fx2d_SetVertexes         name prefix + 'fx2d_SetVertexes',
   fx2d_SetScale            name prefix + 'fx2d_SetScale',
+  fx2d_SetRotatingPivot    name prefix + 'fx2d_SetRotatingPivot',
 
   // Camera 2D
   cam2d_Init               name prefix + 'cam2d_Init',
