@@ -643,6 +643,8 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
     i       : Integer;
     r, g, b : Byte;
 begin
+  if TransparentColor = $FF000000 Then exit;
+
   r := ( TransparentColor and $FF0000 ) shr 16;
   g := ( TransparentColor and $FF00   ) shr 8;
   b := ( TransparentColor and $FF     );
