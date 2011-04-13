@@ -125,7 +125,15 @@ end;
 
 initialization
   cam2d := @cam2dTarget[ TARGET_SCREEN ];
-  cam2dTarget[ TARGET_SCREEN ].Global := @constCamera2D;
-  cam2dTarget[ TARGET_TEXTURE ].Global := @constCamera2D;
+  with cam2dTarget[ TARGET_SCREEN ] do
+    begin
+      Global := @constCamera2D;
+      OnlyXY := TRUE;
+    end;
+  with cam2dTarget[ TARGET_TEXTURE ] do
+    begin
+      Global := @constCamera2D;
+      OnlyXY := TRUE;
+    end;
 
 end.
