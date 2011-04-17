@@ -44,7 +44,7 @@ procedure mem_SetSize( var Memory : zglTMemory; Size : LongWord );
 procedure mem_Free( var Memory : zglTMemory );
 
 {$IFDEF ENDIAN_BIG}
-var
+threadvar
   forceNoSwap : Boolean;
 {$ENDIF}
 

@@ -37,7 +37,7 @@ uses
   MacOSAll
   {$ENDIF}
   {$IFDEF iOS}
-  iPhoneAll, CFrunLoop
+  iPhoneAll, CFrunLoop, CGGeometry
   {$ENDIF}
   ;
 
@@ -66,6 +66,17 @@ type
     procedure applicationWillTerminate( application: UIApplication ); message 'applicationWillTerminate:';
     procedure applicationWillEnterForeground( application: UIApplication ); message 'applicationWillEnterForeground:';
     procedure deviceOrientationDidChange; message 'deviceOrientationDidChange';
+  end;
+
+type
+  zglCiOSWindow = objcclass(UIWindow)
+  protected
+    procedure GetTouchPos( touches : NSSet; var X, Y : Integer ); message 'GetTouchPos:::';
+  public
+    procedure touchesBegan_withEvent( touches : NSSet; event : UIevent ); override;
+    procedure touchesMoved_withEvent( touches : NSSet; event : UIevent ); override;
+    procedure touchesEnded_withEvent( touches : NSSet; event : UIevent ); override;
+    procedure touchesCancelled_withEvent( touches : NSSet; event : UIevent ); override;
   end;
 {$ENDIF}
 
@@ -178,7 +189,7 @@ begin
   while appWork do
     begin
       app_ProcessOS();
-      res_MainLoop();
+      res_Proc();
       {$IFDEF USE_JOYSTICK}
       joy_Proc();
       {$ENDIF}
@@ -1098,6 +1109,80 @@ begin
     270: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeRight );
     90:  UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeLeft );
   end;
+end;
+
+procedure zglCiOSWindow.GetTouchPos( touches : NSSet; var X, Y : Integer );
+  var
+    touch : UITouch;
+    point : CGPoint;
+begin
+  touch := UITouch( touches.allObjects().objectAtIndex( 0 ) );
+  point := touch.locationInView( Window );
+
+  case scrAngle of
+    0:
+      begin
+        mouseX := Round( point.x );
+        mouseY := Round( point.y );
+      end;
+    180:
+      begin
+        mouseX := Round( wndWidth - point.x );
+        mouseY := Round( wndHeight - point.y );
+      end;
+    270:
+      begin
+        mouseX := Round( point.y );
+        mouseY := Round( point.x );
+      end;
+    90:
+      begin
+        mouseX := Round( wndWidth - point.y );
+        mouseY := Round( point.x );
+      end;
+  end;
+end;
+
+procedure zglCiOSWindow.touchesBegan_withEvent( touches : NSSet; event : UIevent );
+begin
+  // mouse emulation
+  mouseDown[ M_BLEFT ] := TRUE;
+  if mouseCanClick[ M_BLEFT ] Then
+    begin
+      mouseClick[ M_BLEFT ] := TRUE;
+      mouseCanClick[ M_BLEFT ] := FALSE;
+      if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+        mouseDblClick[ M_BLEFT ] := TRUE;
+      mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+    end;
+
+  GetTouchPos( touches, mouseX, mouseY );
+
+  inherited touchesBegan_withEvent( touches, event );
+end;
+
+procedure zglCiOSWindow.touchesMoved_withEvent( touches : NSSet; event : UIevent );
+begin
+  GetTouchPos( touches, mouseX, mouseY );
+
+  inherited touchesMoved_withEvent( touches, event );
+end;
+
+procedure zglCiOSWindow.touchesEnded_withEvent( touches : NSSet; event : UIevent );
+begin
+  // mouse emulation
+  mouseDown[ M_BLEFT ]     := FALSE;
+  mouseUp  [ M_BLEFT ]     := TRUE;
+  mouseCanClick[ M_BLEFT ] := TRUE;
+
+  GetTouchPos( touches, mouseX, mouseY );
+
+  inherited touchesEnded_withEvent( touches, event );
+end;
+
+procedure zglCiOSWindow.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
+begin
+  inherited touchesCancelled_withEvent( touches, event );
 end;
 {$ENDIF}
 

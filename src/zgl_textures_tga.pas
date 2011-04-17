@@ -52,7 +52,6 @@ type
     end;
 end;
 
-procedure tga_Load( var Data : Pointer; var W, H : Word );
 procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 
@@ -62,59 +61,54 @@ uses
   zgl_main,
   zgl_log;
 
-threadvar
-  tgaMem     : zglTMemory;
-  tgaHeader  : zglTTGAHeader;
-  tgaData    : array of Byte;
-  tgaPalette : array of Byte;
-
-procedure tga_FlipVertically( var Data : Pointer; w, h, pixelSize : Integer );
+procedure tga_FlipVertically( var Data : Pointer; w, h : Integer );
   var
     i        : Integer;
-    scanLine : array of Byte;
+    scanLine : Pointer;
 begin
-  SetLength( scanLine, w * pixelSize );
+  GetMem( scanLine, w * 4 );
 
   for i := 0 to h shr 1 - 1 do
     begin
-      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
-      Move( Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, Pointer( Ptr( Data ) + i * w * pixelSize )^, w * pixelSize );
-      Move( scanLine[ 0 ], Pointer( Ptr( Data ) + ( h - i - 1 ) * w * pixelSize )^, w * pixelSize );
+      Move( Pointer( Ptr( Data ) + i * w * 4 )^, scanLine^, w * 4 );
+      Move( Pointer( Ptr( Data ) + ( h - i - 1 ) * w * 4 )^, Pointer( Ptr( Data ) + i * w * 4 )^, w * 4 );
+      Move( scanLine^, Pointer( Ptr( Data ) + ( h - i - 1 ) * w * 4 )^, w * 4 );
     end;
+
+  FreeMem( scanLine );
 end;
 
-procedure tga_FlipHorizontally( var Data : Pointer; w, h, pixelSize : Integer );
+procedure tga_FlipHorizontally( var Data : Pointer; w, h : Integer );
   var
-    i, j, x  : Integer;
-    scanLine : array of Byte;
+    i, x     : Integer;
+    scanLine : Pointer;
 begin
-  SetLength( scanLine, w * pixelSize );
+  GetMem( scanLine, w * 4 );
 
   for i := 0 to h - 1 do
     begin
-      Move( Pointer( Ptr( Data ) + i * w * pixelSize )^, scanLine[ 0 ], w * pixelSize );
+      Move( Pointer( Ptr( Data ) + i * w * 4 )^, scanLine^, w * 4 );
       for x := 0 to w - 1 do
-        for j := 0 to pixelSize - 1 do
-          PByte( Ptr( Data ) +  i * w * pixelSize + x * pixelSize + j )^ := scanLine[ ( w - 1 - x ) * pixelSize + j ];
+        PLongWord( Ptr( Data ) +  i * w * 4 + x * 4 )^ := PLongWord( Ptr( scanLine ) + ( w - 1 - x ) * 4 )^;
     end;
+
+  FreeMem( scanLine );
 end;
 
-procedure tga_RLEDecode;
+function tga_RLEDecode( var tgaMem : zglTMemory; var tgaHeader : zglTTGAHeader; var tgaData : PByte ) : LongWord;
   var
+    i, j      : Integer;
     pixelSize : Integer;
-    i, j, n   : Integer;
     packetHdr : Byte;
-    packet    : array of Byte;
+    packet    : array[ 0..3 ] of Byte;
     packetLen : Byte;
 begin
-  pixelSize := tgaHeader.ImgSpec.Depth div 8;
-  n         := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize;
-  SetLength( tgaData, n );
-
-  SetLength( packet, pixelSize );
+  pixelSize := tgaHeader.ImgSpec.Depth shr 3;
+  Result    := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize;
+  GetMem( tgaData, Result );
 
   i := 0;
-  while i < n do
+  while i < Result do
     begin
       mem_Read( tgaMem, packetHdr, 1 );
       packetLen := ( packetHdr and $7F ) + 1;
@@ -123,34 +117,87 @@ begin
           mem_Read( tgaMem, packet[ 0 ], pixelSize );
           for j := 0 to ( packetLen * pixelSize ) - 1 do
             begin
-              tgaData[ i ] := packet[ j mod pixelSize ];
+              tgaData^ := packet[ j mod pixelSize ];
+              INC( tgaData );
               INC( i );
             end;
         end else
-          begin
-            for j := 0 to ( packetLen * pixelSize ) - 1 do
-              begin
-                mem_Read( tgaMem, packet[ j mod pixelSize ], 1 );
-                tgaData[ i ] := packet[ j mod pixelSize ];
-                INC( i );
-             end;
-          end;
+          for j := 0 to ( packetLen * pixelSize ) - 1 do
+            begin
+              mem_Read( tgaMem, packet[ j mod pixelSize ], 1 );
+              tgaData^ := packet[ j mod pixelSize ];
+              INC( tgaData );
+              INC( i );
+            end;
     end;
+  DEC( tgaData, i );
 
   tgaHeader.ImageType := tgaHeader.ImageType - 8;
 end;
 
-procedure tga_Load( var Data : Pointer; var W, H : Word );
+function tga_PaletteDecode( var tgaMem : zglTMemory; var tgaHeader : zglTTGAHeader; var tgaData : PByte; tgaPalette : PByte ) : Boolean;
+  var
+    i, base : Integer;
+    size    : Integer;
+    entry   : Byte;
+begin
+  if ( tgaHeader.CPalType = 1 ) and ( tgaHeader.CPalSpec.EntrySize <> 24 ) Then
+    begin
+      log_Add( 'Unsupported color palette type in TGA-file!' );
+      Result := FALSE;
+      exit;
+    end;
+
+  size := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height;
+  base := tgaHeader.CPalSpec.FirstEntry;
+  ReallocMem( tgaData, size * 3 );
+
+  if tgaHeader.CPalType = 1 Then
+    begin
+      for i := size - 1 downto 0 do
+        begin
+          entry := PByte( Ptr( tgaData ) + i )^;
+          PByte( Ptr( tgaData ) + i * 3 + 0 )^ := PByte( Ptr( tgaPalette ) + entry * 3 + 0 - base )^;
+          PByte( Ptr( tgaData ) + i * 3 + 1 )^ := PByte( Ptr( tgaPalette ) + entry * 3 + 1 - base )^;
+          PByte( Ptr( tgaData ) + i * 3 + 2 )^ := PByte( Ptr( tgaPalette ) + entry * 3 + 2 - base )^;
+        end;
+    end else
+      for i := size - 1 downto 0 do
+        begin
+          entry := PByte( Ptr( tgaData ) + i )^;
+          PByte( Ptr( tgaData ) + i * 3 + 0 )^ := entry;
+          PByte( Ptr( tgaData ) + i * 3 + 1 )^ := entry;
+          PByte( Ptr( tgaData ) + i * 3 + 2 )^ := entry;
+        end;
+
+  tgaHeader.ImageType     := 2;
+  tgaHeader.ImgSpec.Depth := 24;
+  tgaHeader.CPalType      := 0;
+  FillChar( tgaHeader.CPalSpec, SizeOf( tgaHeader.CPalSpec ), 0 );
+
+  Result := TRUE;
+end;
+
+procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+  var
+    tgaMem : zglTMemory;
+begin
+  mem_LoadFromFile( tgaMem, FileName );
+  tga_LoadFromMemory( tgaMem, Data, W, H );
+  mem_Free( tgaMem );
+end;
+
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
   label _exit;
   var
-    i         : LongWord;
-    n, base   : Integer;
-    pixelSize : Integer;
-    entry     : Byte;
+    i, size    : Integer;
+    tgaMem     : zglTMemory;
+    tgaHeader  : zglTTGAHeader;
+    tgaData    : PByte;
+    tgaPalette : array of Byte;
 begin
+  tgaMem := Memory;
   mem_Read( tgaMem, tgaHeader, SizeOf( zglTTGAHeader ) );
-
-  pixelSize := tgaHeader.ImgSpec.Depth shr 3;
 
   if tgaHeader.CPalType = 1 then
     begin
@@ -159,98 +206,58 @@ begin
     end;
 
   if tgaHeader.ImageType >= 9 Then
-    tga_RLEDecode()
+    size := tga_RLEDecode( tgaMem, tgaHeader, tgaData )
   else
     begin
-      SetLength( tgaData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize );
-      mem_Read( tgaMem, tgaData[ 0 ], Length( tgaData ) );
+      size := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * ( tgaHeader.ImgSpec.Depth shr 3 );
+      GetMem( tgaData, size );
+      mem_Read( tgaMem, tgaData^, size );
     end;
-
-  if ( tgaHeader.ImgSpec.Desc and ( 1 shl 4 ) ) <> 0 Then
-    tga_FlipHorizontally( Pointer( tgaData ), tgaHeader.ImgSpec.Width, tgaHeader.ImgSpec.Height, pixelSize );
-  if ( tgaHeader.ImgSpec.Desc and ( 1 shl 5 ) ) <> 0 Then
-    tga_FlipVertically( Pointer( tgaData ), tgaHeader.ImgSpec.Width, tgaHeader.ImgSpec.Height, pixelSize );
 
   if tgaHeader.ImageType <> 2 Then
-    begin
-      if ( tgaHeader.CPalType = 1 ) and ( tgaHeader.CPalSpec.EntrySize <> 24 ) Then
-        begin
-          log_Add( 'Unsupported color palette type in TGA-file!' );
-          goto _exit;
-        end;
-
-      base := tgaHeader.CPalSpec.FirstEntry;
-      n    := Length( tgaData );
-
-      tgaHeader.ImageType     := 2;
-      tgaHeader.ImgSpec.Depth := 24;
-      tgaHeader.CPalType      := 0;
-      FillChar ( tgaHeader.CPalSpec, SizeOf( tgaHeader.CPalSpec ), 0 );
-      SetLength( tgaData, Length( tgaData ) * 3 );
-
-      for i := n - 1 downto 0 do
-        begin
-          entry := tgaData[ i ];
-          if tgaHeader.CPalType = 1 Then
-            begin
-              tgaData[ i * 3 + 0 ] := tgaPalette[ entry * 3 + 0 - base ];
-              tgaData[ i * 3 + 1 ] := tgaPalette[ entry * 3 + 1 - base ];
-              tgaData[ i * 3 + 2 ] := tgaPalette[ entry * 3 + 2 - base ];
-            end else
-              begin
-                tgaData[ i * 3 + 0 ] := entry;
-                tgaData[ i * 3 + 1 ] := entry;
-                tgaData[ i * 3 + 2 ] := entry;
-              end;
-        end;
-    end;
+    if not tga_PaletteDecode( tgaMem, tgaHeader, tgaData, @tgaPalette[ 0 ] ) Then
+      goto _exit;
 
   if tgaHeader.ImgSpec.Depth shr 3 = 3 Then
     begin
-      zgl_GetMem( Data, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+      GetMem( Data, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
       for i := 0 to tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height - 1 do
         begin
-          PByte( Ptr( Data ) + i * 4 + 2 )^ := tgaData[ i * 3 + 0 ];
-          PByte( Ptr( Data ) + i * 4 + 1 )^ := tgaData[ i * 3 + 1 ];
-          PByte( Ptr( Data ) + i * 4 + 0 )^ := tgaData[ i * 3 + 2 ];
+          PByte( Ptr( Data ) + i * 4 + 2 )^ := PByte( Ptr( tgaData ) + 0 )^;
+          PByte( Ptr( Data ) + i * 4 + 1 )^ := PByte( Ptr( tgaData ) + 1 )^;
+          PByte( Ptr( Data ) + i * 4 + 0 )^ := PByte( Ptr( tgaData ) + 2 )^;
           PByte( Ptr( Data ) + i * 4 + 3 )^ := 255;
+          INC( tgaData, 3 );
         end;
+      DEC( tgaData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 3 );
     end else
       if tgaHeader.ImgSpec.Depth shr 3 = 4 Then
         begin
-          zgl_GetMem( Data, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+          GetMem( Data, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
           for i := 0 to tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height - 1 do
             begin
-              PByte( Ptr( Data ) + i * 4 + 2 )^ := tgaData[ i * 4 + 0 ];
-              PByte( Ptr( Data ) + i * 4 + 1 )^ := tgaData[ i * 4 + 1 ];
-              PByte( Ptr( Data ) + i * 4 + 0 )^ := tgaData[ i * 4 + 2 ];
-              PByte( Ptr( Data ) + i * 4 + 3 )^ := tgaData[ i * 4 + 3 ];
+              PByte( Ptr( Data ) + i * 4 + 2 )^ := PByte( Ptr( tgaData ) + 0 )^;
+              PByte( Ptr( Data ) + i * 4 + 1 )^ := PByte( Ptr( tgaData ) + 1 )^;
+              PByte( Ptr( Data ) + i * 4 + 0 )^ := PByte( Ptr( tgaData ) + 2 )^;
+              PByte( Ptr( Data ) + i * 4 + 3 )^ := PByte( Ptr( tgaData ) + 3 )^;
+              INC( tgaData, 4 );
             end;
-        end else
-          Data := nil;
+          DEC( tgaData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
+        end;
+
   W := tgaHeader.ImgSpec.Width;
   H := tgaHeader.ImgSpec.Height;
 
+  if ( tgaHeader.ImgSpec.Desc and ( 1 shl 4 ) ) <> 0 Then
+    tga_FlipHorizontally( Data, W, H );
+  if ( tgaHeader.ImgSpec.Desc and ( 1 shl 5 ) ) <> 0 Then
+    tga_FlipVertically( Data, W, H );
+
 _exit:
   begin
-    SetLength( tgaData, 0 );
+    FreeMem( tgaData );
     SetLength( tgaPalette, 0 );
   end;
-end;
-
-procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
-begin
-  mem_LoadFromFile( tgaMem, FileName );
-  tga_Load( Data, W, H );
-  mem_Free( tgaMem );
-end;
-
-procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
-begin
-  tgaMem.Size     := Memory.Size;
-  tgaMem.Memory   := Memory.Memory;
-  tgaMem.Position := Memory.Position;
-  tga_Load( Data, W, H );
 end;
 
 initialization

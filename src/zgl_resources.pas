@@ -87,7 +87,7 @@ type
 
 procedure res_Init;
 procedure res_Free;
-procedure res_MainLoop;
+procedure res_Proc;
 procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointer );
 function  res_ProcQueue( data : Pointer ) : LongInt;
 
@@ -135,7 +135,7 @@ begin
     end;
 end;
 
-procedure res_MainLoop;
+procedure res_Proc;
   var
     item : zglPResourceItem;
 begin

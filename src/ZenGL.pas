@@ -184,6 +184,7 @@ exports
 
   res_BeginQueue           name prefix + 'res_BeginQueue',
   res_EndQueue             name prefix + 'res_EndQueue',
+  res_Proc                 name prefix + 'res_Proc',
 
   // Textures
   tex_Add                  name prefix + 'tex_Add',

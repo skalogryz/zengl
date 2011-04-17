@@ -1,22 +1,23 @@
-{-------------------------------}
-{-----------= ZenGL =-----------}
-{-------------------------------}
-{                               }
-{ version:  0.3                 }
-{ date:     2011.04.13          }
-{ license:  GNU LGPL version 3  }
-{ homepage: http://zengl.org    }
-{                               }
-{-------- developed by: --------}
-{                               }
-{     Kemka Andrey aka Andru    }
-{                               }
-{ mail: dr.andru@gmail.com      }
-{ JID:  dr.andru@googlemail.com }
-{ ICQ:  496929849               }
-{ www:  http://andru-kun.inf.ua }
-{                               }
-{-------------------------------}
+{--------------------------------}
+{-----------= ZenGL =------------}
+{--------------------------------}
+{                                }
+{ version:  0.3                  }
+{ date:     2011.04.17           }
+{ license:  GNU LGPL version 3   }
+{ homepage: http://zengl.org     }
+{                                }
+{-------- developed by: ---------}
+{                                }
+{     Kemka Andrey aka Andru     }
+{                                }
+{ mail:  dr.andru@gmail.com      }
+{ JID:   dr.andru@googlemail.com }
+{ ICQ:   496929849               }
+{ Skype: andru-kun               }
+{ www:   http://andru-kun.inf.ua }
+{                                }
+{--------------------------------}
 unit zglHeader;
 
 {$IFDEF FPC}
@@ -522,6 +523,7 @@ end;
 var
   res_BeginQueue : procedure( QueueID : Byte );
   res_EndQueue   : procedure;
+  res_Proc       : procedure;
 
 // TEXTURES
 type
@@ -1550,6 +1552,7 @@ begin
 
       res_BeginQueue := dlsym( zglLib, 'res_BeginQueue' );
       res_EndQueue := dlsym( zglLib, 'res_EndQueue' );
+      res_Proc := dlsym( zglLib, 'res_Proc' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );
       tex_Del := dlsym( zglLib, 'tex_Del' );

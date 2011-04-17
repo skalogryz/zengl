@@ -26,7 +26,7 @@ unit zgl_sound_ogg;
   {$UNDEF USE_OGG_STATIC}
 {$ENDIF}
 
-// Developers from xiph.org didn't include target wich build dylib's, so...
+// Developers from xiph.org didn't include target wich builds dylib's, so...
 {$IFDEF DARWIN}
   {$DEFINE USE_OGG_STATIC}
 {$ENDIF}
@@ -65,17 +65,24 @@ uses
   {$IFDEF WINDOWS}
   zgl_msvcrt,
   {$ENDIF}
-  zgl_main,
+  zgl_memory;
+
+const
+  OGG_EXTENSION : array[ 0..3 ] of Char = ( 'O', 'G', 'G', #0 );
+
+procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+
+implementation
+uses
   zgl_types,
-  zgl_application,
+  zgl_main,
   zgl_sound,
   zgl_file,
-  zgl_memory,
   zgl_log,
   zgl_utils;
 
 const
-  OGG_EXTENSION : array[ 0..3 ] of Char = ( 'O', 'G', 'G', #0 );
 {$IFDEF LINUX}
   libogg        = 'libogg.so.0';
   libvorbis     = 'libvorbis.so.0';
@@ -264,30 +271,6 @@ type
     vc : ov_callbacks;
   end;
 
-procedure ogg_Init;
-function  ogg_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-function  ogg_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
-procedure ogg_DecoderLoop( var Stream : zglTSoundStream );
-procedure ogg_DecoderClose( var Stream : zglTSoundStream );
-
-procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
-procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
-
-var
-  oggLoad    : Boolean;
-  oggInit    : Boolean;
-  oggDecoder : zglTSoundDecoder;
-
-  oggLibrary        : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisLibrary     : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisfileLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-
-threadvar
-  oggMemory : zglTMemory;
-
-implementation
-
 {$IFDEF USE_OGG_STATIC}
   function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
   function ov_open_callbacks(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
@@ -304,6 +287,15 @@ implementation
     ov_pcm_seek       : function(var vf: OggVorbis_File; pos: cint64): cint; cdecl;
     ov_pcm_total      : function(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl;
 {$ENDIF}
+
+var
+  oggLoad    : Boolean;
+  oggInit    : Boolean;
+  oggDecoder : zglTSoundDecoder;
+
+  oggLibrary        : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  vorbisLibrary     : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  vorbisfileLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
 
 function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
 begin
@@ -448,7 +440,16 @@ begin
   Result := bytesRead;
 end;
 
-procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+  var
+    oggMemory : zglTMemory;
+begin
+  mem_LoadFromFile( oggMemory, FileName );
+  ogg_LoadFromMemory( oggMemory, Data, Size, Format, Frequency );
+  mem_Free( oggMemory );
+end;
+
+procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
   var
     bytesRead : Integer;
     buffer    : Pointer;
@@ -458,11 +459,11 @@ procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : LongWord )
     _vf : OggVorbis_File;
     _vc : ov_callbacks;
 begin
-  if not oggLoad Then ogg_Init;
+  if not oggLoad Then ogg_Init();
   if not oggInit Then exit;
 
   FillChar( _vc, SizeOf( _vc ), 0 );
-  if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
+  if ov_open_callbacks( nil, _vf, Memory.Memory, Memory.Size - Memory.Position, _vc ) >= 0 Then
     begin
       _vi       := ov_info( _vf, -1 );
       Frequency := _vi.rate;
@@ -480,7 +481,7 @@ begin
       _vi := nil;
       ov_clear( _vf );
 
-      if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
+      if ov_open_callbacks( nil, _vf, Memory.Memory, Memory.Size - Memory.Position, _vc ) >= 0 Then
         begin
           GetMem( Data, Size );
           decoderRead( _vf, Data, Size, _end );
@@ -488,21 +489,6 @@ begin
           ov_clear( _vf );
         end;
     end;
-end;
-
-procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-begin
-  mem_LoadFromFile( oggMemory, FileName );
-  ogg_Load( Data, Size, Format, Frequency );
-  mem_Free( oggMemory );
-end;
-
-procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
-begin
-  oggMemory.Size     := Memory.Size;
-  oggMemory.Memory   := Memory.Memory;
-  oggMemory.Position := Memory.Position;
-  ogg_Load( Data, Size, Format, Frequency );
 end;
 
 initialization

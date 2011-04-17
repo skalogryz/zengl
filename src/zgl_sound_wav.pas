@@ -26,13 +26,22 @@ interface
 
 uses
   zgl_types,
-  zgl_sound,
-  zgl_file,
   zgl_memory;
 
 const
   WAV_EXTENSION : array[ 0..3 ] of Char = ( 'W', 'A', 'V', #0 );
 
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+
+implementation
+uses
+  zgl_main,
+  zgl_file,
+  zgl_sound,
+  zgl_log;
+
+const
   WAV_STANDARD  = $0001;
   WAV_IMA_ADPCM = $0011;
   WAV_MP3       = $0055;
@@ -53,24 +62,23 @@ type
     BitsPerSample    : Word;
  end;
 
-procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
 procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
-
-implementation
-uses
-  zgl_main,
-  zgl_log;
-
-threadvar
-  wavMemory : zglTMemory;
-  wavHeader : zglTWAVHeader;
-
-procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
   var
+    wavMemory : zglTMemory;
+begin
+  mem_LoadFromFile( wavMemory, FileName );
+  wav_LoadFromMemory( wavMemory, Data, Size, Format, Frequency );
+  mem_Free( wavMemory );
+end;
+
+procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+  var
+    wavMemory : zglTMemory;
+    wavHeader : zglTWAVHeader;
     chunkName : array[ 0..3 ] of AnsiChar;
     skip      : Integer;
 begin
+  wavMemory := Memory;
   mem_Read( wavMemory, wavHeader, SizeOf( zglTWAVHeader ) );
 
   Frequency := wavHeader.SampleRate;
@@ -107,21 +115,6 @@ begin
           mem_Seek( wavMemory, skip, FSM_CUR );
         end;
   until wavMemory.Position >= wavMemory.Size;
-end;
-
-procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-begin
-  mem_LoadFromFile( wavMemory, FileName );
-  wav_Load( Data, Size, Format, Frequency );
-  mem_Free( wavMemory );
-end;
-
-procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
-begin
-  wavMemory.Size     := Memory.Size;
-  wavMemory.Memory   := Memory.Memory;
-  wavMemory.Position := Memory.Position;
-  wav_Load( Data, Size, Format, Frequency );
 end;
 
 initialization
