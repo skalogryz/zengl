@@ -86,7 +86,6 @@ end;
 function  font_Add : zglPFont;
 procedure font_Del( var Font : zglPFont );
 
-function font_Load : zglPFont;
 function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
@@ -103,10 +102,6 @@ uses
   zgl_main,
   zgl_log,
   zgl_utils;
-
-threadvar
-  fntMem : zglTMemory;
-  fntID  : array[ 0..13 ] of AnsiChar;
 
 function font_Add;
 begin
@@ -141,11 +136,20 @@ begin
   DEC( managerFont.Count );
 end;
 
-function font_Load : zglPFont;
+function font_Load( var fntMem : zglTMemory ) : zglPFont;
   var
-    i : Integer;
-    c : LongWord;
+    i     : Integer;
+    c     : LongWord;
+    fntID : array[ 0..13 ] of AnsiChar;
 begin
+  fntID[ 13 ] := #0;
+  mem_Read( fntMem, fntID, 13 );
+  if fntID <> ZGL_FONT_INFO Then
+    begin
+      Result := nil;
+      exit;
+    end;
+
   Result := font_Add();
   mem_Read( fntMem, Result.Count.Pages,  2 );
   mem_Read( fntMem, Result.Count.Chars,  2 );
@@ -186,10 +190,11 @@ end;
 
 function font_LoadFromFile( const FileName : String ) : zglPFont;
   var
-    i, j : Integer;
-    dir  : String;
-    name : String;
-    tmp  : String;
+    fntMem : zglTMemory;
+    i, j   : Integer;
+    dir    : String;
+    name   : String;
+    tmp    : String;
 begin
   Result := nil;
 
@@ -200,15 +205,14 @@ begin
     end;
 
   mem_LoadFromFile( fntMem, FileName );
-  mem_Read( fntMem, fntID, 13 );
-  if fntID <> ZGL_FONT_INFO Then
-    begin
-      log_Add( FileName + ' - it''s not a ZenGL Font Info file' );
-      mem_Free( fntMem );
-      exit;
-    end else
-      Result := font_Load();
+  Result := font_Load( fntMem );
   mem_Free( fntMem );
+
+  if not Assigned( Result ) Then
+    begin
+      log_Add( 'Unable to load font: "' + FileName + '"' );
+      exit;
+    end;
 
   dir  := file_GetDirectory( FileName );
   name := file_GetName( FileName );
@@ -225,18 +229,14 @@ begin
 end;
 
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
+  var
+    fntMem : zglTMemory;
 begin
-  fntMem.Size     := Memory.Size;
-  fntMem.Memory   := Memory.Memory;
-  fntMem.Position := Memory.Position;
+  fntMem := Memory;
+  Result := font_Load( fntMem );
 
-  mem_Read( fntMem, fntID, 13 );
-  if fntID <> ZGL_FONT_INFO Then
-    begin
-      Result := nil;
-      log_Add( 'Unable to determinate ZenGL Font Info: From Memory' );
-    end else
-      Result := font_Load();
+  if not Assigned( Result ) Then
+    log_Add( 'Unable to load font: From Memory' );
 end;
 
 function font_GetUTF8ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
@@ -315,7 +315,6 @@ begin
 end;
 
 initialization
-  fntID[ 13 ] := #0;
   {$IFNDEF FPC}
   if SizeOf( Char ) = 2 Then
     font_GetCID := font_GetUTF16ID
