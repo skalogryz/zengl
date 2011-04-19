@@ -145,10 +145,6 @@ function wnd_Create( Width, Height : Integer ) : Boolean;
     size   : MacOSAll.Rect;
     status : OSStatus;
   {$ENDIF}
-  {$IFDEF iOS}
-  var
-    frame : CGRect;
-  {$ENDIF}
 begin
   if wndHandle <> {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF} Then exit;
 
@@ -305,14 +301,8 @@ begin
   wnd_Select();
 {$ENDIF}
 {$IFDEF iOS}
-  FillChar( frame, SizeOf( CGrect ), 0 );
-  frame.origin.x    := wndX;
-  frame.origin.y    := wndY;
-  frame.size.width  := Width;
-  frame.size.height := Height;
-
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
-  wndHandle := UIWindow.alloc().initWithFrame( frame );
+  wndHandle := zglCiOSWindow.alloc().initWithFrame( CGRectMake( wndX, wndY, Width, Height ) );
 
   wnd_Select();
 {$ENDIF}
@@ -484,10 +474,6 @@ begin
 end;
 
 procedure wnd_SetSize( Width, Height : Integer );
-  {$IFDEF iOS}
-  var
-    bounds : CGRect;
-  {$ENDIF}
 begin
   wndWidth  := Width;
   wndHeight := Height;

@@ -62,9 +62,11 @@ type
   zglCAppDelegate = objcclass(NSObject)
     procedure EnterMainLoop; message 'EnterMainLoop';
     procedure applicationDidFinishLaunching( application: UIApplication ); message 'applicationDidFinishLaunching:';
+    procedure applicationWillResignActive( application: UIApplication ); message 'applicationWillResignActive:';
     procedure applicationDidEnterBackground( application: UIApplication ); message 'applicationDidEnterBackground:';
     procedure applicationWillTerminate( application: UIApplication ); message 'applicationWillTerminate:';
     procedure applicationWillEnterForeground( application: UIApplication ); message 'applicationWillEnterForeground:';
+    procedure applicationDidBecomeActive( application: UIApplication ); message 'applicationDidBecomeActive:';
     procedure deviceOrientationDidChange; message 'deviceOrientationDidChange';
   end;
 
@@ -1081,6 +1083,12 @@ begin
   performSelector_withObject_afterDelay( objcselector( 'EnterMainLoop' ), nil, 0.2{magic} );
 end;
 
+procedure zglCAppDelegate.applicationWillResignActive( application : UIApplication );
+begin
+  if appAutoPause Then appPause := TRUE;
+  if appWork Then app_PActivate( FALSE );
+end;
+
 procedure zglCAppDelegate.applicationDidEnterBackground( application: UIApplication );
 begin
 //  appWork := FALSE;
@@ -1093,7 +1101,12 @@ end;
 
 procedure zglCAppDelegate.applicationWillEnterForeground( application: UIApplication );
 begin
-  timer_Reset();
+end;
+
+procedure zglCAppDelegate.applicationDidBecomeActive( application: UIApplication );
+begin
+  appPause := FALSE;
+  if appWork Then app_PActivate( TRUE );
 end;
 
 procedure zglCAppDelegate.deviceOrientationDidChange;
