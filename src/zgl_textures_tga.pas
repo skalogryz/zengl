@@ -95,7 +95,7 @@ begin
   FreeMem( scanLine );
 end;
 
-function tga_RLEDecode( var tgaMem : zglTMemory; var tgaHeader : zglTTGAHeader; var tgaData : PByte ) : LongWord;
+function tga_RLEDecode( var tgaMem : zglTMemory; var Header : zglTTGAHeader; var Data : PByte ) : LongWord;
   var
     i, j      : Integer;
     pixelSize : Integer;
@@ -103,9 +103,9 @@ function tga_RLEDecode( var tgaMem : zglTMemory; var tgaHeader : zglTTGAHeader; 
     packet    : array[ 0..3 ] of Byte;
     packetLen : Byte;
 begin
-  pixelSize := tgaHeader.ImgSpec.Depth shr 3;
-  Result    := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * pixelSize;
-  GetMem( tgaData, Result );
+  pixelSize := Header.ImgSpec.Depth shr 3;
+  Result    := Header.ImgSpec.Width * Header.ImgSpec.Height * pixelSize;
+  GetMem( Data, Result );
 
   i := 0;
   while i < Result do
@@ -117,63 +117,63 @@ begin
           mem_Read( tgaMem, packet[ 0 ], pixelSize );
           for j := 0 to ( packetLen * pixelSize ) - 1 do
             begin
-              tgaData^ := packet[ j mod pixelSize ];
-              INC( tgaData );
+              Data^ := packet[ j mod pixelSize ];
+              INC( Data );
               INC( i );
             end;
         end else
           for j := 0 to ( packetLen * pixelSize ) - 1 do
             begin
               mem_Read( tgaMem, packet[ j mod pixelSize ], 1 );
-              tgaData^ := packet[ j mod pixelSize ];
-              INC( tgaData );
+              Data^ := packet[ j mod pixelSize ];
+              INC( Data );
               INC( i );
             end;
     end;
-  DEC( tgaData, i );
+  DEC( Data, i );
 
-  tgaHeader.ImageType := tgaHeader.ImageType - 8;
+  Header.ImageType := Header.ImageType - 8;
 end;
 
-function tga_PaletteDecode( var tgaMem : zglTMemory; var tgaHeader : zglTTGAHeader; var tgaData : PByte; tgaPalette : PByte ) : Boolean;
+function tga_PaletteDecode( var tgaMem : zglTMemory; var Header : zglTTGAHeader; var Data : PByte; Palette : PByte ) : Boolean;
   var
     i, base : Integer;
     size    : Integer;
     entry   : Byte;
 begin
-  if ( tgaHeader.CPalType = 1 ) and ( tgaHeader.CPalSpec.EntrySize <> 24 ) Then
+  if ( Header.CPalType = 1 ) and ( Header.CPalSpec.EntrySize <> 24 ) Then
     begin
       log_Add( 'Unsupported color palette type in TGA-file!' );
       Result := FALSE;
       exit;
     end;
 
-  size := tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height;
-  base := tgaHeader.CPalSpec.FirstEntry;
-  ReallocMem( tgaData, size * 3 );
+  size := Header.ImgSpec.Width * Header.ImgSpec.Height;
+  base := Header.CPalSpec.FirstEntry;
+  ReallocMem( Data, size * 3 );
 
-  if tgaHeader.CPalType = 1 Then
+  if Header.CPalType = 1 Then
     begin
       for i := size - 1 downto 0 do
         begin
-          entry := PByte( Ptr( tgaData ) + i )^;
-          PByte( Ptr( tgaData ) + i * 3 + 0 )^ := PByte( Ptr( tgaPalette ) + entry * 3 + 0 - base )^;
-          PByte( Ptr( tgaData ) + i * 3 + 1 )^ := PByte( Ptr( tgaPalette ) + entry * 3 + 1 - base )^;
-          PByte( Ptr( tgaData ) + i * 3 + 2 )^ := PByte( Ptr( tgaPalette ) + entry * 3 + 2 - base )^;
+          entry := PByte( Ptr( Data ) + i )^;
+          PByte( Ptr( Data ) + i * 3 + 0 )^ := PByte( Ptr( Palette ) + entry * 3 + 0 - base )^;
+          PByte( Ptr( Data ) + i * 3 + 1 )^ := PByte( Ptr( Palette ) + entry * 3 + 1 - base )^;
+          PByte( Ptr( Data ) + i * 3 + 2 )^ := PByte( Ptr( Palette ) + entry * 3 + 2 - base )^;
         end;
     end else
       for i := size - 1 downto 0 do
         begin
-          entry := PByte( Ptr( tgaData ) + i )^;
-          PByte( Ptr( tgaData ) + i * 3 + 0 )^ := entry;
-          PByte( Ptr( tgaData ) + i * 3 + 1 )^ := entry;
-          PByte( Ptr( tgaData ) + i * 3 + 2 )^ := entry;
+          entry := PByte( Ptr( Data ) + i )^;
+          PByte( Ptr( Data ) + i * 3 + 0 )^ := entry;
+          PByte( Ptr( Data ) + i * 3 + 1 )^ := entry;
+          PByte( Ptr( Data ) + i * 3 + 2 )^ := entry;
         end;
 
-  tgaHeader.ImageType     := 2;
-  tgaHeader.ImgSpec.Depth := 24;
-  tgaHeader.CPalType      := 0;
-  FillChar( tgaHeader.CPalSpec, SizeOf( tgaHeader.CPalSpec ), 0 );
+  Header.ImageType     := 2;
+  Header.ImgSpec.Depth := 24;
+  Header.CPalType      := 0;
+  FillChar( Header.CPalSpec, SizeOf( Header.CPalSpec ), 0 );
 
   Result := TRUE;
 end;
