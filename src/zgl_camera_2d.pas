@@ -73,8 +73,8 @@ procedure cam2d_Init( var Camera : zglTCamera2D );
 begin
   Camera.Zoom.X   := 1;
   Camera.Zoom.Y   := 1;
-  Camera.Center.X := oglWidth / 2;
-  Camera.Center.Y := oglHeight / 2;
+  Camera.Center.X := ( oglWidth - scrSubCX ) / 2;
+  Camera.Center.Y := ( oglHeight - scrSubCY ) / 2;
 end;
 
 procedure cam2d_Set( Camera : zglPCamera2D );
