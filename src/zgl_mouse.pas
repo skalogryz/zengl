@@ -80,12 +80,12 @@ uses
 
 function mouse_X : Integer;
 begin
-  Result := Round( ( mouseX - scrAddCX ) / scrResCX );
+  Result := mouseX;
 end;
 
 function mouse_Y : Integer;
 begin
-  Result := Round( ( mouseY - scrAddCY ) / scrResCY );
+  Result := mouseY;
 end;
 
 function mouse_DX : Integer;

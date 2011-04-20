@@ -64,9 +64,14 @@ const
   INPUT_MOUSE_PRESS      = $000041;
   INPUT_MOUSE_RELEASE    = $000042;
   INPUT_MOUSE_WHEEL      = $000042;
-  INPUT_KEY_PRESS        = $000044;
-  INPUT_KEY_RELEASE      = $000045;
-  INPUT_KEY_CHAR         = $000046;
+  INPUT_KEY_PRESS        = $000050;
+  INPUT_KEY_RELEASE      = $000051;
+  INPUT_KEY_CHAR         = $000052;
+  {$IFDEF iOS}
+  INPUT_TOUCH_MOVE       = $000060;
+  INPUT_TOUCH_PRESS      = $000061;
+  INPUT_TOUCH_RELEASE    = $000062;
+  {$ENDIF}
 
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
@@ -172,6 +177,9 @@ uses
   {$IFEND}
   zgl_timers,
   zgl_log,
+  {$IFDEF iOS}
+  zgl_touch,
+  {$ENDIF}
   zgl_mouse,
   zgl_keyboard,
   zgl_render_2d,
@@ -434,6 +442,20 @@ begin
       begin
         key_PInputChar := UserData;
       end;
+    {$IFDEF iOS}
+    INPUT_TOUCH_MOVE:
+      begin
+        touch_PMove := UserData;
+      end;
+    INPUT_TOUCH_PRESS:
+      begin
+        touch_PPress := UserData;
+      end;
+    INPUT_TOUCH_RELEASE:
+      begin
+        touch_PRelease := UserData;
+      end;
+    {$ENDIF}
     // Textures
     TEX_FORMAT_EXTENSION:
       begin
