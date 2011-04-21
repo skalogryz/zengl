@@ -1263,5 +1263,8 @@ end;
 
 initialization
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
+{$IFDEF iOS}
+  appFlags := appFlags or SCR_ORIENTATION_LANDSCAPE or SCR_ORIENTATION_PORTRAIT;
+{$ENDIF}
 
 end.

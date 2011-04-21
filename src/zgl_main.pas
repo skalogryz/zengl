@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.04.20';
+  cs_Date     = '2011.04.21';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -129,22 +129,26 @@ const
   MANAGER_EMITTER2D       = 806;
 
   // zgl_Enable/zgl_Disable
-  COLOR_BUFFER_CLEAR    = $000001;
-  DEPTH_BUFFER          = $000002;
-  DEPTH_BUFFER_CLEAR    = $000004;
-  DEPTH_MASK            = $000008;
-  STENCIL_BUFFER_CLEAR  = $000010;
-  CORRECT_RESOLUTION    = $000020;
-  CORRECT_WIDTH         = $000040;
-  CORRECT_HEIGHT        = $000080;
-  APP_USE_AUTOPAUSE     = $000100;
-  APP_USE_LOG           = $000200;
-  APP_USE_ENGLISH_INPUT = $000400;
-  APP_USE_UTF8          = $000800;
-  WND_USE_AUTOCENTER    = $001000;
-  SND_CAN_PLAY          = $002000;
-  SND_CAN_PLAY_FILE     = $004000;
-  CLIP_INVISIBLE        = $008000;
+  COLOR_BUFFER_CLEAR        = $000001;
+  DEPTH_BUFFER              = $000002;
+  DEPTH_BUFFER_CLEAR        = $000004;
+  DEPTH_MASK                = $000008;
+  STENCIL_BUFFER_CLEAR      = $000010;
+  CORRECT_RESOLUTION        = $000020;
+  CORRECT_WIDTH             = $000040;
+  CORRECT_HEIGHT            = $000080;
+  APP_USE_AUTOPAUSE         = $000100;
+  APP_USE_LOG               = $000200;
+  APP_USE_ENGLISH_INPUT     = $000400;
+  APP_USE_UTF8              = $000800;
+  WND_USE_AUTOCENTER        = $001000;
+  SND_CAN_PLAY              = $002000;
+  SND_CAN_PLAY_FILE         = $004000;
+  CLIP_INVISIBLE            = $008000;
+  {$IFDEF iOS}
+  SCR_ORIENTATION_PORTRAIT  = $100000;
+  SCR_ORIENTATION_LANDSCAPE = $200000;
+  {$ENDIF}
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
 procedure zgl_InitToHandle( Handle : Ptr; FSAA : Byte = 0; StencilBits : Byte = 0 );
@@ -722,6 +726,14 @@ begin
 
   if What and CLIP_INVISIBLE > 0 Then
     render2dClip := TRUE;
+
+{$IFDEF iOS}
+  if What and SCR_ORIENTATION_PORTRAIT > 0 Then
+    scrCanPortrait := TRUE;
+
+  if What and SCR_ORIENTATION_LANDSCAPE > 0 Then
+    scrCanLandscape := TRUE;
+{$ENDIF}
 end;
 
 procedure zgl_Disable( What : LongWord );
@@ -764,6 +776,14 @@ begin
 
   if What and CLIP_INVISIBLE > 0 Then
     render2dClip := FALSE;
+
+{$IFDEF iOS}
+  if What and SCR_ORIENTATION_PORTRAIT > 0 Then
+    scrCanPortrait := FALSE;
+
+  if What and SCR_ORIENTATION_LANDSCAPE > 0 Then
+    scrCanLandscape := FALSE;
+{$ENDIF}
 end;
 
 end.

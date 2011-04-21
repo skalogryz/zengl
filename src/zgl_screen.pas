@@ -143,9 +143,12 @@ var
   scrModeList  : CFArrayRef;
   {$ENDIF}
   {$IFDEF iOS}
-  scrDesktopW  : Integer;
-  scrDesktopH  : Integer;
-  scrAngle     : Integer;
+  scrDesktopW     : Integer;
+  scrDesktopH     : Integer;
+  scrOrientation  : UIDeviceOrientation;
+  scrAngle        : Integer;
+  scrCanLandscape : Boolean = TRUE;
+  scrCanPortrait  : Boolean = TRUE;
   {$ENDIF}
 
 implementation
@@ -239,32 +242,57 @@ begin
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 {$IFDEF iOS}
-  if ( ( UIDevice.currentDevice.orientation() = UIDeviceOrientationUnknown ) or
-       ( UIDevice.currentDevice.orientation() = UIDeviceOrientationFaceDown ) or
-       ( UIDevice.currentDevice.orientation() = UIDeviceOrientationFaceUp ) ) and ( appWork ) Then exit;
-
-  if ( UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait ) or
-     ( UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown ) or
-     ( UIDevice.currentDevice.orientation() = UIDeviceOrientationUnknown ) Then
+  if ( scrOrientation = UIDeviceOrientationUnknown ) Then
     begin
-      wndPortrait := TRUE;
-      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
-      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
-    end else
-      begin
-        wndPortrait := FALSE;
-        scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
-        scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
-      end;
+      wndPortrait := scrCanPortrait;
+      if scrCanPortrait Then
+        begin
+          scrOrientation := UIDeviceOrientationPortrait;
+          scrAngle       := 0;
+          scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.width );
+          scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.height );
+        end else
+          begin
+            scrOrientation := UIDeviceOrientationLandscapeLeft;
+            scrAngle       := 270;
+            scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.height );
+            scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.width );
+          end;
+      log_Add( u_BoolToStr( wndPortrait ) + ': ' + u_IntToStr( scrDesktopW ) );
+      exit;
+    end;
 
-  if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortrait Then
-    scrAngle := 0;
-  if UIDevice.currentDevice.orientation() = UIDeviceOrientationPortraitUpsideDown Then
-    scrAngle := 180;
-  if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeLeft Then
-    scrAngle := 270;
-  if UIDevice.currentDevice.orientation() = UIDeviceOrientationLandscapeRight Then
-    scrAngle := 90;
+  scrOrientation := UIDevice.currentDevice.orientation();
+  if ( appWork ) and ( ( scrOrientation = UIDeviceOrientationFaceDown ) or ( scrOrientation = UIDeviceOrientationFaceUp ) ) Then exit;
+
+  if scrCanPortrait Then
+    begin
+      if scrOrientation = UIDeviceOrientationPortrait Then
+        scrAngle := 0;
+      if scrOrientation = UIDeviceOrientationPortraitUpsideDown Then
+        scrAngle := 180;
+
+      if ( scrOrientation = UIDeviceOrientationPortrait ) or ( scrOrientation = UIDeviceOrientationPortraitUpsideDown ) Then
+        begin
+          wndPortrait := TRUE;
+          scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
+          scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+        end;
+    end;
+  if scrCanLandscape Then
+    begin
+      if scrOrientation = UIDeviceOrientationLandscapeLeft Then
+        scrAngle := 270;
+      if scrOrientation = UIDeviceOrientationLandscapeRight Then
+        scrAngle := 90;
+
+      if ( scrOrientation = UIDeviceOrientationLandscapeLeft ) or ( scrOrientation = UIDeviceOrientationLandscapeRight ) Then
+        begin
+          wndPortrait := FALSE;
+          scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
+          scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
+        end;
+    end;
 {$ENDIF}
   scrInitialized := TRUE;
 end;
