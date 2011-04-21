@@ -176,6 +176,7 @@ end;
 
 procedure app_Init;
 begin
+  SetCurrentMode();
   scr_Clear();
   app_PLoad();
   scr_Flush();

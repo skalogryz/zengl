@@ -226,11 +226,9 @@ begin
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Initialize() Then exit;
 
+  wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
-
-  Set2DMode();
-  wnd_ShowCursor( appShowCursor );
 
   {$IFDEF LINUX}
   scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
@@ -268,11 +266,9 @@ begin
   {$ENDIF}
   if not gl_Initialize() Then exit;
 
+  wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
-
-  Set2DMode();
-  wnd_ShowCursor( appShowCursor );
 
   app_PInit();
   app_PLoop();
