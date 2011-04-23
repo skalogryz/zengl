@@ -156,10 +156,6 @@ function timer_GetTicks : Double;
     t : int64;
     m : LongWord;
   {$ENDIF}
-  {$IFDEF MACOSX}
-  var
-    t : UnsignedWide;
-  {$ENDIF}
 begin
 {$IFDEF UNIX}
   fpGetTimeOfDay( @t_tmr, nil );
