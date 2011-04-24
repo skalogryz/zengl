@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.04.21';
+  cs_Date     = '2011.04.24';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -656,7 +656,9 @@ begin
 {$IFDEF iOS}
 begin
   appWorkDir := file_GetDirectory( ParamStr( 0 ) );
-  appHomeDir := FpGetEnv( 'HOME' );// + '/Library/Preferences/';
+  appHomeDir := FpGetEnv( 'HOME' ) + '/Documents/';
+  if not file_Exists( appHomeDir ) Then
+    file_MakeDir( appHomeDir );
 {$ENDIF}
   appGotSysDirs := TRUE;
 end;
