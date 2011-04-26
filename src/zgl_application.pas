@@ -1160,7 +1160,7 @@ begin
         270:
           begin
             touchX[ i ] := Round( point.y );
-            touchY[ i ] := Round( point.x );
+            touchY[ i ] := Round( wndHeight - point.x );
           end;
         90:
           begin

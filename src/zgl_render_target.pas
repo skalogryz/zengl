@@ -504,6 +504,11 @@ begin
 
         glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+        {$IFDEF iOS}
+        glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
+        glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
+        glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
+        {$ENDIF}
       end;
   end;
   Result.next._type   := _type;
@@ -656,6 +661,11 @@ begin
               begin
                 glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
                 glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+                {$IFDEF iOS}
+                glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
+                glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
+                glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
+                {$ENDIF}
               end;
           end;
 
