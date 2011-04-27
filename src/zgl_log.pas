@@ -72,7 +72,7 @@ begin
   {$ENDIF}
   {$IFDEF iOS}
   if not Assigned( logFile ) Then
-    logFile := u_GetPChar( appWorkDir + '../log.txt' )
+    logFile := u_GetPChar( appHomeDir + 'log.txt' )
   {$ENDIF}
   else
     logFile := u_GetPChar( logFile );
