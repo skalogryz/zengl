@@ -37,7 +37,7 @@ uses
   MacOSAll
   {$ENDIF}
   {$IFDEF iOS}
-  iPhoneAll, CFrunLoop, CGGeometry
+  iPhoneAll, CFRunLoop, CGGeometry, CFBase, CFString
   {$ENDIF}
   ;
 
@@ -68,6 +68,12 @@ type
     procedure applicationWillEnterForeground( application: UIApplication ); message 'applicationWillEnterForeground:';
     procedure applicationDidBecomeActive( application: UIApplication ); message 'applicationDidBecomeActive:';
     procedure deviceOrientationDidChange; message 'deviceOrientationDidChange';
+
+    // TextField
+    function textFieldShouldBeginEditing( textField : UITextField ) : Boolean; message 'textFieldShouldBeginEditing:';
+    function textField_shouldChangeCharactersInRange_replacementString( textField : UITextField; range : NSRange; string_ : NSString ) : Boolean; message 'textField:shouldChangeCharactersInRange:replacementString:';
+    function textFieldShouldReturn( textField : UITextField ) : Boolean; message 'textFieldShouldReturn:';
+    procedure textFieldEditingChanged; message 'textFieldEditingChanged';
   end;
 
 type
@@ -79,6 +85,12 @@ type
     procedure touchesMoved_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesEnded_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesCancelled_withEvent( touches : NSSet; event : UIevent ); override;
+  end;
+
+type
+  zglCiOSTextField = objcclass(UITextField)
+  public
+    function editingRectForBounds( bounds_ : CGRect ) : CGRect; override;
   end;
 {$ENDIF}
 
@@ -113,7 +125,8 @@ var
   appTimer : LongWord;
   {$ENDIF}
   {$IFDEF iOS}
-  appPool : NSAutoreleasePool;
+  appPool     : NSAutoreleasePool;
+  appDelegate : zglCAppDelegate;
   {$ENDIF}
   appShowCursor : Boolean;
 
@@ -1086,6 +1099,8 @@ end;
 
 procedure zglCAppDelegate.applicationDidFinishLaunching( application: UIApplication );
 begin
+  appDelegate := Self;
+
   UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications();
 
   NSNotificationCenter.DefaultCenter.addObserver_selector_name_object( self, objcselector( 'deviceOrientationDidChange' ), u_GetNSString( 'UIDeviceOrientationDidChangeNotification' ), nil );
@@ -1133,6 +1148,56 @@ begin
     270: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeRight );
     90:  UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeLeft );
   end;
+
+  if Assigned( keysTextField ) and ( keysCanText ) Then
+    begin
+      keysTextField.endEditing( TRUE );
+      keysTextField.becomeFirstResponder();
+    end;
+end;
+
+function zglCAppDelegate.textFieldShouldBeginEditing( textField : UITextField ) : Boolean;
+begin
+  Result := keysCanText;
+end;
+
+function zglCAppDelegate.textField_shouldChangeCharactersInRange_replacementString( textField : UITextField; range : NSRange; string_ : NSString ) : Boolean;
+  var
+    buffer : array[ 0..3 ] of Char;
+begin
+  Result := TRUE;
+  keysTextChanged := TRUE;
+
+  FillChar( buffer, 4, 0 );
+  CFStringGetCString( CFStringRef( string_ ), @buffer[ 0 ], 4, kCFStringEncodingUTF8 );
+
+  if buffer[ 0 ] = #0 Then
+    u_Backspace( keysText )
+  else
+    key_InputText( buffer );
+end;
+
+function zglCAppDelegate.textFieldShouldReturn( textField : UITextField ) : Boolean;
+begin
+  Result := FALSE;
+  keysCanText := FALSE;
+  keysTextField.endEditing( TRUE );
+end;
+
+procedure zglCAppDelegate.textFieldEditingChanged;
+  var
+    i, len : Integer;
+    buffer : PChar;
+begin
+  if not keysTextChanged Then
+    begin
+      len := CFStringGetLength( CFStringRef( keysTextField.text() ) ) * 2;
+      zgl_GetMem( buffer, len );
+      CFStringGetCString( CFStringRef( keysTextField.text() ), @buffer[ 0 ], len, kCFStringEncodingUTF8 );
+      keysText := PChar( @buffer[ 0 ] );
+      zgl_FreeMem( buffer );
+    end else
+      keysTextChanged := FALSE;
 end;
 
 procedure zglCiOSWindow.GetTouchPos( touches : NSSet );
@@ -1258,6 +1323,11 @@ end;
 procedure zglCiOSWindow.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
 begin
   inherited touchesCancelled_withEvent( touches, event );
+end;
+
+function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
+begin
+  Result := CGRectMake( 0, 4096, 0, 0 ); // Good bye standard EditBox... :)
 end;
 {$ENDIF}
 

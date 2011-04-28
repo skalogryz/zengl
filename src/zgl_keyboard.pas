@@ -21,17 +21,24 @@
 unit zgl_keyboard;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 interface
-{$IFDEF LINUX}
-  uses X, Xlib, keysym;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
+uses
+  {$IFDEF LINUX}
+  X, Xlib, keysym;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows;
+  {$ENDIF}
+  {$IFDEF MACOSX}
+  MacOSAll;
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll, CGGeometry;
+  {$ENDIF}
 
 const
   K_SYSRQ      = $B7;
@@ -213,6 +220,11 @@ var
   {$IFDEF LINUX}
   keysRepeat : Integer; // Костыль, да :)
   {$ENDIF}
+  {$IFDEF iOS}
+  keysTextField   : UITextField;
+  keysTextFrame   : CGRect;
+  keysTextChanged : Boolean;
+  {$ENDIF}
 
   // callback
   key_PPress     : procedure( KeyCode : Byte );
@@ -223,6 +235,9 @@ implementation
 uses
   zgl_application,
   zgl_main,
+  {$IFDEF iOS}
+  zgl_window,
+  {$ENDIF}
   zgl_utils;
 
 function key_Down( KeyCode : Byte ) : Boolean;
@@ -250,6 +265,34 @@ begin
   keysText    := u_CopyStr( Text );
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
+
+  {$IFDEF iOS}
+  if not Assigned( keysTextField ) Then
+    begin
+      keysTextFrame := wndHandle.frame;
+      keysTextField := zglCiOSTextField.alloc().initWithFrame( keysTextFrame );
+      keysTextField.setText( u_GetNSString( Text ) );
+      with keysTextField do
+        begin
+          setDelegate( appDelegate );
+          setAutocapitalizationType( UITextAutocapitalizationTypeNone );
+          setAutocorrectionType( UItextAutocorrectionTypeNo );
+          setKeyboardAppearance( UIKeyboardAppearanceDefault );
+          setReturnKeyType( UIReturnKeyDone );
+          setSecureTextEntry( FALSE );
+          addTarget_action_forControlEvents( appDelegate, objcselector( 'textFieldEditingChanged' ), UIControlEventEditingChanged );
+        end;
+      wndHandle.addSubview( keysTextField );
+    end;
+
+    // TODO: Check this?
+    if appFlags and APP_USE_ENGLISH_INPUT > 0 Then
+      keysTextField.setKeyboardType( UIKeyboardTypeASCIICapable )
+    else
+      keysTextField.setKeyboardType( UIKeyboardTypeDefault );
+
+    keysTextField.becomeFirstResponder();
+  {$ENDIF}
 end;
 
 function key_GetText : String;
@@ -261,6 +304,11 @@ procedure key_EndReadText;
 begin
   keysText    := '';
   keysCanText := FALSE;
+
+  {$IFDEF iOS}
+  if Assigned( keysTextField ) Then
+    keysTextField.endEditing( TRUE );
+  {$ENDIF}
 end;
 
 procedure key_ClearState;
