@@ -11,7 +11,7 @@
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
 { header version:    0.99 beta 4             }
-{ date:              2011.01.02              }
+{ date:              2011.05.02              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -879,7 +879,7 @@ var
   cpShapeCacheBB : function( shape : PcpShape ) : cpBB; cdecl;
 
   // Test if a point lies within a shape.
-  cpShapePointQuery : function( shape : cpShape; p : cpVect ) : cpBool; cdecl;
+  cpShapePointQuery : function( shape : PcpShape; p : cpVect ) : cpBool; cdecl;
 
 // CIRCLESHAPE
   // Basic allocation functions for cpCircleShape.
@@ -1154,7 +1154,7 @@ var
   procedure cpShapeDestroy( shape : PcpShape ); cdecl; external;
   procedure cpShapeFree( shape : PcpShape ); cdecl; external;
   function cpShapeCacheBB( shape : PcpShape ) : cpBB; cdecl; external;
-  function cpShapePointQuery( shape : cpShape; p : cpVect ) : cpBool; cdecl; external;
+  function cpShapePointQuery( shape : PcpShape; p : cpVect ) : cpBool; cdecl; external;
   function cpCircleShapeAlloc : cpCircleShape; cdecl; external;
   function cpCircleShapeInit( circle : PcpCircleShape; body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpCircleShape; cdecl; external;
   function cpCircleShapeNew( body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpShape; cdecl; external;
