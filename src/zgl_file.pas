@@ -34,7 +34,7 @@ uses
   Windows,
   {$ENDIF}
   {$IFDEF iOS}
-  iPhoneAll,
+  iPhoneAll, CFBase, CFString,
   {$ENDIF}
   zgl_types;
 
@@ -176,11 +176,14 @@ end;
 
 function file_Remove( const Name : String ) : Boolean;
   var
-  {$IFDEF UNIX}
+  {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
     status : Stat;
-  {$ENDIF}
+  {$IFEND}
   {$IFDEF WINDOWS}
     attr   : LongWord;
+  {$ENDIF}
+  {$IFDEF iOS}
+    error : NSErrorPointer;
   {$ENDIF}
     i    : Integer;
     dir  : Boolean;
@@ -207,9 +210,12 @@ begin
   {$ENDIF}
   dir  := attr and FILE_ATTRIBUTE_DIRECTORY > 0;
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   FpStat( platform_GetRes( filePath + Name ), status );
   dir := fpS_ISDIR( status.st_mode );
+{$ENDIF}
+{$IFDEF iOS}
+  iosFileManager.fileExistsAtPath_isDirectory( u_GetNSString( platform_GetRes( filePath + Name ) ), @dir );
 {$ENDIF}
 
   if dir Then
@@ -224,11 +230,17 @@ begin
       for i := 2 to list.Count - 1 do
         file_Remove( path + list.Items[ i ] );
 
-      {$IFDEF UNIX}
+      {$IFDEF LINUX}
       Result := FpRmdir( filePath + Name ) = 0;
       {$ENDIF}
       {$IFDEF WINDESKTOP}
       Result := RemoveDirectory( PChar( filePath + Name ) );
+      {$ENDIF}
+      {$IFDEF MACOSX}
+      Result := FpRmdir( platform_GetRes( filePath + Name ) ) = 0;
+      {$ENDIF}
+      {$IFDEF iOS}
+      Result := iosFileManager.removeItemAtPath_error( u_GetNSString( platform_GetRes( filePath + Name ) ), error );
       {$ENDIF}
     end else
       {$IFDEF LINUX}
@@ -244,8 +256,11 @@ begin
         FreeMem( wideStr );
       end;
       {$ENDIF}
-      {$IFDEF DARWIN}
+      {$IFDEF MACOSX}
       Result := FpUnlink( platform_GetRes( filePath + Name ) ) = 0;
+      {$ENDIF}
+      {$IFDEF iOS}
+      Result := iosFileManager.removeItemAtPath_error( u_GetNSString( platform_GetRes( filePath + Name ) ), error );
       {$ENDIF}
 end;
 
@@ -372,7 +387,7 @@ end;
 
 procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
   var
-  {$IFDEF UNIX}
+  {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
     dir    : PDir;
     dirent : PDirent;
     _type  : Integer;
@@ -381,15 +396,27 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
     First : THandle;
     FList : WIN32_FIND_DATA;
   {$ENDIF}
+  {$IFDEF iOS}
+    i           : Integer;
+    dirContent  : NSArray;
+    path        : NSString;
+    fileName    : array[ 0..255 ] of Char;
+    error       : NSErrorPointer;
+    isDirectory : Boolean;
+  {$ENDIF}
 begin
   List.Count := 0;
-{$IFDEF LINUX}
+{$IF DEFINED(LINUX) or DEFINED(MACOSX)}
   if FindDir Then
     _type := 4
   else
     _type := 8;
 
+  {$IFDEF LINUX}
   dir := FpOpenDir( filePath + Directory );
+  {$ELSE}
+  dir := FpOpenDir( platform_GetRes( filePath + Directory ) );
+  {$ENDIF}
   repeat
     dirent := FpReadDir( dir^ );
     if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
@@ -421,23 +448,24 @@ begin
   until not FindNextFile( First, FList );
   FindClose( First );
 {$ENDIF}
-{$IFDEF DARWIN}
-  if FindDir Then
-    _type := 4
-  else
-    _type := 8;
+{$IFDEF iOS}
+  path       := u_GetNSString( platform_GetRes( filePath + Directory ) );
+  dirContent := iosFileManager.contentsOfDirectoryAtPath_error( path, error );
+  iosFileManager.changeCurrentDirectoryPath( path );
+  for i := 0 to dirContent.count() - 1 do
+    begin
+      if FindDir Then
+        begin
+          if ( iosFileManager.fileExistsAtPath_isDirectory( dirContent.objectAtIndex( i ), @isDirectory ) ) and ( not isDirectory ) Then continue;
+        end else
+          if ( iosFileManager.fileExistsAtPath_isDirectory( dirContent.objectAtIndex( i ), @isDirectory ) ) and ( isDirectory ) Then continue;
 
-  dir := FpOpenDir( platform_GetRes( filePath + Directory ) );
-  repeat
-    dirent := FpReadDir( dir^ );
-    if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
-      begin
-        SetLength( List.Items, List.Count + 1 );
-        List.Items[ List.Count ] := dirent^.d_name;
-        INC( List.Count );
-      end;
-  until not Assigned( dirent );
-  FpCloseDir( dir^ );
+      SetLength( List.Items, List.Count + 1 );
+      FillChar( fileName[ 0 ], 255, 0 );
+      CFStringGetCString( CFStringRef( dirContent.objectAtIndex( i ) ), @fileName[ 0 ], 255, kCFStringEncodingUTF8 );
+      List.Items[ List.Count ] := PChar( @fileName[ 0 ] );
+      INC( List.Count );
+    end;
 {$ENDIF}
 
   if List.Count > 2 Then
