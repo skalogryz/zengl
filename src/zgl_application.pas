@@ -90,6 +90,7 @@ type
 type
   zglCiOSTextField = objcclass(UITextField)
   public
+    function textRectForBounds( bounds_ : CGRect ) : CGRect; override;
     function editingRectForBounds( bounds_ : CGRect ) : CGRect; override;
   end;
 {$ENDIF}
@@ -1136,22 +1137,25 @@ begin
 end;
 
 procedure zglCAppDelegate.deviceOrientationDidChange;
+  var
+    keysTextFieldEditing : Boolean;
 begin
   if not appWork Then exit;
+
+  if Assigned( keysTextField ) and ( keysTextField.isEditing() ) and ( keysCanText ) Then
+    begin
+      keysTextFieldEditing := TRUE;
+      keysTextField.resignFirstResponder();
+      keysTextField.removeFromSuperview();
+    end else
+      keysTextFieldEditing := FALSE;
 
   scr_Init();
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 
-  case scrAngle of
-    0:   UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortrait );
-    180: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortraitUpsideDown );
-    270: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeRight );
-    90:  UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeLeft );
-  end;
-
-  if Assigned( keysTextField ) and ( keysCanText ) Then
+  if Assigned( keysTextField ) and ( keysTextFieldEditing ) and ( keysCanText ) Then
     begin
-      keysTextField.endEditing( TRUE );
+      wndHandle.addSubview( keysTextField );
       keysTextField.becomeFirstResponder();
     end;
 end;
@@ -1179,9 +1183,10 @@ end;
 
 function zglCAppDelegate.textFieldShouldReturn( textField : UITextField ) : Boolean;
 begin
-  Result := FALSE;
+  Result := TRUE;
   keysCanText := FALSE;
-  keysTextField.endEditing( TRUE );
+  keysTextField.resignFirstResponder();
+  keysTextField.removeFromSuperview();
 end;
 
 procedure zglCAppDelegate.textFieldEditingChanged;
@@ -1198,6 +1203,17 @@ begin
       zgl_FreeMem( buffer );
     end else
       keysTextChanged := FALSE;
+end;
+
+ // Good bye standard EditBox... :)
+function zglCiOSTextField.textRectForBounds( bounds_ : CGRect ) : CGRect;
+begin
+  Result := CGRectMake( 0, 4096, 0, 0 );
+end;
+
+function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
+begin
+  Result := CGRectMake( 0, 4096, 0, 0 );
 end;
 
 procedure zglCiOSWindow.GetTouchPos( touches : NSSet );
@@ -1323,11 +1339,6 @@ end;
 procedure zglCiOSWindow.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
 begin
   inherited touchesCancelled_withEvent( touches, event );
-end;
-
-function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
-begin
-  Result := CGRectMake( 0, 4096, 0, 0 ); // Good bye standard EditBox... :)
 end;
 {$ENDIF}
 

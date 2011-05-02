@@ -258,7 +258,6 @@ begin
             scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.height );
             scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.width );
           end;
-      log_Add( u_BoolToStr( wndPortrait ) + ': ' + u_IntToStr( scrDesktopW ) );
       exit;
     end;
 
@@ -293,6 +292,13 @@ begin
           scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
         end;
     end;
+
+  case scrAngle of
+    0:   UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortrait );
+    180: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortraitUpsideDown );
+    270: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeRight );
+    90:  UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeLeft );
+  end;
 {$ENDIF}
   scrInitialized := TRUE;
 end;

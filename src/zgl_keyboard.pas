@@ -271,7 +271,6 @@ begin
     begin
       keysTextFrame := wndHandle.frame;
       keysTextField := zglCiOSTextField.alloc().initWithFrame( keysTextFrame );
-      keysTextField.setText( u_GetNSString( Text ) );
       with keysTextField do
         begin
           setDelegate( appDelegate );
@@ -291,6 +290,8 @@ begin
     else
       keysTextField.setKeyboardType( UIKeyboardTypeDefault );
 
+    keysTextField.setText( u_GetNSString( Text ) );
+    wndHandle.addSubview( keysTextField );
     keysTextField.becomeFirstResponder();
   {$ENDIF}
 end;
@@ -307,7 +308,7 @@ begin
 
   {$IFDEF iOS}
   if Assigned( keysTextField ) Then
-    keysTextField.endEditing( TRUE );
+    keysTextField.removeFromSuperview();
   {$ENDIF}
 end;
 
