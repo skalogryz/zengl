@@ -161,7 +161,11 @@ end;
 
 procedure tex_Del( var Texture : zglPTexture );
 begin
-  if not Assigned( Texture ) Then exit;
+  if ( not Assigned( Texture ) ) or ( Texture = zeroTexture ) Then
+    begin
+      Texture := nil;
+      exit;
+    end;
 
   glDeleteTextures( 1, @Texture.ID );
   if Assigned( Texture.prev ) Then
