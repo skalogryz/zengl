@@ -59,6 +59,7 @@ const
   SYS_UPDATE             = $000005;
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
+  SYS_CLOSE_QUERY        = $000008;
 
   INPUT_MOUSE_MOVE       = $000040;
   INPUT_MOUSE_PRESS      = $000041;
@@ -395,27 +396,32 @@ begin
     SYS_LOAD:
       begin
         app_PLoad := UserData;
-        if not Assigned( UserData ) Then app_PLoad := zero;
+        if not Assigned( UserData ) Then app_PLoad := app_ZeroProc;
       end;
     SYS_DRAW:
       begin
         app_PDraw := UserData;
-        if not Assigned( UserData ) Then app_PDraw := zero;
+        if not Assigned( UserData ) Then app_PDraw := app_ZeroProc;
       end;
     SYS_UPDATE:
       begin
         app_PUpdate := UserData;
-        if not Assigned( UserData ) Then app_PUpdate := zerou;
+        if not Assigned( UserData ) Then app_PUpdate := app_ZeroUpdate;
       end;
     SYS_EXIT:
       begin
         app_PExit := UserData;
-        if not Assigned( UserData ) Then app_PExit := zero;
+        if not Assigned( UserData ) Then app_PExit := app_ZeroProc;
       end;
     SYS_ACTIVATE:
       begin
         app_PActivate := UserData;
-        if not Assigned( UserData ) Then app_PActivate := zeroa;
+        if not Assigned( UserData ) Then app_PActivate := app_ZeroActivate;
+      end;
+    SYS_CLOSE_QUERY:
+      begin
+        app_PCloseQuery := UserData;
+        if not Assigned( UserData ) Then app_PCloseQuery := app_ZeroCloseQuery;
       end;
     // Input events
     INPUT_MOUSE_MOVE:

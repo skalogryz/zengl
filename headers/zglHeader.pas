@@ -103,6 +103,7 @@ const
   SYS_UPDATE             = $000005;
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
+  SYS_CLOSE_QUERY        = $000008;
 
   INPUT_MOUSE_MOVE       = $000040;
   INPUT_MOUSE_PRESS      = $000041;
