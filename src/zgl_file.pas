@@ -391,7 +391,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
     dir    : PDir;
     dirent : PDirent;
     _type  : Integer;
-  {$ENDIF}
+  {$IFEND}
   {$IFDEF WINDOWS}
     First : THandle;
     FList : WIN32_FIND_DATA;
@@ -427,7 +427,7 @@ begin
       end;
   until not Assigned( dirent );
   FpCloseDir( dir^ );
-{$ENDIF}
+{$IFEND}
 {$IFDEF WINDOWS}
   {$IFNDEF WINCE}
   First := FindFirstFile( PChar( GetDir( filePath + Directory ) + '*' ), FList );
