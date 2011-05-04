@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.05.03';
+  cs_Date     = '2011.05.04';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -317,6 +317,7 @@ begin
     end;
   {$ENDIF}
 
+  managerZeroTexture := nil;
   if managerTexture.Count.Items <> 0 Then
     log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 0 do

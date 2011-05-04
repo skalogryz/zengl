@@ -117,6 +117,7 @@ procedure zeroce( var pData : Pointer; Width, Height : Word );
 
 var
   managerTexture       : zglTTextureManager;
+  managerZeroTexture   : zglPTexture;
   tex_CalcCustomEffect : procedure( var pData : Pointer; Width, Height : Word ) = zeroce;
 
 implementation
@@ -136,9 +137,6 @@ uses
   zgl_file,
   zgl_log,
   zgl_utils;
-
-var
-  zeroTexture : zglPTexture;
 
 procedure zeroce; begin end;
 
@@ -161,7 +159,7 @@ end;
 
 procedure tex_Del( var Texture : zglPTexture );
 begin
-  if ( not Assigned( Texture ) ) or ( Texture = zeroTexture ) Then
+  if ( not Assigned( Texture ) ) or ( Texture = managerZeroTexture ) Then
     begin
       Texture := nil;
       exit;
@@ -256,9 +254,9 @@ begin
   Result := nil;
   pData  := nil;
 
-  if not Assigned( zeroTexture ) Then
-    zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
-  Result := zeroTexture;
+  if not Assigned( managerZeroTexture ) Then
+    managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  Result := managerZeroTexture;
 
   if not file_Exists( FileName ) Then
     begin
@@ -314,9 +312,9 @@ begin
   Result := nil;
   pData  := nil;
 
-  if not Assigned( zeroTexture ) Then
-    zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
-  Result := zeroTexture;
+  if not Assigned( managerZeroTexture ) Then
+    managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  Result := managerZeroTexture;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
