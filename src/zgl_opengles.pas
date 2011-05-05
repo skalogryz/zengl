@@ -110,6 +110,8 @@ var
   oglMaxTexUnits   : Integer;
   oglSeparate      : Boolean;
 
+  oglReadPixelsFBO : LongWord;
+
   {$IFNDEF iOS}
   oglDisplay : EGLDisplay;
   oglConfig  : EGLConfig;
@@ -275,6 +277,9 @@ end;
 
 procedure gl_Destroy;
 begin
+  if oglReadPixelsFBO <> 0 Then
+    glDeleteFramebuffers( 1, @oglReadPixelsFBO );
+
 {$IFNDEF iOS}
 {$IFDEF LINUX}
   FreeMem( oglVisualInfo );

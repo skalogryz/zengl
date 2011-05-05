@@ -793,6 +793,30 @@ begin
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glDisable( GL_TEXTURE_2D );
+  {$ELSE}
+  if oglReadPixelsFBO = 0 Then
+    begin
+      glGenFramebuffers( 1, @oglReadPixelsFBO );
+      glBindFramebuffer( GL_FRAMEBUFFER, oglReadPixelsFBO );
+    end;
+
+  glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture.ID, 0 );
+
+  glReadPixels( 0, 0, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ), GL_RGBA, GL_UNSIGNED_BYTE, pData );
+
+  if oglTarget = TARGET_SCREEN Then
+    begin
+      {$IFNDEF iOS}
+      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+      {$ELSE}
+      glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
+      glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
+      glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
+      {$ENDIF}
+    end else
+      begin
+        // TODO:
+      end;
   {$ENDIF}
 end;
 
