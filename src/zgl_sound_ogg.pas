@@ -58,6 +58,9 @@ unit zgl_sound_ogg;
   {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}
+  {$IFDEF iOS}
+    {$LINKLIB libgcc_s.1.dylib}
+  {$ENDIF}
 {$ENDIF}
 
 interface
