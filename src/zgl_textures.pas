@@ -794,6 +794,8 @@ begin
   glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glDisable( GL_TEXTURE_2D );
   {$ELSE}
+  if not oglCanFBO Then exit;
+
   if oglReadPixelsFBO = 0 Then
     begin
       glGenFramebuffers( 1, @oglReadPixelsFBO );
