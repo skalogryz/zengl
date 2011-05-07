@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.05.03           }
+{ date:     2011.05.07           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -441,14 +441,15 @@ const
   KA_DOWN     = 0;
   KA_UP       = 1;
 var
-  key_Down          : function( KeyCode : Byte ) : Boolean;
-  key_Up            : function( KeyCode : Byte ) : Boolean;
-  key_Press         : function( KeyCode : Byte ) : Boolean;
-  key_Last          : function( KeyAction : Byte ) : Byte;
-  key_BeginReadText : procedure( const Text : String; MaxSymbols : Integer = -1 );
-  _key_GetText      : function : PChar;
-  key_EndReadText   : procedure;
-  key_ClearState    : procedure;
+  key_Down           : function( KeyCode : Byte ) : Boolean;
+  key_Up             : function( KeyCode : Byte ) : Boolean;
+  key_Press          : function( KeyCode : Byte ) : Boolean;
+  key_Last           : function( KeyAction : Byte ) : Byte;
+  key_BeginReadText  : procedure( const Text : String; MaxSymbols : Integer = -1 );
+  key_UpdateReadText : procedure( const Text : String; MaxSymbols : Integer = -1 );
+  _key_GetText       : function : PChar;
+  key_EndReadText    : procedure;
+  key_ClearState     : procedure;
 
   function key_GetText : String;
 
@@ -1539,6 +1540,7 @@ begin
       key_Press := dlsym( zglLib, 'key_Press' );
       key_Last := dlsym( zglLib, 'key_Last' );
       key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
+      key_UpdateReadText := dlsym( zglLib, 'key_UpdateReadText' );
       _key_GetText := dlsym( zglLib, 'key_GetText' );
       key_EndReadText := dlsym( zglLib, 'key_EndReadText' );
       key_ClearState := dlsym( zglLib, 'key_ClearState' );

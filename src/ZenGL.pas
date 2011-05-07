@@ -167,6 +167,7 @@ exports
   key_Press                name prefix + 'key_Press',
   key_Last                 name prefix + 'key_Last',
   key_BeginReadText        name prefix + 'key_BeginReadText',
+  key_UpdateReadText       name prefix + 'key_UpdateReadText',
   _key_GetText             name prefix + 'key_GetText',
   key_EndReadText          name prefix + 'key_EndReadText',
   key_ClearState           name prefix + 'key_ClearState',

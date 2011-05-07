@@ -170,6 +170,7 @@ function  key_Up( KeyCode : Byte ) : Boolean;
 function  key_Press( KeyCode : Byte ) : Boolean;
 function  key_Last( KeyAction : Byte ) : Byte;
 procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
+procedure key_UpdateReadText( const Text : String; MaxSymbols : Integer = -1 );
 function  key_GetText : String;
 procedure key_EndReadText;
 procedure key_ClearState;
@@ -294,6 +295,20 @@ begin
     wndHandle.addSubview( keysTextField );
     keysTextField.becomeFirstResponder();
   {$ENDIF}
+end;
+
+procedure key_UpdateReadText( const Text : String; MaxSymbols : Integer = -1 );
+begin
+  if keysCanText Then
+    begin
+      keysText := u_CopyStr( Text );
+      keysMax  := MaxSymbols;
+
+      {$IFDEF iOS}
+      if Assigned( keysTextField ) Then
+        keysTextField.setText( u_GetNSString( Text ) );
+      {$ENDIF}
+    end;
 end;
 
 function key_GetText : String;
