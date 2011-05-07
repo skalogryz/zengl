@@ -52,7 +52,7 @@ procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
 
 var
-  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
+  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ); Center: ( X: 0; Y: 0 ) );
   cam2d         : zglPCameraSystem;
   cam2dTarget   : array[ 1..2 ] of zglTCameraSystem;
 

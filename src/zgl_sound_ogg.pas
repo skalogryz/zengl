@@ -26,7 +26,7 @@ unit zgl_sound_ogg;
   {$UNDEF USE_OGG_STATIC}
 {$ENDIF}
 
-// Developers from xiph.org didn't include target wich builds dylib's, so...
+// Developers from xiph.org didn't include target which builds dylib's, so...
 {$IFDEF DARWIN}
   {$DEFINE USE_OGG_STATIC}
 {$ENDIF}
@@ -296,9 +296,11 @@ var
   oggInit    : Boolean;
   oggDecoder : zglTSoundDecoder;
 
+{$IFNDEF USE_OGG_STATIC}
   oggLibrary        : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
   vorbisLibrary     : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
   vorbisfileLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+{$ENDIF}
 
 function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
 begin
