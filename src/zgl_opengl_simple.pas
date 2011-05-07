@@ -161,7 +161,14 @@ begin
       Height := Round( Height * scrResCY );
     end;
   glEnable( GL_SCISSOR_TEST );
+  {$IFNDEF iOS}
   glScissor( X, wndHeight - Y - Height, Width, Height );
+  {$ELSE}
+  if wndPortrait Then
+    glScissor( X, wndHeight - Y - Height, Width, Height )
+  else
+    glScissor( wndHeight - Y - Height, X, Height, Width );
+  {$ENDIF}
 
   INC( tSCount );
   SetLength( tScissor, tSCount );
@@ -191,7 +198,14 @@ begin
   if tSCount > 0 Then
     begin
       glEnable( GL_SCISSOR_TEST );
+      {$IFNDEF iOS}
       glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH );
+      {$ELSE}
+      if wndPortrait Then
+        glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH )
+      else
+        glScissor( wndHeight - oglClipY - oglClipH, oglClipX, oglClipH, oglClipW );
+      {$ENDIF}
     end else
       glDisable( GL_SCISSOR_TEST );
 end;
