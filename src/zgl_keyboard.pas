@@ -350,12 +350,14 @@ procedure key_InputText( const Text : String );
 begin
   if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
     begin
+      {$IFNDEF iOS}
       if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
         begin
           c := Char( scancode_to_utf8( keysLast[ 0 ] ) );
           if c <> #0 Then
             keysText := keysText + c;
         end else
+      {$ENDIF}
           keysText := keysText + Text;
     end;
 
