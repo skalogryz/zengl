@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.05.07';
+  cs_Date     = '2011.05.10';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -737,6 +737,9 @@ begin
     render2dClip := TRUE;
 
 {$IFDEF iOS}
+  if ( What and SCR_ORIENTATION_PORTRAIT > 0 ) or ( What and SCR_ORIENTATION_LANDSCAPE > 0 ) Then
+    if not scrInitialized Then scr_Init();
+
   if What and SCR_ORIENTATION_PORTRAIT > 0 Then
     scrCanPortrait := TRUE;
 
@@ -787,6 +790,9 @@ begin
     render2dClip := FALSE;
 
 {$IFDEF iOS}
+  if ( What and SCR_ORIENTATION_PORTRAIT > 0 ) or ( What and SCR_ORIENTATION_LANDSCAPE > 0 ) Then
+    if not scrInitialized Then scr_Init();
+
   if What and SCR_ORIENTATION_PORTRAIT > 0 Then
     scrCanPortrait := FALSE;
 
