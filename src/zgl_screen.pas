@@ -146,6 +146,7 @@ var
   scrDesktopW     : Integer;
   scrDesktopH     : Integer;
   scrOrientation  : UIDeviceOrientation;
+  scrOrientFirst  : Boolean = TRUE;
   scrAngle        : Integer;
   scrCanLandscape : Boolean = TRUE;
   scrCanPortrait  : Boolean = TRUE;
@@ -242,27 +243,31 @@ begin
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 {$IFDEF iOS}
-  if ( scrOrientation = UIDeviceOrientationUnknown ) Then
-    begin
-      wndPortrait := scrCanPortrait;
-      if scrCanPortrait Then
-        begin
-          scrOrientation := UIDeviceOrientationPortrait;
-          scrAngle       := 0;
-          scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.width );
-          scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.height );
-        end else
-          begin
-            scrOrientation := UIDeviceOrientationLandscapeLeft;
-            scrAngle       := 270;
-            scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.height );
-            scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.width );
-          end;
-      exit;
-    end;
-
   scrOrientation := UIDevice.currentDevice.orientation();
   if ( appWork ) and ( ( scrOrientation = UIDeviceOrientationFaceDown ) or ( scrOrientation = UIDeviceOrientationFaceUp ) ) Then exit;
+
+  if ( scrOrientation = UIDeviceOrientationUnknown ) Then
+    begin
+      if scrOrientFirst Then
+        begin
+          scrOrientFirst := FALSE;
+          wndPortrait    := scrCanPortrait;
+          if scrCanPortrait Then
+            begin
+              scrOrientation := UIDeviceOrientationPortrait;
+              scrAngle       := 0;
+              scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.width );
+              scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.height );
+            end else
+              begin
+                scrOrientation := UIDeviceOrientationLandscapeLeft;
+                scrAngle       := 270;
+                scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.height );
+                scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.width );
+              end;
+        end;
+      exit;
+    end;
 
   if scrCanPortrait Then
     begin
