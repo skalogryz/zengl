@@ -739,14 +739,7 @@ begin
         oglClipY := 0;
         oglClipW := oglWidth;
         oglClipH := oglHeight;
-        {$IFNDEF iOS}
         glViewPort( 0, 0, oglTargetW, oglTargetH );
-        {$ELSE}
-        if wndPortrait Then
-          glViewPort( 0, 0, oglTargetW, oglTargetH )
-        else
-          glViewPort( 0, 0, oglTargetH, oglTargetW );
-        {$ENDIF}
       end;
 end;
 
