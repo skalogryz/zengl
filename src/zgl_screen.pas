@@ -146,7 +146,6 @@ var
   scrDesktopW     : Integer;
   scrDesktopH     : Integer;
   scrOrientation  : UIDeviceOrientation;
-  scrOrientFirst  : Boolean = TRUE;
   scrAngle        : Integer;
   scrCanLandscape : Boolean = TRUE;
   scrCanPortrait  : Boolean = TRUE;
@@ -248,9 +247,9 @@ begin
 
   if ( scrOrientation = UIDeviceOrientationUnknown ) Then
     begin
-      if scrOrientFirst Then
+      if not scrInitialized Then
         begin
-          scrOrientFirst := FALSE;
+          scrInitialized := TRUE;
           wndPortrait    := scrCanPortrait;
           if scrCanPortrait Then
             begin
