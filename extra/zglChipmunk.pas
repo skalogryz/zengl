@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 4             }
-{ date:              2011.05.02              }
+{ header version:    0.99 beta 5             }
+{ date:              2011.05.10              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -593,8 +593,8 @@ type
   // User collision handler function types.
   cpCollisionBeginFunc = function( arb : PcpArbiter; space : PcpSpace; data : Pointer ) : cpBool; cdecl;
   cpCollisionPreSolveFunc = function( arb : PcpArbiter; space : PcpSpace; data : Pointer ) : cpBool; cdecl;
-  cpCollisionPostSolveFunc = function( arb : PcpArbiter; space : PcpSpace; data : Pointer ) : cpBool; cdecl;
-  cpCollisionSeparateFunc = function( arb : PcpArbiter; space : PcpSpace; data : Pointer ) : cpBool; cdecl;
+  cpCollisionPostSolveFunc = procedure( arb : PcpArbiter; space : PcpSpace; data : Pointer ); cdecl;
+  cpCollisionSeparateFunc = procedure( arb : PcpArbiter; space : PcpSpace; data : Pointer ); cdecl;
 
   // Structure for holding collision pair function information.
   // Used internally.
