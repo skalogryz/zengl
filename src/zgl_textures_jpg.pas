@@ -21,19 +21,37 @@
 unit zgl_textures_jpg;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
 {$IFNDEF FPC}
   {$UNDEF USE_LIBJPEG}
 {$ENDIF}
 
+{$IFNDEF USE_LIBJPEG}
+  {$IFDEF WINDOWS}
+    {$DEFINE USE_OLEPICTURE}
+  {$ENDIF}
+  {$IFDEF iOS}
+    {$DEFINE USE_UIIMAGE}
+  {$ENDIF}
+{$ENDIF}
+
 interface
 
 uses
-  {$IFNDEF USE_LIBJPEG}
-  Windows,
-  {$ENDIF}
   {$IFDEF WINDOWS}
+  Windows,
   zgl_msvcrt,
+  {$ENDIF}
+  {$IFDEF USE_UIIMAGE}
+  iPhoneAll,
+  CGContext,
+  CGGeometry,
+  CGImage,
+  CGBitmapContext,
+  CGColorSpace,
   {$ENDIF}
   zgl_types,
   zgl_memory;
@@ -94,7 +112,9 @@ type
   end;
 
   procedure jpgturbo_Load( var jpgData : zglTJPGData; var Data : Pointer ); cdecl; external;
-{$ELSE}
+{$ENDIF}
+
+{$IFDEF USE_OLEPICTURE}
 type
   OLE_HANDLE = LongWord;
   OLE_XPOS_HIMETRIC  = Longint;
@@ -191,12 +211,27 @@ type
   end;
 {$ENDIF}
 
+{$IFDEF USE_UIIMAGE}
+type
+  zglPJPGData = ^zglTJPGData;
+  zglTJPGData = record
+    Image   : UIImage;
+    Color   : CGColorSpaceRef;
+    Context : CGContextRef;
+    Data    : NSData;
+    Width   : Word;
+    Height  : Word;
+  end;
+{$ENDIF}
+
 {$IFDEF USE_LIBJPEG}
 function getmem_f( Size : Integer ) : PByte; cdecl;
 begin
   GetMem( Pointer( Result ), Size );
 end;
-{$ELSE}
+{$ENDIF}
+
+{$IFDEF USE_OLEPICTURE}
 procedure jpg_FillData( var jpg : zglTJPGData; var Data : Pointer );
   var
     bi   : BITMAPINFO;
@@ -250,7 +285,7 @@ end;
 procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
   var
     jpg : zglTJPGData;
-  {$IFNDEF USE_LIBJPEG}
+  {$IFDEF USE_OLEPICTURE}
     m : Pointer;
     g : HGLOBAL;
   {$ENDIF}
@@ -260,7 +295,9 @@ begin
   jpg.MemSize := Memory.Size;
   jpg.GetMem  := getmem_f;
   jpgturbo_Load( jpg, Data );
-{$ELSE}
+{$ENDIF}
+
+{$IFDEF USE_OLEPICTURE}
   g := 0;
   try
     g := GlobalAlloc( GMEM_FIXED, Memory.Size - Memory.Position );
@@ -274,6 +311,23 @@ begin
     jpg.Buffer := nil;
     jpg.Stream := nil;
   end;
+{$ENDIF}
+
+{$IFDEF USE_UIIMAGE}
+  jpg.Data    := NSData.alloc().init();
+  jpg.Data.initWithBytesNoCopy_length_freeWhenDone( Memory.Memory, Memory.Size, FALSE );
+  jpg.Image   := UIImage.imageWithData( jpg.Data );
+  jpg.Width   := Round( jpg.Image.size.width );
+  jpg.Height  := Round( jpg.Image.size.height );
+  jpg.Color   := CGImageGetColorSpace( jpg.Image.CGImage() );
+  GetMem( Data, jpg.Width * jpg.Height * 4 );
+  jpg.Context := CGBitmapContextCreate( Data, jpg.Width, jpg.Height, 8, jpg.Width * 4, jpg.Color, kCGImageAlphaPremultipliedLast );
+  CGContextTranslateCTM( jpg.Context, 0, jpg.Height );
+  CGContextScaleCTM( jpg.Context, 1, -1 );
+  CGContextDrawImage( jpg.Context, CGRectMake( 0, 0, jpg.Width, jpg.Height ), jpg.Image.CGImage() );
+  CGContextRelease( jpg.Context );
+  jpg.Data.release();
+  jpg.Image.release();
 {$ENDIF}
 
   W := jpg.Width;
