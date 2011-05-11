@@ -350,16 +350,6 @@ begin
   {$ENDIF}
 
   {$IFDEF USE_SOUND}
-  if managerSound.Count.Items <> 0 Then
-    log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
-  while managerSound.Count.Items > 0 do
-    begin
-      p := managerSound.First.next;
-      snd_Del( zglPSound( p ) );
-    end;
-
-  for i := 1 to SND_MAX do
-    snd_StopFile( i );
   snd_Free();
   {$ENDIF}
 

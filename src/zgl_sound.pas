@@ -395,9 +395,21 @@ end;
 
 procedure snd_Free;
   var
-    i : Integer;
+    i   : Integer;
+    snd : zglPSound;
 begin
   if not sndInitialized Then exit;
+
+  if managerSound.Count.Items <> 0 Then
+    log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
+  while managerSound.Count.Items > 0 do
+    begin
+      snd := managerSound.First.next;
+      snd_Del( snd );
+    end;
+
+  for i := 1 to SND_MAX do
+    snd_StopFile( i );
 
   for i := 1 to SND_MAX do
     if Assigned( sfStream[ i ]._decoder ) Then
@@ -438,6 +450,8 @@ begin
   FreeDSound();
   log_Add( 'DirectSound: sound system finalized' );
 {$ENDIF}
+
+  sndInitialized := FALSE;
 end;
 
 function snd_Add( SourceCount : Integer ) : zglPSound;
