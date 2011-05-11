@@ -21,8 +21,11 @@
 unit zgl_textures_png;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$modeswitch objectivec1}
+{$ENDIF}
 
-{$IFNDEF USE_PASZLIB}
+{$IFDEF USE_ZLIB}
   {$L infback}
   {$L inffast}
   {$L inflate}
@@ -31,6 +34,15 @@ unit zgl_textures_png;
   {$L adler32}
   {$L crc32}
 {$ENDIF}
+
+{$IF ( not DEFINED(USE_ZLIB) ) and ( not DEFINED(USE_PASZLIB) )}
+  {$IFDEF WINDOWS}
+    {$DEFINE USE_OLEPICTURE}
+  {$ENDIF}
+  {$IFDEF iOS}
+    {$DEFINE USE_UIIMAGE}
+  {$ENDIF}
+{$IFEND}
 
 interface
 uses
@@ -41,12 +53,21 @@ uses
   zbase,
   paszlib,
   {$ENDIF}
+  {$IFDEF USE_UIIMAGE}
+  iPhoneAll,
+  CGContext,
+  CGGeometry,
+  CGImage,
+  CGBitmapContext,
+  CGColorSpace,
+  {$ENDIF}
   zgl_types,
   zgl_file,
   zgl_memory;
 
 const
   PNG_EXTENSION : array[ 0..3 ] of Char = ( 'P', 'N', 'G', #0 );
+{$IF DEFINED(USE_ZLIB) or DEFINED(USE_PASZLIB)}
   PNG_SIGNATURE : array[ 0..7 ] of AnsiChar = ( #137, #80, #78, #71, #13, #10, #26, #10 );
 
   PNG_FILTER_NONE    = 0;
@@ -100,7 +121,7 @@ type
     R, G, B, A : Byte;
   end;
 
-{$IFNDEF USE_PASZLIB}
+{$IFDEF USE_ZLIB}
 type
   TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
   TFree = procedure( AppData, Block : Pointer ); cdecl;
@@ -125,11 +146,12 @@ type
     adler     : culong;    // adler32 value of the uncompressed data
     reserved  : culong;    // reserved for future use
   end;
-{$ELSE}
+{$ENDIF}
+{$IFDEF USE_PASZLIB}
 type z_stream_s = TZStream;
 {$ENDIF}
+{$IFEND}
 
-procedure png_Load( var Data : Pointer; var W, H : Word );
 procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
 procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 
@@ -138,6 +160,7 @@ uses
   zgl_main,
   zgl_log;
 
+{$IF DEFINED(USE_ZLIB) or DEFINED(USE_PASZLIB)}
 threadvar
   pngMem          : zglTMemory;
   pngFail         : Boolean;
@@ -160,7 +183,7 @@ threadvar
 
   pngIDATEnd      : LongWord;
 
-{$IFNDEF USE_PASZLIB}
+{$IFDEF USE_ZLIB}
 function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
 function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
 function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
@@ -512,10 +535,34 @@ begin
   mem_Read( pngMem, pngPaletteAlpha, 1 );
   pngHastRNS := TRUE;
 end;
+{$IFEND}
 
-procedure png_Load( var Data : Pointer; var W, H : Word );
-  label _exit;
+procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+  {$IFDEF USE_UIIMAGE}
+  var
+    pngMem : zglTMemory;
+  {$ENDIF}
 begin
+  mem_LoadFromFile( pngMem, FileName );
+  png_LoadFromMemory( pngMem, Data, W, H );
+  mem_Free( pngMem );
+end;
+
+procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+  {$IF DEFINED(USE_ZLIB) or DEFINED(USE_PASZLIB)}
+  label _exit;
+  {$IFEND}
+  {$IFDEF USE_UIIMAGE}
+  var
+    image   : UIImage;
+    color   : CGColorSpaceRef;
+    context : CGContextRef;
+    nData   : NSData;
+  {$ENDIF}
+begin
+{$IF DEFINED(USE_ZLIB) or DEFINED(USE_PASZLIB)}
+  pngMem := Memory;
+
   {$IFDEF ENDIAN_BIG}
   forceNoSwap := TRUE;
   {$ENDIF}
@@ -590,21 +637,24 @@ _exit:
     forceNoSwap := FALSE;
     {$ENDIF}
   end;
-end;
+{$IFEND}
 
-procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
-begin
-  mem_LoadFromFile( pngMem, FileName );
-  png_Load( Data, W, H );
-  mem_Free( pngMem );
-end;
-
-procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
-begin
-  pngMem.Size     := Memory.Size;
-  pngMem.Memory   := Memory.Memory;
-  pngMem.Position := Memory.Position;
-  png_Load( Data, W, H );
+{$IFDEF USE_UIIMAGE}
+  nData   := NSData.alloc().init();
+  nData.initWithBytesNoCopy_length_freeWhenDone( Memory.Memory, Memory.Size, FALSE );
+  image   := UIImage.imageWithData( nData );
+  W       := Round( image.size.width );
+  H       := Round( image.size.height );
+  color   := CGImageGetColorSpace( image.CGImage() );
+  zgl_GetMem( Data, W * H * 4 );
+  context := CGBitmapContextCreate( Data, W, H, 8, W * 4, color, kCGImageAlphaPremultipliedLast );
+  CGContextTranslateCTM( context, 0, H );
+  CGContextScaleCTM( context, 1, -1 );
+  CGContextDrawImage( context, CGRectMake( 0, 0, W, H ), image.CGImage() );
+  CGContextRelease( context );
+  nData.release();
+  image.release();
+{$ENDIF}
 end;
 
 initialization
