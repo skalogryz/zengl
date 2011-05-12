@@ -36,9 +36,6 @@ unit zgl_textures_png;
 {$ENDIF}
 
 {$IF ( not DEFINED(USE_ZLIB) ) and ( not DEFINED(USE_PASZLIB) )}
-  {$IFDEF WINDOWS}
-    {$DEFINE USE_OLEPICTURE}
-  {$ENDIF}
   {$IFDEF iOS}
     {$DEFINE USE_UIIMAGE}
   {$ENDIF}
