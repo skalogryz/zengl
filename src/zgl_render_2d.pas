@@ -66,12 +66,12 @@ procedure batch2d_Begin;
 begin
   b2dNew     := TRUE;
   b2dStarted := TRUE;
+  b2dBatches := 0;
 end;
 
 procedure batch2d_End;
 begin
   batch2d_Flush();
-  b2dBatches  := 0;
   b2dCurMode  := 0;
   b2dCurFX    := 0;
   b2dCurBlend := 0;
