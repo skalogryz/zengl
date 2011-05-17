@@ -343,6 +343,9 @@ function app_ProcessMessages;
     bounds  : HIRect;
     SCAKey  : LongWord;
   {$ENDIF}
+  {$IFDEF WINDOWS}
+    focus : Boolean;
+  {$ENDIF}
     i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of AnsiChar;
@@ -574,8 +577,8 @@ begin
       end;
     WM_ACTIVATE:
       begin
-        appFocus := ( LOWORD( wParam ) <> WA_INACTIVE );
-        if appFocus Then
+        focus := ( LOWORD( wParam ) <> WA_INACTIVE );
+        if ( focus ) and ( not appFocus ) Then
           begin
             appPause := FALSE;
             if appWork Then app_PActivate( TRUE );
@@ -586,16 +589,26 @@ begin
             if ( wndFullScreen ) and ( not wndFirst ) Then
               scr_SetOptions( scrWidth, scrHeight, scrRefresh, wndFullScreen, scrVSync );
           end else
-            begin
-              if appAutoPause Then appPause := TRUE;
-              if appWork Then app_PActivate( FALSE );
-              if appWork and ( wndFullScreen ) and ( not wndFirst ) Then
-                begin
-                  scr_Reset();
-                  wnd_Update();
-                end;
-            end;
+            if ( not focus ) and ( appFocus ) Then
+              begin
+                if appAutoPause Then appPause := TRUE;
+                if appWork Then app_PActivate( FALSE );
+                if appWork and ( wndFullScreen ) and ( not wndFirst ) Then
+                  begin
+                    scr_Reset();
+                    wnd_Update();
+                  end;
+              end;
+        appFocus := focus;
        end;
+    WM_SHOWWINDOW:
+      begin
+        if ( wParam = 0 ) and ( appFocus ) Then
+          SendMessage( wndHandle, WM_ACTIVATE, WA_INACTIVE, 0 )
+        else
+          if ( wParam = 1 ) and ( not appFocus ) Then
+            SendMessage( wndHandle, WM_ACTIVATE, WA_ACTIVE, 0 );
+      end;
     WM_NCHITTEST:
       begin
         Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
