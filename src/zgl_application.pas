@@ -587,7 +587,7 @@ begin
             if ( wndFullScreen ) and ( not wndFirst ) Then
               scr_SetOptions( scrWidth, scrHeight, scrRefresh, wndFullScreen, scrVSync );
           end else
-            if ( wParam = 0 ) and ( appFocus )
+            if ( wParam = 0 ) and ( appFocus ) Then
               begin
                 if appAutoPause Then appPause := TRUE;
                 if appWork Then app_PActivate( FALSE );
