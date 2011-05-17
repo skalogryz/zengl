@@ -125,7 +125,8 @@ var
   appXIC    : PXIC;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  appTimer : LongWord;
+  appTimer     : LongWord;
+  appMinimized : Boolean;
   {$ENDIF}
   {$IFDEF iOS}
   appPool     : NSAutoreleasePool;
@@ -343,9 +344,6 @@ function app_ProcessMessages;
     bounds  : HIRect;
     SCAKey  : LongWord;
   {$ENDIF}
-  {$IFDEF WINDOWS}
-    focus : Boolean;
-  {$ENDIF}
     i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of AnsiChar;
@@ -548,7 +546,7 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   Result := 0;
-  if ( not appWork ) and ( Msg <> WM_ACTIVATE ) Then
+  if ( not appWork ) and ( Msg <> WM_ACTIVATEAPP ) Then
     begin
       Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
       exit;
@@ -575,10 +573,10 @@ begin
         if not wndFullScreen Then
           wnd_Update();
       end;
-    WM_ACTIVATE:
+    WM_ACTIVATEAPP:
       begin
-        focus := ( LOWORD( wParam ) <> WA_INACTIVE );
-        if ( focus ) and ( not appFocus ) Then
+        if appMinimized Then exit;
+        if ( wParam > 0 ) and ( not appFocus ) Then
           begin
             appPause := FALSE;
             if appWork Then app_PActivate( TRUE );
@@ -589,7 +587,7 @@ begin
             if ( wndFullScreen ) and ( not wndFirst ) Then
               scr_SetOptions( scrWidth, scrHeight, scrRefresh, wndFullScreen, scrVSync );
           end else
-            if ( not focus ) and ( appFocus ) Then
+            if ( wParam = 0 ) and ( appFocus )
               begin
                 if appAutoPause Then appPause := TRUE;
                 if appWork Then app_PActivate( FALSE );
@@ -599,15 +597,20 @@ begin
                     wnd_Update();
                   end;
               end;
-        appFocus := focus;
-       end;
-    WM_SHOWWINDOW:
+        appFocus := wParam > 0;
+      end;
+    WM_SIZE:
       begin
-        if ( wParam = 0 ) and ( appFocus ) Then
-          SendMessage( wndHandle, WM_ACTIVATE, WA_INACTIVE, 0 )
-        else
-          if ( wParam = 1 ) and ( not appFocus ) Then
-            SendMessage( wndHandle, WM_ACTIVATE, WA_ACTIVE, 0 );
+        if wParam = SIZE_MINIMIZED Then
+          begin
+            SendMessage( wndHandle, WM_ACTIVATEAPP, 0, 0 );
+            appMinimized := TRUE;
+          end;
+        if ( wParam = SIZE_MAXIMIZED ) or ( wParam = SIZE_RESTORED ) Then
+          begin
+            appMinimized := FALSE;
+            SendMessage( wndHandle, WM_ACTIVATEAPP, 1, 0 );
+          end;
       end;
     WM_NCHITTEST:
       begin
