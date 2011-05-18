@@ -239,6 +239,8 @@ begin
   scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
   {$ENDIF}
   {$IFDEF iOS}
+  key_BeginReadText( '' );
+  key_EndReadText();
   scr_Init();
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
   {$ENDIF}
