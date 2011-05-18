@@ -101,7 +101,6 @@ begin
     if chunkName = 'data' then
       begin
         mem_Read( wavMemory, Size, 4 );
-        if wavHeader.BitsPerSample = 8 then INC( Size );
 
         zgl_GetMem( Data, Size );
         mem_Read( wavMemory, Data^, Size );
