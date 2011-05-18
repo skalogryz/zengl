@@ -285,7 +285,6 @@ begin
       wndHandle.addSubview( keysTextField );
     end;
 
-    // TODO: Check this?
     if appFlags and APP_USE_ENGLISH_INPUT > 0 Then
       keysTextField.setKeyboardType( UIKeyboardTypeASCIICapable )
     else
