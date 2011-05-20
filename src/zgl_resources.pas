@@ -305,9 +305,11 @@ begin
                           Texture.Height := Height;
                           Texture.Flags  := Flags;
                           if Texture.Flags and TEX_CALCULATE_ALPHA > 0 Then
-                            tex_CalcAlpha( pData, TransparentColor, Width, Height )
-                          else
-                            tex_CalcTransparent( pData, TransparentColor, Width, Height );
+                            begin
+                              tex_CalcTransparent( pData, TransparentColor, Width, Height );
+                              tex_CalcAlpha( pData, Width, Height );
+                            end else
+                              tex_CalcTransparent( pData, TransparentColor, Width, Height );
                           tex_CalcFlags( Texture^, pData );
                           tex_CalcTexCoords( Texture^ );
                           Ready := TRUE;
