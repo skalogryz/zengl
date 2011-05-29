@@ -141,7 +141,7 @@ begin
   {$IFNDEF iOS}
   glScissor( X, wndHeight - Y - Height, Width, Height );
   {$ELSE}
-  if wndPortrait Then
+  if ( wndPortrait ) or ( not scrCanPortrait ) Then
     glScissor( X, wndHeight - Y - Height, Width, Height )
   else
     glScissor( wndHeight - Y - Height, X, Height, Width );
