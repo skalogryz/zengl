@@ -145,7 +145,7 @@ var
   {$IFDEF iOS}
   scrDesktopW     : Integer;
   scrDesktopH     : Integer;
-  scrOrientation  : UIDeviceOrientation;
+  scrOrientation  : UIInterfaceOrientation;
   scrAngle        : Integer;
   scrCanLandscape : Boolean = TRUE;
   scrCanPortrait  : Boolean = TRUE;
@@ -242,67 +242,17 @@ begin
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 {$IFDEF iOS}
-  scrOrientation := UIDevice.currentDevice.orientation();
-  if ( appWork ) and ( ( scrOrientation = UIDeviceOrientationFaceDown ) or ( scrOrientation = UIDeviceOrientationFaceUp ) ) Then exit;
-
-  if ( scrOrientation = UIDeviceOrientationUnknown ) Then
-    begin
-      if not scrInitialized Then
-        begin
-          scrInitialized := TRUE;
-          wndPortrait    := scrCanPortrait;
-          if scrCanPortrait Then
-            begin
-              scrOrientation := UIDeviceOrientationPortrait;
-              scrAngle       := 0;
-              scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.width );
-              scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.height );
-            end else
-              begin
-                scrOrientation := UIDeviceOrientationLandscapeLeft;
-                scrAngle       := 270;
-                scrDesktopW    := Round( UIScreen.mainScreen.bounds.size.height );
-                scrDesktopH    := Round( UIScreen.mainScreen.bounds.size.width );
-              end;
-        end;
-      exit;
-    end;
-
+  scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
+  wndPortrait    := scrCanPortrait;
   if scrCanPortrait Then
     begin
-      if scrOrientation = UIDeviceOrientationPortrait Then
-        scrAngle := 0;
-      if scrOrientation = UIDeviceOrientationPortraitUpsideDown Then
-        scrAngle := 180;
-
-      if ( scrOrientation = UIDeviceOrientationPortrait ) or ( scrOrientation = UIDeviceOrientationPortraitUpsideDown ) Then
-        begin
-          wndPortrait := TRUE;
-          scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
-          scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
-        end;
-    end;
-  if scrCanLandscape Then
-    begin
-      if scrOrientation = UIDeviceOrientationLandscapeLeft Then
-        scrAngle := 270;
-      if scrOrientation = UIDeviceOrientationLandscapeRight Then
-        scrAngle := 90;
-
-      if ( scrOrientation = UIDeviceOrientationLandscapeLeft ) or ( scrOrientation = UIDeviceOrientationLandscapeRight ) Then
-        begin
-          wndPortrait := FALSE;
-          scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
-          scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
-        end;
-    end;
-
-  case scrAngle of
-    0:   UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortrait );
-    180: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationPortraitUpsideDown );
-    270: UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeRight );
-    90:  UIApplication.sharedApplication.setStatusBarOrientation( UIInterfaceOrientationLandscapeLeft );
-  end;
+      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
+      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+    end else
+      begin
+        scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
+        scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
+      end;
 {$ENDIF}
   scrInitialized := TRUE;
 end;
@@ -713,7 +663,7 @@ begin
           {$IFNDEF iOS}
           glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
           {$ELSE}
-          if wndPortrait Then
+          if ( wndPortrait ) or ( not scrCanPortrait ) Then
             glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH )
           else
             glViewPort( scrAddCY, scrAddCX, oglClipH, oglClipW );
@@ -727,7 +677,7 @@ begin
             {$IFNDEF iOS}
             glViewPort( 0, 0, oglClipW, oglClipH );
             {$ELSE}
-            if wndPortrait Then
+            if ( wndPortrait ) or ( not scrCanPortrait ) Then
               glViewPort( 0, 0, oglClipW, oglClipH )
             else
               glViewPort( 0, 0, oglClipH, oglClipW );

@@ -325,6 +325,7 @@ exports
   snd_Get                  name prefix + 'snd_Get',
   snd_SetSpeed             name prefix + 'snd_SetSpeed',
   snd_PlayFile             name prefix + 'snd_PlayFile',
+  snd_PlayMemory           name prefix + 'snd_PlayMemory',
   snd_PauseFile            name prefix + 'snd_PauseFile',
   snd_StopFile             name prefix + 'snd_StopFile',
   snd_ResumeFile           name prefix + 'snd_ResumeFile',

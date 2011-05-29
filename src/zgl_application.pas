@@ -63,13 +63,19 @@ type
     procedure applicationWillTerminate( application: UIApplication ); message 'applicationWillTerminate:';
     procedure applicationWillEnterForeground( application: UIApplication ); message 'applicationWillEnterForeground:';
     procedure applicationDidBecomeActive( application: UIApplication ); message 'applicationDidBecomeActive:';
-    procedure deviceOrientationDidChange; message 'deviceOrientationDidChange';
 
     // TextField
     function textFieldShouldBeginEditing( textField : UITextField ) : Boolean; message 'textFieldShouldBeginEditing:';
     function textField_shouldChangeCharactersInRange_replacementString( textField : UITextField; range : NSRange; string_ : NSString ) : Boolean; message 'textField:shouldChangeCharactersInRange:replacementString:';
     function textFieldShouldReturn( textField : UITextField ) : Boolean; message 'textFieldShouldReturn:';
     procedure textFieldEditingChanged; message 'textFieldEditingChanged';
+  end;
+
+type
+  zglCiOSViewController = objcclass(UIViewController)
+  public
+    function shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean; override;
+    procedure willRotateToInterfaceOrientation_duration( toInterfaceOrientation : UIInterfaceOrientation; duration : NSTimeInterval ); override;
   end;
 
 type
@@ -1123,9 +1129,6 @@ begin
 
   UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications();
 
-  NSNotificationCenter.DefaultCenter.addObserver_selector_name_object( self, objcselector( 'deviceOrientationDidChange' ), u_GetNSString( 'UIDeviceOrientationDidChangeNotification' ), nil );
-  app_ProcessOS();
-
   performSelector_withObject_afterDelay( objcselector( 'EnterMainLoop' ), nil, 0.2{magic} );
 end;
 
@@ -1153,30 +1156,6 @@ procedure zglCAppDelegate.applicationDidBecomeActive( application: UIApplication
 begin
   appPause := FALSE;
   if appWork Then app_PActivate( TRUE );
-end;
-
-procedure zglCAppDelegate.deviceOrientationDidChange;
-  var
-    keysTextFieldEditing : Boolean;
-begin
-  if not appWork Then exit;
-
-  if Assigned( keysTextField ) and ( keysTextField.isEditing() ) and ( keysCanText ) Then
-    begin
-      keysTextFieldEditing := TRUE;
-      keysTextField.resignFirstResponder();
-      keysTextField.removeFromSuperview();
-    end else
-      keysTextFieldEditing := FALSE;
-
-  scr_Init();
-  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
-
-  if Assigned( keysTextField ) and ( keysTextFieldEditing ) and ( keysCanText ) Then
-    begin
-      wndHandle.addSubview( keysTextField );
-      keysTextField.becomeFirstResponder();
-    end;
 end;
 
 function zglCAppDelegate.textFieldShouldBeginEditing( textField : UITextField ) : Boolean;
@@ -1233,6 +1212,59 @@ end;
 function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
 begin
   Result := CGRectMake( 0, 4096, 0, 0 );
+end;
+
+function zglCiOSViewController.shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean;
+begin
+  Result := FALSE;
+  if scrCanPortrait Then
+    begin
+      if interfaceOrientation = UIInterfaceOrientationPortrait Then
+        begin
+          scrAngle := 0;
+          Result   := TRUE;
+        end;
+      if interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown Then
+        begin
+          scrAngle := 180;
+          Result   := TRUE;
+        end;
+    end;
+  if scrCanLandscape Then
+    begin
+      if interfaceOrientation = UIInterfaceOrientationLandscapeLeft Then
+        begin
+          scrAngle := 90;
+          Result   := TRUE;
+        end;
+      if interfaceOrientation = UIInterfaceOrientationLandscapeRight Then
+        begin
+          scrAngle := 270;
+          Result   := TRUE;
+        end;
+    end;
+end;
+
+procedure zglCiOSViewController.willRotateToInterfaceOrientation_duration( toInterfaceOrientation : UIInterfaceOrientation; duration : NSTimeInterval );
+begin
+  scrOrientation := toInterfaceOrientation;
+
+  if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
+    begin
+      wndPortrait := TRUE;
+      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
+      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+    end;
+
+  if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
+    begin
+      wndPortrait := FALSE;
+      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
+      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
+    end;
+
+  eglView.setFrame( CGRectMake( 0, 0, scrDesktopW, scrDesktopH ) );
+  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 end;
 
 procedure zglCiOSWindow.GetTouchPos( touches : NSSet );

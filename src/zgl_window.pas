@@ -94,6 +94,7 @@ var
   {$ENDIF}
   {$IFDEF iOS}
   wndHandle   : UIWindow;
+  wndViewCtrl : UIViewController;
   wndPortrait : Boolean;
   {$ENDIF}
 
@@ -303,6 +304,8 @@ begin
 {$IFDEF iOS}
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
   wndHandle := zglCiOSWindow.alloc().initWithFrame( CGRectMake( wndX, wndY, Width, Height ) );
+  wndViewCtrl := zglCiOSViewController.alloc().init();
+  wndHandle.addSubview( wndViewCtrl.view );
 
   wnd_Select();
 {$ENDIF}

@@ -66,33 +66,10 @@ begin
   glLoadIdentity();
   if oglTarget = TARGET_SCREEN Then
     begin
-      {$IFNDEF iOS}
       if appFlags and CORRECT_RESOLUTION > 0 Then
         glOrtho( 0, Round( oglWidth - scrAddCX * 2 / scrResCX ), Round( oglHeight - scrAddCY * 2 / scrResCY ), 0, -1, 1 )
       else
         glOrtho( 0, wndWidth, wndHeight, 0, -1, 1 );
-      {$ELSE}
-      if appFlags and CORRECT_RESOLUTION > 0 Then
-        begin
-          if wndPortrait Then
-            glOrtho( 0, Round( oglWidth - scrAddCX * 2 / scrResCX ), Round( oglHeight - scrAddCY * 2 / scrResCY ), 0, -1, 1 )
-          else
-            glOrtho( 0, Round( oglHeight - scrAddCY * 2 / scrResCY ), Round( oglWidth - scrAddCX * 2 / scrResCX ), 0, -1, 1 );
-        end else
-          begin
-            if wndPortrait Then
-              glOrtho( 0, wndWidth, wndHeight, 0, -1, 1 )
-            else
-              glOrtho( 0, wndHeight, wndWidth, 0, -1, 1 );
-          end;
-
-      if wndPortrait Then
-        glTranslatef( Round( oglWidth - scrAddCX * 2 / scrResCX ) / 2, Round( oglHeight - scrAddCY * 2 / scrResCY ) / 2, 0 )
-      else
-        glTranslatef( Round( oglHeight - scrAddCY * 2 / scrResCY ) / 2, Round( oglWidth - scrAddCX * 2 / scrResCX ) / 2, 0 );
-      glRotatef( -scrAngle, 0, 0, 1 );
-      glTranslatef( -Round( oglWidth - scrAddCX * 2 / scrResCX ) / 2, -Round( oglHeight - scrAddCY * 2 / scrResCY ) / 2, 0 );
-      {$ENDIF}
     end else
       glOrtho( 0, oglWidth, oglHeight, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
@@ -201,7 +178,7 @@ begin
       {$IFNDEF iOS}
       glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH );
       {$ELSE}
-      if wndPortrait Then
+      if ( wndPortrait ) or ( not scrCanPortrait ) Then
         glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH )
       else
         glScissor( wndHeight - oglClipY - oglClipH, oglClipX, oglClipH, oglClipW );
