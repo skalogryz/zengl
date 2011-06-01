@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.05.07           }
+{ date:     2011.06.01           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1102,6 +1102,7 @@ type
   zglTSoundStream = record
     _data      : Pointer;
     _file      : zglTFile;
+    _memory    : zglTMemory;
     _decoder   : zglPSoundDecoder;
     _playing   : Boolean;
     _paused    : Boolean;
@@ -1121,11 +1122,12 @@ type
   end;
 
   zglTSoundDecoder = record
-    Ext   : String;
-    Open  : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-    Read  : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
-    Loop  : procedure( var Stream : zglTSoundStream );
-    Close : procedure( var Stream : zglTSoundStream );
+    Ext     : String;
+    Open    : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+    OpenMem : function( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
+    Read    : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
+    Loop    : procedure( var Stream : zglTSoundStream );
+    Close   : procedure( var Stream : zglTSoundStream );
   end;
 
   zglTSoundFormat = record
@@ -1158,6 +1160,7 @@ var
   snd_SetSpeed       : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
   snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
   snd_PlayFile       : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+  snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
   snd_PauseFile      : procedure( ID : Integer );
   snd_StopFile       : procedure( ID : Integer );
   snd_ResumeFile     : procedure( ID : Integer );
@@ -1672,6 +1675,7 @@ begin
       snd_SetSpeed := dlsym( zglLib, 'snd_SetSpeed' );
       snd_Get := dlsym( zglLib, 'snd_Get' );
       snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
+      snd_PlayMemory := dlsym( zglLib, 'snd_PlayMemory' );
       snd_PauseFile := dlsym( zglLib, 'snd_PauseFile' );
       snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
       snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );

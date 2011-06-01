@@ -96,6 +96,7 @@ type
   zglTSoundStream = record
     _data      : Pointer;
     _file      : zglTFile;
+    _memory    : zglTMemory;
     _decoder   : zglPSoundDecoder;
     _playing   : Boolean;
     _paused    : Boolean;
@@ -115,11 +116,12 @@ type
   end;
 
   zglTSoundDecoder = record
-    Ext   : String;
-    Open  : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-    Read  : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
-    Loop  : procedure( var Stream : zglTSoundStream );
-    Close : procedure( var Stream : zglTSoundStream );
+    Ext     : String;
+    Open    : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+    OpenMem : function( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
+    Read    : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
+    Loop    : procedure( var Stream : zglTSoundStream );
+    Close   : procedure( var Stream : zglTSoundStream );
   end;
 
   zglTSoundFormat = record
@@ -155,6 +157,7 @@ procedure snd_SetSpeed( Sound : zglPSound; ID : Integer; Speed : Single );
 function  snd_Get( Sound : zglPSound; ID, What : Integer ) : Integer;
 
 function  snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+function  snd_PlayMemory( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
 procedure snd_PauseFile( ID : Integer );
 procedure snd_StopFile( ID : Integer );
 procedure snd_ResumeFile( ID : Integer );
@@ -1032,15 +1035,83 @@ begin
   Result := -1;
 end;
 
-function snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+procedure snd_PlayStream( ID : Integer; Loop : Boolean = FALSE );
   var
     i         : Integer;
-    ext       : String;
     _end      : Boolean;
     bytesRead : Integer;
     {$IFNDEF USE_OPENAL}
     buffDesc : zglTBufferDesc;
     {$ENDIF}
+begin
+  if Assigned( sfStream[ ID ]._decoder ) Then
+    sfStream[ ID ].Loop := Loop;
+
+{$IFDEF USE_OPENAL}
+  alSourceStop( sfSource[ ID ] );
+  alSourceRewind( sfSource[ ID ] );
+  alSourcei( sfSource[ ID ], AL_BUFFER, AL_NONE );
+
+  for i := 0 to sfBufCount - 1 do
+    begin
+      bytesRead := sfStream[ ID ]._decoder.Read( sfStream[ ID ], sfStream[ ID ].Buffer, sfStream[ ID ].BufferSize, _end );
+      if bytesRead <= 0 Then break;
+
+      alBufferData( sfBuffers[ ID, i ], sfFormat[ sfStream[ ID ].Channels ], sfStream[ ID ].Buffer, bytesRead, sfStream[ ID ].Frequency );
+      alSourceQueueBuffers( sfSource[ ID ], 1, @sfBuffers[ ID, i ] );
+    end;
+
+  alSourcei( sfSource[ ID ], AL_LOOPING, AL_FALSE );
+  alSourcePlay( sfSource[ ID ] );
+  alSourcef( sfSource[ ID ], AL_GAIN, sfVolume );
+  alSourcef( sfSource[ ID ], AL_FREQUENCY, sfStream[ ID ].Frequency );
+{$ELSE}
+  with buffDesc do
+    begin
+      FormatCode     := 1;
+      ChannelNumber  := sfStream[ ID ].Channels;
+      SampleRate     := sfStream[ ID ].Frequency;
+      BitsPerSample  := sfStream[ ID ].Bits;
+      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
+      BytesPerSecond := SampleRate * BytesPerSample;
+      cbSize         := SizeOf( buffDesc );
+    end;
+  if Assigned( sfSource[ ID ] ) Then sfSource[ ID ] := nil;
+  dsu_CreateBuffer( sfSource[ ID ], sfStream[ ID ].BufferSize, @buffDesc );
+  bytesRead := sfStream[ ID ]._decoder.Read( sfStream[ ID ], sfStream[ ID ].Buffer, sfStream[ ID ].BufferSize, _end );
+  dsu_FillData( sfSource[ ID ], sfStream[ ID ].Buffer, bytesRead );
+
+  sfNotify[ ID ] := nil;
+  sfSource[ ID ].QueryInterface( IDirectSoundNotify, sfNotify[ ID ] );
+  CloseHandle( sfNotifyEvent[ ID ] );
+  sfNotifyEvent[ ID ] := CreateEvent( nil, FALSE, FALSE, nil );
+  sfNotifyPos[ ID ].dwOffset := 0;
+  sfNotifyPos[ ID ].hEventNotify := sfNotifyEvent[ ID ];
+  sfNotify[ ID ].SetNotificationPositions( 1, @sfNotifyPos[ ID ] );
+
+  sfLastPos[ ID ] := 0;
+  sfSource[ ID ].SetCurrentPosition( 0 );
+  sfSource[ ID ].Play( 0, 0, DSBPLAY_LOOPING );
+  sfSource[ ID ].SetVolume( dsu_CalcVolume( sfVolume ) );
+  sfSource[ ID ].SetFrequency( sfStream[ ID ].Frequency );
+{$ENDIF}
+
+  sfStream[ ID ]._playing  := TRUE;
+  sfStream[ ID ]._paused   := FALSE;
+  sfStream[ ID ]._waiting  := FALSE;
+  sfStream[ ID ]._complete := 0;
+  sfStream[ ID ]._lastTime := timer_GetTicks;
+{$IFDEF FPC}
+  sfThread[ ID ] := LongWord( BeginThread( @snd_ProcFile, Pointer( ID ) ) );
+{$ELSE}
+  sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcFile, Pointer( ID ), 0, sfThreadID[ ID ] );
+{$ENDIF}
+end;
+
+function snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+  var
+    i   : Integer;
+    ext : String;
 begin
   if ( not sndInitialized ) or ( not sndCanPlayFile ) Then exit;
 
@@ -1070,76 +1141,47 @@ begin
         sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
     end;
 
-  if Assigned( sfStream[ Result ]._decoder ) Then
-    sfStream[ Result ].Loop := Loop;
-
-  if ( not Assigned( sfStream[ Result ]._decoder ) ) or
-     ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
+  if ( not Assigned( sfStream[ Result ]._decoder ) ) or ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
     begin
       sfStream[ Result ]._decoder := nil;
       log_Add( 'Cannot play: "' + FileName + '"' );
       exit;
     end;
 
-{$IFDEF USE_OPENAL}
-  alSourceStop( sfSource[ Result ] );
-  alSourceRewind( sfSource[ Result ] );
-  alSourcei( sfSource[ Result ], AL_BUFFER, AL_NONE );
+  snd_PlayStream( Result, Loop );
+end;
 
-  for i := 0 to sfBufCount - 1 do
+function snd_PlayMemory( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
+  var
+    i : Integer;
+begin
+  if ( not sndInitialized ) or ( not sndCanPlayFile ) Then exit;
+
+  Result := snd_GetStreamID();
+  if Result = -1 Then
+    exit;
+
+  if Assigned( sfStream[ Result ]._decoder ) Then
     begin
-      bytesRead := sfStream[ Result ]._decoder.Read( sfStream[ Result ], sfStream[ Result ].Buffer, sfStream[ Result ].BufferSize, _end );
-      if bytesRead <= 0 Then break;
-
-      alBufferData( sfBuffers[ Result, i ], sfFormat[ sfStream[ Result ].Channels ], sfStream[ Result ].Buffer, bytesRead, sfStream[ Result ].Frequency );
-      alSourceQueueBuffers( sfSource[ Result ], 1, @sfBuffers[ Result, i ] );
+      sfStream[ Result ]._decoder.Close( sfStream[ Result ] );
+      if Assigned( sfStream[ Result ].Buffer ) Then
+        FreeMem( sfStream[ Result ].Buffer );
+      if Assigned( sfStream[ Result ]._data ) Then
+        FreeMem( sfStream[ Result ]._data );
     end;
 
-  alSourcei( sfSource[ Result ], AL_LOOPING, AL_FALSE );
-  alSourcePlay( sfSource[ Result ] );
-  alSourcef( sfSource[ Result ], AL_GAIN, sfVolume );
-  alSourcef( sfSource[ Result ], AL_FREQUENCY, sfStream[ Result ].Frequency );
-{$ELSE}
-  with buffDesc do
+  for i := managerSound.Count.Formats - 1 downto 0 do
+    if Extension = managerSound.Formats[ i ].Extension Then
+      sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
+
+  if ( not Assigned( sfStream[ Result ]._decoder ) ) or ( not sfStream[ Result ]._decoder.OpenMem( sfStream[ Result ], Memory ) ) Then
     begin
-      FormatCode     := 1;
-      ChannelNumber  := sfStream[ Result ].Channels;
-      SampleRate     := sfStream[ Result ].Frequency;
-      BitsPerSample  := sfStream[ Result ].Bits;
-      BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
-      BytesPerSecond := SampleRate * BytesPerSample;
-      cbSize         := SizeOf( buffDesc );
+      sfStream[ Result ]._decoder := nil;
+      log_Add( 'Cannot play: "From Memory"' );
+      exit;
     end;
-  if Assigned( sfSource[ Result ] ) Then sfSource[ Result ] := nil;
-  dsu_CreateBuffer( sfSource[ Result ], sfStream[ Result ].BufferSize, @buffDesc );
-  bytesRead := sfStream[ Result ]._decoder.Read( sfStream[ Result ], sfStream[ Result ].Buffer, sfStream[ Result ].BufferSize, _end );
-  dsu_FillData( sfSource[ Result ], sfStream[ Result ].Buffer, bytesRead );
 
-  sfNotify[ Result ] := nil;
-  sfSource[ Result ].QueryInterface( IDirectSoundNotify, sfNotify[ Result ] );
-  CloseHandle( sfNotifyEvent[ Result ] );
-  sfNotifyEvent[ Result ] := CreateEvent( nil, FALSE, FALSE, nil );
-  sfNotifyPos[ Result ].dwOffset := 0;
-  sfNotifyPos[ Result ].hEventNotify := sfNotifyEvent[ Result ];
-  sfNotify[ Result ].SetNotificationPositions( 1, @sfNotifyPos[ Result ] );
-
-  sfLastPos[ Result ] := 0;
-  sfSource[ Result ].SetCurrentPosition( 0 );
-  sfSource[ Result ].Play( 0, 0, DSBPLAY_LOOPING );
-  sfSource[ Result ].SetVolume( dsu_CalcVolume( sfVolume ) );
-  sfSource[ Result ].SetFrequency( sfStream[ Result ].Frequency );
-{$ENDIF}
-
-  sfStream[ Result ]._playing  := TRUE;
-  sfStream[ Result ]._paused   := FALSE;
-  sfStream[ Result ]._waiting  := FALSE;
-  sfStream[ Result ]._complete := 0;
-  sfStream[ Result ]._lastTime := timer_GetTicks;
-{$IFDEF FPC}
-  sfThread[ Result ] := LongWord( BeginThread( @snd_ProcFile, Pointer( Result ) ) );
-{$ELSE}
-  sfThread[ Result ] := BeginThread( nil, 0, @snd_ProcFile, Pointer( Result ), 0, sfThreadID[ Result ] );
-{$ENDIF}
+  snd_PlayStream( Result, Loop );
 end;
 
 procedure snd_PauseFile( ID : Integer );
