@@ -235,9 +235,9 @@ begin
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
 
-  {$IFDEF LINUX}
+  {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
   scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
-  {$ENDIF}
+  {$IFEND}
   {$IFDEF iOS}
   key_BeginReadText( '' );
   key_EndReadText();
