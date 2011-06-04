@@ -48,7 +48,7 @@ const
   cs_ZenGL    = 'ZenGL 0.3';
   cs_Date     = '2011.06.04';
   cv_major    = 0;
-  cv_minor    = 2;
+  cv_minor    = 3;
   cv_revision = 0;
 
   // zgl_Reg
