@@ -242,6 +242,7 @@ begin
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 {$IFDEF iOS}
+  app_InitPool();
   scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
   wndPortrait    := scrCanPortrait;
   if scrCanPortrait Then

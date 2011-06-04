@@ -586,7 +586,8 @@ end;
 
 {$IFDEF iOS}
 initialization
-  iosFileManager := NSFileMAnager.alloc().init();
+  app_InitPool();
+  iosFileManager := NSFileManager.alloc().init();
 
 finalization
   iosFileManager.dealloc();

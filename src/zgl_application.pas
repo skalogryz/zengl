@@ -54,6 +54,9 @@ function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam :
 function app_ProcessMessages( inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr ): OSStatus; cdecl;
 {$ENDIF}
 {$IFDEF iOS}
+procedure app_InitPool;
+procedure app_FreePool;
+
 type
   zglCAppDelegate = objcclass(NSObject)
     procedure EnterMainLoop; message 'EnterMainLoop';
@@ -135,8 +138,9 @@ var
   appMinimized : Boolean;
   {$ENDIF}
   {$IFDEF iOS}
-  appPool     : NSAutoreleasePool;
-  appDelegate : zglCAppDelegate;
+  appPool            : NSAutoreleasePool;
+  appPoolInitialized : Boolean;
+  appDelegate        : zglCAppDelegate;
   {$ENDIF}
   appShowCursor : Boolean;
 
@@ -1118,6 +1122,18 @@ begin
 {$ENDIF}
 end;
 {$ELSE}
+procedure app_InitPool;
+begin
+  if not Assigned( appPool ) Then
+    appPool := NSAutoreleasePool.alloc.init();
+end;
+
+procedure app_FreePool;
+begin
+  if Assigned( appPool ) Then
+    appPool.release();
+end;
+
 procedure zglCAppDelegate.EnterMainLoop;
 begin
   zgl_Init( oglFSAA, oglStencil );
