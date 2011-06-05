@@ -71,6 +71,9 @@ uses
 
 procedure cam2d_Init( var Camera : zglTCamera2D );
 begin
+  Camera.X        := 0;
+  Camera.Y        := 0;
+  Camera.Angle    := 0;
   Camera.Zoom.X   := 1;
   Camera.Zoom.Y   := 1;
   Camera.Center.X := ( oglWidth - scrSubCX ) / 2;
