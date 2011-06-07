@@ -24,10 +24,10 @@ unit zgl_timers;
 
 interface
 {$IFDEF LINUX}
-uses Unix
+uses Unix;
 {$ENDIF}
 {$IFDEF WINDOWS}
-uses Windows
+uses Windows;
 {$ENDIF}
 
 type
