@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 5             }
-{ date:              2011.05.10              }
+{ header version:    0.99 beta 6             }
+{ date:              2011.06.09              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -952,19 +952,23 @@ var
   cpConstraintDestroy : procedure( constraint : PcpConstraint ); cdecl;
   cpConstraintFree : procedure( constraint : PcpConstraint ); cdecl;
 
+  cpPinJointGetClass: function: PcpConstraintClass; cdecl;
   cpPinJointAlloc : function : PcpPinJoint; cdecl;
   cpPinJointInit : function( joint : PcpPinJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : cpPinJoint; cdecl;
   cpPinJointNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;
 
+  cpSlideJointGetClass: function: PcpConstraintClass; cdecl;
   cpSlideJointAlloc : function : PcpSlideJoint; cdecl;
   cpSlideJointInit : function( joint : PcpSlideJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpSlideJoint; cdecl;
   cpSlideJointNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl;
 
+  cpPivotJointGetClass: function: PcpConstraintClass; cdecl;
   cpPivotJointAlloc : function : PcpPivotJoint; cdecl;
   cpPivotJointInit : function( joint : PcpPivotJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpPivotJoint; cdecl;
   cpPivotJointNew : function( a : PcpBody; b : PcpBody; pivot : cpVect ) : PcpConstraint; cdecl;
   cpPivotJointNew2 : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;
 
+  cpGrooveJointGetClass: function: PcpConstraintClass; cdecl;
   cpGrooveJointAlloc : function : PcpGrooveJoint; cdecl;
   cpGrooveJointInit : function( joint : PcpGrooveJoint; a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpGrooveJoint; cdecl;
   cpGrooveJointNew : function( a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;
@@ -972,26 +976,32 @@ var
   cpGrooveJointSetGrooveA : procedure( constraint : PcpConstraint; value : cpVect ); cdecl;
   cpGrooveJointSetGrooveB : procedure( constraint : PcpConstraint; value : cpVect ); cdecl;
 
+  cpDampedSpringGetClass: function : PcpConstraintClass; cdecl;
   cpDampedSpringAlloc : function : PcpDampedSpring; cdecl;
   cpDampedSpringInit : function( joint : cpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;
   cpDampedSpringNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;
 
+  cpDampedRotarySpringGetClass: function : PcpConstraintClass; cdecl;
   cpDampedRotarySpringAlloc : function : PcpDampedRotarySpring; cdecl;
   cpDampedRotarySpringInit : function( joint : PcpDampedRotarySpring; a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedRotarySpring; cdecl;
   cpDampedRotarySpringNew : function( a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;
 
+  cpRotaryLimitJointGetClass: function : PcpConstraintClass; cdecl;
   cpRotaryLimitJointAlloc : function : PcpRotaryLimitJoint; cdecl;
   cpRotaryLimitJointInit : function( joint : PcpRotaryLimitJoint; a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpRotaryLimitJoint; cdecl;
   cpRotaryLimitJointNew : function( a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl;
 
+  cpRatchetJointGetClass: function : PcpConstraintClass; cdecl;
   cpRatchetJointAlloc : function : PcpRatchetJoint; cdecl;
   cpRatchetJointInit : function( joint : PcpRatchetJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpRatchetJoint; cdecl;
   cpRatchetJointNew : function( a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpConstraint; cdecl;
 
+  cpGearJointGetClass: function : PcpConstraintClass; cdecl;
   cpGearJointAlloc : function : PcpGearJoint; cdecl;
   cpGearJointInit : function( joint : PcpGearJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpGearJoint; cdecl;
   cpGearJointNew : function( a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpConstraint; cdecl;
 
+  cpSimpleMotorGetClass: function : PcpConstraintClass; cdecl;
   cpSimpleMotorAlloc : function : PcpSimpleMotor; cdecl;
   cpSimpleMotorInit : function( joint : PcpSimpleMotor; a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpSimpleMotor; cdecl;
   cpSimpleMotorNew : function( a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpConstraint; cdecl;
@@ -1909,36 +1919,46 @@ begin
 
       cpConstraintDestroy := dlsym( cpLib, 'cpConstraintDestroy' );
       cpConstraintFree := dlsym( cpLib, 'cpConstraintFree' );
+      cpPinJointGetClass := dlsym( cpLib, 'cpPinJointGetClass' );
       cpPinJointAlloc := dlsym( cpLib, 'cpPinJointAlloc' );
       cpPinJointInit := dlsym( cpLib, 'cpPinJointInit' );
       cpPinJointNew := dlsym( cpLib, 'cpPinJointNew' );
+      cpSlideJointGetClass := dlsym( cpLib, 'cpSlideJointGetClass' );
       cpSlideJointAlloc := dlsym( cpLib, 'cpSlideJointAlloc' );
       cpSlideJointInit := dlsym( cpLib, 'cpSlideJointInit' );
       cpSlideJointNew := dlsym( cpLib, 'cpSlideJointNew' );
+      cpPivotJointGetClass := dlsym( cpLib, 'cpPivotJointGetClass' );
       cpPivotJointAlloc := dlsym( cpLib, 'cpPivotJointAlloc' );
       cpPivotJointInit := dlsym( cpLib, 'cpPivotJointInit' );
       cpPivotJointNew := dlsym( cpLib, 'cpPivotJointNew' );
       cpPivotJointNew2 := dlsym( cpLib, 'cpPivotJointNew2' );
+      cpGrooveJointGetClass := dlsym( cpLib, 'cpGrooveJointGetClass' );
       cpGrooveJointAlloc := dlsym( cpLib, 'cpGrooveJointAlloc' );
       cpGrooveJointInit := dlsym( cpLib, 'cpGrooveJointInit' );
       cpGrooveJointNew := dlsym( cpLib, 'cpGrooveJointNew' );
       cpGrooveJointSetGrooveA := dlsym( cpLib, 'cpGrooveJointSetGrooveA' );
       cpGrooveJointSetGrooveB := dlsym( cpLib, 'cpGrooveJointSetGrooveB' );
+      cpDampedSpringGetClass := dlsym( cpLib, 'cpDampedSpringGetClass' );
       cpDampedSpringAlloc := dlsym( cpLib, 'cpDampedSpringAlloc' );
       cpDampedSpringInit := dlsym( cpLib, 'cpDampedSpringInit' );
       cpDampedSpringNew := dlsym( cpLib, 'cpDampedSpringNew' );
+      cpDampedRotarySpringGetClass := dlsym( cpLib, 'cpDampedRotarySpringGetClass' );
       cpDampedRotarySpringAlloc := dlsym( cpLib, 'cpDampedRotarySpringAlloc' );
       cpDampedRotarySpringInit := dlsym( cpLib, 'cpDampedRotarySpringInit' );
       cpDampedRotarySpringNew := dlsym( cpLib, 'cpDampedRotarySpringNew' );
+      cpRotaryLimitJointGetClass := dlsym( cpLib, 'cpRotaryLimitJointGetClass' );
       cpRotaryLimitJointAlloc := dlsym( cpLib, 'cpRotaryLimitJointAlloc' );
       cpRotaryLimitJointInit := dlsym( cpLib, 'cpRotaryLimitJointInit' );
       cpRotaryLimitJointNew := dlsym( cpLib, 'cpRotaryLimitJointNew' );
+      cpRatchetJointGetClass := dlsym( cpLib, 'cpRatchetJointGetClass' );
       cpRatchetJointAlloc := dlsym( cpLib, 'cpRatchetJointAlloc' );
       cpRatchetJointInit := dlsym( cpLib, 'cpRatchetJointInit' );
       cpRatchetJointNew := dlsym( cpLib, 'cpRatchetJointNew' );
+      cpGearJointGetClass := dlsym( cpLib, 'cpGearJointGetClass' );
       cpGearJointAlloc := dlsym( cpLib, 'cpGearJointAlloc' );
       cpGearJointInit := dlsym( cpLib, 'cpGearJointInit' );
       cpGearJointNew := dlsym( cpLib, 'cpGearJointNew' );
+      cpSimpleMotorGetClass := dlsym( cpLib, 'cpSimpleMotorGetClass' );
       cpSimpleMotorAlloc := dlsym( cpLib, 'cpSimpleMotorAlloc' );
       cpSimpleMotorInit := dlsym( cpLib, 'cpSimpleMotorInit' );
       cpSimpleMotorNew := dlsym( cpLib, 'cpSimpleMotorNew' );
