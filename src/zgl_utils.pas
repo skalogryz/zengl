@@ -421,6 +421,9 @@ begin
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
 {$ENDIF}
+{$IFDEF iOS}
+  WriteLn( 'ERROR: ' + ErrStr );
+{$ENDIF}
 
   log_Add( 'ERROR: ' + ErrStr );
 end;
@@ -448,6 +451,9 @@ begin
 {$ENDIF}
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
+{$ENDIF}
+{$IFDEF iOS}
+  WriteLn( 'WARNING: ' + ErrStr );
 {$ENDIF}
 
   log_Add( 'WARNING: ' + ErrStr );

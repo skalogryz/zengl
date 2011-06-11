@@ -103,10 +103,10 @@ procedure log_Add( const Message : AnsiString; Timings : Boolean = TRUE );
     str : AnsiString;
 begin
   if not appLog Then exit;
-  {$IFDEF LINUX}
+  {$IF DEFINED(LINUX) or DEFINED(iOS)}
   if ( appLog ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
     writeln( Message );
-  {$ENDIF}
+  {$IFEND}
   if Timings Then
     str := log_Timing + Message + #13#10
   else
