@@ -66,6 +66,7 @@ type
     procedure applicationWillTerminate( application: UIApplication ); message 'applicationWillTerminate:';
     procedure applicationWillEnterForeground( application: UIApplication ); message 'applicationWillEnterForeground:';
     procedure applicationDidBecomeActive( application: UIApplication ); message 'applicationDidBecomeActive:';
+    procedure applicationDidReceiveMemoryWarning( application: UIApplication ); message 'applicationDidReceiveMemoryWarning:';
 
     // TextField
     function textFieldShouldBeginEditing( textField : UITextField ) : Boolean; message 'textFieldShouldBeginEditing:';
@@ -127,6 +128,9 @@ var
   app_PUpdate     : procedure( dt : Double );
   app_PActivate   : procedure( activate : Boolean );
   app_PCloseQuery : function : Boolean;
+  {$IFDEF iOS}
+  app_PMemoryWarn : procedure;
+  {$ENDIF}
 
   {$IFDEF LINUX}
   appCursor : TCursor = None;
@@ -1174,6 +1178,11 @@ begin
   if appWork Then app_PActivate( TRUE );
 end;
 
+procedure zglCAppDelegate.applicationDidReceiveMemoryWarning;
+begin
+  app_PMemoryWarn();
+end;
+
 function zglCAppDelegate.textFieldShouldBeginEditing( textField : UITextField ) : Boolean;
 begin
   Result := keysCanText;
@@ -1418,6 +1427,9 @@ initialization
   app_PUpdate     := app_ZeroUpdate;
   app_PActivate   := app_ZeroActivate;
   app_PCloseQuery := app_ZeroCloseQuery;
+{$IFDEF iOS}
+  app_PMemoryWarn := app_ZeroProc;
+{$ENDIF}
 
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
 {$IFDEF iOS}
