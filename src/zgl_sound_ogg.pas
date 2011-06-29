@@ -509,6 +509,7 @@ begin
         bytesRead := decoderRead( _vf, Buffer, 64 * 1024, _End );
         INC( Size, bytesRead );
       until _End;
+      FreeMem( Buffer );
       _vi := nil;
       ov_clear( _vf );
 
