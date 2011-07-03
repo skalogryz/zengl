@@ -33,6 +33,7 @@ all: clean
 
 linux32: clean
 	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/chipmunk/i386-linux \
 	-Fu../../../lib/jpeg/i386-linux \
 	-Fu../../../lib/ogg/i386-linux \
 	-Fu../../../lib/zlib/i386-linux \
