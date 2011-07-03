@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 6             }
-{ date:              2011.06.09              }
+{ header version:    0.99 beta 7             }
+{ date:              2011.07.03              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -39,15 +39,17 @@ unit zglChipmunk;
   {$DEFINE WINDOWS}
 {$ENDIF}
 
+{$IFDEF DARWIN}
+  {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
+    {$DEFINE iOS}
+  {$ELSE}
+    {$DEFINE MACOSX}
+  {$IFEND}
+{$ENDIF}
+
 {$IFDEF FPC}
   {$MODE DELPHI}
   {$PACKRECORDS C}
-  {$IFDEF LINUX}
-    {$DEFINE LINUX_OR_DARWIN}
-  {$ENDIF}
-  {$IFDEF DARWIN}
-    {$DEFINE LINUX_OR_DARWIN}
-  {$ENDIF}
   {$IFDEF CHIPMUNK_STATIC}
     {$L chipmunk}
     {$L cpArbiter}
@@ -75,6 +77,9 @@ unit zglChipmunk;
     {$L cpSpaceQuery}
     {$L cpSpaceStep}
     {$L cpVect}
+    {$IFDEF iOS}
+      {$LINKLIB libgcc_s.1.dylib}
+    {$ENDIF}
     {$IFNDEF STATIC}
       {$IFDEF WINDOWS}
         {$LINKLIB libmsvcrt.a}
@@ -85,7 +90,7 @@ unit zglChipmunk;
 
 interface
 uses
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   MacOSAll,
   {$ENDIF}
   {$IFNDEF STATIC}
@@ -99,6 +104,7 @@ uses
   {$ENDIF}
   ;
 
+{$IFNDEF CHIPMUNK_STATIC}
 const
 {$IFDEF LINUX}
   libChipmunk = 'libchipmunk.so.5.3.2';
@@ -106,8 +112,9 @@ const
 {$IFDEF WINDOWS}
   libChipmunk = 'chipmunk.dll';
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF MACOSX}
   libChipmunk = 'libchipmunk.5.3.2.dylib';
+{$ENDIF}
 {$ENDIF}
 
 {$IFNDEF CHIPMUNK_STATIC}
@@ -118,7 +125,7 @@ procedure cpFree;
 type
   cpHashValue     = LongWord;
   cpBool          = LongBool;
-  cpFloat         = Double;
+  cpFloat         = {$IFDEF iOS} Single {$ELSE} Double {$ENDIF};
   cpDataPointer   = Pointer;
   cpCollisionType = LongWord;
   cpGroup         = LongWord;
@@ -1390,7 +1397,10 @@ var
   cpColorActive    : LongWord = $0000FF;
   cpColorCollision : LongWord = $FF0000;
 
-{$IFDEF LINUX_OR_DARWIN}
+implementation
+
+{$IFNDEF CHIPMUNK_STATIC}
+{$IFDEF UNIX}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
@@ -1404,12 +1414,9 @@ function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall;
 function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
 {$ENDIF}
 
-implementation
-
-{$IFNDEF CHIPMUNK_STATIC}
 var
-  cpLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF DARWIN}
+  cpLib : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  {$IFDEF MACOSX}
   mainPath     : AnsiString;
   mainBundle   : CFBundleRef;
   tmpCFURLRef  : CFURLRef;
@@ -1821,7 +1828,7 @@ begin
   cpLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
   if not Assigned( cpLib ) Then
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
   tmpCFString := CFURLCopyFileSystemPath( tmpCFURLRef, kCFURLPOSIXPathStyle );
@@ -1829,9 +1836,9 @@ begin
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
   {$ENDIF}
-  cpLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  cpLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF UNIX}, $001 {$ENDIF} );
 
-  if cpLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
+  if cpLib <> {$IFDEF UNIX} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
     begin
       Result := TRUE;
 
@@ -2031,7 +2038,7 @@ begin
           {$IFDEF WINDOWS}
           MessageBoxA( 0, 'Error while loading Chipmunk', 'Error', $00000010 );
           {$ENDIF}
-          {$IFDEF DARWIN}
+          {$IFDEF MACOSX}
           StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading Chipmunk', nil, outItemHit );
           {$ENDIF}
         end;
