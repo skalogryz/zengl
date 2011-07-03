@@ -23,13 +23,17 @@ unit zgl_textures_png;
 {$I zgl_config.cfg}
 
 {$IFDEF USE_ZLIB}
-  {$L infback}
-  {$L inffast}
-  {$L inflate}
-  {$L inftrees}
-  {$L zutil}
-  {$L adler32}
-  {$L crc32}
+  {$IFNDEF iOS}
+    {$L infback}
+    {$L inffast}
+    {$L inflate}
+    {$L inftrees}
+    {$L zutil}
+    {$L adler32}
+    {$L crc32}
+  {$ELSE}
+    {$LINKLIB libz.dylib}
+  {$ENDIF}
 {$ENDIF}
 
 interface
