@@ -35,8 +35,9 @@ const
   TEXT_VALIGN_TOP     = $000010;
   TEXT_VALIGN_CENTER  = $000020;
   TEXT_VALIGN_BOTTOM  = $000040;
-  TEXT_FX_VCA         = $000080;
-  TEXT_FX_LENGTH      = $000100;
+  TEXT_CLIP_RECT      = $000080;
+  TEXT_FX_VCA         = $000100;
+  TEXT_FX_LENGTH      = $000200;
 
 type
   zglTTextWord = record
@@ -482,7 +483,7 @@ begin
           lineWidth := 0;
           lineFeed  := FALSE;
           INC( textLinesCount );
-          if ( textLinesCount + 1 ) * Font.MaxHeight > Rect.H Then break;
+          if ( Flags and TEXT_CLIP_RECT > 0 ) and ( ( textLinesCount + 1 ) * Font.MaxHeight > Rect.H ) Then break;
         end;
     end;
 
