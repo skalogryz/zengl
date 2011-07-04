@@ -595,9 +595,7 @@ begin
 
 _exit:
   begin
-    pngHasIDAT  := FALSE;
     pngHastRNS  := FALSE;
-    pngHeaderOk := FALSE;
     {$IFDEF ENDIAN_BIG}
     forceNoSwap := FALSE;
     {$ENDIF}
