@@ -61,6 +61,7 @@ type
     pData            : Pointer;
     TransparentColor : LongWord;
     Flags            : LongWord;
+    Format           : Word;
     Width, Height    : Word;
   end;
 
@@ -284,11 +285,11 @@ begin
                 with item^, zglPTextureResource( Resource )^ do
                   begin
                     if IsFromFile Then
-                      FileLoader( FileName, pData, Width, Height )
+                      FileLoader( FileName, pData, Width, Height, Format )
                     else
                       begin
                         FileName := 'From Memory';
-                        MemLoader( Memory, pData, Width, Height );
+                        MemLoader( Memory, pData, Width, Height, Format );
                       end;
 
                     if not Assigned( pData ) Then
@@ -304,12 +305,16 @@ begin
                           Texture.Width  := Width;
                           Texture.Height := Height;
                           Texture.Flags  := Flags;
-                          if Texture.Flags and TEX_CALCULATE_ALPHA > 0 Then
+                          Texture.Format := Format;
+                          if Texture.Format = TEX_FORMAT_RGBA Then
                             begin
-                              tex_CalcTransparent( pData, TransparentColor, Width, Height );
-                              tex_CalcAlpha( pData, Width, Height );
-                            end else
-                              tex_CalcTransparent( pData, TransparentColor, Width, Height );
+                              if Texture.Flags and TEX_CALCULATE_ALPHA > 0 Then
+                                begin
+                                  tex_CalcTransparent( pData, TransparentColor, Width, Height );
+                                  tex_CalcAlpha( pData, Width, Height );
+                                end else
+                                  tex_CalcTransparent( pData, TransparentColor, Width, Height );
+                            end;
                           tex_CalcFlags( Texture^, pData );
                           tex_CalcTexCoords( Texture^ );
                           Ready := TRUE;

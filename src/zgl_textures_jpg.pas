@@ -93,12 +93,13 @@ const
   {$ENDIF}
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
-procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
 
 implementation
 uses
-  zgl_main;
+  zgl_main,
+  zgl_textures;
 
 {$IFDEF USE_LIBJPEG}
 type
@@ -273,16 +274,16 @@ begin
 end;
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
   var
     jpgMem : zglTMemory;
 begin
   mem_LoadFromFile( jpgMem, FileName );
-  jpg_LoadFromMemory( jpgMem, Data, W, H );
+  jpg_LoadFromMemory( jpgMem, Data, W, H, Format );
   mem_Free( jpgMem );
 end;
 
-procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
   var
     jpg : zglTJPGData;
   {$IFDEF USE_OLEPICTURE}
@@ -330,8 +331,9 @@ begin
   jpg.Image.release();
 {$ENDIF}
 
-  W := jpg.Width;
-  H := jpg.Height;
+  W      := jpg.Width;
+  H      := jpg.Height;
+  Format := TEX_FORMAT_RGBA;
 end;
 
 initialization

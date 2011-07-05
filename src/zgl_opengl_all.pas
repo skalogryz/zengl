@@ -175,6 +175,8 @@ const
   GL_COMPRESSED_RGB_ARB             = $84ED;
   GL_COMPRESSED_RGBA_ARB            = $84EE;
   GL_COMPRESSED_RGB_S3TC_DXT1_EXT   = $83F0;
+  GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  = $83F1;
+  GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  = $83F2;
   GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  = $83F3;
   // Texture Env Mode
   GL_MODULATE                       = $2100;
@@ -374,6 +376,8 @@ var
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
 var
+  //
+  glCompressedTexImage2D : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
   // FBO
   glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
   glBindRenderbuffer: procedure(target: GLenum; renderbuffer: GLuint); stdcall;

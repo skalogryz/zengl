@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.06.01           }
+{ date:     2011.07.06           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -542,6 +542,7 @@ type
     FramesY       : Word;
     FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
+    Format        : Word;
 
     prev, next    : zglPTexture;
 end;
@@ -550,8 +551,8 @@ type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
     Extension  : String;
-    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : Word );
-    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
+    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H, Format : Word );
+    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H, Format : Word );
 end;
 
 type
@@ -566,6 +567,13 @@ type
 end;
 
 const
+  TEX_FORMAT_RGBA       = $01;
+  TEX_FORMAT_RGBA_PVR2  = $10;
+  TEX_FORMAT_RGBA_PVR4  = $11;
+  TEX_FORMAT_RGBA_DXT1  = $20;
+  TEX_FORMAT_RGBA_DXT3  = $21;
+  TEX_FORMAT_RGBA_DXT5  = $22;
+
   TEX_MIPMAP            = $000001;
   TEX_CLAMP             = $000002;
   TEX_REPEAT            = $000004;

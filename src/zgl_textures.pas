@@ -29,6 +29,13 @@ uses
   zgl_memory;
 
 const
+  TEX_FORMAT_RGBA       = $01;
+  TEX_FORMAT_RGBA_PVR2  = $10;
+  TEX_FORMAT_RGBA_PVR4  = $11;
+  TEX_FORMAT_RGBA_DXT1  = $20;
+  TEX_FORMAT_RGBA_DXT3  = $21;
+  TEX_FORMAT_RGBA_DXT5  = $22;
+
   TEX_MIPMAP            = $000001;
   TEX_CLAMP             = $000002;
   TEX_REPEAT            = $000004;
@@ -53,8 +60,8 @@ type
   zglPTextureCoord = ^zglTTextureCoord;
   zglTTextureCoord = array[ 0..3 ] of zglTPoint2D;
 
-  zglTTextureFileLoader = procedure( const FileName : String; var pData : Pointer; var W, H : Word );
-  zglTTextureMemLoader  = procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
+  zglTTextureFileLoader = procedure( const FileName : String; var pData : Pointer; var W, H, Format : Word );
+  zglTTextureMemLoader  = procedure( const Memory : zglTMemory; var pData : Pointer; var W, H, Format : Word );
 
 type
   zglPTexture = ^zglTTexture;
@@ -66,6 +73,7 @@ type
     FramesY       : Word;
     FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
+    Format        : Word;
 
     prev, next    : zglPTexture;
 end;
@@ -216,9 +224,20 @@ begin
   {$ENDIF}
       begin
         if Texture.Flags and TEX_COMPRESS = 0 Then
-          glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData )
-        else
-          glTexImage2D( GL_TEXTURE_2D, 0, cformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+          begin
+            case Texture.Format of
+              TEX_FORMAT_RGBA: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+              {$IFDEF USE_GLES}
+              TEX_FORMAT_RGBA_PVR2: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, width, height, 0, width * height div 4, pData );
+              TEX_FORMAT_RGBA_PVR4: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, width, height, 0, width * height div 2, pData );
+              {$ELSE}
+              TEX_FORMAT_RGBA_DXT1: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, width, height, 0, width * height div 2, pData );
+              TEX_FORMAT_RGBA_DXT3: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, width, height, 0, width * height, pData );
+              TEX_FORMAT_RGBA_DXT5: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, width * height, pData );
+              {$ENDIF}
+            end;
+          end else
+            glTexImage2D( GL_TEXTURE_2D, 0, cformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
       end;
 
   glDisable( GL_TEXTURE_2D );
@@ -237,6 +256,7 @@ begin
   Result.Width  := Width;
   Result.Height := Height;
   Result.Flags  := Flags;
+  Result.Format := TEX_FORMAT_RGBA;
   tex_CalcFlags( Result^, pData );
   tex_CalcTexCoords( Result^ );
   tex_Create( Result^, pData );
@@ -246,10 +266,11 @@ end;
 
 function tex_LoadFromFile( const FileName : String; TransparentColor, Flags : LongWord ) : zglPTexture;
   var
-    i     : Integer;
-    pData : Pointer;
-    w, h  : Word;
-    res   : zglTTextureResource;
+    i      : Integer;
+    pData  : Pointer;
+    w, h   : Word;
+    format : Word;
+    res    : zglTTextureResource;
 begin
   Result := nil;
   pData  := nil;
@@ -277,7 +298,7 @@ begin
           res_AddToQueue( RES_TEXTURE, TRUE, @res );
           exit;
         end else
-          managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
+          managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h, format );
 
   if not Assigned( pData ) Then
     begin
@@ -289,12 +310,16 @@ begin
   Result.Width  := w;
   Result.Height := h;
   Result.Flags  := Flags;
-  if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+  Result.Format := format;
+  if Result.Format = TEX_FORMAT_RGBA Then
     begin
-      tex_CalcTransparent( pData, TransparentColor, w, h );
-      tex_CalcAlpha( pData, w, h );
-    end else
-      tex_CalcTransparent( pData, TransparentColor, w, h );
+      if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+        begin
+          tex_CalcTransparent( pData, TransparentColor, w, h );
+          tex_CalcAlpha( pData, w, h );
+        end else
+          tex_CalcTransparent( pData, TransparentColor, w, h );
+    end;
   tex_CalcFlags( Result^, pData );
   tex_CalcTexCoords( Result^ );
   tex_Create( Result^, pData );
@@ -306,10 +331,11 @@ end;
 
 function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPTexture;
   var
-    i     : Integer;
-    pData : Pointer;
-    w, h  : Word;
-    res   : zglTTextureResource;
+    i      : Integer;
+    pData  : Pointer;
+    w, h   : Word;
+    format : Word;
+    res    : zglTTextureResource;
 begin
   Result := nil;
   pData  := nil;
@@ -331,7 +357,7 @@ begin
           res_AddToQueue( RES_TEXTURE, FALSE, @res );
           exit;
         end else
-          managerTexture.Formats[ i ].MemLoader( Memory, pData, w, h );
+          managerTexture.Formats[ i ].MemLoader( Memory, pData, w, h, format );
 
   if not Assigned( pData ) Then
     begin
@@ -343,12 +369,16 @@ begin
   Result.Width  := w;
   Result.Height := h;
   Result.Flags  := Flags;
-  if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+  Result.Format := format;
+  if Result.Format = TEX_FORMAT_RGBA Then
     begin
-      tex_CalcTransparent( pData, TransparentColor, w, h );
-      tex_CalcAlpha( pData, w, h );
-    end else
-      tex_CalcTransparent( pData, TransparentColor, w, h );
+      if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+        begin
+          tex_CalcTransparent( pData, TransparentColor, w, h );
+          tex_CalcAlpha( pData, w, h );
+        end else
+          tex_CalcTransparent( pData, TransparentColor, w, h );
+    end;
   tex_CalcFlags( Result^, pData );
   tex_CalcTexCoords( Result^ );
   tex_Create( Result^, pData );
@@ -562,6 +592,8 @@ end;
 
 procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
 begin
+  if Texture.Format <> TEX_FORMAT_RGBA Then exit;
+
   if Texture.Flags and TEX_GRAYSCALE > 0 Then
     tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
   if Texture.Flags and TEX_INVERT > 0 Then

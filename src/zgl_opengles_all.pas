@@ -86,199 +86,204 @@ const
     {$ENDIF}
   {$ENDIF}
 
-  GL_FALSE                          = 0;
-  GL_TRUE                           = 1;
-  GL_ZERO                           = 0;
-  GL_ONE                            = 1;
+  GL_FALSE                            = 0;
+  GL_TRUE                             = 1;
+  GL_ZERO                             = 0;
+  GL_ONE                              = 1;
 
   // String Name
-  GL_VENDOR                         = $1F00;
-  GL_RENDERER                       = $1F01;
-  GL_VERSION                        = $1F02;
-  GL_EXTENSIONS                     = $1F03;
+  GL_VENDOR                           = $1F00;
+  GL_RENDERER                         = $1F01;
+  GL_VERSION                          = $1F02;
+  GL_EXTENSIONS                       = $1F03;
 
   // DataType
-  GL_UNSIGNED_BYTE                  = $1401;
-  GL_UNSIGNED_SHORT                 = $1403;
-  GL_FLOAT                          = $1406;
+  GL_UNSIGNED_BYTE                    = $1401;
+  GL_UNSIGNED_SHORT                   = $1403;
+  GL_FLOAT                            = $1406;
 
   // PixelFormat
-  GL_RGBA                           = $1908;
+  GL_RGBA                             = $1908;
 
   // Alpha Function
-  GL_NEVER                          = $0200;
-  GL_LESS                           = $0201;
-  GL_EQUAL                          = $0202;
-  GL_LEQUAL                         = $0203;
-  GL_GREATER                        = $0204;
-  GL_NOTEQUAL                       = $0205;
-  GL_GEQUAL                         = $0206;
-  GL_ALWAYS                         = $0207;
+  GL_NEVER                            = $0200;
+  GL_LESS                             = $0201;
+  GL_EQUAL                            = $0202;
+  GL_LEQUAL                           = $0203;
+  GL_GREATER                          = $0204;
+  GL_NOTEQUAL                         = $0205;
+  GL_GEQUAL                           = $0206;
+  GL_ALWAYS                           = $0207;
 
   // Blend
-  GL_BLEND                          = $0BE2;
+  GL_BLEND                            = $0BE2;
   // Blending Factor Dest
-  GL_SRC_COLOR                      = $0300;
-  GL_ONE_MINUS_SRC_COLOR            = $0301;
-  GL_SRC_ALPHA                      = $0302;
-  GL_ONE_MINUS_SRC_ALPHA            = $0303;
-  GL_DST_ALPHA                      = $0304;
-  GL_ONE_MINUS_DST_ALPHA            = $0305;
+  GL_SRC_COLOR                        = $0300;
+  GL_ONE_MINUS_SRC_COLOR              = $0301;
+  GL_SRC_ALPHA                        = $0302;
+  GL_ONE_MINUS_SRC_ALPHA              = $0303;
+  GL_DST_ALPHA                        = $0304;
+  GL_ONE_MINUS_DST_ALPHA              = $0305;
   // Blending Factor Src
-  GL_DST_COLOR                      = $0306;
-  GL_ONE_MINUS_DST_COLOR            = $0307;
-  GL_SRC_ALPHA_SATURATE             = $0308;
+  GL_DST_COLOR                        = $0306;
+  GL_ONE_MINUS_DST_COLOR              = $0307;
+  GL_SRC_ALPHA_SATURATE               = $0308;
 
   // blendOP
-  GL_FUNC_ADD_EXT                   = $8006; // GL_FUNC_ADD_OES
-  GL_MIN_EXT                        = $8007;
-  GL_MAX_EXT                        = $8008;
-  GL_FUNC_SUBTRACT_EXT              = $800A; // GL_FUNC_SUBTRACT_OES
-  GL_FUNC_REVERSE_SUBTRACT_EXT      = $800B; // GL_FUNC_REVERSE_SUBTRACT_OES
+  GL_FUNC_ADD_EXT                     = $8006; // GL_FUNC_ADD_OES
+  GL_MIN_EXT                          = $8007;
+  GL_MAX_EXT                          = $8008;
+  GL_FUNC_SUBTRACT_EXT                = $800A; // GL_FUNC_SUBTRACT_OES
+  GL_FUNC_REVERSE_SUBTRACT_EXT        = $800B; // GL_FUNC_REVERSE_SUBTRACT_OES
 
-  GL_BLEND_DST_RGB_EXT              = $80C8; // GL_BLEND_DST_RGB_OES
-  GL_BLEND_SRC_RGB_EXT              = $80C9; // GL_BLEND_SRC_RGB_OES
-  GL_BLEND_DST_ALPHA_EXT            = $80CA; // GL_BLEND_DST_ALPHA_OES
-  GL_BLEND_SRC_ALPHA_EXT            = $80CB; // GL_BLEND_SRC_ALPHA_OES
-  GL_BLEND_EQUATION_RGB_EXT         = $8009; // GL_BLEND_EQUATION_RGB_OES
-  GL_BLEND_EQUATION_ALPHA_EXT       = $883D; // GL_BLEND_EQUATION_ALPHA_OES
+  GL_BLEND_DST_RGB_EXT                = $80C8; // GL_BLEND_DST_RGB_OES
+  GL_BLEND_SRC_RGB_EXT                = $80C9; // GL_BLEND_SRC_RGB_OES
+  GL_BLEND_DST_ALPHA_EXT              = $80CA; // GL_BLEND_DST_ALPHA_OES
+  GL_BLEND_SRC_ALPHA_EXT              = $80CB; // GL_BLEND_SRC_ALPHA_OES
+  GL_BLEND_EQUATION_RGB_EXT           = $8009; // GL_BLEND_EQUATION_RGB_OES
+  GL_BLEND_EQUATION_ALPHA_EXT         = $883D; // GL_BLEND_EQUATION_ALPHA_OES
 
   // Hint Mode
-  GL_DONT_CARE                      = $1100;
-  GL_FASTEST                        = $1101;
-  GL_NICEST                         = $1102;
+  GL_DONT_CARE                        = $1100;
+  GL_FASTEST                          = $1101;
+  GL_NICEST                           = $1102;
 
   // Hints
-  GL_PERSPECTIVE_CORRECTION_HINT    = $0C50;
-  GL_LINE_SMOOTH_HINT               = $0C52;
-  GL_FOG_HINT                       = $0C54;
+  GL_PERSPECTIVE_CORRECTION_HINT      = $0C50;
+  GL_LINE_SMOOTH_HINT                 = $0C52;
+  GL_FOG_HINT                         = $0C54;
 
   // Shading Model
-  GL_SHADE_MODEL                    = $0B54;
-  GL_FLAT                           = $1D00;
-  GL_SMOOTH                         = $1D01;
+  GL_SHADE_MODEL                      = $0B54;
+  GL_FLAT                             = $1D00;
+  GL_SMOOTH                           = $1D01;
 
   // Buffer Bit
-  GL_DEPTH_BUFFER_BIT               = $00000100;
-  GL_STENCIL_BUFFER_BIT             = $00000400;
-  GL_COLOR_BUFFER_BIT               = $00004000;
+  GL_DEPTH_BUFFER_BIT                 = $00000100;
+  GL_STENCIL_BUFFER_BIT               = $00000400;
+  GL_COLOR_BUFFER_BIT                 = $00004000;
 
   // Enable
-  GL_LINE_SMOOTH                    = $0B20;
-  GL_NORMALIZE                      = $0BA1;
+  GL_LINE_SMOOTH                      = $0B20;
+  GL_NORMALIZE                        = $0BA1;
 
   // glBegin/glEnd
-  GL_POINTS                         = $0000;
-  GL_LINES                          = $0001;
-  GL_TRIANGLES                      = $0004;
-  GL_TRIANGLE_STRIP                 = $0005;
-  GL_TRIANGLE_FAN                   = $0006;
-  GL_QUADS                          = $0007; // Doesn't exists
+  GL_POINTS                           = $0000;
+  GL_LINES                            = $0001;
+  GL_TRIANGLES                        = $0004;
+  GL_TRIANGLE_STRIP                   = $0005;
+  GL_TRIANGLE_FAN                     = $0006;
+  GL_QUADS                            = $0007; // Doesn't exists
 
   // Texture
-  GL_TEXTURE_2D                     = $0DE1;
-  GL_TEXTURE0_ARB                   = $84C0; // GL_TEXTURE0
-  GL_MAX_TEXTURE_SIZE               = $0D33;
-  GL_MAX_TEXTURE_UNITS_ARB          = $84E2; // GL_MAX_TEXTURE_UNITS
-  GL_TEXTURE_MAX_ANISOTROPY_EXT     = $84FE;
-  GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT = $84FF;
+  GL_TEXTURE_2D                       = $0DE1;
+  GL_TEXTURE0_ARB                     = $84C0; // GL_TEXTURE0
+  GL_MAX_TEXTURE_SIZE                 = $0D33;
+  GL_MAX_TEXTURE_UNITS_ARB            = $84E2; // GL_MAX_TEXTURE_UNITS
+  GL_TEXTURE_MAX_ANISOTROPY_EXT       = $84FE;
+  GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT   = $84FF;
   // Texture Wrap Mode
-  GL_CLAMP_TO_EDGE                  = $812F;
-  GL_REPEAT                         = $2901;
+  GL_CLAMP_TO_EDGE                    = $812F;
+  GL_REPEAT                           = $2901;
+  // Texture Format
+  GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG  = $8C00;
+  GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG  = $8C01;
+  GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = $8C02;
+  GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = $8C03;
   // Texture Env Mode
-  GL_MODULATE                       = $2100;
-  GL_DECAL                          = $2101;
+  GL_MODULATE                         = $2100;
+  GL_DECAL                            = $2101;
   // Texture Env Parameter
-  GL_TEXTURE_ENV_MODE               = $2200;
-  GL_TEXTURE_ENV_COLOR              = $2201;
+  GL_TEXTURE_ENV_MODE                 = $2200;
+  GL_TEXTURE_ENV_COLOR                = $2201;
   // Texture Env Target
-  GL_TEXTURE_ENV                    = $2300;
+  GL_TEXTURE_ENV                      = $2300;
   // Texture Mag Filter
-  GL_NEAREST                        = $2600;
-  GL_LINEAR                         = $2601;
+  GL_NEAREST                          = $2600;
+  GL_LINEAR                           = $2601;
   // Mipmaps
-  GL_GENERATE_MIPMAP                = $8191;
-  GL_GENERATE_MIPMAP_HINT           = $8192;
+  GL_GENERATE_MIPMAP                  = $8191;
+  GL_GENERATE_MIPMAP_HINT             = $8192;
   // Texture Min Filter
-  GL_NEAREST_MIPMAP_NEAREST         = $2700;
-  GL_LINEAR_MIPMAP_NEAREST          = $2701;
-  GL_NEAREST_MIPMAP_LINEAR          = $2702;
-  GL_LINEAR_MIPMAP_LINEAR           = $2703;
+  GL_NEAREST_MIPMAP_NEAREST           = $2700;
+  GL_LINEAR_MIPMAP_NEAREST            = $2701;
+  GL_NEAREST_MIPMAP_LINEAR            = $2702;
+  GL_LINEAR_MIPMAP_LINEAR             = $2703;
   // Texture Parameter Name
-  GL_TEXTURE_MAG_FILTER             = $2800;
-  GL_TEXTURE_MIN_FILTER             = $2801;
-  GL_TEXTURE_WRAP_S                 = $2802;
-  GL_TEXTURE_WRAP_T                 = $2803;
+  GL_TEXTURE_MAG_FILTER               = $2800;
+  GL_TEXTURE_MIN_FILTER               = $2801;
+  GL_TEXTURE_WRAP_S                   = $2802;
+  GL_TEXTURE_WRAP_T                   = $2803;
 
-  GL_COMBINE_ARB                    = $8570; // GL_COMBINE
-  GL_COMBINE_RGB_ARB                = $8571; // GL_COMBINE_RGB
-  GL_COMBINE_ALPHA_ARB              = $8572; // GL_COMBINE_ALPHA
-  GL_SOURCE0_RGB_ARB                = $8580; // GL_SRC0_RGB
-  GL_SOURCE1_RGB_ARB                = $8581; // GL_SRC1_RGB
-  GL_SOURCE2_RGB_ARB                = $8582; // GL_SRC2_RGB
-  GL_SOURCE0_ALPHA_ARB              = $8588; // GL_SRC0_ALPHA
-  GL_SOURCE1_ALPHA_ARB              = $8589; // GL_SRC1_ALPHA
-  GL_SOURCE2_ALPHA_ARB              = $858A; // GL_SRC2_ALPHA
-  GL_OPERAND0_RGB_ARB               = $8590; // GL_OPERAND0_RGB
-  GL_OPERAND1_RGB_ARB               = $8591; // GL_OPERAND1_RGB
-  GL_OPERAND2_RGB_ARB               = $8592; // GL_OPERAND2_RGB
-  GL_OPERAND0_ALPHA_ARB             = $8598; // GL_OPERAND0_ALPHA
-  GL_OPERAND1_ALPHA_ARB             = $8599; // GL_OPERAND1_ALPHA
-  GL_OPERAND2_ALPHA_ARB             = $859A; // GL_OPERAND2_ALPHA
-  GL_RGB_SCALE_ARB                  = $8573; // GL_RGB_SCALE
-  GL_ADD_SIGNED_ARB                 = $8574; // GL_ADD_SIGNED
-  GL_INTERPOLATE_ARB                = $8575; // GL_INTERPOLATE
-  GL_SUBTRACT_ARB                   = $84E7; // GL_SUBTRACT
-  GL_CONSTANT_ARB                   = $8576; // GL_CONSTANT
-  GL_PRIMARY_COLOR_ARB              = $8577; // GL_PRIMARY_COLOR
-  GL_PREVIOUS_ARB                   = $8578; // GL_PREVIOUS
-  GL_DOT3_RGB                       = $86AE; // GL_DOT3_RGB
-  GL_DOT3_RGBA                      = $86AF; // GL_DOT3_RGBA
+  GL_COMBINE_ARB                      = $8570; // GL_COMBINE
+  GL_COMBINE_RGB_ARB                  = $8571; // GL_COMBINE_RGB
+  GL_COMBINE_ALPHA_ARB                = $8572; // GL_COMBINE_ALPHA
+  GL_SOURCE0_RGB_ARB                  = $8580; // GL_SRC0_RGB
+  GL_SOURCE1_RGB_ARB                  = $8581; // GL_SRC1_RGB
+  GL_SOURCE2_RGB_ARB                  = $8582; // GL_SRC2_RGB
+  GL_SOURCE0_ALPHA_ARB                = $8588; // GL_SRC0_ALPHA
+  GL_SOURCE1_ALPHA_ARB                = $8589; // GL_SRC1_ALPHA
+  GL_SOURCE2_ALPHA_ARB                = $858A; // GL_SRC2_ALPHA
+  GL_OPERAND0_RGB_ARB                 = $8590; // GL_OPERAND0_RGB
+  GL_OPERAND1_RGB_ARB                 = $8591; // GL_OPERAND1_RGB
+  GL_OPERAND2_RGB_ARB                 = $8592; // GL_OPERAND2_RGB
+  GL_OPERAND0_ALPHA_ARB               = $8598; // GL_OPERAND0_ALPHA
+  GL_OPERAND1_ALPHA_ARB               = $8599; // GL_OPERAND1_ALPHA
+  GL_OPERAND2_ALPHA_ARB               = $859A; // GL_OPERAND2_ALPHA
+  GL_RGB_SCALE_ARB                    = $8573; // GL_RGB_SCALE
+  GL_ADD_SIGNED_ARB                   = $8574; // GL_ADD_SIGNED
+  GL_INTERPOLATE_ARB                  = $8575; // GL_INTERPOLATE
+  GL_SUBTRACT_ARB                     = $84E7; // GL_SUBTRACT
+  GL_CONSTANT_ARB                     = $8576; // GL_CONSTANT
+  GL_PRIMARY_COLOR_ARB                = $8577; // GL_PRIMARY_COLOR
+  GL_PREVIOUS_ARB                     = $8578; // GL_PREVIOUS
+  GL_DOT3_RGB                         = $86AE; // GL_DOT3_RGB
+  GL_DOT3_RGBA                        = $86AF; // GL_DOT3_RGBA
 
   // Vertex Array
-  GL_VERTEX_ARRAY                   = $8074;
-  GL_NORMAL_ARRAY                   = $8075;
-  GL_COLOR_ARRAY                    = $8076;
-  GL_TEXTURE_COORD_ARRAY            = $8078;
+  GL_VERTEX_ARRAY                     = $8074;
+  GL_NORMAL_ARRAY                     = $8075;
+  GL_COLOR_ARRAY                      = $8076;
+  GL_TEXTURE_COORD_ARRAY              = $8078;
 
   // FBO
-  GL_FRAMEBUFFER                    = $8D40; // GL_FRAMEBUFFER_OES
-  GL_RENDERBUFFER                   = $8D41; // GL_RENDERBUFFER_OES
-  GL_DEPTH_COMPONENT16              = $81A5; // GL_DEPTH_COMPONENT16_OES
-  GL_DEPTH_COMPONENT24              = $81A6; // GL_DEPTH_COMPONENT24_OES
-  GL_DEPTH_COMPONENT32              = $81A7; // GL_DEPTH_COMPONENT32_OES
-  GL_COLOR_ATTACHMENT0              = $8CE0; // GL_COLOR_ATTACHMENT0_OES
-  GL_DEPTH_ATTACHMENT               = $8D00; // GL_DEPTH_ATTACHMENT_OES
-  GL_MAX_RENDERBUFFER_SIZE          = $84E8; // GL_MAX_RENDERBUFFER_SIZE_OES
+  GL_FRAMEBUFFER                      = $8D40; // GL_FRAMEBUFFER_OES
+  GL_RENDERBUFFER                     = $8D41; // GL_RENDERBUFFER_OES
+  GL_DEPTH_COMPONENT16                = $81A5; // GL_DEPTH_COMPONENT16_OES
+  GL_DEPTH_COMPONENT24                = $81A6; // GL_DEPTH_COMPONENT24_OES
+  GL_DEPTH_COMPONENT32                = $81A7; // GL_DEPTH_COMPONENT32_OES
+  GL_COLOR_ATTACHMENT0                = $8CE0; // GL_COLOR_ATTACHMENT0_OES
+  GL_DEPTH_ATTACHMENT                 = $8D00; // GL_DEPTH_ATTACHMENT_OES
+  GL_MAX_RENDERBUFFER_SIZE            = $84E8; // GL_MAX_RENDERBUFFER_SIZE_OES
 
   // Matrices
-  GL_MODELVIEW_MATRIX               = $0BA6;
-  GL_PROJECTION_MATRIX              = $0BA7;
+  GL_MODELVIEW_MATRIX                 = $0BA6;
+  GL_PROJECTION_MATRIX                = $0BA7;
 
   // Matrix Mode
-  GL_MODELVIEW                      = $1700;
-  GL_PROJECTION                     = $1701;
-  GL_TEXTURE                        = $1702;
+  GL_MODELVIEW                        = $1700;
+  GL_PROJECTION                       = $1701;
+  GL_TEXTURE                          = $1702;
 
   // Test
-  GL_DEPTH_TEST                     = $0B71;
-  GL_STENCIL_TEST                   = $0B90;
-  GL_ALPHA_TEST                     = $0BC0;
-  GL_SCISSOR_TEST                   = $0C11;
+  GL_DEPTH_TEST                       = $0B71;
+  GL_STENCIL_TEST                     = $0B90;
+  GL_ALPHA_TEST                       = $0BC0;
+  GL_SCISSOR_TEST                     = $0C11;
 
   // StencilOp
-  GL_KEEP                           = $1E00;
-  GL_REPLACE                        = $1E01;
-  GL_INCR                           = $1E02;
-  GL_DECR                           = $1E03;
+  GL_KEEP                             = $1E00;
+  GL_REPLACE                          = $1E01;
+  GL_INCR                             = $1E02;
+  GL_DECR                             = $1E03;
 
   // VBO
-  GL_BUFFER_SIZE_ARB                = $8764; // GL_BUFFER_SIZE
-  GL_ARRAY_BUFFER_ARB               = $8892; // GL_ARRAY_BUFFER
-  GL_ELEMENT_ARRAY_BUFFER_ARB       = $8893; // GL_ELEMENT_ARRAY_BUFFER
-  GL_WRITE_ONLY_ARB                 = $88B9; // GL_WRITE_ONLY_OES, GL_OES_mapbuffer
-  GL_STATIC_DRAW_ARB                = $88E4;
-  GL_DYNAMIC_DRAW_ARB               = $88E8;
+  GL_BUFFER_SIZE_ARB                  = $8764; // GL_BUFFER_SIZE
+  GL_ARRAY_BUFFER_ARB                 = $8892; // GL_ARRAY_BUFFER
+  GL_ELEMENT_ARRAY_BUFFER_ARB         = $8893; // GL_ELEMENT_ARRAY_BUFFER
+  GL_WRITE_ONLY_ARB                   = $88B9; // GL_WRITE_ONLY_OES, GL_OES_mapbuffer
+  GL_STATIC_DRAW_ARB                  = $88E4;
+  GL_DYNAMIC_DRAW_ARB                 = $88E8;
 
   // Triangulation
   {GLU_TESS_BEGIN                    = $18704;
@@ -364,16 +369,17 @@ var
   // Vertex
   glVertexPointer : procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
   // Texture
-  glBindTexture       : procedure(target: GLenum; texture: GLuint); stdcall;
-  glGenTextures       : procedure(n: GLsizei; textures: PGLuint); stdcall;
-  glDeleteTextures    : procedure(n: GLsizei; const textures: PGLuint); stdcall;
-  glTexParameterf     : procedure(target: GLenum; pname: GLenum; param: GLfloat); stdcall;
-  glTexParameteri     : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
-  glPixelStorei       : procedure(pname: GLenum; param: GLint); stdcall;
-  glTexImage2D        : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall;
-  glTexSubImage2D     : procedure(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall;
-  glCopyTexSubImage2D : procedure(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall;
-  glTexEnvi           : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
+  glBindTexture          : procedure(target: GLenum; texture: GLuint); stdcall;
+  glGenTextures          : procedure(n: GLsizei; textures: PGLuint); stdcall;
+  glDeleteTextures       : procedure(n: GLsizei; const textures: PGLuint); stdcall;
+  glTexParameterf        : procedure(target: GLenum; pname: GLenum; param: GLfloat); stdcall;
+  glTexParameteri        : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
+  glPixelStorei          : procedure(pname: GLenum; param: GLint); stdcall;
+  glTexImage2D           : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall;
+  glCompressedTexImage2D : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
+  glTexSubImage2D        : procedure(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall;
+  glCopyTexSubImage2D    : procedure(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall;
+  glTexEnvi              : procedure(target: GLenum; pname: GLenum; param: GLint); stdcall;
   // TexCoords
   glTexCoordPointer : procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
   //

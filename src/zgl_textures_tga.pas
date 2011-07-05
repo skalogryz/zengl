@@ -52,14 +52,15 @@ type
     end;
 end;
 
-procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
-procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
 
 implementation
 uses
   zgl_types,
   zgl_main,
-  zgl_log;
+  zgl_log,
+  zgl_textures;
 
 procedure tga_FlipVertically( var Data : Pointer; w, h : Integer );
   var
@@ -178,16 +179,16 @@ begin
   Result := TRUE;
 end;
 
-procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
   var
     tgaMem : zglTMemory;
 begin
   mem_LoadFromFile( tgaMem, FileName );
-  tga_LoadFromMemory( tgaMem, Data, W, H );
+  tga_LoadFromMemory( tgaMem, Data, W, H, Format );
   mem_Free( tgaMem );
 end;
 
-procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
   label _exit;
   var
     i, size    : Integer;
@@ -245,8 +246,9 @@ begin
           DEC( tgaData, tgaHeader.ImgSpec.Width * tgaHeader.ImgSpec.Height * 4 );
         end;
 
-  W := tgaHeader.ImgSpec.Width;
-  H := tgaHeader.ImgSpec.Height;
+  W      := tgaHeader.ImgSpec.Width;
+  H      := tgaHeader.ImgSpec.Height;
+  Format := TEX_FORMAT_RGBA;
 
   if ( tgaHeader.ImgSpec.Desc and ( 1 shl 4 ) ) <> 0 Then
     tga_FlipHorizontally( Data, W, H );

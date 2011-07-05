@@ -72,8 +72,6 @@ var
   oglFOVY       : Single = 45;
   oglzNear      : Single = 0.1;
   oglzFar       : Single = 100;
-  oglMTexActive : array[ 0..8 ] of Boolean;
-  oglMTexture   : array[ 0..8 ] of LongWord;
 
   oglMode    : Integer = 2; // 2D/3D Modes
   oglTarget  : Integer = TARGET_SCREEN;
@@ -421,6 +419,9 @@ begin
   // Texture size
   glGetIntegerv( GL_MAX_TEXTURE_SIZE, @oglMaxTexSize );
   log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
+
+  // GL_IMG_texture_compression_pvrtc
+  glCompressedTexImage2D := gl_GetProc( 'glCompressedTexImage2D' );
 
   {oglCanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', oglExtensions );
   log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( oglCanCompressA ) );
