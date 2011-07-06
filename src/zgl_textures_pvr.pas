@@ -85,7 +85,7 @@ begin
   W     := CFSwapInt32LittleToHost( pvrHeader.Width );
   H     := CFSwapInt32LittleToHost( pvrHeader.Height );
   size  := CFSwapInt32LittleToHost( pvrHeader.DataLength );
-	flags := CFSwapInt32LittleToHost( pvrHeader.Flags ) and $FF;
+  flags := CFSwapInt32LittleToHost( pvrHeader.Flags ) and $FF;
   if ( flags = PVR_PVRTC2 ) Then
     Format := TEX_FORMAT_RGBA_PVR2
   else
