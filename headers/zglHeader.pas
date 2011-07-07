@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.07.06           }
+{ date:     2011.07.07           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -597,7 +597,7 @@ const
 var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
-  tex_Create         : procedure( var Texture : zglTTexture; pData : Pointer );
+  tex_Create         : function( var Texture : zglTTexture; pData : Pointer ) : Boolean;
   tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromFile   : function( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;

@@ -72,8 +72,7 @@ var
   ogl3DAccelerator : Boolean;
   oglCanVSync      : Boolean;
   oglCanAnisotropy : Boolean;
-  oglCanCompressA  : Boolean;
-  oglCanCompressE  : Boolean;
+  oglCanS3TC       : Boolean;
   oglCanAutoMipMap : Boolean;
   oglCanARB        : Boolean; // ARBvp/ARBfp шейдеры
   oglCanGLSL       : Boolean; // GLSL шейдеры
@@ -525,11 +524,8 @@ begin
   log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
 
   glCompressedTexImage2D := gl_GetProc( 'glCompressedTexImage2D' );
-
-  oglCanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', oglExtensions );
-  log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( oglCanCompressA ) );
-  oglCanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
-  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanCompressE ) );
+  oglCanS3TC := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
+  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanS3TC ) );
 
   oglCanAutoMipMap := gl_IsSupported( 'GL_SGIS_generate_mipmap', oglExtensions );
   log_Add( 'GL_SGIS_GENERATE_MIPMAP: ' + u_BoolToStr( oglCanAutoMipMap ) );
