@@ -207,10 +207,11 @@ begin
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
   {$IFDEF USE_GLES}
-  if ( not oglCanPVRTC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_DXT1 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT3 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT5 ) ) Then
+  if ( ( not oglCanPVRTC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_DXT1 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT3 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT5 ) ) ) or
   {$ELSE}
-  if ( not oglCanS3TC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_PVR2 ) or ( Texture.Format = TEX_FORMAT_RGBA_PVR4 ) ) Then
+  if ( ( not oglCanS3TC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_PVR2 ) or ( Texture.Format = TEX_FORMAT_RGBA_PVR4 ) ) ) or
   {$ENDIF}
+    ( ( width > oglMaxTexSize ) or ( height > oglMaxTexSize ) ) Then
     begin
       glDisable( GL_TEXTURE_2D );
       exit;
