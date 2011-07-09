@@ -89,8 +89,10 @@ begin
       glEnd();
 
       glDisable( GL_TEXTURE_2D );
-      glDisable( GL_ALPHA_TEST );
-      glDisable( GL_BLEND );
+      if b2dCurBlend = 0 Then
+        glDisable( GL_ALPHA_TEST )
+      else
+        glDisable( GL_BLEND );
 
       if b2dCurSmooth > 0 Then
         begin
