@@ -421,7 +421,7 @@ begin
 
   glCompressedTexImage2D := gl_GetProc( 'glCompressedTexImage2D' );
   oglCanPVRTC := gl_IsSupported( 'GL_IMG_texture_compression_pvrtc', oglExtensions );
-  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_PVRTC: ' + u_BoolToStr( oglCanCompressE ) );
+  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_PVRTC: ' + u_BoolToStr( oglCanPVRTC ) );
 
   oglCanAutoMipMap := TRUE;
 

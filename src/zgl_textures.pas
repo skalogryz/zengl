@@ -242,8 +242,12 @@ begin
               TEX_FORMAT_RGBA_DXT5: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, width * height, pData );
               {$ENDIF}
             end;
+          {$IFDEF USE_GLES}
+          end;
+          {$ELSE}
           end else
             glTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+          {$ENDIF}
       end;
 
   glDisable( GL_TEXTURE_2D );
