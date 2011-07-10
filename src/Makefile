@@ -14,7 +14,8 @@ endif
 
 # Variables
 FPC     = fpc
-FLAGS   = -O3 -XsX -CX -Sd
+DEFINES = #-dUSE_EXPORT_C -Cccdecl
+FLAGS   = -O3 -XsX -CX -Sd $(DEFINES)
 LIBS    = -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS)
 LIBSPPC = -Fu../lib/jpeg/powerpc-$(OS) -Fu../lib/ogg/powerpc-$(OS) -Fu../lib/zlib/powerpc-$(OS)
 OUTPUT  = ./

@@ -85,7 +85,12 @@ uses
 
   zgl_collision_2d,
 
-  zgl_utils;
+  zgl_utils
+
+  {$IFDEF USE_EXPORT_C}
+  , zgl_export_c
+  {$ENDIF}
+  ;
 
 const
 // Ненавижу Apple! :)
@@ -391,6 +396,25 @@ exports
   mem_Free                 name prefix + 'mem_Free',
 
   u_SortList               name prefix + 'u_SortList'
+
+  {$IFDEF USE_EXPORT_C}
+  ,
+  _wnd_SetCaption          name prefix + '_wnd_SetCaption',
+  _log_Add                 name prefix + '_log_Add',
+  _tex_LoadFromFile        name prefix + '_tex_LoadFromFile',
+  _tex_LoadFromMemory      name prefix + '_tex_LoadFromMemory',
+  _font_LoadFromFile       name prefix + '_font_LoadFromFile',
+  _text_Draw               name prefix + '_text_Draw',
+  _text_DrawEx             name prefix + '_text_DrawEx',
+  _text_DrawInRect         name prefix + '_text_DrawInRect',
+  _text_DrawInRectEx       name prefix + '_text_DrawInRectEx',
+  _text_GetWidth           name prefix + '_text_GetWidth',
+  _text_GetHeight          name prefix + '_text_GetHeight',
+  _snd_LoadFromFile        name prefix + '_snd_LoadFromFile',
+  _snd_LoadFromMemory      name prefix + '_snd_LoadFromMemory',
+  _snd_PlayFile            name prefix + '_snd_PlayFile',
+  _snd_PlayMemory          name prefix + '_snd_PlayMemory'
+  {$ENDIF}
   ;
 
 {$IFDEF WINDOWS}
