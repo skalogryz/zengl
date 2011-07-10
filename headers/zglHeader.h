@@ -333,14 +333,14 @@ static void ( *mouse_Lock )();
 #define K_NUMLOCK    0x45
 #define K_SCROLL     0x46
 
-#define K_BRACKET_L  0x1A // [ {
-#define K_BRACKET_R  0x1B // ] }
-#define K_BACKSLASH  0x2B // \
-#define K_SLASH      0x35 // /
-#define K_COMMA      0x33 // ,
-#define K_DECIMAL    0x34 // .
-#define K_SEMICOLON  0x27 // : ;
-#define K_APOSTROPHE 0x28 // ' "
+#define K_BRACKET_L  0x1A // "[" or "{"
+#define K_BRACKET_R  0x1B // "]" or "}"
+#define K_BACKSLASH  0x2B // "\"
+#define K_SLASH      0x35 // "/"
+#define K_COMMA      0x33 // ","
+#define K_DECIMAL    0x34 // "."
+#define K_SEMICOLON  0x27 // ":" or ";"
+#define K_APOSTROPHE 0x28 // ' or "
 
 #define K_0          0x0B
 #define K_1          0x02
