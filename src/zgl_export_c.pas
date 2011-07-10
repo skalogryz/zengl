@@ -29,6 +29,7 @@ uses
   zgl_log,
   zgl_file,
   zgl_memory,
+  zgl_keyboard,
   zgl_textures,
   zgl_font,
   zgl_text,
@@ -39,6 +40,9 @@ uses
 procedure _wnd_SetCaption( NewCaption : PChar );
 
 procedure _log_Add( Message : PChar; Timings : Boolean = TRUE );
+
+procedure _key_BeginReadText( Text : PChar; MaxSymbols : Integer = -1 );
+procedure _key_UpdateReadText( Text : PChar; MaxSymbols : Integer = -1 );
 
 function _tex_LoadFromFile( FileName : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function _tex_LoadFromMemory( Memory : zglTMemory; Extension : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
@@ -67,6 +71,16 @@ end;
 procedure _log_Add( Message : PChar; Timings : Boolean = TRUE );
 begin
   log_Add( Message, Timings );
+end;
+
+procedure _key_BeginReadText( Text : PChar; MaxSymbols : Integer = -1 );
+begin
+  key_BeginReadText( Text, MaxSymbols );
+end;
+
+procedure _key_UpdateReadText( Text : PChar; MaxSymbols : Integer = -1 );
+begin
+  key_UpdateReadText( Text, MaxSymbols );
 end;
 
 function _tex_LoadFromFile( FileName : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;

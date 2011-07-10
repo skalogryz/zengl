@@ -401,6 +401,8 @@ exports
   ,
   _wnd_SetCaption          name prefix + '_wnd_SetCaption',
   _log_Add                 name prefix + '_log_Add',
+  _key_BeginReadText       name prefix + '_key_BeginReadText',
+  _key_UpdateReadText      name prefix + '_key_UpdateReadText',
   _tex_LoadFromFile        name prefix + '_tex_LoadFromFile',
   _tex_LoadFromMemory      name prefix + '_tex_LoadFromMemory',
   _font_LoadFromFile       name prefix + '_font_LoadFromFile',

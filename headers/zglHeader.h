@@ -142,7 +142,7 @@ static void ( *zgl_Reg )( uint What, void* UserData );
 #define MANAGER_SOUND           805 // zglPSoundManager
 #define MANAGER_EMITTER2D       806 // zglPEmitter2DManager
 
-static void ( *zgl_Get )( uint What );
+static size_t ( *zgl_Get )( uint What );
 static void ( *zgl_GetMem )( void** Mem, uint Size );
 static void ( *zgl_FreeMem )( void** Mem );
 //static void ( zgl_FreeStrList )( zglTStringList* List );
@@ -289,7 +289,7 @@ static bool ( *mouse_Click )( byte Button );
 static bool ( *mouse_DblClick )( byte Button );
 static bool ( *mouse_Wheel )( byte Axis );
 static void ( *mouse_ClearState )();
-static void ( *mouse_Lock );
+static void ( *mouse_Lock )();
 
 // KEYBOARD
 #define K_SYSRQ      0xB7
@@ -420,13 +420,24 @@ static bool ( *key_Down )( byte KeyCode );
 static bool ( *key_Up )( byte KeyCode );
 static bool ( *key_Press )( byte KeyCode );
 static byte ( *key_Last )( byte KeyAction );
-//key_BeginReadText  : procedure( const Text : String; MaxSymbols : Integer = -1 );
-//key_UpdateReadText : procedure( const Text : String; MaxSymbols : Integer = -1 );
-//_key_GetText       : function : PChar;
+#ifdef __CPP__
+static void ( *__key_BeginReadText )( const char* Text, int MaxSymbols );
+static inline void key_BeginReadText( const char* Text, int MaxSymbols = -1 )
+{
+  __key_BeginReadText( Text, MaxSymbols );
+}
+static void ( *__key_UpdateReadText )( const char* Text, int MaxSymbols );
+static inline void key_UpdateReadText( const char* Text, int MaxSymbols = -1 )
+{
+  __key_UpdateReadText( Text, MaxSymbols );
+}
+#else
+static void ( *key_BeginReadText )( const char* Text, int MaxSymbols );
+static void ( *key_UpdateReadText )( const char* Text, int MaxSymbols );
+#endif
+static char* ( *key_GetText )();
 static void ( *key_EndReadText )();
 static void ( *key_ClearState )();
-
-//function key_GetText : String;
 
 // JOYSTICK
 typedef struct
@@ -1148,7 +1159,11 @@ static bool ( *col2d_Circle )( zglTCircle Circle1, zglTCircle Circle2 );
 static bool ( *col2d_CircleInCircle )( zglTCircle Circle1, zglTCircle Circle2 );
 static bool ( *col2d_CircleInRect )( zglTCircle Circle, zglTRect Rect );
 
-#define FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} LongWord( -1 ) {$ENDIF};
+#ifndef __WINDOWS__
+  #define FILE_ERROR 0
+#else
+  #define FILE_ERROR -1
+#endif
 
 // Open Mode
 #define FOM_CREATE 0x01 // Create
@@ -1187,6 +1202,7 @@ static void ( *mem_Free )( zglTMemory* Memory );
 
 #ifdef __LINUX__
   #define libZenGL "libZenGL.so"
+  #define libZenGL_local "./libZenGL.so"
 
   #define zglLoadLibrary( a ) dlopen( a, 0x01 )
   #define zglFreeLibrary dlclose
@@ -1197,9 +1213,11 @@ static void ( *mem_Free )( zglTMemory* Memory );
 
 #ifdef __WINDOWS__
   #define libZenGL "ZenGL.dll"
+  #define libZenGL_local "./ZenGL.dll"
+
   #define zglLoadLibrary LoadLibraryA
   #define zglFreeLibrary FreeLibrary
-  #if defined __MINGW32__ || defined __MINGW64__
+  #if ( defined __MINGW32__ || defined __MINGW64__ )
     #define zglGetAddress( a, b, c ) a = (__typeof__(a))GetProcAddress( b, c )
   #else
     #define zglGetAddress( a, b, c ) a = (void*)GetProcAddress( b, c )
@@ -1280,9 +1298,14 @@ static void zglLoad( const char* LibraryName )
     zglGetAddress( key_Up, zglLib, "key_Up" );
     zglGetAddress( key_Press, zglLib, "key_Press" );
     zglGetAddress( key_Last, zglLib, "key_Last" );
-//    zglGetAddress( key_BeginReadText, zglLib, "key_BeginReadText" );
-//    zglGetAddress( key_UpdateReadText, zglLib, "key_UpdateReadText" );
-//    zglGetAddress( key_GetText, zglLib, "key_GetText" );
+#ifdef __CPP__
+    zglGetAddress( __key_BeginReadText, zglLib, "_key_BeginReadText" );
+    zglGetAddress( __key_UpdateReadText, zglLib, "_key_UpdateReadText" );
+#else
+    zglGetAddress( key_BeginReadText, zglLib, "_key_BeginReadText" );
+    zglGetAddress( key_UpdateReadText, zglLib, "_key_UpdateReadText" );
+#endif
+    zglGetAddress( key_GetText, zglLib, "key_GetText" );
     zglGetAddress( key_EndReadText, zglLib, "key_EndReadText" );
     zglGetAddress( key_ClearState, zglLib, "key_ClearState" );
 
