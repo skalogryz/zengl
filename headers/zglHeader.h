@@ -1227,7 +1227,7 @@ static void ( *mem_Free )( zglTMemory* Memory );
   static HMODULE zglLib;
 #endif
 
-static void zglLoad( const char* LibraryName )
+static bool zglLoad( const char* LibraryName )
 {
   char libName[256];
   sprintf( libName, "./%s", LibraryName );
@@ -1562,12 +1562,15 @@ static void zglLoad( const char* LibraryName )
     zglGetAddress( mem_Free, zglLib, "mem_Free" );
 
 //    zglGetAddress( u_SortList, zglLib, "u_SortList" );
+
+    return TRUE;
   }
   else
   {
     #ifdef __LINUX__
-    printf( "Error while loading ZenGL" );
+    printf( "Error while loading ZenGL\n" );
     #endif
+    return FALSE;
   }
 }
 
