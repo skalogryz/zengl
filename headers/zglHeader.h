@@ -764,13 +764,13 @@ struct zglTSEngine2D;
 
 typedef void (*zglSpriteFunc)( struct zglTSprite2D* Sprite );
 
-typedef struct
+typedef struct zglTSEngine2D
 {
   int           Count;
   struct zglTSprite2D* List;
 } zglTSEngine2D, *zglPSEngine2D;
 
-typedef struct
+typedef struct zglTSprite2D
 {
   int           ID;
   zglPSEngine2D Manager;
@@ -1208,6 +1208,7 @@ static void ( *mem_Free )( zglTMemory* Memory );
   #define zglFreeLibrary dlclose
   #define zglGetAddress( a, b, c ) a = (__typeof__(a))dlsym(b, c)
 
+  typedef void* LIBRARY;
   static void* zglLib;
 #endif
 
@@ -1219,9 +1220,10 @@ static void ( *mem_Free )( zglTMemory* Memory );
   #if ( defined __MINGW32__ || defined __MINGW64__ )
     #define zglGetAddress( a, b, c ) a = (__typeof__(a))GetProcAddress( b, c )
   #else
-    #define zglGetAddress( a, b, c ) a = (void*)GetProcAddress( b, c )
+    #define zglGetAddress( a, b, c ) *(void**)&a = (void*)GetProcAddress( b, c )
   #endif
 
+  typedef HMODULE LIBRARY;
   static HMODULE zglLib;
 #endif
 
@@ -1229,9 +1231,9 @@ static void zglLoad( const char* LibraryName )
 {
   char libName[256];
   sprintf( libName, "./%s", LibraryName );
-  zglLib = (void*)zglLoadLibrary( libName );
+  zglLib = (LIBRARY)zglLoadLibrary( libName );
   if ( !zglLib )
-    zglLib = (void*)zglLoadLibrary( LibraryName );
+    zglLib = (LIBRARY)zglLoadLibrary( LibraryName );
 
   if ( zglLib )
   {
