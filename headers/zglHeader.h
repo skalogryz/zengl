@@ -23,8 +23,9 @@
 
 #pragma pack(push,8)
 
+#include <stdio.h>
+#include <stdlib.h>
 #ifdef __linux__
-  #include <stdio.h>
   #include <dlfcn.h>
   #define __LINUX__
 #endif
@@ -1202,7 +1203,6 @@ static void ( *mem_Free )( zglTMemory* Memory );
 
 #ifdef __LINUX__
   #define libZenGL "libZenGL.so"
-  #define libZenGL_local "./libZenGL.so"
 
   #define zglLoadLibrary( a ) dlopen( a, 0x01 )
   #define zglFreeLibrary dlclose
@@ -1213,7 +1213,6 @@ static void ( *mem_Free )( zglTMemory* Memory );
 
 #ifdef __WINDOWS__
   #define libZenGL "ZenGL.dll"
-  #define libZenGL_local "./ZenGL.dll"
 
   #define zglLoadLibrary LoadLibraryA
   #define zglFreeLibrary FreeLibrary
@@ -1228,7 +1227,11 @@ static void ( *mem_Free )( zglTMemory* Memory );
 
 static void zglLoad( const char* LibraryName )
 {
-  zglLib = (void*)zglLoadLibrary( LibraryName );
+  char libName[256];
+  sprintf( libName, "./%s", LibraryName );
+  zglLib = (void*)zglLoadLibrary( libName );
+  if ( !zglLib )
+    zglLib = (void*)zglLoadLibrary( LibraryName );
 
   if ( zglLib )
   {
