@@ -34,6 +34,10 @@
 #if ( defined _WIN32 || defined _WIN64 )
   #include <windows.h>
   #define __WINDOWS__
+
+  #if ( defined __MINGW32__ || defined __MINGW64__ )
+    #define sprintf_s sprintf
+  #endif
 #endif
 
 
