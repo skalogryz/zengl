@@ -58,7 +58,7 @@ void Draw()
 void Timer()
 {
   char caption[256];
-  sprintf( caption, "3 - Primitives 2D[ FPS: %i ]", (int)zgl_Get( RENDER_FPS ) );
+  sprintf_s( caption, "3 - Primitives 2D[ FPS: %i ]", (int)zgl_Get( RENDER_FPS ) );
   wnd_SetCaption( caption );
 }
 

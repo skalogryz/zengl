@@ -28,6 +28,8 @@
 #ifdef __linux__
   #include <dlfcn.h>
   #define __LINUX__
+
+  #define sprintf_s sprintf
 #endif
 #if ( defined _WIN32 || defined _WIN64 )
   #include <windows.h>
@@ -66,7 +68,15 @@ typedef struct
   uint  Position;
 } zglTMemory, *zglPMemory;
 
+#ifdef __CPP__
+static void ( *__zgl_Init )( byte FSAA, byte StencilBits );
+static inline void zgl_Init( byte FSAA = 0, byte StencilBits = 0 )
+{
+  __zgl_Init( FSAA, StencilBits );
+}
+#else
 static void ( *zgl_Init )( byte FSAA, byte StencilBits );
+#endif
 static void ( *zgl_Exit )();
 
 #define SYS_APP_INIT           0x000001
@@ -1230,14 +1240,18 @@ static void ( *mem_Free )( zglTMemory* Memory );
 static bool zglLoad( const char* LibraryName )
 {
   char libName[256];
-  sprintf( libName, "./%s", LibraryName );
+  sprintf_s( libName, "./%s", LibraryName );
   zglLib = (LIBRARY)zglLoadLibrary( libName );
   if ( !zglLib )
     zglLib = (LIBRARY)zglLoadLibrary( LibraryName );
 
   if ( zglLib )
   {
+#ifdef __CPP__
+    zglGetAddress( __zgl_Init, zglLib, "zgl_Init" );
+#else
     zglGetAddress( zgl_Init, zglLib, "zgl_Init" );
+#endif
     zglGetAddress( zgl_Exit, zglLib, "zgl_Exit" );
     zglGetAddress( zgl_Reg, zglLib, "zgl_Reg" );
     zglGetAddress( zgl_Get, zglLib, "zgl_Get" );
@@ -1569,6 +1583,9 @@ static bool zglLoad( const char* LibraryName )
   {
     #ifdef __LINUX__
     printf( "Error while loading ZenGL\n" );
+    #endif
+    #ifdef __WINDOWS__
+    MessageBoxA( 0, "Error while loading ZenGL", "Error", 0x00000010 );
     #endif
     return FALSE;
   }

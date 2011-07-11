@@ -26,7 +26,7 @@ void Timer()
   // RU: Будем в заголовке показывать количество кадров в секунду.
   // EN: Caption will show the frames per second.
   char caption[256];
-  sprintf( caption, "01 - Initialization[ FPS: %i ]", (int)zgl_Get( RENDER_FPS ) );
+  sprintf_s( caption, "01 - Initialization[ FPS: %i ]", (int)zgl_Get( RENDER_FPS ) );
   wnd_SetCaption( caption );
 }
 
