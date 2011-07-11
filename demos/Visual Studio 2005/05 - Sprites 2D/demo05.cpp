@@ -178,8 +178,12 @@ void Draw()
 		ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
 	}
 
-  //if time > 255 Then
-  //  text_Draw( fntMain, 0, 0, "FPS: " + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
+	if ( time > 255 )
+	{
+		char fps[256];
+		sprintf_s( fps, "FPS: %i", (int)zgl_Get( RENDER_FPS ) );
+		text_Draw( fntMain, 0, 0, fps );
+	}
 	batch2d_End();
 }
 

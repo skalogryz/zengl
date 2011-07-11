@@ -48,7 +48,7 @@ int main()
   zglLoad( libZenGL );
 #endif
 #ifdef __WINDOWS__
-    zglLoad( libZenGL );
+  zglLoad( libZenGL );
 #endif
 #ifdef __MACOSX__
   // RU: libZenGL.dylib следует предварительно поместить в каталог
