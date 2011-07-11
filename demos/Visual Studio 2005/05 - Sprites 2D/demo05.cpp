@@ -93,9 +93,9 @@ void Draw()
 		// RU: Рисуем землю.
 		// EN: Render the ground.
 		for ( int i = -2; i <= 800 / 32 + 1; i++ )
-			asprite2d_Draw( texGround, i * 32, 96 - 12, 32, 32, 0, 2 );
+			asprite2d_Draw( texGround, i * 32.0f, 96 - 12, 32, 32, 0, 2 );
 		for ( int i = -2; i <= 800 / 32 + 1; i++ )
-			asprite2d_Draw( texGround, i * 32, 600 - 32 - 12, 32, 32, 0, 2 );
+			asprite2d_Draw( texGround, i * 32.0f, 600 - 32 - 12, 32, 32, 0, 2 );
 
 		// RU: Рисуем шагающих пингвинов.
 		// EN: Render penguins
@@ -104,9 +104,9 @@ void Draw()
 			{
 				// RU: Рисуем надпись в "рамочке" над пингвином.
 				// EN: Render the text in frame over penguins.
-				t = text_GetWidth( fntMain, "I'm so red..." ) * 0.75 + 4;
-				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
-				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, fntMain->MaxHeight, 0xFFFFFF );
+				t = text_GetWidth( fntMain, "I'm so red..." ) * 0.75f + 4;
+				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
+				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0xFFFFFF );
 				text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - fntMain->MaxHeight + 8, 0.75, 0, "I'm so red..." );
 				// RU: Рисуем красного пингвина используя fx2d-функцию и флаг FX_COLOR.
 				// EN: Render red penguin using fx2d-function and flag FX_COLOR.
@@ -114,9 +114,9 @@ void Draw()
 				asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame / 2, 255, FX_BLEND | FX_COLOR );
 			} else if ( i == 7 )
 			{
-				t = text_GetWidth( fntMain, "???" ) * 0.75 + 4;
-				pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
-				pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, fntMain->MaxHeight, 0xFFFFFF );
+				t = text_GetWidth( fntMain, "???" ) * 0.75f + 4;
+				pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
+				pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0xFFFFFF );
 				text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - fntMain->MaxHeight + 8, 0.75, 0, "???", 255, 0xFFFFFF, TEXT_HALIGN_CENTER );
 				// RU: Рисуем пингвина приведение используя флаг FX_COLOR установив режим в FX_COLOR_SET :)
 				// EN: Render penguin ghost using flag FX_COLOR and mode FX_COLOR_SET :)
@@ -134,9 +134,9 @@ void Draw()
 		for ( int i = 10; i < 20; i++ )
 			if ( i == 13 )
 			{
-				t = text_GetWidth( fntMain, "I'm so big..." ) * 0.75 + 4;
-				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight - 10, t, fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
-				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight - 10, t, fntMain->MaxHeight, 0xFFFFFF );
+				t = text_GetWidth( fntMain, "I'm so big..." ) * 0.75f + 4;
+				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight - 10, t, (float)fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
+				pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain->MaxHeight - 10, t, (float)fntMain->MaxHeight, 0xFFFFFF );
 				text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - fntMain->MaxHeight - 4, 0.75, 0, "I'm so big..." );
 				// RU: Рисуем "большего" пингвина. Т.к. FX2D_SCALE увеличивает спрайт относительно центра, то пингвина следует немного "поднять".
 				// EN: Render "big" penguin. It must be shifted up, because FX2D_SCALE scale sprite relative to the center.
@@ -163,9 +163,9 @@ void Draw()
 		asprite2d_Draw( texGround, 12 * 32, 300 - 16, 32, 32, 0, 2 );
 		asprite2d_Draw( texGround, 13 * 32, 300 - 16, 32, 32, 0, 3 );
 
-		t = text_GetWidth( fntMain, "o_O" ) * 0.75 + 4;
-		pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - fntMain->MaxHeight + 4, t, fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
-		pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - fntMain->MaxHeight + 4, t, fntMain->MaxHeight, 0xFFFFFF );
+		t = text_GetWidth( fntMain, "o_O" ) * 0.75f + 4;
+		pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
+		pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0xFFFFFF );
 		text_DrawEx( fntMain, tux[ 20 ].Pos.X + 32, tux[ 20 ].Pos.Y - fntMain->MaxHeight + 8, 0.75, 0, "o_O", 255, 0xFFFFFF, TEXT_HALIGN_CENTER );
 		asprite2d_Draw( tux[ 20 ].Texture, tux[ 20 ].Pos.X, tux[ 20 ].Pos.Y, 64, 64, 0, tux[ 20 ].Frame / 2 );
 	}
@@ -187,7 +187,7 @@ void Timer()
 {
 	time += 2;
 
-	camMain.Angle = camMain.Angle + cosf( time / 1000 ) / 10;
+	camMain.Angle = camMain.Angle + cosf( (float)time / 1000.0f ) / 10;
 
 	for ( int i = 0; i <= 20; i++ )
 	{
@@ -197,13 +197,13 @@ void Timer()
 	}
 	for ( int i = 0; i < 10; i++ )
 	{
-		tux[ i ].Pos.X = tux[ i ].Pos.X + 1.5;
+		tux[ i ].Pos.X = tux[ i ].Pos.X + 1.5f;
 		if ( tux[ i ].Pos.X > 864 )
 			tux[ i ].Pos.X = -96;
 	}
 	for ( int i = 10; i < 20; i++ )
 	{
-		tux[ i ].Pos.X = tux[ i ].Pos.X - 1.5;
+		tux[ i ].Pos.X = tux[ i ].Pos.X - 1.5f;
 		if ( tux[ i ].Pos.X < -96 )
 			tux[ i ].Pos.X = 864;
 	}
