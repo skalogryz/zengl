@@ -284,8 +284,8 @@ typedef struct
 
 static zglPTimer ( *timer_Add )( void* OnTimer, uint Interval );
 static void ( *timer_Del )( zglPTimer* Timer );
-static void ( *timer_GetTicks )();
-static double ( *timer_Reset )();
+static double ( *timer_GetTicks )();
+static void ( *timer_Reset )();
 
 // MOUSE
 #define M_BLEFT   0
