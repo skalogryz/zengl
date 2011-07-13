@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "04 - Text", "04 - Text\04 -
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "05 - Sprites 2D", "05 - Sprites 2D\05 - Sprites 2D.vcproj", "{8F6E5328-BBC7-4781-868F-774195705BCE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "06 - SEngine 2D", "06 - SEngine 2D\06 - SEngine 2D.vcproj", "{8787C4D1-D447-4F2A-A1AA-25D53323AC01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -37,6 +39,10 @@ Global
 		{8F6E5328-BBC7-4781-868F-774195705BCE}.Debug|Win32.Build.0 = Debug|Win32
 		{8F6E5328-BBC7-4781-868F-774195705BCE}.Release|Win32.ActiveCfg = Release|Win32
 		{8F6E5328-BBC7-4781-868F-774195705BCE}.Release|Win32.Build.0 = Release|Win32
+		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Debug|Win32.Build.0 = Debug|Win32
+		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Release|Win32.ActiveCfg = Release|Win32
+		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
