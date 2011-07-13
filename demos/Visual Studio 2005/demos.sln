@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "05 - Sprites 2D", "05 - Spr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "06 - SEngine 2D", "06 - SEngine 2D\06 - SEngine 2D.vcproj", "{8787C4D1-D447-4F2A-A1AA-25D53323AC01}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "08 - Sound", "08 - Sound\08 - Sound.vcproj", "{C4FD56F8-3B86-40EE-B2FE-44B1B6B8267D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,10 @@ Global
 		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Debug|Win32.Build.0 = Debug|Win32
 		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Release|Win32.ActiveCfg = Release|Win32
 		{8787C4D1-D447-4F2A-A1AA-25D53323AC01}.Release|Win32.Build.0 = Release|Win32
+		{C4FD56F8-3B86-40EE-B2FE-44B1B6B8267D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C4FD56F8-3B86-40EE-B2FE-44B1B6B8267D}.Debug|Win32.Build.0 = Debug|Win32
+		{C4FD56F8-3B86-40EE-B2FE-44B1B6B8267D}.Release|Win32.ActiveCfg = Release|Win32
+		{C4FD56F8-3B86-40EE-B2FE-44B1B6B8267D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
