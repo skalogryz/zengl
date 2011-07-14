@@ -32,8 +32,16 @@ uses
 const
   PVR_EXTENSION : array[ 0..3 ] of Char = ( 'P', 'V', 'R', #0 );
 
-  PVR_PVRTC2 = 24;
-  PVR_PVRTC4 = 25;
+  PVR_RGBA_4444 = $10;
+  PVR_RGBA_5551 = $11;
+  PVR_RGBA_8888 = $12;
+  PVR_RGB_565   = $13;
+  PVR_RGB_555   = $14;
+  PVR_RGB_888   = $15;
+  PVR_I_8       = $16;
+  PVR_AI_88     = $17;
+  PVR_PVRTC2    = $18;
+  PVR_PVRTC4    = $19;
 
 type
   zglPPVRHeader = ^zglTPVRHeader;
@@ -86,10 +94,15 @@ begin
   H     := CFSwapInt32LittleToHost( pvrHeader.Height );
   size  := CFSwapInt32LittleToHost( pvrHeader.DataLength );
   flags := CFSwapInt32LittleToHost( pvrHeader.Flags ) and $FF;
-  if ( flags = PVR_PVRTC2 ) Then
-    Format := TEX_FORMAT_RGBA_PVR2
+  case flags of
+    PVR_RGBA_4444: Format := TEX_FORMAT_RGBA_444;
+    PVR_RGBA_8888: Format := TEX_FORMAT_RGBA;
+    PVR_PVRTC2: Format := TEX_FORMAT_RGBA_PVR2
+    PVR_PVRTC4: Format := TEX_FORMAT_RGBA_PVR4;
   else
-    Format := TEX_FORMAT_RGBA_PVR4;
+    Data := nil;
+    exit;
+  end;
 
   GetMem( Data, size );
   Move( Pointer( Ptr( pvrMem.Memory ) + pvrMem.Position )^, Data^, size );

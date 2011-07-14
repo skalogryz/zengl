@@ -30,6 +30,7 @@ uses
 
 const
   TEX_FORMAT_RGBA       = $01;
+  TEX_FORMAT_RGBA_4444  = $02;
   TEX_FORMAT_RGBA_PVR2  = $10;
   TEX_FORMAT_RGBA_PVR4  = $11;
   TEX_FORMAT_RGBA_DXT1  = $20;
@@ -112,7 +113,7 @@ procedure tex_Filter( Texture : zglPTexture; Flags : LongWord );
 procedure tex_SetAnisotropy( Level : Byte );
 
 procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
-procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single );
+procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single; PixelSize : Integer );
 procedure tex_CalcGrayScale( var pData : Pointer; Width, Height : Word );
 procedure tex_CalcInvert( var pData : Pointer; Width, Height : Word );
 procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord; Width, Height : Word );
@@ -155,6 +156,7 @@ begin
   size := Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V );
   case Texture.Format of
     TEX_FORMAT_RGBA: Result := size * 4;
+    TEX_FORMAT_RGBA_4444: Result := size * 2;
     {$IFDEF USE_GLES}
     TEX_FORMAT_RGBA_PVR2: Result := size div 4;
     TEX_FORMAT_RGBA_PVR4: Result := size div 2;
@@ -255,6 +257,7 @@ begin
           begin
             case Texture.Format of
               TEX_FORMAT_RGBA: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+              TEX_FORMAT_RGBA_4444: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, pData );
               {$IFDEF USE_GLES}
               TEX_FORMAT_RGBA_PVR2: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, width, height, 0, size, pData );
               TEX_FORMAT_RGBA_PVR4: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, width, height, 0, size, pData );
@@ -642,24 +645,32 @@ end;
 
 procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
 begin
-  if Texture.Format <> TEX_FORMAT_RGBA Then exit;
+  if Texture.Format = TEX_FORMAT_RGBA Then
+    begin
+      if Texture.Flags and TEX_GRAYSCALE > 0 Then
+        tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
+      if Texture.Flags and TEX_INVERT > 0 Then
+        tex_CalcInvert( pData, Texture.Width, Texture.Height );
+      if Texture.Flags and TEX_CUSTOM_EFFECT > 0 Then
+        tex_CalcCustomEffect( pData, Texture.Width, Texture.Height );
+    end;
 
-  if Texture.Flags and TEX_GRAYSCALE > 0 Then
-    tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
-  if Texture.Flags and TEX_INVERT > 0 Then
-    tex_CalcInvert( pData, Texture.Width, Texture.Height );
-  if Texture.Flags and TEX_CUSTOM_EFFECT > 0 Then
-    tex_CalcCustomEffect( pData, Texture.Width, Texture.Height );
   if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
     begin
-      tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
+      if Texture.Format = TEX_FORMAT_RGBA Then
+        tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V, 4 )
+      else
+        if Texture.Format = TEX_FORMAT_RGBA_4444 Then
+          tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V, 2 )
+        else
+          exit;
 
       Texture.Width  := Round( Texture.Width * Texture.U );
       Texture.Height := Round( Texture.Height * Texture.V );
     end;
 end;
 
-procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single );
+procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single; PixelSize : Integer );
   var
     i, j : LongWord;
     w, h : Word;
@@ -676,19 +687,19 @@ begin
   U := Width  / w;
   V := Height / h;
 
-  SetLength( data, Width * Height * 4 );
-  Move( pData^, Pointer( data )^, Width * Height * 4 );
+  SetLength( data, Width * Height * PixelSize );
+  Move( pData^, Pointer( data )^, Width * Height * PixelSize );
   FreeMem( pData );
-  GetMem( pData, w * h * 4 );
+  GetMem( pData, w * h * PixelSize );
 
   for i := 0 to Height - 1 do
-    Move( data[ i * Width * 4 ], PLongWord( Ptr( pData ) + i * w * 4 )^, Width * 4 );
+    Move( data[ i * Width * PixelSize ], PLongWord( Ptr( pData ) + i * w * PixelSize )^, Width * PixelSize );
 
   for i := Height to h - 1 do
-    Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * 4 )^, PByte( Ptr( pData ) + i * w * 4 )^, Width * 4 );
+    Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * PixelSize )^, PByte( Ptr( pData ) + i * w * PixelSize )^, Width * PixelSize );
   for i := 0 to h - 1 do
     for j := Width to w - 1 do
-      PLongWord( Ptr( pData ) + j * 4 + i * w * 4 )^ := PLongWord( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
+      PLongWord( Ptr( pData ) + j * PixelSize + i * w * PixelSize )^ := PLongWord( Ptr( pData ) + ( Width - 1 ) * PixelSize + i * w * PixelSize )^;
 
   Width  := w;
   Height := h;

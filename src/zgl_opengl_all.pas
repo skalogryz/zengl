@@ -81,6 +81,7 @@ const
   GL_UNSIGNED_SHORT                 = $1403;
   GL_UNSIGNED_INT                   = $1405;
   GL_FLOAT                          = $1406;
+  GL_UNSIGNED_SHORT_4_4_4_4         = $8033;
 
   // PixelFormat
   GL_RGBA                           = $1908;
