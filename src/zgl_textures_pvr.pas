@@ -95,9 +95,9 @@ begin
   size  := CFSwapInt32LittleToHost( pvrHeader.DataLength );
   flags := CFSwapInt32LittleToHost( pvrHeader.Flags ) and $FF;
   case flags of
-    PVR_RGBA_4444: Format := TEX_FORMAT_RGBA_444;
+    PVR_RGBA_4444: Format := TEX_FORMAT_RGBA_4444;
     PVR_RGBA_8888: Format := TEX_FORMAT_RGBA;
-    PVR_PVRTC2: Format := TEX_FORMAT_RGBA_PVR2
+    PVR_PVRTC2: Format := TEX_FORMAT_RGBA_PVR2;
     PVR_PVRTC4: Format := TEX_FORMAT_RGBA_PVR4;
   else
     Data := nil;
