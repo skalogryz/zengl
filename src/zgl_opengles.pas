@@ -86,6 +86,8 @@ var
   oglClipH  : Integer;
   oglClipR  : Integer;
 
+  oglVRAMUsed : LongWord;
+
   oglRenderer      : AnsiString;
   oglExtensions    : AnsiString;
   ogl3DAccelerator : Boolean;

@@ -163,6 +163,7 @@ const
   RENDER_BATCHES_2D       = 701;
   RENDER_CURRENT_MODE     = 702;
   RENDER_CURRENT_TARGET   = 703;
+  RENDER_VRAM_USED        = 704;
 
   MANAGER_TIMER           = 800; // zglPTimerManager
   MANAGER_TEXTURE         = 801; // zglPTextureManager

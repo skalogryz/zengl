@@ -185,7 +185,7 @@ begin
       {$ELSE}
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
       {$ENDIF}
-  end;
+    end;
 end;
 
 function font_LoadFromFile( const FileName : String ) : zglPFont;

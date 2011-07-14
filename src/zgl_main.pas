@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.07.06';
+  cs_Date     = '2011.07.14';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -124,6 +124,7 @@ const
   RENDER_BATCHES_2D       = 701;
   RENDER_CURRENT_MODE     = 702;
   RENDER_CURRENT_TARGET   = 703;
+  RENDER_VRAM_USED        = 704;
 
   MANAGER_TIMER           = 800;
   MANAGER_TEXTURE         = 801;
@@ -577,6 +578,7 @@ begin
     RENDER_BATCHES_2D: Result := b2dBatches + 1;
     RENDER_CURRENT_MODE: Result := oglMode;
     RENDER_CURRENT_TARGET: Result := oglTarget;
+    RENDER_VRAM_USED: Result := oglVRAMUsed;
 
     VIEWPORT_WIDTH: Result := oglWidth - scrSubCX;
     VIEWPORT_HEIGHT: Result := oglHeight - scrSubCY;
