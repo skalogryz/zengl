@@ -532,7 +532,8 @@ type
   end;
 
 type
-  zglGLESVertex = record
+  zglGLESPVertex = ^zglGLESTVertex;
+  zglGLESTVertex = record
     U, V    : Single;
     Color   : LongWord;
     X, Y, Z : Single;
@@ -545,7 +546,7 @@ var
   // Buffers
   newTriangle : Integer;
   bColor      : LongWord;
-  bVertices   : array of zglGLESVertex;
+  bVertices   : array of zglGLESTVertex;
   bSize       : Integer;
 
 function InitGLES : Boolean;
@@ -839,14 +840,17 @@ begin
 end;
 
 procedure glVertex2f(x, y: GLfloat);
+  var
+    vertex : zglGLESPVertex;
 begin
   if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
     SetLength( bVertices, bSize + 1024 );
 
-  bVertices[ bSize ].X     := x;
-  bVertices[ bSize ].Y     := y;
-  bVertices[ bSize ].Z     := 0;
-  bVertices[ bSize ].Color := bColor;
+  vertex       := @bVertices[ bSize ];
+  vertex.X     := x;
+  vertex.Y     := y;
+  vertex.Z     := 0;
+  vertex.Color := bColor;
   INC( bSize );
   if RenderQuad Then
     begin
@@ -872,14 +876,17 @@ begin
 end;
 
 procedure glVertex2fv(v: PGLfloat);
+  var
+    vertex : zglGLESPVertex;
 begin
   if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
     SetLength( bVertices, bSize + 1024 );
 
-  bVertices[ bSize ].X     := zglPPoint2D( v ).X;
-  bVertices[ bSize ].Y     := zglPPoint2D( v ).Y;
-  bVertices[ bSize ].Z     := 0;
-  bVertices[ bSize ].Color := bColor;
+  vertex       := @bVertices[ bSize ];
+  vertex.X     := zglPPoint2D( v ).X;
+  vertex.Y     := zglPPoint2D( v ).Y;
+  vertex.Z     := 0;
+  vertex.Color := bColor;
   INC( bSize );
   if RenderQuad Then
     begin
@@ -905,14 +912,17 @@ begin
 end;
 
 procedure glVertex3f(x, y, z: GLfloat);
+  var
+    vertex : zglGLESPVertex;
 begin
   if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
     SetLength( bVertices, bSize + 1024 );
 
-  bVertices[ bSize ].X     := x;
-  bVertices[ bSize ].Y     := y;
-  bVertices[ bSize ].Z     := z;
-  bVertices[ bSize ].Color := bColor;
+  vertex       := @bVertices[ bSize ];
+  vertex.X     := x;
+  vertex.Y     := y;
+  vertex.Z     := z;
+  vertex.Color := bColor;
   INC( bSize );
   if RenderQuad Then
     begin
