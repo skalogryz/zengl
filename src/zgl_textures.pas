@@ -697,9 +697,16 @@ begin
 
   for i := Height to h - 1 do
     Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * PixelSize )^, PByte( Ptr( pData ) + i * w * PixelSize )^, Width * PixelSize );
-  for i := 0 to h - 1 do
-    for j := Width to w - 1 do
-      PLongWord( Ptr( pData ) + j * PixelSize + i * w * PixelSize )^ := PLongWord( Ptr( pData ) + ( Width - 1 ) * PixelSize + i * w * PixelSize )^;
+
+  if PixelSize = 4 Then
+    begin
+      for i := 0 to h - 1 do
+        for j := Width to w - 1 do
+          PLongWord( Ptr( pData ) + j * 4 + i * w * 4 )^ := PLongWord( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
+    end else
+      for i := 0 to h - 1 do
+        for j := Width to w - 1 do
+          PWord( Ptr( pData ) + j * 2 + i * w * 2 )^ := PWord( Ptr( pData ) + ( Width - 1 ) * 2 + i * w * 2 )^;
 
   Width  := w;
   Height := h;
