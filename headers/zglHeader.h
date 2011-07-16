@@ -571,6 +571,7 @@ end;
 */
 
 #define TEX_FORMAT_RGBA       0x01
+#define TEX_FORMAT_RGBA_4444  0x02
 #define TEX_FORMAT_RGBA_PVR2  0x10
 #define TEX_FORMAT_RGBA_PVR4  0x11
 #define TEX_FORMAT_RGBA_DXT1  0x20
