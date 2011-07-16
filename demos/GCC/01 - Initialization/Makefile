@@ -30,12 +30,12 @@ linux32: clean
 	strip $(OUTPUT)i386/$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
-	$(MINGW32) $(UNIT) $(INCLUDE) -o$(OUTPUT)$(ARCH)/$(TARGET) $(FLAGS)
-	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
+	$(MINGW32) $(UNIT) $(INCLUDE) -o$(OUTPUT)i386/$(TARGETW) $(FLAGS)
+	strip $(OUTPUT)i386/$(TARGETW) --strip-unneeded -R .comment -R .note
 
 win64: clean
-	$(MINGW64) $(UNIT) $(INCLUDE) -o$(OUTPUT)$(ARCH)/$(TARGET) $(FLAGS)
-	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
+	$(MINGW64) $(UNIT) $(INCLUDE) -o$(OUTPUT)x86_64/$(TARGETW) $(FLAGS)
+	strip $(OUTPUT)x86_64/$(TARGETW) --strip-unneeded -R .comment -R .note
 
 macos: clean
 	rm -Rf $(BUNDLE)
