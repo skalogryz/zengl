@@ -275,8 +275,10 @@ begin
 {$IFDEF LINUX}
   XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
 
-  mouseX := Round( ( mouseX - scrAddCX ) / scrResCX );
-  mouseY := Round( ( mouseY - scrAddCY ) / scrResCY );
+  mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
+  mouseDY := Round( ( mouseY - wndHeight div 2 ) / scrResCY );
+  mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
+  mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
   if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
     begin
       mouseLX := mouseX;
@@ -301,8 +303,10 @@ begin
         mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
       end;
 
-  mouseX := Round( ( mouseX - scrAddCX ) / scrResCX );
-  mouseY := Round( ( mouseY - scrAddCY ) / scrResCY );
+  mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
+  mouseDY := Round( ( mouseY - wndHeight div 2 ) / scrResCY );
+  mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
+  mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
   if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
     begin
       mouseLX := mouseX;
@@ -323,8 +327,10 @@ begin
   mouseX := mPos.h - wndX;
   mouseY := mPos.v - wndY;
 
-  mouseX := Round( ( mouseX - scrAddCX ) / scrResCX );
-  mouseY := Round( ( mouseY - scrAddCY ) / scrResCY );
+  mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
+  mouseDY := Round( ( mouseY - wndHeight div 2 ) / scrResCY );
+  mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
+  mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
   if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
     begin
       mouseLX := mouseX;

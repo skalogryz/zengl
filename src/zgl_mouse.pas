@@ -55,6 +55,8 @@ procedure mouse_Lock;
 var
   mouseX        : Integer;
   mouseY        : Integer;
+  mouseDX       : Integer;
+  mouseDY       : Integer;
   mouseLX       : Integer;
   mouseLY       : Integer;
   mouseDown     : array[ 0..2 ] of Boolean;
@@ -90,12 +92,12 @@ end;
 
 function mouse_DX : Integer;
 begin
-  Result := mouse_X() - wndWidth div 2;
+  Result := mouseDX;
 end;
 
 function mouse_DY : Integer;
 begin
-  Result := mouse_Y() - wndHeight div 2;
+  Result := mouseDY;
 end;
 
 function mouse_Down( Button : Byte ) : Boolean;

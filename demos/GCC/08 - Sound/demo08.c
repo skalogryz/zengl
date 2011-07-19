@@ -100,7 +100,7 @@ void Proc()
   if ( ( p >= 0 ) && ( p < 25 ) )
     snd_SetVolume( (zglPSound)audio, SND_STREAM, ( 1.0f / 24.0f ) * p );
   if ( ( p >= 75 ) && ( p < 100 ) )
-    snd_SetVolume( (zglPSound)audio, SND_STREAM, 1 - ( 1.0f / 24.0f ) * ( p - 75 ) );
+    snd_SetVolume( (zglPSound)audio, SND_STREAM, 1 - (float)( ( 1.0f / 24.0f ) * ( p - 75 ) ) );
 
   if ( key_Press( K_ESCAPE ) ) zgl_Exit();
   key_ClearState();
