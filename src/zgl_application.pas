@@ -1283,15 +1283,15 @@ begin
   if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
     begin
       wndPortrait := TRUE;
-      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
-      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+      scrDesktopW := scrCurrentModeW;
+      scrDesktopH := scrCurrentModeH;
     end;
 
   if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
     begin
       wndPortrait := FALSE;
-      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
-      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
+      scrDesktopW := scrCurrentModeH;
+      scrDesktopH := scrCurrentModeW;
     end;
 
   eglView.setFrame( CGRectMake( 0, 0, scrDesktopW, scrDesktopH ) );

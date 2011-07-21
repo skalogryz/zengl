@@ -333,6 +333,9 @@ begin
   frame.size.width  := oglWidth;
   frame.size.height := oglHeight;
   eglView := zglCiOSEAGLView.alloc().initWithFrame( frame );
+  // iPhone Retina display
+  if ( scrCurrentModeW = 640 ) and ( scrCurrentModeH = 960 ) Then
+    eglView.setContentScaleFactor( 2 );
 
   eglSurface := CAEAGLLayer( eglView.layer );
   eglSurface.setOpaque( TRUE );

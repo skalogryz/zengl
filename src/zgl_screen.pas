@@ -143,6 +143,8 @@ var
   scrModeList  : CFArrayRef;
   {$ENDIF}
   {$IFDEF iOS}
+  scrCurrentModeW : Integer;
+  scrCurrentModeH : Integer;
   scrDesktopW     : Integer;
   scrDesktopH     : Integer;
   scrOrientation  : UIInterfaceOrientation;
@@ -245,14 +247,25 @@ begin
   app_InitPool();
   scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
   wndPortrait    := scrCanPortrait;
-  if scrCanPortrait Then
+
+  if ( UIDevice.currentDevice.systemVersion.floatValue() >= 3.2 ) Then
     begin
-      scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
-      scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+      scrCurrentModeW := Round( UIScreen.mainScreen.currentMode.size.width );
+      scrCurrentModeH := Round( UIScreen.mainScreen.currentMode.size.height );
     end else
       begin
-        scrDesktopW := Round( UIScreen.mainScreen.bounds.size.height );
-        scrDesktopH := Round( UIScreen.mainScreen.bounds.size.width );
+        scrCurrentModeW := Round( UIScreen.mainScreen.bounds.size.width );
+        scrCurrentModeH := Round( UIScreen.mainScreen.bounds.size.height );
+      end;
+
+  if scrCanPortrait Then
+    begin
+      scrDesktopW := scrCurrentModeW;
+      scrDesktopH := scrCurrentModeH;
+    end else
+      begin
+        scrDesktopW := scrCurrentModeH;
+        scrDesktopH := scrCurrentModeW;
       end;
 {$ENDIF}
   scrInitialized := TRUE;
