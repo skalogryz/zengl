@@ -1306,8 +1306,10 @@ procedure zglCiOSWindow.GetTouchPos( touches : NSSet );
 begin
   for i := 0 to touches.allObjects().count() - 1 do
     begin
-      touch := UITouch( touches.allObjects().objectAtIndex( i ) );
-      point := touch.locationInView( Window );
+      touch   := UITouch( touches.allObjects().objectAtIndex( i ) );
+      point   := touch.locationInView( Window );
+      point.x := point.x * eglView.contentScaleFactor();
+      point.y := point.y * eglView.contentScaleFactor();
 
       case scrAngle of
         0:
