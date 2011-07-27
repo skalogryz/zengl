@@ -250,8 +250,14 @@ begin
 
   if ( UIDevice.currentDevice.systemVersion.floatValue() >= 3.2 ) Then
     begin
+      // magic...
+      {$IFNDEF iPhoneSim}
+      scrCurrentModeW := Round( UIScreen.mainScreen.currentMode.size.height );
+      scrCurrentModeH := Round( UIScreen.mainScreen.currentMode.size.width );
+      {$ELSE}
       scrCurrentModeW := Round( UIScreen.mainScreen.currentMode.size.width );
       scrCurrentModeH := Round( UIScreen.mainScreen.currentMode.size.height );
+      {$ENDIF}
     end else
       begin
         scrCurrentModeW := Round( UIScreen.mainScreen.bounds.size.width );
