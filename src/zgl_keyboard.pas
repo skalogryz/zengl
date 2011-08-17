@@ -263,6 +263,11 @@ end;
 
 procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
 begin
+  {$IFDEF iOS}
+  if Assigned( keysTextField ) and ( keysText <> Text ) Then
+    keysTextField.setText( u_GetNSString( Text ) );
+  {$ENDIF}
+
   keysText    := u_CopyStr( Text );
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
@@ -282,6 +287,7 @@ begin
           setSecureTextEntry( FALSE );
           addTarget_action_forControlEvents( appDelegate, objcselector( 'textFieldEditingChanged' ), UIControlEventEditingChanged );
         end;
+      keysTextField.setText( u_GetNSString( Text ) );
       wndHandle.addSubview( keysTextField );
     end;
 
@@ -290,7 +296,6 @@ begin
     else
       keysTextField.setKeyboardType( UIKeyboardTypeDefault );
 
-    keysTextField.setText( u_GetNSString( Text ) );
     wndHandle.addSubview( keysTextField );
     keysTextField.becomeFirstResponder();
   {$ENDIF}
@@ -300,13 +305,13 @@ procedure key_UpdateReadText( const Text : String; MaxSymbols : Integer = -1 );
 begin
   if keysCanText Then
     begin
-      keysText := u_CopyStr( Text );
-      keysMax  := MaxSymbols;
-
       {$IFDEF iOS}
-      if Assigned( keysTextField ) Then
+      if Assigned( keysTextField ) and ( keysText <> Text ) Then
         keysTextField.setText( u_GetNSString( Text ) );
       {$ENDIF}
+
+      keysText := u_CopyStr( Text );
+      keysMax  := MaxSymbols;
     end;
 end;
 
