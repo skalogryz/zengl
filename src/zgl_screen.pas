@@ -143,6 +143,7 @@ var
   scrModeList  : CFArrayRef;
   {$ENDIF}
   {$IFDEF iOS}
+  scrDisplayLink  : CADisplayLink;
   scrCurrentModeW : Integer;
   scrCurrentModeH : Integer;
   scrDesktopW     : Integer;

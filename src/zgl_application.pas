@@ -60,6 +60,7 @@ procedure app_FreePool;
 type
   zglCAppDelegate = objcclass(NSObject)
     procedure EnterMainLoop; message 'EnterMainLoop';
+    procedure MainLoop; message 'MainLoop';
     procedure applicationDidFinishLaunching( application: UIApplication ); message 'applicationDidFinishLaunching:';
     procedure applicationWillResignActive( application: UIApplication ); message 'applicationWillResignActive:';
     procedure applicationDidEnterBackground( application: UIApplication ); message 'applicationDidEnterBackground:';
@@ -1147,6 +1148,33 @@ end;
 procedure zglCAppDelegate.EnterMainLoop;
 begin
   zgl_Init( oglFSAA, oglStencil );
+end;
+
+procedure zglCAppDelegate.MainLoop;
+  var
+    t : Double;
+begin
+  res_Proc();
+  {$IFDEF USE_JOYSTICK}
+  joy_Proc();
+  {$ENDIF}
+  {$IFDEF USE_SOUND}
+  snd_MainLoop();
+  {$ENDIF}
+
+  if appPause Then
+    begin
+      timer_Reset();
+      appdt := timer_GetTicks();
+      exit;
+    end else
+      timer_MainLoop();
+
+  t := timer_GetTicks();
+  app_PUpdate( timer_GetTicks() - appdt );
+  appdt := t;
+
+  app_Draw();
 end;
 
 procedure zglCAppDelegate.applicationDidFinishLaunching( application: UIApplication );

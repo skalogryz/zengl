@@ -252,8 +252,18 @@ begin
   {$ENDIF}
 
   app_PInit();
+  {$IFDEF iOS}
+  if ( UIDevice.currentDevice.systemVersion.floatValue() >= 3.1 ) Then
+    begin
+      scrDisplayLink := CADisplayLink.displayLinkWithTarget_selector( appDelegate, objcselector( 'MainLoop' ) );
+      scrDisplayLink.setFrameInterval( 1 );
+      scrDisplayLink.addToRunLoop_forMode( NSRunLoop.currentRunLoop(), NSDefaultRunLoopMode );
+    end else
+      NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats( 1 / 60, appDelegate, objcselector( 'MainLoop' ), nil, TRUE );
+  {$ELSE}
   app_PLoop();
   zgl_Destroy();
+  {$ENDIF}
 end;
 
 procedure zgl_InitToHandle( Handle : Ptr; FSAA : Byte = 0; StencilBits : Byte = 0 );

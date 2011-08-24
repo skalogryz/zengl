@@ -327,8 +327,6 @@ begin
   CGContextScaleCTM( jpg.Context, 1, -1 );
   CGContextDrawImage( jpg.Context, CGRectMake( 0, 0, jpg.Width, jpg.Height ), jpg.Image.CGImage() );
   CGContextRelease( jpg.Context );
-  jpg.Data.release();
-  jpg.Image.release();
 {$ENDIF}
 
   W      := jpg.Width;
