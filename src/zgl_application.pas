@@ -1372,8 +1372,8 @@ begin
       touchY[ i ] := Round( ( touchY[ i ] - scrAddCY ) / scrResCY );
     end;
 
-  mouseX := touchX[ i ];
-  mouseY := touchY[ i ];
+  mouseX := touchX[ touches.allObjects().count() - 1 ];
+  mouseY := touchY[ touches.allObjects().count() - 1 ];
 end;
 
 procedure zglCiOSWindow.touchesBegan_withEvent( touches : NSSet; event : UIevent );
