@@ -378,6 +378,7 @@ begin
     begin
       XNextEvent( scrDisplay, @event );
 
+      if appWork Then
       case event._type of
         ClientMessage:
           if ( event.xclient.message_type = wndProtocols ) and ( event.xclient.data.l[ 0 ] = wndDestroyAtom ) Then appWork := not app_PCloseQuery();

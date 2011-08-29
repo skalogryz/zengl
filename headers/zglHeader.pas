@@ -1701,7 +1701,7 @@ begin
       tess_GetData := dlsym( zglLib, 'tess_GetData' );
 
       col2d_PointInRect := dlsym( zglLib, 'col2d_PointInRect' );
-      col2d_PointInTriangle := dlsym( zglLib, 'col2d_PointInriangle' );
+      col2d_PointInTriangle := dlsym( zglLib, 'col2d_PointInTriangle' );
       col2d_PointInCircle := dlsym( zglLib, 'col2d_PointInCircle' );
       col2d_Line := dlsym( zglLib, 'col2d_Line' );
       col2d_LineVsRect := dlsym( zglLib, 'col2d_LineVsRect' );

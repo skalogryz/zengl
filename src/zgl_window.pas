@@ -316,6 +316,7 @@ procedure wnd_Destroy;
 begin
 {$IFDEF LINUX}
   XDestroyWindow( scrDisplay, wndHandle );
+  XSync( scrDisplay, X_FALSE );
 {$ENDIF}
 {$IFDEF WINDOWS}
   if ( wndDC > 0 ) and ( ReleaseDC( wndHandle, wndDC ) = 0 ) Then
