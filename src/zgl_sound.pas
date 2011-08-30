@@ -1153,7 +1153,8 @@ end;
 
 function snd_PlayMemory( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
   var
-    i : Integer;
+    i   : Integer;
+    ext : String;
 begin
   if ( not sndInitialized ) or ( not sndCanPlayFile ) Then exit;
 
@@ -1171,8 +1172,11 @@ begin
     end;
 
   for i := managerSound.Count.Formats - 1 downto 0 do
-    if Extension = managerSound.Formats[ i ].Extension Then
-      sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
+    begin
+      ext := u_StrUp( Extension );
+      if ext = managerSound.Formats[ i ].Extension Then
+        sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
+    end;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or ( not sfStream[ Result ]._decoder.OpenMem( sfStream[ Result ], Memory ) ) Then
     begin

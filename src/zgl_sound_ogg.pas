@@ -328,6 +328,27 @@ begin
   Result := file_GetPos( zglTFile( datasource^ ) );
 end;
 
+
+function ogg_ReadMem( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
+begin
+  Result := mem_Read( zglTMemory( datasource^ ), ptr^, size * nmemb );
+end;
+
+function ogg_SeekMem( datasource : pointer; offset : cint64; whence : cint) : cint; cdecl;
+begin
+  case whence of
+    0: mem_Seek( zglTMemory( datasource^ ), offset, FSM_SET );
+    1: mem_Seek( zglTMemory( datasource^ ), offset, FSM_CUR );
+    2: mem_Seek( zglTMemory( datasource^ ), offset, FSM_END );
+  end;
+  Result := 0;
+end;
+
+function ogg_GetPosMem( datasource : pointer ) : clong; cdecl;
+begin
+  Result := zglTMemory( datasource^ ).Position;
+end;
+
 procedure ogg_Init;
 begin
 {$IFDEF USE_OGG_STATIC}
@@ -407,11 +428,15 @@ begin
   if not oggInit Then exit;
 
   zgl_GetMem( Stream._data, SizeOf( zglTOggStream ) );
+  Stream._memory := Memory;
 
   with zglTOggStream( Stream._data^ ) do
     begin
       FillChar( vc, SizeOf( vc ), 0 );
-      if ov_open_callbacks( nil, vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, vc ) >= 0 Then
+      vc.read  := @ogg_ReadMem;
+      vc.seek  := @ogg_SeekMem;
+      vc.tell  := @ogg_GetPosMem;
+      if ov_open_callbacks( @Stream._memory, vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, vc ) >= 0 Then
         begin
           vi                := ov_info( vf, -1 );
           Stream.Bits       := 16;
