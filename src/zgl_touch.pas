@@ -40,6 +40,8 @@ var
   touchTap    : array[ 0..255 ] of Boolean;
   touchCanTap : array[ 0..255 ] of Boolean;
   touchDblTap : array[ 0..255 ] of Boolean;
+  touchList   : array[ 0..255 ] of Pointer;
+  touchCount  : Integer;
 
   // callback
   touch_PMove    : procedure( Finger : Byte; X, Y : Integer );

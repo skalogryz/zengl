@@ -87,7 +87,9 @@ type
 type
   zglCiOSWindow = objcclass(UIWindow)
   protected
-    procedure GetTouchPos( touches : NSSet ); message 'GetTouchPos:';
+    procedure SetTouchPos_id( touch : UITouch; id : Byte ); message 'SetTouchPos:id:';
+    function  GetTouchID( touch : UITouch ) : Byte; message 'GetTouchID:';
+    procedure UpdateTouches( touches : NSSet ); message 'UpdateTouches:';
   public
     procedure touchesBegan_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesMoved_withEvent( touches : NSSet; event : UIevent ); override;
@@ -1333,73 +1335,123 @@ begin
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 end;
 
-procedure zglCiOSWindow.GetTouchPos( touches : NSSet );
+procedure zglCiOSWindow.SetTouchPos_id( touch : UITouch; id : Byte );
   var
-    i     : Integer;
-    touch : UITouch;
     point : CGPoint;
 begin
-  for i := 0 to touches.allObjects().count() - 1 do
-    begin
-      touch   := UITouch( touches.allObjects().objectAtIndex( i ) );
-      point   := touch.locationInView( Window );
-      point.x := point.x * eglView.contentScaleFactor();
-      point.y := point.y * eglView.contentScaleFactor();
+  point   := touch.locationInView( Window );
+  point.x := point.x * eglView.contentScaleFactor();
+  point.y := point.y * eglView.contentScaleFactor();
 
-      case scrAngle of
-        0:
-          begin
-            touchX[ i ] := Round( point.x );
-            touchY[ i ] := Round( point.y );
-          end;
-        180:
-          begin
-            touchX[ i ] := Round( wndWidth - point.x );
-            touchY[ i ] := Round( wndHeight - point.y );
-          end;
-        270:
-          begin
-            touchX[ i ] := Round( point.y );
-            touchY[ i ] := Round( wndHeight - point.x );
-          end;
-        90:
-          begin
-            touchX[ i ] := Round( wndWidth - point.y );
-            touchY[ i ] := Round( point.x );
-          end;
+  case scrAngle of
+    0:
+      begin
+        touchX[ id ] := Round( point.x );
+        touchY[ id ] := Round( point.y );
       end;
-
-      touchX[ i ] := Round( ( touchX[ i ] - scrAddCX ) / scrResCX );
-      touchY[ i ] := Round( ( touchY[ i ] - scrAddCY ) / scrResCY );
+    180:
+      begin
+        touchX[ id ] := Round( wndWidth - point.x );
+        touchY[ id ] := Round( wndHeight - point.y );
+      end;
+    270:
+      begin
+        touchX[ id ] := Round( point.y );
+        touchY[ id ] := Round( wndHeight - point.x );
+      end;
+    90:
+      begin
+        touchX[ id ] := Round( wndWidth - point.y );
+        touchY[ id ] := Round( point.x );
+      end;
     end;
 
-  mouseX := touchX[ touches.allObjects().count() - 1 ];
-  mouseY := touchY[ touches.allObjects().count() - 1 ];
+  touchX[ id ] := Round( ( touchX[ id ] - scrAddCX ) / scrResCX );
+  touchY[ id ] := Round( ( touchY[ id ] - scrAddCY ) / scrResCY );
+  mouseX := touchX[ id ];
+  mouseY := touchY[ id ];
+end;
+
+function zglCiOSWindow.GetTouchID( touch : UITouch ) : Byte;
+  var
+    i : Integer;
+begin
+  for i := 0 to touchCount - 1 do
+    if touchList[ i ] = Pointer( touch ) Then
+      begin
+        Result := i;
+        exit;
+      end;
+
+  for i := 0 to 255 do
+    if not Assigned( touchList[ i ] ) Then
+      begin
+        INC( touchCount );
+        Result := i;
+        exit;
+      end;
+end;
+
+procedure zglCiOSWindow.UpdateTouches( touches : NSSet );
+  var
+    i, j  : Integer;
+    id    : Byte;
+    touch : UITouch;
+begin
+  for i := 0 to touches.count - 1 do
+    begin
+      touch := UITouch( touches.allObjects().objectAtIndex( i ) );
+      id    := GetTouchID( touch );
+      SetTouchPos_id( touch, id );
+
+      case touch.phase of
+        UITouchPhaseBegan:
+          begin
+            touchList[ id ] := touch;
+            touchDown[ id ] := TRUE;
+            if touchCanTap[ id ] Then
+              begin
+                touchTap   [ id ] := TRUE;
+                touchCanTap[ id ] := FALSE;
+                if touch.tapCount = 2 Then
+                  touchDblTap[ id ] := TRUE;
+              end;
+
+            if Assigned( touch_PPress ) Then
+              touch_PPress( id );
+          end;
+        UITouchPhaseMoved:
+          begin
+            touchList[ id ] := touch;
+            touchDown[ id ] := TRUE;
+            if touchCanTap[ id ] Then
+              begin
+                touchTap   [ id ] := TRUE;
+                touchCanTap[ id ] := FALSE;
+                if touch.tapCount = 2 Then
+                  touchDblTap[ id ] := TRUE;
+              end;
+
+            if Assigned( touch_PMove ) Then
+              touch_PMove( id, touchX[ id ], touchY[ id ] );
+          end;
+        UITouchPhaseEnded, UITouchPhaseCancelled:
+          begin
+            touchList[ id ]   := nil;
+            touchDown[ id ]   := FALSE;
+            touchUp  [ id ]   := TRUE;
+            touchCanTap[ id ] := FALSE;
+
+            if Assigned( touch_PRelease ) Then
+              touch_PRelease( id );
+          end;
+      end;
+    end;
 end;
 
 procedure zglCiOSWindow.touchesBegan_withEvent( touches : NSSet; event : UIevent );
-  var
-    i     : Integer;
-    touch : UITouch;
 begin
-  GetTouchPos( touches );
-
-  for i := 0 to touches.allObjects().count() - 1 do
-    begin
-      touch := UITouch( touches.allObjects().objectAtIndex( i ) );
-
-      touchDown[ i ] := TRUE;
-      if touchCanTap[ i ] Then
-        begin
-          touchTap   [ i ] := TRUE;
-          touchCanTap[ i ] := FALSE;
-          if touch.tapCount() = 2 Then
-            touchDblTap[ i ] := TRUE;
-        end;
-
-      if Assigned( touch_PPress ) Then
-        touch_PPress( i );
-    end;
+  UpdateTouches( event.touchesForWindow( Self ) );
 
   // mouse emulation
   mouseDown[ M_BLEFT ] := TRUE;
@@ -1411,34 +1463,21 @@ begin
         mouseDblClick[ M_BLEFT ] := TRUE;
       mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
     end;
-
-  inherited touchesBegan_withEvent( touches, event );
 end;
 
 procedure zglCiOSWindow.touchesMoved_withEvent( touches : NSSet; event : UIevent );
-  var
-    i : Integer;
 begin
-  GetTouchPos( touches );
-
-  if Assigned( touch_PMove ) Then
-    for i := 0 to touches.allObjects().count() - 1 do
-      touch_PMove( i, touchX[ i ], touchY[ i ] );
-
-  inherited touchesMoved_withEvent( touches, event );
+  UpdateTouches( event.touchesForWindow( Self ) );
 end;
 
 procedure zglCiOSWindow.touchesEnded_withEvent( touches : NSSet; event : UIevent );
   var
-    i     : Integer;
-    touch : UITouch;
+    i : Integer;
 begin
-  GetTouchPos( touches );
-
-  for i := 0 to touches.allObjects().count() - 1 do
+  touchCount := 0;
+  for i := 0 to 255 do
     begin
-      touch := UITouch( touches.allObjects().objectAtIndex( i ) );
-
+      touchList[ i ]   := nil;
       touchDown[ i ]   := FALSE;
       touchUp  [ i ]   := TRUE;
       touchCanTap[ i ] := FALSE;
@@ -1451,13 +1490,11 @@ begin
   mouseDown[ M_BLEFT ]     := FALSE;
   mouseUp  [ M_BLEFT ]     := TRUE;
   mouseCanClick[ M_BLEFT ] := TRUE;
-
-  inherited touchesEnded_withEvent( touches, event );
 end;
 
 procedure zglCiOSWindow.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
 begin
-  inherited touchesCancelled_withEvent( touches, event );
+  touchesEnded_withEvent( touches, event );
 end;
 {$ENDIF}
 

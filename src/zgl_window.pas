@@ -304,6 +304,7 @@ begin
 {$IFDEF iOS}
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
   wndHandle := zglCiOSWindow.alloc().initWithFrame( CGRectMake( wndX, wndY, Width, Height ) );
+  wndHandle.setMultipleTouchEnabled( TRUE );
   wndViewCtrl := zglCiOSViewController.alloc().init();
   wndHandle.addSubview( wndViewCtrl.view );
 
