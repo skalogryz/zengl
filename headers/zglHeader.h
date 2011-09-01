@@ -1540,7 +1540,7 @@ static bool zglLoad( const char* LibraryName )
     zglGetAddress( tess_GetData, zglLib, "tess_GetData" );
 
     zglGetAddress( col2d_PointInRect, zglLib, "col2d_PointInRect" );
-    zglGetAddress( col2d_PointInTriangle, zglLib, "col2d_PointInriangle" );
+    zglGetAddress( col2d_PointInTriangle, zglLib, "col2d_PointInTriangle" );
     zglGetAddress( col2d_PointInCircle, zglLib, "col2d_PointInCircle" );
     zglGetAddress( col2d_Line, zglLib, "col2d_Line" );
     zglGetAddress( col2d_LineVsRect, zglLib, "col2d_LineVsRect" );
