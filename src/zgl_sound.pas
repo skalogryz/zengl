@@ -36,9 +36,7 @@ uses
   Windows,
   {$ENDIF}
   {$IFDEF iOS}
-  iPhoneAll,
   CFBase,
-  CFString,
   CFRunLoop,
   {$ENDIF}
   {$IFDEF USE_OPENAL}
