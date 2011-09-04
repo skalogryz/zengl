@@ -135,25 +135,26 @@ const
   MANAGER_EMITTER2D       = 806;
 
   // zgl_Enable/zgl_Disable
-  COLOR_BUFFER_CLEAR        = $000001;
-  DEPTH_BUFFER              = $000002;
-  DEPTH_BUFFER_CLEAR        = $000004;
-  DEPTH_MASK                = $000008;
-  STENCIL_BUFFER_CLEAR      = $000010;
-  CORRECT_RESOLUTION        = $000020;
-  CORRECT_WIDTH             = $000040;
-  CORRECT_HEIGHT            = $000080;
-  APP_USE_AUTOPAUSE         = $000100;
-  APP_USE_LOG               = $000200;
-  APP_USE_ENGLISH_INPUT     = $000400;
-  APP_USE_UTF8              = $000800;
-  WND_USE_AUTOCENTER        = $001000;
-  SND_CAN_PLAY              = $002000;
-  SND_CAN_PLAY_FILE         = $004000;
-  CLIP_INVISIBLE            = $008000;
+  COLOR_BUFFER_CLEAR    = $000001;
+  DEPTH_BUFFER          = $000002;
+  DEPTH_BUFFER_CLEAR    = $000004;
+  DEPTH_MASK            = $000008;
+  STENCIL_BUFFER_CLEAR  = $000010;
+  CORRECT_RESOLUTION    = $000020;
+  CORRECT_WIDTH         = $000040;
+  CORRECT_HEIGHT        = $000080;
+  APP_USE_AUTOPAUSE     = $000100;
+  APP_USE_LOG           = $000200;
+  APP_USE_ENGLISH_INPUT = $000400;
+  APP_USE_UTF8          = $000800;
+  WND_USE_AUTOCENTER    = $001000;
+  SND_CAN_PLAY          = $002000;
+  SND_CAN_PLAY_FILE     = $004000;
+  CLIP_INVISIBLE        = $008000;
   {$IFDEF iOS}
-  SCR_ORIENTATION_PORTRAIT  = $100000;
-  SCR_ORIENTATION_LANDSCAPE = $200000;
+  SCR_ORIENTATION_PORTRAIT   = $100000;
+  SCR_ORIENTATION_LANDSCAPE  = $200000;
+  SND_ALLOW_BACKGROUND_MUSIC = $300000;
   {$ENDIF}
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
@@ -761,6 +762,9 @@ begin
 
   if What and SCR_ORIENTATION_LANDSCAPE > 0 Then
     scrCanLandscape := TRUE;
+
+  if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
+    sndAllowBackgroundMusic := 1;
 {$ENDIF}
 end;
 
@@ -814,6 +818,9 @@ begin
 
   if What and SCR_ORIENTATION_LANDSCAPE > 0 Then
     scrCanLandscape := FALSE;
+
+  if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
+    sndAllowBackgroundMusic := 0;
 {$ENDIF}
 end;
 

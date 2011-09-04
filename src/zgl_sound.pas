@@ -21,6 +21,9 @@
 unit zgl_sound;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$LINKFRAMEWORK AudioToolbox}
+{$ENDIF}
 
 interface
 
@@ -31,6 +34,12 @@ uses
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll,
+  CFBase,
+  CFString,
+  CFRunLoop,
   {$ENDIF}
   {$IFDEF USE_OPENAL}
   zgl_sound_openal,
@@ -191,6 +200,10 @@ var
   sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 
+  {$IFDEF iOS}
+  sndAllowBackgroundMusic : LongWord;
+  {$ENDIF}
+
   sfThread : array[ 1..SND_MAX ] of LongWord;
   {$IFNDEF FPC}
   sfThreadID : array[ 1..SND_MAX ] of LongWord;
@@ -206,6 +219,44 @@ uses
   zgl_resources,
   zgl_log,
   zgl_utils;
+
+{$IFDEF iOS}
+const
+  kAudioSessionProperty_PreferredHardwareSampleRate           = 'hwsr';   // Float64          (get/set)
+  kAudioSessionProperty_PreferredHardwareIOBufferDuration     = 'iobd';   // Float32          (get/set)
+  kAudioSessionProperty_AudioCategory                         = 'acat';   // UInt32           (get/set)
+  kAudioSessionProperty_AudioRoute                            = 'rout';   // CFStringRef      (get only)
+  kAudioSessionProperty_AudioRouteChange                      = 'roch';   // CFDictionaryRef  (property listener)
+  kAudioSessionProperty_CurrentHardwareSampleRate             = 'chsr';   // Float64          (get only)
+  kAudioSessionProperty_CurrentHardwareInputNumberChannels    = 'chic';   // UInt32           (get only)
+  kAudioSessionProperty_CurrentHardwareOutputNumberChannels   = 'choc';   // UInt32           (get only)
+  kAudioSessionProperty_CurrentHardwareOutputVolume           = 'chov';   // Float32          (get only/property listener)
+  kAudioSessionProperty_CurrentHardwareInputLatency           = 'cilt';   // Float32          (get only)
+  kAudioSessionProperty_CurrentHardwareOutputLatency          = 'colt';   // Float32          (get only)
+  kAudioSessionProperty_CurrentHardwareIOBufferDuration       = 'chbd';   // Float32          (get only)
+  kAudioSessionProperty_OtherAudioIsPlaying                   = 'othr';   // UInt32           (get only)
+  kAudioSessionProperty_OverrideAudioRoute                    = 'ovrd';   // UInt32           (set only)
+  kAudioSessionProperty_AudioInputAvailable                   = 'aiav';   // UInt32           (get only/property listener)
+  kAudioSessionProperty_ServerDied                            = 'died';   // UInt32           (property listener)
+  kAudioSessionProperty_OtherMixableAudioShouldDuck           = 'duck';   // UInt32           (get/set)
+  kAudioSessionProperty_OverrideCategoryMixWithOthers         = 'cmix';   // UInt32           (get, some set)
+  kAudioSessionProperty_OverrideCategoryDefaultToSpeaker      = 'cspk';   // UInt32           (get, some set)
+  kAudioSessionProperty_OverrideCategoryEnableBluetoothInput  = 'cblu';   // UInt32           (get, some set)
+  kAudioSessionProperty_InterruptionType                      = 'type';   // UInt32           (get only)
+
+  kAudioSessionCategory_AmbientSound     = 'ambi';
+  kAudioSessionCategory_SoloAmbientSound = 'solo';
+  kAudioSessionCategory_MediaPlayback    = 'medi';
+  kAudioSessionCategory_RecordAudio      = 'reca';
+  kAudioSessionCategory_PlayAndRecord    = 'plar';
+  kAudioSessionCategory_AudioProcessing  = 'proc';
+
+type
+  AudioSessionInterruptionListener = ( kAudioSessionEndInterruption = 0, kAudioSessionBeginInterruption = 1 );
+
+function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetProperty( inID : PChar; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
+{$ENDIF}
 
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
   var
@@ -298,6 +349,9 @@ end;
 function snd_Init : Boolean;
   var
     i : Integer;
+  {$IFDEF iOS}
+    sessionCategory : LongWord;
+  {$ENDIF}
 begin
   Result := FALSE;
 {$IFDEF USE_OPENAL}
@@ -316,15 +370,27 @@ begin
   log_Add( 'OpenAL: opening "Generic Software"' );
   oalDevice := alcOpenDevice( 'Generic Software' );
   {$ENDIF}
-  {$IFDEF DARWIN}
+  {$IFDEF MACOSX}
   log_Add( 'OpenAL: opening "CoreAudio Software"' );
   oalDevice := alcOpenDevice( 'CoreAudio Software' );
   {$ENDIF}
+  {$IFDEF iOS}
+  log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
+  oalDevice := alcOpenDevice( nil );
+  if Assigned( oalDevice ) and ( sndAllowBackgroundMusic = 1 ) Then
+    begin
+      AudioSessionInitialize( nil, nil, kAudioSessionEndInterruption, nil );
+      sessionCategory := LongWord( kAudioSessionCategory_MediaPlayback );
+      AudioSessionSetProperty( kAudioSessionProperty_AudioCategory, SizeOf( sessionCategory ), @sessionCategory );
+      AudioSessionSetProperty( kAudioSessionProperty_OverrideCategoryMixWithOthers, SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+    end;
+  {$ELSE}
   if not Assigned( oalDevice ) Then
     begin
       oalDevice := alcOpenDevice( nil );
       log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
     end;
+  {$ENDIF}
   if not Assigned( oalDevice ) Then
     begin
       log_Add( 'Cannot open sound device' );
