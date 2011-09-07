@@ -502,8 +502,11 @@ begin
     end;
 {$ENDIF}
 {$IFDEF iOS}
-  wndWidth  := scrDesktopW;
-  wndHeight := scrDesktopH;
+  if wndPortrait and scrCanPortrait Then
+    eglView.setFrame( CGRectMake( 0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height ) )
+  else
+    eglView.setFrame( CGRectMake( 0, 0, UIScreen.mainScreen.bounds.size.height, UIScreen.mainScreen.bounds.size.width ) );
+  eglContext.renderbufferStorage_fromDrawable( GL_RENDERBUFFER, eglSurface );
 {$ENDIF}
   oglWidth  := Width;
   oglHeight := Height;

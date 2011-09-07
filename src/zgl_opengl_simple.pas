@@ -138,26 +138,21 @@ begin
       Height := Round( Height * scrResCY );
     end;
   glEnable( GL_SCISSOR_TEST );
-  {$IFNDEF iOS}
   glScissor( X, wndHeight - Y - Height, Width, Height );
-  {$ELSE}
-  if ( wndPortrait ) or ( not scrCanPortrait ) Then
-    glScissor( X, wndHeight - Y - Height, Width, Height )
-  else
-    glScissor( wndHeight - Y - Height, X, Height, Width );
-  {$ENDIF}
 
   INC( tSCount );
   SetLength( tScissor, tSCount );
-  tScissor[ tSCount - 1 ][ 0 ] := oglClipX;
-  tScissor[ tSCount - 1 ][ 1 ] := oglClipY;
-  tScissor[ tSCount - 1 ][ 2 ] := oglClipW;
-  tScissor[ tSCount - 1 ][ 3 ] := oglClipH;
+  tScissor[ tSCount - 1 ][ 0 ] := render2dClipX;
+  tScissor[ tSCount - 1 ][ 1 ] := render2dClipY;
+  tScissor[ tSCount - 1 ][ 2 ] := render2dClipW;
+  tScissor[ tSCount - 1 ][ 3 ] := render2dClipH;
 
-  oglClipX := X;
-  oglClipY := Y;
-  oglClipW := Width;
-  oglClipH := Height;
+  render2dClipX  := X;
+  render2dClipY  := Y;
+  render2dClipW  := Width;
+  render2dClipH  := Height;
+  render2dClipXW := render2dClipX + render2dClipW;
+  render2dClipYH := render2dClipY + render2dClipH;
 end;
 
 procedure scissor_End;
@@ -166,23 +161,16 @@ begin
 
   if tSCount - 1 < 0 Then exit;
   DEC( tSCount );
-  oglClipX := tScissor[ tSCount ][ 0 ];
-  oglClipY := tScissor[ tSCount ][ 1 ];
-  oglClipW := tScissor[ tSCount ][ 2 ];
-  oglClipH := tScissor[ tSCount ][ 3 ];
+  render2dClipX := tScissor[ tSCount ][ 0 ];
+  render2dClipY := tScissor[ tSCount ][ 1 ];
+  render2dClipW := tScissor[ tSCount ][ 2 ];
+  render2dClipH := tScissor[ tSCount ][ 3 ];
   SetLength( tScissor, tSCount );
 
   if tSCount > 0 Then
     begin
       glEnable( GL_SCISSOR_TEST );
-      {$IFNDEF iOS}
-      glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH );
-      {$ELSE}
-      if ( wndPortrait ) or ( not scrCanPortrait ) Then
-        glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH )
-      else
-        glScissor( wndHeight - oglClipY - oglClipH, oglClipX, oglClipH, oglClipW );
-      {$ENDIF}
+      glScissor( render2dClipX, wndHeight - render2dClipY - render2dClipH, render2dClipW, render2dClipH );
     end else
       glDisable( GL_SCISSOR_TEST );
 end;

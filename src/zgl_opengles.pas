@@ -77,14 +77,8 @@ var
   oglTarget  : Integer = TARGET_SCREEN;
   oglTargetW : Integer;
   oglTargetH : Integer;
-
-  oglWidth  : Integer;
-  oglHeight : Integer;
-  oglClipX  : Integer;
-  oglClipY  : Integer;
-  oglClipW  : Integer;
-  oglClipH  : Integer;
-  oglClipR  : Integer;
+  oglWidth   : Integer;
+  oglHeight  : Integer;
 
   oglVRAMUsed : LongWord;
 
@@ -334,8 +328,11 @@ begin
   frame.size.height := oglHeight;
   eglView := zglCiOSEAGLView.alloc().initWithFrame( frame );
   // iPhone Retina display
-  if ( scrCurrentModeW = 640 ) and ( scrCurrentModeH = 960 ) Then
-    eglView.setContentScaleFactor( 2 );
+  if ( UIDevice.currentDevice.systemVersion.floatValue >= 3.2 ) and ( UIScreen.mainScreen.currentMode.size.width = 640 ) and ( UIScreen.mainScreen.currentMode.size.height = 960 ) Then
+    begin
+      eglView.setContentScaleFactor( 2 );
+      log_Add( 'Retina display detected' );
+    end;
 
   eglSurface := CAEAGLLayer( eglView.layer );
   eglSurface.setOpaque( TRUE );

@@ -132,8 +132,6 @@ var
   lRTarget : zglPRenderTarget;
   lGLW     : Integer;
   lGLH     : Integer;
-  lClipW   : Integer;
-  lClipH   : Integer;
   lResCX   : Single;
   lResCY   : Single;
 
@@ -579,13 +577,11 @@ begin
 
   if Assigned( Target ) Then
     begin
-      lRTarget   := Target;
-      lGLW       := oglWidth;
-      lGLH       := oglHeight;
-      lClipW     := oglClipW;
-      lClipH     := oglClipH;
-      lResCX     := scrResCX;
-      lResCY     := scrResCY;
+      lRTarget := Target;
+      lGLW     := oglWidth;
+      lGLH     := oglHeight;
+      lResCX   := scrResCX;
+      lResCY   := scrResCY;
 
       case Target._type of
         {$IFNDEF USE_GLES}
@@ -676,8 +672,6 @@ begin
           oglTargetH := oglHeight;
           if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
             begin
-              oglClipW := lClipW;
-              oglClipH := lClipH;
               scrResCX := lResCX;
               scrResCY := lResCY;
             end;

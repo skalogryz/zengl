@@ -58,14 +58,8 @@ var
   oglTarget  : Integer = TARGET_SCREEN;
   oglTargetW : Integer;
   oglTargetH : Integer;
-
-  oglWidth  : Integer;
-  oglHeight : Integer;
-  oglClipX  : Integer;
-  oglClipY  : Integer;
-  oglClipW  : Integer;
-  oglClipH  : Integer;
-  oglClipR  : Integer;
+  oglWidth   : Integer;
+  oglHeight  : Integer;
 
   oglVRAMUsed : LongWord;
 

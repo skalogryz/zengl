@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.08.17';
+  cs_Date     = '2011.09.06';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -231,9 +231,8 @@ begin
   zgl_GetSysDir();
   log_Init();
 
-  if not scr_Create() Then exit;
   appInitialized := TRUE;
-
+  if not scr_Create() Then exit;
   if not gl_Create() Then exit;
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Initialize() Then exit;
@@ -248,8 +247,7 @@ begin
   {$IFDEF iOS}
   key_BeginReadText( '' );
   key_EndReadText();
-  scr_Init();
-  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
+  scr_SetOptions( scrDesktopW, scrDesktopH, 0, TRUE, TRUE );
   {$ENDIF}
 
   app_PInit();
@@ -274,9 +272,9 @@ begin
 
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
-  if not scr_Create() Then exit;
-  appInitedToHandle := TRUE;
 
+  appInitedToHandle := TRUE;
+  if not scr_Create() Then exit;
   if not gl_Create() Then exit;
   {$IFDEF LINUX}
   wndHandle := TWindow( Handle );
@@ -754,9 +752,6 @@ begin
     render2dClip := TRUE;
 
 {$IFDEF iOS}
-  if ( What and SCR_ORIENTATION_PORTRAIT > 0 ) or ( What and SCR_ORIENTATION_LANDSCAPE > 0 ) Then
-    if not scrInitialized Then scr_Init();
-
   if What and SCR_ORIENTATION_PORTRAIT > 0 Then
     scrCanPortrait := TRUE;
 
@@ -810,9 +805,6 @@ begin
     render2dClip := FALSE;
 
 {$IFDEF iOS}
-  if ( What and SCR_ORIENTATION_PORTRAIT > 0 ) or ( What and SCR_ORIENTATION_LANDSCAPE > 0 ) Then
-    if not scrInitialized Then scr_Init();
-
   if What and SCR_ORIENTATION_PORTRAIT > 0 Then
     scrCanPortrait := FALSE;
 

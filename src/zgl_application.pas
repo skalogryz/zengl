@@ -1185,8 +1185,7 @@ procedure zglCAppDelegate.applicationDidFinishLaunching( application: UIApplicat
 begin
   appDelegate := Self;
 
-  UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications();
-
+  scr_Init();
   performSelector_withObject_afterDelay( objcselector( 'EnterMainLoop' ), nil, 0.2{magic} );
 end;
 
@@ -1320,18 +1319,17 @@ begin
   if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
     begin
       wndPortrait := TRUE;
-      scrDesktopW := scrCurrentModeW;
-      scrDesktopH := scrCurrentModeH;
+      scrDesktopW := scrCurrModeW;
+      scrDesktopH := scrCurrModeH;
     end;
 
   if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
     begin
       wndPortrait := FALSE;
-      scrDesktopW := scrCurrentModeH;
-      scrDesktopH := scrCurrentModeW;
+      scrDesktopW := scrCurrModeH;
+      scrDesktopH := scrCurrModeW;
     end;
 
-  eglView.setFrame( CGRectMake( 0, 0, scrDesktopW, scrDesktopH ) );
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 end;
 

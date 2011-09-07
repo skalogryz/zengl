@@ -886,53 +886,91 @@ procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2
   var
     w, h, tX, tY, tU, tV, u, v   : Single;
     i, j, aI, aJ, bI, bJ, tI, tJ : Integer;
+    s, c, x1, y1, x2, y2, x3, y3, x4, y4 : Single;
 begin
   if ( not Assigned( Texture ) ) or ( not Assigned( Tiles ) ) Then exit;
 
-  i  := Round( Tiles.Size.W );
-  j  := Round( Tiles.Size.H );
-  tX := X;
-  tY := Y;
+  i := Round( Tiles.Size.W );
+  j := Round( Tiles.Size.H );
 
-  if tX < 0 Then
+  if X < 0 Then
     begin
-      aI := Round( -tX ) div i;
-      bI := Round( oglClipW / scrResCX ) div i + aI;
+      aI := Round( -X ) div i;
+      bI := render2dClipW div i + aI;
     end else
       begin
         aI := 0;
-        bI := Round( oglClipW / scrResCX ) div i - Round( tX ) div i;
+        bI := render2dClipW div i - Round( X ) div i;
       end;
 
-  if tY < 0 Then
+  if Y < 0 Then
     begin
-      aJ := Round( -tY ) div j;
-      bJ := Round( oglClipH / scrResCY ) div j + aJ;
+      aJ := Round( -Y ) div j;
+      bJ := render2dClipH div j + aJ;
     end else
       begin
         aJ := 0;
-        bJ := Round( oglClipH / scrResCY ) div j - Round( tY ) div j;
+        bJ := render2dClipH div j - Round( Y ) div j;
       end;
 
   if not cam2d.OnlyXY Then
     begin
-      tI := oglClipR div i - Round( oglWidth / scrResCX ) div i div 2 + 3;
-      tJ := oglClipR div j - Round( oglHeight / scrResCY ) div j div 2 + 3;
-      DEC( aI, tI );
-      INC( bI, tI );
-      DEC( aJ, tJ );
-      INC( bJ, tJ );
-    end;
-  if tX >= 0 Then
-    INC( aI, Round( ( cam2d.Global.X - tX ) / i ) - 1 )
-  else
-    INC( aI, Round( cam2d.Global.X / i ) - 1 );
-  INC( bI, Round( ( cam2d.Global.X ) / i ) + 1 );
-  if tY >= 0 Then
-    INC( aJ, Round( ( cam2d.Global.Y - tY ) / j ) - 1 )
-  else
-    INC( aJ, Round( cam2d.Global.Y / j ) - 1 );
-  INC( bJ, Round( cam2d.Global.Y / j ) + 1 );
+      tX := -cam2d.CX;
+      tY := -cam2d.CY;
+      tU := render2dClipW + tX;
+      tV := render2dClipH + tY;
+      u  := cam2d.CX;
+      v  := cam2d.CY;
+
+      m_SinCos( -cam2d.Global.Angle * deg2rad, s, c );
+
+      x1 := tX * c - tY * s + u;
+      y1 := tX * s + tY * c + v;
+      x2 := tU * c - tY * s + u;
+      y2 := tU * s + tY * c + v;
+      x3 := tU * c - tV * s + u;
+      y3 := tU * s + tV * c + v;
+      x4 := tX * c - tV * s + u;
+      y4 := tX * s + tV * c + v;
+
+      if x1 > x2 Then tX := x2 else tX := x1;
+      if tX > x3 Then tX := x3;
+      if tX > x4 Then tX := x4;
+      if y1 > y2 Then tY := y2 else tY := y1;
+      if tY > y3 Then tY := y3;
+      if tY > y4 Then tY := y4;
+      if x1 < x2 Then tU := x2 else tU := x1;
+      if tU < x3 Then tU := x3;
+      if tU < x4 Then tU := x4;
+      if y1 < y2 Then tV := y2 else tV := y1;
+      if tV < y3 Then tV := y3;
+      if tV < y4 Then tV := y4;
+
+      DEC( aI, Round( -tX / i ) );
+      INC( bI, Round( ( ( tU - render2dClipW ) ) / i ) );
+      DEC( aJ, Round( -tY / j ) );
+      INC( bJ, Round( ( tV - render2dClipH ) / j ) );
+
+      x1 := cam2d.Global.X * c - cam2d.Global.Y * s;
+      y1 := cam2d.Global.X * s + cam2d.Global.Y * c;
+      INC( aI, Round( x1 / i ) - 1 );
+      INC( bI, Round( x1 / i ) + 1 );
+      INC( aJ, Round( y1 / j ) - 1 );
+      INC( bJ, Round( y1 / j ) + 1 );
+    end else
+      begin
+        if X >= 0 Then
+          INC( aI, Round( ( cam2d.Global.X - X ) / i ) - 1 )
+        else
+          INC( aI, Round( cam2d.Global.X / i ) - 1 );
+        INC( bI, Round( ( cam2d.Global.X ) / i ) + 1 );
+        if Y >= 0 Then
+          INC( aJ, Round( ( cam2d.Global.Y - Y ) / j ) - 1 )
+        else
+          INC( aJ, Round( cam2d.Global.Y / j ) - 1 );
+        INC( bJ, Round( cam2d.Global.Y / j ) + 1 );
+      end;
+
   if aI < 0 Then aI := 0;
   if aJ < 0 Then aJ := 0;
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;

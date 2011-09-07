@@ -36,6 +36,13 @@ function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
 
 var
   render2dClip      : Boolean;
+  render2dClipX     : Integer;
+  render2dClipY     : Integer;
+  render2dClipW     : Integer;
+  render2dClipH     : Integer;
+  render2dClipXW    : Integer;
+  render2dClipYH    : Integer;
+  render2dClipR     : Integer;
   b2dStarted        : Boolean;
   b2dNew            : Boolean;
   b2dBatches        : LongWord;
@@ -128,11 +135,11 @@ end;
 function sprite2d_InScreenSimple( X, Y, W, H, Angle : Single ) : Boolean;
 begin
   if Angle <> 0 Then
-    Result := ( ( X + W + H / 2 > oglClipX ) and ( X - W - H / 2 < oglClipX + oglClipW / scrResCX ) and
-                ( Y + H + W / 2 > oglClipY ) and ( Y - W - H / 2 < oglClipY + oglClipH / scrResCY ) )
+    Result := ( ( X + W + H / 2 > render2dClipX ) and ( X - W - H / 2 < render2dClipXW ) and
+                ( Y + H + W / 2 > render2dClipY ) and ( Y - W - H / 2 < render2dClipYH ) )
   else
-    Result := ( ( X + W > oglClipX ) and ( X < oglClipX + oglClipW / scrResCX ) and
-                ( Y + H > oglClipY ) and ( Y < oglClipY + oglClipH / scrResCY ) );
+    Result := ( ( X + W > render2dClipX ) and ( X < render2dClipXW ) and
+                ( Y + H > render2dClipY ) and ( Y < render2dClipYH ) );
 end;
 
 function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
@@ -145,14 +152,14 @@ begin
       sy   := Y + H / 2;
       srad := ( W + H ) / 2;
 
-      Result := sqr( sx - cam2d.CX ) + sqr( sy - cam2d.CY ) < sqr( srad + oglClipR );
+      Result := sqr( sx - cam2d.CX ) + sqr( sy - cam2d.CY ) < sqr( srad + render2dClipR );
     end else
       if Angle <> 0 Then
-        Result := ( ( X + W + H / 2 > oglClipX + cam2d.Global.X ) and ( X - W - H / 2 < oglClipX + oglClipW / scrResCX + cam2d.Global.X ) and
-                    ( Y + H + W / 2 > oglClipY + cam2d.Global.Y ) and ( Y - W - H / 2 < oglClipY + oglClipH / scrResCY + cam2d.Global.Y ) )
+        Result := ( ( X + W + H / 2 > render2dClipX + cam2d.Global.X ) and ( X - W - H / 2 < render2dClipXW + cam2d.Global.X ) and
+                    ( Y + H + W / 2 > render2dClipY + cam2d.Global.Y ) and ( Y - W - H / 2 < render2dClipYH + cam2d.Global.Y ) )
       else
-        Result := ( ( X + W > oglClipX + cam2d.Global.X ) and ( X < oglClipX + oglClipW / scrResCX + cam2d.Global.X ) and
-                    ( Y + H > oglClipY + cam2d.Global.Y ) and ( Y < oglClipY + oglClipH / scrResCY + cam2d.Global.Y ) );
+        Result := ( ( X + W > render2dClipX + cam2d.Global.X ) and ( X < render2dClipXW + cam2d.Global.X ) and
+                    ( Y + H > render2dClipY + cam2d.Global.Y ) and ( Y < render2dClipYH + cam2d.Global.Y ) );
 end;
 
 initialization

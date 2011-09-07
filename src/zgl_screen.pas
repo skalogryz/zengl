@@ -108,6 +108,12 @@ var
   scrInitialized : Boolean;
   scrChanging    : Boolean;
 
+  // Viewport
+  scrViewportX : Integer;
+  scrViewportY : Integer;
+  scrViewportW : Integer;
+  scrViewportH : Integer;
+
   // Resolution Correct
   scrResW  : Integer;
   scrResH  : Integer;
@@ -144,8 +150,8 @@ var
   {$ENDIF}
   {$IFDEF iOS}
   scrDisplayLink  : CADisplayLink;
-  scrCurrentModeW : Integer;
-  scrCurrentModeH : Integer;
+  scrCurrModeW    : Integer;
+  scrCurrModeH    : Integer;
   scrDesktopW     : Integer;
   scrDesktopH     : Integer;
   scrOrientation  : UIInterfaceOrientation;
@@ -245,35 +251,38 @@ begin
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
 {$IFDEF iOS}
+  if not appInitialized Then exit;
+
   app_InitPool();
+
+  if UIDevice.currentDevice.systemVersion.floatValue >= 3.2 Then
+    begin
+      scrDesktopW := Round( UIScreen.mainScreen.currentMode.size.width );
+      scrDesktopH := Round( UIScreen.mainScreen.currentMode.size.height );
+    end else
+      begin
+        scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
+        scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+      end;
+
+  // here some magic...
+  if scrDesktopW > scrDesktopH Then
+    begin
+      scrCurrModeH := scrDesktopH;
+      scrDesktopH  := scrDesktopW;
+      scrDesktopW  := scrCurrModeH;
+    end;
+
+  scrCurrModeW   := scrDesktopW;
+  scrCurrModeH   := scrDesktopH;
+  wndWidth       := scrDesktopW;
+  wndHeight      := scrDesktopH;
+  oglWidth       := scrDesktopW;
+  oglHeight      := scrDesktopH;
+  oglTargetW     := scrDesktopW;
+  oglTargetH     := scrDesktopH;
   scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
-  wndPortrait    := scrCanPortrait;
-
-  if ( UIDevice.currentDevice.systemVersion.floatValue() >= 3.2 ) Then
-    begin
-      // magic...
-      {$IFNDEF iPhoneSim}
-      scrCurrentModeW := Round( UIScreen.mainScreen.currentMode.size.height );
-      scrCurrentModeH := Round( UIScreen.mainScreen.currentMode.size.width );
-      {$ELSE}
-      scrCurrentModeW := Round( UIScreen.mainScreen.currentMode.size.width );
-      scrCurrentModeH := Round( UIScreen.mainScreen.currentMode.size.height );
-      {$ENDIF}
-    end else
-      begin
-        scrCurrentModeW := Round( UIScreen.mainScreen.bounds.size.width );
-        scrCurrentModeH := Round( UIScreen.mainScreen.bounds.size.height );
-      end;
-
-  if scrCanPortrait Then
-    begin
-      scrDesktopW := scrCurrentModeW;
-      scrDesktopH := scrCurrentModeH;
-    end else
-      begin
-        scrDesktopW := scrCurrentModeH;
-        scrDesktopH := scrCurrentModeW;
-      end;
+  wndPortrait    := ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown );
 {$ENDIF}
   scrInitialized := TRUE;
 end;
@@ -508,11 +517,12 @@ procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boo
     b : Integer;
   {$ENDIF}
 begin
+{$IFDEF iOS}
+  FullScreen := TRUE;
+  VSync      := TRUE;
+{$ENDIF}
+
   scrChanging   := TRUE;
-  oglWidth      := Width;
-  oglHeight     := Height;
-  oglTargetW    := Width;
-  oglTargetH    := Height;
   wndWidth      := Width;
   wndHeight     := Height;
   wndFullScreen := FullScreen;
@@ -533,7 +543,14 @@ begin
         {$ENDIF}
       end;
 
-  if not appInitialized Then exit;
+  if not appInitialized Then
+    begin
+      oglWidth   := Width;
+      oglHeight  := Height;
+      oglTargetW := Width;
+      oglTargetH := Height;
+      exit;
+    end;
   scr_SetVSync( scrVSync );
 {$IFDEF LINUX}
   if wndFullScreen Then
@@ -636,10 +653,14 @@ end;
 
 procedure scr_CorrectResolution( Width, Height : Word );
 begin
-  scrResW  := Width;
-  scrResH  := Height;
-  scrResCX := wndWidth  / Width;
-  scrResCY := wndHeight / Height;
+  scrResW        := Width;
+  scrResH        := Height;
+  scrResCX       := wndWidth  / Width;
+  scrResCY       := wndHeight / Height;
+  render2dClipW  := Width;
+  render2dClipH  := Height;
+  render2dClipXW := render2dClipX + render2dClipW;
+  render2dClipYH := render2dClipY + render2dClipH;
 
   if scrResCX < scrResCY Then
     begin
@@ -677,41 +698,36 @@ begin
     begin
       if ( appFlags and CORRECT_RESOLUTION > 0 ) and ( oglMode = 2 ) Then
         begin
-          oglClipX := 0;
-          oglClipY := 0;
-          oglClipW := wndWidth - scrAddCX * 2;
-          oglClipH := wndHeight - scrAddCY * 2;
-          {$IFNDEF iOS}
-          glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
-          {$ELSE}
-          if ( wndPortrait ) or ( not scrCanPortrait ) Then
-            glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH )
-          else
-            glViewPort( scrAddCY, scrAddCX, oglClipH, oglClipW );
-          {$ENDIF}
+          scrViewportX := scrAddCX;
+          scrViewportY := scrAddCY;
+          scrViewportW := wndWidth- scrAddCX * 2;
+          scrViewportH := wndHeight - scrAddCY * 2;
         end else
           begin
-            oglClipX := 0;
-            oglClipY := 0;
-            oglClipW := wndWidth;
-            oglClipH := wndHeight;
-            {$IFNDEF iOS}
-            glViewPort( 0, 0, oglClipW, oglClipH );
-            {$ELSE}
-            if ( wndPortrait ) or ( not scrCanPortrait ) Then
-              glViewPort( 0, 0, oglClipW, oglClipH )
-            else
-              glViewPort( 0, 0, oglClipH, oglClipW );
-            {$ENDIF}
+            scrViewportX := 0;
+            scrViewportY := 0;
+            scrViewportW := wndWidth;
+            scrViewportH := wndHeight;
           end;
     end else
       begin
-        oglClipX := 0;
-        oglClipY := 0;
-        oglClipW := oglWidth;
-        oglClipH := oglHeight;
-        glViewPort( 0, 0, oglTargetW, oglTargetH );
+        scrViewportX := 0;
+        scrViewportY := 0;
+        scrViewportW := oglTargetW;
+        scrViewportH := oglTargetH;
       end;
+
+  if appFlags and CORRECT_RESOLUTION > 0 Then
+    begin
+      render2dClipW := scrResW;
+      render2dClipH := scrResH;
+    end else
+      begin
+        render2dClipW := scrViewportW;
+        render2dClipH := scrViewportH;
+      end;
+
+  glViewPort( scrViewportX, scrViewportY, scrViewportW, scrViewportH );
 end;
 
 procedure scr_SetVSync( VSync : Boolean );
@@ -762,7 +778,7 @@ procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );
-  glReadPixels( X, oglClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+  glReadPixels( X, oglHeight - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
 
 end.
