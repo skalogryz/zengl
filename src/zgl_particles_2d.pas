@@ -1177,8 +1177,9 @@ begin
             EMITTER_LINE:
               begin
                 p.Direction  := AsLine.Direction + AsLine.Spread / 2 - Random( Round( AsLine.Spread * 1000 ) ) / 1000;
-                p.Position.X := Params.Position.X + cos( AsLine.Direction + 90 * deg2rad ) * ( AsLine.Size / 2 - Random( Round( AsLine.Size * 1000 ) ) / 1000 );
-                p.Position.Y := Params.Position.Y + sin( AsLine.Direction + 90 * deg2rad ) * ( AsLine.Size / 2 - Random( Round( AsLine.Size * 1000 ) ) / 1000 );
+                size         := ( AsLine.Size / 2 - Random( Round( AsLine.Size * 1000 ) ) / 1000 );
+                p.Position.X := Params.Position.X + cos( AsLine.Direction + 90 * deg2rad ) * size;
+                p.Position.Y := Params.Position.Y + sin( AsLine.Direction + 90 * deg2rad ) * size;
                 if AsLine.TwoSide Then
                   p.Direction := p.Direction + 180 * ( Random( 2 ) - 1 ) * deg2rad;
               end;
