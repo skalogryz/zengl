@@ -719,12 +719,16 @@ begin
 
   if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
-      render2dClipW := scrResW;
-      render2dClipH := scrResH;
+      render2dClipW  := scrResW;
+      render2dClipH  := scrResH;
+      render2dClipXW := render2dClipX + render2dClipW;
+      render2dClipYH := render2dClipY + render2dClipH;
     end else
       begin
-        render2dClipW := scrViewportW;
-        render2dClipH := scrViewportH;
+        render2dClipW  := scrViewportW;
+        render2dClipH  := scrViewportH;
+        render2dClipXW := render2dClipX + render2dClipW;
+        render2dClipYH := render2dClipY + render2dClipH;
       end;
 
   glViewPort( scrViewportX, scrViewportY, scrViewportW, scrViewportH );
