@@ -126,13 +126,17 @@ type
   end;
 
   zglTEmitterRect = record
-    Rect : zglTRect;
+    Direction : Single;
+    Spread    : Single;
+    Rect      : zglTRect;
   end;
 
   zglPEmitterCircle = ^zglTEmitterCircle;
   zglTEmitterCircle = record
-    cX, cY : Single;
-    Radius : Single;
+    Direction : Single;
+    Spread    : Single;
+    cX, cY    : Single;
+    Radius    : Single;
   end;
 
   zglTParticleParams = record
@@ -1185,11 +1189,13 @@ begin
               end;
             EMITTER_RECTANGLE:
               begin
+                p.Direction  := AsRect.Direction + AsRect.Spread / 2 - Random( Round( AsRect.Spread * 1000 ) ) / 1000;
                 p.Position.X := Params.Position.X + AsRect.Rect.X + Random( Round( AsRect.Rect.W ) );
                 p.Position.Y := Params.Position.Y + AsRect.Rect.Y + Random( Round( AsRect.Rect.H ) );
               end;
             EMITTER_CIRCLE:
               begin
+                p.Direction  := AsCircle.Direction + AsCircle.Spread / 2 - Random( Round( AsCircle.Spread * 1000 ) ) / 1000;
                 p.Position.X := Params.Position.X + AsCircle.cX + cos( Random( 360 ) * deg2rad ) * AsCircle.Radius;
                 p.Position.Y := Params.Position.Y + AsCircle.cY + sin( Random( 360 ) * deg2rad ) * AsCircle.Radius;
               end;

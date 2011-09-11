@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.07.07           }
+{ date:     2011.09.11           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -900,13 +900,17 @@ type
   end;
 
   zglTEmitterRect = record
-    Rect : zglTRect;
+    Direction : Single;
+    Spread    : Single;
+    Rect      : zglTRect;
   end;
 
   zglPEmitterCircle = ^zglTEmitterCircle;
   zglTEmitterCircle = record
-    cX, cY : Single;
-    Radius : Single;
+    Direction : Single;
+    Spread    : Single;
+    cX, cY    : Single;
+    Radius    : Single;
   end;
 
   zglTParticleParams = record
