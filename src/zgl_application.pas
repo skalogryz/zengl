@@ -1475,13 +1475,13 @@ begin
   touchCount := 0;
   for i := 0 to 255 do
     begin
+      if Assigned( touch_PRelease ) and Assigned( touchList[ i ] ) Then
+        touch_PRelease( i );
+
       touchList[ i ]   := nil;
       touchDown[ i ]   := FALSE;
       touchUp  [ i ]   := TRUE;
       touchCanTap[ i ] := FALSE;
-
-      if Assigned( touch_PRelease ) Then
-        touch_PRelease( i );
     end;
 
   // mouse emulation
