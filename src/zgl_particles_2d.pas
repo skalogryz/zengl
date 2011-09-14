@@ -53,6 +53,7 @@ const
   EMITTER_LINE      = 2;
   EMITTER_RECTANGLE = 3;
   EMITTER_CIRCLE    = 4;
+  EMITTER_RING      = 5;
 
 type
   PDiagramByte         = ^TDiagramByte;
@@ -139,6 +140,15 @@ type
     Radius    : Single;
   end;
 
+  zglPEmitterRing = ^zglTEmitterRing;
+  zglTEmitterRing = record
+    Direction : Single;
+    Spread    : Single;
+    cX, cY    : Single;
+    Radius0   : Single;
+    Radius1   : Single;
+  end;
+
   zglTParticleParams = record
     Texture    : zglPTexture;
     BlendMode  : Byte;
@@ -202,6 +212,7 @@ type
       EMITTER_LINE: ( AsLine : zglTEmitterLine );
       EMITTER_RECTANGLE: ( AsRect : zglTEmitterRect );
       EMITTER_CIRCLE: ( AsCircle : zglTEmitterCircle );
+      EMITTER_RING: ( AsRing : zglTEmitterRing );
   end;
 
   zglTPEngine2D = record
@@ -386,6 +397,7 @@ begin
         EMITTER_LINE:      AsLine   := Emitter.AsLine;
         EMITTER_RECTANGLE: AsRect   := Emitter.AsRect;
         EMITTER_CIRCLE:    AsCircle := Emitter.AsCircle;
+        EMITTER_RING:      AsRing   := Emitter.AsRing;
       end;
       with ParParams do
         begin
@@ -598,6 +610,7 @@ begin
                 EMITTER_LINE: mem_Read( emitter2dMem, AsLine, SizeOf( zglTEmitterLine ) );
                 EMITTER_RECTANGLE: mem_Read( emitter2dMem, AsRect, SizeOf( zglTEmitterRect ) );
                 EMITTER_CIRCLE: mem_Read( emitter2dMem, AsCircle, SizeOf( zglTEmitterCircle ) );
+                EMITTER_RING: mem_Read( emitter2dMem, AsRing, SizeOf( zglTEmitterRing ) );
               else
                 emitter2dMem.Position := emitter2dMem.Position + size - 1;
               end;
@@ -749,6 +762,7 @@ begin
         EMITTER_LINE: size := SizeOf( zglTEmitterLine ) + 1;
         EMITTER_RECTANGLE: size := SizeOf( zglTEmitterRect ) + 1;
         EMITTER_CIRCLE: size := SizeOf( zglTEmitterCircle ) + 1;
+        EMITTER_RING: size := SizeOf( zglTEmitterRing ) + 1;
       end;
       file_Write( f, chunk, 2 );
       file_Write( f, size, 4 );
@@ -1104,6 +1118,7 @@ procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
     i        : Integer;
     p        : zglPParticle2D;
     parCount : Integer;
+    angle    : Integer;
     size     : Single;
 begin
   if not Assigned( Emitter ) Then exit;
@@ -1175,12 +1190,12 @@ begin
           case _type of
             EMITTER_POINT:
               begin
-                p.Direction := AsPoint.Direction + AsPoint.Spread / 2 - Random( Round( AsPoint.Spread * 1000 ) ) / 1000;
+                p.Direction := AsPoint.Direction + Random( Round( AsPoint.Spread * 1000 ) ) / 1000 - AsPoint.Spread / 2;
                 p.Position  := Params.Position;
               end;
             EMITTER_LINE:
               begin
-                p.Direction  := AsLine.Direction + AsLine.Spread / 2 - Random( Round( AsLine.Spread * 1000 ) ) / 1000;
+                p.Direction  := AsLine.Direction + Random( Round( AsLine.Spread * 1000 ) ) / 1000 - AsLine.Spread / 2;
                 size         := ( AsLine.Size / 2 - Random( Round( AsLine.Size * 1000 ) ) / 1000 );
                 p.Position.X := Params.Position.X + cos( AsLine.Direction + 90 * deg2rad ) * size;
                 p.Position.Y := Params.Position.Y + sin( AsLine.Direction + 90 * deg2rad ) * size;
@@ -1189,15 +1204,25 @@ begin
               end;
             EMITTER_RECTANGLE:
               begin
-                p.Direction  := AsRect.Direction + AsRect.Spread / 2 - Random( Round( AsRect.Spread * 1000 ) ) / 1000;
+                p.Direction  := AsRect.Direction + Random( Round( AsRect.Spread * 1000 ) ) / 1000 - AsRect.Spread / 2;
                 p.Position.X := Params.Position.X + AsRect.Rect.X + Random( Round( AsRect.Rect.W ) );
                 p.Position.Y := Params.Position.Y + AsRect.Rect.Y + Random( Round( AsRect.Rect.H ) );
               end;
             EMITTER_CIRCLE:
               begin
-                p.Direction  := AsCircle.Direction + AsCircle.Spread / 2 - Random( Round( AsCircle.Spread * 1000 ) ) / 1000;
-                p.Position.X := Params.Position.X + AsCircle.cX + cos( Random( 360 ) * deg2rad ) * AsCircle.Radius;
-                p.Position.Y := Params.Position.Y + AsCircle.cY + sin( Random( 360 ) * deg2rad ) * AsCircle.Radius;
+                angle        := Random( 360 );
+                size         := Random( Round( AsCircle.Radius * 1000 ) ) / 1000;
+                p.Direction  := AsCircle.Direction + Random( Round( AsCircle.Spread * 1000 ) ) / 1000 - AsCircle.Spread / 2;
+                p.Position.X := Params.Position.X + AsCircle.cX + cos( angle * deg2rad ) * size;
+                p.Position.Y := Params.Position.Y + AsCircle.cY + sin( angle * deg2rad ) * size;
+              end;
+            EMITTER_RING:
+              begin
+                angle        := Random( 360 );
+                size         := ( AsRing.Radius1 + AsRing.Radius0 ) / 2 + Random( Round( abs( AsRing.Radius1 - AsRing.Radius0 ) * 1000 ) ) / 1000 - abs( AsRing.Radius1 - AsRing.Radius0 ) / 2;
+                p.Direction  := AsRing.Direction + AsRing.Spread / 2 - Random( Round( AsRing.Spread * 1000 ) ) / 1000;
+                p.Position.X := Params.Position.X + AsRing.cX + cos( angle * deg2rad ) * size;
+                p.Position.Y := Params.Position.Y + AsRing.cY + sin( angle * deg2rad ) * size;
               end;
           end;
 

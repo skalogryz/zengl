@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.09.11           }
+{ date:     2011.09.14           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -827,6 +827,7 @@ const
   EMITTER_LINE      = 2;
   EMITTER_RECTANGLE = 3;
   EMITTER_CIRCLE    = 4;
+  EMITTER_RING      = 5;
 
 type
   PDiagramByte         = ^TDiagramByte;
@@ -911,6 +912,15 @@ type
     Spread    : Single;
     cX, cY    : Single;
     Radius    : Single;
+  end;
+
+  zglPEmitterRing = ^zglTEmitterRing;
+  zglTEmitterRing = record
+    Direction : Single;
+    Spread    : Single;
+    cX, cY    : Single;
+    Radius0   : Single;
+    Radius1   : Single;
   end;
 
   zglTParticleParams = record
