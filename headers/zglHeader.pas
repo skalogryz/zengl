@@ -986,6 +986,7 @@ type
       EMITTER_LINE: ( AsLine : zglTEmitterLine );
       EMITTER_RECTANGLE: ( AsRect : zglTEmitterRect );
       EMITTER_CIRCLE: ( AsCircle : zglTEmitterCircle );
+      EMITTER_RING: ( AsRing : zglTEmitterRing );
   end;
 
   zglTPEngine2D = record
