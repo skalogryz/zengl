@@ -1154,6 +1154,8 @@ begin
         exit;
 
       parCount    := Round( ( Time - LastSecond ) * ( Params.Emission / 1000 ) - _parCreated );
+      if Particles + parCount > EMITTER_MAX_PARTICLES Then
+        parCount := EMITTER_MAX_PARTICLES - ( Particles + parCount );
       _parCreated := _parCreated + parCount;
 
       for i := 0 to parCount - 1 do
