@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.09.14';
+  cs_Date     = '2011.09.17';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -62,7 +62,8 @@ const
   SYS_CLOSE_QUERY        = $000008;
 
   {$IFDEF iOS}
-  SYS_iOS_MEMORY_WARNING = $000080;
+  SYS_iOS_MEMORY_WARNING     = $000080;
+  SYS_iOS_CHANGE_ORIENTATION = $000081;
   {$ENDIF}
 
   INPUT_MOUSE_MOVE       = $000040;
@@ -436,6 +437,11 @@ begin
       begin
         app_PMemoryWarn := UserData;
         if not Assigned( UserData ) Then app_PMemoryWarn := app_ZeroProc;
+      end;
+    SYS_iOS_CHANGE_ORIENTATION:
+      begin
+        app_POrientation := UserData;
+        if not Assigned( UserData ) Then app_POrientation := app_ZeroOrientation;
       end;
     {$ENDIF}
     // Input events

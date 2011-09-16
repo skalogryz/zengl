@@ -109,6 +109,9 @@ procedure app_ZeroProc;
 procedure app_ZeroUpdate( dt : Double );
 procedure app_ZeroActivate( activate : Boolean );
 function  app_ZeroCloseQuery : Boolean;
+{$IFDEF iOS}
+procedure app_ZeroOrientation( orientation : UIInterfaceOrientation );
+{$ENDIF}
 
 var
   appInitialized    : Boolean;
@@ -133,7 +136,8 @@ var
   app_PActivate   : procedure( activate : Boolean );
   app_PCloseQuery : function : Boolean;
   {$IFDEF iOS}
-  app_PMemoryWarn : procedure;
+  app_PMemoryWarn  : procedure;
+  app_POrientation : procedure( orientation : UIInterfaceOrientation );
   {$ENDIF}
 
   {$IFDEF LINUX}
@@ -191,6 +195,9 @@ procedure app_ZeroProc; begin end;
 procedure app_ZeroUpdate( dt : Double ); begin end;
 procedure app_ZeroActivate( activate : Boolean ); begin end;
 function  app_ZeroCloseQuery : Boolean; begin Result := TRUE; end;
+{$IFDEF iOS}
+procedure app_ZeroOrientation( orientation : UIInterfaceOrientation ); begin end;
+{$ENDIF}
 
 procedure app_Draw;
 begin
@@ -1330,6 +1337,8 @@ begin
       scrDesktopH := scrCurrModeW;
     end;
 
+  if appWork Then
+    app_POrientation( scrOrientation );
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 end;
 
@@ -1506,7 +1515,8 @@ initialization
   app_PActivate   := app_ZeroActivate;
   app_PCloseQuery := app_ZeroCloseQuery;
 {$IFDEF iOS}
-  app_PMemoryWarn := app_ZeroProc;
+  app_PMemoryWarn  := app_ZeroProc;
+  app_POrientation := app_ZeroOrientation;
 {$ENDIF}
 
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
