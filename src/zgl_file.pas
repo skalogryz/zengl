@@ -461,7 +461,7 @@ begin
           if ( iosFileManager.fileExistsAtPath_isDirectory( dirContent.objectAtIndex( i ), @isDirectory ) ) and ( isDirectory ) Then continue;
 
       SetLength( List.Items, List.Count + 1 );
-      FillChar( fileName[ 0 ], 255, 0 );
+      FillChar( fileName[ 0 ], 256, 0 );
       CFStringGetCString( CFStringRef( dirContent.objectAtIndex( i ) ), @fileName[ 0 ], 255, kCFStringEncodingUTF8 );
       List.Items[ List.Count ] := PChar( @fileName[ 0 ] );
       INC( List.Count );

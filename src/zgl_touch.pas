@@ -84,10 +84,10 @@ end;
 
 procedure touch_ClearState;
 begin
-  FillChar( touchUp[ 0 ], 255, 0 );
-  FillChar( touchTap[ 0 ], 255, 0 );
-  FillChar( touchDblTap[ 0 ], 255, 0 );
-  FillChar( touchCanTap[ 0 ], 255, 1 );
+  FillChar( touchUp[ 0 ], 256, 0 );
+  FillChar( touchTap[ 0 ], 256, 0 );
+  FillChar( touchDblTap[ 0 ], 256, 0 );
+  FillChar( touchCanTap[ 0 ], 256, 1 );
 end;
 
 end.
