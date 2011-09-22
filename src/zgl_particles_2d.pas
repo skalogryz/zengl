@@ -783,10 +783,13 @@ begin
           // ZEF_CHUNK_TEXTURE
           chunk := ZEF_CHUNK_TEXTURE;
           size  := length( Emitter._texFile );
-          file_Write( f, chunk, 2 );
-          file_Write( f, size, 4 );
+          if size > 0 Then
+            begin
+              file_Write( f, chunk, 2 );
+              file_Write( f, size, 4 );
 
-          file_Write( f, Emitter._texFile[ 1 ], size );
+              file_Write( f, Emitter._texFile[ 1 ], size );
+            end;
 
           // ZEF_CHUNK_BLENDMODE
           chunk := ZEF_CHUNK_BLENDMODE;
