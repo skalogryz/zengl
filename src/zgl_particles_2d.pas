@@ -621,7 +621,6 @@ begin
             end;
           ZEF_CHUNK_TEXTURE:
             begin
-              mem_Read( emitter2dMem, Params, size );
               SetLength( _texFile, size );
               mem_Read( emitter2dMem, _texFile[ 1 ], size );
               _texHash := u_Hash( _texFile );
