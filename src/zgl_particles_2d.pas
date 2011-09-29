@@ -605,15 +605,7 @@ begin
           ZEF_CHUNK_TYPE:
             begin
               mem_Read( emitter2dMem, _type, 1 );
-              case _type of
-                EMITTER_POINT: mem_Read( emitter2dMem, AsPoint, SizeOf( zglTEmitterPoint ) );
-                EMITTER_LINE: mem_Read( emitter2dMem, AsLine, SizeOf( zglTEmitterLine ) );
-                EMITTER_RECTANGLE: mem_Read( emitter2dMem, AsRect, SizeOf( zglTEmitterRect ) );
-                EMITTER_CIRCLE: mem_Read( emitter2dMem, AsCircle, SizeOf( zglTEmitterCircle ) );
-                EMITTER_RING: mem_Read( emitter2dMem, AsRing, SizeOf( zglTEmitterRing ) );
-              else
-                emitter2dMem.Position := emitter2dMem.Position + size - 1;
-              end;
+              mem_Read( emitter2dMem, AsPoint, size - 1 );
             end;
           ZEF_CHUNK_PARAMS:
             begin
