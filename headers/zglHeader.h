@@ -528,6 +528,7 @@ typedef struct
 static void ( *res_BeginQueue )( byte QueueID );
 static void ( *res_EndQueue )();
 static int ( *res_GetPercentage )( byte QueueID );
+static int ( *res_GetCompleted )();
 static void ( *res_Proc )();
 
 // TEXTURES
@@ -1345,6 +1346,7 @@ static bool zglLoad( const char* LibraryName )
     zglGetAddress( res_BeginQueue, zglLib, "res_BeginQueue" );
     zglGetAddress( res_EndQueue, zglLib, "res_EndQueue" );
     zglGetAddress( res_GetPercentage, zglLib, "res_GetPercentage" );
+    zglGetAddress( res_GetCompleted, zglLib, "res_GetCompleted" );
     zglGetAddress( res_Proc, zglLib, "res_Proc" );
 
     zglGetAddress( tex_Add, zglLib, "tex_Add" );

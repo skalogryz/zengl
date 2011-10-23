@@ -527,6 +527,7 @@ var
   res_BeginQueue    : procedure( QueueID : Byte );
   res_EndQueue      : procedure;
   res_GetPercentage : function( QueueID : Byte ) : Integer;
+  res_GetCompleted  : function : Integer;
   res_Proc          : procedure;
 
 // TEXTURES
@@ -1584,6 +1585,7 @@ begin
       res_BeginQueue := dlsym( zglLib, 'res_BeginQueue' );
       res_EndQueue := dlsym( zglLib, 'res_EndQueue' );
       res_GetPercentage := dlsym( zglLib, 'res_GetPercentage' );
+      res_GetCompleted := dlsym( zglLib, 'res_GetCompleted' );
       res_Proc := dlsym( zglLib, 'res_Proc' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );

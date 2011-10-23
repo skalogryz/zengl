@@ -24,6 +24,9 @@ unit zgl_resources;
 
 interface
 uses
+  {$IFDEF WINDOWS}
+  Windows,
+  {$ENDIF}
   zgl_memory,
   zgl_textures,
   {$IFDEF USE_SOUND}
@@ -35,9 +38,6 @@ const
   RES_TEXTURE           = 1;
   RES_TEXTURE_FRAMESIZE = 2;
   RES_SOUND             = 3;
-
-  QUEUE_STATE_STOP  = 0;
-  QUEUE_STATE_START = 1;
 
 type
   zglPResourceItem = ^zglTResourceItem;
@@ -95,20 +95,22 @@ function  res_ProcQueue( data : Pointer ) : LongInt;
 procedure res_BeginQueue( QueueID : Byte );
 procedure res_EndQueue;
 function  res_GetPercentage( QueueID : Byte ) : Integer;
+function  res_GetCompleted : Integer;
 
 var
-  resInitialized : Boolean;
-  resBackground  : Boolean;
-  resIsLoaded    : Boolean;
-  resPercentage  : Integer;
-  resThread      : LongWord;
+  resUseThreaded     : Boolean;
+  resCompleted       : Integer;
+  resThread          : array[ 0..255 ] of LongWord;
   {$IFNDEF FPC}
-  resThreadID    : LongWord;
+  resThreadID        : array[ 0..255 ] of LongWord;
   {$ENDIF}
-  resQueueState  : Integer;
-  resQueueSize   : Integer;
-  resQueueMax    : Integer;
-  resQueue       : zglTResourceItem;
+  resQueueID         : array[ 0..255 ] of Byte;
+  resQueueCurrentID  : Byte;
+  resQueueState      : array[ 0..255 ] of {$IFDEF FPC} PRTLEvent {$ELSE} THandle {$ENDIF};
+  resQueueSize       : array[ 0..255 ] of Integer;
+  resQueueMax        : array[ 0..255 ] of Integer;
+  resQueuePercentage : array[ 0..255 ] of Integer;
+  resQueueItems      : array[ 0..255 ] of zglTResourceItem;
 
 implementation
 uses
@@ -119,67 +121,85 @@ uses
   zgl_log,
   zgl_utils;
 
+const
+  EVENT_STATE_NULL = {$IFDEF FPC} nil {$ELSE} 0 {$ENDIF};
+
 procedure res_Init;
 begin
-{$IFDEF FPC}
-  resThread := LongWord( BeginThread( @res_ProcQueue, nil ) );
-{$ELSE}
-  resThread := BeginThread( nil, 0, @res_ProcQueue, nil, 0, resThreadID );
-{$ENDIF}
-  while not resInitialized do;
 end;
 
 procedure res_Free;
+  var
+    i : Integer;
 begin
-  if resInitialized Then
-    begin
-      resQueueSize := 0;
-      while resInitialized do;
-    end;
+  for i := 0 to 255 do
+    if resQueueState[ i ] <> EVENT_STATE_NULL Then
+      begin
+        {$IFDEF FPC}
+        RTLEventSetEvent( resQueueState[ i ] );
+        {$ELSE}
+        SetEvent( resQueueState[ i ] );
+        {$ENDIF}
+        resQueueSize[ i ] := 0;
+        while resQueueState[ i ] <> EVENT_STATE_NULL do;
+      end;
 end;
 
 procedure res_Proc;
   var
     item : zglPResourceItem;
+    id   : Integer;
+    size : Integer;
+    max  : Integer;
 begin
-  if resQueueSize <= 0 Then exit;
+  size := 0;
+  for id := 0 to 255 do
+    if resQueueState[ id ] <> EVENT_STATE_NULL Then
+      begin
+        if resQueueSize[ id ] <= 0 Then continue;
 
-  item := resQueue.next;
-  while Assigned( item ) do
-    begin
-      if ( item.Ready ) and Assigned( item.Resource ) Then
-        case item._type of
-          RES_TEXTURE:
-            with zglPTextureResource( item.Resource )^ do
-              begin
-                tex_Create( Texture^, pData );
-                FreeMem( pData );
-                if item.IsFromFile Then
-                  log_Add( 'Texture loaded: "' + FileName + '"' );
+        item := resQueueItems[ id ].next;
+        while Assigned( item ) do
+          begin
+            if ( item.Ready ) and Assigned( item.Resource ) Then
+              case item._type of
+                RES_TEXTURE:
+                  with zglPTextureResource( item.Resource )^ do
+                    begin
+                      tex_Create( Texture^, pData );
+                      FreeMem( pData );
+                      if item.IsFromFile Then
+                        log_Add( 'Texture loaded: "' + FileName + '"' );
 
-                FileName := '';
-                FreeMem( item.Resource );
-                item.Resource := nil;
-                item.Ready := FALSE;
-                DEC( resQueueSize );
-                break;
+                      FileName := '';
+                      FreeMem( item.Resource );
+                      item.Resource := nil;
+                      item.Ready := FALSE;
+                      DEC( resQueueSize[ id ] );
+                      break;
+                    end;
               end;
-        end;
 
-      if resQueueSize <= 0 Then
-        break
-      else
-        item := item.next;
-    end;
+            if resQueueSize[ id ] = 0 Then
+              break
+            else
+              item := item.next;
+          end;
 
-  if resQueueSize = 0 Then
-    begin
-      resPercentage := 100;
-      resQueueMax   := 0;
-    end else
-      resPercentage := Round( ( 1 - resQueueSize / resQueueMax ) * 100 );
+        INC( size, resQueueSize[ id ] );
+        INC( max, resQueueMax[ id ] );
+        if resQueueSize[ id ] = 0 Then
+          begin
+            resQueuePercentage[ id ] := 100;
+            resQueueMax[ id ]   := 0;
+          end else
+            resQueuePercentage[ id ] := Round( ( 1 - resQueueSize[ id ] / resQueueMax[ id ] ) * 100 );
+      end;
 
-  resIsLoaded := resQueueSize = 0;
+  if size = 0 Then
+    resCompleted := 100
+  else
+    resCompleted := Round( ( 1 - size / max ) * 100 );
 end;
 
 procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointer );
@@ -194,8 +214,8 @@ procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointe
     {$ENDIF}
 begin
   new  := TRUE;
-  item := @resQueue.next;
-  last := @resQueue;
+  item := @resQueueItems[ resQueueCurrentID ].next;
+  last := @resQueueItems[ resQueueCurrentID ];
   while Assigned( item^ ) do
     begin
       if not Assigned( item^.Resource ) Then
@@ -208,8 +228,8 @@ begin
       item := @item^.next;
     end;
 
-  INC( resQueueSize );
-  INC( resQueueMax );
+  INC( resQueueSize[ resQueueCurrentID ] );
+  INC( resQueueMax[ resQueueCurrentID ] );
 
   if new Then
     zgl_GetMem( Pointer( item^ ), SizeOf( zglTResourceItem ) );
@@ -266,18 +286,25 @@ begin
     end;
   item^.IsFromFile := FromFile;
   item^._type      := _type;
+
+  {$IFDEF FPC}
+  RTLEventSetEvent( resQueueState[ resQueueCurrentID ] );
+  {$ELSE}
+  SetEvent( resQueueState[ resQueueCurrentID ] );
+  {$ENDIF}
 end;
 
 function res_ProcQueue( data : Pointer ) : LongInt;
   var
+    id   : Byte;
     item : zglPResourceItem;
 begin
   Result := 0;
-  resInitialized := TRUE;
-  item := nil;
+  id     := PByte( data )^;
+  item   := nil;
   while appWork do
     begin
-      item := resQueue.next;
+      item := resQueueItems[ id ].next;
       while Assigned( item ) do
         begin
           if ( not item.Ready ) and Assigned( item.Resource ) Then
@@ -300,7 +327,7 @@ begin
                         FileName := '';
                         FreeMem( Resource );
                         Resource := nil;
-                        DEC( resQueueSize );
+                        DEC( resQueueSize[ id ] );
                       end else
                         begin
                           Texture.Width  := Width;
@@ -335,7 +362,7 @@ begin
 
                     FreeMem( Resource );
                     Resource := nil;
-                    DEC( resQueueSize );
+                    DEC( resQueueSize[ id ] );
                   end;
               {$IFDEF USE_SOUND}
               RES_SOUND:
@@ -360,7 +387,7 @@ begin
                     FileName := '';
                     FreeMem( Resource );
                     Resource := nil;
-                    DEC( resQueueSize );
+                    DEC( resQueueSize[ id ] );
                   end;
               {$ENDIF}
             end;
@@ -368,31 +395,58 @@ begin
           item := item.next;
         end;
 
-      while ( appWork ) and ( resQueueSize = 0 ) do
-        u_Sleep( 10 );
+      {$IFDEF FPC}
+      RTLEventWaitFor( resQueueState[ id ] );
+      {$ELSE}
+      WaitForSingleObject( resQueueState[ id ], INFINITE );
+      {$ENDIF}
+      if not appWork Then
+        begin
+          {$IFDEF FPC}
+          RTLEventDestroy( resQueueState[ id ] );
+          {$ELSE}
+          CloseHandle( resQueueState[ id ] );
+          {$ENDIF}
+          resQueueState[ id ] := EVENT_STATE_NULL;
+          break;
+        end;
     end;
 
-  resInitialized := FALSE;
   EndThread( 0 );
 end;
 
 procedure res_BeginQueue( QueueID : Byte );
 begin
-  resQueueState := QUEUE_STATE_START;
+  if resQueueState[ QueueID ] = EVENT_STATE_NULL Then
+    begin
+      resQueueID[ QueueID ]         := QueueID;
+      resQueueItems[ QueueID ].prev := @resQueueItems[ QueueID ];
+      resQueueItems[ QueueID ].next := nil;
+      {$IFDEF FPC}
+      resQueueState[ QueueID ] := RTLEventCreate();
+      resThread[ QueueID ]     := LongWord( BeginThread( @res_ProcQueue, @resQueueID[ QueueID ] ) );
+      {$ELSE}
+      resQueueState[ QueueID ] := CreateEvent( nil, TRUE, FALSE, nil );
+      resThread[ QueueID ]     := BeginThread( nil, 0, @res_ProcQueue, @resQueueID[ QueueID ], 0, resThreadID[ QueueID ] );
+      {$ENDIF}
+    end;
+  resQueueCurrentID := QueueID;
+  resUseThreaded := TRUE;
 end;
 
 procedure res_EndQueue;
 begin
-  resQueueState := QUEUE_STATE_STOP;
+  resUseThreaded := FALSE;
 end;
 
 function res_GetPercentage( QueueID : Byte ) : Integer;
 begin
-  Result := resPercentage;
+  Result := resQueuePercentage[ QueueID ];
 end;
 
-initialization
-  resQueue.prev := @resQueue;
-  resQueue.next := nil;
+function res_GetCompleted : Integer;
+begin
+  Result := resCompleted;
+end;
 
 end.

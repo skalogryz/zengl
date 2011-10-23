@@ -655,7 +655,7 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
-      if resQueueState = QUEUE_STATE_START Then
+      if resUseThreaded Then
         begin
           res.FileName   := FileName;
           res.Sound      := Result;
@@ -692,7 +692,7 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerSound.Formats[ i ].Extension Then
-      if resQueueState = QUEUE_STATE_START Then
+      if resUseThreaded Then
         begin
           res.Memory    := Memory;
           res.Sound     := Result;

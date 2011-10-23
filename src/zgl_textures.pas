@@ -328,7 +328,7 @@ begin
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
-      if resQueueState = QUEUE_STATE_START Then
+      if resUseThreaded Then
         begin
           Result               := tex_Add();
           res.FileName         := FileName;
@@ -391,7 +391,7 @@ begin
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
-      if resQueueState = QUEUE_STATE_START Then
+      if resUseThreaded Then
         begin
           Result               := tex_Add();
           res.Memory           := Memory;
@@ -439,7 +439,7 @@ procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight :
   var
     res : zglTTextureFrameSizeResource;
 begin
-  if resQueueState = QUEUE_STATE_START Then
+  if resUseThreaded Then
     begin
       res.Texture     := Texture;
       res.FrameWidth  := FrameWidth;
