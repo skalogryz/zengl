@@ -104,6 +104,7 @@ var
   {$IFNDEF FPC}
   resThreadID        : array[ 0..255 ] of LongWord;
   {$ENDIF}
+  resQueueStackID    : array of Byte;
   resQueueID         : array[ 0..255 ] of Byte;
   resQueueCurrentID  : Byte;
   resQueueState      : array[ 0..255 ] of {$IFDEF FPC} PRTLEvent {$ELSE} THandle {$ENDIF};
@@ -430,12 +431,23 @@ begin
       resThread[ QueueID ]     := BeginThread( nil, 0, @res_ProcQueue, @resQueueID[ QueueID ], 0, resThreadID[ QueueID ] );
       {$ENDIF}
     end;
+
+  SetLength( resQueueStackID, Length( resQueueStackID ) + 1 );
+  resQueueStackID[ Length( resQueueStackID ) - 1 ] := QueueID;
+
   resQueueCurrentID := QueueID;
   resUseThreaded := TRUE;
 end;
 
 procedure res_EndQueue;
 begin
+  if Length( resQueueStackID ) > 0 Then
+    begin
+      resQueueCurrentID := resQueueStackID[ Length( resQueueStackID ) - 1 ];
+      SetLength( resQueueStackID, Length( resQueueStackID ) - 1 );
+      exit;
+    end;
+
   resUseThreaded := FALSE;
 end;
 
