@@ -191,6 +191,7 @@ exports
   res_BeginQueue           name prefix + 'res_BeginQueue',
   res_EndQueue             name prefix + 'res_EndQueue',
   res_GetPercentage        name prefix + 'res_GetPercentage',
+  res_GetCompleted         name prefix + 'res_GetCompleted',
   res_Proc                 name prefix + 'res_Proc',
 
   // Textures
