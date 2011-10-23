@@ -401,17 +401,14 @@ begin
       {$ELSE}
       WaitForSingleObject( resQueueState[ id ], INFINITE );
       {$ENDIF}
-      if not appWork Then
-        begin
-          {$IFDEF FPC}
-          RTLEventDestroy( resQueueState[ id ] );
-          {$ELSE}
-          CloseHandle( resQueueState[ id ] );
-          {$ENDIF}
-          resQueueState[ id ] := EVENT_STATE_NULL;
-          break;
-        end;
     end;
+
+  {$IFDEF FPC}
+  RTLEventDestroy( resQueueState[ id ] );
+  {$ELSE}
+  CloseHandle( resQueueState[ id ] );
+  {$ENDIF}
+  resQueueState[ id ] := EVENT_STATE_NULL;
 
   EndThread( 0 );
 end;
