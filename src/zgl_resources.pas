@@ -154,6 +154,7 @@ procedure res_Proc;
     max  : Integer;
 begin
   size := 0;
+  max  := 0;
   for id := 0 to 255 do
     if resQueueState[ id ] <> EVENT_STATE_NULL Then
       begin
