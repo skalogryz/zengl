@@ -192,7 +192,7 @@ begin
         if resQueueSize[ id ] = 0 Then
           begin
             resQueuePercentage[ id ] := 100;
-            resQueueMax[ id ]   := 0;
+            resQueueMax[ id ]        := 0;
           end else
             resQueuePercentage[ id ] := Round( ( 1 - resQueueSize[ id ] / resQueueMax[ id ] ) * 100 );
       end;
@@ -442,7 +442,8 @@ begin
     begin
       resQueueCurrentID := resQueueStackID[ Length( resQueueStackID ) - 1 ];
       SetLength( resQueueStackID, Length( resQueueStackID ) - 1 );
-      exit;
+      if Length( resQueueStackID ) > 0 Then
+        exit;
     end;
 
   resUseThreaded := FALSE;
