@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.09.14           }
+{ date:     2011.10.23           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -524,9 +524,10 @@ end;
 
 // RESOURCES
 var
-  res_BeginQueue : procedure( QueueID : Byte );
-  res_EndQueue   : procedure;
-  res_Proc       : procedure;
+  res_BeginQueue    : procedure( QueueID : Byte );
+  res_EndQueue      : procedure;
+  res_GetPercentage : function( QueueID : Byte ) : Integer;
+  res_Proc          : procedure;
 
 // TEXTURES
 type
@@ -1582,6 +1583,7 @@ begin
 
       res_BeginQueue := dlsym( zglLib, 'res_BeginQueue' );
       res_EndQueue := dlsym( zglLib, 'res_EndQueue' );
+      res_GetPercentage := dlsym( zglLib, 'res_GetPercentage' );
       res_Proc := dlsym( zglLib, 'res_Proc' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );

@@ -94,18 +94,20 @@ function  res_ProcQueue( data : Pointer ) : LongInt;
 
 procedure res_BeginQueue( QueueID : Byte );
 procedure res_EndQueue;
+function  res_GetPercentage( QueueID : Byte ) : Integer;
 
 var
   resInitialized : Boolean;
   resBackground  : Boolean;
-  resIsLoaded    : PByte;
-  resPercent     : PInteger;
+  resIsLoaded    : Boolean;
+  resPercentage  : Integer;
   resThread      : LongWord;
   {$IFNDEF FPC}
   resThreadID    : LongWord;
   {$ENDIF}
   resQueueState  : Integer;
   resQueueSize   : Integer;
+  resQueueMax    : Integer;
   resQueue       : zglTResourceItem;
 
 implementation
@@ -170,16 +172,14 @@ begin
         item := item.next;
     end;
 
-  if Assigned( resPercent ) Then
+  if resQueueSize = 0 Then
     begin
-      if resQueueSize = 0 Then
-        resPercent^ := 100
-      else
-        resPercent^ := Round( 1 / resQueueSize * 100 );
-    end;
+      resPercentage := 100;
+      resQueueMax   := 0;
+    end else
+      resPercentage := Round( ( 1 - resQueueSize / resQueueMax ) * 100 );
 
-  if Assigned( resIsLoaded ) Then
-    resIsLoaded^ := Byte( resQueueSize = 0 );
+  resIsLoaded := resQueueSize = 0;
 end;
 
 procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointer );
@@ -209,6 +209,7 @@ begin
     end;
 
   INC( resQueueSize );
+  INC( resQueueMax );
 
   if new Then
     zgl_GetMem( Pointer( item^ ), SizeOf( zglTResourceItem ) );
@@ -383,6 +384,11 @@ end;
 procedure res_EndQueue;
 begin
   resQueueState := QUEUE_STATE_STOP;
+end;
+
+function res_GetPercentage( QueueID : Byte ) : Integer;
+begin
+  Result := resPercentage;
 end;
 
 initialization
