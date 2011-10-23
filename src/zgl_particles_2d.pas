@@ -467,16 +467,10 @@ procedure pengine2d_DelEmitter( ID : Integer );
   var
     i : Integer;
 begin
-  if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) or ( pengine2d.Count.Emitters = 0 ) Then exit;
+  if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) Then exit;
 
   emitter2d_Free( pengine2d.List[ ID ] );
-  pengine2d.List[ ID ] := nil;
-  for i := ID to pengine2d.Count.Emitters - 2 do
-    begin
-      pengine2d.List[ i ]    := pengine2d.List[ i + 1 ];
-      pengine2d.List[ i ].ID := i;
-    end;
-
+  pengine2d.List[ ID ] := pengine2d.List[ pengine2d.Count.Emitters - 1 ];
   DEC( pengine2d.Count.Emitters );
 end;
 
