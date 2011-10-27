@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.10.23';
+  cs_Date     = '2011.10.27';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -532,11 +532,11 @@ end;
 
 function zgl_Get( What : LongWord ) : Ptr;
 begin
-  if ( What = DIRECTORY_APPLICATION ) or ( What = DIRECTORY_HOME ) Then
-    if not appGotSysDirs Then zgl_GetSysDir();
+  if ( not appGotSysDirs ) and ( ( What = DIRECTORY_APPLICATION ) or ( What = DIRECTORY_HOME ) ) Then
+    zgl_GetSysDir();
 
-  if ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) Then
-    if not scrInitialized Then scr_Init();
+  if ( not scrInitialized ) and ( ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) or ( What = RESOLUTION_LIST ) ) Then
+    scr_Init();
 
   case What of
     ZENGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
