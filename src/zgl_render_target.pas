@@ -52,6 +52,8 @@ const
   RT_CLEAR_COLOR  = $04;
   RT_CLEAR_DEPTH  = $08;
 
+  RT_FORCE_PBUFFER = $100000;
+
 {$IFNDEF USE_GLES}
 {$IFDEF LINUX}
 type
@@ -126,7 +128,8 @@ uses
   zgl_opengl_simple,
   zgl_render_2d,
   zgl_sprite_2d,
-  zgl_log;
+  zgl_log,
+  zgl_utils;
 
 var
   lRTarget : zglPRenderTarget;
@@ -208,11 +211,15 @@ begin
   if Surface.Width > oglMaxFBOSize Then
     _type := RT_TYPE_PBUFFER;
 
-  if not oglCanFBO Then
-    if oglCanPBuffer Then
-      _type := RT_TYPE_PBUFFER
-    else
-      exit;
+  if ( not oglCanFBO ) or ( Flags and RT_FORCE_PBUFFER > 0 ) Then
+    if not oglCanPBuffer Then
+      begin
+        u_Error( 'There is no possibility to create render target' );
+        Result := nil;
+        FreeMem( Result.next );
+        exit;
+      end else
+        _type := RT_TYPE_PBUFFER;
 
   case _type of
     {$IFNDEF USE_GLES}
@@ -258,6 +265,7 @@ begin
           begin
             log_Add( 'PBuffer: failed to choose GLXFBConfig' );
             FreePBuffer( Result, 1 );
+            Result := nil;
             exit;
           end else
             pPBuffer.Handle := PInteger( fbconfig )^;
@@ -299,6 +307,7 @@ begin
           begin
             log_Add( 'PBuffer: failed to choose Visual' );
             FreePBuffer( Result, 3 );
+            Result := nil;
             exit;
           end;
 
@@ -309,6 +318,7 @@ begin
           begin
             log_Add( 'PBuffer: failed to create GLXContext' );
             FreePBuffer( Result, 4 );
+            Result := nil;
             exit;
           end;
 
@@ -370,6 +380,7 @@ begin
               begin
                 log_Add( 'PBuffer: RC create - Error' );
                 FreePBuffer( Result, 2 );
+                Result := nil;
                 exit;
               end;
             wglShareLists( oglContext, pPBuffer.RC );
@@ -377,6 +388,7 @@ begin
             begin
               log_Add( 'PBuffer: wglCreatePbufferARB - failed' );
               FreePBuffer( Result, 1 );
+              Result := nil;
               exit;
             end;
         wglMakeCurrent( pPBuffer.DC, pPBuffer.RC );
@@ -428,6 +440,7 @@ begin
           begin
             log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
             FreePBuffer( Result, 1 );
+            Result := nil;
             exit;
           end;
 
@@ -436,6 +449,7 @@ begin
           begin
             log_Add( 'PBuffer: aglCreateContext - failed' );
             FreePBuffer( Result, 2 );
+            Result := nil;
             exit;
           end;
         aglDestroyPixelFormat( pixelFormat );
@@ -444,6 +458,7 @@ begin
           begin
             log_Add( 'PBuffer: aglCreatePBuffer - failed' );
             FreePBuffer( Result, 3 );
+            Result := nil;
             exit;
           end;
       end;
@@ -460,7 +475,7 @@ begin
           begin
             log_Add( 'FBO: Gen FrameBuffer - Error' );
             FreeFBO( Result, 1 );
-            Result := rtarget_Add( Surface, Flags );
+            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
             exit;
           end;
 
@@ -470,7 +485,7 @@ begin
           begin
             log_Add( 'FBO: Gen RenderBuffer - Error' );
             FreeFBO( Result, 2 );
-            Result := rtarget_Add( Surface, Flags );
+            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
             exit;
           end;
 
