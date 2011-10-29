@@ -439,6 +439,8 @@ procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight :
   var
     res : zglTTextureFrameSizeResource;
 begin
+  if not Assigned( Texture ) Then exit;
+
   if resUseThreaded Then
     begin
       res.Texture     := Texture;
@@ -447,8 +449,6 @@ begin
       res_AddToQueue( RES_TEXTURE_FRAMESIZE, TRUE, @res );
     end else
       begin
-        if not Assigned( Texture ) Then exit;
-
         Texture.FramesX := Round( Texture.Width ) div FrameWidth;
         Texture.FramesY := Round( Texture.Height ) div FrameHeight;
         if Texture.FramesX = 0 Then Texture.FramesX := 1;
@@ -463,30 +463,41 @@ procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
     tData  : Pointer;
     mData  : Pointer;
     rW, mW : Integer;
+    res    : zglTTextureMaskResource;
 begin
-  if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) or
-     ( Texture.Width <> Mask.Width ) or ( Texture.Height <> Mask.Height ) or
-     ( Texture.Format <> TEX_FORMAT_RGBA ) or ( Mask.Format <> TEX_FORMAT_RGBA ) Then exit;
+  if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) Then exit;
 
-  rW := Round( Texture.Width / Texture.U );
-  mW := Round( Mask.Width / Mask.U );
-
-  tex_GetData( Texture, tData );
-  tex_GetData( Mask, mData );
-
-  for j := 0 to Texture.Height - 1 do
+  if resUseThreaded Then
     begin
-      for i := 0 to Texture.Width - 1 do
-        PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
-      INC( tData, rW * 4 );
-      INC( mData, mW * 4 );
-    end;
-  DEC( tData, rW * Texture.Height * 4 );
-  DEC( mData, mW * Mask.Height * 4 );
-  tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
+      res.Texture := Texture;
+      res.Mask    := Mask;
+      res.tData   := nil;
+      res.mData   := nil;
+      res_AddToQueue( RES_TEXTURE_MASK, TRUE, @res );
+    end else
+      begin
+        if ( Texture.Width <> Mask.Width ) or ( Texture.Height <> Mask.Height ) or ( Texture.Format <> TEX_FORMAT_RGBA ) or ( Mask.Format <> TEX_FORMAT_RGBA ) Then exit;
 
-  FreeMem( tData );
-  FreeMem( mData );
+        rW := Round( Texture.Width / Texture.U );
+        mW := Round( Mask.Width / Mask.U );
+
+        tex_GetData( Texture, tData );
+        tex_GetData( Mask, mData );
+
+        for j := 0 to Texture.Height - 1 do
+          begin
+            for i := 0 to Texture.Width - 1 do
+              PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
+            INC( tData, rW * 4 );
+            INC( mData, mW * 4 );
+          end;
+        DEC( tData, rW * Texture.Height * 4 );
+        DEC( mData, mW * Mask.Height * 4 );
+        tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
+
+        FreeMem( tData );
+        FreeMem( mData );
+      end;
 end;
 
 procedure tex_CalcTexCoords( var Texture : zglTTexture );

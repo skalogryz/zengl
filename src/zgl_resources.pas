@@ -35,9 +35,12 @@ uses
   zgl_types;
 
 const
-  RES_TEXTURE           = 1;
-  RES_TEXTURE_FRAMESIZE = 2;
-  RES_SOUND             = 3;
+  RES_TEXTURE           = $000001;
+  RES_TEXTURE_FRAMESIZE = $000002;
+  RES_TEXTURE_MASK      = $000003;
+  RES_TEXTURE_DELETE    = $000004;
+  RES_SOUND             = $000010;
+  RES_SOUND_DELETE      = $000011;
 
 type
   zglPResourceItem = ^zglTResourceItem;
@@ -45,6 +48,7 @@ type
     _type      : Integer;
     IsFromFile : Boolean;
     Ready      : Boolean;
+    Prepared   : Boolean;
     Resource   : Pointer;
 
     prev, next : zglPResourceItem;
@@ -71,6 +75,15 @@ type
     Texture     : zglPTexture;
     FrameWidth  : Integer;
     FrameHeight : Integer;
+  end;
+
+type
+  zglPTextureMaskResource = ^zglTTextureMaskResource;
+  zglTTextureMaskResource = record
+    Texture : zglPTexture;
+    Mask    : zglPTexture;
+    tData   : Pointer;
+    mData   : Pointer;
   end;
 
 {$IFDEF USE_SOUND}
@@ -180,6 +193,37 @@ begin
                       DEC( resQueueSize[ id ] );
                       break;
                     end;
+                RES_TEXTURE_MASK:
+                  with zglPTextureMaskResource( item.Resource )^ do
+                    begin
+                      tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
+                      FreeMem( tData );
+                      FreeMem( mData );
+
+                      FreeMem( item.Resource );
+                      item.Resource := nil;
+                      item.Ready := FALSE;
+                      DEC( resQueueSize[ id ] );
+                      break;
+                    end;
+              end;
+            if ( not item.Prepared ) and Assigned( item.Resource ) Then
+              case item._type of
+                RES_TEXTURE_MASK:
+                  with zglPTextureMaskResource( item.Resource )^ do
+                    begin
+                      tex_GetData( Texture, tData );
+                      tex_GetData( Mask, mData );
+                      item.Prepared := TRUE;
+
+                      {$IFDEF FPC}
+                      RTLEventSetEvent( resQueueState[ id ] );
+                      {$ELSE}
+                      SetEvent( resQueueState[ id ] );
+                      {$ENDIF}
+
+                      break;
+                    end;
               end;
 
             if resQueueSize[ id ] = 0 Then
@@ -211,6 +255,7 @@ procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointe
     new  : Boolean;
     tex  : zglPTextureResource;
     tfs  : zglPTextureFrameSizeResource;
+    tm   : zglPTextureMaskResource;
     {$IFDEF USE_SOUND}
     snd  : zglPSoundResource;
     {$ENDIF}
@@ -263,6 +308,19 @@ begin
           end;
         item^.Resource := tfs;
       end;
+    RES_TEXTURE_MASK:
+      begin
+        zgl_GetMem( Pointer( tm ), SizeOf( zglTTextureMaskResource ) );
+        with zglPTextureMaskResource( Resource )^ do
+          begin
+            tm.Texture := Texture;
+            tm.Mask    := Mask;
+          end;
+        item^.Resource := tm;
+      end;
+    RES_TEXTURE_DELETE:
+      begin
+      end;
     {$IFDEF USE_SOUND}
     RES_SOUND:
       begin
@@ -276,6 +334,9 @@ begin
             snd.MemLoader  := MemLoader;
           end;
         item^.Resource := snd;
+      end;
+    RES_SOUND_DELETE:
+      begin
       end;
     {$ENDIF}
   end;
@@ -300,6 +361,8 @@ function res_ProcQueue( data : Pointer ) : LongInt;
   var
     id   : Byte;
     item : zglPResourceItem;
+    // mask
+    i, j, mW, rW : Integer;
 begin
   Result := 0;
   id     := PByte( data )^;
@@ -366,6 +429,32 @@ begin
                     Resource := nil;
                     DEC( resQueueSize[ id ] );
                   end;
+              RES_TEXTURE_MASK:
+                if item.Prepared Then
+                  with item^, zglPTextureMaskResource( Resource )^ do
+                    begin
+                      if ( Texture.Width <> Mask.Width ) or ( Texture.Height <> Mask.Height ) or ( Texture.Format <> TEX_FORMAT_RGBA ) or ( Mask.Format <> TEX_FORMAT_RGBA ) Then
+                        begin
+                          FreeMem( Resource );
+                          Resource := nil;
+                          DEC( resQueueSize[ id ] );
+                        end;
+
+                      rW := Round( Texture.Width / Texture.U );
+                      mW := Round( Mask.Width / Mask.U );
+
+                      for j := 0 to Texture.Height - 1 do
+                        begin
+                          for i := 0 to Texture.Width - 1 do
+                            PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
+                          INC( tData, rW * 4 );
+                          INC( mData, mW * 4 );
+                        end;
+                      DEC( tData, rW * Texture.Height * 4 );
+                      DEC( mData, mW * Mask.Height * 4 );
+
+                      Ready := TRUE;
+                    end;
               {$IFDEF USE_SOUND}
               RES_SOUND:
                 with item^, zglPSoundResource( Resource )^ do
