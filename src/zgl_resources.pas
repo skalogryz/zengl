@@ -250,7 +250,6 @@ procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointe
   var
     item : ^zglPResourceItem;
     last : zglPResourceItem;
-    new  : Boolean;
     tex  : zglPTextureResource;
     tfs  : zglPTextureFrameSizeResource;
     tm   : zglPTextureMaskResource;
@@ -258,26 +257,21 @@ procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointe
     snd  : zglPSoundResource;
     {$ENDIF}
 begin
-  new  := TRUE;
   item := @resQueueItems[ resQueueCurrentID ].next;
   last := @resQueueItems[ resQueueCurrentID ];
   while Assigned( item^ ) do
     begin
-      if not Assigned( item^.Resource ) Then
-        begin
-          new := FALSE;
-          break;
-        end;
-
       last := item^;
       item := @item^.next;
     end;
 
   INC( resQueueSize[ resQueueCurrentID ] );
   INC( resQueueMax[ resQueueCurrentID ] );
+  resQueuePercentage[ resQueueCurrentID ] := Round( ( 1 - resQueueSize[ resQueueCurrentID ] / resQueueMax[ resQueueCurrentID ] ) * 100 );
+  if resCompleted = 100 Then
+    resCompleted := 0;
 
-  if new Then
-    zgl_GetMem( Pointer( item^ ), SizeOf( zglTResourceItem ) );
+  zgl_GetMem( Pointer( item^ ), SizeOf( zglTResourceItem ) );
 
   case _type of
     RES_TEXTURE:
@@ -339,12 +333,9 @@ begin
     {$ENDIF}
   end;
 
-  if new Then
-    begin
-      item^.prev      := last;
-      item^.next      := nil;
-      item^.prev.next := item^;
-    end;
+  item^.prev       := last;
+  item^.next       := nil;
+  item^.prev.next  := item^;
   item^.Prepared   := FALSE;
   item^.Ready      := FALSE;
   item^.IsFromFile := FromFile;
@@ -361,6 +352,7 @@ function res_ProcQueue( data : Pointer ) : LongInt;
   var
     id   : Byte;
     item : zglPResourceItem;
+    idel : zglPResourceItem;
     // mask
     i, j, mW, rW : Integer;
 begin
@@ -370,6 +362,7 @@ begin
   while appWork do
     begin
       item := resQueueItems[ id ].next;
+      idel := nil;
       while Assigned( item ) do
         begin
           if ( not item.Ready ) and Assigned( item.Resource ) Then
@@ -483,9 +476,22 @@ begin
                     DEC( resQueueSize[ id ] );
                   end;
               {$ENDIF}
-            end;
+            end else
+              if ( item.Ready ) and ( not Assigned( item.Resource ) ) Then
+                begin
+                  idel := item;
+                  if Assigned( item.prev ) Then
+                    item.prev.next := item.next;
+                  if Assigned( item.next ) Then
+                    item.next.prev := item.prev;
+                end;
 
           item := item.next;
+          if Assigned( idel ) Then
+            begin
+              FreeMem( idel );
+              idel := nil;
+            end;
         end;
 
       {$IFDEF FPC}
