@@ -106,7 +106,7 @@ function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flag
 function  tex_LoadFromFile( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
-function  tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture ) : zglPTexture;
+procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
 procedure tex_CalcTexCoords( var Texture : zglTTexture );
 
 procedure tex_Filter( Texture : zglPTexture; Flags : LongWord );
@@ -457,50 +457,34 @@ begin
       end;
 end;
 
-function tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture ) : zglPTexture;
+procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
   var
     i, j   : Integer;
     tData  : Pointer;
     mData  : Pointer;
-    pData  : Pointer;
     rW, mW : Integer;
 begin
-  if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) Then exit;
+  if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) or
+     ( Texture.Width <> Mask.Width ) or ( Texture.Height <> Mask.Height ) or
+     ( Texture.Format <> TEX_FORMAT_RGBA ) or ( Mask.Format <> TEX_FORMAT_RGBA ) Then exit;
 
   rW := Round( Texture.Width / Texture.U );
   mW := Round( Mask.Width / Mask.U );
 
   tex_GetData( Texture, tData );
   tex_GetData( Mask, mData );
-  GetMem( pData, Texture.Width * Texture.Height * 4 );
 
-  for i := 0 to Texture.Width - 1 do
-    for j := 0 to Texture.Height - 1 do
-      begin
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 0 )^ := PByte( Ptr( tData ) + i * 4 + j * rW * 4 + 0 )^;
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 1 )^ := PByte( Ptr( tData ) + i * 4 + j * rW * 4 + 1 )^;
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 2 )^ := PByte( Ptr( tData ) + i * 4 + j * rW * 4 + 2 )^;
-        PByte( Ptr( pData ) + i * 4 + j * Texture.Width * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 + j * mW * 4 + 0 )^;
-      end;
-
-  Result        := tex_Add();
-  Result.Width  := Texture.Width;
-  Result.Height := Texture.Height;
-  Result.Flags  := Texture.Flags;
-  if Result.Flags and TEX_GRAYSCALE > 0 Then
-    Result.Flags := Result.Flags xor TEX_GRAYSCALE;
-  if Result.Flags and TEX_INVERT > 0 Then
-    Result.Flags := Result.Flags xor TEX_INVERT;
-  tex_CalcFlags( Result^, pData );
-  tex_CalcTexCoords( Result^ );
-  if not tex_Create( Result^, pData ) Then
+  for j := 0 to Texture.Height - 1 do
     begin
-      tex_Del( Result );
-      Result := managerZeroTexture;
+      for i := 0 to Texture.Width - 1 do
+        PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
+      INC( tData, rW * 4 );
+      INC( mData, mW * 4 );
     end;
-  tex_Del( Texture );
+  DEC( tData, rW * Texture.Height * 4 );
+  DEC( mData, mW * Mask.Height * 4 );
+  tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
 
-  FreeMem( pData );
   FreeMem( tData );
   FreeMem( mData );
 end;
