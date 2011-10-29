@@ -189,7 +189,6 @@ begin
                       FileName := '';
                       FreeMem( item.Resource );
                       item.Resource := nil;
-                      item.Ready := FALSE;
                       DEC( resQueueSize[ id ] );
                       break;
                     end;
@@ -202,7 +201,6 @@ begin
 
                       FreeMem( item.Resource );
                       item.Resource := nil;
-                      item.Ready := FALSE;
                       DEC( resQueueSize[ id ] );
                       break;
                     end;
@@ -226,7 +224,7 @@ begin
                     end;
               end;
 
-            if resQueueSize[ id ] = 0 Then
+            if ( resQueueSize[ id ] = 0 ) or ( not item.Ready ) Then
               break
             else
               item := item.next;
@@ -347,6 +345,8 @@ begin
       item^.next      := nil;
       item^.prev.next := item^;
     end;
+  item^.Prepared   := FALSE;
+  item^.Ready      := FALSE;
   item^.IsFromFile := FromFile;
   item^._type      := _type;
 
@@ -427,6 +427,7 @@ begin
 
                     FreeMem( Resource );
                     Resource := nil;
+                    Ready := TRUE;
                     DEC( resQueueSize[ id ] );
                   end;
               RES_TEXTURE_MASK:
@@ -478,6 +479,7 @@ begin
                     FileName := '';
                     FreeMem( Resource );
                     Resource := nil;
+                    Ready := TRUE;
                     DEC( resQueueSize[ id ] );
                   end;
               {$ENDIF}
