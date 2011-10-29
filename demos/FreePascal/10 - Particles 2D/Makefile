@@ -58,6 +58,15 @@ win64: clean
 macos: clean
 	rm -Rf $(BUNDLE)
 	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM) -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
+	mv $(OUTPUT)$(TARGETM) $(BUNDLE)/Contents/MacOS/
+	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/back02.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/particle.png $(BUNDLE)/Contents/Resources/
+
+macos_uni: clean
+	rm -Rf $(BUNDLE)
+	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
 	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
 	$(FPC) $(UNIT) $(INCLUDE) $(LIBSPPC) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min 10.4"
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
