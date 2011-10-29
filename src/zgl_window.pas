@@ -306,7 +306,7 @@ begin
   wndHandle := zglCiOSWindow.alloc().initWithFrame( CGRectMake( wndX, wndY, Width, Height ) );
   wndHandle.setMultipleTouchEnabled( TRUE );
   wndViewCtrl := zglCiOSViewController.alloc().init();
-  wndHandle.setRootViewController( wndViewCtrl );
+  wndHandle.addSubview( wndViewCtrl.view );
 
   wnd_Select();
 {$ENDIF}
