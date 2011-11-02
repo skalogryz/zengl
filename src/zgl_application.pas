@@ -610,6 +610,7 @@ begin
         if appMinimized Then exit;
         if ( wParam > 0 ) and ( not appFocus ) Then
           begin
+            appFocus := TRUE;
             appPause := FALSE;
             if appWork Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
@@ -621,15 +622,18 @@ begin
           end else
             if ( wParam = 0 ) and ( appFocus ) Then
               begin
+                appFocus := FALSE;
                 if appAutoPause Then appPause := TRUE;
-                if appWork Then app_PActivate( FALSE );
-                if appWork and ( wndFullScreen ) and ( not wndFirst ) Then
+                if appWork Then
                   begin
-                    scr_Reset();
-                    wnd_Update();
+                    app_PActivate( FALSE );
+                    if ( wndFullScreen ) and ( not wndFirst ) Then
+                      begin
+                        scr_Reset();
+                        wnd_Update();
+                      end;
                   end;
               end;
-        appFocus := wParam > 0;
       end;
     WM_SIZE:
       begin

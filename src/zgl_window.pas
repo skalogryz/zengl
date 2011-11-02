@@ -373,7 +373,14 @@ begin
   if appFocus Then
     FullScreen := wndFullScreen
   else
-    FullScreen := FALSE;
+    begin
+      FullScreen := FALSE;
+      if ( wndWidth = zgl_Get( DESKTOP_WIDTH ) ) and ( wndHeight = zgl_Get( DESKTOP_HEIGHT ) ) Then
+        begin
+          ShowWindow( wndHandle, SW_MINIMIZE );
+          exit;
+        end;
+    end;
 
   if FullScreen Then
     wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
