@@ -375,7 +375,7 @@ begin
   else
     begin
       FullScreen := FALSE;
-      if ( wndWidth = zgl_Get( DESKTOP_WIDTH ) ) and ( wndHeight = zgl_Get( DESKTOP_HEIGHT ) ) Then
+      if ( wndWidth >= zgl_Get( DESKTOP_WIDTH ) ) and ( wndHeight >= zgl_Get( DESKTOP_HEIGHT ) ) Then
         begin
           ShowWindow( wndHandle, SW_MINIMIZE );
           exit;
