@@ -16,8 +16,8 @@ endif
 FPC     = fpc
 FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src
-LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS)
-LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS)
+LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS) -Fu../../../lib/zip/$(ARCH)-$(OS)
+LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS) -Fu../../../lib/zip/powerpc-$(OS)
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
 UNIT    = demo03.pas
@@ -36,6 +36,7 @@ linux32: clean
 	-Fu../../../lib/jpeg/i386-linux \
 	-Fu../../../lib/ogg/i386-linux \
 	-Fu../../../lib/zlib/i386-linux \
+	-Fu../../../lib/zip/i386-linux \
 	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
 	strip $(OUTPUT)i386/$(TARGET) --strip-unneeded -R .comment -R .note
 
@@ -45,6 +46,7 @@ win32: clean
 	-Fu../../../lib/msvcrt/i386 \
 	-Fu../../../lib/ogg/i386-win32 \
 	-Fu../../../lib/zlib/i386-win32 \
+	-Fu../../../lib/zip/i386-win32 \
 	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
@@ -53,6 +55,7 @@ win64: clean
 	-Fu../../../lib/msvcrt/x86_64 \
 	-Fu../../../lib/ogg/x86_64-win64 \
 	-Fu../../../lib/zlib/x86_64-win64 \
+	-Fu../../../lib/zip/x86_64-win64 \
 	-FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
 
 macos: clean

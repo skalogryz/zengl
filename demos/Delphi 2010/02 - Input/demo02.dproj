@@ -20,7 +20,7 @@
       <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-      <DCC_UnitSearchPath>../../../headers;../../../extra;../../../src;../../../lib/zlib/delphi;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+      <DCC_UnitSearchPath>../../../headers;../../../extra;../../../src;../../../lib/zlib/delphi;../../../lib/zip/delphi;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
       <DCC_DependencyCheckOutputName>..\..\..\bin\i386\demo02.exe</DCC_DependencyCheckOutputName>
       <DCC_ImageBase>00400000</DCC_ImageBase>
       <DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
