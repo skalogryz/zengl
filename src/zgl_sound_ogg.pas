@@ -66,7 +66,7 @@ unit zgl_sound_ogg;
 interface
 uses
   {$IFDEF WINDOWS}
-  zgl_msvcrt,
+  zgl_lib_msvcrt,
   {$ENDIF}
   zgl_memory;
 

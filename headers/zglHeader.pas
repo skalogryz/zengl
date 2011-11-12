@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.10.23           }
+{ date:     2011.11.12           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1263,6 +1263,8 @@ var
   _file_GetExtension : function( const FileName : String ) : PChar;
   _file_GetDirectory : function( const FileName : String ) : PChar;
   file_SetPath       : procedure( const Path : String );
+  file_OpenArchive   : function( const FileName : String; const Password : String = '' ) : Boolean;
+  file_CloseArchive  : procedure;
 
   function file_GetName( const FileName : String ) : String;
   function file_GetExtension( const FileName : String ) : String;
@@ -1751,6 +1753,8 @@ begin
       _file_GetExtension := dlsym( zglLib, 'file_GetExtension' );
       _file_GetDirectory := dlsym( zglLib, 'file_GetDirectory' );
       file_SetPath := dlsym( zglLib, 'file_SetPath' );
+      file_OpenArchive := dlsym( zglLib, 'file_OpenArchive' );
+      file_CloseArchive := dlsym( zglLib, 'file_CloseArchive' );
 
       mem_LoadFromFile := dlsym( zglLib, 'mem_LoadFromFile' );
       mem_SaveToFile := dlsym( zglLib, 'mem_SaveToFile' );

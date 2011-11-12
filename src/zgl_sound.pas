@@ -29,7 +29,6 @@ interface
 
 uses
   {$IFDEF UNIX}
-  {$LINKLIB pthread}
   cthreads,
   {$ENDIF}
   {$IFDEF WINDOWS}

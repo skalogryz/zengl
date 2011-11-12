@@ -387,6 +387,10 @@ exports
   _file_GetExtension       name prefix + 'file_GetExtension',
   _file_GetDirectory       name prefix + 'file_GetDirectory',
   file_SetPath             name prefix + 'file_SetPath',
+  {$IFDEF USE_ZIP}
+  file_OpenArchive         name prefix + 'file_OpenArchive',
+  file_CloseArchive        name prefix + 'file_CloseArchive',
+  {$ENDIF}
 
   mem_LoadFromFile         name prefix + 'mem_LoadFromFile',
   mem_SaveToFile           name prefix + 'mem_SaveToFile',

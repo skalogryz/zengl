@@ -43,7 +43,7 @@ interface
 uses
   {$IFDEF WINDOWS}
   Windows,
-  zgl_msvcrt,
+  zgl_lib_msvcrt,
   {$ENDIF}
   {$IFDEF USE_UIIMAGE}
   iPhoneAll,
@@ -87,7 +87,7 @@ const
   {$L jquant1}
   {$L jquant2}
   {$L jutils}
-  {$L wrapper}
+  {$L jpeg_helper}
   {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}

@@ -115,7 +115,7 @@ var
   resCompleted       : Integer;
   resThread          : array[ 0..255 ] of LongWord;
   {$IFNDEF FPC}
-  resThreadID        : array[ 0..255 ] of LongWord;
+  resThreadID        : array[ 0..255 ] of THandle;
   {$ENDIF}
   resQueueStackID    : array of Byte;
   resQueueID         : array[ 0..255 ] of Byte;
@@ -441,11 +441,11 @@ begin
                         begin
                           for i := 0 to Texture.Width - 1 do
                             PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
-                          INC( tData, rW * 4 );
-                          INC( mData, mW * 4 );
+                          INC( PByte( tData ), rW * 4 );
+                          INC( PByte( mData ), mW * 4 );
                         end;
-                      DEC( tData, rW * Texture.Height * 4 );
-                      DEC( mData, mW * Mask.Height * 4 );
+                      DEC( PByte( tData ), rW * Texture.Height * 4 );
+                      DEC( PByte( mData ), mW * Mask.Height * 4 );
 
                       Ready := TRUE;
                     end;

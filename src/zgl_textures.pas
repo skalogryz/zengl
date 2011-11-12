@@ -488,11 +488,11 @@ begin
           begin
             for i := 0 to Texture.Width - 1 do
               PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
-            INC( tData, rW * 4 );
-            INC( mData, mW * 4 );
+            INC( PByte( tData ), rW * 4 );
+            INC( PByte( mData ), mW * 4 );
           end;
-        DEC( tData, rW * Texture.Height * 4 );
-        DEC( mData, mW * Mask.Height * 4 );
+        DEC( PByte( tData ), rW * Texture.Height * 4 );
+        DEC( PByte( mData ), mW * Mask.Height * 4 );
         tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
 
         FreeMem( tData );
@@ -756,8 +756,7 @@ end;
 
 procedure tex_CalcAlpha( var pData : Pointer; Width, Height : Word );
   var
-    i       : Integer;
-    r, g, b : Byte;
+    i : Integer;
 begin
   for i := 0 to Width * Height - 1 do
     if ( PByte( Ptr( pData ) + i * 4 + 3 )^ = 0 ) Then

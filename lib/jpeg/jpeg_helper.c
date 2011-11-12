@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include <jconfig.h>
+#include <jmorecfg.h>
 #include <jpeglib.h>
 
 typedef unsigned char* (*getmem_func)( int Size );
@@ -13,7 +14,7 @@ typedef struct{
     getmem_func GetMem;
 } zglTJPGData;
 
-void jpgturbo_Load( zglTJPGData* jpgData, unsigned char** Data )
+void jpgturbo_Load( zglTJPGData *jpgData, unsigned char **Data )
 {
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;

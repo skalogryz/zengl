@@ -22,29 +22,12 @@ unit zgl_textures_png;
 
 {$I zgl_config.cfg}
 
-{$IFDEF USE_ZLIB}
-  {$IFNDEF iOS}
-    {$L infback}
-    {$L inffast}
-    {$L inflate}
-    {$L inftrees}
-    {$L zutil}
-    {$L adler32}
-    {$L crc32}
-  {$ELSE}
-    {$LINKLIB libz.dylib}
-  {$ENDIF}
-{$ENDIF}
-
 interface
 uses
   {$IFDEF WINDOWS}
-  zgl_msvcrt,
+  zgl_lib_msvcrt,
   {$ENDIF}
-  {$IFDEF USE_PASZLIB}
-  zbase,
-  paszlib,
-  {$ENDIF}
+  zgl_lib_zip,
   zgl_memory;
 
 const
@@ -67,7 +50,6 @@ threadvar
   pngPalette      : array[ 0..255, 0..2 ] of Byte;
   pngPaletteAlpha : Byte;
 
-{$IF DEFINED(USE_ZLIB) or DEFINED(USE_PASZLIB)}
 const
   PNG_SIGNATURE : array[ 0..7 ] of AnsiChar = ( #137, #80, #78, #71, #13, #10, #26, #10 );
 
@@ -82,21 +64,6 @@ const
   PNG_COLOR_PALETTE        = 3;
   PNG_COLOR_GRAYSCALEALPHA = 4;
   PNG_COLOR_RGBALPHA       = 6;
-
-  ZLIB_VERSION = '1.2.5';
-
-  _z_errmsg: array[ 0..9 ] of PAnsiChar = (
-    '',                     // Z_OK             (0)
-    'need dictionary',      // Z_NEED_DICT      (2)
-    'stream end',           // Z_STREAM_END     (1)
-    'file error',           // Z_ERRNO          (-1)
-    'stream error',         // Z_STREAM_ERROR   (-2)
-    'data error',           // Z_DATA_ERROR     (-3)
-    'insufficient memory',  // Z_MEM_ERROR      (-4)
-    'buffer error',         // Z_BUF_ERROR      (-5)
-    'incompatible version', // Z_VERSION_ERROR  (-6)
-    ''
-  );
 
 type
   zglTPNGChunkName = array[ 0..3 ] of AnsiChar;
@@ -121,41 +88,6 @@ type
   TColor = record
     R, G, B, A : Byte;
   end;
-{$IFEND}
-
-{$IFDEF USE_ZLIB}
-type
-  TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
-  TFree = procedure( AppData, Block : Pointer ); cdecl;
-
-  z_stream_s = record
-    next_in   : PByte;     // next input byte
-    avail_in  : cuint;     // number of bytes available at next_in
-    total_in  : clong;     // total nb of input bytes read so far
-
-    next_out  : PByte;     // next output byte should be put here
-    avail_out : cuint;     // remaining free space at next_out
-    total_out : clong;     // total nb of bytes output so far
-
-    msg       : PAnsiChar; // last error message, NULL if no error
-    state     : Pointer;   // not visible by applications
-
-    zalloc    : TAlloc;    // used to allocate the internal state
-    zfree     : TFree;     // used to free the internal state
-    opaque    : Pointer;   // private data object passed to zalloc and zfree
-
-    data_type : Integer;   // best guess about the data type: ascii or binary
-    adler     : culong;    // adler32 value of the uncompressed data
-    reserved  : culong;    // reserved for future use
-  end;
-
-function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
-function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
-function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
-{$ENDIF}
-{$IFDEF USE_PASZLIB}
-type z_stream_s = TZStream;
-{$ENDIF}
 
 procedure png_GetPixelInfo( var pngHeader : zglTPNGHeader; var pngRowSize, pngOffset : LongWord );
 begin
@@ -332,64 +264,6 @@ begin
   end;
 end;
 
-function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; var pngIDATEnd : LongWord; pngZData : Pointer; Buffer : Pointer; Bytes : Integer ) : Integer;
-  var
-    IDATHeader : zglTPNGChunkName;
-begin
-  Result := -1;
-  with pngZStream do
-    begin
-      next_out  := Buffer;
-      avail_out := Bytes;
-
-      while avail_out > 0 do
-        begin
-          if ( pngMem.Position = pngIDATEnd ) and ( avail_out > 0 ) and ( avail_in = 0 ) Then
-            begin
-              mem_Seek( pngMem, 4, FSM_CUR );
-
-              mem_ReadSwap( pngMem, pngIDATEnd, 4 );
-              mem_Read( pngMem, IDATHeader, 4 );
-
-              if IDATHeader <> 'IDAT' Then
-                begin
-                  log_Add( 'PNG - IDAT chunk expected' );
-                  Result := -1;
-                  exit;
-                end;
-
-              INC( pngIDATEnd, pngMem.Position );
-            end;
-
-          if avail_in = 0 Then
-            begin
-              if pngMem.Position + 65535 > pngIDATEnd Then
-                avail_in := mem_Read( pngMem, pngZData^, pngIDATEnd - pngMem.Position )
-              else
-                avail_in := mem_Read( pngMem, pngZData^, 65535 );
-
-              if avail_in = 0 Then
-                begin
-                  Result := Bytes - avail_out;
-                  exit;
-                end;
-
-              next_in := pngZData;
-            end;
-
-          Result := inflate( pngZStream, 0 );
-
-          if Result < 0 Then
-            begin
-              log_Add( 'PNG - ZLib error: ' + _z_errmsg[ abs( Result ) + 2 ] );
-              Result := -1;
-              exit;
-            end else
-              Result := avail_In;
-        end;
-    end;
-end;
-
 function png_ReadIHDR( var pngMem : zglTMemory; var pngHeader : zglTPNGheader; var Data : Pointer; Size : Integer ) : Boolean;
   var
     i : Integer;
@@ -449,7 +323,6 @@ function png_ReadIDAT( var pngMem : zglTMemory; pngHeader : zglTPNGHeader; var D
     CopyP        : procedure( Src, Dest : PByte; Width : Integer );
     pngIDATEnd   : LongWord;
     pngZStream   : z_stream_s;
-    pngZData     : Pointer;
     pngRowUsed   : Boolean;
     pngRowBuffer : array[ Boolean ] of PByteArray;
     pngRowSize   : LongWord;
@@ -461,9 +334,7 @@ begin
   pngIDATEnd := pngMem.Position + Size;
   png_GetPixelInfo( pngHeader, pngRowSize, pngOffset );
 
-  FillChar( pngZStream, SizeOf( z_stream_s ), 0 );
-  inflateInit_( pngZStream, ZLIB_VERSION, SizeOf( z_stream_s ) );
-  GetMem( pngZData, 65535 );
+  zlib_Init( pngZStream );
 
   zgl_GetMem( Pointer( pngRowBuffer[ FALSE ] ), pngRowSize + 1 );
   zgl_GetMem( Pointer( pngRowBuffer[ TRUE ] ), pngRowSize + 1 );
@@ -485,8 +356,9 @@ begin
   if Result Then
     for i := pngHeader.Height downto 1 do
       begin
-        if png_DecodeIDAT( pngMem, pngZStream, pngIDATEnd, pngZData, @pngRowBuffer[ pngRowUsed ][ 0 ], pngRowsize + 1 ) = -1 Then
+        if png_DecodeIDAT( pngMem, pngZStream, pngIDATEnd, @pngRowBuffer[ pngRowUsed ][ 0 ], pngRowsize + 1 ) < 0 Then
           begin
+            log_Add( 'PNG - Failed to decode IDAT chunk' );
             Result := FALSE;
             break;
           end;
@@ -501,8 +373,7 @@ begin
   FreeMem( pngRowBuffer[ FALSE ] );
   FreeMem( pngRowBuffer[ TRUE ] );
 
-  FreeMem( pngZData );
-  inflateEnd( pngZStream );
+  zlib_Free( pngZStream );
 end;
 
 procedure png_ReadtRNS( var pngMem : zglTMemory; Size : Integer );

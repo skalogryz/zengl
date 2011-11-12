@@ -1605,5 +1605,4 @@ static void zglFree()
   if ( zglLib )
     zglFreeLibrary( zglLib );
 }
-
 #endif
