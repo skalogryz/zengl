@@ -97,7 +97,7 @@ uses
   zglHeader
   {$ELSE}
   {$IFDEF WINDOWS}
-  zgl_msvcrt,
+  zgl_lib_msvcrt,
   {$ENDIF}
   zgl_types,
   zgl_primitives_2d
