@@ -35,7 +35,7 @@ uses
   {$IFDEF FPC}
   procedure __chkstk_ms; cdecl; public name '___chkstk_ms';
   function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '_MoveFileExA@12';
-  function kernel32__imp_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '__imp_MoveFileExA';
+  procedure __imp_MoveFileExA; stdcall; external 'kernel32.dll';
   function stat( path : PAnsiChar; var buffer ) : cint; cdecl; public name 'stat';
   {$ELSE}
   procedure _llmul; cdecl;
@@ -111,11 +111,6 @@ begin
 end;
 
 function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean;
-begin
-  Result := MoveFileExA( lpExistingFileName, lpNewFileName, dwFlags );
-end;
-
-function kernel32__imp_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean;
 begin
   Result := MoveFileExA( lpExistingFileName, lpNewFileName, dwFlags );
 end;
