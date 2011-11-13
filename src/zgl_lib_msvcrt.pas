@@ -35,7 +35,14 @@ uses
   {$IFDEF FPC}
   procedure __chkstk_ms; cdecl; public name '___chkstk_ms';
   function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '_MoveFileExA@12'; public name '__imp_MoveFileExA';
-  function stat( path : PAnsiChar; var buffer ) : cint; cdecl; public name 'stat';
+  function msvcrt_stat( path : PAnsiChar; var buffer ) : cint; cdecl; public name 'stat'; public name '_stat';
+  function msvcrt_fstat( handle : cint; var buffer ) : cint; cdecl; public name 'fstat'; public name '_fstat';
+  {$IFDEF WIN64}
+  function msvcrt_fseeki64( stream : Pointer; offset : cint64; origin : cint ) : Pointer; cdecl; public name '_fseeki64';
+  function msvcrt_ftelli64( stream : Pointer ) : cint64; cdecl; public name '_ftelli64';
+  function msvcrt_pow( x, y : Double ) : Double; cdecl; public name 'pow';
+  function msvcrt_ldexp( x : Double; exp : cint ) : Double; cdecl; public name 'ldexp';
+  {$ENDIF}
   {$ELSE}
   procedure _llmul; cdecl;
   {$ENDIF}
@@ -80,7 +87,7 @@ uses
   function _stat( path : PAnsiChar; var buffer ) : cint; cdecl; external 'msvcrt.dll';
   procedure memchr; cdecl; external 'msvcrt.dll';
   procedure time; cdecl; external 'msvcrt.dll';
-  procedure _fstat; cdecl; external 'msvcrt.dll';
+  function _fstat( handle : cint; var buffer ) : cint; cdecl; external 'msvcrt.dll';
   function pow( x, y : Double ) : Double; cdecl; external 'msvcrt.dll';
   function ldexp( x : Double; exp : cint ) : Double; cdecl; external 'msvcrt.dll';
 
@@ -92,13 +99,6 @@ uses
   {$IFDEF WIN64}
   function _fseeki64( stream : Pointer; offset : cint64; origin : cint ) : Pointer; cdecl; external 'msvcrt.dll';
   function _ftelli64( stream : Pointer ) : cint64; cdecl; external 'msvcrt.dll';
-
-  {$IFDEF BUGGY_FPC_ON_WIN64}
-  function msvcrt_fseeki64( stream : Pointer; offset : cint64; origin : cint ) : Pointer; cdecl; public name '_fseeki64';
-  function msvcrt_ftelli64( stream : Pointer ) : cint64; cdecl; public name '_ftelli64';
-  function msvcrt_pow( x, y : Double ) : Double; cdecl; public name 'pow';
-  function msvcrt_ldexp( x : Double; exp : cint ) : Double; cdecl; public name 'ldexp';
-  {$ENDIF}
   {$ENDIF}
 
 implementation
@@ -114,12 +114,17 @@ begin
   Result := MoveFileExA( lpExistingFileName, lpNewFileName, dwFlags );
 end;
 
-function stat( path : PAnsiChar; var buffer ) : cint;
+function msvcrt_stat( path : PAnsiChar; var buffer ) : cint;
 begin
   Result := _stat( path, buffer );
 end;
 
-{$IFDEF BUGGY_FPC_ON_WIN64}
+function msvcrt_fstat( handle : cint; var buffer ) : cint;
+begin
+  Result := _fstat( handle, buffer );
+end;
+
+{$IFDEF WIN64}
 function msvcrt_fseeki64( stream : Pointer; offset : cint64; origin : cint ) : Pointer;
 begin
   Result := _fseeki64( stream, offset, origin );

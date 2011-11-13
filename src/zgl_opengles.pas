@@ -36,7 +36,7 @@ uses
   X, XLib, XUtil,
   {$ENDIF}
   {$IFDEF WINDOWS}
-  windows,
+  Windows,
   {$ENDIF}
   {$IFDEF iOS}
   iPhoneAll, CGGeometry,

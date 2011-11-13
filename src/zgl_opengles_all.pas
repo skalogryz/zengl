@@ -471,10 +471,10 @@ const
   EGL_BAD_SURFACE         = $300D;
   EGL_CONTEXT_LOST        = $300E;
 
-  EGL_DEFAULT_DISPLAY = 0;
-  EGL_NO_CONTEXT      = 0;
+  EGL_DEFAULT_DISPLAY = {$IFDEF WINDOWS} 0 {$ELSE} nil {$ENDIF};
+  EGL_NO_CONTEXT      = nil;
   EGL_NO_DISPLAY      = nil;
-  EGL_NO_SURFACE      = 0;
+  EGL_NO_SURFACE      = nil;
 
   EGL_NONE            = $3038;
 
