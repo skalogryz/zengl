@@ -687,6 +687,7 @@ function file_OpenArchive( const FileName : String; const Password : String = ''
     error : Integer;
 begin
   zipCurrent := zip_open( PAnsiChar( FileName ), 0, error );
+  Result     := zipCurrent <> nil;
   if Password = '' Then
     zip_set_default_password( zipCurrent, nil )
   else
