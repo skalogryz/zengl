@@ -49,7 +49,7 @@ unit zgl_lib_zip;
 
 interface
 uses
-  {$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
   zgl_lib_msvcrt,
   {$ENDIF}
   zgl_memory,

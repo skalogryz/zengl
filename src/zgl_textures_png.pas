@@ -24,7 +24,7 @@ unit zgl_textures_png;
 
 interface
 uses
-  {$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
   zgl_lib_msvcrt,
   {$ENDIF}
   zgl_lib_zip,

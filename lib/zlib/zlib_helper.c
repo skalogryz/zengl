@@ -1,5 +1,7 @@
 #include <stdio.h>
+#ifndef __CEGCC__
 #include <memory.h>
+#endif
 #include <math.h>
 #include <zlib.h>
 
@@ -20,6 +22,38 @@ void zlib_Free( z_stream *strm )
 {
   inflateEnd( strm );
 }
+
+#ifdef __CEGCC__
+unsigned long udivmodsi4( unsigned long num, unsigned long den, int modwanted )
+{
+  unsigned long bit = 1;
+  unsigned long res = 0;
+
+  while ( den < num && bit && !( den & ( 1L << 31 ) ) )
+  {
+    den <<= 1;
+    bit <<= 1;
+  }
+  while ( bit )
+  {
+    if (num >= den)
+      {
+        num -= den;
+        res |= bit;
+      }
+    bit >>=1;
+    den >>=1;
+  }
+
+  if ( modwanted ) return num;
+  return res;
+}
+
+long __umodsi3 ( long a, long b )
+{
+  return udivmodsi4( a, b, 1 );
+}
+#endif
 
 int png_DecodeIDAT( zglTMemory *pngMem, z_stream *pngZStream, unsigned int *pngIDATEnd, void *Buffer, int Bytes )
 {

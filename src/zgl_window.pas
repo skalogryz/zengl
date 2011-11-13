@@ -147,6 +147,7 @@ function wnd_Create( Width, Height : Integer ) : Boolean;
     status : OSStatus;
   {$ENDIF}
 begin
+  Result := TRUE;
   if wndHandle <> {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF} Then exit;
 
   Result    := FALSE;
