@@ -89,7 +89,7 @@ end;
 function mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 begin
   {$IFDEF ENDIAN_BIG}
-  if ( Bytes <=4 ) and ( not forceNoSwap ) Then
+  if ( Bytes <= 4 ) and ( not forceNoSwap ) Then
     begin
       Result := mem_ReadSwap( Memory, Buffer, Bytes );
       exit;
