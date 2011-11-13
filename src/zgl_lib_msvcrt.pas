@@ -34,8 +34,7 @@ uses
   // I hate hacks >_<
   {$IFDEF FPC}
   procedure __chkstk_ms; cdecl; public name '___chkstk_ms';
-  function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '_MoveFileExA@12';
-  procedure __imp_MoveFileExA; stdcall; external 'kernel32.dll';
+  function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '_MoveFileExA@12'; public name '__imp_MoveFileExA';
   function stat( path : PAnsiChar; var buffer ) : cint; cdecl; public name 'stat';
   {$ELSE}
   procedure _llmul; cdecl;
