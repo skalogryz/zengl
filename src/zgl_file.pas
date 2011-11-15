@@ -516,8 +516,35 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
     error       : NSErrorPointer;
     isDirectory : Boolean;
   {$ENDIF}
+  {$IFDEF USE_ZIP}
+    count : Integer;
+    name  : PAnsiChar;
+    len   : Integer;
+  {$ENDIF}
 begin
   List.Count := 0;
+
+{$IFDEF USE_ZIP}
+  if Assigned( zipCurrent ) Then
+    begin
+      for count := 0 to zip_get_num_entries( zipCurrent, ZIP_FL_UNCHANGED ) do
+        begin
+          name := zip_get_name( zipCurrent, count, ZIP_FL_UNCHANGED );
+          len  := Length( name );
+          if ( file_GetDirectory( name ) = Directory ) and ( ( FindDir and ( name[ len - 1 ] = '/' ) ) or ( ( not FindDir ) and ( name[ len - 1 ] <> '/' ) ) ) Then
+            begin
+              SetLength( List.Items, List.Count + 1 );
+              List.Items[ List.Count ] := u_CopyStr( name );
+              INC( List.Count );
+            end;
+        end;
+
+      if List.Count > 2 Then
+        u_SortList( List, 0, List.Count - 1 );
+      exit;
+    end;
+{$ENDIF}
+
 {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
   if FindDir Then
     _type := 4

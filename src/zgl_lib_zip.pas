@@ -126,6 +126,9 @@ function zip_fopen( archive : Pzip; fname : PAnsiChar; flags : cint ) : Pzip_fil
 function zip_fread( file_ : Pzip_file; var buf; nbytes : cuint64 ) : cint; cdecl; external;
 function zip_fclose( file_ : Pzip_file ) : cint; cdecl; external;
 
+function zip_get_num_entries( archive : Pzip; flags : cint ) : cuint64; cdecl; external;
+function zip_get_name( archive : Pzip; index : cint; flags : cint ) : PAnsiChar; cdecl; external;
+
 // hack for compression functions which will be never used, but which are needed on linking stage
 {$IFDEF FPC}
 function deflate_fake : Integer; cdecl; public name '_deflate'; public name 'deflate';
@@ -203,4 +206,4 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-end.
+end.
