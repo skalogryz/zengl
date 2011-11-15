@@ -40,8 +40,10 @@ uses
   // <censored>, standard msvcrt.dll have no _ftelli64
   function msvcrt_fseeki64( stream : Pointer; offset : cint64; origin : cint ) : cint; cdecl; public name '_fseeki64';
   function msvcrt_ftelli64( stream : Pointer ) : cint64; cdecl; public name '_ftelli64';
+  {$IFDEF NAME_MANGLING}
   function msvcrt_pow( x, y : Double ) : Double; cdecl; public name 'pow';
   function msvcrt_ldexp( x : Double; exp : cint ) : Double; cdecl; public name 'ldexp';
+  {$ENDIF}
   {$ENDIF}
   {$ELSE}
   procedure _llmul; cdecl;
@@ -123,6 +125,7 @@ begin
   Result := ftell( stream );
 end;
 
+{$IFDEF NAME_MANGLING}
 function msvcrt_pow( x, y : Double ) : Double;
 begin
   Result := pow( x, y );
@@ -132,6 +135,7 @@ function msvcrt_ldexp( x : Double; exp : cint ) : Double;
 begin
   Result := ldexp( x, exp );
 end;
+{$ENDIF}
 {$ENDIF}
 
 {$ELSE}
