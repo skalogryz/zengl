@@ -23,11 +23,7 @@ unit zgl_lib_zip;
 {$I zgl_config.cfg}
 
 {$IFDEF USE_ZIP}
-  {$IFDEF FPC}
-    {$LINKLIB libzip.a}
-  {$ELSE}
-    {$L libzip}
-  {$ENDIF}
+  {$L libzip}
 {$ENDIF}
 
 {$L zlib_helper}

@@ -35,16 +35,13 @@ uses
   {$IFDEF FPC}
   procedure __chkstk_ms; cdecl; public name '___chkstk_ms';
   function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '_MoveFileExA@12'; public name '__imp_MoveFileExA';
-  function msvcrt_stat( path : PAnsiChar; var buffer ) : cint; cdecl; public name 'stat';
   {$IFDEF WIN64}
-  // <censored>, standard msvcrt.dll have no _ftelli64
-  function msvcrt_fseeki64( stream : Pointer; offset : cint64; origin : cint ) : cint; cdecl; public name '_fseeki64';
-  function msvcrt_ftelli64( stream : Pointer ) : cint64; cdecl; public name '_ftelli64';
   {$IFDEF NAME_MANGLING}
   function msvcrt_pow( x, y : Double ) : Double; cdecl; public name 'pow';
   function msvcrt_ldexp( x : Double; exp : cint ) : Double; cdecl; public name 'ldexp';
   {$ENDIF}
   {$ENDIF}
+
   {$ELSE}
   procedure _llmul; cdecl;
   procedure errno; cdecl; external 'msvcrt.dll' name '_errno';
@@ -53,6 +50,13 @@ uses
   {$ENDIF}
 
   function MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; external 'kernel32.dll';
+  function fseek( stream : Pointer; offset : clong; origin : cint ) : cint; cdecl; external 'msvcrt.dll';
+  function ftell( stream : Pointer ) : clong; cdecl; external 'msvcrt.dll';
+  function _stat( path : PAnsiChar; var buffer ) : cint; cdecl; external 'msvcrt.dll';
+  function _fstat( handle : cint; var buffer ) : cint; cdecl; external 'msvcrt.dll';
+  function pow( x, y : Double ) : Double; cdecl; external 'msvcrt.dll';
+  function ldexp( x : Double; exp : cint ) : Double; cdecl; external 'msvcrt.dll';
+
   procedure memcpy; cdecl; external 'msvcrt.dll';
   procedure memset; cdecl; external 'msvcrt.dll';
   procedure malloc; cdecl; external 'msvcrt.dll';
@@ -64,8 +68,6 @@ uses
   procedure strlen; cdecl; external 'msvcrt.dll';
   procedure remove; cdecl; external 'msvcrt.dll';
   procedure qsort; cdecl; external 'msvcrt.dll';
-  function fseek( stream : Pointer; offset : clong; origin : cint ) : cint; cdecl; external 'msvcrt.dll';
-  function ftell( stream : Pointer ) : clong; cdecl; external 'msvcrt.dll';
   procedure fclose; cdecl; external 'msvcrt.dll';
   procedure fopen; cdecl; external 'msvcrt.dll';
   procedure fread; cdecl; external 'msvcrt.dll';
@@ -89,12 +91,8 @@ uses
   procedure clearerr; cdecl; external 'msvcrt.dll';
   procedure strncmp; cdecl; external 'msvcrt.dll';
   procedure strtoul; cdecl; external 'msvcrt.dll';
-  function _stat( path : PAnsiChar; var buffer ) : cint; cdecl; external 'msvcrt.dll';
   procedure memchr; cdecl; external 'msvcrt.dll';
   procedure time; cdecl; external 'msvcrt.dll';
-  function _fstat( handle : cint; var buffer ) : cint; cdecl; external 'msvcrt.dll';
-  function pow( x, y : Double ) : Double; cdecl; external 'msvcrt.dll';
-  function ldexp( x : Double; exp : cint ) : Double; cdecl; external 'msvcrt.dll';
 
 implementation
 
@@ -109,22 +107,7 @@ begin
   Result := MoveFileExA( lpExistingFileName, lpNewFileName, dwFlags );
 end;
 
-function msvcrt_stat( path : PAnsiChar; var buffer ) : cint;
-begin
-  Result := _stat( path, buffer );
-end;
-
 {$IFDEF WIN64}
-function msvcrt_fseeki64( stream : Pointer; offset : cint64; origin : cint ) : cint;
-begin
-  Result := fseek( stream, offset, origin );
-end;
-
-function msvcrt_ftelli64( stream : Pointer ) : cint64;
-begin
-  Result := ftell( stream );
-end;
-
 {$IFDEF NAME_MANGLING}
 function msvcrt_pow( x, y : Double ) : Double;
 begin
