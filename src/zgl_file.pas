@@ -139,11 +139,11 @@ begin
   if Assigned( zipCurrent ) Then
     begin
       zgl_GetMem( Pointer( FileHandle ), SizeOf( zglZipFile ) );
-      zglPZipFile( FileHandle ).file_ := zip_fopen( zipCurrent, PAnsiChar( FileName ), ZIP_FL_UNCHANGED );
+      zglPZipFile( FileHandle ).file_ := zip_fopen( zipCurrent, PAnsiChar( filePath + FileName ), ZIP_FL_UNCHANGED );
       if not Assigned( zglPZipFile( FileHandle ).file_ ) Then
         zgl_FreeMem( Pointer( FileHandle ) )
       else
-        zglPZipFile( FileHandle ).name := u_GetPAnsiChar( FileName );
+        zglPZipFile( FileHandle ).name := u_GetPAnsiChar( filePath + FileName );
 
       Result := FileHandle <> 0;
       if ( Mode = FOM_CREATE ) or ( Mode = FOM_OPENRW ) Then
@@ -193,6 +193,7 @@ begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
     begin
+      Result := FALSE;
       exit;
     end;
   {$ENDIF}
@@ -229,6 +230,14 @@ function file_Remove( const Name : String ) : Boolean;
     path : String;
     list : zglTFileList;
 begin
+  {$IFDEF USE_ZIP}
+  if Assigned( zipCurrent ) Then
+    begin
+      Result := FALSE;
+      exit;
+    end;
+  {$ENDIF}
+
   if not file_Exists( Name ) Then
     begin
       Result := FALSE;
@@ -345,6 +354,7 @@ begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
     begin
+      Result := 0;
       exit;
     end;
   {$ENDIF}
@@ -411,6 +421,7 @@ begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
     begin
+      Result := 0;
       exit;
     end;
   {$ENDIF}
@@ -461,10 +472,7 @@ end;
 procedure file_Flush( FileHandle : zglTFile );
 begin
   {$IFDEF USE_ZIP}
-  if Assigned( zipCurrent ) Then
-    begin
-      exit;
-    end;
+  if Assigned( zipCurrent ) Then exit;
   {$ENDIF}
 
 {$IFDEF UNIX}
@@ -524,7 +532,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
 begin
   List.Count := 0;
 
-{$IFDEF USE_ZIP}
+  {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
     begin
       for count := 0 to zip_get_num_entries( zipCurrent, ZIP_FL_UNCHANGED ) do
@@ -543,7 +551,7 @@ begin
         u_SortList( List, 0, List.Count - 1 );
       exit;
     end;
-{$ENDIF}
+  {$ENDIF}
 
 {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
   if FindDir Then
