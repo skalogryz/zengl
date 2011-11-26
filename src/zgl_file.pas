@@ -721,7 +721,11 @@ function file_OpenArchive( const FileName : String; const Password : String = ''
   var
     error : Integer;
 begin
+  {$IF DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(WINCE)}
+  zipCurrent := zip_open( PAnsiChar( platform_GetRes( filePath + FileName ) ), 0, error );
+  {$ELSE}
   zipCurrent := zip_open( PAnsiChar( FileName ), 0, error );
+  {$IFEND}
   Result     := zipCurrent <> nil;
   if Password = '' Then
     zip_set_default_password( zipCurrent, nil )
