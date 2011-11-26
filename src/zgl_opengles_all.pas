@@ -26,18 +26,20 @@ unit zgl_opengles_all;
 {$ENDIF}
 
 interface
+{$IFNDEF ANDROID}
 uses
-  math,
-  {$IFDEF LINUX}
-  X, XLib
+  {$IFDEF USE_X11}
+  X, XLib,
   {$ENDIF}
   {$IFDEF WINDOWS}
-  Windows
+  Windows,
   {$ENDIF}
   {$IFDEF iOS}
-  iPhoneAll
+  iPhoneAll,
   {$ENDIF}
+  math
   ;
+{$ENDIF}
 
 function InitGLES : Boolean;
 procedure FreeGLES;
@@ -47,7 +49,7 @@ function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
 
 const
   {$IFNDEF USE_GLES_ON_DESKTOP}
-    {$IFDEF LINUX}
+    {$IFDEF USE_X11}
     libEGL     = 'libEGL.so';
     libGLES_CM = 'libGLES_CM.so';
     libGLESv1  = 'libGLESv1.so';
@@ -63,6 +65,12 @@ const
     libGLES_CM = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
     libGLESv1  = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
     libGLESv2  = '/System/Library/Frameworks/OpenGLES.framework/OpenGLES';
+    {$ENDIF}
+    {$IFDEF ANDROID}
+    libEGL     = 'libEGL.so';
+    libGLES_CM = 'libGLESv1_CM.so';
+    libGLESv1  = 'libGLESv1_CM.so';
+    libGLESv2  = 'libGLESv2.so';
     {$ENDIF}
   {$ELSE}
     {$IFDEF LINUX}
@@ -435,13 +443,17 @@ var
 {$IFNDEF iOS}
 // EGL Types
 type
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   EGLNativeDisplayType = PDisplay;
   EGLNativeWindowType  = TWindow;
   {$ENDIF}
   {$IFDEF WINDOWS}
   EGLNativeDisplayType = HDC;
   EGLNativeWindowType  = HWND;
+  {$ENDIF}
+  {$IFDEF ANDROID} // android-9
+  EGLNativeDisplayType = Integer;
+  EGLNativeWindowType  = Pointer;
   {$ENDIF}
   EGLBoolean      = LongBool;
   EGLint          = LongInt;
@@ -708,13 +720,13 @@ function gl_GetProc( const Proc : AnsiString ) : Pointer;
     wideStr : PWideChar;
   {$ENDIF}
 begin
-{$IFNDEF iOS}
+{$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) ) }
   Result := eglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := eglGetProcAddress( PAnsiChar( Proc + 'OES' ) );
 {$ELSE}
   Result := nil;
-{$ENDIF}
+{$IFEND}
 
   {$IFNDEF WINCE}
   if Result = nil Then
@@ -808,6 +820,16 @@ begin
   PByte( Ptr( @bColor ) + 2 )^ := Round( blue * 255 );
   PByte( Ptr( @bColor ) + 3 )^ := Round( alpha * 255 );
 end;
+
+{$IFDEF ANDROID}
+function tan( x : Single ) : Single;
+  var
+    _sin,_cos : Single;
+begin
+  m_SinCos( x, _sin, _cos );
+  tan := _sin / _cos;
+end;
+{$ENDIF}
 
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
   var

@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 7             }
-{ date:              2011.07.03              }
+{ header version:    0.99 beta 8             }
+{ date:              2011.11.26              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -39,6 +39,10 @@ unit zglChipmunk;
   {$DEFINE WINDOWS}
 {$ENDIF}
 
+{$IF DEFINED(LINUX) and DEFINED(CPUARM)}
+  {$DEFINE ANDROID}
+  {$DEFINE CHIPMUNK_LINK}
+{$IFEND}
 {$IFDEF DARWIN}
   {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
     {$DEFINE iOS}
@@ -50,6 +54,7 @@ unit zglChipmunk;
 {$IFDEF FPC}
   {$MODE DELPHI}
   {$PACKRECORDS C}
+  {$IFNDEF CHIPMUNK_LINK}
   {$IFDEF CHIPMUNK_STATIC}
     {$L chipmunk}
     {$L cpArbiter}
@@ -86,6 +91,7 @@ unit zglChipmunk;
       {$ENDIF}
     {$ENDIF}
   {$ENDIF}
+  {$ENDIF}
 {$ENDIF}
 
 interface
@@ -101,10 +107,9 @@ uses
   {$ENDIF}
   ;
 
-{$IFNDEF CHIPMUNK_STATIC}
 const
 {$IFDEF LINUX}
-  libChipmunk = 'libchipmunk.so.5.3.2';
+  libChipmunk = {$IFDEF ANDROID} 'libchipmunk.so' {$ELSE} 'libchipmunk.so.5.3.2' {$ENDIF};
 {$ENDIF}
 {$IFDEF WINDOWS}
   libChipmunk = 'chipmunk.dll';
@@ -112,17 +117,16 @@ const
 {$IFDEF MACOSX}
   libChipmunk = 'libchipmunk.5.3.2.dylib';
 {$ENDIF}
-{$ENDIF}
 
-{$IFNDEF CHIPMUNK_STATIC}
+{$IF ( not DEFINED(CHIPMUNK_STATIC) ) and ( not DEFINED(CHIPMUNK_LINK) )}
 function  cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure cpFree;
-{$ENDIF}
+{$IFEND}
 
 type
   cpHashValue     = LongWord;
   cpBool          = LongBool;
-  cpFloat         = {$IFDEF iOS} Single {$ELSE} Double {$ENDIF};
+  cpFloat         = {$IF DEFINED(iOS) or DEFINED(ANDROID)} Single {$ELSE} Double {$IFEND};
   cpDataPointer   = Pointer;
   cpCollisionType = LongWord;
   cpGroup         = LongWord;
@@ -801,7 +805,7 @@ const
   INFINITY                    = 1e1000;
   CP_MAX_CONTACTS_PER_ARBITER = 6;
 
-{$IFNDEF CHIPMUNK_STATIC}
+{$IF ( not DEFINED(CHIPMUNK_STATIC) ) and ( not DEFINED(CHIPMUNK_LINK) )}
 var
   cpInitChipmunk : procedure; cdecl;
   cpMomentForCircle : function( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl;
@@ -1130,169 +1134,169 @@ var
   // This function was very lonely in cpCollision.h :)
   cpCollideShapes : function( a : PcpShape; b : PcpShape; arr : PcpContact ) : Integer; cdecl;
 {$ELSE}
-  procedure cpInitChipmunk; cdecl; external;
-  function cpMomentForCircle( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl; external;
-  function cpMomentForSegment( m : cpFloat; a : cpVect; b : cpVect ) : cpFloat; cdecl; external;
-  function cpMomentForPoly( m : cpFloat; numVerts : Integer; verts : PcpVect; offset : cpVect ) : cpFloat; cdecl; external;
-  function cpMomentForBox( m : cpFloat; width : cpFloat; height : cpFloat ) : cpFloat; cdecl; external;
-  function cpvlength( v : cpVect ) : cpFloat; cdecl; external;
-  function cpvslerp ( v1 : cpVect; v2 : cpVect; t : cpFloat ) : cpVect; cdecl; external;
-  function cpvslerpconst( v1 : cpVect; v2 : cpVect; a : cpFloat ) : cpVect; cdecl; external;
-  function cpvforangle( a : cpFloat ) : cpVect; cdecl; external;
-  function cpvtoangle( v : cpVect ) : cpFloat; cdecl; external;
-  function cpBBClampVect( bb : cpBB; v : cpVect ) : cpVect; cdecl; external;
-  function cpBBWrapVect( bb : cpBB; v : cpVect ) : cpVect; cdecl; external;
-  function cpArrayAlloc : PcpArray; cdecl; external;
-  function cpArrayInit( arr : PcpArray; size : Integer ) : PcpArray; cdecl; external;
-  function cpArrayNew( size : Integer ) : PcpArray; cdecl; external;
-  procedure cpArrayDestroy( arr : PcpArray); cdecl; external;
-  procedure cpArrayFree( arr : PcpArray ); cdecl; external;
-  procedure cpArrayClear( arr : PcpArray ); cdecl; external;
-  procedure cpArrayPush( arr : PcpArray; _object : Pointer ); cdecl; external;
-  function cpArrayPop( arr : PcpArray ) : Pointer; cdecl; external;
-  procedure cpArrayDeleteIndex( arr : PcpArray; idx : Integer ); cdecl; external;
-  procedure cpArrayDeleteObj( arr : PcpArray; obj : Pointer ); cdecl; external;
-  procedure cpArrayAppend( arr : PcpArray; other : PcpArray ); cdecl; external;
-  procedure cpArrayEach( arr : PcpArray; iterFunc : cpArrayIter; data : Pointer ); cdecl; external;
-  function cpArrayContains( arr : PcpArray; ptr : Pointer ) : cpBool; cdecl; external;
-  function cpContactInit( con : PcpContact; p : cpVect; n : cpVect; dist : cpFloat; hasg : cpHashValue ) : PcpContact; cdecl; external;
-  function cpArbiterInit( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : cpArbiter; cdecl; external;
-  procedure cpArbiterUpdate( arb : PcpArbiter; contacts : PcpContact; numContacts : Integer; handler : PcpCollisionHandler; a : PcpShape; b : PcpShape ); cdecl; external;
-  procedure cpArbiterPreStep( arb : PcpArbiter; dt_inv : cpFloat ); cdecl; external;
-  procedure cpArbiterApplyCachedImpulse( arb : PcpArbiter ); cdecl; external;
-  procedure cpArbiterApplyImpulse( arb : PcpArbiter; eCoef : cpFloat ); cdecl; external;
-  function cpArbiterTotalImpulse( arb : PcpArbiter ) : cpVect; cdecl; external;
-  function cpArbiterTotalImpulseWithFriction( arb : PcpArbiter ) : cpVect; cdecl; external;
-  procedure cpArbiterIgnore( arb : PcpArbiter ); external;
-  function cpShapeInit( shape : PcpShape; klass : PcpShapeClass; body : PcpBody ) : PcpShape; cdecl; external;
-  procedure cpShapeDestroy( shape : PcpShape ); cdecl; external;
-  procedure cpShapeFree( shape : PcpShape ); cdecl; external;
-  function cpShapeCacheBB( shape : PcpShape ) : cpBB; cdecl; external;
-  function cpShapePointQuery( shape : PcpShape; p : cpVect ) : cpBool; cdecl; external;
-  function cpCircleShapeAlloc : cpCircleShape; cdecl; external;
-  function cpCircleShapeInit( circle : PcpCircleShape; body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpCircleShape; cdecl; external;
-  function cpCircleShapeNew( body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpShape; cdecl; external;
-  function cpSegmentShapeAlloc : PcpSegmentShape; cdecl; external;
-  function cpSegmentShapeInit( seg : PcpSegmentShape; body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpSegmentShape; cdecl; external;
-  function cpSegmentShapeNew( body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpShape; cdecl; external;
-  procedure cpResetShapeIdCounter; cdecl; external;
-  function cpShapeSegmentQuery( shape : PcpShape; a : cpVect; b : cpVect; info : PcpSegmentQueryInfo ) : cpBool; cdecl; external;
-  function cpPolyShapeAlloc : PcpPolyShape; cdecl; external;
-  function cpPolyShapeInit ( poly : PcpPolyShape; body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpPolyShape; cdecl; external;
-  function cpPolyShapeNew( body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpShape; cdecl; external;
-  function cpBoxShapeInit( poly : cpPolyShape; body : cpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl; external;
-  function cpBoxShapeNew( body : PcpBody; width : cpFloat; height : cpFloat ) : PcpShape; cdecl; external;
-  function cpPolyValidate( verts : PcpVect; numVerts : Integer ) : cpBool; cdecl; external;
-  function cpPolyShapeGetNumVerts( shape : PcpShape ) : Integer; cdecl; external;
-  function cpPolyShapeGetVert( shape : PcpShape; idx : Integer ) : cpVect; cdecl; external;
-  function cpBodyAlloc : PcpBody; cdecl; external;
-  function cpBodyInit( body : PcpBody; m : cpFloat; i : cpFloat ) : PcpBody; cdecl; external;
-  function cpBodyNew( m : cpFloat; i : cpFloat ) : PcpBody; cdecl; external;
-  procedure cpBodyDestroy( body : PcpBody ); cdecl; external;
-  procedure cpBodyFree( body : PcpBody ); cdecl; external;
-  procedure cpBodyActivate( body : PcpBody ); cdecl; external;
-  procedure cpBodySleep( body : PcpBody ); cdecl; external;
-  procedure cpBodySetMass( body : PcpBody; m : cpFloat ); cdecl; external;
-  procedure cpBodySetMoment( body : PcpBody; i : cpFloat ); cdecl; external;
-  procedure cpBodySetAngle( body : PcpBody; a : cpFloat ); cdecl; external;
-  procedure cpBodySlew( body : PcpBody; pos : cpVect; dt : cpFloat ); cdecl; external;
-  procedure cpBodyUpdateVelocity( body : PcpBody; gravity : cpVect; damping : cpFloat; dt : cpFloat ); cdecl; external;
-  procedure cpBodyUpdatePosition( body : PcpBody; dt : cpFloat ); cdecl; external;
-  procedure cpBodyResetForces( body : PcpBody ); cdecl; external;
-  procedure cpBodyApplyForce( body : PcpBody; f : cpVect; r : cpVect ); cdecl; external;
-  procedure cpApplyDampedSpring( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; rlen : cpFloat; k : cpFloat; dmp : cpFloat; dt : cpFloat ); cdecl; external;
-  procedure cpConstraintDestroy( constraint : PcpConstraint ); cdecl; external;
-  procedure cpConstraintFree( constraint : PcpConstraint ); cdecl; external;
-  function cpPinJointAlloc : PcpPinJoint; cdecl; external;
-  function cpPinJointInit( joint : PcpPinJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : cpPinJoint; cdecl; external;
-  function cpPinJointNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl; external;
-  function cpSlideJointAlloc : PcpSlideJoint; cdecl; external;
-  function cpSlideJointInit( joint : PcpSlideJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpSlideJoint; cdecl; external;
-  function cpSlideJointNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpPivotJointAlloc : PcpPivotJoint; cdecl; external;
-  function cpPivotJointInit( joint : PcpPivotJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpPivotJoint; cdecl; external;
-  function cpPivotJointNew( a : PcpBody; b : PcpBody; pivot : cpVect ) : PcpConstraint; cdecl; external;
-  function cpPivotJointNew2( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl; external;
-  function cpGrooveJointAlloc : PcpGrooveJoint; cdecl; external;
-  function cpGrooveJointInit( joint : PcpGrooveJoint; a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpGrooveJoint; cdecl; external;
-  function cpGrooveJointNew( a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl; external;
-  procedure cpGrooveJointSetGrooveA( constraint : PcpConstraint; value : cpVect ); cdecl; external;
-  procedure cpGrooveJointSetGrooveB( constraint : PcpConstraint; value : cpVect ); cdecl; external;
-  function cpDampedSpringAlloc : PcpDampedSpring; cdecl; external;
-  function cpDampedSpringInit( joint : cpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl; external;
-  function cpDampedSpringNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpDampedRotarySpringAlloc : PcpDampedRotarySpring; cdecl; external;
-  function cpDampedRotarySpringInit( joint : PcpDampedRotarySpring; a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedRotarySpring; cdecl; external;
-  function cpDampedRotarySpringNew( a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpRotaryLimitJointAlloc : PcpRotaryLimitJoint; cdecl; external;
-  function cpRotaryLimitJointInit( joint : PcpRotaryLimitJoint; a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpRotaryLimitJoint; cdecl; external;
-  function cpRotaryLimitJointNew( a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpRatchetJointAlloc : PcpRatchetJoint; cdecl; external;
-  function cpRatchetJointInit( joint : PcpRatchetJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpRatchetJoint; cdecl; external;
-  function cpRatchetJointNew( a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpGearJointAlloc : PcpGearJoint; cdecl; external;
-  function cpGearJointInit( joint : PcpGearJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpGearJoint; cdecl; external;
-  function cpGearJointNew( a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpSimpleMotorAlloc : PcpSimpleMotor; cdecl; external;
-  function cpSimpleMotorInit( joint : PcpSimpleMotor; a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpSimpleMotor; cdecl; external;
-  function cpSimpleMotorNew( a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpConstraint; cdecl; external;
-  function cpSpaceAlloc : PcpSpace; cdecl; external;
-  function cpSpaceInit( space : PcpSpace ) : PcpSpace; cdecl; external;
-  function cpSpaceNew : PcpSpace; cdecl; external;
-  procedure cpSpaceDestroy( space : cpSpace ); cdecl; external;
-  procedure cpSpaceFree( space : PcpSpace ); cdecl; external;
-  procedure cpSpaceFreeChildren( space : PcpSpace ); cdecl; external;
-  procedure cpSpaceSetDefaultCollisionHandler( space : PcpSpace; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc; separate : cpCollisionSeparateFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceAddCollisionHandler( space : PcpSpace; a : cpCollisionType; b : cpCollisionType; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc;  separate : cpCollisionSeparateFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceRemoveCollisionHandler( space : PcpSpace; a : cpCollisionType; b : cpCollisionType ); cdecl; external;
-  function cpSpaceAddShape( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl; external;
-  function cpSpaceAddStaticShape( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl; external;
-  function cpSpaceAddBody( space : PcpSpace; body : PcpBody ) : PcpBody; cdecl; external;
-  function cpSpaceAddConstraint( space : PcpSpace; constraint : PcpConstraint ) : PcpConstraint; cdecl; external;
-  procedure cpSpaceRemoveShape( space : PcpSpace; shape : PcpShape ); cdecl; external;
-  procedure cpSpaceRemoveStaticShape( space : PcpSpace; shape : PcpShape ); cdecl; external;
-  procedure cpSpaceRemoveBody( space : PcpSpace; body : PcpBody ); cdecl; external;
-  procedure cpSpaceRemoveConstraint( space : PcpSpace; constraint : PcpConstraint );  cdecl; external;
-  procedure cpSpaceAddPostStepCallback( space : PcpSpace; func : cpPostStepFunc; obj : Pointer; data : Pointer ); cdecl; external;
-  procedure cpSpacePointQuery( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup; func : cpSpacePointQueryFunc; data : Pointer ); cdecl; external;
-  function cpSpacePointQueryFirst( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup ) : PcpShape; cdecl; external;
-  procedure cpSpaceSegmentQuery( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; func : cpSpaceSegmentQueryFunc; data : Pointer ); cdecl; external;
-  function cpSpaceSegmentQueryFirst( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; out info : cpSegmentQueryInfo ) : PcpShape; cdecl; external;
-  procedure cpSpaceBBQuery( space : PcpSpace; bb : cpBB; layers : cpLayers; group : cpGroup; func : cpSpaceBBQueryFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceEachBody( space : PcpSpace; func : cpSpaceBodyIterator; data : Pointer ); cdecl; external;
-  procedure cpSpaceResizeStaticHash( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl; external;
-  procedure cpSpaceResizeActiveHash( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl; external;
-  procedure cpSpaceRehashStatic( space : PcpSpace ); cdecl; external;
-  procedure cpSpaceRehashShape( space : PcpSpace; shape : PcpShape ); cdecl; external;
-  procedure cpSpaceStep( space : PcpSpace; dt : cpFloat ); cdecl; external;
-  procedure cpHashSetDestroy( _set : PcpHashSet ); cdecl; external;
-  procedure cpHashSetFree( _set : PcpHashSet ); cdecl; external;
-  function cpHashSetAlloc : PcpHashSet; cdecl; external;
-  function cpHashSetInit( _set : PcpHashSet; size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl; external;
-  function cpHashSetNew( size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl; external;
-  function cpHashSetInsert( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer; data : Pointer ) : Pointer; cdecl; external;
-  function cpHashSetRemove( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer ) : Pointer; cdecl; external;
-  function cpHashSetFind( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer ) : Pointer; cdecl; external;
-  procedure cpHashSetEach( _set : PcpHashSet; func : cpHashSetIterFunc; data : Pointer ); cdecl; external;
-  procedure cpHashSetFilter( _set : PcpHashSet; func : cpHashSetIterFunc; data : Pointer ); cdecl; external;
-  function cpSpaceHashAlloc : PcpSpaceHash; cdecl; external;
-  function cpSpaceHashInit( hash : PcpSpaceHash; clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl; external;
-  function cpSpaceHashNew( clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl; external;
-  procedure cpSpaceHashDestroy( hash : PcpSpaceHash ); cdecl; external;
-  procedure cpSpaceHashFree( hash : PcpSpaceHash ); cdecl; external;
-  procedure cpSpaceHashResize( hash : PcpSpaceHash; celldim : cpFloat; numcells : Integer ); cdecl; external;
-  procedure cpSpaceHashInsert( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue; _deprecated_ignored : cpBB ); cdecl; external;
-  procedure cpSpaceHashRemove( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl; external;
-  procedure cpSpaceHashEach( hash : PcpSpaceHash; func : cpSpaceHashIterator; data : Pointer ); cdecl; external;
-  procedure cpSpaceHashRehash( hash : PcpSpaceHash ); cdecl; external;
-  procedure cpSpaceHashRehashObject( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl; external;
-  procedure cpSpaceHashPointQuery( hash : PcpSpaceHash; point : cpVect; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceHashQuery( hash : PcpSpaceHash; obj : Pointer; bb : cpBB; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceHashQueryInsert( hash : PcpSpaceHash; obj : Pointer; bb : cpBB; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceHashQueryRehash( hash : PcpSpaceHash; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl; external;
-  procedure cpSpaceHashSegmentQuery( hash : PcpSpaceHash; obj : Pointer; a : cpVect; b : cpVect; t_exit : cpFloat; func : cpSpaceHashSegmentQueryFunc; data : Pointer ); cdecl; external;
-  function cpCollideShapes( a : PcpShape; b : PcpShape; arr : PcpContact ) : Integer; cdecl; external;
-{$ENDIF}
+  procedure cpInitChipmunk; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpMomentForCircle( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpMomentForSegment( m : cpFloat; a : cpVect; b : cpVect ) : cpFloat; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpMomentForPoly( m : cpFloat; numVerts : Integer; verts : PcpVect; offset : cpVect ) : cpFloat; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpMomentForBox( m : cpFloat; width : cpFloat; height : cpFloat ) : cpFloat; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpvlength( v : cpVect ) : cpFloat; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpvslerp ( v1 : cpVect; v2 : cpVect; t : cpFloat ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpvslerpconst( v1 : cpVect; v2 : cpVect; a : cpFloat ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpvforangle( a : cpFloat ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpvtoangle( v : cpVect ) : cpFloat; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBBClampVect( bb : cpBB; v : cpVect ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBBWrapVect( bb : cpBB; v : cpVect ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArrayAlloc : PcpArray; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArrayInit( arr : PcpArray; size : Integer ) : PcpArray; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArrayNew( size : Integer ) : PcpArray; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayDestroy( arr : PcpArray); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayFree( arr : PcpArray ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayClear( arr : PcpArray ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayPush( arr : PcpArray; _object : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArrayPop( arr : PcpArray ) : Pointer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayDeleteIndex( arr : PcpArray; idx : Integer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayDeleteObj( arr : PcpArray; obj : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayAppend( arr : PcpArray; other : PcpArray ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArrayEach( arr : PcpArray; iterFunc : cpArrayIter; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArrayContains( arr : PcpArray; ptr : Pointer ) : cpBool; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpContactInit( con : PcpContact; p : cpVect; n : cpVect; dist : cpFloat; hasg : cpHashValue ) : PcpContact; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArbiterInit( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : cpArbiter; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArbiterUpdate( arb : PcpArbiter; contacts : PcpContact; numContacts : Integer; handler : PcpCollisionHandler; a : PcpShape; b : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArbiterPreStep( arb : PcpArbiter; dt_inv : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArbiterApplyCachedImpulse( arb : PcpArbiter ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArbiterApplyImpulse( arb : PcpArbiter; eCoef : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArbiterTotalImpulse( arb : PcpArbiter ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArbiterTotalImpulseWithFriction( arb : PcpArbiter ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArbiterIgnore( arb : PcpArbiter );{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpShapeInit( shape : PcpShape; klass : PcpShapeClass; body : PcpBody ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpShapeDestroy( shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpShapeFree( shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpShapeCacheBB( shape : PcpShape ) : cpBB; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpShapePointQuery( shape : PcpShape; p : cpVect ) : cpBool; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpCircleShapeAlloc : cpCircleShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpCircleShapeInit( circle : PcpCircleShape; body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpCircleShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpCircleShapeNew( body : PcpBody; radius : cpFloat; offset : cpVect ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSegmentShapeAlloc : PcpSegmentShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSegmentShapeInit( seg : PcpSegmentShape; body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpSegmentShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSegmentShapeNew( body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpResetShapeIdCounter; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpShapeSegmentQuery( shape : PcpShape; a : cpVect; b : cpVect; info : PcpSegmentQueryInfo ) : cpBool; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPolyShapeAlloc : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPolyShapeInit ( poly : PcpPolyShape; body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPolyShapeNew( body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBoxShapeInit( poly : cpPolyShape; body : cpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBoxShapeNew( body : PcpBody; width : cpFloat; height : cpFloat ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPolyValidate( verts : PcpVect; numVerts : Integer ) : cpBool; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPolyShapeGetNumVerts( shape : PcpShape ) : Integer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPolyShapeGetVert( shape : PcpShape; idx : Integer ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBodyAlloc : PcpBody; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBodyInit( body : PcpBody; m : cpFloat; i : cpFloat ) : PcpBody; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBodyNew( m : cpFloat; i : cpFloat ) : PcpBody; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyDestroy( body : PcpBody ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyFree( body : PcpBody ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyActivate( body : PcpBody ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodySleep( body : PcpBody ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodySetMass( body : PcpBody; m : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodySetMoment( body : PcpBody; i : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodySetAngle( body : PcpBody; a : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodySlew( body : PcpBody; pos : cpVect; dt : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyUpdateVelocity( body : PcpBody; gravity : cpVect; damping : cpFloat; dt : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyUpdatePosition( body : PcpBody; dt : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyResetForces( body : PcpBody ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpBodyApplyForce( body : PcpBody; f : cpVect; r : cpVect ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpApplyDampedSpring( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; rlen : cpFloat; k : cpFloat; dmp : cpFloat; dt : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpConstraintDestroy( constraint : PcpConstraint ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpConstraintFree( constraint : PcpConstraint ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPinJointAlloc : PcpPinJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPinJointInit( joint : PcpPinJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : cpPinJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPinJointNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSlideJointAlloc : PcpSlideJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSlideJointInit( joint : PcpSlideJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpSlideJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSlideJointNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPivotJointAlloc : PcpPivotJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPivotJointInit( joint : PcpPivotJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpPivotJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPivotJointNew( a : PcpBody; b : PcpBody; pivot : cpVect ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpPivotJointNew2( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpGrooveJointAlloc : PcpGrooveJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpGrooveJointInit( joint : PcpGrooveJoint; a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpGrooveJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpGrooveJointNew( a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpGrooveJointSetGrooveA( constraint : PcpConstraint; value : cpVect ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpGrooveJointSetGrooveB( constraint : PcpConstraint; value : cpVect ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedSpringAlloc : PcpDampedSpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedSpringInit( joint : cpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedSpringNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedRotarySpringAlloc : PcpDampedRotarySpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedRotarySpringInit( joint : PcpDampedRotarySpring; a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedRotarySpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedRotarySpringNew( a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpRotaryLimitJointAlloc : PcpRotaryLimitJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpRotaryLimitJointInit( joint : PcpRotaryLimitJoint; a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpRotaryLimitJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpRotaryLimitJointNew( a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpRatchetJointAlloc : PcpRatchetJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpRatchetJointInit( joint : PcpRatchetJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpRatchetJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpRatchetJointNew( a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpGearJointAlloc : PcpGearJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpGearJointInit( joint : PcpGearJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpGearJoint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpGearJointNew( a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSimpleMotorAlloc : PcpSimpleMotor; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSimpleMotorInit( joint : PcpSimpleMotor; a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpSimpleMotor; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSimpleMotorNew( a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceAlloc : PcpSpace; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceInit( space : PcpSpace ) : PcpSpace; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceNew : PcpSpace; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceDestroy( space : cpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceFree( space : PcpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceFreeChildren( space : PcpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceSetDefaultCollisionHandler( space : PcpSpace; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc; separate : cpCollisionSeparateFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceAddCollisionHandler( space : PcpSpace; a : cpCollisionType; b : cpCollisionType; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc;  separate : cpCollisionSeparateFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRemoveCollisionHandler( space : PcpSpace; a : cpCollisionType; b : cpCollisionType ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceAddShape( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceAddStaticShape( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceAddBody( space : PcpSpace; body : PcpBody ) : PcpBody; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceAddConstraint( space : PcpSpace; constraint : PcpConstraint ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRemoveShape( space : PcpSpace; shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRemoveStaticShape( space : PcpSpace; shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRemoveBody( space : PcpSpace; body : PcpBody ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRemoveConstraint( space : PcpSpace; constraint : PcpConstraint );  cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceAddPostStepCallback( space : PcpSpace; func : cpPostStepFunc; obj : Pointer; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpacePointQuery( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup; func : cpSpacePointQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpacePointQueryFirst( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceSegmentQuery( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; func : cpSpaceSegmentQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceSegmentQueryFirst( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; out info : cpSegmentQueryInfo ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceBBQuery( space : PcpSpace; bb : cpBB; layers : cpLayers; group : cpGroup; func : cpSpaceBBQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceEachBody( space : PcpSpace; func : cpSpaceBodyIterator; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceResizeStaticHash( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceResizeActiveHash( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRehashStatic( space : PcpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceRehashShape( space : PcpSpace; shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceStep( space : PcpSpace; dt : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpHashSetDestroy( _set : PcpHashSet ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpHashSetFree( _set : PcpHashSet ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpHashSetAlloc : PcpHashSet; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpHashSetInit( _set : PcpHashSet; size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpHashSetNew( size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpHashSetInsert( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer; data : Pointer ) : Pointer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpHashSetRemove( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer ) : Pointer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpHashSetFind( _set : PcpHashSet; hash : cpHashValue; ptr : Pointer ) : Pointer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpHashSetEach( _set : PcpHashSet; func : cpHashSetIterFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpHashSetFilter( _set : PcpHashSet; func : cpHashSetIterFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceHashAlloc : PcpSpaceHash; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceHashInit( hash : PcpSpaceHash; clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpSpaceHashNew( clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashDestroy( hash : PcpSpaceHash ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashFree( hash : PcpSpaceHash ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashResize( hash : PcpSpaceHash; celldim : cpFloat; numcells : Integer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashInsert( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue; _deprecated_ignored : cpBB ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashRemove( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashEach( hash : PcpSpaceHash; func : cpSpaceHashIterator; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashRehash( hash : PcpSpaceHash ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashRehashObject( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashPointQuery( hash : PcpSpaceHash; point : cpVect; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashQuery( hash : PcpSpaceHash; obj : Pointer; bb : cpBB; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashQueryInsert( hash : PcpSpaceHash; obj : Pointer; bb : cpBB; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashQueryRehash( hash : PcpSpaceHash; func : cpSpaceHashQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceHashSegmentQuery( hash : PcpSpaceHash; obj : Pointer; a : cpVect; b : cpVect; t_exit : cpFloat; func : cpSpaceHashSegmentQueryFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpCollideShapes( a : PcpShape; b : PcpShape; arr : PcpContact ) : Integer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+{$IFEND}
 
 //
 function cpfmin( a, b : cpFloat ) : cpFloat;
@@ -1396,7 +1400,7 @@ var
 
 implementation
 
-{$IFNDEF CHIPMUNK_STATIC}
+{$IF ( not DEFINED(CHIPMUNK_STATIC) ) and ( not DEFINED(CHIPMUNK_LINK) )}
 {$IFDEF UNIX}
 function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
@@ -1421,7 +1425,7 @@ var
   tmpPath      : array[ 0..8191 ] of Char;
   outItemHit   : SInt16;
   {$ENDIF}
-{$ENDIF}
+{$IFEND}
 
 // VECT
 function cpfmin( a, b : cpFloat ) : cpFloat;
@@ -1817,7 +1821,7 @@ begin
     cpArrayEach( space.arbiters, cpDrawCollision, @cpColorCollision );
 end;
 
-{$IFNDEF CHIPMUNK_STATIC}
+{$IF ( not DEFINED(CHIPMUNK_STATIC) ) and ( not DEFINED(CHIPMUNK_LINK) )}
 function cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 begin
   Result := FALSE;
@@ -2045,6 +2049,6 @@ procedure cpFree;
 begin
   dlclose( cpLib );
 end;
-{$ENDIF}
+{$IFEND}
 
 end.

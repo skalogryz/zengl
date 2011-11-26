@@ -28,7 +28,7 @@ unit zgl_utils;
 interface
 uses
   {$IFDEF UNIX}
-  Unix,
+  UnixType,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -82,6 +82,13 @@ function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 
 function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ):longint;cdecl;external 'libc';
+{$ENDIF}
+{$IFDEF ANDROID}
+type
+  ppthread_t      = ^pthread_t;
+  ppthread_attr_t = ^pthread_attr_t;
+
+function pthread_create( __thread : ppthread_t; __attr : ppthread_attr_t; __start_routine : Pointer; __arg : Pointer ) : LongInt; cdecl; external;
 {$ENDIF}
 {$IFDEF WINDESKTOP}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
@@ -414,9 +421,9 @@ begin
   MessageBox( 0, PChar( ErrStr ), 'ERROR!', MB_OK or MB_ICONERROR );
 {$ENDIF}
 {$IFDEF WINCE}
-  //wideStr := u_GetPWideChar( ErrStr );
-  //MessageBox( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
-  //FreeMem( wideStr );
+  wideStr := u_GetPWideChar( ErrStr );
+  MessageBox( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
+  FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
@@ -445,9 +452,9 @@ begin
   MessageBox( 0, PChar( ErrStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
 {$ENDIF}
 {$IFDEF WINCE}
-  //wideStr := u_GetPWideChar( ErrStr );
-  //MessageBox( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
-  //FreeMem( wideStr );
+  wideStr := u_GetPWideChar( ErrStr );
+  MessageBox( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
+  FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );

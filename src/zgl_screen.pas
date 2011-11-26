@@ -26,20 +26,18 @@ unit zgl_screen;
 {$ENDIF}
 
 interface
-uses
-  {$IFDEF LINUX}
-  X, XLib, XRandr, UnixType
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Windows
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll
-  {$ENDIF}
-  {$IFDEF iOS}
-  iPhoneAll
-  {$ENDIF}
-  ;
+{$IFDEF USE_X11}
+  uses X, XLib, XRandr, UnixType;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  uses Windows;
+{$ENDIF}
+{$IFDEF MACOSX}
+  uses MacOSAll;
+{$ENDIF}
+{$IFDEF iOS}
+  uses iPhoneAll;
+{$ENDIF}
 
 const
   REFRESH_MAXIMUM = 0;
@@ -61,7 +59,7 @@ procedure scr_SetVSync( VSync : Boolean );
 procedure scr_SetFSAA( FSAA : Byte );
 procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
 function XCloseIM(im : PXIM) : TStatus;cdecl;external;
 function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
@@ -124,7 +122,7 @@ var
   scrSubCX : Integer = 0;
   scrSubCY : Integer = 0;
 
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   scrDisplay   : PDisplay;
   scrDefault   : cint;
   scrSettings  : Pointer;
@@ -158,6 +156,10 @@ var
   scrAngle        : Integer;
   scrCanLandscape : Boolean = TRUE;
   scrCanPortrait  : Boolean = TRUE;
+  {$ENDIF}
+  {$IFDEF ANDROID}
+  scrDesktopW : Integer;
+  scrDesktopH : Integer;
   {$ENDIF}
 
 implementation
@@ -199,12 +201,12 @@ end;
 {$ENDIF}
 
 procedure scr_Init;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   var
     rotation : Word;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   log_Init();
 
   if Assigned( scrDisplay ) Then
@@ -292,7 +294,7 @@ begin
   Result := FALSE;
 
   scr_Init();
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
     begin
       u_Error( 'DefaultDepth not set to 24-bit.' );
@@ -332,7 +334,7 @@ end;
 procedure scr_GetResList;
   var
     i : Integer;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
     tmpSettings : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -351,7 +353,7 @@ procedure scr_GetResList;
       if ( scrResList.Width[ j ] = Width ) and ( scrResList.Height[ j ] = Height ) Then Result := TRUE;
   end;
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   tmpSettings := scrModeList;
   for i := 0 to scrModeCount - 1 do
     begin
@@ -412,7 +414,7 @@ end;
 procedure scr_Destroy;
 begin
   scr_Reset();
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   XRRFreeScreenConfigInfo( scrSettings );
 
   XDestroyIC( appXIC );
@@ -429,7 +431,7 @@ end;
 procedure scr_Reset;
 begin
   scrChanging := TRUE;
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -463,7 +465,9 @@ begin
   {$ENDIF}
 {$ELSE}
   {$IFNDEF iOS}
+  {$IFNDEF ANDROID}
   eglSwapBuffers( oglDisplay, oglSurface );
+  {$ENDIF}
   {$ELSE}
   eglContext.presentRenderbuffer( GL_RENDERBUFFER );
   {$ENDIF}
@@ -476,7 +480,7 @@ procedure scr_SetWindowedMode;
     settings : DEVMODEW;
   {$ENDIF}
 begin
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   scr_Reset();
   XMapWindow( scrDisplay, wndHandle );
   {$ENDIF}
@@ -502,7 +506,7 @@ begin
 end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   var
     modeToSet : Integer;
     mode      : PXRRScreenSize;
@@ -552,7 +556,7 @@ begin
       exit;
     end;
   scr_SetVSync( scrVSync );
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   if wndFullScreen Then
     begin
       scrCurrent := -1;
@@ -738,7 +742,7 @@ procedure scr_SetVSync( VSync : Boolean );
 begin
   scrVSync := VSync;
 {$IFNDEF USE_GLES}
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   if oglCanVSync Then
     glXSwapIntervalSGI( Integer( scrVSync ) );
   {$ENDIF}

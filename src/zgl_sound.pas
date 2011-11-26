@@ -28,9 +28,9 @@ unit zgl_sound;
 interface
 
 uses
-  {$IFDEF UNIX}
+  {$IF DEFINED(UNIX) and (not DEFINED(ANDROID))}
   cthreads,
-  {$ENDIF}
+  {$IFEND}
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
@@ -167,7 +167,7 @@ function  snd_PlayMemory( const Memory : zglTMemory; const Extension : String; L
 procedure snd_PauseFile( ID : Integer );
 procedure snd_StopFile( ID : Integer );
 procedure snd_ResumeFile( ID : Integer );
-function  snd_ProcFile( data : Pointer ) : LongInt; register;
+function  snd_ProcFile( data : Pointer ) : LongInt;
 
 var
   managerSound : zglTSoundManager;
@@ -346,18 +346,23 @@ end;
 function snd_Init : Boolean;
   var
     i : Integer;
+  {$IFDEF ANDROID}
+    attr : array[ 0..2 ] of Integer;
+  {$ENDIF}
   {$IFDEF iOS}
     sessionCategory : LongWord;
   {$ENDIF}
 begin
   Result := FALSE;
 {$IFDEF USE_OPENAL}
+  {$IFNDEF ANDROID}
   log_Add( 'OpenAL: load ' + libopenal  );
   if not InitOpenAL Then
     begin
       log_Add( 'Error while loading ' + libopenal );
       exit;
     end;
+  {$ENDIF}
 
   {$IFDEF LINUX}
   log_Add( 'OpenAL: opening "ALSA Software"' );
@@ -395,7 +400,14 @@ begin
     end;
 
   log_Add( 'OpenAL: creating context' );
+  {$IFNDEF ANDROID}
   oalContext := alcCreateContext( oalDevice, nil );
+  {$ELSE}
+  attr[ 0 ] := $1007;
+  attr[ 1 ] := 22050;
+  attr[ 2 ] := 0;
+  oalContext := alcCreateContext( oalDevice, @attr[ 0 ] );
+  {$ENDIF}
   if not Assigned( oalContext ) Then
     begin
       log_Add( 'Cannot create sound context' );
@@ -1165,7 +1177,11 @@ begin
   sfStream[ ID ]._complete := 0;
   sfStream[ ID ]._lastTime := timer_GetTicks;
 {$IFDEF FPC}
+  {$IFNDEF ANDROID}
   sfThread[ ID ] := LongWord( BeginThread( @snd_ProcFile, Pointer( ID ) ) );
+  {$ELSE}
+  pthread_create( @sfThread[ ID ], nil, @snd_ProcFile, Pointer( ID ) );
+  {$ENDIF}
 {$ELSE}
   sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcFile, Pointer( ID ), 0, sfThreadID[ ID ] );
 {$ENDIF}
@@ -1292,7 +1308,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_ProcFile( data : Pointer ) : LongInt; register;
+function snd_ProcFile( data : Pointer ) : LongInt;
   var
     id        : Integer;
     _end      : Boolean;
@@ -1389,7 +1405,9 @@ begin
         end;
     end;
 
+{$IFNDEF ANDROID}
   EndThread( 0 );
+{$ENDIF}
 end;
 
 end.

@@ -23,7 +23,7 @@ unit zgl_mouse;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   uses X, XLib;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -149,7 +149,7 @@ procedure mouse_Lock;
     Point : CGPoint;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   XWarpPointer( scrDisplay, None, wndHandle, 0, 0, 0, 0, wndWidth div 2, wndHeight div 2 );
 {$ENDIF}
 {$IFDEF WINDOWS}

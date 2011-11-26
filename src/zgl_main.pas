@@ -30,7 +30,7 @@ uses
   {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   X, XRandr,
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -260,10 +260,14 @@ begin
       scrDisplayLink.addToRunLoop_forMode( NSRunLoop.currentRunLoop(), NSDefaultRunLoopMode );
     end else
       NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats( 1 / 60, appDelegate, objcselector( 'MainLoop' ), nil, TRUE );
-  {$ELSE}
+  exit;
+  {$ENDIF}
+  {$IFDEF ANDROID}
+  exit;
+  {$ENDIF}
+
   app_PLoop();
   zgl_Destroy();
-  {$ENDIF}
 end;
 
 procedure zgl_InitToHandle( Handle : Ptr; FSAA : Byte = 0; StencilBits : Byte = 0 );
@@ -277,7 +281,7 @@ begin
   appInitedToHandle := TRUE;
   if not scr_Create() Then exit;
   if not gl_Create() Then exit;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   wndHandle := TWindow( Handle );
   {$ENDIF}
   {$IFDEF MACOSX}
@@ -551,25 +555,25 @@ begin
         Result := Ptr( @logfile );
 
     DESKTOP_WIDTH:
-    {$IFDEF LINUX}
+    {$IFDEF USE_X11}
       Result := PXRRScreenSize( scrModeList + scrDesktop * SizeOf( PXRRScreenSize ) ).width;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsWidth;
     {$ENDIF}
-    {$IFDEF DARWIN}
+    {$IF DEFINED(DARWIN) or DEFINED(ANDROID)}
       Result := scrDesktopW;
-    {$ENDIF}
+    {$IFEND}
     DESKTOP_HEIGHT:
-    {$IFDEF LINUX}
+    {$IFDEF USE_X11}
       Result := PXRRScreenSize( scrModeList + scrDesktop * SizeOf( PXRRScreenSize ) ).height;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsHeight;
     {$ENDIF}
-    {$IFDEF DARWIN}
+    {$IF DEFINED(DARWIN) or DEFINED(ANDROID)}
       Result := scrDesktopH;
-    {$ENDIF}
+    {$IFEND}
     RESOLUTION_LIST: Result := Ptr( @scrResList );
 
     {$IFNDEF iOS}
@@ -622,6 +626,7 @@ end;
 procedure zgl_GetSysDir;
 {$IFDEF LINUX}
 begin
+  {$IFNDEF ANDROID}
   appWorkDir := './';
   appHomeDir := FpGetEnv( 'XDG_CONFIG_HOME' );
   if appHomeDir = '' Then
@@ -631,6 +636,7 @@ begin
   // for some old distros
   if not file_Exists( appHomeDir ) Then
     file_MakeDir( appHomeDir );
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF WINDOWS}
   var

@@ -54,6 +54,7 @@ type
   cchar   = cint8;    pcchar   = ^cchar;
   cschar  = cint8;    pcschar  = ^cschar;
   cuchar  = cuint8;   pcuchar  = ^cuchar;
+  cint16  = smallint; pcint16  = ^cint16;
   cuint16 = word;     pcuint16 = ^cuint16;
   cint32  = longint;  pcint32  = ^cint32;
   cuint32 = longword; pcuint32 = ^cuint32;

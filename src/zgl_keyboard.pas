@@ -26,19 +26,18 @@ unit zgl_keyboard;
 {$ENDIF}
 
 interface
-uses
-  {$IFDEF LINUX}
-  X, Xlib, keysym;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Windows;
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll;
-  {$ENDIF}
-  {$IFDEF iOS}
-  iPhoneAll, CGGeometry;
-  {$ENDIF}
+{$IFDEF USE_X11}
+  uses X, Xlib, keysym;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  uses Windows;
+{$ENDIF}
+{$IFDEF MACOSX}
+  uses MacOSAll;
+{$ENDIF}
+{$IFDEF iOS}
+  uses iPhoneAll, CGGeometry;
+{$ENDIF}
 
 const
   K_SYSRQ      = $B7;
@@ -177,7 +176,7 @@ procedure key_ClearState;
 
 procedure key_InputText( const Text : String );
 function scancode_to_utf8( ScanCode : Byte ) : Byte;
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
 function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
 {$ENDIF}
@@ -218,7 +217,7 @@ var
   keysCanText  : Boolean;
   keysMax      : Integer;
   keysLast     : array[ 0..1 ] of Byte;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   keysRepeat : Integer; // Костыль, да :)
   {$ENDIF}
   {$IFDEF iOS}
@@ -335,7 +334,7 @@ procedure key_ClearState;
   var
     i : Integer;
 begin
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   if keysRepeat < 2 Then
   {$ENDIF}
   for i := 0 to 255 do
@@ -474,7 +473,7 @@ begin
     end;
 end;
 
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
 // Большинство сканкодов можно получить простым преобразованием, закомментированные
 // оставил себе на память :)
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
@@ -716,7 +715,7 @@ end;
 
 procedure doKeyPress( KeyCode : LongWord );
 begin
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   if keysRepeat < 2 Then
   {$ENDIF}
   if keysCanPress[ KeyCode ] Then

@@ -24,7 +24,7 @@ unit zgl_timers;
 
 interface
 {$IFDEF LINUX}
-uses Unix;
+uses UnixType;
 {$ENDIF}
 {$IFDEF WINDOWS}
 uses Windows;
@@ -64,6 +64,9 @@ uses
   zgl_application,
   zgl_main;
 
+{$IFDEF LINUX}
+function fpGetTimeOfDay( val : PTimeVal; tzp : Pointer ) : Integer; cdecl; external 'libc' name 'gettimeofday';
+{$ENDIF}
 {$IFDEF DARWIN}
 type
   mach_timebase_info_t = record

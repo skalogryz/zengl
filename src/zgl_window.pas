@@ -30,20 +30,18 @@ unit zgl_window;
 {$ENDIF}
 
 interface
-uses
-  {$IFDEF LINUX}
-  X, XLib, XUtil
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Windows
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll
-  {$ENDIF}
-  {$IFDEF iOS}
-  iPhoneAll, CGGeometry, CGAffineTransforms
-  {$ENDIF}
-  ;
+{$IFDEF USE_X11}
+  uses X, XLib, XUtil;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  uses Windows;
+{$ENDIF}
+{$IFDEF MACOSX}
+  uses MacOSAll;
+{$ENDIF}
+{$IFDEF iOS}
+  uses iPhoneAll, CGGeometry, CGAffineTransforms;
+{$ENDIF}
 
 function  wnd_Create( Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
@@ -63,7 +61,7 @@ var
   wndFullScreen : Boolean;
   wndCaption    : String;
 
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   wndHandle      : TWindow;
   wndRoot        : TWindow;
   wndClass       : TXClassHint;
@@ -97,6 +95,9 @@ var
   wndViewCtrl : UIViewController;
   wndPortrait : Boolean;
   {$ENDIF}
+  {$IFDEF ANDROID}
+  wndHandle : Integer; // dummy
+  {$ENDIF}
 
 implementation
 uses
@@ -118,7 +119,7 @@ uses
 function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcall; external user32 name 'LoadCursorW';
 {$ENDIF}
 
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
 procedure wnd_SetHints( Initialized : Boolean = TRUE );
   var
     sizehints : TXSizeHints;
@@ -161,7 +162,7 @@ begin
       wndX := ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2;
       wndY := ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2;
     end;
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   FillChar( wndAttr, SizeOf( wndAttr ), 0 );
   wndAttr.colormap   := XCreateColormap( scrDisplay, wndRoot, oglVisualInfo.visual, AllocNone );
   wndAttr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask or StructureNotifyMask;
@@ -316,7 +317,7 @@ end;
 
 procedure wnd_Destroy;
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   XDestroyWindow( scrDisplay, wndHandle );
   XSync( scrDisplay, X_FALSE );
 {$ENDIF}
@@ -346,7 +347,7 @@ begin
 end;
 
 procedure wnd_Update;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   var
     event : TXEvent;
   {$ENDIF}
@@ -355,7 +356,7 @@ procedure wnd_Update;
     FullScreen : Boolean;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   XSync( scrDisplay, X_TRUE );
   wnd_SetHints();
 
@@ -413,22 +414,22 @@ begin
 end;
 
 procedure wnd_SetCaption( const NewCaption : String );
-  {$IFNDEF iOS}
+  {$IFDEF USE_X11}
   var
-  {$ENDIF}
-  {$IFDEF LINUX}
     err : Integer;
     str : PChar;
   {$ENDIF}
   {$IFDEF WINDOWS}
+  var
     len : Integer;
   {$ENDIF}
   {$IFDEF MACOSX}
+  var
     str : CFStringRef;
   {$ENDIF}
 begin
   wndCaption := u_CopyStr( NewCaption );
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   if wndHandle <> 0 Then
     begin
       str := u_GetPChar( wndCaption );
@@ -490,7 +491,7 @@ procedure wnd_SetSize( Width, Height : Integer );
 begin
   wndWidth  := Width;
   wndHeight := Height;
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   if ( not appInitedToHandle ) and ( wndHandle <> 0 ) Then
     begin
       wnd_SetHints();
@@ -532,7 +533,7 @@ procedure wnd_SetPos( X, Y : Integer );
 begin
   wndX := X;
   wndY := Y;
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   if wndHandle <> 0 Then
     if not wndFullScreen Then
       XMoveWindow( scrDisplay, wndHandle, X, Y )
@@ -565,7 +566,7 @@ begin
 end;
 
 procedure wnd_ShowCursor( Show : Boolean );
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   var
     mask   : TPixmap;
     xcolor : TXColor;
@@ -589,7 +590,7 @@ begin
         XDefineCursor( scrDisplay, wndHandle, appCursor );
       end;
 {$ENDIF}
-{$IF DEFINED(WINDOWS) or DEFINED(MACOSX) or DEFINED(iOS)}
+{$IF DEFINED(WINDOWS) or DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(ANDROID)}
 begin
   appShowCursor := Show;
 {$IFEND}
@@ -597,7 +598,7 @@ end;
 
 procedure wnd_Select;
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   XMapWindow( scrDisplay, wndHandle );
 {$ENDIF}
 {$IFDEF WINDOWS}

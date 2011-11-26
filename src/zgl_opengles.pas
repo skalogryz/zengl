@@ -32,7 +32,7 @@ unit zgl_opengles;
 
 interface
 uses
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   X, XLib, XUtil,
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -112,7 +112,7 @@ var
   oglContext : EGLContext;
 
   oglAttr : array[ 0..31 ] of EGLint;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   oglVisualInfo : PXVisualInfo;
   {$ENDIF}
   {$ELSE}
@@ -171,8 +171,8 @@ begin
       exit;
     end;
 
-{$IFNDEF iOS}
-{$IFDEF LINUX}
+{$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
+{$IFDEF USE_X11}
   GetMem( oglVisualInfo, SizeOf( TXVisualInfo ) );
   XMatchVisualInfo( scrDisplay, scrDefault, DefaultDepth( scrDisplay, scrDefault ), TrueColor, oglVisualInfo );
 
@@ -265,7 +265,7 @@ begin
   Result := j = 1;
 {$ELSE}
   Result := TRUE;
-{$ENDIF}
+{$IFEND}
 end;
 
 procedure gl_Destroy;
@@ -274,12 +274,13 @@ begin
     glDeleteFramebuffers( 1, @oglReadPixelsFBO );
 
 {$IFNDEF iOS}
-{$IFDEF LINUX}
+  {$IFDEF USE_X11}
   FreeMem( oglVisualInfo );
-{$ENDIF}
-
+  {$ENDIF}
+  {$IFNDEF ANDROID}
   eglMakeCurrent( oglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
   eglTerminate( oglDisplay );
+  {$ENDIF}
 {$ELSE}
   eglView.dealloc();
 
@@ -301,6 +302,7 @@ function gl_Initialize : Boolean;
     {$ENDIF}
 begin
 {$IFNDEF iOS}
+  {$IFNDEF ANDROID}
   oglSurface := eglCreateWindowSurface( oglDisplay, oglConfig, wndHandle, nil );
   err := eglGetError();
   if err <> EGL_SUCCESS Then
@@ -322,6 +324,7 @@ begin
       u_Error( 'Cannot set current OpenGL ES context - ' + gles_GetErrorStr( err ) );
       exit;
     end;
+  {$ENDIF}
 {$ELSE}
   FillChar( frame, SizeOf( CGRect ), 0 );
   frame.size.width  := oglWidth;
@@ -475,13 +478,13 @@ begin
   log_Add( 'GL_OES_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( oglCanFBO ) );
 
   // WaitVSync
-{$IFNDEF iOS}
+{$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) ) }
   oglCanVSync := Assigned( eglSwapInterval );
   if oglCanVSync Then
     scr_SetVSync( scrVSync );
 {$ELSE}
   oglCanVSync := FALSE;
-{$ENDIF}
+{$IFEND}
   log_Add( 'Support WaitVSync: ' + u_BoolToStr( oglCanVSync ) );
 end;
 

@@ -61,33 +61,35 @@ const
   JPEG_EXTENSION : array[ 0..4 ] of Char = ( 'J', 'P', 'E', 'G', #0 );
 
 {$IFDEF USE_LIBJPEG}
-  {$L jaricom}
-  {$L jcomapi}
-  {$L jdapimin}
-  {$L jdapistd}
-  {$L jdarith}
-  {$L jdatasrc}
-  {$L jdcoefct}
-  {$L jdcolor}
-  {$L jddctmgr}
-  {$L jdhuff}
-  {$L jdinput}
-  {$L jdmainct}
-  {$L jdmarker}
-  {$L jdmaster}
-  {$L jdmerge}
-  {$L jdpostct}
-  {$L jdsample}
-  {$L jerror}
-  {$L jidctflt}
-  {$L jidctfst}
-  {$L jidctint}
-  {$L jmemmgr}
-  {$L jmemnobs}
-  {$L jquant1}
-  {$L jquant2}
-  {$L jutils}
-  {$L jpeg_helper}
+  {$IFNDEF ANDROID}
+    {$L jpeg_helper}
+    {$L jaricom}
+    {$L jcomapi}
+    {$L jdapimin}
+    {$L jdapistd}
+    {$L jdarith}
+    {$L jdatasrc}
+    {$L jdcoefct}
+    {$L jdcolor}
+    {$L jddctmgr}
+    {$L jdhuff}
+    {$L jdinput}
+    {$L jdmainct}
+    {$L jdmarker}
+    {$L jdmaster}
+    {$L jdmerge}
+    {$L jdpostct}
+    {$L jdsample}
+    {$L jerror}
+    {$L jidctflt}
+    {$L jidctfst}
+    {$L jidctint}
+    {$L jmemmgr}
+    {$L jmemnobs}
+    {$L jquant1}
+    {$L jquant2}
+    {$L jutils}
+  {$ENDIF}
   {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}
@@ -112,7 +114,7 @@ type
     GetMem  : function( Size : Integer ) : PByte; cdecl;
   end;
 
-  procedure jpgturbo_Load( var jpgData : zglTJPGData; var Data : Pointer ); cdecl; external;
+  procedure jpgturbo_Load( var jpgData : zglTJPGData; var Data : Pointer ); cdecl; external {$IFDEF ANDROID} 'zenjpeg' {$ENDIF};
 {$ENDIF}
 
 {$IFDEF USE_OLEPICTURE}

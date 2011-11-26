@@ -44,6 +44,10 @@ uses
   zgl_main,
   zgl_timers;
 
+{$IFDEF ANDROID}
+function __android_log_write( prio : LongInt; tag, text : PAnsiChar ) : LongInt; cdecl; external 'liblog.so' name '__android_log_write';
+{$ENDIF}
+
 procedure log_Init;
   var
     i  : Integer;
@@ -77,7 +81,9 @@ begin
   else
     logFile := u_GetPChar( logFile );
 
+  {$IFNDEF ANDROID}
   file_Open( log, logFile, FOM_CREATE );
+  {$ENDIF}
   // crazy code :)
   es := '';
   for i := 0 to length( cs_ZenGL + ' (' + cs_Date + ')' ) + 7 do
@@ -112,7 +118,11 @@ begin
   else
     str := Message + #13#10;
 
+  {$IFNDEF ANDROID}
   file_Write( log, str[ 1 ], length( str ) );
+  {$ELSE}
+  __android_log_write( 3, 'ZenGL', PAnsiChar( log_Timing + Message ) );
+  {$ENDIF}
 
   {$IFDEF USE_LOG_FLUSH}
   log_Flush();

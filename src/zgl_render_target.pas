@@ -24,7 +24,7 @@ unit zgl_render_target;
 
 interface
 uses
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   X, XLib, XUtil,
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -55,7 +55,7 @@ const
   RT_FORCE_PBUFFER = $100000;
 
 {$IFNDEF USE_GLES}
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
 type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
@@ -144,7 +144,7 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
     pFBO     : zglPFBO;
 {$IFNDEF USE_GLES}
     pPBuffer : zglPPBuffer;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
     n            : Integer;
     fbconfig     : GLXFBConfig;
     visualinfo   : PXVisualInfo;
@@ -166,7 +166,7 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
     oglCanPBuffer := FALSE;
     FreeMem( Target.next.Handle );
     FreeMem( Target.next );
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
     if Stage = 4 Then
       case oglPBufferMode of
         1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
@@ -223,7 +223,7 @@ begin
 
   case _type of
     {$IFNDEF USE_GLES}
-    {$IFDEF LINUX}
+    {$IFDEF USE_X11}
     RT_TYPE_PBUFFER:
       begin
         zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
@@ -544,7 +544,7 @@ begin
     {$IFNDEF USE_GLES}
     RT_TYPE_PBUFFER:
       begin
-        {$IFDEF LINUX}
+        {$IFDEF USE_X11}
         case oglPBufferMode of
           1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
           2: glXDestroyGLXPbufferSGIX( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
@@ -602,7 +602,7 @@ begin
         {$IFNDEF USE_GLES}
         RT_TYPE_PBUFFER:
           begin
-            {$IFDEF LINUX}
+            {$IFDEF USE_X11}
             glXMakeCurrent( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
             {$ENDIF}
             {$IFDEF WINDOWS}
@@ -656,7 +656,7 @@ begin
                 glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
                 glDisable( GL_TEXTURE_2D );
 
-                {$IFDEF LINUX}
+                {$IFDEF USE_X11}
                 glXMakeCurrent( scrDisplay, wndHandle, oglContext );
                 {$ENDIF}
                 {$IFDEF WINDOWS}

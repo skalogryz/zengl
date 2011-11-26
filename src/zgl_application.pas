@@ -27,7 +27,7 @@ unit zgl_application;
 
 interface
 uses
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   X, XLib
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -38,6 +38,9 @@ uses
   {$ENDIF}
   {$IFDEF iOS}
   iPhoneAll, CFRunLoop, CGGeometry, CFBase, CFString
+  {$ENDIF}
+  {$IFDEF ANDROID}
+  jni
   {$ENDIF}
   ;
 
@@ -104,6 +107,13 @@ type
     function editingRectForBounds( bounds_ : CGRect ) : CGRect; override;
   end;
 {$ENDIF}
+{$IFDEF ANDROID}
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; var thiz : jobject; path : jstring ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( var env : JNIEnv; var thiz : jobject; Width, Height : jint ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( var env : JNIEnv; var thiz : jobject ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeActivate( var env : JNIEnv; var thiz : jobject; Activate : jboolean ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
+{$ENDIF}
 
 procedure app_ZeroProc;
 procedure app_ZeroUpdate( dt : Double );
@@ -140,7 +150,7 @@ var
   app_POrientation : procedure( orientation : UIInterfaceOrientation );
   {$ENDIF}
 
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   appCursor : TCursor = None;
   appXIM    : PXIM;
   appXIC    : PXIC;
@@ -175,9 +185,9 @@ uses
   zgl_opengles,
   {$ENDIF}
   zgl_opengl_simple,
-  {$IFDEF iOS}
+  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
   zgl_touch,
-  {$ENDIF}
+  {$IFEND}
   zgl_mouse,
   zgl_keyboard,
   {$IFDEF USE_JOYSTICK}
@@ -264,7 +274,7 @@ begin
 end;
 
 procedure app_ProcessOS;
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
   var
     root_return   : TWindow;
     child_return  : TWindow;
@@ -283,7 +293,7 @@ procedure app_ProcessOS;
     mPos  : Point;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
 
   mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
@@ -361,7 +371,7 @@ end;
 {$IFNDEF iOS}
 function app_ProcessMessages;
   var
-  {$IFDEF LINUX}
+  {$IFDEF USE_X11}
     event  : TXEvent;
     keysym : TKeySym;
     status : TStatus;
@@ -381,7 +391,7 @@ function app_ProcessMessages;
     str : AnsiString;
     key : LongWord;
 begin
-{$IFDEF LINUX}
+{$IFDEF USE_X11}
   Result := 0;
   while XPending( scrDisplay ) <> 0 do
     begin
@@ -1506,6 +1516,115 @@ end;
 procedure zglCiOSWindow.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
 begin
   touchesEnded_withEvent( touches, event );
+end;
+{$ENDIF}
+
+{$IFDEF ANDROID}
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; var thiz : jobject; path : jstring );
+  var
+    isCopy : jboolean;
+begin
+  isCopy     := 0;
+  appWorkDir := env^.GetStringUTFChars( @env, path, isCopy );
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( var env : JNIEnv; var thiz : jobject; Width, Height : jint );
+begin
+  if not appInitialized Then
+    begin
+      scrDesktopW := Width;
+      scrDesktopH := Height;
+      wndWidth    := Width;
+      wndHeight   := Height;
+
+      zgl_Init();
+    end else
+      wnd_SetSize( Width, Height );
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( var env : JNIEnv; var thiz : jobject );
+  var
+    t : Double;
+begin
+  res_Proc();
+  {$IFDEF USE_JOYSTICK}
+  joy_Proc();
+  {$ENDIF}
+  {$IFDEF USE_SOUND}
+  snd_MainLoop();
+  {$ENDIF}
+
+  if appPause Then
+    begin
+      timer_Reset();
+      appdt := timer_GetTicks();
+      exit;
+    end else
+      timer_MainLoop();
+
+  t := timer_GetTicks();
+  app_PUpdate( timer_GetTicks() - appdt );
+  appdt := t;
+
+  app_Draw();
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeActivate( var env : JNIEnv; var thiz : jobject; Activate : jboolean );
+begin
+  if Activate > 0 Then
+    begin
+      appFocus := TRUE;
+      appPause := FALSE;
+      if appWork Then app_PActivate( TRUE );
+      FillChar( keysDown[ 0 ], 256, 0 );
+      key_ClearState();
+      FillChar( mouseDown[ 0 ], 3, 0 );
+      mouse_ClearState();
+      touch_ClearState();
+    end else
+      begin
+        appFocus := FALSE;
+        appPause := TRUE;
+        if appWork Then app_PActivate( FALSE );
+      end;
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat );
+begin
+  if appFlags and CORRECT_RESOLUTION > 0 Then
+    begin
+      mouseX  := Round( ( X - scrAddCX ) / scrResCX );
+      mouseY  := Round( ( Y - scrAddCY ) / scrResCY );
+    end else
+      begin
+        mouseX := Round( X );
+        mouseY := Round( Y );
+      end;
+
+  touchX[ ID ] := mouseX;
+  touchY[ ID ] := mouseY;
+  if ( touchDown[ ID ] ) and ( Pressure > 0 ) Then exit;
+  touchDown[ ID ] := Pressure > 0;
+  if not touchDown[ ID ] Then
+    touchUp[ ID ] := TRUE;
+
+  mouseDown[ M_BLEFT ] := Pressure > 0;
+  if mouseDown[ M_BLEFT ] Then
+    begin
+      if mouseCanClick[ M_BLEFT ] Then
+        begin
+          mouseClick[ M_BLEFT ] := TRUE;
+          mouseCanClick[ M_BLEFT ] := FALSE;
+          if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+            mouseDblClick[ M_BLEFT ] := TRUE;
+          mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+        end;
+    end else
+      begin
+        mouseDown[ M_BLEFT ]     := FALSE;
+        mouseUp  [ M_BLEFT ]     := TRUE;
+        mouseCanClick[ M_BLEFT ] := TRUE;
+      end;
 end;
 {$ENDIF}
 
