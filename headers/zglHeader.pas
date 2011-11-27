@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.11.12           }
+{ date:     2011.11.27           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
