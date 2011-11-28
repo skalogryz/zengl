@@ -453,7 +453,9 @@ begin
   if Assigned( zipCurrent ) Then
     begin
       if zip_stat( zipCurrent, zglPZipFile( FileHandle ).name, 0, zipStat ) = 0 Then
-        Result := zipStat.size;
+        Result := zipStat.size
+      else
+        Result := 0;
       exit;
     end;
   {$ENDIF}

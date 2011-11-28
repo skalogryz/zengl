@@ -87,8 +87,13 @@ function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeou
 type
   ppthread_t      = ^pthread_t;
   ppthread_attr_t = ^pthread_attr_t;
+  psem_t          = ^sem_t;
 
 function pthread_create( __thread : ppthread_t; __attr : ppthread_attr_t; __start_routine : Pointer; __arg : Pointer ) : LongInt; cdecl; external;
+function sem_init( __sem : psem_t; __pshared : LongInt; __value : DWORD ) : LongInt; cdecl; external;
+function sem_destroy ( __sem : psem_t ) : LongInt; cdecl; external;
+function sem_wait( __sem : psem_t ) : LongInt; cdecl; external;
+function sem_post( __sem : psem_t ) : LongInt; cdecl; external;
 {$ENDIF}
 {$IFDEF WINDESKTOP}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
