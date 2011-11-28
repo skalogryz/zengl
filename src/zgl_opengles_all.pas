@@ -440,7 +440,7 @@ var
   {$ENDIF}
 
 // EGL
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
 // EGL Types
 type
   {$IFDEF USE_X11}
@@ -523,7 +523,7 @@ var
 {$ENDIF}
 
 var
-  {$IFNDEF iOS}
+  {$IFNDEF NO_EGL}
   eglLibrary  : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
   glesLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
   separateEGL : Boolean;
@@ -571,7 +571,7 @@ begin
     Set8087CW($133F);
   {$ENDIF}
 
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
   eglLibrary := dlopen( libEGL {$IFDEF UNIX}, $001 {$ENDIF} );
   if eglLibrary = LIB_ERROR Then
     begin
@@ -599,13 +599,13 @@ begin
   glesLibrary := dlopen( libGLES_CM, $001 );
 {$ENDIF}
 
-  if {$IFNDEF iOS}( eglLibrary = LIB_ERROR ) or{$ENDIF} ( glesLibrary = LIB_ERROR ) Then
+  if {$IFNDEF NO_EGL}( eglLibrary = LIB_ERROR ) or{$ENDIF} ( glesLibrary = LIB_ERROR ) Then
     begin
       Result := FALSE;
       exit;
     end;
 
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
   eglGetProcAddress      := dlsym( eglLibrary, 'eglGetProcAddress' );
   {$IFDEF USE_AMD_DRIVERS}
   eglGetError            := eglGetProcAddress( 'eglGetError' );
@@ -694,7 +694,7 @@ begin
   if not Assigned( glTexEnvi ) Then
     glTexEnvi          := dlsym( glesLibrary, 'glTexEnvx' );
 
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
   Result := Assigned( eglGetDisplay ) and Assigned( eglInitialize ) and Assigned( eglTerminate ) and Assigned( eglChooseConfig ) and
             Assigned( eglCreateWindowSurface ) and Assigned( eglDestroySurface ) and Assigned( eglCreateContext ) and Assigned( eglDestroyContext ) and
             Assigned( eglMakeCurrent ) and Assigned( eglSwapBuffers );
@@ -705,7 +705,7 @@ end;
 
 procedure FreeGLES;
 begin
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
   if separateEGL Then
     dlclose( glesLibrary );
   dlclose( eglLibrary );
@@ -720,13 +720,13 @@ function gl_GetProc( const Proc : AnsiString ) : Pointer;
     wideStr : PWideChar;
   {$ENDIF}
 begin
-{$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) ) }
+{$IFNDEF NO_EGL}
   Result := eglGetProcAddress( PAnsiChar( Proc ) );
   if Result = nil Then
     Result := eglGetProcAddress( PAnsiChar( Proc + 'OES' ) );
 {$ELSE}
   Result := nil;
-{$IFEND}
+{$ENDIF}
 
   {$IFNDEF WINCE}
   if Result = nil Then

@@ -105,7 +105,7 @@ var
 
   oglReadPixelsFBO : LongWord;
 
-  {$IFNDEF iOS}
+  {$IFNDEF NO_EGL}
   oglDisplay : EGLDisplay;
   oglConfig  : EGLConfig;
   oglSurface : EGLSurface;
@@ -115,7 +115,9 @@ var
   {$IFDEF USE_X11}
   oglVisualInfo : PXVisualInfo;
   {$ENDIF}
-  {$ELSE}
+  {$ENDIF}
+
+  {$IFDEF iOS}
   eglContext      : EAGLContext;
   eglSurface      : CAEAGLLayer;
   eglView         : zglCiOSEAGLView;
@@ -133,7 +135,7 @@ uses
 
 function gles_GetErrorStr( ErrorCode : LongWord ) : String;
 begin
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
   case ErrorCode of
     EGL_NOT_INITIALIZED: Result := 'EGL_NOT_INITIALIZED';
     EGL_BAD_ACCESS: Result := 'EGL_BAD_ACCESS';
@@ -153,12 +155,12 @@ begin
     Result := 'Error code not recognized';
   end;
 {$ELSE}
-    Result := 'Error codes are not implemented for iOS';
+  Result := 'Error codes are not implemented for this platform';
 {$ENDIF}
 end;
 
 function gl_Create : Boolean;
-  {$IFNDEF iOS}
+  {$IFNDEF NO_EGL}
   var
     i, j : EGLint;
   {$ENDIF}
@@ -171,22 +173,22 @@ begin
       exit;
     end;
 
-{$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
-{$IFDEF USE_X11}
+{$IFNDEF NO_EGL}
+  {$IFDEF USE_X11}
   GetMem( oglVisualInfo, SizeOf( TXVisualInfo ) );
   XMatchVisualInfo( scrDisplay, scrDefault, DefaultDepth( scrDisplay, scrDefault ), TrueColor, oglVisualInfo );
 
   oglColor := DefaultDepth( scrDisplay, scrDefault );
 
   oglDisplay := eglGetDisplay( scrDisplay );
-{$ENDIF}
-{$IFDEF WINDOWS}
+  {$ENDIF}
+  {$IFDEF WINDOWS}
   wnd_Create( wndWidth, wndHeight );
 
   oglColor := scrDesktop.dmBitsPerPel;
 
   oglDisplay := eglGetDisplay( wndDC );
-{$ENDIF}
+  {$ENDIF}
 
   if oglDisplay = EGL_NO_DISPLAY Then
     begin
@@ -265,7 +267,7 @@ begin
   Result := j = 1;
 {$ELSE}
   Result := TRUE;
-{$IFEND}
+{$ENDIF}
 end;
 
 procedure gl_Destroy;
@@ -273,15 +275,14 @@ begin
   if oglReadPixelsFBO <> 0 Then
     glDeleteFramebuffers( 1, @oglReadPixelsFBO );
 
-{$IFNDEF iOS}
+{$IFNDEF NO_EGL}
   {$IFDEF USE_X11}
   FreeMem( oglVisualInfo );
   {$ENDIF}
-  {$IFNDEF ANDROID}
   eglMakeCurrent( oglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
   eglTerminate( oglDisplay );
-  {$ENDIF}
-{$ELSE}
+{$ENDIF}
+{$IFDEF iOS}
   eglView.dealloc();
 
   glDeleteFramebuffers( 1, @eglFramebuffer );
@@ -301,8 +302,7 @@ function gl_Initialize : Boolean;
     frame : CGRect;
     {$ENDIF}
 begin
-{$IFNDEF iOS}
-  {$IFNDEF ANDROID}
+{$IFNDEF NO_EGL}
   oglSurface := eglCreateWindowSurface( oglDisplay, oglConfig, wndHandle, nil );
   err := eglGetError();
   if err <> EGL_SUCCESS Then
@@ -324,8 +324,8 @@ begin
       u_Error( 'Cannot set current OpenGL ES context - ' + gles_GetErrorStr( err ) );
       exit;
     end;
-  {$ENDIF}
-{$ELSE}
+{$ENDIF}
+{$IFDEF iOS}
   FillChar( frame, SizeOf( CGRect ), 0 );
   frame.size.width  := oglWidth;
   frame.size.height := oglHeight;

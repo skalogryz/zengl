@@ -584,7 +584,7 @@ begin
     WINDOW_WIDTH: Result := Ptr( wndWidth );
     WINDOW_HEIGHT: Result := Ptr( wndHeight );
 
-    {$IFNDEF iOS}
+    {$IFNDEF NO_EGL}
     GAPI_CONTEXT: Result := Ptr( oglContext );
     {$ENDIF}
     GAPI_MAX_TEXTURE_SIZE: Result := oglMaxTexSize;

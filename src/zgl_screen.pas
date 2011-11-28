@@ -464,11 +464,10 @@ begin
   aglSwapBuffers( oglContext );
   {$ENDIF}
 {$ELSE}
-  {$IFNDEF iOS}
-  {$IFNDEF ANDROID}
+  {$IFNDEF NO_EGL}
   eglSwapBuffers( oglDisplay, oglSurface );
   {$ENDIF}
-  {$ELSE}
+  {$IFDEF iOS}
   eglContext.presentRenderbuffer( GL_RENDERBUFFER );
   {$ENDIF}
 {$ENDIF}
@@ -755,10 +754,9 @@ begin
     aglSetInt( oglContext, AGL_SWAP_INTERVAL, Byte( scrVSync ) );
   {$ENDIF}
 {$ELSE}
-  {$IFNDEF iOS}
+  {$IFNDEF NO_EGL}
   if oglCanVSync Then
     eglSwapInterval( oglDisplay, Integer( scrVSync ) );
-  {$ELSE}
   {$ENDIF}
 {$ENDIF}
 end;
