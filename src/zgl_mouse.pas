@@ -170,7 +170,11 @@ begin
             X := wndX + wndBrdSizeX + wndWidth div 2;
             Y := wndY + wndBrdSizeY + wndCpnSize + wndHeight div 2;
           end;
-    end;
+    end else
+      begin
+        X := wndX + X;
+        Y := wndY + Y;
+      end;
 
   SetCursorPos( X, Y );
 {$ENDIF}
@@ -181,8 +185,8 @@ begin
       Point.Y := wndY + wndHeight / 2;
     end else
       begin
-        Point.X := X;
-        Point.Y := Y;
+        Point.X := wndX + X;
+        Point.Y := wndY + Y;
       end;
   CGWarpMouseCursorPosition( Point );
 {$ENDIF}
