@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.11.27           }
+{ date:     2011.12.03           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -314,7 +314,7 @@ var
   mouse_DblClick   : function( Button : Byte ) : Boolean;
   mouse_Wheel      : function( Axis : Byte ) : Boolean;
   mouse_ClearState : procedure;
-  mouse_Lock       : procedure;
+  mouse_Lock       : procedure( X : Integer = -1; Y : Integer = -1 );
 
 // KEYBOARD
 const

@@ -304,7 +304,15 @@ static bool ( *mouse_Click )( byte Button );
 static bool ( *mouse_DblClick )( byte Button );
 static bool ( *mouse_Wheel )( byte Axis );
 static void ( *mouse_ClearState )();
-static void ( *mouse_Lock )();
+#ifdef __CPP__
+static void ( *__mouse_Lock )( int X, int Y );
+static inline void mouse_Lock( int X = -1, int Y = -1 )
+{
+  __mouse_Lock( X, Y );
+}
+#else
+static void ( *mouse_Lock )( int X, int Y );
+#endif
 
 // KEYBOARD
 #define K_SYSRQ      0xB7
@@ -1318,7 +1326,11 @@ static bool zglLoad( const char* LibraryName )
     zglGetAddress( mouse_DblClick, zglLib, "mouse_DblClick" );
     zglGetAddress( mouse_Wheel, zglLib, "mouse_Wheel" );
     zglGetAddress( mouse_ClearState, zglLib, "mouse_ClearState" );
+#ifdef __CPP__
+    zglGetAddress( __mouse_Lock, zglLib, "mouse_Lock" );
+#else
     zglGetAddress( mouse_Lock, zglLib, "mouse_Lock" );
+#endif
 
     zglGetAddress( key_Down, zglLib, "key_Down" );
     zglGetAddress( key_Up, zglLib, "key_Up" );
