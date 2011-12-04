@@ -166,6 +166,9 @@ procedure zlib_Init( var strm : z_stream_s ); cdecl; external;
 procedure zlib_Free( var strm : z_stream_s ); cdecl; external;
 function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; var pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl; external;
 
+threadvar
+  zipCurrent : Pzip;
+
 implementation
 
 {$IFDEF USE_ZIP}

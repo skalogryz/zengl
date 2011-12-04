@@ -35,6 +35,9 @@ uses
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
+  {$IFDEF USE_ZIP}
+  zgl_lib_zip,
+  {$ENDIF}
   zgl_utils,
   zgl_types;
 
@@ -43,8 +46,12 @@ const
   RES_TEXTURE_FRAMESIZE = $000002;
   RES_TEXTURE_MASK      = $000003;
   RES_TEXTURE_DELETE    = $000004;
-  RES_SOUND             = $000010;
-  RES_SOUND_DELETE      = $000011;
+  RES_FONT              = $000010;
+  RES_FONT_DELETE       = $000011;
+  RES_SOUND             = $000020;
+  RES_SOUND_DELETE      = $000021;
+  RES_ZIP_OPEN          = $000030;
+  RES_ZIP_CLOSE         = $000031;
 
 type
   zglPResourceItem = ^zglTResourceItem;
@@ -90,6 +97,13 @@ type
     mData   : Pointer;
   end;
 
+type
+  zglPFontResource = ^zglTFontResource;
+  zglTFontResource = record
+    FileName : String;
+    Memory   : zglTMemory;
+  end;
+
 {$IFDEF USE_SOUND}
 type
   zglPSoundResource = ^zglTSoundResource;
@@ -100,6 +114,15 @@ type
     FileLoader : zglTSoundFileLoader;
     MemLoader  : zglTSoundMemLoader;
     Format     : LongWord;
+  end;
+{$ENDIF}
+
+{$IFDEF USE_ZIP}
+type
+  zglPZIPResource = ^zglTZIPResource;
+  zglTZIPResource = record
+    FileName : String;
+    Password : String;
   end;
 {$ENDIF}
 
@@ -139,6 +162,7 @@ uses
   zgl_window,
   zgl_screen,
   zgl_application,
+  zgl_file,
   zgl_log;
 
 const
@@ -271,6 +295,9 @@ procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointe
     {$IFDEF USE_SOUND}
     snd  : zglPSoundResource;
     {$ENDIF}
+    {$IFDEF USE_ZIP}
+    zip : zglPZIPResource;
+    {$ENDIF}
 begin
   item := @resQueueItems[ resQueueCurrentID ].next;
   last := @resQueueItems[ resQueueCurrentID ];
@@ -346,6 +373,19 @@ begin
       begin
       end;
     {$ENDIF}
+    {$IFDEF USE_ZIP}
+    RES_ZIP_OPEN,
+    RES_ZIP_CLOSE:
+      begin
+        zgl_GetMem( Pointer( zip ), SizeOf( zglTZIPResource ) );
+        with zglPZIPResource( Resource )^ do
+          begin
+            zip.FileName := FileName;
+            zip.Password := Password;
+          end;
+        item^.Resource := zip;
+      end;
+    {$ENDIF}
   end;
 
   item^.prev       := last;
@@ -389,13 +429,24 @@ begin
               RES_TEXTURE:
                 with item^, zglPTextureResource( Resource )^ do
                   begin
-                    if IsFromFile Then
-                      FileLoader( FileName, pData, Width, Height, Format )
-                    else
+                    if file_Exists( FileName ) Then
                       begin
-                        FileName := 'From Memory';
-                        MemLoader( Memory, pData, Width, Height, Format );
-                      end;
+                        if IsFromFile Then
+                          FileLoader( FileName, pData, Width, Height, Format )
+                        else
+                          begin
+                            FileName := 'From Memory';
+                            MemLoader( Memory, pData, Width, Height, Format );
+                          end;
+                      end else
+                        begin
+                          log_Add( 'Cannot read "' + FileName + '"' );
+
+                          FileName := '';
+                          FreeMem( Resource );
+                          Resource := nil;
+                          DEC( resQueueSize[ id ] );
+                        end;
 
                     if not Assigned( pData ) Then
                       begin
@@ -472,15 +523,26 @@ begin
               RES_SOUND:
                 with item^, zglPSoundResource( Resource )^ do
                   begin
-                    if IsFromFile Then
-                      FileLoader( FileName, Sound.Data, Sound.Size, Format, Sound.Frequency )
-                    else
+                    if file_Exists( FileName ) Then
                       begin
-                        FileName := 'From Memory';
-                        MemLoader( Memory, Sound.Data, Sound.Size, Format, Sound.Frequency );
-                      end;
+                        if IsFromFile Then
+                          FileLoader( FileName, Sound.Data, Sound.Size, Format, Sound.Frequency )
+                        else
+                          begin
+                            FileName := 'From Memory';
+                            MemLoader( Memory, Sound.Data, Sound.Size, Format, Sound.Frequency );
+                          end;
+                      end else
+                        begin
+                          log_Add( 'Cannot read "' + FileName + '"' );
 
-                    if Assigned( Sound.Data ) Then
+                          FileName := '';
+                          FreeMem( Resource );
+                          Resource := nil;
+                          DEC( resQueueSize[ id ] );
+                        end;
+
+                    if not Assigned( Sound.Data ) Then
                       begin
                         snd_Create( Sound^, Format );
                         if IsFromFile Then
@@ -489,6 +551,48 @@ begin
                         log_Add( 'Unable to load sound: "' + FileName + '"' );
 
                     FileName := '';
+                    FreeMem( Resource );
+                    Resource := nil;
+                    Ready := TRUE;
+                    DEC( resQueueSize[ id ] );
+                  end;
+              {$ENDIF}
+              {$IFDEF USE_ZIP}
+              RES_ZIP_OPEN:
+                with item^, zglPZIPResource( Resource )^ do
+                  begin
+                    {$IF DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(WINCE)}
+                    zipCurrent := zip_open( PAnsiChar( platform_GetRes( filePath + FileName ) ), 0, i );
+                    {$ELSE}
+                    zipCurrent := zip_open( PAnsiChar( FileName ), 0, i );
+                    {$IFEND}
+
+                    if zipCurrent = nil Then
+                      begin
+                        log_Add( 'Unable to open archive: ' + FileName );
+                      end else
+                        begin
+                          if Password = '' Then
+                            zip_set_default_password( zipCurrent, nil )
+                          else
+                            zip_set_default_password( zipCurrent, PAnsiChar( Password ) );
+                        end;
+
+                    FileName := '';
+                    Password := '';
+                    FreeMem( Resource );
+                    Resource := nil;
+                    Ready := TRUE;
+                    DEC( resQueueSize[ id ] );
+                  end;
+              RES_ZIP_CLOSE:
+                with item^, zglPZIPResource( Resource )^ do
+                  begin
+                    zip_close( zipCurrent );
+                    zipCurrent := nil;
+
+                    FileName := '';
+                    Password := '';
                     FreeMem( Resource );
                     Resource := nil;
                     Ready := TRUE;

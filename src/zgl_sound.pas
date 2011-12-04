@@ -657,7 +657,7 @@ begin
 
   if not sndInitialized Then exit;
 
-  if not file_Exists( FileName ) Then
+  if ( not resUseThreaded ) and ( not file_Exists( FileName ) ) Then
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;

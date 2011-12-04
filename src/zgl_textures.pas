@@ -320,7 +320,7 @@ begin
     managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
   Result := managerZeroTexture;
 
-  if not file_Exists( FileName ) Then
+  if ( not resUseThreaded ) and ( not file_Exists( FileName ) ) Then
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
