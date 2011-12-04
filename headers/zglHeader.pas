@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.12.03           }
+{ date:     2011.12.04           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -192,10 +192,11 @@ const
   APP_USE_LOG           = $000200;
   APP_USE_ENGLISH_INPUT = $000400;
   APP_USE_UTF8          = $000800;
-  WND_USE_AUTOCENTER    = $001000;
-  SND_CAN_PLAY          = $002000;
-  SND_CAN_PLAY_FILE     = $004000;
-  CLIP_INVISIBLE        = $008000;
+  APP_USE_DT_CORRECTION = $001000;
+  WND_USE_AUTOCENTER    = $002000;
+  SND_CAN_PLAY          = $004000;
+  SND_CAN_PLAY_FILE     = $008000;
+  CLIP_INVISIBLE        = $010000;
 
 var
   zgl_Enable  : procedure( What : LongWord );

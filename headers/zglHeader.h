@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3                  */
-/* date:     2011.10.23           */
+/* date:     2011.12.04           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -174,10 +174,11 @@ static void ( *zgl_FreeMem )( void **Mem );
 #define APP_USE_LOG           0x000200
 #define APP_USE_ENGLISH_INPUT 0x000400
 #define APP_USE_UTF8          0x000800
-#define WND_USE_AUTOCENTER    0x001000
-#define SND_CAN_PLAY          0x002000
-#define SND_CAN_PLAY_FILE     0x004000
-#define CLIP_INVISIBLE        0x008000
+#define APP_USE_DT_CORRECTION 0x001000
+#define WND_USE_AUTOCENTER    0x002000
+#define SND_CAN_PLAY          0x004000
+#define SND_CAN_PLAY_FILE     0x008000
+#define CLIP_INVISIBLE        0x010000
 
 static void ( *zgl_Enable )( uint What );
 static void ( *zgl_Disable )( uint What );

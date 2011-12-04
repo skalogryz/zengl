@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.12.03';
+  cs_Date     = '2011.12.04';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -148,10 +148,11 @@ const
   APP_USE_LOG           = $000200;
   APP_USE_ENGLISH_INPUT = $000400;
   APP_USE_UTF8          = $000800;
-  WND_USE_AUTOCENTER    = $001000;
-  SND_CAN_PLAY          = $002000;
-  SND_CAN_PLAY_FILE     = $004000;
-  CLIP_INVISIBLE        = $008000;
+  APP_USE_DT_CORRECTION = $001000;
+  WND_USE_AUTOCENTER    = $002000;
+  SND_CAN_PLAY          = $004000;
+  SND_CAN_PLAY_FILE     = $008000;
+  CLIP_INVISIBLE        = $010000;
   {$IFDEF iOS}
   SCR_ORIENTATION_PORTRAIT   = $100000;
   SCR_ORIENTATION_LANDSCAPE  = $200000;

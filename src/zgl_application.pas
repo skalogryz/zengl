@@ -266,6 +266,12 @@ begin
           timer_MainLoop();
 
       t := timer_GetTicks();
+      {$IFDEF WINDESKTOP}
+      // Workaround for bug with unstable time between frames...
+      if ( scrVSync ) and ( appFPS > 0 ) and ( appFPS = scrRefresh ) and ( appFlags and APP_USE_DT_CORRECTION > 0 ) Then
+        app_PUpdate( 1000 / appFPS )
+      else
+      {$ENDIF}
       app_PUpdate( timer_GetTicks() - appdt );
       appdt := t;
 
@@ -1642,7 +1648,7 @@ initialization
   app_POrientation := app_ZeroOrientation;
 {$ENDIF}
 
-  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
+  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE {$IFDEF WINDESKTOP} or APP_USE_DT_CORRECTION {$ENDIF};
 {$IFDEF iOS}
   appFlags := appFlags or SCR_ORIENTATION_LANDSCAPE or SCR_ORIENTATION_PORTRAIT;
 {$ENDIF}

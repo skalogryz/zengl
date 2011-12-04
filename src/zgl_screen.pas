@@ -495,6 +495,8 @@ begin
           zgl_Exit();
         end else
           ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
+
+      scrRefresh := GetDisplayRefresh();
     end else
       scr_Reset();
   {$ENDIF}
@@ -528,6 +530,7 @@ begin
   scrChanging   := TRUE;
   wndWidth      := Width;
   wndHeight     := Height;
+  scrRefresh    := Refresh;
   wndFullScreen := FullScreen;
   scrVsync      := VSync;
 
@@ -541,9 +544,6 @@ begin
       begin
         scrWidth  := zgl_Get( DESKTOP_WIDTH );
         scrHeight := zgl_Get( DESKTOP_HEIGHT );
-        {$IFDEF WINDOWS}
-        scrRefresh := GetDisplayRefresh();
-        {$ENDIF}
       end;
 
   if not appInitialized Then
@@ -619,6 +619,8 @@ begin
           wndFullScreen := FALSE;
         end else
           ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_FULLSCREEN, nil );
+
+      scrRefresh := GetDisplayRefresh();
     end else
       scr_SetWindowedMode();
 {$ENDIF}
@@ -626,12 +628,12 @@ begin
   if wndFullScreen Then
     begin
       //CGDisplayCapture( scrDisplay );
-      if scrRefresh <> 0 Then
+      if ( scrRefresh <> 0 ) and ( scrRefresh <> 1 ) Then
         begin
           scrSettings := CGDisplayBestModeForParametersAndRefreshRate( scrDisplay, 32, scrWidth, scrHeight, scrRefresh, b );
           scrRefresh  := b;
         end;
-      if scrRefresh = 0 Then
+      if ( scrRefresh = 0 ) or ( scrRefresh = 1 ) Then
         scrSettings := CGDisplayBestModeForParameters( scrDisplay, 32, scrWidth, scrHeight, b );
 
       if b = 1 Then
