@@ -89,6 +89,8 @@ procedure font_Del( var Font : zglPFont );
 function font_LoadFromFile( const FileName : String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 
+procedure font_Load( var fnt : zglPFont; var fntMem : zglTMemory );
+
 function font_GetUTF8ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 function font_GetUTF16ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
 function font_GetCP1251ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
@@ -100,6 +102,7 @@ var
 implementation
 uses
   zgl_main,
+  zgl_resources,
   zgl_log,
   zgl_utils;
 
@@ -136,58 +139,6 @@ begin
   DEC( managerFont.Count );
 end;
 
-function font_Load( var fntMem : zglTMemory ) : zglPFont;
-  var
-    i     : Integer;
-    c     : LongWord;
-    fntID : array[ 0..13 ] of AnsiChar;
-begin
-  fntID[ 13 ] := #0;
-  mem_Read( fntMem, fntID, 13 );
-  if fntID <> ZGL_FONT_INFO Then
-    begin
-      Result := nil;
-      exit;
-    end;
-
-  Result := font_Add();
-  mem_Read( fntMem, Result.Count.Pages,  2 );
-  mem_Read( fntMem, Result.Count.Chars,  2 );
-  mem_Read( fntMem, Result.MaxHeight,    4 );
-  mem_Read( fntMem, Result.MaxShiftY,    4 );
-  mem_Read( fntMem, Result.Padding[ 0 ], 4 );
-  SetLength( Result.Pages, Result.Count.Pages );
-  for i := 0 to Result.Count.Chars - 1 do
-    begin
-      mem_Read( fntMem, c, 4 );
-      zgl_GetMem( Pointer( Result.CharDesc[ c ] ), SizeOf( zglTCharDesc ) );
-      {$IFDEF ENDIAN_BIG}
-      forceNoSwap := TRUE;
-      {$ENDIF}
-      mem_Read( fntMem, Result.CharDesc[ c ].Page, 4 );
-      {$IFDEF ENDIAN_BIG}
-      forceNoSwap := FALSE;
-      {$ENDIF}
-      mem_Read( fntMem, Result.CharDesc[ c ].Width, 1 );
-      mem_Read( fntMem, Result.CharDesc[ c ].Height, 1 );
-      mem_Read( fntMem, Result.CharDesc[ c ].ShiftX, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].ShiftY, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].ShiftP, 4 );
-      {$IFDEF ENDIAN_BIG}
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ].X, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ].Y, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 1 ].X, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 1 ].Y, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 2 ].X, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 2 ].Y, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 3 ].X, 4 );
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
-      {$ELSE}
-      mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
-      {$ENDIF}
-    end;
-end;
-
 function font_LoadFromFile( const FileName : String ) : zglPFont;
   var
     fntMem : zglTMemory;
@@ -195,8 +146,18 @@ function font_LoadFromFile( const FileName : String ) : zglPFont;
     dir    : String;
     name   : String;
     tmp    : String;
+    res    : zglTFontResource;
 begin
   Result := nil;
+
+  if resUseThreaded Then
+    begin
+      Result       := font_Add();
+      res.FileName := FileName;
+      res.Font     := Result;
+      res_AddToQueue( RES_FONT, TRUE, @res );
+      exit;
+    end;
 
   if not file_Exists( FileName ) Then
     begin
@@ -205,7 +166,7 @@ begin
     end;
 
   mem_LoadFromFile( fntMem, FileName );
-  Result := font_Load( fntMem );
+  font_Load( Result, fntMem );
   mem_Free( fntMem );
 
   if not Assigned( Result ) Then
@@ -231,12 +192,79 @@ end;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
   var
     fntMem : zglTMemory;
+    res    : zglTFontResource;
 begin
+  if resUseThreaded Then
+    begin
+      Result     := font_Add();
+      res.Memory := Memory;
+      res.Font   := Result;
+      res_AddToQueue( RES_FONT, FALSE, @res );
+      exit;
+    end;
+
   fntMem := Memory;
-  Result := font_Load( fntMem );
+  font_Load( Result, fntMem );
 
   if not Assigned( Result ) Then
     log_Add( 'Unable to load font: From Memory' );
+end;
+
+procedure font_Load( var fnt : zglPFont; var fntMem : zglTMemory );
+  var
+    i     : Integer;
+    c     : LongWord;
+    fntID : array[ 0..13 ] of AnsiChar;
+begin
+  fntID[ 13 ] := #0;
+  mem_Read( fntMem, fntID, 13 );
+  if fntID <> ZGL_FONT_INFO Then
+    begin
+      if Assigned( fnt ) Then
+        FreeMemory( fnt );
+      fnt := nil;
+      exit;
+    end;
+
+  if not Assigned( fnt ) Then
+    fnt := font_Add();
+  mem_Read( fntMem, fnt.Count.Pages,  2 );
+  mem_Read( fntMem, fnt.Count.Chars,  2 );
+  mem_Read( fntMem, fnt.MaxHeight,    4 );
+  mem_Read( fntMem, fnt.MaxShiftY,    4 );
+  mem_Read( fntMem, fnt.Padding[ 0 ], 4 );
+  SetLength( fnt.Pages, fnt.Count.Pages );
+  for i := 0 to fnt.Count.Pages - 1 do
+    fnt.Pages[ i ] := nil;
+  for i := 0 to fnt.Count.Chars - 1 do
+    begin
+      mem_Read( fntMem, c, 4 );
+      zgl_GetMem( Pointer( fnt.CharDesc[ c ] ), SizeOf( zglTCharDesc ) );
+      {$IFDEF ENDIAN_BIG}
+      forceNoSwap := TRUE;
+      {$ENDIF}
+      mem_Read( fntMem, fnt.CharDesc[ c ].Page, 4 );
+      {$IFDEF ENDIAN_BIG}
+      forceNoSwap := FALSE;
+      {$ENDIF}
+      mem_Read( fntMem, fnt.CharDesc[ c ].Width, 1 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].Height, 1 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].ShiftX, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].ShiftY, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].ShiftP, 4 );
+      {$IFDEF ENDIAN_BIG}
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ].X, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ].Y, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 1 ].X, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 1 ].Y, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 2 ].X, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 2 ].Y, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].X, 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
+      {$ELSE}
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
+      {$ENDIF}
+    end;
 end;
 
 function font_GetUTF8ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;

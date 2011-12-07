@@ -32,6 +32,7 @@ uses
   {$ENDIF}
   zgl_memory,
   zgl_textures,
+  zgl_font,
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -102,6 +103,11 @@ type
   zglTFontResource = record
     FileName : String;
     Memory   : zglTMemory;
+    Font     : zglPFont;
+    pData    : array of Pointer;
+    Format   : array of Word;
+    Width    : array of Word;
+    Height   : array of Word;
   end;
 
 {$IFDEF USE_SOUND}
@@ -200,6 +206,7 @@ procedure res_Proc;
     id   : Integer;
     size : Integer;
     max  : Integer;
+    i    : Integer;
 begin
   size := 0;
   max  := 0;
@@ -239,6 +246,26 @@ begin
                       DEC( resQueueSize[ id ] );
                       break;
                     end;
+                RES_FONT:
+                  with zglPFontResource( item.Resource )^ do
+                    if item.Prepared Then
+                      begin
+                        for i := 0 to Font.Count.Pages - 1 do
+                          begin
+                            tex_Create( Font.Pages[ i ]^, pData[ i ] );
+                            FreeMem( pData[ i ] );
+                          end;
+                        SetLength( pData, 0 );
+                        SetLength( Format, 0 );
+                        SetLength( Width, 0 );
+                        SetLength( Height, 0 );
+
+                        FileName := '';
+                        FreeMem( item.Resource );
+                        item.Resource := nil;
+                        DEC( resQueueSize[ id ] );
+                        break;
+                      end;
               end;
             if ( not item.Prepared ) and Assigned( item.Resource ) Then
               case item._type of
@@ -261,6 +288,26 @@ begin
 
                       break;
                     end;
+                RES_FONT:
+                  if item.Ready Then
+                    with zglPFontResource( item.Resource )^ do
+                      begin
+                        for i := 0 to Font.Count.Pages - 1 do
+                          Font.Pages[ i ] := tex_Add();
+                        item.Prepared := TRUE;
+
+                        {$IFNDEF ANDROID}
+                        {$IFDEF FPC}
+                        RTLEventSetEvent( resQueueState[ id ] );
+                        {$ELSE}
+                        SetEvent( resQueueState[ id ] );
+                        {$ENDIF}
+                        {$ELSE}
+                        sem_post( resQueueState[ id ] );
+                        {$ENDIF}
+
+                        item.Ready := FALSE;
+                      end;
               end;
 
             if ( resQueueSize[ id ] = 0 ) or ( not item.Ready ) Then
@@ -292,6 +339,7 @@ procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointe
     tex  : zglPTextureResource;
     tfs  : zglPTextureFrameSizeResource;
     tm   : zglPTextureMaskResource;
+    fnt  : zglPFontResource;
     {$IFDEF USE_SOUND}
     snd  : zglPSoundResource;
     {$ENDIF}
@@ -355,6 +403,20 @@ begin
     RES_TEXTURE_DELETE:
       begin
       end;
+    RES_FONT:
+      begin
+        zgl_GetMem( Pointer( fnt ), SizeOf( zglTFontResource ) );
+        with zglPFontResource( Resource )^ do
+          begin
+            fnt.FileName := FileName;
+            fnt.Memory   := Memory;
+            fnt.Font     := Font;
+          end;
+        item^.Resource := fnt;
+      end;
+    RES_FONT_DELETE:
+      begin
+      end;
     {$IFDEF USE_SOUND}
     RES_SOUND:
       begin
@@ -414,6 +476,11 @@ function res_ProcQueue( data : Pointer ) : LongInt;
     idel : zglPResourceItem;
     // mask
     i, j, mW, rW : Integer;
+    // font
+    mem  : zglTMemory;
+    dir  : String;
+    name : String;
+    tmp  : String;
 begin
   Result := 0;
   id     := PByte( data )^;
@@ -519,6 +586,74 @@ begin
 
                       Ready := TRUE;
                     end;
+              RES_FONT:
+                with item^, zglPFontResource( Resource )^ do
+                  begin
+                    if not Prepared Then
+                      begin
+                        if IsFromFile Then
+                          mem_LoadFromFile( mem, FileName )
+                        else
+                          begin
+                            FileName := 'From Memory';
+                            mem := Memory;
+                          end;
+
+                        font_Load( Font, mem );
+
+                        if IsFromFile Then
+                          mem_Free( mem );
+
+                        if Assigned( Font ) Then
+                          begin
+                            if IsFromFile Then
+                              begin
+                                dir  := file_GetDirectory( FileName );
+                                name := file_GetName( FileName );
+                                SetLength( pData, Font.Count.Pages );
+                                SetLength( Format, Font.Count.Pages );
+                                SetLength( Width, Font.Count.Pages );
+                                SetLength( Height, Font.Count.Pages );
+                                for i := 0 to Font.Count.Pages - 1 do
+                                  for j := managerTexture.Count.Formats - 1 downto 0 do
+                                    begin
+                                      tmp := dir + name + '-page' + u_IntToStr( i ) + '.' + u_StrDown( managerTexture.Formats[ j ].Extension );
+                                      if file_Exists( tmp ) Then
+                                        begin
+                                          managerTexture.Formats[ j ].FileLoader( tmp, pData[ i ], Width[ i ], Height[ i ], Format[ i ] );
+                                          log_ADd( 'Texture loaded: "' + tmp + '"'  );
+                                          break;
+                                        end;
+                                    end;
+                              end;
+
+                            Ready := TRUE;
+                          end else
+                            begin
+                              log_Add( 'Unable to load font: "' + FileName + '"' );
+
+                              FileName := '';
+                              FreeMem( Resource );
+                              Resource := nil;
+                              DEC( resQueueSize[ id ] );
+                            end;
+                      end else
+                        begin
+                          for i := 0 to Font.Count.Pages - 1 do
+                            begin
+                              Font.Pages[ i ].Flags  := TEX_DEFAULT_2D;
+                              Font.Pages[ i ].Format := Format[ i ];
+                              Font.Pages[ i ].Width  := Width[ i ];
+                              Font.Pages[ i ].Height := Height[ i ];
+                              if Format[ i ] = TEX_FORMAT_RGBA Then
+                                tex_CalcAlpha( pData[ i ], Width[ i ], Height[ i ] );
+                              tex_CalcFlags( Font.Pages[ i ]^, pData[ i ] );
+                              tex_CalcTexCoords( Font.Pages[ i ]^ );
+                            end;
+
+                          Ready := TRUE;
+                        end;
+                  end;
               {$IFDEF USE_SOUND}
               RES_SOUND:
                 with item^, zglPSoundResource( Resource )^ do
