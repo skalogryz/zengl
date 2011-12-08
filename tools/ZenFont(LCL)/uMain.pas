@@ -70,6 +70,7 @@ type
     procedure ComboBoxPageSizeChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormResize(Sender: TObject);
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure Panel1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer
@@ -248,6 +249,12 @@ end;
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   zgl_Exit();
+end;
+
+procedure TForm1.FormResize(Sender: TObject);
+begin
+  if zglInited Then
+    wnd_SetSize( Panel1.ClientWidth, Panel1.ClientHeight );
 end;
 
 procedure TForm1.Panel1MouseDown(Sender: TObject; Button: TMouseButton;

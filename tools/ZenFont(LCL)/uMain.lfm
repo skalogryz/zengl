@@ -1,19 +1,18 @@
 object Form1: TForm1
-  Left = 560
+  Left = 1075
   Height = 600
-  Top = 192
+  Top = 183
   Width = 800
   ActiveControl = Panel1
   BorderStyle = bsDialog
   Caption = 'ZenFont 0.2.4(LCL)'
   ClientHeight = 600
   ClientWidth = 800
-  Constraints.MaxHeight = 600
-  Constraints.MaxWidth = 800
   Constraints.MinHeight = 600
   Constraints.MinWidth = 800
   OnActivate = FormActivate
   OnClose = FormClose
+  OnResize = FormResize
   Position = poScreenCenter
   LCLVersion = '0.9.31'
   Visible = True
@@ -98,6 +97,7 @@ object Form1: TForm1
       Height = 25
       Top = 40
       Width = 150
+      Anchors = [akTop, akRight]
       Caption = 'Save Font'
       OnClick = ButtonSaveFontClick
       TabOrder = 5
@@ -107,6 +107,7 @@ object Form1: TForm1
       Height = 25
       Top = 150
       Width = 150
+      Anchors = [akTop, akRight]
       Caption = 'Exit'
       OnClick = ButtonExitClick
       TabOrder = 6
@@ -116,6 +117,7 @@ object Form1: TForm1
       Height = 25
       Top = 10
       Width = 150
+      Anchors = [akTop, akRight]
       Caption = 'Rebuild Font'
       OnClick = ButtonRebuildFontClick
       TabOrder = 4
@@ -125,6 +127,7 @@ object Form1: TForm1
       Height = 70
       Top = 105
       Width = 460
+      Anchors = [akTop, akLeft, akRight]
       Caption = 'Char Padding'
       ClientHeight = 52
       ClientWidth = 456
@@ -213,6 +216,7 @@ object Form1: TForm1
       Height = 95
       Top = 0
       Width = 335
+      Anchors = [akTop, akLeft, akRight]
       Caption = 'Chars'
       ClientHeight = 77
       ClientWidth = 331
@@ -231,6 +235,7 @@ object Form1: TForm1
         Height = 25
         Top = 45
         Width = 150
+        Anchors = [akTop, akRight]
         Caption = 'Import from file'
         OnClick = ButtonImportSymbolsClick
         TabOrder = 1
@@ -240,6 +245,7 @@ object Form1: TForm1
         Height = 26
         Top = 10
         Width = 310
+        Anchors = [akTop, akLeft, akRight]
         TabOrder = 2
       end
     end
