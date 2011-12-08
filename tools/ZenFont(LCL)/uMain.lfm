@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 560
   Height = 600
-  Top = 240
+  Top = 192
   Width = 800
   ActiveControl = Panel1
   BorderStyle = bsDialog
@@ -15,7 +15,7 @@ object Form1: TForm1
   OnActivate = FormActivate
   OnClose = FormClose
   Position = poScreenCenter
-  LCLVersion = '0.9.29'
+  LCLVersion = '0.9.31'
   Visible = True
   object GroupBox1: TGroupBox
     Left = 0
@@ -29,9 +29,9 @@ object Form1: TForm1
     TabOrder = 0
     object CheckBoxAntialiasing: TCheckBox
       Left = 10
-      Height = 22
+      Height = 21
       Top = 95
-      Width = 96
+      Width = 93
       Caption = 'Antialiasing'
       Checked = True
       OnChange = CheckBoxAntialiasingChange
@@ -40,9 +40,9 @@ object Form1: TForm1
     end
     object CheckBoxPack: TCheckBox
       Left = 10
-      Height = 22
+      Height = 21
       Top = 120
-      Width = 53
+      Width = 52
       Caption = 'Pack'
       Checked = True
       OnChange = CheckBoxPackChange
@@ -53,13 +53,13 @@ object Form1: TForm1
       Left = 10
       Height = 17
       Top = 55
-      Width = 87
+      Width = 85
       Caption = 'Current Page:'
       ParentColor = False
     end
     object ComboBoxPageSize: TComboBox
       Left = 90
-      Height = 30
+      Height = 24
       Top = 10
       Width = 70
       ItemHeight = 0

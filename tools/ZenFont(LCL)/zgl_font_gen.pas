@@ -638,6 +638,7 @@ begin
       zgl_GetMem( pData, sqr( fg_PageSize ) * 4 );
       SetLength( Font.Pages, Font.Count.Pages );
       Font.Pages[ 0 ]        := tex_Add;
+      Font.Pages[ 0 ].Format := TEX_FORMAT_RGBA;
       Font.Pages[ 0 ].Width  := fg_PageSize;
       Font.Pages[ 0 ].Height := fg_PageSize;
       Font.Pages[ 0 ].U      := 1;
@@ -672,13 +673,16 @@ begin
           if not Assigned( sn ) Then
             begin
               image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
+              tex_CalcAlpha( pData, fg_PageSize, fg_PageSize );
+              tex_CalcTexCoords( Font.Pages[ Font.Count.Pages - 1 ]^ );
               tex_Create( Font.Pages[ Font.Count.Pages - 1 ]^, pData );
               FreeMemory( pData );
 
               zgl_GetMem( pData, sqr( fg_PageSize ) * 4 );
               INC( Font.Count.Pages );
               SetLength( Font.Pages, Font.Count.Pages );
-              Font.Pages[ Font.Count.Pages - 1 ]        := tex_Add;
+              Font.Pages[ Font.Count.Pages - 1 ]        := tex_Add();
+              Font.Pages[ Font.Count.Pages - 1 ].Format := TEX_FORMAT_RGBA;
               Font.Pages[ Font.Count.Pages - 1 ].Width  := fg_PageSize;
               Font.Pages[ Font.Count.Pages - 1 ].Height := fg_PageSize;
               Font.Pages[ Font.Count.Pages - 1 ].U      := 1;
@@ -720,6 +724,8 @@ begin
               end;
         end;
       image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
+      tex_CalcAlpha( pData, fg_PageSize, fg_PageSize );
+      tex_CalcTexCoords( Font.Pages[ Font.Count.Pages - 1 ]^ );
       tex_Create( Font.Pages[ Font.Count.Pages - 1 ]^, pData );
       FreeMemory( pData );
     end else
@@ -735,6 +741,7 @@ begin
         for i := 0 to Font.Count.Pages - 1 do
           begin
             Font.Pages[ i ]        := tex_Add;
+            Font.Pages[ i ].Format := TEX_FORMAT_RGBA;
             Font.Pages[ i ].Width  := fg_PageSize;
             Font.Pages[ i ].Height := fg_PageSize;
             Font.Pages[ i ].U      := 1;
@@ -779,6 +786,8 @@ begin
                 Font.MaxShiftY := Round( Max( Font.MaxShiftY, Font.CharDesc[ CharUID ].ShiftY ) );
             end;
           image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
+          tex_CalcAlpha( pData, fg_PageSize, fg_PageSize );
+          tex_CalcTexCoords( Font.Pages[ i ]^ );
           tex_Create( Font.Pages[ i ]^, pData );
           FreeMemory( pData );
         end;

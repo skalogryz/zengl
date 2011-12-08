@@ -128,7 +128,7 @@ begin
   pr2d_Rect( 0, 0, Form1.Panel1.Width, Form1.Panel1.Height, $505050, 255, PR2D_FILL );
   pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL );
 
-  if Assigned( fg_Font.Pages ) Then
+  if Assigned( fg_Font ) and Assigned( fg_Font.Pages ) Then
     begin
       ssprite2d_Draw( fg_Font.Pages[ Form1.SpinCurrentPage.Value - 1 ], fontX, fontY, fg_PageSize, fg_PageSize, 0 );
 
