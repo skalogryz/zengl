@@ -100,6 +100,7 @@
       </Verbosity>
       <CompilerMessages>
         <UseMsgFile Value="True"/>
+        <MsgFileName Value="/usr/lib/fpc/2.4.4/msg/errore.msg"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

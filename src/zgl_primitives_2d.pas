@@ -116,6 +116,13 @@ begin
     begin
       if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
         begin
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glEnable( GL_LINE_SMOOTH    );
+              {$IFNDEF USE_GLES}
+              glEnable( GL_POLYGON_SMOOTH );
+              {$ENDIF}
+            end;
           glEnable( GL_BLEND );
           glBegin( GL_TRIANGLES );
         end;
@@ -153,6 +160,14 @@ begin
       if not b2dStarted Then
         begin
           glEnd();
+
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glDisable( GL_LINE_SMOOTH    );
+              {$IFNDEF USE_GLES}
+              glDisable( GL_POLYGON_SMOOTH );
+              {$ENDIF}
+            end;
           glDisable( GL_BLEND );
         end;
    end else
@@ -164,6 +179,14 @@ begin
 
       if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glEnable( GL_LINE_SMOOTH    );
+              {$IFNDEF USE_GLES}
+              glEnable( GL_POLYGON_SMOOTH );
+              {$ENDIF}
+            end;
+
           glEnable( GL_BLEND );
           glBegin( GL_LINES );
         end;
@@ -205,6 +228,13 @@ begin
 
       if not b2dStarted Then
         begin
+          if FX and PR2D_SMOOTH > 0 Then
+            begin
+              glDisable( GL_LINE_SMOOTH    );
+              {$IFNDEF USE_GLES}
+              glDisable( GL_POLYGON_SMOOTH );
+              {$ENDIF}
+            end;
           glEnd();
           glDisable( GL_BLEND );
         end;
