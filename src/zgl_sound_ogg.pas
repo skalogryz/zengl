@@ -63,6 +63,9 @@ unit zgl_sound_ogg;
   {$ELSE}
     {$LINKLIB libtremolo.a}
   {$ENDIF}
+  {$IFDEF UNIX}
+    {$LINKLIB m}
+  {$ENDIF}
   {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}
