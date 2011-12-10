@@ -496,23 +496,22 @@ begin
               RES_TEXTURE:
                 with item^, zglPTextureResource( Resource )^ do
                   begin
-                    if file_Exists( FileName ) Then
+                    if IsFromFile Then
                       begin
-                        if IsFromFile Then
-                          FileLoader( FileName, pData, Width, Height, Format )
-                        else
+                        if not file_Exists( FileName ) Then
                           begin
-                            FileName := 'From Memory';
-                            MemLoader( Memory, pData, Width, Height, Format );
-                          end;
+                            log_Add( 'Cannot read "' + FileName + '"' );
+
+                            FileName := '';
+                            FreeMem( Resource );
+                            Resource := nil;
+                            DEC( resQueueSize[ id ] );
+                          end else
+                            FileLoader( FileName, pData, Width, Height, Format )
                       end else
                         begin
-                          log_Add( 'Cannot read "' + FileName + '"' );
-
-                          FileName := '';
-                          FreeMem( Resource );
-                          Resource := nil;
-                          DEC( resQueueSize[ id ] );
+                          FileName := 'From Memory';
+                          MemLoader( Memory, pData, Width, Height, Format );
                         end;
 
                     if not Assigned( pData ) Then
@@ -658,24 +657,24 @@ begin
               RES_SOUND:
                 with item^, zglPSoundResource( Resource )^ do
                   begin
-                    if file_Exists( FileName ) Then
+                    if IsFromFile Then
                       begin
-                        if IsFromFile Then
-                          FileLoader( FileName, Sound.Data, Sound.Size, Format, Sound.Frequency )
-                        else
+                        if not file_Exists( FileName ) Then
                           begin
-                            FileName := 'From Memory';
-                            MemLoader( Memory, Sound.Data, Sound.Size, Format, Sound.Frequency );
-                          end;
+                            log_Add( 'Cannot read "' + FileName + '"' );
+
+                            FileName := '';
+                            FreeMem( Resource );
+                            Resource := nil;
+                            DEC( resQueueSize[ id ] );
+                          end else
+                            FileLoader( FileName, Sound.Data, Sound.Size, Format, Sound.Frequency )
                       end else
                         begin
-                          log_Add( 'Cannot read "' + FileName + '"' );
-
-                          FileName := '';
-                          FreeMem( Resource );
-                          Resource := nil;
-                          DEC( resQueueSize[ id ] );
+                          FileName := 'From Memory';
+                          MemLoader( Memory, Sound.Data, Sound.Size, Format, Sound.Frequency );
                         end;
+
 
                     if not Assigned( Sound.Data ) Then
                       begin
