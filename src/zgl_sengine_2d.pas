@@ -48,15 +48,15 @@ type
     Frame   : Single;
     Alpha   : Integer;
     FxFlags : LongWord;
-    Data    : Pointer;
 
-    OnInit  : procedure( Sprite : zglPSprite2D );
-    OnDraw  : procedure( Sprite : zglPSprite2D );
-    OnProc  : procedure( Sprite : zglPSprite2D );
-    OnFree  : procedure( Sprite : zglPSprite2D );
+    OnInit  : procedure( var Sprite );
+    OnDraw  : procedure( var Sprite );
+    OnProc  : procedure( var Sprite );
+    OnFree  : procedure( var Sprite );
   end;
 
 function  sengine2d_AddSprite( Texture : zglPTexture; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
+function  sengine2d_AddCustom( Texture : zglPTexture; Size : LongWord; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
 procedure sengine2d_DelSprite( ID : Integer );
 procedure sengine2d_ClearAll;
 
@@ -78,13 +78,18 @@ var
   sengine2d : zglPSEngine2D;
 
 function sengine2d_AddSprite( Texture : zglPTexture; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
+begin
+  Result := sengine2d_AddCustom( Texture, SizeOf( zglTSprite2D ), Layer, OnInit, OnDraw, OnProc, OnFree );
+end;
+
+function sengine2d_AddCustom( Texture : zglPTexture; Size : LongWord; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   var
     new : zglPSprite2D;
 begin
   if sengine2d.Count + 1 > length( sengine2d.List ) Then
     SetLength( sengine2d.List, length( sengine2d.List ) + 16384 );
 
-  zgl_GetMem( Pointer( new ), SizeOf( zglTSprite2D ) );
+  zgl_GetMem( Pointer( new ), Size );
   sengine2d.List[ sengine2d.Count ] := new;
   INC( sengine2d.Count );
 
@@ -100,14 +105,13 @@ begin
   new.Frame   := 1;
   new.Alpha   := 255;
   new.FxFlags := FX_BLEND;
-  new.Data    := nil;
   new.OnInit  := OnInit;
   new.OnDraw  := OnDraw;
   new.OnProc  := OnProc;
   new.OnFree  := OnFree;
   Result      := new;
   if Assigned( Result.OnInit ) Then
-    Result.OnInit( Result );
+    Result.OnInit( Result^ );
 end;
 
 procedure sengine2d_DelSprite( ID : Integer );
@@ -117,7 +121,7 @@ begin
   if ( ID < 0 ) or ( ID > sengine2d.Count - 1 ) or ( sengine2d.Count = 0 ) Then exit;
 
   if Assigned( sengine2d.List[ ID ].OnFree ) Then
-    sengine2d.List[ ID ].OnFree( sengine2d.List[ ID ] );
+    sengine2d.List[ ID ].OnFree( sengine2d.List[ ID ]^ );
 
   FreeMem( sengine2d.List[ ID ] );
   sengine2d.List[ ID ] := nil;
@@ -139,7 +143,7 @@ begin
     begin
       s := sengine2d.List[ i ];
       if Assigned( s.OnFree ) Then
-        sengine2d.List[ i ].OnFree( s );
+        sengine2d.List[ i ].OnFree( s^ );
       FreeMem( s );
     end;
   SetLength( sengine2d.List, 0 );
@@ -169,7 +173,7 @@ begin
     begin
       s := sengine2d.List[ i ];
       if Assigned( s.OnDraw ) Then
-        s.OnDraw( s )
+        s.OnDraw( s^ )
       else
         asprite2d_Draw( s.Texture, s.X, s.Y, s.W, s.H, s.Angle, Round( s.Frame ), s.Alpha, s.FxFlags );
 
@@ -193,7 +197,7 @@ begin
     begin
       s := sengine2d.List[ i ];
       if Assigned( s.OnProc ) Then
-        s.OnProc( s );
+        s.OnProc( s^ );
 
       if Assigned( s ) Then
         begin

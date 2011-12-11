@@ -60,7 +60,7 @@ begin
 
       if i < 3 Then
         begin
-          _type             := EMITTER_POINT;
+          Type_             := EMITTER_POINT;
           Params.Loop       := TRUE;
           Params.LifeTime   := 1000;
           Params.Emission   := 10;
@@ -72,7 +72,7 @@ begin
         end else
           if i < 6 Then
             begin
-              _type             := EMITTER_POINT;
+              Type_             := EMITTER_POINT;
               Params.Loop       := TRUE;
               Params.LifeTime   := 1000;
               Params.Emission   := 10;
@@ -83,7 +83,7 @@ begin
               ParParams.LifeTimeV := 0;
             end else
               begin
-                _type            := EMITTER_LINE;
+                Type_            := EMITTER_LINE;
                 Params.Loop      := TRUE;
                 Params.LifeTime  := 1000;
                 Params.Emission  := 100;
@@ -215,13 +215,7 @@ begin
       begin
         emitter2d_Init( @eDiamond );
 
-        for j := 0 to EMITTER_MAX_PARTICLES - 1 do
-          begin
-            _list[ j ]    := @_particle[ j ];
-            _list[ j ].ID := j;
-          end;
-
-        _type             := EMITTER_RECTANGLE;
+        Type_             := EMITTER_RECTANGLE;
         Params.Loop       := TRUE;
         Params.LifeTime   := 1000;
         Params.Emission   := 2;
@@ -302,7 +296,7 @@ begin
       begin
         emitter2d_Init( @eRain );
 
-        _type             := EMITTER_LINE;
+        Type_             := EMITTER_LINE;
         Params.Loop       := TRUE;
         Params.LifeTime   := 1000;
         Params.Emission   := 250;

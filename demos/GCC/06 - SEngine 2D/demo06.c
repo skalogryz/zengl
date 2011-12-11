@@ -1,6 +1,17 @@
 #include <math.h>
 #include "zglHeader.h"
 
+typedef struct
+{
+  // RU: Обязательная часть нового типа спрайта.
+  // EN: New type should start with this.
+  ZGLTSPRITE2D
+
+  // RU: Новые параметры.
+  // EN: New params.
+  zglTPoint2D Speed;
+} zglTMiku, *zglPMiku;
+
 zglPFont      fntMain;
 zglPTexture   texLogo;
 zglPTexture   texMiku;
@@ -8,50 +19,42 @@ int           time;
 zglTSEngine2D sengine2d;
 
 // Miku
-void MikuInit( zglPSprite2D Sprite )
+void MikuInit( zglPMiku Miku )
 {
-  Sprite->X = 800.0f + rand() % 800;
-  Sprite->Y = (float)( rand() % ( 600 - 128 ) );
-  // RU: Задаем скорость движения. В пользовательском параметре Data выделим память под структуру zglTPoint2D.
-  // EN: Set the moving speed. Allocate memory for structure zglTPoint2D in userspace parameter "Data".
-  zgl_GetMem( &Sprite->Data, sizeof( zglTPoint2D ) );
-  ((zglPPoint2D)Sprite->Data)->X = -( rand() % 10 ) / 5.0f - 0.5f;
-  ((zglPPoint2D)Sprite->Data)->Y = ( rand() % 10 - 5 ) / 5.0f;
+  Miku->X = 800.0f + rand() % 800;
+  Miku->Y = (float)( rand() % ( 600 - 128 ) );
+  // RU: Задаем скорость движения.
+  // EN: Set the moving speed.
+  Miku->Speed.X = -( rand() % 10 ) / 5.0f - 0.5f;
+  Miku->Speed.Y = ( rand() % 10 - 5 ) / 5.0f;
 }
 
-void MikuDraw( zglPSprite2D Sprite )
+void MikuDraw( zglPMiku Miku )
 {
-  asprite2d_Draw( Sprite->Texture, Sprite->X, Sprite->Y, Sprite->W, Sprite->H, Sprite->Angle, (ushort)Sprite->Frame, Sprite->Alpha, Sprite->FxFlags );
+  asprite2d_Draw( Miku->Texture, Miku->X, Miku->Y, Miku->W, Miku->H, Miku->Angle, (ushort)Miku->Frame, Miku->Alpha, Miku->FxFlags );
 }
 
-void MikuProc( zglPSprite2D Sprite )
+void MikuProc( zglPMiku Miku )
 {
-  zglPPoint2D speed;
-
-  speed = (zglPPoint2D)Sprite->Data;
-
-  Sprite->X += speed->X;
-  Sprite->Y += speed->Y;
-  Sprite->Frame += ( abs( speed->X ) + abs( speed->Y ) ) / 25.0f;
-  if ( Sprite->Frame > 8 )
-    Sprite->Frame = 1;
+  Miku->X += Miku->Speed.X;
+  Miku->Y += Miku->Speed.Y;
+  Miku->Frame += ( abs( Miku->Speed.X ) + abs( Miku->Speed.Y ) ) / 25.0f;
+  if ( Miku->Frame > 8 )
+    Miku->Frame = 1;
   // RU: Если спрайт выходит за пределы по X, сразу же удаляем его.
   // EN: Delete the sprite if it goes beyond X.
-  if ( Sprite->X < -128 )
-    sengine2d_DelSprite( Sprite->ID );
+  if ( Miku->X < -128 )
+    sengine2d_DelSprite( Miku->ID );
   // RU: Если спрайт выходит за пределы по Y, ставим его в очередь на удаление.
   // EN: Add sprite to queue for delete if it goes beyond Y.
-  if ( Sprite->Y < -128 )
-    Sprite->Destroy = TRUE;
-  if ( Sprite->Y > 600 )
-    Sprite->Destroy = TRUE;
+  if ( Miku->Y < -128 )
+    Miku->Destroy = TRUE;
+  if ( Miku->Y > 600 )
+    Miku->Destroy = TRUE;
 }
 
-void MikuFree( zglPSprite2D Sprite )
+void MikuFree( zglPMiku Miku )
 {
-  // RU: Очистим ранее выделенную память.
-  // EN: Free the memory allocated for Data.
-  zgl_FreeMem( &Sprite->Data );
 }
 
 // RU: Добавить 100 спрайтов.
@@ -63,7 +66,7 @@ void AddMiku()
   // EN: For adding sprite to sprite engine must be set next parameters: texture, layer(Z-coordinate) and
   // pointers to Initialization, Render, Process and Destroy functions.
   for ( int i = 1; i <= 100; i++ )
-    sengine2d_AddSprite( texMiku, rand() % 10, (zglSpriteFunc)&MikuInit, (zglSpriteFunc)&MikuDraw, (zglSpriteFunc)&MikuProc, (zglSpriteFunc)&MikuFree );
+    sengine2d_AddCustom( texMiku, sizeof( zglTMiku ), rand() % 10, (zglSpriteFunc)&MikuInit, (zglSpriteFunc)&MikuDraw, (zglSpriteFunc)&MikuProc, (zglSpriteFunc)&MikuFree );
 }
 
 // RU: Удалить 100 спрайтов.
@@ -118,7 +121,7 @@ void Draw()
     char text[256];
 
     pr2d_Rect( 0, 0, 256, 64, 0x000000, 200, PR2D_FILL );
-    sprintf_s( text, "FPS: %i", zgl_Get( RENDER_FPS ) );
+    sprintf_s( text, "FPS: %i", (int)zgl_Get( RENDER_FPS ) );
     text_Draw( fntMain, 0, 0, text, 0 );
     sprintf_s( text, "Sprites: %i", sengine2d.Count );
     text_Draw( fntMain, 0, 20, text, 0 );

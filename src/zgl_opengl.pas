@@ -402,10 +402,10 @@ end;
 function gl_Initialize : Boolean;
 begin
 {$IFDEF LINUX}
-  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, TRUE );
+  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, nil, TRUE );
   if not Assigned( oglContext ) Then
     begin
-      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, FALSE );
+      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, nil, FALSE );
       if not Assigned( oglContext ) Then
         begin
           u_Error( 'Cannot create OpenGL context' );

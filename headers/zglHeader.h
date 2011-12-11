@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3                  */
-/* date:     2011.12.08           */
+/* date:     2011.12.11           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -796,6 +796,26 @@ typedef struct zglTSEngine2D
   struct zglTSprite2D *List;
 } zglTSEngine2D, *zglPSEngine2D;
 
+#define ZGLTSPRITE2D \
+  int           ID; \
+  zglPSEngine2D Manager; \
+  zglPTexture   Texture; \
+  bool          Destroy; \
+  uint          Layer; \
+  float         X; \
+  float         Y; \
+  float         W; \
+  float         H; \
+  float         Angle; \
+  float         Frame; \
+  int           Alpha; \
+  uint          FxFlags; \
+  void*         Data; \
+  zglSpriteFunc OnInit; \
+  zglSpriteFunc OnDraw; \
+  zglSpriteFunc OnProc; \
+  zglSpriteFunc OnFree;
+
 typedef struct zglTSprite2D
 {
   int           ID;
@@ -844,6 +864,7 @@ typedef struct
 } zglTGrid2D, *zglPGrid2D;
 
 static zglPSprite2D ( *sengine2d_AddSprite )( zglPTexture Texture, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
+static zglPSprite2D ( *sengine2d_AddCustom )( zglPTexture Texture, size_t Size, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
 static void ( *sengine2d_DelSprite )( int ID );
 static void ( *sengine2d_ClearAll )();
 static void ( *sengine2d_Set )( zglPSEngine2D SEngine );
@@ -1448,6 +1469,7 @@ static bool zglLoad( const char* LibraryName )
 #endif
 
     zglGetAddress( sengine2d_AddSprite, zglLib, "sengine2d_AddSprite" );
+    zglGetAddress( sengine2d_AddCustom, zglLib, "sengine2d_AddCustom" );
     zglGetAddress( sengine2d_DelSprite, zglLib, "sengine2d_DelSprite" );
     zglGetAddress( sengine2d_ClearAll, zglLib, "sengine2d_ClearAll" );
     zglGetAddress( sengine2d_Set, zglLib, "sengine2d_Set" );

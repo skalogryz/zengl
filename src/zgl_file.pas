@@ -511,7 +511,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
   {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
     dir    : PDir;
     dirent : PDirent;
-    _type  : Integer;
+    type_  : Integer;
   {$IFEND}
   {$IFDEF WINDOWS}
     First : THandle;
@@ -556,9 +556,9 @@ begin
 
 {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
   if FindDir Then
-    _type := 4
+    type_ := 4
   else
-    _type := 8;
+    type_ := 8;
 
   {$IFDEF LINUX}
   dir := FpOpenDir( filePath + Directory );
@@ -567,7 +567,7 @@ begin
   {$ENDIF}
   repeat
     dirent := FpReadDir( dir^ );
-    if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
+    if Assigned( dirent ) and ( dirent^.d_type = type_ ) Then
       begin
         SetLength( List.Items, List.Count + 1 );
         List.Items[ List.Count ] := dirent^.d_name;

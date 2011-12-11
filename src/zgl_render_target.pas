@@ -93,7 +93,7 @@ end;
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
-    _type      : Byte;
+    Type_      : Byte;
     Handle     : Pointer;
     Surface    : zglPTexture;
     Flags      : Byte;
@@ -140,7 +140,7 @@ var
 
 function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
   var
-    i, _type : Integer;
+    i, type_ : Integer;
     pFBO     : zglPFBO;
 {$IFNDEF USE_GLES}
     pPBuffer : zglPPBuffer;
@@ -202,14 +202,14 @@ begin
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
 
-  _type := RT_TYPE_FBO;
+  type_ := RT_TYPE_FBO;
 
   // GeForce FX sucks: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
   if gl_IsSupported( 'GeForce FX', oglRenderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
-    _type := RT_TYPE_PBUFFER;
+    type_ := RT_TYPE_PBUFFER;
 
   if Surface.Width > oglMaxFBOSize Then
-    _type := RT_TYPE_PBUFFER;
+    type_ := RT_TYPE_PBUFFER;
 
   if ( not oglCanFBO ) or ( Flags and RT_FORCE_PBUFFER > 0 ) Then
     if not oglCanPBuffer Then
@@ -219,9 +219,9 @@ begin
         FreeMem( Result.next );
         exit;
       end else
-        _type := RT_TYPE_PBUFFER;
+        type_ := RT_TYPE_PBUFFER;
 
-  case _type of
+  case type_ of
     {$IFNDEF USE_GLES}
     {$IFDEF USE_X11}
     RT_TYPE_PBUFFER:
@@ -524,7 +524,7 @@ begin
         {$ENDIF}
       end;
   end;
-  Result.next._type   := _type;
+  Result.next.Type_   := type_;
   Result.next.Surface := Surface;
   Result.next.Flags   := Flags;
 
@@ -540,7 +540,7 @@ begin
 
   tex_Del( Target.Surface );
 
-  case Target._type of
+  case Target.Type_ of
     {$IFNDEF USE_GLES}
     RT_TYPE_PBUFFER:
       begin
@@ -598,7 +598,7 @@ begin
       lResCX   := scrResCX;
       lResCY   := scrResCY;
 
-      case Target._type of
+      case Target.Type_ of
         {$IFNDEF USE_GLES}
         RT_TYPE_PBUFFER:
           begin
@@ -647,7 +647,7 @@ begin
     end else
       if Assigned( lRTarget ) Then
         begin
-          case lRTarget._type of
+          case lRTarget.Type_ of
             {$IFNDEF USE_GLES}
             RT_TYPE_PBUFFER:
               begin

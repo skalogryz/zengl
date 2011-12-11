@@ -57,7 +57,7 @@ const
 type
   zglPResourceItem = ^zglTResourceItem;
   zglTResourceItem = record
-    _type      : Integer;
+    Type_      : Integer;
     IsFromFile : Boolean;
     Ready      : Boolean;
     Prepared   : Boolean;
@@ -135,7 +135,7 @@ type
 procedure res_Init;
 procedure res_Free;
 procedure res_Proc;
-procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointer );
+procedure res_AddToQueue( Type_ : Integer; FromFile : Boolean; Resource : Pointer );
 function  res_ProcQueue( data : Pointer ) : LongInt;
 
 procedure res_BeginQueue( QueueID : Byte );
@@ -219,7 +219,7 @@ begin
         while Assigned( item ) do
           begin
             if ( item.Ready ) and Assigned( item.Resource ) Then
-              case item._type of
+              case item.Type_ of
                 RES_TEXTURE:
                   with zglPTextureResource( item.Resource )^ do
                     begin
@@ -268,7 +268,7 @@ begin
                       end;
               end;
             if ( not item.Prepared ) and Assigned( item.Resource ) Then
-              case item._type of
+              case item.Type_ of
                 RES_TEXTURE_MASK:
                   with zglPTextureMaskResource( item.Resource )^ do
                     begin
@@ -332,7 +332,7 @@ begin
     resCompleted := Round( ( 1 - size / max ) * 100 );
 end;
 
-procedure res_AddToQueue( _type : Integer; FromFile : Boolean; Resource : Pointer );
+procedure res_AddToQueue( Type_ : Integer; FromFile : Boolean; Resource : Pointer );
   var
     item : ^zglPResourceItem;
     last : zglPResourceItem;
@@ -363,7 +363,7 @@ begin
 
   zgl_GetMem( Pointer( item^ ), SizeOf( zglTResourceItem ) );
 
-  case _type of
+  case Type_ of
     RES_TEXTURE:
       begin
         zgl_GetMem( Pointer( tex ), SizeOf( zglTTextureResource ) );
@@ -456,7 +456,7 @@ begin
   item^.Prepared   := FALSE;
   item^.Ready      := FALSE;
   item^.IsFromFile := FromFile;
-  item^._type      := _type;
+  item^.Type_      := Type_;
 
   {$IFNDEF ANDROID}
   {$IFDEF FPC}
@@ -492,7 +492,7 @@ begin
       while Assigned( item ) do
         begin
           if ( not item.Ready ) and Assigned( item.Resource ) Then
-            case item._type of
+            case item.Type_ of
               RES_TEXTURE:
                 with item^, zglPTextureResource( Resource )^ do
                   begin

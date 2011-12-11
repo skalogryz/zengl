@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.12.08           }
+{ date:     2011.12.11           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -653,7 +653,7 @@ var
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
-    _type      : Byte;
+    Type_      : Byte;
     Handle     : Pointer;
     Surface    : zglPTexture;
     Flags      : Byte;
@@ -806,6 +806,7 @@ type
 
 var
   sengine2d_AddSprite : function( Texture : zglPTexture; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
+  sengine2d_AddCustom : function( Texture : zglPTexture; Size : LongWord; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   sengine2d_DelSprite : procedure( ID : Integer );
   sengine2d_ClearAll  : procedure;
   sengine2d_Set       : procedure( SEngine : zglPSEngine2D );
@@ -861,34 +862,37 @@ type
   end;
 
   zglTParticle2D = record
-    _lColorID     : Integer;
-    _lAlphaID     : Integer;
-    _lSizeXID     : Integer;
-    _lSizeYID     : Integer;
-    _lVelocityID  : Integer;
-    _laVelocityID : Integer;
-    _lSpinID      : Integer;
-    ID            : Integer;
+    _private   : record
+      lColorID     : Integer;
+      lAlphaID     : Integer;
+      lSizeXID     : Integer;
+      lSizeYID     : Integer;
+      lVelocityID  : Integer;
+      laVelocityID : Integer;
+      lSpinID      : Integer;
+                    end;
 
-    Life          : Single;
-    LifeTime      : Integer;
-    Time          : Double;
+    ID         : Integer;
 
-    Frame         : Word;
-    Color         : LongWord;
-    Alpha         : Byte;
+    Life       : Single;
+    LifeTime   : Integer;
+    Time       : Double;
 
-    Position      : zglTPoint2D;
-    Size          : zglTPoint2D;
-    SizeS         : zglTPoint2D;
-    Angle         : Single;
-    Direction     : Single;
+    Frame      : Word;
+    Color      : LongWord;
+    Alpha      : Byte;
 
-    Velocity      : Single;
-    VelocityS     : Single;
-    aVelocity     : Single;
-    aVelocityS    : Single;
-    Spin          : Single;
+    Position   : zglTPoint2D;
+    Size       : zglTPoint2D;
+    SizeS      : zglTPoint2D;
+    Angle      : Single;
+    Direction  : Single;
+
+    Velocity   : Single;
+    VelocityS  : Single;
+    aVelocity  : Single;
+    aVelocityS : Single;
+    Spin       : Single;
   end;
 
   zglTEmitterPoint = record
@@ -957,29 +961,31 @@ type
   end;
 
   zglTEmitter2D = record
-    _type       : Byte;
-    _pengine    : zglPPEngine2D;
-    _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
-    _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
-    _parCreated : Integer;
-    _texFile    : String;
-    _texHash    : LongWord;
+    _private   : record
+      pengine    : zglPPEngine2D;
+      particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
+      list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
+      parCreated : Integer;
+      texFile    : String;
+      texHash    : LongWord;
+                 end;
 
-    ID          : Integer;
-    Params      : record
+    ID         : Integer;
+    Type_      : Byte;
+    Params     : record
       Layer    : Integer;
       LifeTime : Integer;
       Loop     : Boolean;
       Emission : Integer;
       Position : zglTPoint2D;
-                  end;
-    ParParams   : zglTParticleParams;
+                 end;
+    ParParams  : zglTParticleParams;
 
-    Life        : Single;
-    Time        : Double;
-    LastSecond  : Double;
-    Particles   : Integer;
-    BBox        : record
+    Life       : Single;
+    Time       : Double;
+    LastSecond : Double;
+    Particles  : Integer;
+    BBox       : record
       MinX, MaxX : Single;
       MinY, MaxY : Single;
                   end;
@@ -1650,6 +1656,7 @@ begin
       pr2d_TriList := dlsym( zglLib, 'pr2d_TriList' );
 
       sengine2d_AddSprite := dlsym( zglLib, 'sengine2d_AddSprite' );
+      sengine2d_AddCustom := dlsym( zglLib, 'sengine2d_AddCustom' );
       sengine2d_DelSprite := dlsym( zglLib, 'sengine2d_DelSprite' );
       sengine2d_ClearAll := dlsym( zglLib, 'sengine2d_ClearAll' );
       sengine2d_Set := dlsym( zglLib, 'sengine2d_Set' );

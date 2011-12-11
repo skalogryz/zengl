@@ -84,34 +84,37 @@ type
   end;
 
   zglTParticle2D = record
-    _lColorID     : Integer;
-    _lAlphaID     : Integer;
-    _lSizeXID     : Integer;
-    _lSizeYID     : Integer;
-    _lVelocityID  : Integer;
-    _laVelocityID : Integer;
-    _lSpinID      : Integer;
-    ID            : Integer;
+    _private   : record
+      lColorID     : Integer;
+      lAlphaID     : Integer;
+      lSizeXID     : Integer;
+      lSizeYID     : Integer;
+      lVelocityID  : Integer;
+      laVelocityID : Integer;
+      lSpinID      : Integer;
+                    end;
 
-    Life          : Single;
-    LifeTime      : Integer;
-    Time          : Double;
+    ID         : Integer;
 
-    Frame         : Word;
-    Color         : LongWord;
-    Alpha         : Byte;
+    Life       : Single;
+    LifeTime   : Integer;
+    Time       : Double;
 
-    Position      : zglTPoint2D;
-    Size          : zglTPoint2D;
-    SizeS         : zglTPoint2D;
-    Angle         : Single;
-    Direction     : Single;
+    Frame      : Word;
+    Color      : LongWord;
+    Alpha      : Byte;
 
-    Velocity      : Single;
-    VelocityS     : Single;
-    aVelocity     : Single;
-    aVelocityS    : Single;
-    Spin          : Single;
+    Position   : zglTPoint2D;
+    Size       : zglTPoint2D;
+    SizeS      : zglTPoint2D;
+    Angle      : Single;
+    Direction  : Single;
+
+    Velocity   : Single;
+    VelocityS  : Single;
+    aVelocity  : Single;
+    aVelocityS : Single;
+    Spin       : Single;
   end;
 
   zglTEmitterPoint = record
@@ -180,29 +183,31 @@ type
   end;
 
   zglTEmitter2D = record
-    _type       : Byte;
-    _pengine    : zglPPEngine2D;
-    _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
-    _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
-    _parCreated : Integer;
-    _texFile    : String;
-    _texHash    : LongWord;
+    _private   : record
+      pengine    : zglPPEngine2D;
+      particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
+      list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
+      parCreated : Integer;
+      texFile    : String;
+      texHash    : LongWord;
+                 end;
 
-    ID          : Integer;
-    Params      : record
+    ID         : Integer;
+    Type_      : Byte;
+    Params     : record
       Layer    : Integer;
       LifeTime : Integer;
       Loop     : Boolean;
       Emission : Integer;
       Position : zglTPoint2D;
-                  end;
-    ParParams   : zglTParticleParams;
+                 end;
+    ParParams  : zglTParticleParams;
 
-    Life        : Single;
-    Time        : Double;
-    LastSecond  : Double;
-    Particles   : Integer;
-    BBox        : record
+    Life       : Single;
+    Time       : Double;
+    LastSecond : Double;
+    Particles  : Integer;
+    BBox       : record
       MinX, MaxX : Single;
       MinY, MaxY : Single;
                   end;
@@ -378,21 +383,21 @@ begin
   INC( pengine2d.Count.Emitters );
 
   Result := new;
-  with Result^ do
+  with Result^, Result._private do
     begin
-      _type       := Emitter._type;
-      _pengine    := pengine2d;
-      _parCreated := Emitter._parCreated;
-      _texFile    := Emitter._texFile;
-      _texHash    := Emitter._texHash;
+      pengine     := pengine2d;
+      parCreated  := Emitter._private.parCreated;
+      texFile     := Emitter._private.texFile;
+      texHash     := Emitter._private.texHash;
       ID          := pengine2d.Count.Emitters - 1;
+      Type_       := Emitter.Type_;
       Params      := Emitter.Params;
       Life        := Emitter.Life;
       Time        := Emitter.Time;
       LastSecond  := Emitter.LastSecond;
       Particles   := Emitter.Particles;
       BBox        := Emitter.BBox;
-      case Emitter._type of
+      case Type_ of
         EMITTER_POINT:     AsPoint  := Emitter.AsPoint;
         EMITTER_LINE:      AsLine   := Emitter.AsLine;
         EMITTER_RECTANGLE: AsRect   := Emitter.AsRect;
@@ -457,15 +462,13 @@ begin
 
       Params.Position.X := Params.Position.X + X;
       Params.Position.Y := Params.Position.Y + Y;
-      Move( Emitter._particle[ 0 ], _particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
+      Move( Emitter._private.particle[ 0 ], particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
     end;
 
   emitter2d_Init( Result );
 end;
 
 procedure pengine2d_DelEmitter( ID : Integer );
-  var
-    i : Integer;
 begin
   if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) Then exit;
 
@@ -492,7 +495,7 @@ begin
   Result := nil;
   hash   := u_Hash( FileName );
   for i := 0 to pengine2d.Count.Emitters - 1 do
-    if pengine2d.List[ i ]._texHash = hash Then
+    if pengine2d.List[ i ]._private.texHash = hash Then
       begin
         Result := pengine2d.List[ i ].ParParams.Texture;
         break;
@@ -591,14 +594,14 @@ function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
     size  : LongWord;
 begin
   Result := emitter2d_Add();
-  with Result^ do
+  with Result^, Result._private do
     while mem_Read( emitter2dMem, chunk, 2 ) > 0 do
       begin
         mem_Read( emitter2dMem, size, 4 );
         case chunk of
           ZEF_CHUNK_TYPE:
             begin
-              mem_Read( emitter2dMem, _type, 1 );
+              mem_Read( emitter2dMem, Type_, 1 );
               mem_Read( emitter2dMem, AsPoint, size - 1 );
             end;
           ZEF_CHUNK_PARAMS:
@@ -607,11 +610,11 @@ begin
             end;
           ZEF_CHUNK_TEXTURE:
             begin
-              SetLength( _texFile, size );
-              mem_Read( emitter2dMem, _texFile[ 1 ], size );
-              _texHash := u_Hash( _texFile );
+              SetLength( texFile, size );
+              mem_Read( emitter2dMem, texFile[ 1 ], size );
+              texHash := u_Hash( texFile );
               if FileName <> '' Then
-                ParParams.Texture := pengine2d_LoadTexture( file_GetDirectory( FileName ) + _texFile );
+                ParParams.Texture := pengine2d_LoadTexture( file_GetDirectory( FileName ) + texFile );
             end;
           ZEF_CHUNK_BLENDMODE:
             begin
@@ -738,11 +741,11 @@ begin
 
   file_Open( f, FileName, FOM_CREATE );
   file_Write( f, ZGL_EMITTER_2D, 14 );
-  with Emitter^ do
+  with Emitter^, Emitter._private do
     begin
       // ZEF_CHUNK_TYPE
       chunk := ZEF_CHUNK_TYPE;
-      case _type of
+      case Type_ of
         EMITTER_POINT: size := SizeOf( zglTEmitterPoint ) + 1;
         EMITTER_LINE: size := SizeOf( zglTEmitterLine ) + 1;
         EMITTER_RECTANGLE: size := SizeOf( zglTEmitterRect ) + 1;
@@ -752,7 +755,7 @@ begin
       file_Write( f, chunk, 2 );
       file_Write( f, size, 4 );
 
-      file_Write( f, _type, 1 );
+      file_Write( f, Type_, 1 );
       file_Write( f, PByte( @AsPoint )^, size - 1 );
 
       // ZEF_CHUNK_PARAMS
@@ -767,13 +770,13 @@ begin
         begin
           // ZEF_CHUNK_TEXTURE
           chunk := ZEF_CHUNK_TEXTURE;
-          size  := length( Emitter._texFile );
+          size  := length( texFile );
           if size > 0 Then
             begin
               file_Write( f, chunk, 2 );
               file_Write( f, size, 4 );
 
-              file_Write( f, Emitter._texFile[ 1 ], size );
+              file_Write( f, texFile[ 1 ], size );
             end;
 
           // ZEF_CHUNK_BLENDMODE
@@ -903,10 +906,10 @@ begin
   if not Assigned( Emitter ) Then exit;
 
   for i := 0 to EMITTER_MAX_PARTICLES - 1 do
-    with Emitter^ do
+    with Emitter^, Emitter._private do
       begin
-        _list[ i ]    := @_particle[ i ];
-        _list[ i ].ID := i;
+        list[ i ]    := @particle[ i ];
+        list[ i ].ID := i;
       end;
 end;
 
@@ -914,7 +917,7 @@ procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 begin
   if not Assigned( Emitter ) Then exit;
 
-  Emitter._texFile := '';
+  Emitter._private.texFile := '';
   with Emitter.ParParams do
     begin
       SetLength( Color, 0 );
@@ -946,7 +949,7 @@ begin
   with Emitter.BBox do
     if not sprite2d_InScreen( MinX, MinY, MaxX - MinX, MaxY - MinY, 0 ) Then exit;
 
-  with Emitter^ do
+  with Emitter^, Emitter._private do
     begin
       fx_SetBlendMode( ParParams.BlendMode );
       fx_SetColorMode( ParParams.ColorMode );
@@ -965,7 +968,7 @@ begin
           fx2d_SetColor( $FFFFFF );
           for i := 0 to Particles - 1 do
             begin
-              p  := _list[ i ];
+              p  := list[ i ];
               tc := @ParParams.Texture.FramesCoord[ p.Frame ];
 
               if p.Angle <> 0 Then
@@ -1028,7 +1031,7 @@ begin
         end else
           for i := 0 to Particles - 1 do
             begin
-              p  := _list[ i ];
+              p  := list[ i ];
               tc := @ParParams.Texture.FramesCoord[ p.Frame ];
               fx2d_SetColor( p.Color );
 
@@ -1111,7 +1114,7 @@ procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
 begin
   if not Assigned( Emitter ) Then exit;
 
-  with Emitter^ do
+  with Emitter^, Emitter._private do
     begin
       BBox.MinX := Params.Position.X;
       BBox.MaxX := Params.Position.X;
@@ -1121,12 +1124,12 @@ begin
       i := 0;
       while i < Particles do
         begin
-          particle2d_Proc( _list[ i ], @Emitter.ParParams, dt );
-          if _list[ i ].Life = 0 Then
+          particle2d_Proc( list[ i ], @Emitter.ParParams, dt );
+          if list[ i ].Life = 0 Then
             begin
-              p                      := _list[ i ];
-              _list[ i ]             := _list[ Particles - 1 ];
-              _list[ Particles - 1 ] := p;
+              p                     := list[ i ];
+              list[ i ]             := list[ Particles - 1 ];
+              list[ Particles - 1 ] := p;
               DEC( Particles );
             end else
               INC( i );
@@ -1141,18 +1144,21 @@ begin
       if ( Time >= Params.LifeTime ) and ( not Params.Loop ) Then
         exit;
 
-      parCount    := Round( ( Time - LastSecond ) * ( Params.Emission / 1000 ) - _parCreated );
+      parCount    := Round( ( Time - LastSecond ) * ( Params.Emission / 1000 ) - parCreated );
       if Particles + parCount > EMITTER_MAX_PARTICLES Then
         parCount := EMITTER_MAX_PARTICLES - ( Particles + parCount );
-      _parCreated := _parCreated + parCount;
+      parCreated := parCreated + parCount;
 
       for i := 0 to parCount - 1 do
         begin
-          p := _list[ Particles ];
-          p._lColorID := 1;
-          p._lAlphaID := 1;
-          p._lSizeXID := 1;
-          p._lSizeYID := 1;
+          p := list[ Particles ];
+          with p._private do
+            begin
+              lColorID := 1;
+              lAlphaID := 1;
+              lSizeXID := 1;
+              lSizeYID := 1;
+            end;
 
           p.Life       := 1;
           p.LifeTime   := ParParams.LifeTimeS + Random( ParParams.LifeTimeV ) - Round( ParParams.LifeTimeV / 2 );
@@ -1177,7 +1183,7 @@ begin
           p.aVelocity  := p.aVelocityS;
           p.Spin       := ParParams.SpinS + Random( Round( ParParams.SpinV * 1000 ) ) / 1000 - ParParams.SpinV / 2;
 
-          case _type of
+          case Type_ of
             EMITTER_POINT:
               begin
                 p.Direction := AsPoint.Direction + Random( Round( AsPoint.Spread * 1000 ) ) / 1000 - AsPoint.Spread / 2;
@@ -1222,7 +1228,7 @@ begin
 
         for i := 0 to Particles - 1 do
           begin
-            p    := _list[ i ];
+            p    := list[ i ];
             size := ( p.Size.X + p.Size.Y ) / 2;
             if p.Position.X - size < Emitter.BBox.MinX Then
               Emitter.BBox.MinX := p.Position.X - size;
@@ -1236,15 +1242,15 @@ begin
 
       if Time >= Params.LifeTime Then
         begin
-          Time        := 0;
-          LastSecond  := 0;
-          _parCreated := 0;
+          Time       := 0;
+          LastSecond := 0;
+          parCreated := 0;
         end;
 
       if Time - LastSecond >= 1000 Then
         begin
-          _parCreated := 0;
-          LastSecond  := Time;
+          parCreated := 0;
+          LastSecond := Time;
         end;
     end;
 end;
@@ -1258,17 +1264,17 @@ begin
 
   lo   := iLo;
   hi   := iHi;
-  mid  := Emitter._list[ ( lo + hi ) shr 1 ].ID;
+  mid  := Emitter._private.list[ ( lo + hi ) shr 1 ].ID;
 
-  with Emitter^ do
+  with Emitter^, Emitter._private do
     repeat
-      while _list[ lo ].ID < mid do INC( lo );
-      while _list[ hi ].ID > mid do DEC( hi );
+      while list[ lo ].ID < mid do INC( lo );
+      while list[ hi ].ID > mid do DEC( hi );
       if lo <= hi then
         begin
-          t           := _list[ lo ];
-          _list[ lo ] := _list[ hi ];
-          _list[ hi ] := t;
+          t          := list[ lo ];
+          list[ lo ] := list[ hi ];
+          list[ hi ] := t;
           INC( lo );
           DEC( hi );
         end;
@@ -1290,7 +1296,7 @@ procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParam
     prevL, nextL : PDiagramLW;
     prevS, nextS : PDiagramSingle;
 begin
-  with Particle^ do
+  with Particle^, Particle._private do
     begin
       Time  := Time + dt;
       iLife := Time / LifeTime;
@@ -1303,9 +1309,9 @@ begin
           // Color
           if length( Params.Color ) > 0 Then
             begin
-              while iLife > Params.Color[ _lColorID ].Life do INC( _lColorID );
-              prevL := @Params.Color[ _lColorID - 1 ];
-              nextL := @Params.Color[ _lColorID ];
+              while iLife > Params.Color[ lColorID ].Life do INC( lColorID );
+              prevL := @Params.Color[ lColorID - 1 ];
+              nextL := @Params.Color[ lColorID ];
               coeff := ( iLife - prevL.Life ) / ( nextL.Life - prevL.Life );
               rn    :=   nextL.Value             shr 16;
               gn    := ( nextL.Value and $FF00 ) shr 8;
@@ -1321,25 +1327,25 @@ begin
               Color := $FFFFFF;
 
           // Alpha
-          while iLife > Params.Alpha[ _lAlphaID ].Life do INC( _lAlphaID );
-          prevB := @Params.Alpha[ _lAlphaID - 1 ];
-          nextB := @Params.Alpha[ _lAlphaID ];
+          while iLife > Params.Alpha[ lAlphaID ].Life do INC( lAlphaID );
+          prevB := @Params.Alpha[ lAlphaID - 1 ];
+          nextB := @Params.Alpha[ lAlphaID ];
           Alpha := prevB.Value + Round( ( nextB.Value - prevB.Value ) * ( iLife - prevB.Life ) / ( nextB.Life - prevB.Life ) );
 
           // Size
-          while iLife > Params.SizeXD[ _lSizeXID ].Life do INC( _lSizeXID );
-          while iLife > Params.SizeYD[ _lSizeYID ].Life do INC( _lSizeYID );
-          prevS  := @Params.SizeXD[ _lSizeXID - 1 ];
-          nextS  := @Params.SizeXD[ _lSizeXID ];
+          while iLife > Params.SizeXD[ lSizeXID ].Life do INC( lSizeXID );
+          while iLife > Params.SizeYD[ lSizeYID ].Life do INC( lSizeYID );
+          prevS  := @Params.SizeXD[ lSizeXID - 1 ];
+          nextS  := @Params.SizeXD[ lSizeXID ];
           Size.X := SizeS.X * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
-          prevS  := @Params.SizeYD[ _lSizeYID - 1 ];
-          nextS  := @Params.SizeYD[ _lSizeYID ];
+          prevS  := @Params.SizeYD[ lSizeYID - 1 ];
+          nextS  := @Params.SizeYD[ lSizeYID ];
           Size.Y := SizeS.Y * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
 
           // Velocity
-          while iLife > Params.VelocityD[ _lVelocityID ].Life do INC( _lVelocityID );
-          prevS      := @Params.VelocityD[ _lVelocityID - 1 ];
-          nextS      := @Params.VelocityD[ _lVelocityID ];
+          while iLife > Params.VelocityD[ lVelocityID ].Life do INC( lVelocityID );
+          prevS      := @Params.VelocityD[ lVelocityID - 1 ];
+          nextS      := @Params.VelocityD[ lVelocityID ];
           Velocity   := VelocityS * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
           coeff      := dt / 1000;
           speed      := Velocity * coeff;
@@ -1348,15 +1354,15 @@ begin
           Position.Y := Position.Y + sin( Direction ) * speed;
 
           // Angular Velocity
-          while iLife > Params.aVelocityD[ _laVelocityID ].Life do INC( _laVelocityID );
-          prevS     := @Params.aVelocityD[ _laVelocityID - 1 ];
-          nextS     := @Params.aVelocityD[ _laVelocityID ];
+          while iLife > Params.aVelocityD[ laVelocityID ].Life do INC( laVelocityID );
+          prevS     := @Params.aVelocityD[ laVelocityID - 1 ];
+          nextS     := @Params.aVelocityD[ laVelocityID ];
           aVelocity := aVelocityS * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
 
           // Spin
-          while iLife > Params.SpinD[ _lSpinID ].Life do INC( _lSpinID );
-          prevS := @Params.SpinD[ _lSpinID - 1 ];
-          nextS := @Params.SpinD[ _lSpinID ];
+          while iLife > Params.SpinD[ lSpinID ].Life do INC( lSpinID );
+          prevS := @Params.SpinD[ lSpinID - 1 ];
+          nextS := @Params.SpinD[ lSpinID ];
           Angle := Angle + Spin * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) ) * coeff * rad2deg;
         end else
           Life := 0;
