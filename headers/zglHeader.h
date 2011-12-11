@@ -864,7 +864,7 @@ typedef struct
 } zglTGrid2D, *zglPGrid2D;
 
 static zglPSprite2D ( *sengine2d_AddSprite )( zglPTexture Texture, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
-static zglPSprite2D ( *sengine2d_AddCustom )( zglPTexture Texture, size_t Size, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
+static zglPSprite2D ( *sengine2d_AddCustom )( zglPTexture Texture, uint Size, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
 static void ( *sengine2d_DelSprite )( int ID );
 static void ( *sengine2d_ClearAll )();
 static void ( *sengine2d_Set )( zglPSEngine2D SEngine );
