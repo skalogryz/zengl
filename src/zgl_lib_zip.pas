@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://andru-kun.inf.ua
+ *  site: http://zengl.org
  *
  *  This file is part of ZenGL.
  *
@@ -207,4 +207,4 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-end.
+end.
