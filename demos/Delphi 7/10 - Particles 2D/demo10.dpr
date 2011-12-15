@@ -216,7 +216,7 @@ begin
       begin
         emitter2d_Init( @eDiamond );
 
-        Tye_             := EMITTER_RECTANGLE;
+        Type_             := EMITTER_RECTANGLE;
         Params.Loop       := TRUE;
         Params.LifeTime   := 1000;
         Params.Emission   := 2;
