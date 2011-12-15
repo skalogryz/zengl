@@ -74,6 +74,7 @@ var
 {$IFDEF LINUX}
 const
   libxft = 'libXft';
+  libfontconfig = 'libfontconfig';
 
   FC_FAMILY  = 'family';
 
@@ -166,21 +167,21 @@ procedure XftDrawDestroy( draw : PXftDraw ); cdecl; external libXft;
 procedure XftDrawRect( draw : PXftDraw; color : PXftColor; x, y : longint; width, height : dword ); cdecl; external libXft;
 
 // FontSet
-procedure FcFontSetDestroy( s : PFcFontSet ); cdecl; external libXft;
+procedure FcFontSetDestroy( s : PFcFontSet ); cdecl; external libfontconfig;
 // Pattern
-function  FcPatternCreate : PFcPattern; cdecl; external libXft;
-procedure FcPatternDestroy( p: PFcPattern ); cdecl; external libXft;
-function  FcPatternAddBool( p : PFcPattern; _object : PChar; b : LongBool ) : LongBool; cdecl; external libXft;
-function  FcPatternGetBool( const p : PFcPattern; const _object : PChar; n : Integer; b : PLongBool ) : TFcResult; cdecl; external libXft;
-function  FcPatternAddInteger( p : PFcPattern; _object : PChar; i : LongInt ) : LongBool; cdecl; external libXft;
-function  FcPatternAddString( p : PFcPattern; _object : PChar; s : PAnsiChar ) : LongBool; cdecl; external libXft;
-function  FcPatternGetString( const p : PFcPattern; const _object : PChar; n : Integer; s : PPChar ) : TFcResult; cdecl; external libXft;
+function  FcPatternCreate : PFcPattern; cdecl; external libfontconfig;
+procedure FcPatternDestroy( p: PFcPattern ); cdecl; external libfontconfig;
+function  FcPatternAddBool( p : PFcPattern; _object : PChar; b : LongBool ) : LongBool; cdecl; external libfontconfig;
+function  FcPatternGetBool( const p : PFcPattern; const _object : PChar; n : Integer; b : PLongBool ) : TFcResult; cdecl; external libfontconfig;
+function  FcPatternAddInteger( p : PFcPattern; _object : PChar; i : LongInt ) : LongBool; cdecl; external libfontconfig;
+function  FcPatternAddString( p : PFcPattern; _object : PChar; s : PAnsiChar ) : LongBool; cdecl; external libfontconfig;
+function  FcPatternGetString( const p : PFcPattern; const _object : PChar; n : Integer; s : PPChar ) : TFcResult; cdecl; external libfontconfig;
 // ObjectSet
-function  FcObjectSetCreate : PFcObjectSet; cdecl; external libXft;
-procedure FcObjectSetDestroy( os : PFcObjectSet ); cdecl; external libXft;
-function  FcObjectSetAdd( os : PFcObjectSet; _object : PChar ) : LongBool; cdecl; external libXft;
+function  FcObjectSetCreate : PFcObjectSet; cdecl; external libfontconfig;
+procedure FcObjectSetDestroy( os : PFcObjectSet ); cdecl; external libfontconfig;
+function  FcObjectSetAdd( os : PFcObjectSet; _object : PChar ) : LongBool; cdecl; external libfontconfig;
 // FontList
-function  FcFontList( config : PFcConfig; p : PFcPattern; os : PFcObjectSet ) : PFcFontSet; cdecl; external libXft;
+function  FcFontList( config : PFcConfig; p : PFcPattern; os : PFcObjectSet ) : PFcFontSet; cdecl; external libfontconfig;
 {$ENDIF}
 
 implementation
