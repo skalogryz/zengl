@@ -1,41 +1,47 @@
 # Get current platform
 ifeq ($(shell uname -m), x86_64)
-  ARCH  = x86_64
+  ARCH = x86_64
 else
-  ARCH  = i386
+  ARCH = i386
 endif
 
 # Get current OS
 ifeq ($(shell uname), Linux)
-  OS    = linux
+  OS = linux
 else ifeq ($(shell uname), Darwin)
-  OS    = darwin
+  OS = darwin
 endif
 
 # Variables
-FPC            = fpc
-DEFINES     	 = #-dUSE_EXPORT_C -Cccdecl
-FLAGS          = -O3 -XsX -CX -Sd $(DEFINES)
-LIBS       		 = -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS) -Fu../lib/zip/$(ARCH)-$(OS)
-LIBSPPC     	 = -Fu../lib/jpeg/powerpc-$(OS) -Fu../lib/ogg/powerpc-$(OS) -Fu../lib/zlib/powerpc-$(OS) -Fu../lib/zip/powerpc-$(OS)
+FPC              = fpc
+DEFINES          = #-dUSE_EXPORT_C -Cccdecl
+FLAGS          	 = -O3 -XsX -CX -Sd $(DEFINES)
+LIBS             = -Fu../lib/jpeg/$(ARCH)-$(OS) -Fu../lib/ogg/$(ARCH)-$(OS) -Fu../lib/zlib/$(ARCH)-$(OS) -Fu../lib/zip/$(ARCH)-$(OS)
+LIBSPPC          = -Fu../lib/jpeg/powerpc-$(OS) -Fu../lib/ogg/powerpc-$(OS) -Fu../lib/zlib/powerpc-$(OS) -Fu../lib/zip/powerpc-$(OS)
 # Linux 32-bit
-LIBS_LINUX32   = -Fu../lib/jpeg/i386-linux -Fu../lib/ogg/i386-linux -Fu../lib/zlib/i386-linux -Fu../lib/zip/i386-linux
+LIBS_LINUX32   	 = -Fu../lib/jpeg/i386-linux -Fu../lib/ogg/i386-linux -Fu../lib/zlib/i386-linux -Fu../lib/zip/i386-linux
 # Win32
-BINUTILS_WIN32 = -XPi486-mingw32-
-LIBS_WIN32     = -Fu../lib/jpeg/i386-win32 -Fu../lib/msvcrt/i386 -Fu../lib/ogg/i386-win32 -Fu../lib/zlib/i386-win32 -Fu../lib/zip/i386-win32
+BINUTILS_WIN32 	 = -XPi486-mingw32-
+LIBS_WIN32     	 = -Fu../lib/jpeg/i386-win32 -Fu../lib/msvcrt/i386 -Fu../lib/ogg/i386-win32 -Fu../lib/zlib/i386-win32 -Fu../lib/zip/i386-win32
 # Win64
-BINUTILS_WIN64 = -XPx86_64-w64-mingw32-
-LIBS_WIN64     = -Fu../lib/jpeg/x86_64-win64 -Fu../lib/msvcrt/x86_64 -Fu../lib/ogg/x86_64-win64 -Fu../lib/zlib/x86_64-win64 -Fu../lib/zip/x86_64-win64
+BINUTILS_WIN64 	 = -XPx86_64-w64-mingw32-
+LIBS_WIN64     	 = -Fu../lib/jpeg/x86_64-win64 -Fu../lib/msvcrt/x86_64 -Fu../lib/ogg/x86_64-win64 -Fu../lib/zlib/x86_64-win64 -Fu../lib/zip/x86_64-win64
 # WinCE
-BINUTILS_WINCE = -XParm-wince-
-LIBS_WINCE     = -Fu../lib/jpeg/arm-wince -Fu../lib/ogg/arm-wince -Fu../lib/zlib/arm-wince -Fu../lib/zip/arm-wince
+BINUTILS_WINCE 	 = -XParm-wince-
+LIBS_WINCE     	 = -Fu../lib/jpeg/arm-wince -Fu../lib/ogg/arm-wince -Fu../lib/zlib/arm-wince -Fu../lib/zip/arm-wince
+# Android
+ANDROID_FLAGS    = -CpARMv5 -CfSOFT
+ANDROID_LIB    	 = -Fu$(ANDROID_NDK)/platforms/android-3/arch-arm/usr/lib
+ANDROID_STRIP    = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-strip
+BINUTILS_ANDROID = -XParm-linux-androideabi- -FD$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
+LIBS_ANDROID   	 = -Fu../lib/jpeg/arm-linux -Fu../lib/ogg/arm-linux -Fu../lib/zlib/arm-linux -Fu../lib/zip/arm-linux -Fu../lib/chipmunk/arm-linux
 
-OUTPUT         = ./
-DESTDIR        = /usr
-TMP         	 = -FUtmp
-TARGET      	 = libZenGL.so
-TARGETW     	 = ZenGL.dll
-TARGETM     	 = libZenGL.dylib
+OUTPUT           = ./
+DESTDIR          = /usr
+TMP              = -FUtmp
+TARGET           = libZenGL.so
+TARGETW          = ZenGL.dll
+TARGETM          = libZenGL.dylib
 
 # Targets
 all: clean
@@ -45,6 +51,10 @@ all: clean
 linux32: clean
 	$(FPC) ZenGL.pas $(LIBS_LINUX32) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
 	strip $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
+
+android: clean
+	$(FPC) ZenGL.pas $(LIBS_ANDROID) $(ANDROID_FLAGS) $(ANDROID_LIB) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Parm $(BINUTILS_ANDROID) -Xd
+	$(ANDROID_STRIP) $(OUTPUT)$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
 	$(FPC) ZenGL.pas $(LIBS_WIN32) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 $(BINUTILS_WIN32) -WG
