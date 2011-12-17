@@ -148,7 +148,7 @@ var
   resCompleted       : Integer;
   resThread          : array[ 0..255 ] of {$IFNDEF ANDROID} LongWord {$ELSE} ppthread_t {$ENDIF};
   {$IFNDEF FPC}
-  resThreadID        : array[ 0..255 ] of THandle;
+  resThreadID        : array[ 0..255 ] of LongWord;
   {$ENDIF}
   resQueueStackID    : array of Byte;
   resQueueID         : array[ 0..255 ] of Byte;
