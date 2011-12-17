@@ -1,9 +1,9 @@
 #include <stdio.h>
-#ifndef __CEGCC__
-#include <memory.h>
-#endif
 #include <math.h>
 #include <zlib.h>
+#ifndef __CEGCC__
+  #include <memory.h>
+#endif
 
 typedef struct
 {
