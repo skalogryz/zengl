@@ -561,12 +561,12 @@ begin
 end;
 
 initialization
-  oggDecoder.Ext      := OGG_EXTENSION;
-  oggDecoder.Open     := ogg_DecoderOpen;
-  oggDecoder.OpenMem  := ogg_DecoderOpenMem;
-  oggDecoder.Read     := ogg_DecoderRead;
-  oggDecoder.Loop     := ogg_DecoderLoop;
-  oggDecoder.Close    := ogg_DecoderClose;
+  oggDecoder.Ext     := OGG_EXTENSION;
+  oggDecoder.Open    := ogg_DecoderOpen;
+  oggDecoder.OpenMem := ogg_DecoderOpenMem;
+  oggDecoder.Read    := ogg_DecoderRead;
+  oggDecoder.Loop    := ogg_DecoderLoop;
+  oggDecoder.Close   := ogg_DecoderClose;
   zgl_Reg( SND_FORMAT_EXTENSION,   @OGG_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
