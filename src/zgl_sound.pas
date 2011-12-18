@@ -1178,12 +1178,12 @@ begin
   sfStream[ ID ]._lastTime := timer_GetTicks;
 {$IFDEF FPC}
   {$IFNDEF ANDROID}
-  sfThread[ ID ] := LongWord( BeginThread( @snd_ProcFile, Pointer( ID ) ) );
+  sfThread[ ID ] := LongWord( BeginThread( @snd_ProcFile, @ID ) );
   {$ELSE}
-  pthread_create( @sfThread[ ID ], nil, @snd_ProcFile, Pointer( ID ) );
+  pthread_create( @sfThread[ ID ], nil, @snd_ProcFile, @ID );
   {$ENDIF}
 {$ELSE}
-  sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcFile, Pointer( ID ), 0, sfThreadID[ ID ] );
+  sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcFile, @ID, 0, sfThreadID[ ID ] );
 {$ENDIF}
 end;
 
@@ -1324,7 +1324,7 @@ function snd_ProcFile( data : Pointer ) : LongInt;
   {$ENDIF}
 begin
   Result := 0;
-  id := LongWord( data );
+  id := LongWord( data^ );
 
 {$IFDEF USE_OPENAL}
   processed := 0;
