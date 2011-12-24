@@ -1095,13 +1095,15 @@ const
   SND_FORMAT_STEREO8  = 3;
   SND_FORMAT_STEREO16 = 4;
 
-  SND_ALL           = -2;
-  SND_STREAM        = -3;
+  SND_ALL        = -$000002;
+  SND_ALL_LOOPED = -$000003;
+  SND_STREAM     = -$000010;
 
   SND_STATE_PLAYING = 1;
-  SND_STATE_PERCENT = 2;
-  SND_STATE_TIME    = 3;
-  SND_INFO_LENGTH   = 4;
+  SND_STATE_LOOPED  = 2;
+  SND_STATE_PERCENT = 3;
+  SND_STATE_TIME    = 4;
+  SND_INFO_LENGTH   = 5;
 
 type
   zglPSound        = ^zglTSound;

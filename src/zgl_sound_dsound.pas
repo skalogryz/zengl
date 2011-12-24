@@ -47,6 +47,7 @@ const
 
   DSBSTATUS_PLAYING           = $00000001;
   DSBSTATUS_BUFFERLOST        = $00000002;
+  DSBSTATUS_LOOPING           = $00000004;
 
   DSBPLAY_LOOPING             = $00000001;
 

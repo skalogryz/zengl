@@ -1019,13 +1019,15 @@ static void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCharDe
 #define SND_FORMAT_STEREO8  3
 #define SND_FORMAT_STEREO16 4
 
-#define SND_ALL           -2
-#define SND_STREAM        -3
+#define SND_ALL           -0x000002
+#define SND_ALL_LOOPED    -0x000003
+#define SND_STREAM        -0x000010
 
 #define SND_STATE_PLAYING 1
-#define SND_STATE_PERCENT 2
-#define SND_STATE_TIME    3
-#define SND_INFO_LENGTH   4
+#define SND_STATE_LOOPED  2
+#define SND_STATE_PERCENT 3
+#define SND_STATE_TIME    4
+#define SND_INFO_LENGTH   5
 
 typedef struct
 {

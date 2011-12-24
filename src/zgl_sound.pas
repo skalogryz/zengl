@@ -52,14 +52,16 @@ const
   SND_FORMAT_STEREO8  = 3;
   SND_FORMAT_STEREO16 = 4;
 
-  SND_ALL           = -2;
-  SND_STREAM        = -3;
-  SND_ERROR         = {$IFDEF USE_OPENAL} 0 {$ELSE} nil {$ENDIF};
+  SND_ALL        = -$000002;
+  SND_ALL_LOOPED = -$000003;
+  SND_STREAM     = -$000010;
+  SND_ERROR      = {$IFDEF USE_OPENAL} 0 {$ELSE} nil {$ENDIF};
 
   SND_STATE_PLAYING = 1;
-  SND_STATE_PERCENT = 2;
-  SND_STATE_TIME    = 3;
-  SND_INFO_LENGTH   = 4;
+  SND_STATE_LOOPED  = 2;
+  SND_STATE_PERCENT = 3;
+  SND_STATE_TIME    = 4;
+  SND_INFO_LENGTH   = 5;
 
   SND_MAX           = 8;
 
@@ -270,6 +272,24 @@ begin
     end;
   Source.GetStatus( Status );
   Result := Byte( Status and DSBSTATUS_PLAYING > 0 );
+  {$ENDIF}
+end;
+
+function GetStatusLooped( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
+  var
+    Status : {$IFDEF USE_OPENAL} LongInt {$ELSE} LongWord {$ENDIF};
+begin
+  {$IFDEF USE_OPENAL}
+  alGetSourcei( Source, AL_LOOPING, Status );
+  Result := Byte( Status = AL_TRUE );
+  {$ELSE}
+  if not Assigned( Source ) Then
+    begin
+      Result := 0;
+      exit;
+    end;
+  Source.GetStatus( Status );
+  Result := Byte( Status and DSBSTATUS_LOOPING > 0 );
   {$ENDIF}
 end;
 
@@ -833,8 +853,14 @@ begin
           for i := 0 to Sound.SourceCount - 1 do
             Stop( Sound, i );
         end else
-          if ID >= 0 Then
-            Stop( Sound, ID );
+          if ID = SND_ALL_LOOPED Then
+            begin
+              for i := 0 to Sound.SourceCount - 1 do
+                if snd_Get( Sound, i, SND_STATE_LOOPED ) = 1 Then
+                  Stop( Sound, i );
+            end else
+              if ID >= 0 Then
+                Stop( Sound, ID );
     end else
       if ID = SND_ALL Then
         begin
@@ -845,7 +871,18 @@ begin
                 Stop( snd, j );
               snd := snd.next;
             end;
-        end;
+        end else
+          if ID = SND_ALL_LOOPED Then
+            begin
+              snd := managerSound.First.next;
+              for i := 0 to managerSound.Count.Items - 1 do
+                begin
+                  for j := 0 to snd.SourceCount - 1 do
+                    if snd_Get( snd, j, SND_STATE_LOOPED ) = 1 Then
+                      Stop( snd, j );
+                  snd := snd.next;
+                end;
+            end;
 end;
 
 procedure snd_SetPos( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
@@ -1086,6 +1123,7 @@ begin
     begin
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ Ptr( Sound ) ] );
+        SND_STATE_LOOPED: Result := Byte( sfStream[ Ptr( Sound ) ].Loop );
         SND_STATE_TIME: Result := Round( sfStream[ Ptr( Sound ) ]._complete );
         SND_STATE_PERCENT: Result := Round( 100 / sfStream[ Ptr( Sound ) ].Length * sfStream[ Ptr( Sound ) ]._complete );
         SND_INFO_LENGTH: Result := Round( sfStream[ Ptr( Sound ) ].Length );
@@ -1093,6 +1131,7 @@ begin
     end else
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
+        SND_STATE_LOOPED: Result := GetStatusLooped( Sound.Channel[ ID ].Source );
         SND_INFO_LENGTH: Result := Round( Sound.Length );
       end;
 end;
