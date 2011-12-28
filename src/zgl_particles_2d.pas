@@ -585,6 +585,7 @@ begin
         for j := i to managerEmitter2D.Count - 2 do
           managerEmitter2D.List[ i ] := managerEmitter2D.List[ i + 1 ];
       end;
+  DEC( managerEmitter2D.Count );
 end;
 
 function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
