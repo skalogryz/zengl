@@ -573,18 +573,18 @@ end;
 
 procedure emitter2d_Del( var Emitter : zglPEmitter2D );
   var
-    i, j : Integer;
+    i : Integer;
 begin
   if not Assigned( Emitter ) Then exit;
 
   for i := 0 to managerEmitter2D.Count - 1 do
     if managerEmitter2D.List[ i ] = Emitter Then
       begin
-        emitter2d_Free( Emitter );
-        managerEmitter2D.List[ i ] := nil;
-        for j := i to managerEmitter2D.Count - 2 do
-          managerEmitter2D.List[ i ] := managerEmitter2D.List[ i + 1 ];
         DEC( managerEmitter2D.Count );
+        emitter2d_Free( Emitter );
+        managerEmitter2D.List[ i ] := managerEmitter2D.List[ managerEmitter2D.Count ];
+        managerEmitter2D.List[ managerEmitter2D.Count ] := nil;
+        break;
       end;
 end;
 
