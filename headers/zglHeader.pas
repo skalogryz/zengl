@@ -1145,6 +1145,8 @@ type
     _complete  : Double;
     _lastTime  : Double;
 
+    ID         : Integer;
+
     Buffer     : Pointer;
     BufferSize : LongWord;
 
