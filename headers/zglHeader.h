@@ -40,6 +40,11 @@
   #endif
 #endif
 
+#ifndef ZGL_IMPORT
+  #define ZGLEXTERN extern
+#else
+  #define ZGLEXTERN
+#endif
 
 #define FALSE 0
 #define TRUE 1
@@ -73,15 +78,15 @@ typedef struct
 } zglTMemory, *zglPMemory;
 
 #ifdef __CPP__
-static void ( *__zgl_Init )( byte FSAA, byte StencilBits );
+ZGLEXTERN void ( *__zgl_Init )( byte FSAA, byte StencilBits );
 static inline void zgl_Init( byte FSAA = 0, byte StencilBits = 0 )
 {
   __zgl_Init( FSAA, StencilBits );
 }
 #else
-static void ( *zgl_Init )( byte FSAA, byte StencilBits );
+ZGLEXTERN void ( *zgl_Init )( byte FSAA, byte StencilBits );
 #endif
-static void ( *zgl_Exit )();
+ZGLEXTERN void ( *zgl_Exit )();
 
 #define SYS_APP_INIT           0x000001
 #define SYS_APP_LOOP           0x000002
@@ -110,7 +115,7 @@ static void ( *zgl_Exit )();
 #define SND_FORMAT_MEM_LOADER  0x000022
 #define SND_FORMAT_DECODER     0x000023
 
-static void ( *zgl_Reg )( uint What, void *UserData );
+ZGLEXTERN void ( *zgl_Reg )( uint What, void *UserData );
 
 #define ZENGL_VERSION           1 // Major shr 16, ( Minor and $FF00 ) shr 8, Revision and $FF
 #define ZENGL_VERSION_STRING    2 // PChar
@@ -157,10 +162,10 @@ static void ( *zgl_Reg )( uint What, void *UserData );
 #define MANAGER_SOUND           805 // zglPSoundManager
 #define MANAGER_EMITTER2D       806 // zglPEmitter2DManager
 
-static size_t ( *zgl_Get )( uint What );
-static void ( *zgl_GetMem )( void **Mem, uint Size );
-static void ( *zgl_FreeMem )( void **Mem );
-//static void ( zgl_FreeStrList )( zglTStringList* List );
+ZGLEXTERN size_t ( *zgl_Get )( uint What );
+ZGLEXTERN void ( *zgl_GetMem )( void **Mem, uint Size );
+ZGLEXTERN void ( *zgl_FreeMem )( void **Mem );
+//ZGLEXTERN void ( zgl_FreeStrList )( zglTStringList* List );
 
 #define COLOR_BUFFER_CLEAR    0x000001
 #define DEPTH_BUFFER          0x000002
@@ -180,25 +185,25 @@ static void ( *zgl_FreeMem )( void **Mem );
 #define SND_CAN_PLAY_FILE     0x008000
 #define CLIP_INVISIBLE        0x010000
 
-static void ( *zgl_Enable )( uint What );
-static void ( *zgl_Disable )( uint What );
+ZGLEXTERN void ( *zgl_Enable )( uint What );
+ZGLEXTERN void ( *zgl_Disable )( uint What );
 
 // LOG
 #ifdef __CPP__
-static void ( *__log_Add )( const char *Message, bool Timings );
+ZGLEXTERN void ( *__log_Add )( const char *Message, bool Timings );
 static inline void log_Add( const char *Message, bool Timings = TRUE )
 {
   __log_Add( Message, Timings );
 }
 #else
-static void ( *log_Add )( const char *Message, bool Timings );
+ZGLEXTERN void ( *log_Add )( const char *Message, bool Timings );
 #endif
 
 // WINDOW
-static void ( *wnd_SetCaption )( const char *NewCaption );
-static void ( *wnd_SetSize )( int Width, int Height );
-static void ( *wnd_SetPos )( int X, int Y );
-static void ( *wnd_ShowCursor )( bool Show );
+ZGLEXTERN void ( *wnd_SetCaption )( const char *NewCaption );
+ZGLEXTERN void ( *wnd_SetSize )( int Width, int Height );
+ZGLEXTERN void ( *wnd_SetPos )( int X, int Y );
+ZGLEXTERN void ( *wnd_ShowCursor )( bool Show );
 
 // SCREEN
 typedef struct
@@ -211,38 +216,38 @@ typedef struct
 #define REFRESH_MAXIMUM 0
 #define REFRESH_DEFAULT 1
 
-static void ( *scr_Clear )();
-static void ( *scr_Flush )();
-static void ( *scr_SetVSync )( bool VSync );
+ZGLEXTERN void ( *scr_Clear )();
+ZGLEXTERN void ( *scr_Flush )();
+ZGLEXTERN void ( *scr_SetVSync )( bool VSync );
 // RU: ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
 // EN: WARNING: Function will destroy OpenGL context, so all resources must be reloaded
-static void ( *scr_SetFSAA )( byte FSAA );
-static void ( *scr_SetOptions )( ushort Width, ushort Height, ushort Refresh, bool FullScreen, bool VSync );
-static void ( *scr_CorrectResolution )( ushort Width, ushort Height );
-static void ( *scr_ReadPixels )( void **pData, ushort X, ushort Y, ushort Width, ushort Height );
+ZGLEXTERN void ( *scr_SetFSAA )( byte FSAA );
+ZGLEXTERN void ( *scr_SetOptions )( ushort Width, ushort Height, ushort Refresh, bool FullScreen, bool VSync );
+ZGLEXTERN void ( *scr_CorrectResolution )( ushort Width, ushort Height );
+ZGLEXTERN void ( *scr_ReadPixels )( void **pData, ushort X, ushort Y, ushort Width, ushort Height );
 
 // GL
 #define TARGET_SCREEN  1
 #define TARGET_TEXTURE 2
 
-static void ( *Set2DMode )();
+ZGLEXTERN void ( *Set2DMode )();
 #ifdef __CPP__
-static void ( *__Set3DMode )( float FOVY );
+ZGLEXTERN void ( *__Set3DMode )( float FOVY );
 static inline void Set3DMode( float FOVY = 45 )
 {
   __Set3DMode( FOVY );
 }
 #else
-static void ( *Set3DMode )( float FOVY );
+ZGLEXTERN void ( *Set3DMode )( float FOVY );
 #endif
 
 // Z BUFFER
-static void ( *zbuffer_SetDepth )( float zNear, float zFar );
-static void ( *zbuffer_Clear )();
+ZGLEXTERN void ( *zbuffer_SetDepth )( float zNear, float zFar );
+ZGLEXTERN void ( *zbuffer_Clear )();
 
 // SCISSOR
-static void ( *scissor_Begin )( int X, int Y, int Width, int Height );
-static void ( *scissor_End )();
+ZGLEXTERN void ( *scissor_Begin )( int X, int Y, int Width, int Height );
+ZGLEXTERN void ( *scissor_End )();
 
 // INI
 /*
@@ -283,10 +288,10 @@ typedef struct
   zglTTimer First;
 } zglTTimerManager, *zglPTimerManager;
 
-static zglPTimer ( *timer_Add )( void *OnTimer, uint Interval );
-static void ( *timer_Del )( zglPTimer *Timer );
-static double ( *timer_GetTicks )();
-static void ( *timer_Reset )();
+ZGLEXTERN zglPTimer ( *timer_Add )( void *OnTimer, uint Interval );
+ZGLEXTERN void ( *timer_Del )( zglPTimer *Timer );
+ZGLEXTERN double ( *timer_GetTicks )();
+ZGLEXTERN void ( *timer_Reset )();
 
 // MOUSE
 #define M_BLEFT   0
@@ -295,24 +300,24 @@ static void ( *timer_Reset )();
 #define M_WUP     0
 #define M_WDOWN   1
 
-static int ( *mouse_X )();
-static int ( *mouse_Y )();
-static int ( *mouse_DX )();
-static int ( *mouse_DY )();
-static bool ( *mouse_Down )( byte Button );
-static bool ( *mouse_Up )( byte Button );
-static bool ( *mouse_Click )( byte Button );
-static bool ( *mouse_DblClick )( byte Button );
-static bool ( *mouse_Wheel )( byte Axis );
-static void ( *mouse_ClearState )();
+ZGLEXTERN int ( *mouse_X )();
+ZGLEXTERN int ( *mouse_Y )();
+ZGLEXTERN int ( *mouse_DX )();
+ZGLEXTERN int ( *mouse_DY )();
+ZGLEXTERN bool ( *mouse_Down )( byte Button );
+ZGLEXTERN bool ( *mouse_Up )( byte Button );
+ZGLEXTERN bool ( *mouse_Click )( byte Button );
+ZGLEXTERN bool ( *mouse_DblClick )( byte Button );
+ZGLEXTERN bool ( *mouse_Wheel )( byte Axis );
+ZGLEXTERN void ( *mouse_ClearState )();
 #ifdef __CPP__
-static void ( *__mouse_Lock )( int X, int Y );
+ZGLEXTERN void ( *__mouse_Lock )( int X, int Y );
 static inline void mouse_Lock( int X = -1, int Y = -1 )
 {
   __mouse_Lock( X, Y );
 }
 #else
-static void ( *mouse_Lock )( int X, int Y );
+ZGLEXTERN void ( *mouse_Lock )( int X, int Y );
 #endif
 
 // KEYBOARD
@@ -440,28 +445,28 @@ static void ( *mouse_Lock )( int X, int Y );
 #define KA_DOWN      0
 #define KA_UP        1
 
-static bool ( *key_Down )( byte KeyCode );
-static bool ( *key_Up )( byte KeyCode );
-static bool ( *key_Press )( byte KeyCode );
-static byte ( *key_Last )( byte KeyAction );
+ZGLEXTERN bool ( *key_Down )( byte KeyCode );
+ZGLEXTERN bool ( *key_Up )( byte KeyCode );
+ZGLEXTERN bool ( *key_Press )( byte KeyCode );
+ZGLEXTERN byte ( *key_Last )( byte KeyAction );
 #ifdef __CPP__
-static void ( *__key_BeginReadText )( const char *Text, int MaxSymbols );
+ZGLEXTERN void ( *__key_BeginReadText )( const char *Text, int MaxSymbols );
 static inline void key_BeginReadText( const char *Text, int MaxSymbols = -1 )
 {
   __key_BeginReadText( Text, MaxSymbols );
 }
-static void ( *__key_UpdateReadText )( const char *Text, int MaxSymbols );
+ZGLEXTERN void ( *__key_UpdateReadText )( const char *Text, int MaxSymbols );
 static inline void key_UpdateReadText( const char *Text, int MaxSymbols = -1 )
 {
   __key_UpdateReadText( Text, MaxSymbols );
 }
 #else
-static void ( *key_BeginReadText )( const char *Text, int MaxSymbols );
-static void ( *key_UpdateReadText )( const char *Text, int MaxSymbols );
+ZGLEXTERN void ( *key_BeginReadText )( const char *Text, int MaxSymbols );
+ZGLEXTERN void ( *key_UpdateReadText )( const char *Text, int MaxSymbols );
 #endif
-static char * ( *key_GetText )();
-static void ( *key_EndReadText )();
-static void ( *key_ClearState )();
+ZGLEXTERN char * ( *key_GetText )();
+ZGLEXTERN void ( *key_EndReadText )();
+ZGLEXTERN void ( *key_ClearState )();
 
 // JOYSTICK
 typedef struct
@@ -492,13 +497,13 @@ typedef struct
 #define JOY_POVX   6
 #define JOY_POVY   7
 
-static byte ( *joy_Init )();
-static zglPJoyInfo ( *joy_GetInfo )( byte JoyID );
-static float ( *joy_AxisPos )( byte JoyID, byte Axis );
-static bool ( *joy_Down )( byte JoyID, byte Button );
-static bool ( *joy_Up )( byte JoyID, byte Button );
-static bool ( *joy_Press )( byte JoyID, byte Button );
-static void ( *joy_ClearState )();
+ZGLEXTERN byte ( *joy_Init )();
+ZGLEXTERN zglPJoyInfo ( *joy_GetInfo )( byte JoyID );
+ZGLEXTERN float ( *joy_AxisPos )( byte JoyID, byte Axis );
+ZGLEXTERN bool ( *joy_Down )( byte JoyID, byte Button );
+ZGLEXTERN bool ( *joy_Up )( byte JoyID, byte Button );
+ZGLEXTERN bool ( *joy_Press )( byte JoyID, byte Button );
+ZGLEXTERN void ( *joy_ClearState )();
 
 // 2D
 typedef struct
@@ -534,11 +539,11 @@ typedef struct
 } zglTCircle, *zglPCircle;
 
 // RESOURCES
-static void ( *res_BeginQueue )( byte QueueID );
-static void ( *res_EndQueue )();
-static int ( *res_GetPercentage )( byte QueueID );
-static int ( *res_GetCompleted )();
-static void ( *res_Proc )();
+ZGLEXTERN void ( *res_BeginQueue )( byte QueueID );
+ZGLEXTERN void ( *res_EndQueue )();
+ZGLEXTERN int ( *res_GetPercentage )( byte QueueID );
+ZGLEXTERN int ( *res_GetCompleted )();
+ZGLEXTERN void ( *res_Proc )();
 
 // TEXTURES
 typedef zglTPoint2D zglTTextureCoord[ 3 ];
@@ -609,44 +614,44 @@ end;
 
 #define TEX_DEFAULT_2D        TEX_CLAMP | TEX_FILTER_LINEAR | TEX_CONVERT_TO_POT | TEX_CALCULATE_ALPHA
 
-static zglPTexture ( *tex_Add )();
-static void ( *tex_Del )( zglPTexture *Texture );
-static bool ( *tex_Create )( zglTTexture *Texture, void *pData );
+ZGLEXTERN zglPTexture ( *tex_Add )();
+ZGLEXTERN void ( *tex_Del )( zglPTexture *Texture );
+ZGLEXTERN bool ( *tex_Create )( zglTTexture *Texture, void *pData );
 #ifdef __CPP__
-static zglPTexture ( *__tex_CreateZero )( ushort Width, ushort Height, uint Color, uint Flags );
+ZGLEXTERN zglPTexture ( *__tex_CreateZero )( ushort Width, ushort Height, uint Color, uint Flags );
 static inline zglPTexture tex_CreateZero( ushort Width, ushort Height, uint Color = 0x000000, uint Flags = TEX_DEFAULT_2D )
 {
   return __tex_CreateZero( Width, Height, Color, Flags );
 }
-static zglPTexture ( *__tex_LoadFromFile )( const char *FileName, uint TransparentColor, uint Flags );
+ZGLEXTERN zglPTexture ( *__tex_LoadFromFile )( const char *FileName, uint TransparentColor, uint Flags );
 static inline zglPTexture tex_LoadFromFile( const char *FileName, uint TransparentColor = 0xFF000000, uint Flags = TEX_DEFAULT_2D )
 {
   return __tex_LoadFromFile( FileName, TransparentColor, Flags );
 }
-static zglPTexture ( *__tex_LoadFromMemory )( const zglTMemory Memory, const char *Extension, uint TransparentColor, uint Flags );
+ZGLEXTERN zglPTexture ( *__tex_LoadFromMemory )( const zglTMemory Memory, const char *Extension, uint TransparentColor, uint Flags );
 static inline zglPTexture tex_LoadFromMemory( const zglTMemory Memory, const char *Extension, uint TransparentColor = 0xFF000000, uint Flags = TEX_DEFAULT_2D )
 {
   return __tex_LoadFromMemory( Memory, Extension, TransparentColor, Flags );
 }
 #else
-static zglPTexture ( *tex_CreateZero )( ushort Width, ushort Height, uint Color, uint Flags );
-static zglPTexture ( *tex_LoadFromFile )( const char *FileName, uint TransparentColor, uint Flags );
-static zglPTexture ( *tex_LoadFromMemory )( const zglTMemory Memory, const char *Extension, uint TransparentColor, uint Flags );
+ZGLEXTERN zglPTexture ( *tex_CreateZero )( ushort Width, ushort Height, uint Color, uint Flags );
+ZGLEXTERN zglPTexture ( *tex_LoadFromFile )( const char *FileName, uint TransparentColor, uint Flags );
+ZGLEXTERN zglPTexture ( *tex_LoadFromMemory )( const zglTMemory Memory, const char *Extension, uint TransparentColor, uint Flags );
 #endif
-static void ( *tex_SetFrameSize )( zglPTexture *Texture, ushort FrameWidth, ushort FrameHeight );
-static zglPTexture ( *tex_SetMask )( zglPTexture *Texture, zglPTexture Mask );
+ZGLEXTERN void ( *tex_SetFrameSize )( zglPTexture *Texture, ushort FrameWidth, ushort FrameHeight );
+ZGLEXTERN zglPTexture ( *tex_SetMask )( zglPTexture *Texture, zglPTexture Mask );
 #ifdef __CPP__
-static void ( *__tex_SetData )( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride );
+ZGLEXTERN void ( *__tex_SetData )( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride );
 static inline void tex_SetData( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride = 0 )
 {
   __tex_SetData( Texture, pData, X, Y, Width, Height, Stride );
 }
 #else
-static void ( *tex_SetData )( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride );
+ZGLEXTERN void ( *tex_SetData )( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride );
 #endif
-static void ( *tex_GetData )( zglPTexture Texture, void **pData );
-static void ( *tex_Filter )( zglPTexture Texture, uint Flags );
-static void ( *tex_SetAnisotropy )( byte Level );
+ZGLEXTERN void ( *tex_GetData )( zglPTexture Texture, void **pData );
+ZGLEXTERN void ( *tex_Filter )( zglPTexture Texture, uint Flags );
+ZGLEXTERN void ( *tex_SetAnisotropy )( byte Level );
 
 // RENDER TARGETS
 typedef struct
@@ -676,10 +681,10 @@ typedef void (*zglTRenderCallback)( void *Data );
 #define RT_CLEAR_DEPTH  0x08
 #define RT_SAVE_CONTENT 0x10 // Direct3D only!
 
-static zglPRenderTarget ( *rtarget_Add )( zglPTexture Surface, byte Flags );
-static void ( *rtarget_Del )( zglPRenderTarget *Target );
-static void ( *rtarget_Set )( zglPRenderTarget Target );
-static void ( *rtarget_DrawIn )( zglPRenderTarget Target, zglTRenderCallback RenderCallback, void *Data );
+ZGLEXTERN zglPRenderTarget ( *rtarget_Add )( zglPTexture Surface, byte Flags );
+ZGLEXTERN void ( *rtarget_Del )( zglPRenderTarget *Target );
+ZGLEXTERN void ( *rtarget_Set )( zglPRenderTarget Target );
+ZGLEXTERN void ( *rtarget_DrawIn )( zglPRenderTarget Target, zglTRenderCallback RenderCallback, void *Data );
 
 // FX
 #define FX_BLEND_NORMAL 0x00
@@ -696,16 +701,16 @@ static void ( *rtarget_DrawIn )( zglPRenderTarget Target, zglTRenderCallback Ren
 #define FX_COLOR        0x200000
 
 #ifdef __CPP__
-static void ( *__fx_SetBlendMode )( byte Mode, bool SeparateAlpha );
+ZGLEXTERN void ( *__fx_SetBlendMode )( byte Mode, bool SeparateAlpha );
 static inline void fx_SetBlendMode( byte Mode, bool SeparateAlpha = TRUE )
 {
   __fx_SetBlendMode( Mode, SeparateAlpha );
 }
 #else
-static void ( *fx_SetBlendMode )( byte Mode, bool SeparateAlpha );
+ZGLEXTERN void ( *fx_SetBlendMode )( byte Mode, bool SeparateAlpha );
 #endif
-static void ( *fx_SetColorMode )( byte Mode );
-static void ( *fx_SetColorMask )( bool R, bool G, bool B, bool Alpha );
+ZGLEXTERN void ( *fx_SetColorMode )( byte Mode );
+ZGLEXTERN void ( *fx_SetColorMask )( bool R, bool G, bool B, bool Alpha );
 
 // FX 2D
 #define FX2D_FLIPX   0x000001
@@ -715,11 +720,11 @@ static void ( *fx_SetColorMask )( bool R, bool G, bool B, bool Alpha );
 #define FX2D_SCALE   0x000010
 #define FX2D_RPIVOT  0x000020
 
-static void ( *fx2d_SetColor )( uint Color );
-static void ( *fx2d_SetVCA )( uint c1, uint c2, uint c3, uint c4, byte a1, byte a2, byte a3, byte a4 );
-static void ( *fx2d_SetVertexes )( float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4 );
-static void ( *fx2d_SetScale )( float scaleX, float scaleY );
-static void ( *fx2d_SetRotatingPivot )( float X, float Y );
+ZGLEXTERN void ( *fx2d_SetColor )( uint Color );
+ZGLEXTERN void ( *fx2d_SetVCA )( uint c1, uint c2, uint c3, uint c4, byte a1, byte a2, byte a3, byte a4 );
+ZGLEXTERN void ( *fx2d_SetVertexes )( float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4 );
+ZGLEXTERN void ( *fx2d_SetScale )( float scaleX, float scaleY );
+ZGLEXTERN void ( *fx2d_SetRotatingPivot )( float X, float Y );
 
 // Camera 2D
 typedef struct
@@ -731,57 +736,57 @@ typedef struct
   zglTPoint2D Center;
 } zglTCamera2D, *zglPCamera2D;
 
-static void ( *cam2d_Init )( zglTCamera2D *Camera );
-static void ( *cam2d_Set )( zglPCamera2D Camera );
-static zglPCamera2D ( *cam2d_Get )();
+ZGLEXTERN void ( *cam2d_Init )( zglTCamera2D *Camera );
+ZGLEXTERN void ( *cam2d_Set )( zglPCamera2D Camera );
+ZGLEXTERN zglPCamera2D ( *cam2d_Get )();
 
 // Render 2D
-static void ( *batch2d_Begin )();
-static void ( *batch2d_End )();
-static void ( *batch2d_Flush )();
+ZGLEXTERN void ( *batch2d_Begin )();
+ZGLEXTERN void ( *batch2d_End )();
+ZGLEXTERN void ( *batch2d_Flush )();
 
 // Primitives 2D
 #define PR2D_FILL   0x010000
 #define PR2D_SMOOTH 0x020000
 
 #ifdef __CPP__
-static void ( *__pr2d_Pixel )( float X, float Y, uint Color, byte Alpha );
+ZGLEXTERN void ( *__pr2d_Pixel )( float X, float Y, uint Color, byte Alpha );
 static inline void pr2d_Pixel( float X, float Y, uint Color = 0xFFFFFF, byte Alpha = 255 )
 {
   __pr2d_Pixel( X, Y, Color, Alpha );
 }
-static void ( *__pr2d_Line )( float X1, float Y1, float X2, float Y2, uint Color, byte Alpha, uint FX );
+ZGLEXTERN void ( *__pr2d_Line )( float X1, float Y1, float X2, float Y2, uint Color, byte Alpha, uint FX );
 static inline void pr2d_Line( float X1, float Y1, float X2, float Y2, uint Color = 0xFFFFFF, byte Alpha = 255, uint FX = 0 )
 {
   __pr2d_Line( X1, Y1, X2, Y2, Color, Alpha, FX );
 }
-static void ( *__pr2d_Rect )( float X, float Y, float W, float H, uint Color, byte Alpha, uint FX );
+ZGLEXTERN void ( *__pr2d_Rect )( float X, float Y, float W, float H, uint Color, byte Alpha, uint FX );
 static inline void pr2d_Rect( float X, float Y, float W, float H, uint Color = 0xFFFFFF, byte Alpha = 255, uint FX = 0 )
 {
   __pr2d_Rect( X, Y, W, H, Color, Alpha, FX );
 }
-static void ( *__pr2d_Circle )( float X, float Y, float Radius, uint Color, byte Alpha, ushort Quality, uint FX );
+ZGLEXTERN void ( *__pr2d_Circle )( float X, float Y, float Radius, uint Color, byte Alpha, ushort Quality, uint FX );
 static inline void pr2d_Circle( float X, float Y, float Radius, uint Color = 0xFFFFFF, byte Alpha = 255, ushort Quality = 32, uint FX = 0 )
 {
   __pr2d_Circle( X, Y, Radius, Color, Alpha, Quality, FX );
 }
-static void ( *__pr2d_Ellipse )( float X, float Y, float xRadius, float yRadius, uint Color, byte Alpha, ushort Quality, uint FX );
+ZGLEXTERN void ( *__pr2d_Ellipse )( float X, float Y, float xRadius, float yRadius, uint Color, byte Alpha, ushort Quality, uint FX );
 static inline void pr2d_Ellipse( float X, float Y, float xRadius, float yRadius, uint Color = 0xFFFFFF, byte Alpha = 255, ushort Quality = 32, uint FX = 0 )
 {
   __pr2d_Ellipse( X, Y, xRadius, yRadius, Color, Alpha, Quality, FX );
 }
-static void ( *__pr2d_TriList )( zglPTexture Texture, zglPPoints2D TriList, zglPPoints2D TexCoords, int iLo, int iHi, uint Color, byte Alpha, uint FX );
+ZGLEXTERN void ( *__pr2d_TriList )( zglPTexture Texture, zglPPoints2D TriList, zglPPoints2D TexCoords, int iLo, int iHi, uint Color, byte Alpha, uint FX );
 static inline void pr2d_TriList( zglPTexture Texture, zglPPoints2D TriList, zglPPoints2D TexCoords, int iLo, int iHi, uint Color = 0xFFFFFF, byte Alpha = 255, uint FX = 0 )
 {
   __pr2d_TriList( Texture, TriList, TexCoords, iLo, iHi, Color, Alpha, FX );
 }
 #else
-static void ( *pr2d_Pixel )( float X, float Y, uint Color, byte Alpha );
-static void ( *pr2d_Line )( float X1, float Y1, float X2, float Y2, uint Color, byte Alpha, uint FX );
-static void ( *pr2d_Rect )( float X, float Y, float W, float H, uint Color, byte Alpha, uint FX );
-static void ( *pr2d_Circle )( float X, float Y, float Radius, uint Color, byte Alpha, ushort Quality, uint FX );
-static void ( *pr2d_Ellipse )( float X, float Y, float xRadius, float yRadius, uint Color, byte Alpha, ushort Quality, uint FX );
-static void ( *pr2d_TriList )( zglPTexture Texture, zglPPoints2D TriList, zglPPoints2D TexCoords, int iLo, int iHi, uint Color, byte Alpha, uint FX );
+ZGLEXTERN void ( *pr2d_Pixel )( float X, float Y, uint Color, byte Alpha );
+ZGLEXTERN void ( *pr2d_Line )( float X1, float Y1, float X2, float Y2, uint Color, byte Alpha, uint FX );
+ZGLEXTERN void ( *pr2d_Rect )( float X, float Y, float W, float H, uint Color, byte Alpha, uint FX );
+ZGLEXTERN void ( *pr2d_Circle )( float X, float Y, float Radius, uint Color, byte Alpha, ushort Quality, uint FX );
+ZGLEXTERN void ( *pr2d_Ellipse )( float X, float Y, float xRadius, float yRadius, uint Color, byte Alpha, ushort Quality, uint FX );
+ZGLEXTERN void ( *pr2d_TriList )( zglPTexture Texture, zglPPoints2D TriList, zglPPoints2D TexCoords, int iLo, int iHi, uint Color, byte Alpha, uint FX );
 #endif
 
 // Sprites 2D
@@ -863,64 +868,64 @@ typedef struct
   zglTPoint2D** Grid;
 } zglTGrid2D, *zglPGrid2D;
 
-static zglPSprite2D ( *sengine2d_AddSprite )( zglPTexture Texture, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
-static zglPSprite2D ( *sengine2d_AddCustom )( zglPTexture Texture, uint Size, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
-static void ( *sengine2d_DelSprite )( int ID );
-static void ( *sengine2d_ClearAll )();
-static void ( *sengine2d_Set )( zglPSEngine2D SEngine );
-static void ( *sengine2d_Draw )();
-static void ( *sengine2d_Proc )();
+ZGLEXTERN zglPSprite2D ( *sengine2d_AddSprite )( zglPTexture Texture, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
+ZGLEXTERN zglPSprite2D ( *sengine2d_AddCustom )( zglPTexture Texture, uint Size, int Layer, zglSpriteFunc OnInit, zglSpriteFunc OnDraw, zglSpriteFunc OnProc, zglSpriteFunc OnFree );
+ZGLEXTERN void ( *sengine2d_DelSprite )( int ID );
+ZGLEXTERN void ( *sengine2d_ClearAll )();
+ZGLEXTERN void ( *sengine2d_Set )( zglPSEngine2D SEngine );
+ZGLEXTERN void ( *sengine2d_Draw )();
+ZGLEXTERN void ( *sengine2d_Proc )();
 
 #ifdef __CPP__
-static void ( *__texture2d_Draw )( zglPTexture Texture, zglTPoint2D *TexCoord, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
+ZGLEXTERN void ( *__texture2d_Draw )( zglPTexture Texture, zglTPoint2D *TexCoord, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
 static inline void texture2d_Draw( zglPTexture Texture, zglTPoint2D *TexCoord, float X, float Y, float W, float H, float Angle, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __texture2d_Draw( Texture, TexCoord, X, Y, W, H, Angle, Alpha, FX );
 }
-static void ( *__ssprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
+ZGLEXTERN void ( *__ssprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
 static inline void ssprite2d_Draw( zglPTexture Texture, float X, float Y, float W, float H, float Angle, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __ssprite2d_Draw( Texture, X, Y, W, H, Angle, Alpha, FX );
 }
-static void ( *__asprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, ushort Frame, byte Alpha, uint FX );
+ZGLEXTERN void ( *__asprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, ushort Frame, byte Alpha, uint FX );
 static inline void asprite2d_Draw( zglPTexture Texture, float X, float Y, float W, float H, float Angle, ushort Frame, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __asprite2d_Draw( Texture, X, Y, W, H, Angle, Frame, Alpha, FX );
 }
-static void ( *__csprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, zglTRect CutRect, byte Alpha, uint FX );
+ZGLEXTERN void ( *__csprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, zglTRect CutRect, byte Alpha, uint FX );
 static inline void csprite2d_Draw( zglPTexture Texture, float X, float Y, float W, float H, float Angle, zglTRect CutRect, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __csprite2d_Draw( Texture, X, Y, W, H, Angle, CutRect, Alpha, FX );
 }
-static void ( *__tiles2d_Draw )( zglPTexture Texture, float X, float Y, zglPTiles2D Tiles, byte Alpha, uint FX );
+ZGLEXTERN void ( *__tiles2d_Draw )( zglPTexture Texture, float X, float Y, zglPTiles2D Tiles, byte Alpha, uint FX );
 static inline void tiles2d_Draw( zglPTexture Texture, float X, float Y, zglPTiles2D Tiles, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __tiles2d_Draw( Texture, X, Y, Tiles, Alpha, FX );
 }
-static void ( *__sgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, byte Alpha, uint FX );
+ZGLEXTERN void ( *__sgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, byte Alpha, uint FX );
 static inline void sgrid2d_Draw( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __sgrid2d_Draw( Texture, X, Y, Grid, Alpha, FX );
 }
-static void ( *__agrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, int Frame, byte Alpha, uint FX );
+ZGLEXTERN void ( *__agrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, int Frame, byte Alpha, uint FX );
 static inline void agrid2d_Draw( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, int Frame, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __agrid2d_Draw( Texture, X, Y, Grid, Frame, Alpha, FX );
 }
-static void ( *__cgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, zglTRect CutRect, byte Alpha, uint FX );
+ZGLEXTERN void ( *__cgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, zglTRect CutRect, byte Alpha, uint FX );
 static inline void cgrid2d_Draw( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, zglTRect CutRect, byte Alpha = 255, uint FX = FX_BLEND )
 {
   __cgrid2d_Draw( Texture, X, Y, Grid, CutRect, Alpha, FX );
 }
 #else
-static void ( *texture2d_Draw )( zglPTexture Texture, zglTPoint2D *TexCoord, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
-static void ( *ssprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
-static void ( *asprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, ushort Frame, byte Alpha, uint FX );
-static void ( *csprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, zglTRect CutRect, byte Alpha, uint FX );
-static void ( *tiles2d_Draw )( zglPTexture Texture, float X, float Y, zglPTiles2D Tiles, byte Alpha, uint FX );
-static void ( *sgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, byte Alpha, uint FX );
-static void ( *agrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, int Frame, byte Alpha, uint FX );
-static void ( *cgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, zglTRect CutRect, byte Alpha, uint FX );
+ZGLEXTERN void ( *texture2d_Draw )( zglPTexture Texture, zglTPoint2D *TexCoord, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
+ZGLEXTERN void ( *ssprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, byte Alpha, uint FX );
+ZGLEXTERN void ( *asprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, ushort Frame, byte Alpha, uint FX );
+ZGLEXTERN void ( *csprite2d_Draw )( zglPTexture Texture, float X, float Y, float W, float H, float Angle, zglTRect CutRect, byte Alpha, uint FX );
+ZGLEXTERN void ( *tiles2d_Draw )( zglPTexture Texture, float X, float Y, zglPTiles2D Tiles, byte Alpha, uint FX );
+ZGLEXTERN void ( *sgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, byte Alpha, uint FX );
+ZGLEXTERN void ( *agrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, int Frame, byte Alpha, uint FX );
+ZGLEXTERN void ( *cgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, zglTRect CutRect, byte Alpha, uint FX );
 #endif
 
 // Text
@@ -968,50 +973,50 @@ typedef struct
 #define TEXT_VALIGN_BOTTOM  0x000040
 #define TEXT_FX_VCA         0x000080
 
-static zglPFont ( *font_Add )();
-static void ( *font_Del )( zglPFont *Font );
-static zglPFont ( *font_LoadFromFile )( const char *FileName );
-static zglPFont ( *font_LoadFromMemory )( zglTMemory Memory );
+ZGLEXTERN zglPFont ( *font_Add )();
+ZGLEXTERN void ( *font_Del )( zglPFont *Font );
+ZGLEXTERN zglPFont ( *font_LoadFromFile )( const char *FileName );
+ZGLEXTERN zglPFont ( *font_LoadFromMemory )( zglTMemory Memory );
 #ifdef __CPP__
-static void ( *__text_Draw )( zglPFont Font, float X, float Y, const char *Text, uint Flags );
+ZGLEXTERN void ( *__text_Draw )( zglPFont Font, float X, float Y, const char *Text, uint Flags );
 static inline void text_Draw( zglPFont Font, float X, float Y, const char *Text, uint Flags = 0 )
 {
   __text_Draw( Font, X, Y, Text, Flags );
 }
-static void ( *__text_DrawEx )( zglPFont Font, float X, float Y, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
+ZGLEXTERN void ( *__text_DrawEx )( zglPFont Font, float X, float Y, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
 static inline void text_DrawEx( zglPFont Font, float X, float Y, float Scale, float Step, const char *Text, byte Alpha = 255, uint Color = 0xFFFFFF, uint Flags = 0 )
 {
   __text_DrawEx( Font, X, Y, Scale, Step, Text, Alpha, Color, Flags );
 }
-static void ( *__text_DrawInRect )( zglPFont Font, zglTRect Rect, const char *Text, uint Flags );
+ZGLEXTERN void ( *__text_DrawInRect )( zglPFont Font, zglTRect Rect, const char *Text, uint Flags );
 static inline void text_DrawInRect( zglPFont Font, zglTRect Rect, const char *Text, uint Flags = 0 )
 {
   __text_DrawInRect( Font, Rect, Text, Flags );
 }
-static void ( *__text_DrawInRectEx )( zglPFont Font, zglTRect Rect, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
+ZGLEXTERN void ( *__text_DrawInRectEx )( zglPFont Font, zglTRect Rect, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
 static inline void text_DrawInRectEx( zglPFont Font, zglTRect Rect, float Scale, float Step, const char *Text, byte Alpha = 255, uint Color = 0xFFFFFF, uint Flags = 0 )
 {
   __text_DrawInRectEx( Font, Rect, Scale, Step, Text, Alpha, Color, Flags );
 }
-static float ( *__text_GetWidth )( zglPFont Font, const char *Text, float Step );
+ZGLEXTERN float ( *__text_GetWidth )( zglPFont Font, const char *Text, float Step );
 static inline float text_GetWidth( zglPFont Font, const char *Text, float Step = 0.0 )
 {
   return __text_GetWidth( Font, Text, Step );
 }
-static float ( *__text_GetHeight )( zglPFont Font, float Width, const char *Text, float Scale, float Step );
+ZGLEXTERN float ( *__text_GetHeight )( zglPFont Font, float Width, const char *Text, float Scale, float Step );
 static inline float text_GetHeight( zglPFont Font, float Width, const char *Text, float Scale = 1.0, float Step = 0.0 )
 {
   return __text_GetHeight( Font, Width, Text, Scale, Step );
 }
 #else
-static void ( *text_Draw )( zglPFont Font, float X, float Y, const char *Text, uint Flags );
-static void ( *text_DrawEx )( zglPFont Font, float X, float Y, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
-static void ( *text_DrawInRect )( zglPFont Font, zglTRect Rect, const char *Text, uint Flags );
-static void ( *text_DrawInRectEx )( zglPFont Font, zglTRect Rect, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
-static float ( *text_GetWidth )( zglPFont Font, const char *Text, float Step );
-static float ( *text_GetHeight )( zglPFont Font, float Width, const char *Text, float Scale, float Step );
+ZGLEXTERN void ( *text_Draw )( zglPFont Font, float X, float Y, const char *Text, uint Flags );
+ZGLEXTERN void ( *text_DrawEx )( zglPFont Font, float X, float Y, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
+ZGLEXTERN void ( *text_DrawInRect )( zglPFont Font, zglTRect Rect, const char *Text, uint Flags );
+ZGLEXTERN void ( *text_DrawInRectEx )( zglPFont Font, zglTRect Rect, float Scale, float Step, const char *Text, byte Alpha, uint Color, uint Flags );
+ZGLEXTERN float ( *text_GetWidth )( zglPFont Font, const char *Text, float Step );
+ZGLEXTERN float ( *text_GetHeight )( zglPFont Font, float Width, const char *Text, float Scale, float Step );
 #endif
-static void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCharDesc LastCharDesc );
+ZGLEXTERN void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCharDesc LastCharDesc );
 
 // Sound
 #define SND_FORMAT_MONO8    1
@@ -1107,54 +1112,54 @@ typedef struct
     Formats : array of zglTSoundFormat;
   end;
 */
-static bool ( *snd_Init )();
-static void ( *snd_Free )();
-static zglPSound ( *snd_Add )( int SourceCount );
-static void ( *snd_Del )( zglPSound *Sound );
+ZGLEXTERN bool ( *snd_Init )();
+ZGLEXTERN void ( *snd_Free )();
+ZGLEXTERN zglPSound ( *snd_Add )( int SourceCount );
+ZGLEXTERN void ( *snd_Del )( zglPSound *Sound );
 #ifdef __CPP__
-static zglPSound ( *__snd_LoadFromFile )( const char *FileName, int SourceCount );
+ZGLEXTERN zglPSound ( *__snd_LoadFromFile )( const char *FileName, int SourceCount );
 static inline zglPSound snd_LoadFromFile( const char *FileName, int SourceCount = 8 )
 {
   return __snd_LoadFromFile( FileName, SourceCount );
 }
-static zglPSound ( *__snd_LoadFromMemory )( zglTMemory Memory, const char *Extension, int SourceCount );
+ZGLEXTERN zglPSound ( *__snd_LoadFromMemory )( zglTMemory Memory, const char *Extension, int SourceCount );
 static inline zglPSound snd_LoadFromMemory( zglTMemory Memory, const char *Extension, int SourceCount = 8 )
 {
   return __snd_LoadFromMemory( Memory, Extension, SourceCount );
 }
-static int ( *__snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z );
+ZGLEXTERN int ( *__snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z );
 static inline int snd_Play( zglPSound Sound, bool Loop = FALSE, float X = 0.0, float Y = 0.0, float Z = 0.0 )
 {
   return __snd_Play( Sound, Loop, X, Y, Z );
 }
 #else
-static zglPSound ( *snd_LoadFromFile )( const char *FileName, int SourceCount );
-static zglPSound ( *snd_LoadFromMemory )( zglTMemory Memory, const char *Extension, int SourceCount );
-static int ( *snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z );
+ZGLEXTERN zglPSound ( *snd_LoadFromFile )( const char *FileName, int SourceCount );
+ZGLEXTERN zglPSound ( *snd_LoadFromMemory )( zglTMemory Memory, const char *Extension, int SourceCount );
+ZGLEXTERN int ( *snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z );
 #endif
-static void ( *snd_Stop )( zglPSound Sound, int ID );
-static void ( *snd_SetPos )( zglPSound Sound, int ID, float X, float Y, float Z );
-static void ( *snd_SetVolume )( zglPSound Sound, int ID, float Volume );
-static void ( *snd_SetSpeed )( zglPSound Sound, int ID, float Speed );
-static int ( *snd_Get )( zglPSound Sound, int ID, int What );
+ZGLEXTERN void ( *snd_Stop )( zglPSound Sound, int ID );
+ZGLEXTERN void ( *snd_SetPos )( zglPSound Sound, int ID, float X, float Y, float Z );
+ZGLEXTERN void ( *snd_SetVolume )( zglPSound Sound, int ID, float Volume );
+ZGLEXTERN void ( *snd_SetSpeed )( zglPSound Sound, int ID, float Speed );
+ZGLEXTERN int ( *snd_Get )( zglPSound Sound, int ID, int What );
 #ifdef __CPP__
-static int ( *__snd_PlayFile )( const char *FileName, bool Loop );
+ZGLEXTERN int ( *__snd_PlayFile )( const char *FileName, bool Loop );
 static inline int snd_PlayFile( const char *FileName, bool Loop = FALSE )
 {
   return __snd_PlayFile( FileName, Loop );
 }
-static int ( *__snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
+ZGLEXTERN int ( *__snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
 static inline int snd_PlayMemory( zglTMemory Memory, const char *Extension, bool Loop = FALSE )
 {
   return __snd_PlayMemory( Memory, Extension, Loop );
 }
 #else
-static int ( *snd_PlayFile )( const char *FileName, bool Loop );
-static int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
+ZGLEXTERN int ( *snd_PlayFile )( const char *FileName, bool Loop );
+ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
 #endif
-static void ( *snd_PauseFile )( int ID );
-static void ( *snd_StopFile )( int ID );
-static void ( *snd_ResumeFile )( int ID );
+ZGLEXTERN void ( *snd_PauseFile )( int ID );
+ZGLEXTERN void ( *snd_StopFile )( int ID );
+ZGLEXTERN void ( *snd_ResumeFile )( int ID );
 
 // MATH
 #define pi      3.141592654
@@ -1165,49 +1170,49 @@ static void ( *snd_ResumeFile )( int ID );
 #define ORIENTATION_RIGHT 1
 #define ORIENTATION_ZERO  0
 
-static float ( *m_Cos )( int Angle );
-static float ( *m_Sin )( int Angle );
-static float ( *m_Distance )( float x1, float y1, float x2, float y2 );
-static float ( *m_FDistance )( float x1, float y1, float x2, float y2 );
-static float ( *m_Angle )( float x1, float y1, float x2, float y2 );
-static int ( *m_Orientation )( float x, float y, float x1, float y1, float x2, float y2 );
+ZGLEXTERN float ( *m_Cos )( int Angle );
+ZGLEXTERN float ( *m_Sin )( int Angle );
+ZGLEXTERN float ( *m_Distance )( float x1, float y1, float x2, float y2 );
+ZGLEXTERN float ( *m_FDistance )( float x1, float y1, float x2, float y2 );
+ZGLEXTERN float ( *m_Angle )( float x1, float y1, float x2, float y2 );
+ZGLEXTERN int ( *m_Orientation )( float x, float y, float x1, float y1, float x2, float y2 );
 
 #ifdef __CPP__
-static void ( *__tess_Triangulate )( zglPPoints2D Contour, int iLo, int iHi, bool AddHoles );
+ZGLEXTERN void ( *__tess_Triangulate )( zglPPoints2D Contour, int iLo, int iHi, bool AddHoles );
 static inline void tess_Triangulate( zglPPoints2D Contour, int iLo, int iHi, bool AddHoles = FALSE )
 {
   __tess_Triangulate( Contour, iLo, iHi, AddHoles );
 }
-static void ( *__tess_AddHole )( zglPPoints2D Contour, int iLo, int iHi, bool LastHole );
+ZGLEXTERN void ( *__tess_AddHole )( zglPPoints2D Contour, int iLo, int iHi, bool LastHole );
 static inline void tess_AddHole( zglPPoints2D Contour, int iLo, int iHi, bool LastHole = TRUE )
 {
   __tess_AddHole( Contour, iLo, iHi, LastHole );
 }
 #else
-static void ( *tess_Triangulate )( zglPPoints2D Contour, int iLo, int iHi, bool AddHoles );
-static void ( *tess_AddHole )( zglPPoints2D Contour, int iLo, int iHi, bool LastHole );
+ZGLEXTERN void ( *tess_Triangulate )( zglPPoints2D Contour, int iLo, int iHi, bool AddHoles );
+ZGLEXTERN void ( *tess_AddHole )( zglPPoints2D Contour, int iLo, int iHi, bool LastHole );
 #endif
-static int ( *tess_GetData )( zglPPoints2D* TriPoints );
+ZGLEXTERN int ( *tess_GetData )( zglPPoints2D* TriPoints );
 
 // COLLISION 2D
-static bool ( *col2d_PointInRect )( float X, float Y, zglTRect Rect );
-static bool ( *col2d_PointInTriangle )( float X, float Y, zglTPoint2D P1, zglTPoint2D P2, zglTPoint2D P3 );
-static bool ( *col2d_PointInCircle )( float X, float Y, zglTCircle Circle );
+ZGLEXTERN bool ( *col2d_PointInRect )( float X, float Y, zglTRect Rect );
+ZGLEXTERN bool ( *col2d_PointInTriangle )( float X, float Y, zglTPoint2D P1, zglTPoint2D P2, zglTPoint2D P3 );
+ZGLEXTERN bool ( *col2d_PointInCircle )( float X, float Y, zglTCircle Circle );
 //line 2d
-static bool ( *col2d_Line )( zglTLine A, zglTLine B, zglPPoint2D ColPoint );
-static bool ( *col2d_LineVsRect )( zglTLine Line, zglTRect Rect, zglPPoint2D ColPoint );
-static bool ( *col2d_LineVsCircle )( zglTLine Line, zglTCircle Circle );
-static bool ( *col2d_LineVsCircleXY )( zglTLine Line, zglTCircle Circle, byte Precision, zglPPoint2D ColPoint );
+ZGLEXTERN bool ( *col2d_Line )( zglTLine A, zglTLine B, zglPPoint2D ColPoint );
+ZGLEXTERN bool ( *col2d_LineVsRect )( zglTLine Line, zglTRect Rect, zglPPoint2D ColPoint );
+ZGLEXTERN bool ( *col2d_LineVsCircle )( zglTLine Line, zglTCircle Circle );
+ZGLEXTERN bool ( *col2d_LineVsCircleXY )( zglTLine Line, zglTCircle Circle, byte Precision, zglPPoint2D ColPoint );
 // rect
-static bool ( *col2d_Rect )( zglTRect Rect1, zglTRect Rect2 );
-static bool ( *col2d_ClipRect )( zglTRect Rect1, zglTRect Rect2 );
-static bool ( *col2d_RectInRect )( zglTRect Rect1, zglTRect Rect2 );
-static bool ( *col2d_RectInCircle )( zglTRect Rect, zglTCircle Circle );
-static bool ( *col2d_RectVsCircle )( zglTRect Rect, zglTCircle Circle );
+ZGLEXTERN bool ( *col2d_Rect )( zglTRect Rect1, zglTRect Rect2 );
+ZGLEXTERN bool ( *col2d_ClipRect )( zglTRect Rect1, zglTRect Rect2 );
+ZGLEXTERN bool ( *col2d_RectInRect )( zglTRect Rect1, zglTRect Rect2 );
+ZGLEXTERN bool ( *col2d_RectInCircle )( zglTRect Rect, zglTCircle Circle );
+ZGLEXTERN bool ( *col2d_RectVsCircle )( zglTRect Rect, zglTCircle Circle );
 // circle
-static bool ( *col2d_Circle )( zglTCircle Circle1, zglTCircle Circle2 );
-static bool ( *col2d_CircleInCircle )( zglTCircle Circle1, zglTCircle Circle2 );
-static bool ( *col2d_CircleInRect )( zglTCircle Circle, zglTRect Rect );
+ZGLEXTERN bool ( *col2d_Circle )( zglTCircle Circle1, zglTCircle Circle2 );
+ZGLEXTERN bool ( *col2d_CircleInCircle )( zglTCircle Circle1, zglTCircle Circle2 );
+ZGLEXTERN bool ( *col2d_CircleInRect )( zglTCircle Circle, zglTRect Rect );
 
 #ifndef __WINDOWS__
   #define FILE_ERROR 0
@@ -1225,30 +1230,30 @@ static bool ( *col2d_CircleInRect )( zglTCircle Circle, zglTRect Rect );
 #define FSM_CUR    0x02
 #define FSM_END    0x03
 
-static bool ( *file_Open )( zglTFile *FileHandle, const char *FileName, byte Mode );
-static bool ( *file_MakeDir )( const char *Directory );
-static bool ( *file_Remove )( const char *Name );
-static bool ( *file_Exists )( const char *Name );
-static uint ( *file_Seek )( zglTFile FileHandle, uint Offset, uint Mode );
-static uint ( *file_GetPos )( zglTFile FileHandle );
-static uint ( *file_Read )( zglTFile FileHandle, void *Buffer, uint Bytes );
-static uint ( *file_Write )( zglTFile FileHandle, void *Buffer, uint Bytes );
-static uint ( *file_GetSize )( zglTFile FileHandle );
-static void ( *file_Flush )( zglTFile FileHandle );
-static void ( *file_Close )( zglTFile* FileHandle );
-static void ( *file_Find )( const char *Directory, zglTFileList *List, bool FindDir );
-static char* ( *file_GetName )( const char *FileName );
-static char* ( *file_GetExtension )( const char *FileName );
-static char* ( *file_GetDirectory )( const char *FileName );
-static void ( *file_SetPath )( const char *Path );
+ZGLEXTERN bool ( *file_Open )( zglTFile *FileHandle, const char *FileName, byte Mode );
+ZGLEXTERN bool ( *file_MakeDir )( const char *Directory );
+ZGLEXTERN bool ( *file_Remove )( const char *Name );
+ZGLEXTERN bool ( *file_Exists )( const char *Name );
+ZGLEXTERN uint ( *file_Seek )( zglTFile FileHandle, uint Offset, uint Mode );
+ZGLEXTERN uint ( *file_GetPos )( zglTFile FileHandle );
+ZGLEXTERN uint ( *file_Read )( zglTFile FileHandle, void *Buffer, uint Bytes );
+ZGLEXTERN uint ( *file_Write )( zglTFile FileHandle, void *Buffer, uint Bytes );
+ZGLEXTERN uint ( *file_GetSize )( zglTFile FileHandle );
+ZGLEXTERN void ( *file_Flush )( zglTFile FileHandle );
+ZGLEXTERN void ( *file_Close )( zglTFile* FileHandle );
+ZGLEXTERN void ( *file_Find )( const char *Directory, zglTFileList *List, bool FindDir );
+ZGLEXTERN char* ( *file_GetName )( const char *FileName );
+ZGLEXTERN char* ( *file_GetExtension )( const char *FileName );
+ZGLEXTERN char* ( *file_GetDirectory )( const char *FileName );
+ZGLEXTERN void ( *file_SetPath )( const char *Path );
 
-static void ( *mem_LoadFromFile )( zglTMemory *Memory, const char *FileName );
-static void ( *mem_SaveToFile )( zglTMemory *Memory, const char *FileName );
-static uint ( *mem_Seek )( zglTMemory *Memory, int Offset, int Mode );
-static uint ( *mem_Read )( zglTMemory *Memory, void *Buffer, uint Bytes );
-static uint ( *mem_Write )( zglTMemory *Memory, void *Buffer, uint Bytes );
-static void ( *mem_SetSize )( zglTMemory *Memory, uint Size );
-static void ( *mem_Free )( zglTMemory *Memory );
+ZGLEXTERN void ( *mem_LoadFromFile )( zglTMemory *Memory, const char *FileName );
+ZGLEXTERN void ( *mem_SaveToFile )( zglTMemory *Memory, const char *FileName );
+ZGLEXTERN uint ( *mem_Seek )( zglTMemory *Memory, int Offset, int Mode );
+ZGLEXTERN uint ( *mem_Read )( zglTMemory *Memory, void *Buffer, uint Bytes );
+ZGLEXTERN uint ( *mem_Write )( zglTMemory *Memory, void *Buffer, uint Bytes );
+ZGLEXTERN void ( *mem_SetSize )( zglTMemory *Memory, uint Size );
+ZGLEXTERN void ( *mem_Free )( zglTMemory *Memory );
 
 #ifdef __LINUX__
   #define libZenGL "libZenGL.so"
@@ -1258,7 +1263,7 @@ static void ( *mem_Free )( zglTMemory *Memory );
   #define zglGetAddress( a, b, c ) a = (__typeof__(a))dlsym(b, c)
 
   typedef void* LIBRARY;
-  static void* zglLib;
+  ZGLEXTERN void* zglLib;
 #endif
 
 #ifdef __WINDOWS__
@@ -1273,10 +1278,11 @@ static void ( *mem_Free )( zglTMemory *Memory );
   #endif
 
   typedef HMODULE LIBRARY;
-  static HMODULE zglLib;
+  ZGLEXTERN HMODULE zglLib;
 #endif
 
-static bool zglLoad( const char* LibraryName )
+#ifdef ZGL_IMPORT
+bool zglLoad( const char* LibraryName )
 {
   char libName[256];
   sprintf_s( libName, "./%s", LibraryName );
@@ -1637,9 +1643,14 @@ static bool zglLoad( const char* LibraryName )
   }
 }
 
-static void zglFree()
+void zglFree()
 {
   if ( zglLib )
     zglFreeLibrary( zglLib );
 }
+#else
+extern bool zglLoad( const char* LibraryName );
+extern void zglFree();
+#endif
+
 #endif

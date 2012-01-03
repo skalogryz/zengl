@@ -1,3 +1,4 @@
+#define ZGL_IMPORT
 #include "zglHeader.h"
 
 bool     FullScreen;
@@ -111,7 +112,7 @@ void Timer()
   // EN: If left mouse button is down - lock the mouse cursor in center of screen.
   // Delta can be obtained from functions mouse_DX and mouse_DY by calling them before mouse_Lock.
   if ( mouse_Down( M_BLEFT ) )
-    mouse_Lock();
+    mouse_Lock( -1, -1 );
 
   // RU: "Считываем" в переменную введеный текст, но сначала чистим предыдущее содержимое.
   // EN: "Read" the text to variable, but free previos content first.

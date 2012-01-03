@@ -1,3 +1,4 @@
+#define ZGL_IMPORT
 #include "zglHeader.h"
 
 #define SCREEN_WIDTH  800

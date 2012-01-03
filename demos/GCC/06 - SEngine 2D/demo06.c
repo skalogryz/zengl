@@ -1,4 +1,5 @@
 #include <math.h>
+#define ZGL_IMPORT
 #include "zglHeader.h"
 
 typedef struct

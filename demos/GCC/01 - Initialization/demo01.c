@@ -1,3 +1,7 @@
+// RU: Этот дефайн необходим указать только один раз в главном модуле
+// EN: This define is needed only once in main unit
+#define ZGL_IMPORT
+
 #include "zglHeader.h"
 
 char* DirApp;
