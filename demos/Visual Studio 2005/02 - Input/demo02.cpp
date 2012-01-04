@@ -1,3 +1,4 @@
+#define ZGL_IMPORT
 #include "zglHeader.h"
 
 bool		FullScreen;
