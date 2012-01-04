@@ -27,7 +27,7 @@ unit zgl_lib_zip;
 {$ENDIF}
 
 {$L zlib_helper}
-{$IF ( DEFINED(LINUX) and ( not DEFINED(ANDROID) ) ) or DEFINED(WINDOWS) or DEFINED(MACOSX)}
+{$IFDEF USE_ZLIB_STATIC}
   {$L infback}
   {$L inffast}
   {$L inflate}
@@ -35,12 +35,16 @@ unit zgl_lib_zip;
   {$L zutil}
   {$L adler32}
   {$L crc32}
-{$IFEND}
-{$IFDEF ANDROID}
-  {$LINKLIB libz.so}
-{$ENDIF}
-{$IFDEF iOS}
-  {$LINKLIB libz.dylib}
+{$ELSE}
+  {$IF DEFINED(LINUX) and ( not DEFINED(ANDROID) )}
+    {$LINKLIB libz.so.1}
+  {$IFEND}
+  {$IFDEF ANDROID}
+    {$LINKLIB libz.so}
+  {$ENDIF}
+  {$IFDEF DARWIN}
+    {$LINKLIB libz.dylib}
+  {$ENDIF}
 {$ENDIF}
 
 interface
