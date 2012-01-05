@@ -33,7 +33,9 @@ uses
   zgl_textures,
   zgl_font,
   zgl_text,
+  {$IFDEF USE_SOUND}
   zgl_sound,
+  {$ENDIF}
   zgl_math_2d,
   zgl_utils;
 
@@ -56,10 +58,12 @@ procedure _text_DrawInRectEx( Font : zglPFont; Rect : zglTRect; Scale, Step : Si
 function  _text_GetWidth( Font : zglPFont; Text : PChar; Step : Single = 0.0 ) : Single;
 function  _text_GetHeight( Font : zglPFont; Width : Single; Text : PChar; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
 
+{$IFDEF USE_SOUND}
 function _snd_LoadFromFile( FileName : PChar; SourceCount : Integer = 8 ) : zglPSound;
 function _snd_LoadFromMemory( Memory : zglTMemory; Extension : PChar; SourceCount : Integer = 8 ) : zglPSound;
 function _snd_PlayFile( FileName : PChar; Loop : Boolean = FALSE ) : Integer;
 function _snd_PlayMemory( Memory : zglTMemory; Extension : PChar; Loop : Boolean = FALSE ) : Integer;
+{$ENDIF}
 
 implementation
 
@@ -128,6 +132,7 @@ begin
   Result := text_GetHeight( Font, Width, Text, Scale, Step );
 end;
 
+{$IFDEF USE_SOUND}
 function _snd_LoadFromFile( FileName : PChar; SourceCount : Integer = 8 ) : zglPSound;
 begin
   Result := snd_LoadFromFile( FileName, SourceCount );
@@ -147,5 +152,6 @@ function _snd_PlayMemory( Memory : zglTMemory; Extension : PChar; Loop : Boolean
 begin
   Result := snd_PlayMemory( Memory, Extension, Loop );
 end;
+{$ENDIF}
 
 end.

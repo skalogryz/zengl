@@ -419,10 +419,12 @@ exports
   _text_DrawInRectEx       name prefix + '_text_DrawInRectEx',
   _text_GetWidth           name prefix + '_text_GetWidth',
   _text_GetHeight          name prefix + '_text_GetHeight',
+  {$IFDEF USE_SOUND}
   _snd_LoadFromFile        name prefix + '_snd_LoadFromFile',
   _snd_LoadFromMemory      name prefix + '_snd_LoadFromMemory',
   _snd_PlayFile            name prefix + '_snd_PlayFile',
   _snd_PlayMemory          name prefix + '_snd_PlayMemory'
+  {$ENDIF}
   {$ENDIF}
   ;
 
