@@ -168,10 +168,10 @@ function  snd_Get( Sound : zglPSound; ID, What : Integer ) : Integer;
 
 function  snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
 function  snd_PlayMemory( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
-procedure snd_PauseFile( ID : Integer );
-procedure snd_StopFile( ID : Integer );
-procedure snd_ResumeFile( ID : Integer );
-function  snd_ProcFile( data : Pointer ) : LongInt;
+procedure snd_PauseStream( ID : Integer );
+procedure snd_StopStream( ID : Integer );
+procedure snd_ResumeStream( ID : Integer );
+function  snd_ProcStream( data : Pointer ) : LongInt;
 
 var
   managerSound : zglTSoundManager;
@@ -338,7 +338,7 @@ begin
         if sfStream[ i ]._playing and sfStream[ i ]._waiting Then
           begin
             sfStream[ i ]._waiting := FALSE;
-            snd_ResumeFile( i );
+            snd_ResumeStream( i );
           end;
     end else
       begin
@@ -359,7 +359,7 @@ begin
         for i := 1 to SND_MAX do
           if sfStream[ i ]._playing and ( not sfStream[ i ]._paused ) and ( not sfStream[ i ]._waiting ) Then
             begin
-              snd_PauseFile( i );
+              snd_PauseStream( i );
               sfStream[ i ]._waiting := TRUE;
             end;
       end;
@@ -509,7 +509,7 @@ begin
     end;
 
   for i := 1 to SND_MAX do
-    snd_StopFile( i );
+    snd_StopStream( i );
 
   for i := 1 to SND_MAX do
     if Assigned( sfStream[ i ]._decoder ) Then
@@ -1220,12 +1220,12 @@ begin
   sfStream[ ID ]._lastTime := timer_GetTicks;
 {$IFDEF FPC}
   {$IFNDEF ANDROID}
-  sfThread[ ID ] := LongWord( BeginThread( @snd_ProcFile, @sfStream[ ID ].ID ) );
+  sfThread[ ID ] := LongWord( BeginThread( @snd_ProcStream, @sfStream[ ID ].ID ) );
   {$ELSE}
-  pthread_create( @sfThread[ ID ], nil, @snd_ProcFile, @sfStream[ ID ].ID );
+  pthread_create( @sfThread[ ID ], nil, @snd_ProcStream, @sfStream[ ID ].ID );
   {$ENDIF}
 {$ELSE}
-  sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcFile, @sfStream[ ID ].ID, 0, sfThreadID[ ID ] );
+  sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcStream, @sfStream[ ID ].ID, 0, sfThreadID[ ID ] );
 {$ENDIF}
 end;
 
@@ -1309,7 +1309,7 @@ begin
   snd_PlayStream( Result, Loop );
 end;
 
-procedure snd_PauseFile( ID : Integer );
+procedure snd_PauseStream( ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or
      ( not sfStream[ ID ]._playing ) or ( sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;
@@ -1324,7 +1324,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_StopFile( ID : Integer );
+procedure snd_StopStream( ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or ( not sfStream[ ID ]._playing ) Then exit;
 
@@ -1336,7 +1336,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_ResumeFile( ID : Integer );
+procedure snd_ResumeStream( ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or
      ( not sfStream[ ID ]._playing ) or ( not sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;
@@ -1350,7 +1350,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_ProcFile( data : Pointer ) : LongInt;
+function snd_ProcStream( data : Pointer ) : LongInt;
   var
     id        : Integer;
     _end      : Boolean;

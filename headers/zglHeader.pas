@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2011.12.11           }
+{ date:     2012.01.07           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1198,9 +1198,9 @@ var
   snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
   snd_PlayFile       : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
   snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
-  snd_PauseFile      : procedure( ID : Integer );
-  snd_StopFile       : procedure( ID : Integer );
-  snd_ResumeFile     : procedure( ID : Integer );
+  snd_PauseStream      : procedure( ID : Integer );
+  snd_StopStream       : procedure( ID : Integer );
+  snd_ResumeStream     : procedure( ID : Integer );
 
 // MATH
 const
@@ -1718,9 +1718,9 @@ begin
       snd_Get := dlsym( zglLib, 'snd_Get' );
       snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
       snd_PlayMemory := dlsym( zglLib, 'snd_PlayMemory' );
-      snd_PauseFile := dlsym( zglLib, 'snd_PauseFile' );
-      snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
-      snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );
+      snd_PauseStream := dlsym( zglLib, 'snd_PauseStream' );
+      snd_StopStream := dlsym( zglLib, 'snd_StopStream' );
+      snd_ResumeStream := dlsym( zglLib, 'snd_ResumeStream' );
 
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );

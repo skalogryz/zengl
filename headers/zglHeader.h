@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3                  */
-/* date:     2011.12.11           */
+/* date:     2011.01.07           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1157,9 +1157,9 @@ static inline int snd_PlayMemory( zglTMemory Memory, const char *Extension, bool
 ZGLEXTERN int ( *snd_PlayFile )( const char *FileName, bool Loop );
 ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
 #endif
-ZGLEXTERN void ( *snd_PauseFile )( int ID );
-ZGLEXTERN void ( *snd_StopFile )( int ID );
-ZGLEXTERN void ( *snd_ResumeFile )( int ID );
+ZGLEXTERN void ( *snd_PauseStream )( int ID );
+ZGLEXTERN void ( *snd_StopStream )( int ID );
+ZGLEXTERN void ( *snd_ResumeStream )( int ID );
 
 // MATH
 #define pi      3.141592654
@@ -1566,9 +1566,9 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( snd_PlayFile, zglLib, "_snd_PlayFile" );
     zglGetAddress( snd_PlayMemory, zglLib, "_snd_PlayMemory" );
 #endif
-    zglGetAddress( snd_PauseFile, zglLib, "snd_PauseFile" );
-    zglGetAddress( snd_StopFile, zglLib, "snd_StopFile" );
-    zglGetAddress( snd_ResumeFile, zglLib, "snd_ResumeFile" );
+    zglGetAddress( snd_PauseStream, zglLib, "snd_PauseStream" );
+    zglGetAddress( snd_StopStream, zglLib, "snd_StopStream" );
+    zglGetAddress( snd_ResumeStream, zglLib, "snd_ResumeStream" );
 
     zglGetAddress( m_Cos, zglLib, "m_Cos" );
     zglGetAddress( m_Sin, zglLib, "m_Sin" );
