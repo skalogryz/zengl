@@ -27,7 +27,8 @@ LIBS_WIN32     	 = -Fu../lib/jpeg/i386-win32 -Fu../lib/msvcrt/i386 -Fu../lib/ogg
 BINUTILS_WIN64 	 = -XPx86_64-w64-mingw32-
 LIBS_WIN64     	 = -Fu../lib/jpeg/x86_64-win64 -Fu../lib/msvcrt/x86_64 -Fu../lib/ogg/x86_64-win64 -Fu../lib/zlib/x86_64-win64 -Fu../lib/zip/x86_64-win64
 # WinCE
-BINUTILS_WINCE 	 = -XParm-wince-
+WINCE_FLAGS      = -CpARMv4 -CfSOFT
+BINUTILS_WINCE 	 = -XParm-wince-cegcc-
 LIBS_WINCE     	 = -Fu../lib/jpeg/arm-wince -Fu../lib/ogg/arm-wince -Fu../lib/zlib/arm-wince -Fu../lib/zip/arm-wince
 # Android
 ANDROID_FLAGS    = -CpARMv5 -CfSOFT
@@ -63,7 +64,7 @@ win64: clean
 	$(FPC) ZenGL.pas $(LIBS_WIN64) $(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 $(BINUTILS_WIN64) -WG
 
 wince: clean
-	$(FPC) ZenGL.pas $(LIBS_WINCE) $(TMP) $(FLAGS) -o$(TARGETW) -TWINCE -Parm $(BINUTILS_WINCE) -WG
+	$(FPC) ZenGL.pas $(LIBS_WINCE) $(WINCE_FLAGS) $(TMP) $(FLAGS) -o$(TARGETW) -TWINCE -Parm $(BINUTILS_WINCE) -WG
 
 macos: clean
 	$(FPC) ZenGL.pas $(LIBS) -FE$(OUTPUT) $(TMP) $(FLAGS) -o$(TARGETM) -TDARWIN -Pi386 -k"-no_order_inits" -k"-no_order_data" -k"-macosx_version_min 10.4"
