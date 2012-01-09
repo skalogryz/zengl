@@ -1,4 +1,5 @@
-iOS_GCC=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin10-gcc-4.2.1
+iOS_GCC=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2
+iOS_SYSROOT=/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk
 ANDROID_GCC=$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-gcc
 
 linux:
@@ -22,5 +23,9 @@ macos:
 	powerpc-apple-darwin10-gcc-4.2.1 zlib_helper.c -c -opowerpc-darwin/zlib_helper.o -O2 -s -ffast-math -std=c99
 
 ios:
-	$(iOS_GCC) zlib_helper.c -c -oarm-darwin/zlib_helper.o -O2 -s -ffast-math -std=c99
+	$(iOS_GCC) -isysroot$(iOS_SYSROOT) -arch armv6 zlib_helper.c -c -oarm-darwin/zlib_helper_armv6.o -O2 -s -ffast-math -std=c99
+	$(iOS_GCC) -isysroot$(iOS_SYSROOT) -arch armv7 zlib_helper.c -c -oarm-darwin/zlib_helper_armv7.o -O2 -s -ffast-math -std=c99
+	lipo -create arm-darwin/zlib_helper_armv6.o arm-darwin/zlib_helper_armv7.o -output arm-darwin/zlib_helper.o
+	rm -f arm-darwin/zlib_helper_armv6.o
+	rm -f arm-darwin/zlib_helper_armv7.o
 	gcc zlib_helper.c -c -oi386-iphonesim/zlib_helper.o -O2 -s -ffast-math -std=c99 -march=i686 -m32
