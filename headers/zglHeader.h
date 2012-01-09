@@ -2,8 +2,8 @@
 /*-----------= ZenGL =------------*/
 /*--------------------------------*/
 /*                                */
-/* version:  0.3                  */
-/* date:     2011.01.07           */
+/* version:  0.3 alpha            */
+/* date:     2011.01.09           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */

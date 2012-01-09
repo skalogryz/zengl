@@ -2,8 +2,8 @@
 {-----------= ZenGL =------------}
 {--------------------------------}
 {                                }
-{ version:  0.3                  }
-{ date:     2012.01.07           }
+{ version:  0.3 alpha            }
+{ date:     2012.01.09           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -24,17 +24,23 @@ unit zglHeader;
   {$MODE DELPHI}
   {$MACRO ON}
   {$PACKRECORDS C}
+
+  {$IFDEF CPUARM}
+    {$IFDEF WINCE}
+      {$ALIGN 4}
+    {$ENDIF}
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
   {$DEFINE WINDOWS}
 {$ENDIF}
 {$IFDEF DARWIN}
-{$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
-  {$DEFINE iOS}
-{$ELSE}
-  {$DEFINE MACOSX}
-{$IFEND}
+  {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
+    {$DEFINE iOS}
+  {$ELSE}
+    {$DEFINE MACOSX}
+  {$IFEND}
 {$ENDIF}
 
 interface

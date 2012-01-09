@@ -45,8 +45,8 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2012.01.07';
+  cs_ZenGL    = 'ZenGL 0.3 alpha';
+  cs_Date     = '2012.01.09';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
