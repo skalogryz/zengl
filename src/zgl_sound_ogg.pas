@@ -23,7 +23,12 @@ unit zgl_sound_ogg;
 {$I zgl_config.cfg}
 
 {$IFDEF USE_OGG_STATIC}
-  {$IFNDEF USE_TREMOLO}
+  {$IF DEFINED(USE_TREMOLO)}
+    {$LINKLIB libtremolo.a}
+  {$ELSEIF DEFINED(USE_TREMOR)}
+    {$LINKLIB libtremor.a}
+  {$ELSE}
+    {$DEFINE USE_VORBIS}
     {$L bitwise}
     {$L framing}
     {$L analysis}
@@ -47,9 +52,7 @@ unit zgl_sound_ogg;
     {$L synthesis}
     {$L vorbisfile}
     {$L window}
-  {$ELSE}
-    {$LINKLIB libtremolo.a}
-  {$ENDIF}
+  {$IFEND}
   {$IFDEF UNIX}
     {$LINKLIB m}
   {$ENDIF}
@@ -59,6 +62,8 @@ unit zgl_sound_ogg;
   {$IFDEF iOS}
     {$LINKLIB libgcc_s.1.dylib}
   {$ENDIF}
+{$ELSE}
+  {$DEFINE USE_VORBIS}
 {$ENDIF}
 
 interface
@@ -257,8 +262,8 @@ type
     ready_state     : cint;
     current_serialno: clong;
     current_link    : cint;
-    bittrack        : {$IFNDEF USE_TREMOLO} cdouble {$ELSE} ogg_int64_t {$ENDIF};
-    samptrack       : {$IFNDEF USE_TREMOLO} cdouble {$ELSE} ogg_int64_t {$ENDIF};
+    bittrack        : {$IFDEF USE_VORBIS} cdouble {$ELSE} ogg_int64_t {$ENDIF};
+    samptrack       : {$IFDEF USE_VORBIS} cdouble {$ELSE} ogg_int64_t {$ENDIF};
     os              : ogg_stream_state;
     vd              : vorbis_dsp_state;
     vb              : vorbis_block;
@@ -276,7 +281,7 @@ type
   function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
   function ov_open_callbacks(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
   function ov_info(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl; external;
-  function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; {$IFNDEF USE_TREMOLO} bigendianp: cbool; word: cint; sgned: cbool; {$ENDIF} bitstream: pcint): clong; cdecl; external;
+  function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; {$IFDEF USE_VORBIS} bigendianp: cbool; word: cint; sgned: cbool; {$ENDIF} bitstream: pcint): clong; cdecl; external;
   function ov_pcm_seek(var vf: OggVorbis_File; pos: cint64): cint; cdecl; external;
   function ov_pcm_total(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl; external;
 {$ELSE}
@@ -458,7 +463,7 @@ begin
 
   bytesRead := 0;
   repeat
-    Result := ov_read( zglTOggStream( Stream._data^ ).vf, Pointer( Ptr( Buffer ) + bytesRead ), Bytes - bytesRead, {$IFNDEF USE_TREMOLO} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
+    Result := ov_read( zglTOggStream( Stream._data^ ).vf, Pointer( Ptr( Buffer ) + bytesRead ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
     bytesRead := bytesRead + Result;
   until ( Result = 0 ) or ( bytesRead = Bytes );
 
@@ -487,7 +492,7 @@ function decoderRead( var VorbisFile : OggVorbis_File; const Buffer : Pointer; c
 begin
   bytesRead := 0;
   repeat
-    Result := ov_read( VorbisFile, Pointer( Ptr( Buffer ) + bytesRead ), Bytes - bytesRead, {$IFNDEF USE_TREMOLO} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
+    Result := ov_read( VorbisFile, Pointer( Ptr( Buffer ) + bytesRead ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
     bytesRead := bytesRead + Result;
   until ( Result = 0 ) or ( bytesRead = Bytes );
 
