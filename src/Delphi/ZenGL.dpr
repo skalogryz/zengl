@@ -342,9 +342,9 @@ exports
   snd_SetSpeed             name prefix + 'snd_SetSpeed',
   snd_PlayFile             name prefix + 'snd_PlayFile',
   snd_PlayMemory           name prefix + 'snd_PlayMemory',
-  snd_PauseFile            name prefix + 'snd_PauseFile',
-  snd_StopFile             name prefix + 'snd_StopFile',
-  snd_ResumeFile           name prefix + 'snd_ResumeFile',
+  snd_PauseStream          name prefix + 'snd_PauseStream',
+  snd_StopStream           name prefix + 'snd_StopStream',
+  snd_ResumeStream         name prefix + 'snd_ResumeStream',
   {$ENDIF}
 
   // Math
