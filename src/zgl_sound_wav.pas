@@ -116,9 +116,11 @@ begin
   until wavMemory.Position >= wavMemory.Size;
 end;
 
+{$IFDEF USE_WAV}
 initialization
   zgl_Reg( SND_FORMAT_EXTENSION,   @WAV_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @wav_LoadFromMemory );
+{$ENDIF}
 
 end.

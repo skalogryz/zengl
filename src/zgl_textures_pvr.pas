@@ -108,9 +108,11 @@ begin
   Move( Pointer( Ptr( pvrMem.Memory ) + pvrMem.Position )^, Data^, size );
 end;
 
+{$IFDEF USE_PVR}
 initialization
   zgl_Reg( TEX_FORMAT_EXTENSION,   @PVR_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @pvr_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @pvr_LoadFromMemory );
+{$ENDIF}
 
 end.

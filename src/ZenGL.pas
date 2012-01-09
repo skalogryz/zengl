@@ -37,6 +37,9 @@ uses
 
   zgl_mouse,
   zgl_keyboard,
+  {$IFDEF ANDROID}
+  zgl_touch,
+  {$ENDIF}
   {$IFDEF USE_JOYSTICK}
   zgl_joystick,
   {$ENDIF}
@@ -44,11 +47,15 @@ uses
   zgl_resources,
 
   zgl_textures,
-  {$IFNDEF WINCE}
+  {$IFDEF USE_JPG}
   zgl_textures_jpg,
   {$ENDIF}
+  {$IFDEF USE_PNG}
   zgl_textures_png,
+  {$ENDIF}
+  {$IFDEF USE_TGA}
   zgl_textures_tga,
+  {$ENDIF}
 
   {$IFDEF USE_TEXTURE_ATLAS}
   zgl_texture_atlas,
@@ -57,8 +64,12 @@ uses
 
   {$IFDEF USE_SOUND}
   zgl_sound,
-  zgl_sound_wav,
+  {$IFDEF USE_OGG}
   zgl_sound_ogg,
+  {$ENDIF}
+  {$IFDEF USE_WAV}
+  zgl_sound_wav,
+  {$ENDIF}
   {$ENDIF}
 
   zgl_fx,
@@ -176,6 +187,17 @@ exports
   _key_GetText             name prefix + 'key_GetText',
   key_EndReadText          name prefix + 'key_EndReadText',
   key_ClearState           name prefix + 'key_ClearState',
+
+  // Touch
+  {$IFDEF ANDROID}
+  touch_X                   name prefix + 'touch_X',
+  touch_Y                   name prefix + 'touch_Y',
+  touch_Down                name prefix + 'touch_Down',
+  touch_Up                  name prefix + 'touch_Up',
+  touch_Tap                 name prefix + 'touch_Tap',
+  touch_DblTap              name prefix + 'touch_DblTap',
+  touch_ClearState          name prefix + 'touch_ClearState',
+  {$ENDIF}
 
   // Joystick
   {$IFDEF USE_JOYSTICK}
@@ -334,9 +356,9 @@ exports
   snd_SetSpeed             name prefix + 'snd_SetSpeed',
   snd_PlayFile             name prefix + 'snd_PlayFile',
   snd_PlayMemory           name prefix + 'snd_PlayMemory',
-  snd_PauseFile            name prefix + 'snd_PauseFile',
-  snd_StopFile             name prefix + 'snd_StopFile',
-  snd_ResumeFile           name prefix + 'snd_ResumeFile',
+  snd_PauseStream          name prefix + 'snd_PauseStream',
+  snd_StopStream           name prefix + 'snd_StopStream',
+  snd_ResumeStream         name prefix + 'snd_ResumeStream',
   {$ENDIF}
 
   // Math

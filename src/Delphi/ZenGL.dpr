@@ -44,11 +44,15 @@ uses
   zgl_resources,
 
   zgl_textures,
-  {$IFNDEF WINCE}
+  {$IFDEF USE_JPG}
   zgl_textures_jpg,
   {$ENDIF}
+  {$IFDEF USE_PNG}
   zgl_textures_png,
+  {$ENDIF}
+  {$IFDEF USE_TGA}
   zgl_textures_tga,
+  {$ENDIF}
 
   {$IFDEF USE_TEXTURE_ATLAS}
   zgl_texture_atlas,
@@ -57,8 +61,12 @@ uses
 
   {$IFDEF USE_SOUND}
   zgl_sound,
-  zgl_sound_wav,
+  {$IFDEF USE_OGG}
   zgl_sound_ogg,
+  {$ENDIF}
+  {$IFDEF USE_WAV}
+  zgl_sound_wav,
+  {$ENDIF}
   {$ENDIF}
 
   zgl_fx,

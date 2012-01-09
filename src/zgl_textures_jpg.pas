@@ -336,6 +336,7 @@ begin
   Format := TEX_FORMAT_RGBA;
 end;
 
+{$IFDEF USE_JPG}
 initialization
   // jpg
   zgl_Reg( TEX_FORMAT_EXTENSION,   @JPG_EXTENSION[ 0 ] );
@@ -345,6 +346,6 @@ initialization
   zgl_Reg( TEX_FORMAT_EXTENSION,   @JPEG_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
-
+{$ENDIF}
 
 end.

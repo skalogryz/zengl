@@ -262,9 +262,11 @@ _exit:
   end;
 end;
 
+{$IFDEF USE_TGA}
 initialization
   zgl_Reg( TEX_FORMAT_EXTENSION,   @TGA_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @tga_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @tga_LoadFromMemory );
+{$ENDIF}
 
 end.

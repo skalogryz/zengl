@@ -475,9 +475,11 @@ _exit:
   end;
 end;
 
+{$IFDEF USE_PNG}
 initialization
   zgl_Reg( TEX_FORMAT_EXTENSION,   @PNG_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @png_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @png_LoadFromMemory );
+{$ENDIF}
 
 end.

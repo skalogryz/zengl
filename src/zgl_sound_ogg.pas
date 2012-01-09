@@ -22,19 +22,6 @@ unit zgl_sound_ogg;
 
 {$I zgl_config.cfg}
 
-{$IFNDEF FPC}
-  {$UNDEF USE_OGG_STATIC}
-{$ENDIF}
-
-//
-{$IFDEF ANDROID}
-  {$DEFINE USE_OGG_STATIC}
-{$ENDIF}
-// Developers from xiph.org didn't include target which builds dylib's, so...
-{$IFDEF DARWIN}
-  {$DEFINE USE_OGG_STATIC}
-{$ENDIF}
-
 {$IFDEF USE_OGG_STATIC}
   {$IFNDEF USE_TREMOLO}
     {$L bitwise}
@@ -560,6 +547,7 @@ begin
     end;
 end;
 
+{$IFDEF USE_OGG}
 initialization
   oggDecoder.Ext     := OGG_EXTENSION;
   oggDecoder.Open    := ogg_DecoderOpen;
@@ -571,6 +559,7 @@ initialization
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
   zgl_Reg( SND_FORMAT_DECODER,     @oggDecoder );
+{$ENDIF}
 
 finalization
 {$IFNDEF USE_OGG_STATIC}
