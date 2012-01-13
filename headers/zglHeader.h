@@ -639,7 +639,7 @@ ZGLEXTERN zglPTexture ( *tex_LoadFromFile )( const char *FileName, uint Transpar
 ZGLEXTERN zglPTexture ( *tex_LoadFromMemory )( const zglTMemory Memory, const char *Extension, uint TransparentColor, uint Flags );
 #endif
 ZGLEXTERN void ( *tex_SetFrameSize )( zglPTexture *Texture, ushort FrameWidth, ushort FrameHeight );
-ZGLEXTERN zglPTexture ( *tex_SetMask )( zglPTexture *Texture, zglPTexture Mask );
+ZGLEXTERN void ( *tex_SetMask )( zglPTexture **Texture, zglPTexture Mask );
 #ifdef __CPP__
 ZGLEXTERN void ( *__tex_SetData )( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride );
 static inline void tex_SetData( zglPTexture Texture, void *pData, ushort X, ushort Y, ushort Width, ushort Height, int Stride = 0 )
