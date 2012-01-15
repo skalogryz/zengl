@@ -186,6 +186,14 @@ function winkey_to_scancode( WinKey : Integer ) : Byte;
 {$IFDEF MACOSX}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
 {$ENDIF}
+{$IFDEF iOS}
+type
+  zglCiOSTextField = objcclass(UITextField, UITextInputTraitsProtocol)
+  public
+    function textRectForBounds( bounds_ : CGRect ) : CGRect; override;
+    function editingRectForBounds( bounds_ : CGRect ) : CGRect; override;
+  end;
+{$ENDIF}
 function  SCA( KeyCode : LongWord ) : LongWord;
 procedure doKeyPress( KeyCode : LongWord );
 
@@ -221,7 +229,8 @@ var
   keysRepeat : Integer; // Костыль, да :)
   {$ENDIF}
   {$IFDEF iOS}
-  keysTextField   : UITextField;
+  keysTextField   : zglCiOSTextField;
+  keysTextTraits  : UITextInputTraitsProtocol;
   keysTextFrame   : CGRect;
   keysTextChanged : Boolean;
   {$ENDIF}
@@ -276,7 +285,8 @@ begin
     begin
       keysTextFrame := wndHandle.frame;
       keysTextField := zglCiOSTextField.alloc().initWithFrame( keysTextFrame );
-      with keysTextField do
+      keysTextTraits := keysTextField;
+      with keysTextField, keysTextTraits do
         begin
           setDelegate( appDelegate );
           setAutocapitalizationType( UITextAutocapitalizationTypeNone );
@@ -291,9 +301,9 @@ begin
     end;
 
     if appFlags and APP_USE_ENGLISH_INPUT > 0 Then
-      keysTextField.setKeyboardType( UIKeyboardTypeASCIICapable )
+      keysTextTraits.setKeyboardType( UIKeyboardTypeASCIICapable )
     else
-      keysTextField.setKeyboardType( UIKeyboardTypeDefault );
+      keysTextTraits.setKeyboardType( UIKeyboardTypeDefault );
 
     wndHandle.addSubview( keysTextField );
     keysTextField.becomeFirstResponder();
@@ -701,6 +711,19 @@ begin
     $67: Result := K_F11;
     $6F: Result := K_F12;
   end;
+end;
+{$ENDIF}
+
+{$IFDEF iOS}
+// Good bye standard EditBox... :)
+function zglCiOSTextField.textRectForBounds( bounds_ : CGRect ) : CGRect;
+begin
+  Result := CGRectMake( 0, 4096, 0, 0 );
+end;
+
+function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
+begin
+  Result := CGRectMake( 0, 4096, 0, 0 );
 end;
 {$ENDIF}
 

@@ -99,13 +99,6 @@ type
     procedure touchesEnded_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesCancelled_withEvent( touches : NSSet; event : UIevent ); override;
   end;
-
-type
-  zglCiOSTextField = objcclass(UITextField)
-  public
-    function textRectForBounds( bounds_ : CGRect ) : CGRect; override;
-    function editingRectForBounds( bounds_ : CGRect ) : CGRect; override;
-  end;
 {$ENDIF}
 {$IFDEF ANDROID}
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; var thiz : jobject; path : jstring ); cdecl;
@@ -397,8 +390,8 @@ function app_ProcessMessages;
     str : AnsiString;
     key : LongWord;
 begin
-{$IFDEF USE_X11}
   Result := 0;
+{$IFDEF USE_X11}
   while XPending( scrDisplay ) <> 0 do
     begin
       XNextEvent( scrDisplay, @event );
@@ -593,7 +586,6 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Result := 0;
   if ( not appWork ) and ( Msg <> WM_ACTIVATEAPP ) Then
     begin
       Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
@@ -1295,17 +1287,6 @@ begin
       zgl_FreeMem( buffer );
     end else
       keysTextChanged := FALSE;
-end;
-
- // Good bye standard EditBox... :)
-function zglCiOSTextField.textRectForBounds( bounds_ : CGRect ) : CGRect;
-begin
-  Result := CGRectMake( 0, 4096, 0, 0 );
-end;
-
-function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
-begin
-  Result := CGRectMake( 0, 4096, 0, 0 );
 end;
 
 function zglCiOSViewController.shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean;
