@@ -143,7 +143,7 @@ begin
   FillChar( mouseWheel[ 0 ], 2, 0 );
 end;
 
-procedure mouse_Lock;
+procedure mouse_Lock( X : Integer = -1; Y : Integer = -1 );
   {$IFDEF MACOSX}
   var
     Point : CGPoint;
