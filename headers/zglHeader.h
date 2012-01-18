@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2011.01.09           */
+/* date:     2011.01.18           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -100,7 +100,7 @@ ZGLEXTERN void ( *zgl_Exit )();
 #define INPUT_MOUSE_MOVE       0x000040
 #define INPUT_MOUSE_PRESS      0x000041
 #define INPUT_MOUSE_RELEASE    0x000042
-#define INPUT_MOUSE_WHEEL      0x000042
+#define INPUT_MOUSE_WHEEL      0x000043
 #define INPUT_KEY_PRESS        0x000050
 #define INPUT_KEY_RELEASE      0x000051
 #define INPUT_KEY_CHAR         0x000052

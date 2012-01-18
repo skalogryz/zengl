@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.01.09           }
+{ date:     2012.01.18           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -114,7 +114,7 @@ const
   INPUT_MOUSE_MOVE       = $000040;
   INPUT_MOUSE_PRESS      = $000041;
   INPUT_MOUSE_RELEASE    = $000042;
-  INPUT_MOUSE_WHEEL      = $000042;
+  INPUT_MOUSE_WHEEL      = $000043;
   INPUT_KEY_PRESS        = $000050;
   INPUT_KEY_RELEASE      = $000051;
   INPUT_KEY_CHAR         = $000052;

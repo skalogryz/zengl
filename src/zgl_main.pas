@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.01.15';
+  cs_Date     = '2012.01.18';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -69,7 +69,7 @@ const
   INPUT_MOUSE_MOVE       = $000040;
   INPUT_MOUSE_PRESS      = $000041;
   INPUT_MOUSE_RELEASE    = $000042;
-  INPUT_MOUSE_WHEEL      = $000042;
+  INPUT_MOUSE_WHEEL      = $000043;
   INPUT_KEY_PRESS        = $000050;
   INPUT_KEY_RELEASE      = $000051;
   INPUT_KEY_CHAR         = $000052;
@@ -461,6 +461,10 @@ begin
     INPUT_MOUSE_RELEASE:
       begin
         mouse_PRelease := UserData;
+      end;
+    INPUT_MOUSE_WHEEL:
+      begin
+        mouse_PWheel := UserData;
       end;
     INPUT_KEY_PRESS:
       begin
