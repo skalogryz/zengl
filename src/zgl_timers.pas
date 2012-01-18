@@ -34,9 +34,12 @@ type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Active     : Boolean;
+    Custom     : Boolean;
+    UserData   : Pointer;
     Interval   : LongWord;
     LastTick   : Double;
     OnTimer    : procedure;
+    OnTimerEx  : procedure( Timer : zglPTimer );
 
     prev, next : zglPTimer;
 end;
@@ -48,7 +51,7 @@ type
     First : zglTTimer;
 end;
 
-function  timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
+function  timer_Add( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
 procedure timer_Del( var Timer : zglPTimer );
 
 procedure timer_MainLoop;
@@ -94,19 +97,24 @@ var
   {$ENDIF}
   timerStart : Double;
 
-function timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
+function timer_Add( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
 begin
   Result := @managerTimer.First;
   while Assigned( Result.next ) do
     Result := Result.next;
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTTimer ) );
-  Result.next.Active   := TRUE;
-  Result.next.Interval := Interval;
-  Result.next.OnTimer  := OnTimer;
-  Result.next.LastTick := timer_GetTicks();
-  Result.next.prev     := Result;
-  Result.next.next     := nil;
+  Result.next.Active    := TRUE;
+  Result.next.Custom    := UseSenderForCallback;
+  Result.next.UserData  := UserData;
+  Result.next.Interval  := Interval;
+  if UseSenderForCallback Then
+    Result.next.OnTimer := OnTimer
+  else
+    Result.next.OnTimerEx := OnTimer;
+  Result.next.LastTick  := timer_GetTicks();
+  Result.next.prev      := Result;
+  Result.next.next      := nil;
   Result := Result.next;
   INC( managerTimer.Count );
 end;
@@ -151,7 +159,10 @@ begin
             while t >= timer.LastTick + timer.Interval do
               begin
                 timer.LastTick := timer.LastTick + timer.Interval;
-                timer.OnTimer();
+                if timer.Custom Then
+                  timer.OnTimerEx( timer );
+                else
+                  timer.OnTimer();
                 if t < timer_GetTicks() - timer.Interval Then
                   break
                 else

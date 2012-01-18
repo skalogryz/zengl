@@ -274,9 +274,11 @@ ZGLEXTERN void ( *scissor_End )();
 typedef struct
 {
   bool   Active;
+  bool   Custom;
   uint   Interval;
   double LastTick;
   void*  OnTimer;
+  void   ( *OnTimerEx )( void *Timer );
 
   void*  Prev;
   void*  Next;
@@ -288,7 +290,15 @@ typedef struct
   zglTTimer First;
 } zglTTimerManager, *zglPTimerManager;
 
-ZGLEXTERN zglPTimer ( *timer_Add )( void *OnTimer, uint Interval );
+#ifdef __CPP__
+ZGLEXTERN zglPTimer ( *__timer_Add )( void *OnTimer, uint Interval, bool UseSenderForCallback, void *UserData );
+static inline void timer_Add( void *OnTimer, uint Interval, bool UseSenderForCallback = FALSE, void *UserData = NULL )
+{
+  __timer_Add( OnTimer, Interval, UseSenderForCallback, UserData );
+}
+#else
+ZGLEXTERN zglPTimer ( *timer_Add )( void *OnTimer, uint Interval, bool UseSenderForCallback, void *UserData );
+#endif
 ZGLEXTERN void ( *timer_Del )( zglPTimer *Timer );
 ZGLEXTERN double ( *timer_GetTicks )();
 ZGLEXTERN void ( *timer_Reset )();
@@ -1341,7 +1351,11 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( ini_WriteKeyFloat, zglLib, "ini_WriteKeyFloat" );
     zglGetAddress( ini_WriteKeyBool, zglLib, "ini_WriteKeyBool" );
 */
+#ifdef __CPP__
+    zglGetAddress( __timer_Add, zglLib, "timer_Add" );
+#else
     zglGetAddress( timer_Add, zglLib, "timer_Add" );
+#endif
     zglGetAddress( timer_Del, zglLib, "timer_Del" );
     zglGetAddress( timer_GetTicks, zglLib, "timer_GetTicks" );
     zglGetAddress( timer_Reset, zglLib, "timer_Reset" );

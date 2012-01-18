@@ -297,7 +297,7 @@ type
 end;
 
 var
-  timer_Add      : function( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
+  timer_Add      : function( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
   timer_Del      : procedure( var Timer : zglPTimer );
   timer_GetTicks : function : Double;
   timer_Reset    : procedure;
@@ -1398,9 +1398,11 @@ end;
 
 function u_StrToInt( const Value : String ) : Integer;
   var
-    E : Integer;
+    e : Integer;
 begin
-  Val( String( Value ), Result, E );
+  Val( Value, Result, e );
+  if e <> 0 Then
+    Result := 0;
 end;
 
 function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
@@ -1410,10 +1412,10 @@ end;
 
 function u_StrToFloat( const Value : String ) : Single;
   var
-    E : Integer;
+    e : Integer;
 begin
-  Val( String( Value ), Result, E );
-  if E <> 0 Then
+  Val( Value, Result, e );
+  if e <> 0 Then
     Result := 0;
 end;
 
@@ -1442,7 +1444,8 @@ function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
 begin
   len := length( Str );
   SetLength( Result, len );
-  System.Move( Str[ 1 ], Result[ 1 ], len );
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result[ 1 ], len );
 end;
 
 function u_CopyStr( const Str : String ) : String;
@@ -1451,7 +1454,19 @@ function u_CopyStr( const Str : String ) : String;
 begin
   len := length( Str );
   SetLength( Result, len );
-  System.Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
+end;
+
+function u_GetPAnsiChar( const Str : AnsiString ) : PAnsiChar;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  GetMem( Result, len + 1 );
+  Result[ len ] := #0;
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result^, len );
 end;
 
 {$IFDEF WINCE}
@@ -1468,7 +1483,18 @@ begin
 end;
 {$ENDIF}
 
-function u_StrUp( const str : String ) : String;
+function u_GetPChar( const Str : String ) : PChar;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  GetMem( Result, ( len + 1 ) * SizeOf( Char ) );
+  Result[ len ] := #0;
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result^, len * SizeOf( Char ) );
+end;
+
+function u_StrUp( const Str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -1481,7 +1507,7 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-function u_StrDown( const str : String ) : String;
+function u_StrDown( const Str : String ) : String;
   var
     i, l : Integer;
 begin

@@ -161,8 +161,8 @@ int main()
 
   srand( 0xDeaDBeeF );
 
-  timer_Add( (void*)&Timer, 16 );
-  timer_Add( (void*)&AddMiku, 1000 );
+  timer_Add( (void*)&Timer, 16, FALSE, NULL );
+  timer_Add( (void*)&AddMiku, 1000, FALSE, NULL );
 
   zgl_Reg( SYS_LOAD, (void*)&Init );
   zgl_Reg( SYS_DRAW, (void*)&Draw );

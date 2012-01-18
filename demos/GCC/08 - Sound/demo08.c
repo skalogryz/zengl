@@ -114,7 +114,7 @@ int main()
 
   srand( 0xDeaDBeeF );
 
-  timer_Add( (void*)&Proc, 16 );
+  timer_Add( (void*)&Proc, 16, FALSE, NULL );
 
   zgl_Reg( SYS_LOAD, (void*)&Init );
   zgl_Reg( SYS_DRAW, (void*)&Draw );

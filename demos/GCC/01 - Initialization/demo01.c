@@ -80,7 +80,7 @@ int main()
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
-  timer_Add( (void*)&Timer, 1000 );
+  timer_Add( (void*)&Timer, 1000, FALSE, NULL );
 
   // RU: Регистрируем функцию, что выполнится сразу после инициализации ZenGL.
   // EN: Register the function, that will be executed after ZenGL initialization.
