@@ -151,11 +151,11 @@ var
   alBufferData           : procedure(bid: LongWord; format: LongInt; data: Pointer; size: LongInt; freq: LongInt); cdecl;
   {$ENDIF}
 
-  oalDevice  : PALCdevice  = nil;
-  oalContext : PALCcontext = nil;
-  oalSources : array of LongWord;
-  oalSrcPtrs : array of Pointer;
-  oalSrcState: array of LongWord;
+  oalDevice   : PALCdevice  = nil;
+  oalContext  : PALCcontext = nil;
+  oalSources  : array of LongWord;
+  oalSrcPtrs  : array of Pointer;
+  oalSrcState : array of LongWord;
 
   // Параметры слушателя
   oalPosition    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция

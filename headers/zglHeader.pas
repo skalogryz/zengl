@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.01.18           }
+{ date:     2012.01.19           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1119,7 +1119,7 @@ type
   zglPSoundManager = ^zglTSoundManager;
 
   zglTSoundChannel = record
-    Source     : LongWord;
+    Source     : Ptr;
     Speed      : Single;
     Volume     : Single;
     Position   : record

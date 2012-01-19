@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2011.01.18           */
+/* date:     2011.01.19           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1046,9 +1046,9 @@ ZGLEXTERN void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCha
 
 typedef struct
 {
-  uint  Source;
-  float Speed;
-  float Volume;
+  size_t Source;
+  float  Speed;
+  float  Volume;
 
   struct
   {
