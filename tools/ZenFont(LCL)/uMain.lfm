@@ -4,12 +4,9 @@ object Form1: TForm1
   Top = 183
   Width = 800
   ActiveControl = Panel1
-  BorderStyle = bsDialog
   Caption = 'ZenFont 0.2.4(LCL)'
   ClientHeight = 600
   ClientWidth = 800
-  Constraints.MinHeight = 600
-  Constraints.MinWidth = 800
   OnActivate = FormActivate
   OnClose = FormClose
   OnResize = FormResize
@@ -23,7 +20,7 @@ object Form1: TForm1
     Width = 800
     Align = alBottom
     Caption = 'Parameters'
-    ClientHeight = 182
+    ClientHeight = 184
     ClientWidth = 796
     TabOrder = 0
     object CheckBoxAntialiasing: TCheckBox
@@ -50,7 +47,7 @@ object Form1: TForm1
     end
     object LabelCurrentPage: TLabel
       Left = 10
-      Height = 17
+      Height = 15
       Top = 55
       Width = 85
       Caption = 'Current Page:'
@@ -58,7 +55,7 @@ object Form1: TForm1
     end
     object ComboBoxPageSize: TComboBox
       Left = 90
-      Height = 24
+      Height = 23
       Top = 10
       Width = 70
       ItemHeight = 0
@@ -77,7 +74,7 @@ object Form1: TForm1
     end
     object LabelPageSize: TLabel
       Left = 10
-      Height = 17
+      Height = 15
       Top = 15
       Width = 62
       Caption = 'Page Size:'
@@ -129,12 +126,12 @@ object Form1: TForm1
       Width = 460
       Anchors = [akTop, akLeft, akRight]
       Caption = 'Char Padding'
-      ClientHeight = 52
+      ClientHeight = 54
       ClientWidth = 456
       TabOrder = 7
       object Label1: TLabel
         Left = 120
-        Height = 17
+        Height = 15
         Top = 15
         Width = 26
         Caption = 'Top:'
@@ -142,7 +139,7 @@ object Form1: TForm1
       end
       object Label2: TLabel
         Left = 10
-        Height = 17
+        Height = 15
         Top = 15
         Width = 30
         Caption = 'Left:'
@@ -150,7 +147,7 @@ object Form1: TForm1
       end
       object Label3: TLabel
         Left = 220
-        Height = 17
+        Height = 15
         Top = 15
         Width = 37
         Caption = 'Right:'
@@ -158,7 +155,7 @@ object Form1: TForm1
       end
       object Label4: TLabel
         Left = 340
-        Height = 17
+        Height = 15
         Top = 15
         Width = 51
         Caption = 'Bottom:'
@@ -166,7 +163,7 @@ object Form1: TForm1
       end
       object SpinTop: TSpinEdit
         Left = 160
-        Height = 26
+        Height = 24
         Top = 10
         Width = 50
         OnChange = SpinTopChange
@@ -175,7 +172,7 @@ object Form1: TForm1
       end
       object SpinLeft: TSpinEdit
         Left = 60
-        Height = 26
+        Height = 24
         Top = 10
         Width = 50
         OnChange = SpinLeftChange
@@ -184,7 +181,7 @@ object Form1: TForm1
       end
       object SpinRight: TSpinEdit
         Left = 280
-        Height = 26
+        Height = 24
         Top = 10
         Width = 50
         OnChange = SpinRightChange
@@ -193,7 +190,7 @@ object Form1: TForm1
       end
       object SpinBottom: TSpinEdit
         Left = 400
-        Height = 26
+        Height = 24
         Top = 10
         Width = 50
         OnChange = SpinBottomChange
@@ -203,7 +200,7 @@ object Form1: TForm1
     end
     object SpinCurrentPage: TSpinEdit
       Left = 110
-      Height = 26
+      Height = 24
       Top = 50
       Width = 50
       MaxValue = 1
@@ -218,7 +215,7 @@ object Form1: TForm1
       Width = 335
       Anchors = [akTop, akLeft, akRight]
       Caption = 'Chars'
-      ClientHeight = 77
+      ClientHeight = 79
       ClientWidth = 331
       TabOrder = 9
       object ButtonDefaultSymbols: TButton
@@ -242,7 +239,7 @@ object Form1: TForm1
       end
       object EditChars: TEdit
         Left = 10
-        Height = 26
+        Height = 24
         Top = 10
         Width = 310
         Anchors = [akTop, akLeft, akRight]
@@ -255,12 +252,12 @@ object Form1: TForm1
       Top = 0
       Width = 120
       Caption = 'Test String'
-      ClientHeight = 77
+      ClientHeight = 79
       ClientWidth = 116
       TabOrder = 10
       object EditTest: TEdit
         Left = 10
-        Height = 26
+        Height = 24
         Top = 10
         Width = 95
         TabOrder = 0
