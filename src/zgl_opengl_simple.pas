@@ -129,7 +129,11 @@ begin
       Y      := Trunc( ( Y - cam2d.Global.Center.Y ) * cam2d.Global.Zoom.Y - cam2d.Global.Y );
       Width  := Trunc( Width  * cam2d.Global.Zoom.X );
       Height := Trunc( Height * cam2d.Global.Zoom.Y );
-    end;
+    end else
+      begin
+        X := Trunc( ( X - cam2d.Global.X );
+        Y := Trunc( ( Y - cam2d.Global.Y );
+      end;
   if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
       X      := Round( X * scrResCX + scrAddCX );
