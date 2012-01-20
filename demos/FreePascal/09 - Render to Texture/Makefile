@@ -15,7 +15,7 @@ endif
 # Variables
 FPC     = fpc
 FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../../branches/zendx -Fu../../../../branches/zendx/Direct3D
+INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src
 LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS) -Fu../../../lib/zip/$(ARCH)-$(OS)
 LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS) -Fu../../../lib/zip/powerpc-$(OS)
 OUTPUT  = ../../../bin/
