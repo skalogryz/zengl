@@ -127,8 +127,8 @@ begin
     begin
       if cam2d.OnlyXY Then
         begin
-          X := Trunc( ( X - cam2d.Global.X );
-          Y := Trunc( ( Y - cam2d.Global.Y );
+          X := Trunc( X - cam2d.Global.X );
+          Y := Trunc( Y - cam2d.Global.Y );
         end else
           begin
             X      := Trunc( ( X - cam2d.Global.Center.X ) * cam2d.Global.Zoom.X - cam2d.Global.X );
