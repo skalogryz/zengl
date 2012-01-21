@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2011.01.19           */
+/* date:     2011.01.21           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -246,7 +246,15 @@ ZGLEXTERN void ( *zbuffer_SetDepth )( float zNear, float zFar );
 ZGLEXTERN void ( *zbuffer_Clear )();
 
 // SCISSOR
-ZGLEXTERN void ( *scissor_Begin )( int X, int Y, int Width, int Height );
+#ifdef __CPP__
+ZGLEXTERN void ( *__scissor_Begin )( int X, int Y, int Width, int Height, bool ConsiderCamera );
+static inline void ( *scissor_Begin )( int X, int Y, int Width, int Height, bool ConsiderCamera = TRUE );
+{
+  __scissor_Begin( X, Y, Width, Height, ConsiderCamera );
+}
+#else
+ZGLEXTERN void ( *scissor_Begin )( int X, int Y, int Width, int Height, bool ConsiderCamera );
+#endif
 ZGLEXTERN void ( *scissor_End )();
 
 // INI
@@ -1445,7 +1453,11 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( zbuffer_SetDepth, zglLib, "zbuffer_SetDepth" );
     zglGetAddress( zbuffer_Clear, zglLib, "zbuffer_Clear" );
 
+#ifdef __CPP__
+    zglGetAddress( __scissor_Begin, zglLib, "scissor_Begin" );
+#else
     zglGetAddress( scissor_Begin, zglLib, "scissor_Begin" );
+#endif
     zglGetAddress( scissor_End, zglLib, "scissor_End" );
 
     zglGetAddress( rtarget_Add, zglLib, "rtarget_Add" );

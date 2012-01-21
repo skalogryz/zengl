@@ -31,7 +31,7 @@ procedure SetCurrentMode;
 procedure zbuffer_SetDepth( zNear, zFar : Single );
 procedure zbuffer_Clear;
 
-procedure scissor_Begin( X, Y, Width, Height : Integer );
+procedure scissor_Begin( X, Y, Width, Height : Integer; ConsiderCamera : Boolean = TRUE );
 procedure scissor_End;
 
 implementation
@@ -118,22 +118,25 @@ begin
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 
-procedure scissor_Begin( X, Y, Width, Height : Integer );
+procedure scissor_Begin( X, Y, Width, Height : Integer; ConsiderCamera : Boolean = TRUE );
 begin
   batch2d_Flush();
 
   if ( Width < 0 ) or ( Height < 0 ) Then exit;
-  if not cam2d.OnlyXY Then
+  if ConsiderCamera Then
     begin
-      X      := Trunc( ( X - cam2d.Global.Center.X ) * cam2d.Global.Zoom.X - cam2d.Global.X );
-      Y      := Trunc( ( Y - cam2d.Global.Center.Y ) * cam2d.Global.Zoom.Y - cam2d.Global.Y );
-      Width  := Trunc( Width  * cam2d.Global.Zoom.X );
-      Height := Trunc( Height * cam2d.Global.Zoom.Y );
-    end else
-      begin
-        X := Trunc( ( X - cam2d.Global.X );
-        Y := Trunc( ( Y - cam2d.Global.Y );
-      end;
+      if cam2d.OnlyXY Then
+        begin
+          X := Trunc( ( X - cam2d.Global.X );
+          Y := Trunc( ( Y - cam2d.Global.Y );
+        end else
+          begin
+            X      := Trunc( ( X - cam2d.Global.Center.X ) * cam2d.Global.Zoom.X - cam2d.Global.X );
+            Y      := Trunc( ( Y - cam2d.Global.Center.Y ) * cam2d.Global.Zoom.Y - cam2d.Global.Y );
+            Width  := Trunc( Width  * cam2d.Global.Zoom.X );
+            Height := Trunc( Height * cam2d.Global.Zoom.Y );
+          end;
+    end;
   if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
       X      := Round( X * scrResCX + scrAddCX );

@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.01.19           }
+{ date:     2012.01.21           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -255,7 +255,7 @@ var
   zbuffer_Clear     : procedure;
 
 // SCISSOR
-  scissor_Begin : procedure( X, Y, Width, Height : Integer );
+  scissor_Begin : procedure( X, Y, Width, Height : Integer; ConsiderCamera : Boolean = TRUE );
   scissor_End   : procedure;
 
 // INI
