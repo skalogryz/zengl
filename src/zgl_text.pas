@@ -42,18 +42,18 @@ const
 type
   zglTTextWord = record
     X, Y, W : Integer;
-    Str     : String;
+    Str     : UTF8String;
 end;
 
-procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : String; Flags : LongWord = 0 );
-procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
-procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-function  text_GetWidth( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
-function  text_GetHeight( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : UTF8String; Flags : LongWord = 0 );
+procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
+procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+function  text_GetWidth( Font : zglPFont; const Text : UTF8String; Step : Single = 0.0 ) : Single;
+function  text_GetHeight( Font : zglPFont; Width : Single; const Text : UTF8String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
 procedure textFx_SetLength( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
 
-procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
 
 implementation
 uses
@@ -80,7 +80,7 @@ var
   textWordsCount : Integer;
   textLinesCount : Integer;
 
-procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : String; Flags : LongWord = 0 );
+procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : UTF8String; Flags : LongWord = 0 );
   var
     i, c, s  : Integer;
     charDesc : zglPCharDesc;
@@ -112,7 +112,7 @@ begin
   FillChar( quad[ 0 ], SizeOf( zglTPoint2D ) * 4, 0 );
   charDesc := nil;
   lastPage := -1;
-  c := font_GetCID( Text, 1, @i );
+  c := u_GetUTF8ID( Text, 1, @i );
   s := 1;
   i := 1;
   if Flags and TEXT_FX_VCA > 0 Then
@@ -143,7 +143,7 @@ begin
           X := sx;
           Y := Y + Font.MaxHeight * textScale;
         end;
-      c := font_GetCID( Text, i, @i );
+      c := u_GetUTF8ID( Text, i, @i );
 
       if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then
         begin
@@ -246,7 +246,7 @@ begin
     end;
 end;
 
-procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 begin
   textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
@@ -263,7 +263,7 @@ begin
   textStep      := 0;
 end;
 
-procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
   var
     i, j, b  : Integer;
     NewFlags : Integer;
@@ -292,7 +292,7 @@ begin
     end;
 end;
 
-procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 begin
   textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
@@ -309,7 +309,7 @@ begin
   textStep      := 0;
 end;
 
-function text_GetWidth( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
+function text_GetWidth( Font : zglPFont; const Text : UTF8String; Step : Single = 0.0 ) : Single;
   var
     i : Integer;
     c : LongWord;
@@ -321,7 +321,7 @@ begin
   i  := 1;
   while i <= length( Text ) do
     begin
-      c := font_GetCID( Text, i, @i );
+      c := u_GetUTF8ID( Text, i, @i );
       if c = 10 Then
         begin
           lResult := Result;
@@ -334,7 +334,7 @@ begin
     Result := lResult;
 end;
 
-function text_GetHeight( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+function text_GetHeight( Font : zglPFont; Width : Single; const Text : UTF8String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
   var
     Rect : zglTRect;
 begin
@@ -359,7 +359,7 @@ begin
   textLCharDesc := LastCharDesc;
 end;
 
-procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
   var
     x, y, sX   : Integer;
     b, i, imax : Integer;
@@ -392,7 +392,7 @@ begin
     begin
       lc   := c;
       j    := i;
-      c    := font_GetCID( Text, i, @i );
+      c    := u_GetUTF8ID( Text, i, @i );
       imax := Integer( i > length( Text ) );
 
       if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then

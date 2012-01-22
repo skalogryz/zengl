@@ -37,7 +37,7 @@ type
 end;
 
 var
-  dirRes      : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
+  dirRes      : UTF8String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fntMain     : zglPFont;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
@@ -261,12 +261,6 @@ Begin
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
-
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
-  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
-  // string variables.
-  zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '05 - Sprites 2D' );
 

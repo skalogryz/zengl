@@ -64,8 +64,8 @@ procedure atlas_DelNode( var Node : zglPAtlasNode );
 
 procedure atlas_GetFrameCoord( Node : zglPAtlasNode; Frame : Word; var TexCoord : array of zglTPoint2D );
 function  atlas_InsertFromTexture( Atlas : zglPAtlas; Texture : zglPTexture ) : zglPAtlasNode;
-function  atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
-function  atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function  atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function  atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
 
 procedure atals_InsertDataToNode( var Node : zglPAtlasNode; pData : Pointer; RowLength, Width, Height : Word );
 
@@ -266,7 +266,7 @@ begin
   FreeMem( pData );
 end;
 
-function atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
     i      : Integer;
     pData  : Pointer;
@@ -322,7 +322,7 @@ begin
   FreeMem( pData );
 end;
 
-function atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
     i      : Integer;
     pData  : Pointer;

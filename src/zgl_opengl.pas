@@ -63,8 +63,8 @@ var
 
   oglVRAMUsed : LongWord;
 
-  oglRenderer      : AnsiString;
-  oglExtensions    : AnsiString;
+  oglRenderer      : UTF8String;
+  oglExtensions    : UTF8String;
   ogl3DAccelerator : Boolean;
   oglCanVSync      : Boolean;
   oglCanAnisotropy : Boolean;
@@ -83,7 +83,7 @@ var
   oglSeparate      : Boolean;
 
   {$IFDEF LINUX}
-  oglXExtensions : AnsiString;
+  oglXExtensions : UTF8String;
   oglPBufferMode : Integer;
   oglContext     : GLXContext;
   oglVisualInfo  : PXVisualInfo;

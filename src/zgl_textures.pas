@@ -61,7 +61,7 @@ type
   zglPTextureCoord = ^zglTTextureCoord;
   zglTTextureCoord = array[ 0..3 ] of zglTPoint2D;
 
-  zglTTextureFileLoader = procedure( const FileName : String; var pData : Pointer; var W, H, Format : Word );
+  zglTTextureFileLoader = procedure( const FileName : UTF8String; var pData : Pointer; var W, H, Format : Word );
   zglTTextureMemLoader  = procedure( const Memory : zglTMemory; var pData : Pointer; var W, H, Format : Word );
 
 type
@@ -82,7 +82,7 @@ end;
 type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
-    Extension  : String;
+    Extension  : UTF8String;
     FileLoader : zglTTextureFileLoader;
     MemLoader  : zglTTextureMemLoader;
 end;
@@ -103,8 +103,8 @@ procedure tex_Del( var Texture : zglPTexture );
 
 function  tex_Create( var Texture : zglTTexture; pData : Pointer ) : Boolean;
 function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-function  tex_LoadFromFile( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
 procedure tex_CalcTexCoords( var Texture : zglTTexture );
@@ -305,9 +305,10 @@ begin
   FreeMem( pData );
 end;
 
-function tex_LoadFromFile( const FileName : String; TransparentColor, Flags : LongWord ) : zglPTexture;
+function tex_LoadFromFile( const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPTexture;
   var
     i      : Integer;
+    ext    : UTF8String;
     pData  : Pointer;
     w, h   : Word;
     format : Word;
@@ -326,8 +327,9 @@ begin
       exit;
     end;
 
+  ext := u_StrUp( file_GetExtension( FileName ) );
   for i := managerTexture.Count.Formats - 1 downto 0 do
-    if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
+    if ext = managerTexture.Formats[ i ].Extension Then
       if resUseThreaded Then
         begin
           Result               := tex_Add();
@@ -374,9 +376,10 @@ begin
   FreeMem( pData );
 end;
 
-function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPTexture;
+function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPTexture;
   var
     i      : Integer;
+    ext    : UTF8String;
     pData  : Pointer;
     w, h   : Word;
     format : Word;
@@ -389,8 +392,9 @@ begin
     managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
   Result := managerZeroTexture;
 
+  ext := u_StrUp( Extension );
   for i := managerTexture.Count.Formats - 1 downto 0 do
-    if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
+    if ext = managerTexture.Formats[ i ].Extension Then
       if resUseThreaded Then
         begin
           Result               := tex_Add();

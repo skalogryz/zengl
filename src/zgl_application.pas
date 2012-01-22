@@ -126,8 +126,8 @@ var
   appFocus          : Boolean = TRUE;
   appLog            : Boolean;
   appInitedToHandle : Boolean;
-  appWorkDir        : String;
-  appHomeDir        : String;
+  appWorkDir        : UTF8String;
+  appHomeDir        : UTF8String;
 
   // call-back
   app_PInit       : procedure;
@@ -387,7 +387,7 @@ function app_ProcessMessages;
     i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of AnsiChar;
-    str : AnsiString;
+    str : UTF8String;
     key : LongWord;
 begin
   Result := 0;
@@ -560,11 +560,12 @@ begin
               K_TAB:       key_InputText( '  ' );
             else
               len := Xutf8LookupString( appXIC, @event, @c[ 0 ], 6, @keysym, @status );
-              str := '';
-              for i := 0 to len - 1 do
-                str := str + c[ i ];
-              if str <> '' Then
-                key_InputText( str );
+              if len > 0 Then
+                begin
+                  SetLength( str, len );
+                  Move( c[ 0 ], str[ 1 ], len );
+                  key_InputText( str );
+                end;
             end;
           end;
         KeyRelease:
@@ -823,38 +824,14 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          if appFlags and APP_USE_UTF8 > 0 Then
+          len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
+          if len > 0 Then
             begin
-              {$IFNDEF FPC}
-              if SizeOf( Char ) = 1 Then
-                begin
-              {$ENDIF}
-                  len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
-                  WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
-                  str := '';
-                  for i := 0 to len - 1 do
-                    str := str + c[ i ];
-                  if str <> '' Then
-                    key_InputText( str );
-              {$IFNDEF FPC}
-                end else
-                  key_InputText( Char( wParam ) );
-              {$ENDIF}
-            end else
-            {$IFNDEF FPC}
-              if SizeOf( Char ) = 2 Then
-                key_InputText( Char( wParam ) )
-              else
-            {$ENDIF}
-              if wParam < 128 Then
-                key_InputText( Char( CP1251_TO_UTF8[ wParam ] ) )
-              else
-                for i := 128 to 255 do
-                  if wParam = CP1251_TO_UTF8[ i ] Then
-                    begin
-                      key_InputText( Char( i ) );
-                      break;
-                    end;
+              WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
+              SetLength( str, len );
+              Move( c[ 0 ], str[ 1 ], len );
+              key_InputText( str );
+            end;
         end;
       end;
   else
@@ -1000,11 +977,12 @@ begin
                 K_TAB:       key_InputText( '  ' );
               else
                 GetEventParameter( inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[ 0 ] );
-                str := '';
-                for i := 0 to len - 1 do
-                  str := str + c[ i ];
-                if str <> '' Then
-                  key_InputText( str );
+                if len > 0 Then
+                  begin
+                    SetLength( str, len );
+                    Move( c[ 0 ], str[ 1 ], len );
+                    key_InputText( str );
+                  end;
               end;
             end;
           kEventRawKeyUp:
@@ -1246,7 +1224,7 @@ end;
 
 function zglCAppDelegate.textField_shouldChangeCharactersInRange_replacementString( textField : UITextField; range : NSRange; string_ : NSString ) : Boolean;
   var
-    buffer : array[ 0..3 ] of Char;
+    buffer : array[ 0..3 ] of AnsiChar;
 begin
   Result := TRUE;
   keysTextChanged := TRUE;
@@ -1276,14 +1254,14 @@ end;
 procedure zglCAppDelegate.textFieldEditingChanged;
   var
     i, len : Integer;
-    buffer : PChar;
+    buffer : PAnsiChar;
 begin
   if not keysTextChanged Then
     begin
       len := CFStringGetLength( CFStringRef( keysTextField.text() ) ) * 2;
       zgl_GetMem( buffer, len );
       CFStringGetCString( CFStringRef( keysTextField.text() ), @buffer[ 0 ], len, kCFStringEncodingUTF8 );
-      keysText := PChar( @buffer[ 0 ] );
+      keysText := PAnsiChar( @buffer[ 0 ] );
       zgl_FreeMem( buffer );
     end else
       keysTextChanged := FALSE;

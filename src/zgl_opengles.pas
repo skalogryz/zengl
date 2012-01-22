@@ -82,8 +82,8 @@ var
 
   oglVRAMUsed : LongWord;
 
-  oglRenderer      : AnsiString;
-  oglExtensions    : AnsiString;
+  oglRenderer      : UTF8String;
+  oglExtensions    : UTF8String;
   ogl3DAccelerator : Boolean;
   oglCanVSync      : Boolean;
   oglCanAnisotropy : Boolean;
@@ -133,7 +133,7 @@ uses
   zgl_log,
   zgl_utils;
 
-function gles_GetErrorStr( ErrorCode : LongWord ) : String;
+function gles_GetErrorStr( ErrorCode : LongWord ) : UTF8String;
 begin
 {$IFNDEF NO_EGL}
   case ErrorCode of

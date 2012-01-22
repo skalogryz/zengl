@@ -30,7 +30,7 @@ uses
   zgl_memory;
 
 const
-  PVR_EXTENSION : array[ 0..3 ] of Char = ( 'P', 'V', 'R', #0 );
+  PVR_EXTENSION : UTF8String = 'PVR';
 
   PVR_RGBA_4444 = $10;
   PVR_RGBA_5551 = $11;
@@ -62,7 +62,7 @@ type
   end;
 
 
-procedure pvr_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure pvr_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
 procedure pvr_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
 
 implementation
@@ -72,7 +72,7 @@ uses
   zgl_log,
   zgl_textures;
 
-procedure pvr_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure pvr_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
   var
     pvrMem : zglTMemory;
 begin
@@ -110,7 +110,7 @@ end;
 
 {$IFDEF USE_PVR}
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION,   @PVR_EXTENSION[ 0 ] );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @PVR_EXTENSION[ 1 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @pvr_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @pvr_LoadFromMemory );
 {$ENDIF}

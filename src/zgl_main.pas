@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.01.21';
+  cs_Date     = '2012.01.22';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -147,12 +147,11 @@ const
   APP_USE_AUTOPAUSE     = $000100;
   APP_USE_LOG           = $000200;
   APP_USE_ENGLISH_INPUT = $000400;
-  APP_USE_UTF8          = $000800;
-  APP_USE_DT_CORRECTION = $001000;
-  WND_USE_AUTOCENTER    = $002000;
-  SND_CAN_PLAY          = $004000;
-  SND_CAN_PLAY_FILE     = $008000;
-  CLIP_INVISIBLE        = $010000;
+  APP_USE_DT_CORRECTION = $000800;
+  WND_USE_AUTOCENTER    = $001000;
+  SND_CAN_PLAY          = $002000;
+  SND_CAN_PLAY_FILE     = $004000;
+  CLIP_INVISIBLE        = $008000;
   {$IFDEF iOS}
   SCR_ORIENTATION_PORTRAIT   = $100000;
   SCR_ORIENTATION_LANDSCAPE  = $200000;
@@ -185,7 +184,7 @@ uses
   zgl_opengles_all,
   {$ENDIF}
   zgl_opengl_simple,
-  {$IF DEFINED(LINUX) or DEFINED(WINCE) or DEFINED(iOS)}
+  {$IF DEFINED(LINUX) or DEFINED(WINDOWS) or DEFINED(iOS)}
   zgl_file,
   {$IFEND}
   zgl_timers,
@@ -496,7 +495,7 @@ begin
     TEX_FORMAT_EXTENSION:
       begin
         SetLength( managerTexture.Formats, managerTexture.Count.Formats + 1 );
-        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( String( PChar( UserData ) ) );
+        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( UTF8String( PAnsiChar( UserData ) ) );
       end;
     TEX_FORMAT_FILE_LOADER:
       begin
@@ -517,7 +516,7 @@ begin
     SND_FORMAT_EXTENSION:
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
-        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( String( PChar( UserData ) ) );
+        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( UTF8String( PAnsiChar( UserData ) ) );
         managerSound.Formats[ managerSound.Count.Formats ].Decoder   := nil;
       end;
     SND_FORMAT_FILE_LOADER:
@@ -549,11 +548,11 @@ begin
 
   case What of
     ZENGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
-    ZENGL_VERSION_STRING: Result := Ptr( PChar( cs_ZenGL ) );
-    ZENGL_VERSION_DATE: Result := Ptr( PChar( cs_Date ) );
+    ZENGL_VERSION_STRING: Result := Ptr( PAnsiChar( cs_ZenGL ) );
+    ZENGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
 
-    DIRECTORY_APPLICATION: Result := Ptr( PChar( appWorkDir ) );
-    DIRECTORY_HOME: Result := Ptr( PChar( appHomeDir ) );
+    DIRECTORY_APPLICATION: Result := Ptr( PAnsiChar( appWorkDir ) );
+    DIRECTORY_HOME: Result := Ptr( PAnsiChar( appHomeDir ) );
 
     LOG_FILENAME:
       if not appWork Then
@@ -645,37 +644,16 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   var
-    {$IFDEF WINDESKTOP}
-    buffer : PChar;
-    fn, fp : PChar;
-    t      : array[ 0..MAX_PATH - 1 ] of Char;
-    {$ELSE}
-    fn     : PWideChar;
-    len    : Integer;
-    {$ENDIF}
+    fn  : PWideChar;
+    len : Integer;
 begin
   wndINST := GetModuleHandle( nil );
-  {$IFDEF WINDESKTOP}
-  GetMem( buffer, 65535 );
-  GetMem( fn, 65535 );
-  GetModuleFileName( wndINST, fn, 65535 );
-  GetFullPathName( fn, 65535, buffer, fp );
-  appWorkDir := copy( String( buffer ), 1, length( buffer ) - length( fp ) );
-
-  GetEnvironmentVariable( 'APPDATA', t, MAX_PATH );
-  appHomeDir := t;
-  appHomeDir := appHomeDir + '\';
-
-  FreeMem( buffer );
-  {$ELSE}
   GetMem( fn, 65535 * 2 );
-  GetModuleFileName( wndINST, fn, 65535 );
-
+  GetModuleFileNameW( wndINST, fn, 65535 );
   len := WideCharToMultiByte( CP_UTF8, 0, fn, 65535, nil, 0, nil, nil );
   SetLength( appWorkDir, len );
   WideCharToMultiByte( CP_UTF8, 0, fn, 65535, @appWorkDir[ 1 ], len, nil, nil );
   appWorkDir := file_GetDirectory( appWorkDir );
-  {$ENDIF}
   FreeMem( fn );
 {$ENDIF}
 {$IFDEF MACOSX}
@@ -747,16 +725,6 @@ begin
   if What and APP_USE_LOG > 0 Then
     appLog := TRUE;
 
-  if What and APP_USE_UTF8 > 0 Then
-    begin
-      {$IFNDEF FPC}
-      if SizeOf( Char ) = 2 Then
-        font_GetCID := font_GetUTF16ID
-      else
-      {$ENDIF}
-        font_GetCID := font_GetUTF8ID;
-    end;
-
   {$IFDEF USE_SOUND}
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := TRUE;
@@ -806,9 +774,6 @@ begin
 
   if What and APP_USE_LOG > 0 Then
     appLog := FALSE;
-
-  if What and APP_USE_UTF8 > 0 Then
-    font_GetCID := font_GetCP1251ID;
 
   {$IFDEF USE_SOUND}
   if What and SND_CAN_PLAY > 0 Then

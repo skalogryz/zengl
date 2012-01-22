@@ -47,8 +47,8 @@ procedure FreeGL;
 function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
-function gl_GetProc( const Proc : AnsiString ) : Pointer;
-function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
+function gl_GetProc( const Proc : UTF8String ) : Pointer;
+function gl_IsSupported( const Extension, SearchIn : UTF8String ) : Boolean;
 
 const
   {$IFDEF LINUX}
@@ -396,7 +396,7 @@ var
   // Triangulation
   {$IFDEF USE_TRIANGULATION}
   procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
-  function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
+  function  gluErrorString(error: Integer): PAnsiChar; stdcall external libGLU;
   function  gluNewTess: Integer; stdcall external libGLU;
   procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
   procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
@@ -445,10 +445,10 @@ const
   function  glXQueryExtension(dpy: PDisplay; var errorb, event: Integer): Boolean; cdecl; external libGL;
   function  glXQueryVersion(dpy: PDisplay; var major, minor: Integer): Boolean; cdecl; external libGL;
   function  glXIsDirect(dpy: PDisplay; ctx: GLXContext): Boolean; cdecl; external libGL;
-  function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PChar; cdecl; external libGL;
+  function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PAnsiChar; cdecl; external libGL;
 
 var
-  glXGetProcAddressARB: function(name: PChar): Pointer; cdecl;
+  glXGetProcAddressARB: function(name: PAnsiChar): Pointer; cdecl;
   glXSwapIntervalSGI: function( interval: Integer): Integer; cdecl;
   // PBuffer
   glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
@@ -633,7 +633,7 @@ begin
 end;
 {$ENDIF}
 
-function gl_GetProc( const Proc : AnsiString ) : Pointer;
+function gl_GetProc( const Proc : UTF8String ) : Pointer;
 begin
   {$IFDEF WINDOWS}
   Result := wglGetProcAddress( PAnsiChar( Proc ) );
@@ -655,7 +655,7 @@ begin
   {$ENDIF}
 end;
 
-function gl_IsSupported( const Extension, SearchIn: AnsiString ) : Boolean;
+function gl_IsSupported( const Extension, SearchIn: UTF8String ) : Boolean;
   var
     extPos: Integer;
 begin

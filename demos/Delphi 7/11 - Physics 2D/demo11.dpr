@@ -26,7 +26,7 @@ uses
   ;
 
 var
-  dirRes : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
+  dirRes : UTF8String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fnt    : zglPFont;
   space  : PcpSpace;
   bCount : Integer;

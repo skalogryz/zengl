@@ -39,116 +39,116 @@ uses
   zgl_math_2d,
   zgl_utils;
 
-procedure _wnd_SetCaption( NewCaption : PChar );
+procedure _wnd_SetCaption( NewCaption : PAnsiChar );
 
-procedure _log_Add( Message : PChar; Timings : Boolean = TRUE );
+procedure _log_Add( Message : PAnsiChar; Timings : Boolean = TRUE );
 
-procedure _key_BeginReadText( Text : PChar; MaxSymbols : Integer = -1 );
-procedure _key_UpdateReadText( Text : PChar; MaxSymbols : Integer = -1 );
+procedure _key_BeginReadText( Text : PAnsiChar; MaxSymbols : Integer = -1 );
+procedure _key_UpdateReadText( Text : PAnsiChar; MaxSymbols : Integer = -1 );
 
-function _tex_LoadFromFile( FileName : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-function _tex_LoadFromMemory( Memory : zglTMemory; Extension : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function _tex_LoadFromFile( FileName : PAnsiChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function _tex_LoadFromMemory( Memory : zglTMemory; Extension : PAnsiChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 
-function _font_LoadFromFile( FileName : PChar ) : zglPFont;
+function _font_LoadFromFile( FileName : PAnsiChar ) : zglPFont;
 
-procedure _text_Draw( Font : zglPFont; X, Y : Single; Text : PChar; Flags : LongWord = 0 );
-procedure _text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; Text : PChar; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-procedure _text_DrawInRect( Font : zglPFont; Rect : zglTRect; Text : PChar; Flags : LongWord = 0 );
-procedure _text_DrawInRectEx( Font : zglPFont; Rect : zglTRect; Scale, Step : Single; Text : PChar; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-function  _text_GetWidth( Font : zglPFont; Text : PChar; Step : Single = 0.0 ) : Single;
-function  _text_GetHeight( Font : zglPFont; Width : Single; Text : PChar; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+procedure _text_Draw( Font : zglPFont; X, Y : Single; Text : PAnsiChar; Flags : LongWord = 0 );
+procedure _text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; Text : PAnsiChar; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure _text_DrawInRect( Font : zglPFont; Rect : zglTRect; Text : PAnsiChar; Flags : LongWord = 0 );
+procedure _text_DrawInRectEx( Font : zglPFont; Rect : zglTRect; Scale, Step : Single; Text : PAnsiChar; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+function  _text_GetWidth( Font : zglPFont; Text : PAnsiChar; Step : Single = 0.0 ) : Single;
+function  _text_GetHeight( Font : zglPFont; Width : Single; Text : PAnsiChar; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
 
 {$IFDEF USE_SOUND}
-function _snd_LoadFromFile( FileName : PChar; SourceCount : Integer = 8 ) : zglPSound;
-function _snd_LoadFromMemory( Memory : zglTMemory; Extension : PChar; SourceCount : Integer = 8 ) : zglPSound;
-function _snd_PlayFile( FileName : PChar; Loop : Boolean = FALSE ) : Integer;
-function _snd_PlayMemory( Memory : zglTMemory; Extension : PChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_LoadFromFile( FileName : PAnsiChar; SourceCount : Integer = 8 ) : zglPSound;
+function _snd_LoadFromMemory( Memory : zglTMemory; Extension : PAnsiChar; SourceCount : Integer = 8 ) : zglPSound;
+function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
 {$ENDIF}
 
 implementation
 
-procedure _wnd_SetCaption( NewCaption : PChar );
+procedure _wnd_SetCaption( NewCaption : PAnsiChar );
 begin
   wnd_SetCaption( NewCaption );
 end;
 
-procedure _log_Add( Message : PChar; Timings : Boolean = TRUE );
+procedure _log_Add( Message : PAnsiChar; Timings : Boolean = TRUE );
 begin
   log_Add( Message, Timings );
 end;
 
-procedure _key_BeginReadText( Text : PChar; MaxSymbols : Integer = -1 );
+procedure _key_BeginReadText( Text : PAnsiChar; MaxSymbols : Integer = -1 );
 begin
   key_BeginReadText( Text, MaxSymbols );
 end;
 
-procedure _key_UpdateReadText( Text : PChar; MaxSymbols : Integer = -1 );
+procedure _key_UpdateReadText( Text : PAnsiChar; MaxSymbols : Integer = -1 );
 begin
   key_UpdateReadText( Text, MaxSymbols );
 end;
 
-function _tex_LoadFromFile( FileName : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function _tex_LoadFromFile( FileName : PAnsiChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 begin
   Result := tex_LoadFromFile( FileName, TransparentColor, Flags );
 end;
 
-function _tex_LoadFromMemory( Memory : zglTMemory; Extension : PChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function _tex_LoadFromMemory( Memory : zglTMemory; Extension : PAnsiChar; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 begin
   Result := tex_LoadFromMemory( Memory, Extension, TransparentColor, Flags );
 end;
 
-function _font_LoadFromFile( FileName : PChar ) : zglPFont;
+function _font_LoadFromFile( FileName : PAnsiChar ) : zglPFont;
 begin
   Result := font_LoadFromFile( FileName );
 end;
 
-procedure _text_Draw( Font : zglPFont; X, Y : Single; Text : PChar; Flags : LongWord = 0 );
+procedure _text_Draw( Font : zglPFont; X, Y : Single; Text : PAnsiChar; Flags : LongWord = 0 );
 begin
   text_Draw( Font, X, Y, Text, Flags );
 end;
 
-procedure _text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; Text : PChar; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure _text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; Text : PAnsiChar; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 begin
   text_DrawEx( Font, X, Y, Scale, Step, Text, Alpha, Color, Flags );
 end;
 
-procedure _text_DrawInRect( Font : zglPFont; Rect : zglTRect; Text : PChar; Flags : LongWord = 0 );
+procedure _text_DrawInRect( Font : zglPFont; Rect : zglTRect; Text : PAnsiChar; Flags : LongWord = 0 );
 begin
   text_DrawInRect( Font, Rect, Text, Flags );
 end;
 
-procedure _text_DrawInRectEx( Font : zglPFont; Rect : zglTRect; Scale, Step : Single; Text : PChar; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure _text_DrawInRectEx( Font : zglPFont; Rect : zglTRect; Scale, Step : Single; Text : PAnsiChar; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 begin
   text_DrawInRectEx( Font, Rect, Scale, Step, Text, Alpha, Color, Flags );
 end;
 
-function  _text_GetWidth( Font : zglPFont; Text : PChar; Step : Single = 0.0 ) : Single;
+function  _text_GetWidth( Font : zglPFont; Text : PAnsiChar; Step : Single = 0.0 ) : Single;
 begin
   Result := text_GetWidth( Font, Text, Step );
 end;
 
-function  _text_GetHeight( Font : zglPFont; Width : Single; Text : PChar; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+function  _text_GetHeight( Font : zglPFont; Width : Single; Text : PAnsiChar; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
 begin
   Result := text_GetHeight( Font, Width, Text, Scale, Step );
 end;
 
 {$IFDEF USE_SOUND}
-function _snd_LoadFromFile( FileName : PChar; SourceCount : Integer = 8 ) : zglPSound;
+function _snd_LoadFromFile( FileName : PAnsiChar; SourceCount : Integer = 8 ) : zglPSound;
 begin
   Result := snd_LoadFromFile( FileName, SourceCount );
 end;
 
-function _snd_LoadFromMemory( Memory : zglTMemory; Extension : PChar; SourceCount : Integer = 8 ) : zglPSound;
+function _snd_LoadFromMemory( Memory : zglTMemory; Extension : PAnsiChar; SourceCount : Integer = 8 ) : zglPSound;
 begin
   Result := snd_LoadFromMemory( Memory, Extension, SourceCount );
 end;
 
-function _snd_PlayFile( FileName : PChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
 begin
   Result := snd_PlayFile( FileName, Loop );
 end;
 
-function _snd_PlayMemory( Memory : zglTMemory; Extension : PChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
 begin
   Result := snd_PlayMemory( Memory, Extension, Loop );
 end;

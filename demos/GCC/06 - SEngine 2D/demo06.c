@@ -168,12 +168,6 @@ int main()
   zgl_Reg( SYS_DRAW, (void*)&Draw );
   zgl_Reg( SYS_EXIT, (void*)&Quit );
 
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
-  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
-  // string variables.
-  zgl_Enable( APP_USE_UTF8 );
-
   wnd_SetCaption( "06 - SEngine 2D" );
 
   wnd_ShowCursor( TRUE );

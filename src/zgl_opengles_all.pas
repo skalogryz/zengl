@@ -44,8 +44,8 @@ uses
 function InitGLES : Boolean;
 procedure FreeGLES;
 
-function gl_GetProc( const Proc : AnsiString ) : Pointer;
-function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
+function gl_GetProc( const Proc : UTF8String ) : Pointer;
+function gl_IsSupported( const Extension, SearchIn : UTF8String ) : Boolean;
 
 const
   {$IFNDEF USE_GLES_ON_DESKTOP}
@@ -714,7 +714,7 @@ begin
 {$ENDIF}
 end;
 
-function gl_GetProc( const Proc : AnsiString ) : Pointer;
+function gl_GetProc( const Proc : UTF8String ) : Pointer;
   {$IFDEF WINCE}
   var
     wideStr : PWideChar;
@@ -749,7 +749,7 @@ begin
   {$ENDIF}
 end;
 
-function gl_IsSupported( const Extension, SearchIn: AnsiString ) : Boolean;
+function gl_IsSupported( const Extension, SearchIn: UTF8String ) : Boolean;
   var
     extPos: Integer;
 begin

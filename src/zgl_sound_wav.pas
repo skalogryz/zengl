@@ -29,9 +29,9 @@ uses
   zgl_memory;
 
 const
-  WAV_EXTENSION : array[ 0..3 ] of Char = ( 'W', 'A', 'V', #0 );
+  WAV_EXTENSION : UTF8String = 'WAV';
 
-procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
 procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 
 implementation
@@ -62,7 +62,7 @@ type
     BitsPerSample    : Word;
  end;
 
-procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
   var
     wavMemory : zglTMemory;
 begin
@@ -118,7 +118,7 @@ end;
 
 {$IFDEF USE_WAV}
 initialization
-  zgl_Reg( SND_FORMAT_EXTENSION,   @WAV_EXTENSION[ 0 ] );
+  zgl_Reg( SND_FORMAT_EXTENSION,   @WAV_EXTENSION[ 1 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @wav_LoadFromMemory );
 {$ENDIF}

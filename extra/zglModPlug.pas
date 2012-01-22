@@ -51,15 +51,15 @@ type
 
 procedure mp_Init;
 procedure mp_Free;
-function  mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+function  mp_DecoderOpen( var Stream : zglTSoundStream; const FileName : UTF8String ) : Boolean;
 function  mp_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : DWORD; var _End : Boolean ) : DWORD;
 procedure mp_DecoderLoop( var Stream : zglTSoundStream );
 procedure mp_DecoderClose( var Stream : zglTSoundStream );
 
 var
   Decoders : array[ 0..MAX_FORMATS - 1 ] of zglTSoundDecoder;
-  FORMATS  : array[ 0..MAX_FORMATS - 1 ] of String = ( 'MOD', 'IT',  'S3M', 'XM',  'IT',  '669', 'AMF', 'AMS', 'DBM', 'DMF', 'DSM', 'FAR',
-                                                       'MDL', 'MED', 'MTM', 'OKT', 'PTM', 'STM', 'ULT', 'UMX', 'MT2', 'PSM' );
+  FORMATS  : array[ 0..MAX_FORMATS - 1 ] of UTF8String = ( 'MOD', 'IT',  'S3M', 'XM',  'IT',  '669', 'AMF', 'AMS', 'DBM', 'DMF', 'DSM', 'FAR',
+                                                           'MDL', 'MED', 'MTM', 'OKT', 'PTM', 'STM', 'ULT', 'UMX', 'MT2', 'PSM' );
 
   mpLoad    : Boolean;
   mpInit    : Boolean;
@@ -84,22 +84,22 @@ begin
       Decoders[ i ].Read  := mp_DecoderRead;
       Decoders[ i ].Loop  := mp_DecoderLoop;
       Decoders[ i ].Close := mp_DecoderClose;
-      zgl_Reg( SND_FORMAT_EXTENSION, PChar( FORMATS[ i ] ) );
+      zgl_Reg( SND_FORMAT_EXTENSION, @FORMATS[ i ] );
       zgl_Reg( SND_FORMAT_FILE_LOADER, nil );
       zgl_Reg( SND_FORMAT_MEM_LOADER,  nil );
       zgl_Reg( SND_FORMAT_DECODER, @Decoders[ i ] );
     end;
 
   {$IFDEF LINUX}
-  mpLibrary := dlopen( PChar( './' + libmodplug + '.1' ), $001 );
-  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.1' ), $001 );
-  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PChar( libmodplug + '.0' ), $001 );
+  mpLibrary := dlopen( PAnsiChar( './' + libmodplug + '.1' ), $001 );
+  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PAnsiChar( libmodplug + '.1' ), $001 );
+  if mpLibrary = LIB_ERROR Then mpLibrary := dlopen( PAnsiChar( libmodplug + '.0' ), $001 );
   {$ENDIF}
   {$IFDEF WINDOWS}
   mpLibrary := dlopen( libmodplug );
   {$ENDIF}
   {$IFDEF MACOSX}
-  mpLibrary := dlopen( PChar( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Frameworks/' + libmodplug ), $001 );
+  mpLibrary := dlopen( PAnsiChar( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Frameworks/' + libmodplug ), $001 );
   {$ENDIF}
 
   if mpLibrary <> LIB_ERROR Then

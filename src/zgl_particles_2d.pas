@@ -188,7 +188,7 @@ type
       particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
       list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
       parCreated : Integer;
-      texFile    : String;
+      texFile    : UTF8String;
       texHash    : LongWord;
                  end;
 
@@ -240,7 +240,7 @@ procedure pengine2d_Proc( dt : Double );
 function  pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
-function  pengine2d_LoadTexture( const FileName : String ) : zglPTexture;
+function  pengine2d_LoadTexture( const FileName : UTF8String ) : zglPTexture;
 
 procedure pengine2d_Sort( iLo, iHi : Integer );
 procedure pengine2d_SortID( iLo, iHi : Integer );
@@ -248,11 +248,11 @@ procedure pengine2d_SortID( iLo, iHi : Integer );
 function  emitter2d_Add : zglPEmitter2D;
 procedure emitter2d_Del( var Emitter : zglPEmitter2D );
 
-function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
-function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
+function emitter2d_Load( const FileName : UTF8String ) : zglPEmitter2D;
+function emitter2d_LoadFromFile( const FileName : UTF8String ) : zglPEmitter2D;
 function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
 
-procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : String );
+procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : UTF8String );
 
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
 procedure emitter2d_Free( var Emitter : zglPEmitter2D );
@@ -487,7 +487,7 @@ begin
   pengine2d.Count.Emitters := 0;
 end;
 
-function pengine2d_LoadTexture( const FileName : String ) : zglPTexture;
+function pengine2d_LoadTexture( const FileName : UTF8String ) : zglPTexture;
   var
     i    : Integer;
     hash : LongWord;
@@ -588,7 +588,7 @@ begin
       end;
 end;
 
-function emitter2d_Load( const FileName : String ) : zglPEmitter2D;
+function emitter2d_Load( const FileName : UTF8String ) : zglPEmitter2D;
   var
     c     : LongWord;
     chunk : Word;
@@ -698,7 +698,7 @@ begin
       end;
 end;
 
-function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
+function emitter2d_LoadFromFile( const FileName : UTF8String ) : zglPEmitter2D;
 begin
   Result := nil;
   if not file_Exists( FileName ) Then
@@ -731,7 +731,7 @@ begin
       Result := emitter2d_Load( '' );
 end;
 
-procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : String );
+procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : UTF8String );
   var
     c : LongWord;
     f : zglTFile;

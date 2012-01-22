@@ -47,7 +47,7 @@ function  wnd_Create( Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
-procedure wnd_SetCaption( const NewCaption : String );
+procedure wnd_SetCaption( const NewCaption : UTF8String );
 procedure wnd_SetSize( Width, Height : Integer );
 procedure wnd_SetPos( X, Y : Integer );
 procedure wnd_ShowCursor( Show : Boolean );
@@ -59,7 +59,7 @@ var
   wndWidth      : Integer = 800;
   wndHeight     : Integer = 600;
   wndFullScreen : Boolean;
-  wndCaption    : String;
+  wndCaption    : UTF8String;
 
   {$IFDEF USE_X11}
   wndHandle      : TWindow;
@@ -413,11 +413,11 @@ begin
   wnd_SetSize( wndWidth, wndHeight );
 end;
 
-procedure wnd_SetCaption( const NewCaption : String );
+procedure wnd_SetCaption( const NewCaption : UTF8String );
   {$IFDEF USE_X11}
   var
     err : Integer;
-    str : PChar;
+    str : PAnsiChar;
   {$ENDIF}
   {$IFDEF WINDOWS}
   var
@@ -428,15 +428,12 @@ procedure wnd_SetCaption( const NewCaption : String );
     str : CFStringRef;
   {$ENDIF}
 begin
-  wndCaption := u_CopyStr( NewCaption );
+  wndCaption := u_CopyUTF8Str( NewCaption );
 {$IFDEF USE_X11}
   if wndHandle <> 0 Then
     begin
-      str := u_GetPChar( wndCaption );
-      if appFlags and APP_USE_UTF8 > 0 Then
-        err := Xutf8TextListToTextProperty( scrDisplay, @str, 1, XUTF8StringStyle, @wndTitle )
-      else
-        err := XStringListToTextProperty( @str, 1, @wndTitle );
+      str := u_GetPAnsiChar( wndCaption );
+      err := Xutf8TextListToTextProperty( scrDisplay, @str, 1, XUTF8StringStyle, @wndTitle );
 
       if err = 0 Then
         begin
@@ -448,38 +445,22 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFNDEF FPC}
-  if SizeOf( Char ) = 2 Then
+  if wndHandle <> 0 Then
     begin
-      len := 2;
-      wndCaptionW := PWideChar( wndCaption );
-    end else
-  {$ENDIF}
-  len := 1;
-  if len = 1 Then
-    begin
-      if appFlags and APP_USE_UTF8 = 0 Then
-        wndCaption := AnsiToUtf8( wndCaption );
       len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
       if Assigned( wndCaptionW ) Then
         FreeMem( wndCaptionW );
       GetMem( wndCaptionW, len * 2 + 2 );
       wndCaptionW[ len ] := #0;
       MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
-      if appFlags and APP_USE_UTF8 = 0 Then
-        wndCaption := wndCaptionW;
-    end;
 
-  if wndHandle <> 0 Then
-    SetWindowTextW( wndHandle, wndCaptionW );
+      SetWindowTextW( wndHandle, wndCaptionW );
+    end;
 {$ENDIF}
 {$IFDEF MACOSX}
   if Assigned( wndHandle ) Then
     begin
-      if appFlags and APP_USE_UTF8 = 0 Then
-        str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingASCII )
-      else
-        str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingUTF8 );
+      str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingUTF8 );
       SetWindowTitleWithCFString( wndHandle, str );
       CFRelease( str );
       wnd_Select();

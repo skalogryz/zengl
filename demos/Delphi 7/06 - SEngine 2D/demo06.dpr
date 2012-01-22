@@ -47,7 +47,7 @@ type
   end;
 
 var
-  dirRes    : String = '../data/';
+  dirRes    : UTF8String = '../data/';
   fntMain   : zglPFont;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;

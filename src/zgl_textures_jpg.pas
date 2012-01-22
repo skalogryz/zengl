@@ -57,8 +57,8 @@ uses
   zgl_memory;
 
 const
-  JPG_EXTENSION  : array[ 0..3 ] of Char = ( 'J', 'P', 'G', #0 );
-  JPEG_EXTENSION : array[ 0..4 ] of Char = ( 'J', 'P', 'E', 'G', #0 );
+  JPG_EXTENSION  : UTF8String = 'JPG';
+  JPEG_EXTENSION : UTF8String = 'JPEG';
 
 {$IFDEF USE_LIBJPEG}
   {$IFNDEF ANDROID}
@@ -95,7 +95,7 @@ const
   {$ENDIF}
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure jpg_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
 procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
 
 implementation
@@ -276,7 +276,7 @@ begin
 end;
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure jpg_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
   var
     jpgMem : zglTMemory;
 begin
@@ -339,11 +339,11 @@ end;
 {$IFDEF USE_JPG}
 initialization
   // jpg
-  zgl_Reg( TEX_FORMAT_EXTENSION,   @JPG_EXTENSION[ 0 ] );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @JPG_EXTENSION[ 1 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
   // jpeg
-  zgl_Reg( TEX_FORMAT_EXTENSION,   @JPEG_EXTENSION[ 0 ] );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @JPEG_EXTENSION[ 1 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
 {$ENDIF}

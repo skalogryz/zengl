@@ -12,8 +12,8 @@ uses
   ;
 
 var
-  DirApp  : String;
-  DirHome : String;
+  DirApp  : UTF8String;
+  DirHome : UTF8String;
 
 procedure Init;
 begin
@@ -43,8 +43,8 @@ Begin
   //
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home
   // directory, or to executable file(not works for GNU/Linux).
-  DirApp  := u_CopyStr( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-  DirHome := u_CopyStr( PChar( zgl_Get( DIRECTORY_HOME ) ) );
+  DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+  DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
@@ -59,12 +59,6 @@ Begin
   // RU: Регистрируем процедуру, которая будет принимать разницу времени между кадрами.
   // EN: Register the procedure, that will get delta time between the frames.
   zgl_Reg( SYS_UPDATE, @Update );
-
-  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-  // следует указать использование этой кодировки.
-  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
-  // string variables.
-  zgl_Enable( APP_USE_UTF8 );
 
   // RU: Инициализируем ZenGL.
   // EN: Initialize ZenGL.

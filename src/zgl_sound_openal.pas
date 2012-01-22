@@ -176,8 +176,8 @@ begin
   oalLibrary := dlopen( libopenal {$IFDEF UNIX}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   // Для надежности...
-  if oalLibrary = nil Then oalLibrary := dlopen( PChar( libopenal + '.1' ), $001 );
-  if oalLibrary = nil Then oalLibrary := dlopen( PChar( libopenal + '.0' ), $001 );
+  if oalLibrary = nil Then oalLibrary := dlopen( PAnsiChar( libopenal + '.1' ), $001 );
+  if oalLibrary = nil Then oalLibrary := dlopen( PAnsiChar( libopenal + '.0' ), $001 );
   {$ENDIF}
 
   if oalLibrary <> LIB_ERROR Then

@@ -29,7 +29,7 @@ uses
   zgl_memory;
 
 const
-  TGA_EXTENSION : array[ 0..3 ] of Char = ( 'T', 'G', 'A', #0 );
+  TGA_EXTENSION : UTF8String = 'TGA';
 
 type
   zglPTGAHeader = ^zglTTGAHeader;
@@ -52,7 +52,7 @@ type
     end;
 end;
 
-procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure tga_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
 procedure tga_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
 
 implementation
@@ -179,7 +179,7 @@ begin
   Result := TRUE;
 end;
 
-procedure tga_LoadFromFile( const FileName : String; var Data : Pointer; var W, H, Format : Word );
+procedure tga_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
   var
     tgaMem : zglTMemory;
 begin
@@ -264,7 +264,7 @@ end;
 
 {$IFDEF USE_TGA}
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION,   @TGA_EXTENSION[ 0 ] );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @TGA_EXTENSION[ 1 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @tga_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @tga_LoadFromMemory );
 {$ENDIF}

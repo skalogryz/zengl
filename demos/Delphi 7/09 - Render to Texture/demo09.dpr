@@ -26,7 +26,7 @@ uses
   ;
 
 var
-  dirRes  : String = '../data/';
+  dirRes  : UTF8String = '../data/';
   fntMain : zglPFont;
   texTux  : zglPTexture;
   rtarget : zglPRenderTarget;
@@ -51,8 +51,6 @@ begin
 end;
 
 procedure Draw;
-  var
-    i : Integer;
 begin
   // RU: Устанавливаем текущий RenderTarget.
   // EN: Set current RenderTarget.

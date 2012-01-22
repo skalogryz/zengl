@@ -63,10 +63,10 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-function  file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
-function  file_MakeDir( const Directory : String ) : Boolean;
-function  file_Remove( const Name : String ) : Boolean;
-function  file_Exists( const Name : String ) : Boolean;
+function  file_Open( var FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
+function  file_MakeDir( const Directory : UTF8String ) : Boolean;
+function  file_Remove( const Name : UTF8String ) : Boolean;
+function  file_Exists( const Name : UTF8String ) : Boolean;
 function  file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 function  file_GetPos( FileHandle : zglTFile ) : LongWord;
 function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -74,23 +74,23 @@ function  file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : 
 function  file_GetSize( FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
-procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
-function  file_GetName( const FileName : String ) : String;
-function  file_GetExtension( const FileName : String ) : String;
-function  file_GetDirectory( const FileName : String ) : String;
-procedure file_SetPath( const Path : String );
+procedure file_Find( const Directory : UTF8String; var List : zglTFileList; FindDir : Boolean );
+function  file_GetName( const FileName : UTF8String ) : UTF8String;
+function  file_GetExtension( const FileName : UTF8String ) : UTF8String;
+function  file_GetDirectory( const FileName : UTF8String ) : UTF8String;
+procedure file_SetPath( const Path : UTF8String );
 
 {$IFDEF USE_ZIP}
-function  file_OpenArchive( const FileName : String; const Password : String = '' ) : Boolean;
+function  file_OpenArchive( const FileName : UTF8String; const Password : UTF8String = '' ) : Boolean;
 procedure file_CloseArchive;
 {$ENDIF}
 
-function _file_GetName( const FileName : String ) : PChar;
-function _file_GetExtension( const FileName : String ) : PChar;
-function _file_GetDirectory( const FileName : String ) : PChar;
+function _file_GetName( const FileName : UTF8String ) : PAnsiChar;
+function _file_GetExtension( const FileName : UTF8String ) : PAnsiChar;
+function _file_GetDirectory( const FileName : UTF8String ) : PAnsiChar;
 
 {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
-function platform_GetRes( const FileName : String ) : String;
+function platform_GetRes( const FileName : UTF8String ) : UTF8String;
 {$IFEND}
 
 {$IFDEF UNIX}
@@ -113,15 +113,15 @@ uses
   zgl_utils;
 
 var
-  filePath : String = '';
-  {$IFDEF WINCE}
+  filePath : UTF8String = '';
+  {$IFDEF WINDOWS}
   wideStr : PWideChar;
   {$ENDIF}
   {$IFDEF iOS}
   iosFileManager : NSFileManager;
   {$ENDIF}
 
-function GetDir( const Path : String ) : String;
+function GetDir( const Path : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
@@ -129,10 +129,10 @@ begin
   if ( len > 0 ) and ( Path[ len ] <> '/' ) {$IFDEF WINDOWS} and ( Path[ len ] <> '\' ) {$ENDIF} Then
     Result := Path + '/'
   else
-    Result := u_CopyStr( Path );
+    Result := u_CopyUTF8Str( Path );
 end;
 
-function file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
+function file_Open( var FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
 begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
@@ -161,19 +161,16 @@ begin
     FOM_OPENRW: FileHandle := FpOpen( filePath + FileName, O_RdWr );
   end;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-  case Mode of
-    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
-    FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
-    FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
-  end;
-{$ENDIF}
-{$IFDEF WINCE}
+{$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
+  wideStr := u_GetPWideChar( filePath + FileName );
+  {$ELSE}
   wideStr := u_GetPWideChar( platform_GetRes( filePath + FileName ) );
+  {$ENDIF}
   case Mode of
-    FOM_CREATE: FileHandle := CreateFile( wideStr, GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
-    FOM_OPENR:  FileHandle := CreateFile( wideStr, GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
-    FOM_OPENRW: FileHandle := CreateFile( wideStr, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+    FOM_CREATE: FileHandle := CreateFileW( wideStr, GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_OPENR:  FileHandle := CreateFileW( wideStr, GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
+    FOM_OPENRW: FileHandle := CreateFileW( wideStr, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
   FreeMem( wideStr );
 {$ENDIF}
@@ -187,7 +184,7 @@ begin
   Result := FileHandle <> FILE_ERROR;
 end;
 
-function file_MakeDir( const Directory : String ) : Boolean;
+function file_MakeDir( const Directory : UTF8String ) : Boolean;
 begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
@@ -200,12 +197,13 @@ begin
 {$IFDEF LINUX}
   Result := FpMkdir( filePath + Directory, MODE_MKDIR ) = FILE_ERROR;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-  Result := CreateDirectory( PChar( filePath + Directory ), nil );
-{$ENDIF}
-{$IFDEF WINCE}
+{$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
+  wideStr := u_GetPWideChar( filePath + Directory );
+  {$ELSE}
   wideStr := u_GetPWideChar( platform_GetRes( filePath + Directory ) );
-  Result := CreateDirectory( wideStr, nil );
+  {$ENDIF}
+  Result := CreateDirectoryW( wideStr, nil );
   FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -213,20 +211,17 @@ begin
 {$ENDIF}
 end;
 
-function file_Remove( const Name : String ) : Boolean;
+function file_Remove( const Name : UTF8String ) : Boolean;
   var
   {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
     status : Stat;
   {$IFEND}
-  {$IFDEF WINDOWS}
-    attr   : LongWord;
-  {$ENDIF}
   {$IFDEF iOS}
     error : NSErrorPointer;
   {$ENDIF}
     i    : Integer;
     dir  : Boolean;
-    path : String;
+    path : UTF8String;
     list : zglTFileList;
 begin
   {$IFDEF USE_ZIP}
@@ -247,15 +242,14 @@ begin
   FpStat( filePath + Name, status );
   dir := fpS_ISDIR( status.st_mode );
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-  {$IFNDEF WINCE}
-  attr := GetFileAttributes( PChar( filePath + Name ) );
+{$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
+  wideStr := u_GetPWideChar( filePath + Name );
   {$ELSE}
   wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
-  attr    := GetFileAttributes( wideStr );
-  FreeMem( wideStr );
   {$ENDIF}
-  dir  := attr and FILE_ATTRIBUTE_DIRECTORY > 0;
+  dir := GetFileAttributesW( wideStr ) and FILE_ATTRIBUTE_DIRECTORY > 0;
+  FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF MACOSX}
   FpStat( platform_GetRes( filePath + Name ), status );
@@ -280,8 +274,14 @@ begin
       {$IFDEF LINUX}
       Result := FpRmdir( filePath + Name ) = 0;
       {$ENDIF}
+      {$IFDEF WINDOWS}
       {$IFDEF WINDESKTOP}
-      Result := RemoveDirectory( PChar( filePath + Name ) );
+      wideStr := u_GetPWideChar( filePath + Name );
+      {$ELSE}
+      wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+      {$ENDIF}
+      Result := RemoveDirectoryW( wideStr );
+      FreeMem( wideStr );
       {$ENDIF}
       {$IFDEF MACOSX}
       Result := FpRmdir( platform_GetRes( filePath + Name ) ) = 0;
@@ -293,13 +293,14 @@ begin
       {$IFDEF LINUX}
       Result := FpUnlink( filePath + Name ) = 0;
       {$ENDIF}
-      {$IFDEF WINDESKTOP}
-      Result := DeleteFile( PChar( filePath + Name ) );
-      {$ENDIF}
-      {$IFDEF WINCE}
+      {$IFDEF WINDOWS}
       begin
+        {$IFDEF WINDESKTOP}
+        wideStr := u_GetPWideChar( filePath + Name );
+        {$ELSE}
         wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
-        Result  := DeleteFile( wideStr );
+        {$ENDIF}
+        Result := DeleteFileW( wideStr );
         FreeMem( wideStr );
       end;
       {$ENDIF}
@@ -311,7 +312,7 @@ begin
       {$ENDIF}
 end;
 
-function file_Exists( const Name : String ) : Boolean;
+function file_Exists( const Name : UTF8String ) : Boolean;
   {$IFDEF UNIX}
   var
     status : Stat;
@@ -332,12 +333,13 @@ begin
 {$IFDEF LINUX}
   Result := FpStat( filePath + Name, status ) = 0;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-  Result := GetFileAttributes( PChar( filePath + Name ) ) <> $FFFFFFFF;
-{$ENDIF}
-{$IFDEF WINCE}
+{$IFDEF WINDOWS}
+  {$IFDEF WINDESKTOP}
+  wideStr := u_GetPWideChar( filePath + Name );
+  {$ELSE}
   wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
-  Result  := GetFileAttributes( wideStr ) <> $FFFFFFFF;
+  {$ENDIF}
+  Result  := GetFileAttributesW( wideStr ) <> $FFFFFFFF;
   FreeMem( wideStr );
 {$ENDIF}
 {$IFDEF MACOSX}
@@ -506,7 +508,7 @@ begin
   FileHandle := FILE_ERROR;
 end;
 
-procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
+procedure file_Find( const Directory : UTF8String; var List : zglTFileList; FindDir : Boolean );
   var
   {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
     dir    : PDir;
@@ -515,13 +517,16 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
   {$IFEND}
   {$IFDEF WINDOWS}
     First : THandle;
-    FList : WIN32_FIND_DATA;
+    FList : WIN32_FIND_DATAW;
+    {$IFNDEF USE_ZIP}
+    len   : Integer;
+    {$ENDIF}
   {$ENDIF}
   {$IFDEF iOS}
     i           : Integer;
     dirContent  : NSArray;
     path        : NSString;
-    fileName    : array[ 0..255 ] of Char;
+    fileName    : array[ 0..255 ] of AnsiChar;
     error       : NSErrorPointer;
     isDirectory : Boolean;
   {$ENDIF}
@@ -543,7 +548,7 @@ begin
           if ( file_GetDirectory( name ) = Directory ) and ( ( FindDir and ( name[ len - 1 ] = '/' ) ) or ( ( not FindDir ) and ( name[ len - 1 ] <> '/' ) ) ) Then
             begin
               SetLength( List.Items, List.Count + 1 );
-              List.Items[ List.Count ] := u_CopyStr( name );
+              List.Items[ List.Count ] := u_CopyUTF8Str( name );
               INC( List.Count );
             end;
         end;
@@ -577,13 +582,13 @@ begin
   FpCloseDir( dir^ );
 {$IFEND}
 {$IFDEF WINDOWS}
-  {$IFNDEF WINCE}
-  First := FindFirstFile( PChar( GetDir( filePath + Directory ) + '*' ), FList );
+  {$IFDEF WINDESKTOP}
+  wideStr := u_GetPWideChar( filePath + Directory + '*' );
   {$ELSE}
   wideStr := u_GetPWideChar( platform_GetRes( filePath + Directory ) + '*' );
-  First   := FindFirstFile( wideStr, FList );
-  FreeMem( wideStr );
   {$ENDIF}
+  First   := FindFirstFileW( wideStr, FList );
+  FreeMem( wideStr );
   repeat
     if FindDir Then
       begin
@@ -591,9 +596,9 @@ begin
       end else
         if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY > 0 Then continue;
     SetLength( List.Items, List.Count + 1 );
-    List.Items[ List.Count ] := FList.cFileName;
+    List.Items[ List.Count ] := u_GetUTF8String( FList.cFileName );
     INC( List.Count );
-  until not FindNextFile( First, FList );
+  until not FindNextFileW( First, FList );
   FindClose( First );
 {$ENDIF}
 {$IFDEF iOS}
@@ -611,7 +616,7 @@ begin
       SetLength( List.Items, List.Count + 1 );
       FillChar( fileName[ 0 ], 256, 0 );
       CFStringGetCString( CFStringRef( dirContent.objectAtIndex( i ) ), @fileName[ 0 ], 255, kCFStringEncodingUTF8 );
-      List.Items[ List.Count ] := PChar( @fileName[ 0 ] );
+      List.Items[ List.Count ] := PAnsiChar( @fileName[ 0 ] );
       INC( List.Count );
     end;
 {$ENDIF}
@@ -620,7 +625,7 @@ begin
     u_SortList( List, 0, List.Count - 1 );
 end;
 
-procedure GetStr( const Str : String; var Result : String; const d : Char; const b : Boolean );
+procedure GetStr( const Str : UTF8String; var Result : UTF8String; const d : AnsiChar; const b : Boolean );
   var
     i, pos, l : Integer;
 begin
@@ -638,9 +643,9 @@ begin
     Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
 end;
 
-function file_GetName( const FileName : String ) : String;
+function file_GetName( const FileName : UTF8String ) : UTF8String;
   var
-    tmp : String;
+    tmp : UTF8String;
 begin
   GetStr( FileName, Result, '/', FALSE );
   {$IFDEF WINDOWS}
@@ -652,9 +657,9 @@ begin
     Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
-function file_GetExtension( const FileName : String ) : String;
+function file_GetExtension( const FileName : UTF8String ) : UTF8String;
   var
-    tmp : String;
+    tmp : UTF8String;
 begin
   GetStr( FileName, tmp, '/', FALSE );
   {$IFDEF WINDOWS}
@@ -666,7 +671,7 @@ begin
     Result := '';
 end;
 
-function file_GetDirectory( const FileName : String ) : String;
+function file_GetDirectory( const FileName : UTF8String ) : UTF8String;
 begin
   GetStr( FileName, Result, '/', TRUE );
   {$IFDEF WINDOWS}
@@ -675,13 +680,13 @@ begin
   {$ENDIF}
 end;
 
-procedure file_SetPath( const Path : String );
+procedure file_SetPath( const Path : UTF8String );
 begin
   filePath := GetDir( Path );
 end;
 
 {$IFDEF MACOSX}
-function platform_GetRes( const FileName : String ) : String;
+function platform_GetRes( const FileName : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
@@ -693,7 +698,7 @@ begin
 end;
 {$ENDIF}
 {$IFDEF WINCE}
-function platform_GetRes( const FileName : String ) : String;
+function platform_GetRes( const FileName : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
@@ -705,7 +710,7 @@ begin
 end;
 {$ENDIF}
 {$IFDEF iOS}
-function platform_GetRes( const FileName : String ) : String;
+function platform_GetRes( const FileName : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
@@ -718,7 +723,7 @@ end;
 {$ENDIF}
 
 {$IFDEF USE_ZIP}
-function file_OpenArchive( const FileName : String; const Password : String = '' ) : Boolean;
+function file_OpenArchive( const FileName : UTF8String; const Password : UTF8String = '' ) : Boolean;
   var
     error : Integer;
     res   : zglTZIPResource;
@@ -735,7 +740,7 @@ begin
   {$IF DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(WINCE)}
   zipCurrent := zip_open( PAnsiChar( platform_GetRes( filePath + FileName ) ), 0, error );
   {$ELSE}
-  zipCurrent := zip_open( PAnsiChar( FileName ), 0, error );
+  zipCurrent := zip_open( PAnsiChar( filePath + FileName ), 0, error );
   {$IFEND}
   Result     := zipCurrent <> nil;
 
@@ -768,19 +773,19 @@ begin
 end;
 {$ENDIF}
 
-function _file_GetName( const FileName : String ) : PChar;
+function _file_GetName( const FileName : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPChar( file_GetName( FileName ) );
+  Result := u_GetPAnsiChar( file_GetName( FileName ) );
 end;
 
-function _file_GetExtension( const FileName : String ) : PChar;
+function _file_GetExtension( const FileName : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPChar( file_GetExtension( FileName ) );
+  Result := u_GetPAnsiChar( file_GetExtension( FileName ) );
 end;
 
-function _file_GetDirectory( const FileName : String ) : PChar;
+function _file_GetDirectory( const FileName : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPChar( file_GetDirectory( FileName ) );
+  Result := u_GetPAnsiChar( file_GetDirectory( FileName ) );
 end;
 
 {$IFDEF iOS}

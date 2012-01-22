@@ -73,7 +73,7 @@ type
   zglPSoundFormat  = ^zglTSoundFormat;
   zglPSoundManager = ^zglTSoundManager;
 
-  zglTSoundFileLoader = procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+  zglTSoundFileLoader = procedure( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
   zglTSoundMemLoader  = procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
 
   zglTSoundChannel = record
@@ -127,8 +127,8 @@ type
   end;
 
   zglTSoundDecoder = record
-    Ext     : String;
-    Open    : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+    Ext     : UTF8String;
+    Open    : function( var Stream : zglTSoundStream; const FileName : UTF8String ) : Boolean;
     OpenMem : function( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
     Read    : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
     Loop    : procedure( var Stream : zglTSoundStream );
@@ -136,7 +136,7 @@ type
   end;
 
   zglTSoundFormat = record
-    Extension  : String;
+    Extension  : UTF8String;
     Decoder    : zglPSoundDecoder;
     FileLoader : zglTSoundFileLoader;
     MemLoader  : zglTSoundMemLoader;
@@ -157,8 +157,8 @@ procedure snd_Free;
 function  snd_Add( SourceCount : Integer ) : zglPSound;
 procedure snd_Del( var Sound : zglPSound );
 procedure snd_Create( var Sound : zglTSound; Format : LongWord );
-function  snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
-function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
+function  snd_LoadFromFile( const FileName : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
+function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
 
 function  snd_Play( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
 procedure snd_Stop( Sound : zglPSound; ID : Integer );
@@ -167,8 +167,8 @@ procedure snd_SetVolume( Sound : zglPSound; ID : Integer; Volume : Single );
 procedure snd_SetSpeed( Sound : zglPSound; ID : Integer; Speed : Single );
 function  snd_Get( Sound : zglPSound; ID, What : Integer ) : Integer;
 
-function  snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
-function  snd_PlayMemory( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
+function  snd_PlayFile( const FileName : UTF8String; Loop : Boolean = FALSE ) : Integer;
+function  snd_PlayMemory( const Memory : zglTMemory; const Extension : UTF8String; Loop : Boolean = FALSE ) : Integer;
 procedure snd_PauseStream( ID : Integer );
 procedure snd_StopStream( ID : Integer );
 procedure snd_ResumeStream( ID : Integer );
@@ -256,7 +256,7 @@ type
   AudioSessionInterruptionListener = ( kAudioSessionEndInterruption = 0, kAudioSessionBeginInterruption = 1 );
 
 function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetProperty( inID : PChar; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetProperty( inID : PAnsiChar; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
 {$ENDIF}
 
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
@@ -669,9 +669,10 @@ begin
 {$ENDIF}
 end;
 
-function snd_LoadFromFile( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
+function snd_LoadFromFile( const FileName : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
   var
     i   : Integer;
+    ext : UTF8String;
     fmt : LongWord;
     res : zglTSoundResource;
 begin
@@ -686,8 +687,9 @@ begin
     end;
   Result := snd_Add( SourceCount );
 
+  ext := u_StrUp( file_GetExtension( FileName ) );
   for i := managerSound.Count.Formats - 1 downto 0 do
-    if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
+    if ext = managerSound.Formats[ i ].Extension Then
       if resUseThreaded Then
         begin
           res.FileName   := FileName;
@@ -711,9 +713,10 @@ begin
     log_Add( 'Sound loaded: "' + FileName + '"' );
 end;
 
-function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
+function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
   var
     i   : Integer;
+    ext : UTF8String;
     fmt : LongWord;
     res : zglTSoundResource;
 begin
@@ -723,8 +726,9 @@ begin
 
   Result := snd_Add( SourceCount );
 
+  ext := u_StrUp( Extension );
   for i := managerSound.Count.Formats - 1 downto 0 do
-    if u_StrUp( Extension ) = managerSound.Formats[ i ].Extension Then
+    if ext = managerSound.Formats[ i ].Extension Then
       if resUseThreaded Then
         begin
           res.Memory    := Memory;
@@ -1229,10 +1233,10 @@ begin
 {$ENDIF}
 end;
 
-function snd_PlayFile( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+function snd_PlayFile( const FileName : UTF8String; Loop : Boolean = FALSE ) : Integer;
   var
     i   : Integer;
-    ext : String;
+    ext : UTF8String;
 begin
   if ( not sndInitialized ) or ( not sndCanPlayFile ) Then exit;
 
@@ -1255,12 +1259,10 @@ begin
       exit;
     end;
 
+  ext := u_StrUp( file_GetExtension( FileName ) );
   for i := managerSound.Count.Formats - 1 downto 0 do
-    begin
-      ext := u_StrUp( file_GetExtension( FileName ) );
-      if ext = managerSound.Formats[ i ].Extension Then
-        sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
-    end;
+    if ext = managerSound.Formats[ i ].Extension Then
+      sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
     begin
@@ -1272,10 +1274,10 @@ begin
   snd_PlayStream( Result, Loop );
 end;
 
-function snd_PlayMemory( const Memory : zglTMemory; const Extension : String; Loop : Boolean = FALSE ) : Integer;
+function snd_PlayMemory( const Memory : zglTMemory; const Extension : UTF8String; Loop : Boolean = FALSE ) : Integer;
   var
     i   : Integer;
-    ext : String;
+    ext : UTF8String;
 begin
   if ( not sndInitialized ) or ( not sndCanPlayFile ) Then exit;
 
@@ -1292,12 +1294,10 @@ begin
         FreeMem( sfStream[ Result ]._data );
     end;
 
+  ext := u_StrUp( Extension );
   for i := managerSound.Count.Formats - 1 downto 0 do
-    begin
-      ext := u_StrUp( Extension );
-      if ext = managerSound.Formats[ i ].Extension Then
-        sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
-    end;
+    if ext = managerSound.Formats[ i ].Extension Then
+      sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or ( not sfStream[ Result ]._decoder.OpenMem( sfStream[ Result ], Memory ) ) Then
     begin
