@@ -93,7 +93,7 @@ const
   libZenGL = 'libZenGL.dylib';
 {$ENDIF}
 
-function zglLoad( LibraryName : UTF8String; Error : Boolean = TRUE ) : Boolean;
+function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure zglFree;
 
 var
@@ -1319,17 +1319,17 @@ function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 
 {$IFDEF WINDOWS}
 {$IFNDEF WINCE}
-function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryW';
+function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
-function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddressW';
+function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 
-function MessageBoxW( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
+function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
 {$ELSE}
 function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
 
-function MessageBoxW( hWnd : LongWord; lpText, lpCaption : PWideChar; uType : LongWord) : Integer; stdcall; external 'coredll.dll';
+function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PWideChar; uType : LongWord) : Integer; stdcall; external 'coredll.dll' name 'MessageBoxW';
 {$ENDIF}
 {$ENDIF}
 
@@ -1448,7 +1448,7 @@ begin
     System.Move( Str[ 1 ], Result[ 1 ], len );
 end;
 
-{$IFDEF WINDOWS}
+{$IFDEF WINCE}
 function u_GetPWideChar( const Str : UTF8String ) : PWideChar;
   var
     len : Integer;
@@ -1486,8 +1486,8 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-function zglLoad( LibraryName : UTF8String; Error : Boolean = TRUE ) : Boolean;
-  {$IFDEF WINDOWS}
+function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+  {$IFDEF WINCE}
   var
     lib : PWideChar;
   {$ENDIF}
@@ -1496,7 +1496,6 @@ begin
   {$IFDEF LINUX}
   zglLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
   if not Assigned( zglLib ) Then
-    zglLib := dlopen( PAnsiChar( LibraryName ), $001 );
   {$ENDIF}
   {$IFDEF MACOSX}
   mainBundle  := CFBundleGetMainBundle;
@@ -1505,12 +1504,13 @@ begin
   CFStringGetFileSystemRepresentation( tmpCFString, @tmpPath[ 0 ], 8192 );
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
-  zglLib      := dlopen( PAnsiChar( LibraryName ), $001 );
   {$ENDIF}
-  {$IFDEF WINDOWS}
-  lib    := u_GetPWideChar( LibraryName );
+  {$IFDEF WINCE}
+  lib := u_GetPWideChar( LibraryName );
   zglLib := dlopen( lib );
   FreeMem( lib );
+  {$ELSE}
+  zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF UNIX}, $001 {$ENDIF} );
   {$ENDIF}
 
   if zglLib <> {$IFDEF UNIX} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
@@ -1782,7 +1782,7 @@ begin
           WriteLn( 'Error while loading ZenGL' );
           {$ENDIF}
           {$IFDEF WINDOWS}
-          MessageBoxW( 0, 'Error while loading ZenGL', 'Error', $00000010 );
+          MessageBoxA( 0, 'Error while loading ZenGL', 'Error', $00000010 );
           {$ENDIF}
           {$IFDEF MACOSX}
           StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading ZenGL', nil, outItemHit );
