@@ -190,7 +190,7 @@ const
   JS_AXIS : array[ 0..17 ] of Byte = ( JOY_AXIS_X, JOY_AXIS_Y, JOY_AXIS_Z, JOY_AXIS_U, JOY_AXIS_V, JOY_AXIS_R, JOY_AXIS_Z, JOY_AXIS_R, 0, 0, 0, 0, 0, 0, 0, 0, JOY_POVX, JOY_POVY );
 {$ENDIF}
 {$IFDEF WINDESKTOP}
-  JS_AXIS : array[ 0..5 ] of LongWord = ( 9 {X}, 11 {Y}, 13 {Z}, 18 {R}, 20 {U}, 22 {V} );
+  JS_AXIS : array[ 0..5 ] of LongWord = ( 17 {X}, 19 {Y}, 21 {Z}, 26 {R}, 28 {U}, 30 {V} );
 {$ENDIF}
 
 function  joy_Init : Byte;
