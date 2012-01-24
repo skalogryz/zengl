@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 8             }
-{ date:              2011.11.26              }
+{ header version:    0.99 beta 9             }
+{ date:              2012.01.24              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -715,7 +715,7 @@ type
   // Equality function. Returns true if ptr is equal to elt.
   cpHashSetEqlFunc = function( ptr : Pointer; elt : Pointer ) : cpBool; cdecl;
   // Used by cpHashSetInsert(). Called to transform the ptr into an element.
-  cpHashSetTransFunc = procedure( ptr : Pointer; date : Pointer ); cdecl;
+  cpHashSetTransFunc = function( ptr : Pointer; date : Pointer ) : Pointer; cdecl;
 
   cpHashSet = record
     // Number of elements stored in the table.
@@ -986,7 +986,7 @@ var
 
   cpDampedSpringGetClass: function : PcpConstraintClass; cdecl;
   cpDampedSpringAlloc : function : PcpDampedSpring; cdecl;
-  cpDampedSpringInit : function( joint : cpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;
+  cpDampedSpringInit : function( joint : PcpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;
   cpDampedSpringNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;
 
   cpDampedRotarySpringGetClass: function : PcpConstraintClass; cdecl;
@@ -1020,7 +1020,7 @@ var
   cpSpaceInit : function( space : PcpSpace ) : PcpSpace; cdecl;
   cpSpaceNew : function : PcpSpace; cdecl;
 
-  cpSpaceDestroy : procedure( space : cpSpace ); cdecl;
+  cpSpaceDestroy : procedure( space : PcpSpace ); cdecl;
   cpSpaceFree : procedure( space : PcpSpace ); cdecl;
 
   // Convenience function. Frees all referenced entities. (bodies, shapes and constraints)
