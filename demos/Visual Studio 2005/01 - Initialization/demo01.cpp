@@ -75,12 +75,6 @@ int CALLBACK WinMain (
 	// EN: Register the function, that will be executed after ZenGL shutdown.
 	zgl_Reg( SYS_EXIT, (void*)&Quit );
 
-	// RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
-	// следует указать использование этой кодировки.
-	// EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
-	// string variables.
-	zgl_Enable( APP_USE_UTF8 );
-
 	// RU: Устанавливаем заголовок окна.
 	// EN: Set the caption of the window.
 	wnd_SetCaption( "01 - Initialization" );
