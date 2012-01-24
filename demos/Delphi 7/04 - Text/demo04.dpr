@@ -1,3 +1,12 @@
+// RU: Этот пример использует стадартную функцию AnsiToUTF8. Связано это с тем, что ZenGL работает со строками
+//     исключительно в UTF-8. Поэтому если необходимо вывести на экран текст с не латинскими символами, следует
+//     использовать AnsiToUTF8. Необходимости в этом нет, если использовать Lazarus(или любой другой редактор/IDE
+//     сохраняющий pas-файлы в UTF-8) и компилятор FreePascal, либо Delphi 2009+.
+//
+// EN: This example uses standard function AnsiToUTF8, because ZenGL works only with strings which are encoded
+//     in UTF-8. So, if you need to render text with non-latin symbols then you should use AnsiToUTF8. There is no
+//     need to use this function if you use Lazarus(or any other editor/IDE which will save pas-files in UTF-8) and
+//     FreePascal compiler, or Delphi 2009+.
 program demo04;
 
 {$R *.res}
@@ -88,7 +97,7 @@ begin
 
   // RU: Выводим количество FPS в правом углу, используя text_GetWidth.
   // EN: Render frames per second in the top right corner using text_GetWidth.
-  s := AnsiToUTF8( 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
+  s := 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) );
   text_Draw( fnt, 800 - text_GetWidth( fnt, s ), 0, s );
   batch2d_End();
 end;
