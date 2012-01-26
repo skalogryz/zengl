@@ -270,7 +270,7 @@ begin
       if ( tmp = 'UIInterfaceOrientationLandscapeLeft' ) or ( tmp = 'UIInterfaceOrientationLandscapeRight' ) Then
         scrCanLandscape := TRUE;
       if ( tmp = 'UIInterfaceOrientationPortrait' ) or ( tmp = 'UIInterfaceOrientationPortraitUpsideDown' ) Then
-        scrCanLandscape := TRUE;
+        scrCanPortrait := TRUE;
     end;
 
   if UIDevice.currentDevice.systemVersion.floatValue >= 3.2 Then
