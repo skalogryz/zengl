@@ -205,6 +205,12 @@ procedure scr_Init;
   var
     rotation : Word;
   {$ENDIF}
+  {$IFDEF iOS}
+  var
+    i            : Integer;
+    orientations : NSArray;
+    tmp          : array[ 0..255 ] of AnsiChar;
+  {$ENDIF}
 begin
 {$IFDEF USE_X11}
   log_Init();
@@ -257,6 +263,16 @@ begin
 
   app_InitPool();
 
+  orientations := NSBundle.mainBundle.infoDictionary.objectForKey( u_GetNSString( 'UISupportedInterfaceOrientations' ) );
+  for i := 0 to orientations.count() - 1 do
+    begin
+      CFStringGetCString( CFStringRef( orientations.objectAtIndex( i ) ), @tmp[ 0 ], 255, kCFStringEncodingUTF8 );
+      if ( tmp = 'UIInterfaceOrientationLandscapeLeft' ) or ( tmp = 'UIInterfaceOrientationLandscapeRight' ) Then
+        scrCanLandscape := TRUE;
+      if ( tmp = 'UIInterfaceOrientationPortrait' ) or ( tmp = 'UIInterfaceOrientationPortraitUpsideDown' ) Then
+        scrCanLandscape := TRUE;
+    end;
+
   if UIDevice.currentDevice.systemVersion.floatValue >= 3.2 Then
     begin
       scrDesktopW := Round( UIScreen.mainScreen.currentMode.size.width );
@@ -273,12 +289,17 @@ begin
       scrCurrModeH := scrDesktopH;
       scrDesktopH  := scrDesktopW;
       scrDesktopW  := scrCurrModeH;
-    end;
+
+      wndWidth     := Round( UIScreen.mainScreen.bounds.size.height );
+      wndHeight    := Round( UIScreen.mainScreen.bounds.size.width );
+    end else
+      begin
+        wndWidth   := Round( UIScreen.mainScreen.bounds.size.width );
+        wndHeight  := Round( UIScreen.mainScreen.bounds.size.height );
+      end;
 
   scrCurrModeW   := scrDesktopW;
   scrCurrModeH   := scrDesktopH;
-  wndWidth       := scrDesktopW;
-  wndHeight      := scrDesktopH;
   oglWidth       := scrDesktopW;
   oglHeight      := scrDesktopH;
   oglTargetW     := scrDesktopW;
