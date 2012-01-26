@@ -154,8 +154,8 @@ var
   scrDesktopH     : Integer;
   scrOrientation  : UIInterfaceOrientation;
   scrAngle        : Integer;
-  scrCanLandscape : Boolean = TRUE;
-  scrCanPortrait  : Boolean = TRUE;
+  scrCanLandscape : Boolean;
+  scrCanPortrait  : Boolean;
   {$ENDIF}
   {$IFDEF ANDROID}
   scrDesktopW : Integer;
