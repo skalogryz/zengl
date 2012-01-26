@@ -36,7 +36,7 @@ interface
   uses MacOSAll;
 {$ENDIF}
 {$IFDEF iOS}
-  uses iPhoneAll;
+  uses iPhoneAll, CFBase, CFString;
 {$ENDIF}
 
 const
