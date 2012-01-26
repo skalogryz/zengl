@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 9             }
-{ date:              2012.01.24              }
+{ header version:    0.99 beta 10            }
+{ date:              2012.01.26              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -911,7 +911,7 @@ var
   cpPolyShapeInit : function ( poly : PcpPolyShape; body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpPolyShape; cdecl;
   cpPolyShapeNew : function( body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpShape; cdecl;
 
-  cpBoxShapeInit : function( poly : cpPolyShape; body : cpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl;
+  cpBoxShapeInit : function( poly : PcpPolyShape; body : PcpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl;
   cpBoxShapeNew : function( body : PcpBody; width : cpFloat; height : cpFloat ) : PcpShape; cdecl;
 
   // Check that a set of vertexes has a correct winding and that they are convex
@@ -1184,7 +1184,7 @@ var
   function cpPolyShapeAlloc : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpPolyShapeInit ( poly : PcpPolyShape; body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpPolyShapeNew( body : PcpBody; numVerts : Integer; verts : PcpVect; offset : cpVect ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
-  function cpBoxShapeInit( poly : cpPolyShape; body : cpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpBoxShapeInit( poly : PcpPolyShape; body : PcpBody; width : cpFloat; height : cpFloat ) : PcpPolyShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpBoxShapeNew( body : PcpBody; width : cpFloat; height : cpFloat ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpPolyValidate( verts : PcpVect; numVerts : Integer ) : cpBool; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpPolyShapeGetNumVerts( shape : PcpShape ) : Integer; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
@@ -1223,7 +1223,7 @@ var
   procedure cpGrooveJointSetGrooveA( constraint : PcpConstraint; value : cpVect ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpGrooveJointSetGrooveB( constraint : PcpConstraint; value : cpVect ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpDampedSpringAlloc : PcpDampedSpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
-  function cpDampedSpringInit( joint : cpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpDampedSpringInit( joint : PcpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpDampedSpringNew( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpDampedRotarySpringAlloc : PcpDampedRotarySpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpDampedRotarySpringInit( joint : PcpDampedRotarySpring; a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedRotarySpring; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
@@ -1243,7 +1243,7 @@ var
   function cpSpaceAlloc : PcpSpace; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpSpaceInit( space : PcpSpace ) : PcpSpace; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpSpaceNew : PcpSpace; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
-  procedure cpSpaceDestroy( space : cpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpSpaceDestroy( space : PcpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpSpaceFree( space : PcpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpSpaceFreeChildren( space : PcpSpace ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpSpaceSetDefaultCollisionHandler( space : PcpSpace; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc; separate : cpCollisionSeparateFunc; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
