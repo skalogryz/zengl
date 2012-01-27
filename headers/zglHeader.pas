@@ -134,11 +134,11 @@ var
 
 const
   ZENGL_VERSION           = 1; // Major shr 16, ( Minor and $FF00 ) shr 8, Revision and $FF
-  ZENGL_VERSION_STRING    = 2; // PChar
-  ZENGL_VERSION_DATE      = 3; // PChar
+  ZENGL_VERSION_STRING    = 2; // PAnsiChar
+  ZENGL_VERSION_DATE      = 3; // PAnsiChar
 
-  DIRECTORY_APPLICATION   = 101; // PChar
-  DIRECTORY_HOME          = 102; // PChar
+  DIRECTORY_APPLICATION   = 101; // PAnsiChar
+  DIRECTORY_HOME          = 102; // PAnsiChar
 
   LOG_FILENAME            = 203; // PPAnsiChar
 
@@ -1312,9 +1312,9 @@ var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
 {$IFDEF UNIX}
-function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
+function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
-function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
+function dlsym  ( Lib : Pointer; Name : PAnsiChar) : Pointer; cdecl; external 'dl';
 {$ENDIF}
 
 {$IFDEF WINDOWS}
@@ -1341,7 +1341,7 @@ var
   mainBundle   : CFBundleRef;
   tmpCFURLRef  : CFURLRef;
   tmpCFString  : CFStringRef;
-  tmpPath      : array[ 0..8191 ] of Char;
+  tmpPath      : array[ 0..8191 ] of AnsiChar;
   outItemHit   : SInt16;
   mainPath     : UTF8String;
   {$ENDIF}
@@ -1468,7 +1468,7 @@ begin
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
-      Result[ i ] := Char( Byte( Str[ i ] ) - 32 )
+      Result[ i ] := AnsiChar( Byte( Str[ i ] ) - 32 )
     else
       Result[ i ] := Str[ i ];
 end;
@@ -1481,7 +1481,7 @@ begin
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
-      Result[ i ] := Char( Byte( Str[ i ] ) + 32 )
+      Result[ i ] := AnsiChar( Byte( Str[ i ] ) + 32 )
     else
       Result[ i ] := Str[ i ];
 end;
