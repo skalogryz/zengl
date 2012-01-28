@@ -32,8 +32,8 @@ uses
   ;
 
 var
-  DirApp  : String;
-  DirHome : String;
+  DirApp  : UTF8String;
+  DirHome : UTF8String;
 
 procedure Init;
 begin
