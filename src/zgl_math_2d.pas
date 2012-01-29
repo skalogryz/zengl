@@ -346,7 +346,6 @@ begin
     end;
   if tessVCount > 0 Then
     begin
-      FreeMem( TriPoints );
       zgl_GetMem( Pointer( TriPoints ), tessVCount * SizeOf( zglTPoint2D ) );
       Move( tessVerts[ 0 ], TriPoints[ 0 ], tessVCount * SizeOf( zglTPoint2D ) );
       Result := tessVCount;
