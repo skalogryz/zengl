@@ -10,8 +10,8 @@
 { chipmunk homepage:                         }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 10            }
-{ date:              2012.01.26              }
+{ header version:    0.99 beta 11            }
+{ date:              2012.01.29              }
 { header homepage:                           }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
@@ -873,7 +873,7 @@ var
   // Arbiter Helper Functions
   cpArbiterTotalImpulse : function( arb : PcpArbiter ) : cpVect; cdecl;
   cpArbiterTotalImpulseWithFriction : function( arb : PcpArbiter ) : cpVect; cdecl;
-  cpArbiterIgnore : procedure( arb : PcpArbiter );
+  cpArbiterIgnore : procedure( arb : PcpArbiter ); cdecl;
 
 // SHAPE
   // Low level shape initialization func.
@@ -1167,7 +1167,7 @@ var
   procedure cpArbiterApplyImpulse( arb : PcpArbiter; eCoef : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpArbiterTotalImpulse( arb : PcpArbiter ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpArbiterTotalImpulseWithFriction( arb : PcpArbiter ) : cpVect; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
-  procedure cpArbiterIgnore( arb : PcpArbiter );{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  procedure cpArbiterIgnore( arb : PcpArbiter ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpShapeInit( shape : PcpShape; klass : PcpShapeClass; body : PcpBody ) : PcpShape; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpShapeDestroy( shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpShapeFree( shape : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
