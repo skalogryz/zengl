@@ -859,7 +859,7 @@ var
   cpContactInit : function( con : PcpContact; p : cpVect; n : cpVect; dist : cpFloat; hasg : cpHashValue ) : PcpContact; cdecl;
 
   // Arbiters are allocated in large buffers by the space and don't require a destroy function
-  cpArbiterInit : function( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : cpArbiter; cdecl;
+  cpArbiterInit : function( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : PcpArbiter; cdecl;
 
   // These functions are all intended to be used internally.
   // Inject new contact points into the arbiter while preserving contact history.
@@ -1160,7 +1160,7 @@ var
   procedure cpArrayEach( arr : PcpArray; iterFunc : cpArrayIter; data : Pointer ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpArrayContains( arr : PcpArray; ptr : Pointer ) : cpBool; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpContactInit( con : PcpContact; p : cpVect; n : cpVect; dist : cpFloat; hasg : cpHashValue ) : PcpContact; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
-  function cpArbiterInit( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : cpArbiter; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
+  function cpArbiterInit( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : PcpArbiter; cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpArbiterUpdate( arb : PcpArbiter; contacts : PcpContact; numContacts : Integer; handler : PcpCollisionHandler; a : PcpShape; b : PcpShape ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpArbiterPreStep( arb : PcpArbiter; dt_inv : cpFloat ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   procedure cpArbiterApplyCachedImpulse( arb : PcpArbiter ); cdecl;{$IFDEF CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
