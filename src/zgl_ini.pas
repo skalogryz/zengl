@@ -81,6 +81,7 @@ var
 
 implementation
 uses
+  zgl_types,
   zgl_file,
   zgl_utils;
 
@@ -483,23 +484,49 @@ end;
 
 procedure ini_Process;
   var
-    c : AnsiChar;
-    s : UTF8String;
-    i : Integer;
+    lineEndCode : Byte;
+    newLine     : Boolean;
+    newLineSize : Integer;
+    str         : UTF8String;
+    lastPos     : LongWord;
+    len         : Integer;
 begin
-  s := '';
-  for i := 0 to iniMem.Size - 1 do
+  str         := '';
+  lastPos     := 0;
+  while iniMem.Position < iniMem.Size do
     begin
-      mem_Read( iniMem, c, 1 );
-      if ( c <> #13 ) and ( c <> #10 ) Then
-        s := s + c
-      else
+      mem_Read( iniMem, lineEndCode, 1 );
+      newLine := lineEndCode = 10;
+      newLineSize := 1;
+      if ( not newLine ) and ( lineEndCode = 13 ) Then
         begin
-          addData( s );
-          s := '';
+          mem_Read( iniMem, lineEndCode, 1 );
+          newLine := lineEndCode = 10;
+          newLineSize := 2;
+        end;
+
+      if newLine Then
+        begin
+          len := iniMem.Position - lastPos - newLineSize;
+          if len = 0 Then
+            begin
+              INC( lastPos, newLineSize );
+              continue;
+            end;
+          SetLength( str, len );
+          Move( PByte( Ptr( iniMem.Memory ) + lastPos )^, str[ 1 ], len );
+          addData( str );
+          writeln( str );
+
+          lastPos := iniMem.Position;
         end;
     end;
-  addData( s );
+
+  len := iniMem.Position - lastPos;
+  SetLength( str, len );
+  Move( PByte( Ptr( iniMem.Memory ) + lastPos )^, str[ 1 ], len );
+  addData( str );
+  writeln( str );
 end;
 
 procedure ini_Free;
