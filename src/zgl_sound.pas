@@ -376,6 +376,8 @@ function snd_Init : Boolean;
   {$ENDIF}
 begin
   Result := FALSE;
+
+  if sndInitialized Then exit;
 {$IFDEF USE_OPENAL}
   {$IFNDEF ANDROID}
   log_Add( 'OpenAL: load ' + libopenal  );
