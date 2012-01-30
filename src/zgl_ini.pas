@@ -482,6 +482,7 @@ begin
       end;
 end;
 
+// TODO: optimize this code written at night... :)
 procedure ini_Process;
   var
     lineEndCode : Byte;
@@ -522,9 +523,12 @@ begin
     end;
 
   len := iniMem.Position - lastPos;
-  SetLength( str, len );
-  Move( PByte( Ptr( iniMem.Memory ) + lastPos )^, str[ 1 ], len );
-  addData( str );
+  if len > 0 Then
+    begin
+      SetLength( str, len );
+      Move( PByte( Ptr( iniMem.Memory ) + lastPos )^, str[ 1 ], len );
+      addData( str );
+    end;
 end;
 
 procedure ini_Free;
