@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -89,14 +89,8 @@ var
 implementation
 uses
   zgl_main,
-  {$IFNDEF USE_GLES}
-  zgl_opengl_all
-  {$ELSE}
-  zgl_opengles_all
-  {$ENDIF}
-  ;
+  zgl_opengl_all;
 
-{$IFDEF USE_TRIANGULATION}
 var
   tess        : Integer;
   tessMode    : Integer;
@@ -106,7 +100,6 @@ var
   tessVertex  : array[ 0..2 ] of zglTPoint2D;
   tessVCount  : Integer;
   tessVerts   : array of zglTPoint2D;
-{$ENDIF}
 
 function ArcTan2( dx, dy : Single ) : Single;
 begin
@@ -237,7 +230,7 @@ end;
 
 // GLU Triangulation
 {$IFDEF USE_TRIANGULATION}
-{$IFDEF UNIX}
+{$IFDEF LINUX_OR_DARWIN}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
 
@@ -346,6 +339,7 @@ begin
     end;
   if tessVCount > 0 Then
     begin
+      FreeMem( TriPoints );
       zgl_GetMem( Pointer( TriPoints ), tessVCount * SizeOf( zglTPoint2D ) );
       Move( tessVerts[ 0 ], TriPoints[ 0 ], tessVCount * SizeOf( zglTPoint2D ) );
       Result := tessVCount;

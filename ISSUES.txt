@@ -1,0 +1,1 @@
+Considering a bug inside current stable version of FreePascal demo11(with Chipmunk physics) in 64-bit mode won't work. So, update your FreePascal to latest version from svn or to one of fixes-branch(e.g. http://svn.freepascal.org/svn/fpc/branches/fixes_2_6/).

@@ -28,7 +28,7 @@ uses
   ;
 
 var
-  dirRes : UTF8String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
+  dirRes : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fnt    : zglPFont;
 
 procedure Init;
@@ -48,7 +48,7 @@ procedure Draw;
   var
     i : Integer;
     r : zglTRect;
-    s : UTF8String;
+    s : String;
 begin
   batch2d_Begin();
   text_Draw( fnt, 400, 25, 'Строка с выравниванием по центру', TEXT_HALIGN_CENTER );
@@ -113,6 +113,12 @@ Begin
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '04 - Text' );
 
