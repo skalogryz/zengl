@@ -31,7 +31,7 @@ procedure SetCurrentMode;
 procedure zbuffer_SetDepth( zNear, zFar : Single );
 procedure zbuffer_Clear;
 
-procedure scissor_Begin( X, Y, Width, Height : Integer; ConsiderCamera : Boolean = TRUE );
+procedure scissor_Begin( X, Y, Width, Height : Integer );
 procedure scissor_End;
 
 implementation
@@ -40,13 +40,8 @@ uses
   zgl_main,
   zgl_window,
   zgl_screen,
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
   zgl_render_2d,
   zgl_camera_2d;
 
@@ -118,24 +113,17 @@ begin
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 
-procedure scissor_Begin( X, Y, Width, Height : Integer; ConsiderCamera : Boolean = TRUE );
+procedure scissor_Begin( X, Y, Width, Height : Integer );
 begin
   batch2d_Flush();
 
   if ( Width < 0 ) or ( Height < 0 ) Then exit;
-  if ConsiderCamera Then
+  if not cam2d.OnlyXY Then
     begin
-      if cam2d.OnlyXY Then
-        begin
-          X := Trunc( X - cam2d.Global.X );
-          Y := Trunc( Y - cam2d.Global.Y );
-        end else
-          begin
-            X      := Trunc( ( X - cam2d.Global.Center.X ) * cam2d.Global.Zoom.X - cam2d.Global.X );
-            Y      := Trunc( ( Y - cam2d.Global.Center.Y ) * cam2d.Global.Zoom.Y - cam2d.Global.Y );
-            Width  := Trunc( Width  * cam2d.Global.Zoom.X );
-            Height := Trunc( Height * cam2d.Global.Zoom.Y );
-          end;
+      X      := Trunc( ( X - cam2d.Global.X ) * cam2d.Global.Zoom.X + ( ( oglWidth  / 2 ) - ( oglWidth  / 2 ) * cam2d.Global.Zoom.X ) - cam2d.Global.X );
+      Y      := Trunc( ( Y - cam2d.Global.Y ) * cam2d.Global.Zoom.Y + ( ( oglHeight / 2 ) - ( oglHeight / 2 ) * cam2d.Global.Zoom.Y ) - cam2d.Global.Y );
+      Width  := Trunc( Width  * cam2d.Global.Zoom.X );
+      Height := Trunc( Height * cam2d.Global.Zoom.Y );
     end;
   if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
@@ -149,17 +137,15 @@ begin
 
   INC( tSCount );
   SetLength( tScissor, tSCount );
-  tScissor[ tSCount - 1 ][ 0 ] := render2dClipX;
-  tScissor[ tSCount - 1 ][ 1 ] := render2dClipY;
-  tScissor[ tSCount - 1 ][ 2 ] := render2dClipW;
-  tScissor[ tSCount - 1 ][ 3 ] := render2dClipH;
+  tScissor[ tSCount - 1 ][ 0 ] := oglClipX;
+  tScissor[ tSCount - 1 ][ 1 ] := oglClipY;
+  tScissor[ tSCount - 1 ][ 2 ] := oglClipW;
+  tScissor[ tSCount - 1 ][ 3 ] := oglClipH;
 
-  render2dClipX  := X;
-  render2dClipY  := Y;
-  render2dClipW  := Width;
-  render2dClipH  := Height;
-  render2dClipXW := render2dClipX + render2dClipW;
-  render2dClipYH := render2dClipY + render2dClipH;
+  oglClipX := X;
+  oglClipY := Y;
+  oglClipW := Width;
+  oglClipH := Height;
 end;
 
 procedure scissor_End;
@@ -168,16 +154,16 @@ begin
 
   if tSCount - 1 < 0 Then exit;
   DEC( tSCount );
-  render2dClipX := tScissor[ tSCount ][ 0 ];
-  render2dClipY := tScissor[ tSCount ][ 1 ];
-  render2dClipW := tScissor[ tSCount ][ 2 ];
-  render2dClipH := tScissor[ tSCount ][ 3 ];
+  oglClipX := tScissor[ tSCount ][ 0 ];
+  oglClipY := tScissor[ tSCount ][ 1 ];
+  oglClipW := tScissor[ tSCount ][ 2 ];
+  oglClipH := tScissor[ tSCount ][ 3 ];
   SetLength( tScissor, tSCount );
 
   if tSCount > 0 Then
     begin
       glEnable( GL_SCISSOR_TEST );
-      glScissor( render2dClipX, wndHeight - render2dClipY - render2dClipH, render2dClipW, render2dClipH );
+      glScissor( oglClipX, wndHeight - oglClipY - oglClipH, oglClipW, oglClipH );
     end else
       glDisable( GL_SCISSOR_TEST );
 end;

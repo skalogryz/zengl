@@ -28,7 +28,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="53">
+    <Units Count="46">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -259,41 +259,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_render_2d"/>
       </Unit45>
-      <Unit46>
-        <Filename Value="../zgl_opengles.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengles"/>
-      </Unit46>
-      <Unit47>
-        <Filename Value="../zgl_opengles_all.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengles_all"/>
-      </Unit47>
-      <Unit48>
-        <Filename Value="../zgl_resources.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_resources"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="../zgl_textures_pvr.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_textures_pvr"/>
-      </Unit49>
-      <Unit50>
-        <Filename Value="../zgl_touch.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_touch"/>
-      </Unit50>
-      <Unit51>
-        <Filename Value="../zgl_lib_msvcrt.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_lib_msvcrt"/>
-      </Unit51>
-      <Unit52>
-        <Filename Value="../zgl_lib_zip.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_lib_zip"/>
-      </Unit52>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -303,7 +268,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp"/>
     </SearchPaths>
     <Parsing>
@@ -328,9 +293,6 @@
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
@@ -340,6 +302,9 @@
         <ShowHints Value="False"/>
         <ShowGenInfo Value="False"/>
       </Verbosity>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

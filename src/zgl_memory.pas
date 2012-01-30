@@ -34,8 +34,8 @@ type
     Position : LongWord;
 end;
 
-procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : UTF8String );
-procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String );
+procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
+procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
 function  mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
 function  mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
@@ -44,7 +44,7 @@ procedure mem_SetSize( var Memory : zglTMemory; Size : LongWord );
 procedure mem_Free( var Memory : zglTMemory );
 
 {$IFDEF ENDIAN_BIG}
-threadvar
+var
   forceNoSwap : Boolean;
 {$ENDIF}
 
@@ -53,7 +53,7 @@ uses
   zgl_main,
   zgl_file;
 
-procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : UTF8String );
+procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
   var
     f : zglTFile;
 begin
@@ -67,7 +67,7 @@ begin
   file_Close( f );
 end;
 
-procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String );
+procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
   var
     f : zglTFile;
 begin
@@ -89,7 +89,7 @@ end;
 function mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 begin
   {$IFDEF ENDIAN_BIG}
-  if ( Bytes <= 4 ) and ( not forceNoSwap ) Then
+  if ( Bytes <=4 ) and ( not forceNoSwap ) Then
     begin
       Result := mem_ReadSwap( Memory, Buffer, Bytes );
       exit;

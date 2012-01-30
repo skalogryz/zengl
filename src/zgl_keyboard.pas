@@ -21,23 +21,19 @@
 unit zgl_keyboard;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
-  {$modeswitch objectivec1}
-{$ENDIF}
 
 interface
-{$IFDEF USE_X11}
-  uses X, Xlib, keysym;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
-{$IFDEF iOS}
-  uses iPhoneAll, CGGeometry;
-{$ENDIF}
+uses
+  {$IFDEF LINUX}
+  X, Xlib, keysym
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll
+  {$ENDIF}
+  ;
 
 const
   K_SYSRQ      = $B7;
@@ -168,38 +164,29 @@ function  key_Down( KeyCode : Byte ) : Boolean;
 function  key_Up( KeyCode : Byte ) : Boolean;
 function  key_Press( KeyCode : Byte ) : Boolean;
 function  key_Last( KeyAction : Byte ) : Byte;
-procedure key_BeginReadText( const Text : UTF8String; MaxSymbols : Integer = -1 );
-procedure key_UpdateReadText( const Text : UTF8String; MaxSymbols : Integer = -1 );
-function  key_GetText : UTF8String;
+procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
+function  key_GetText : String;
 procedure key_EndReadText;
 procedure key_ClearState;
 
-procedure key_InputText( const Text : UTF8String );
-function  scancode_to_utf8( ScanCode : Byte ) : Byte;
-{$IFDEF USE_X11}
+procedure key_InputText( Text : String );
+function scancode_to_utf8( ScanCode : Byte ) : Byte;
+{$IFDEF LINUX}
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
-function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PAnsiChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
+function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
 {$ENDIF}
 {$IFDEF WINDOWS}
 function winkey_to_scancode( WinKey : Integer ) : Byte;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
-{$ENDIF}
-{$IFDEF iOS}
-type
-  zglCiOSTextField = objcclass(UITextField, UITextInputTraitsProtocol)
-  public
-    function textRectForBounds( bounds_ : CGRect ) : CGRect; override;
-    function editingRectForBounds( bounds_ : CGRect ) : CGRect; override;
-  end;
 {$ENDIF}
 function  SCA( KeyCode : LongWord ) : LongWord;
 procedure doKeyPress( KeyCode : LongWord );
 
-function _key_GetText : PAnsiChar;
+function _key_GetText : PChar;
 
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 type
   zglTModifier = record
     bit : Integer;
@@ -221,32 +208,18 @@ var
   keysUp       : array[ 0..255 ] of Boolean;
   keysPress    : array[ 0..255 ] of Boolean;
   keysCanPress : array[ 0..255 ] of Boolean;
-  keysText     : UTF8String = '';
+  keysText     : String = '';
   keysCanText  : Boolean;
   keysMax      : Integer;
   keysLast     : array[ 0..1 ] of Byte;
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   keysRepeat : Integer; // Костыль, да :)
   {$ENDIF}
-  {$IFDEF iOS}
-  keysTextField   : zglCiOSTextField;
-  keysTextTraits  : UITextInputTraitsProtocol;
-  keysTextFrame   : CGRect;
-  keysTextChanged : Boolean;
-  {$ENDIF}
-
-  // callback
-  key_PPress     : procedure( KeyCode : Byte );
-  key_PRelease   : procedure( KeyCode : Byte );
-  key_PInputChar : procedure( Symbol : UTF8String );
 
 implementation
 uses
   zgl_application,
   zgl_main,
-  {$IFDEF iOS}
-  zgl_window,
-  {$ENDIF}
   zgl_utils;
 
 function key_Down( KeyCode : Byte ) : Boolean;
@@ -269,62 +242,14 @@ begin
   Result := keysLast[ KeyAction ];
 end;
 
-procedure key_BeginReadText( const Text : UTF8String; MaxSymbols : Integer = -1 );
+procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
 begin
-  {$IFDEF iOS}
-  if Assigned( keysTextField ) and ( keysText <> Text ) Then
-    keysTextField.setText( u_GetNSString( Text ) );
-  {$ENDIF}
-
-  keysText    := u_CopyUTF8Str( Text );
+  keysText    := u_CopyStr( Text );
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
-
-  {$IFDEF iOS}
-  if not Assigned( keysTextField ) Then
-    begin
-      keysTextFrame := wndHandle.frame;
-      keysTextField := zglCiOSTextField.alloc().initWithFrame( keysTextFrame );
-      keysTextTraits := keysTextField;
-      with keysTextField, keysTextTraits do
-        begin
-          setDelegate( appDelegate );
-          setAutocapitalizationType( UITextAutocapitalizationTypeNone );
-          setAutocorrectionType( UItextAutocorrectionTypeNo );
-          setKeyboardAppearance( UIKeyboardAppearanceDefault );
-          setReturnKeyType( UIReturnKeyDone );
-          setSecureTextEntry( FALSE );
-          addTarget_action_forControlEvents( appDelegate, objcselector( 'textFieldEditingChanged' ), UIControlEventEditingChanged );
-        end;
-      keysTextField.setText( u_GetNSString( Text ) );
-      wndHandle.addSubview( keysTextField );
-    end;
-
-    if appFlags and APP_USE_ENGLISH_INPUT > 0 Then
-      keysTextTraits.setKeyboardType( UIKeyboardTypeASCIICapable )
-    else
-      keysTextTraits.setKeyboardType( UIKeyboardTypeDefault );
-
-    wndHandle.addSubview( keysTextField );
-    keysTextField.becomeFirstResponder();
-  {$ENDIF}
 end;
 
-procedure key_UpdateReadText( const Text : UTF8String; MaxSymbols : Integer = -1 );
-begin
-  if keysCanText Then
-    begin
-      {$IFDEF iOS}
-      if Assigned( keysTextField ) and ( keysText <> Text ) Then
-        keysTextField.setText( u_GetNSString( Text ) );
-      {$ENDIF}
-
-      keysText := u_CopyUTF8Str( Text );
-      keysMax  := MaxSymbols;
-    end;
-end;
-
-function key_GetText : UTF8String;
+function key_GetText : String;
 begin
   Result := keysText;
 end;
@@ -333,18 +258,13 @@ procedure key_EndReadText;
 begin
   keysText    := '';
   keysCanText := FALSE;
-
-  {$IFDEF iOS}
-  if Assigned( keysTextField ) Then
-    keysTextField.removeFromSuperview();
-  {$ENDIF}
 end;
 
 procedure key_ClearState;
   var
     i : Integer;
 begin
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   if keysRepeat < 2 Then
   {$ENDIF}
   for i := 0 to 255 do
@@ -357,32 +277,19 @@ begin
   keysLast[ KA_UP   ] := 0;
 end;
 
-procedure key_InputText( const Text : UTF8String );
+procedure key_InputText( Text : String );
   var
-    c : AnsiChar;
+    c : Char;
 begin
   if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
     begin
-      {$IFNDEF iOS}
       if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
         begin
-          c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
+          c := Char( scancode_to_utf8( keysLast[ 0 ] ) );
           if c <> #0 Then
-            keysText := keysText + UTF8String( c );
+            keysText := keysText + c;
         end else
-      {$ENDIF}
           keysText := keysText + Text;
-    end;
-
-  if Assigned( key_PInputChar ) Then
-    begin
-      if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
-        begin
-          c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
-          if c <> #0 Then
-            key_PInputChar( c );
-        end else
-          key_PInputChar( Text );
     end;
 end;
 
@@ -483,7 +390,7 @@ begin
     end;
 end;
 
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
 // Большинство сканкодов можно получить простым преобразованием, закомментированные
 // оставил себе на память :)
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
@@ -591,7 +498,7 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 function mackey_to_scancode( MacKey : Integer ) : Byte;
 begin
   case MacKey of
@@ -714,19 +621,6 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF iOS}
-// Good bye standard EditBox... :)
-function zglCiOSTextField.textRectForBounds( bounds_ : CGRect ) : CGRect;
-begin
-  Result := CGRectMake( 0, 4096, 0, 0 );
-end;
-
-function zglCiOSTextField.editingRectForBounds( bounds_ : CGRect ) : CGRect;
-begin
-  Result := CGRectMake( 0, 4096, 0, 0 );
-end;
-{$ENDIF}
-
 function SCA( KeyCode : LongWord ) : LongWord;
 begin
   Result := KeyCode;
@@ -738,7 +632,7 @@ end;
 
 procedure doKeyPress( KeyCode : LongWord );
 begin
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   if keysRepeat < 2 Then
   {$ENDIF}
   if keysCanPress[ KeyCode ] Then
@@ -748,9 +642,9 @@ begin
     end;
 end;
 
-function _key_GetText : PAnsiChar;
+function _key_GetText : PChar;
 begin
-  Result := u_GetPAnsiChar( key_GetText() );
+  Result := u_GetPChar( key_GetText() );
 end;
 
 end.
