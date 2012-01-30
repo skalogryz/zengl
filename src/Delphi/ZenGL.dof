@@ -94,7 +94,7 @@ OutputDir=
 UnitOutputDir=../tmp
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=../;../../lib/zlib/delphi;../../lib/zip/delphi
+SearchPath=../;../Direct3D/;../../lib/zlib/delphi
 Packages=vcl;rtl;vclx;vclactnband;dbrtl;adortl;vcldb;bdertl;vcldbx;visualclx;visualdbclx;dss;teeui;teedb;tee;ibxpress;dsnap;dsnapcon
 Conditionals=
 DebugSourceDirs=
@@ -134,3 +134,17 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
+[Excluded Packages]
+c:\program files\borland\delphi7\Bin\dclnet70.bpl=Borland Internet Components
+c:\program files\borland\delphi7\Bin\dclsoap70.bpl=Borland SOAP Components
+c:\program files\borland\delphi7\Bin\dclwbm70.bpl=Borland InternetExpress Components
+c:\program files\borland\delphi7\Bin\dclwebsnap70.bpl=Borland WebSnap Components
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=1
+Item0=../;../Direct3D/;../../lib/zlib/delphi
+[HistoryLists\hlUnitOutputDirectory]
+Count=1
+Item0=../tmp
