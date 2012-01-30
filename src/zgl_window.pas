@@ -599,4 +599,9 @@ end;
 initialization
   wndCaption := cs_ZenGL;
 
+{$IFDEF WINDOWS}
+finalization
+  FreeMem( wndCaptionW );
+{$ENDIF}
+
 end.
