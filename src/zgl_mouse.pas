@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -23,15 +23,17 @@ unit zgl_mouse;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF USE_X11}
-  uses X, XLib;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
+uses
+  {$IFDEF LINUX}
+  X, XLib
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll
+  {$ENDIF}
+  ;
 
 const
   M_BLEFT   = 0;
@@ -50,15 +52,11 @@ function mouse_Click( Button : Byte ) : Boolean;
 function mouse_DblClick( Button : Byte ) : Boolean;
 function mouse_Wheel( Axis : Byte ) : Boolean;
 procedure mouse_ClearState;
-procedure mouse_Lock( X : Integer = -1; Y : Integer = -1 );
+procedure mouse_Lock;
 
 var
   mouseX        : Integer;
   mouseY        : Integer;
-  mouseDX       : Integer;
-  mouseDY       : Integer;
-  mouseLX       : Integer;
-  mouseLY       : Integer;
   mouseDown     : array[ 0..2 ] of Boolean;
   mouseUp       : array[ 0..2 ] of Boolean;
   mouseClick    : array[ 0..2 ] of Boolean;
@@ -69,12 +67,6 @@ var
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
 
-  // callback
-  mouse_PMove    : procedure( X, Y : Integer );
-  mouse_PPress   : procedure( Button : Byte );
-  mouse_PRelease : procedure( Button : Byte );
-  mouse_PWheel   : procedure( Axis : Byte );
-
 implementation
 uses
   zgl_window,
@@ -82,27 +74,27 @@ uses
 
 function mouse_X : Integer;
 begin
-  Result := mouseX;
+  Result := Round( ( mouseX - scrAddCX ) / scrResCX );
 end;
 
 function mouse_Y : Integer;
 begin
-  Result := mouseY;
+  Result := Round( ( mouseY - scrAddCY ) / scrResCY );
 end;
 
 function mouse_DX : Integer;
 begin
-  Result := mouseDX;
+  Result := mouse_X() - wndWidth div 2;
 end;
 
 function mouse_DY : Integer;
 begin
-  Result := mouseDY;
+  Result := mouse_Y() - wndHeight div 2;
 end;
 
 function mouse_Down( Button : Byte ) : Boolean;
 begin
-  {$IFDEF UNIX}
+  {$IFDEF LINUX_OR_DARWIN}
   Result := mouseDown[ Button ];
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -143,51 +135,24 @@ begin
   FillChar( mouseWheel[ 0 ], 2, 0 );
 end;
 
-procedure mouse_Lock( X : Integer = -1; Y : Integer = -1 );
-  {$IFDEF MACOSX}
+procedure mouse_Lock;
+  {$IFDEF DARWIN}
   var
     Point : CGPoint;
   {$ENDIF}
 begin
-{$IFDEF USE_X11}
-  if ( X = -1 ) and ( Y = -1 ) Then
-    begin
-      X := wndWidth div 2;
-      Y := wndHeight div 2;
-    end;
-
-  XWarpPointer( scrDisplay, None, wndHandle, 0, 0, 0, 0, X, Y );
+{$IFDEF LINUX}
+  XWarpPointer( scrDisplay, None, wndHandle, 0, 0, 0, 0, wndWidth div 2, wndHeight div 2 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  if ( X = -1 ) and ( Y = -1 ) Then
-    begin
-      if wndFullScreen Then
-        begin
-          X := wndWidth div 2;
-          Y := wndHeight div 2;
-        end else
-          begin
-            X := wndX + wndBrdSizeX + wndWidth div 2;
-            Y := wndY + wndBrdSizeY + wndCpnSize + wndHeight div 2;
-          end;
-    end else
-      begin
-        X := wndX + X;
-        Y := wndY + Y;
-      end;
-
-  SetCursorPos( X, Y );
+  if wndFullScreen Then
+    SetCursorPos( wndWidth div 2, wndHeight div 2 )
+  else
+    SetCursorPos( wndX + wndBrdSizeX + wndWidth div 2, wndY + wndBrdSizeY + wndCpnSize + wndHeight div 2 );
 {$ENDIF}
-{$IFDEF MACOSX}
-  if ( X = -1 ) and ( Y = -1 ) Then
-    begin
-      Point.X := wndX + wndWidth / 2;
-      Point.Y := wndY + wndHeight / 2;
-    end else
-      begin
-        Point.X := wndX + X;
-        Point.Y := wndY + Y;
-      end;
+{$IFDEF DARWIN}
+  Point.X := wndX + wndWidth / 2;
+  Point.Y := wndY + wndHeight / 2;
   CGWarpMouseCursorPosition( Point );
 {$ENDIF}
 end;

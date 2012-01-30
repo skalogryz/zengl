@@ -1,56 +1,44 @@
-{--------------------------------}
-{-----------= ZenGL =------------}
-{--------------------------------}
-{                                }
-{ version:  0.3 alpha            }
-{ date:     2012.01.30           }
-{ license:  GNU LGPL version 3   }
-{ homepage: http://zengl.org     }
-{                                }
-{-------- developed by: ---------}
-{                                }
-{     Kemka Andrey aka Andru     }
-{                                }
-{ mail:  dr.andru@gmail.com      }
-{ JID:   dr.andru@googlemail.com }
-{ ICQ:   496929849               }
-{ Skype: andru-kun               }
-{ www:   http://andru-kun.inf.ua }
-{                                }
-{--------------------------------}
+{-------------------------------}
+{-----------= ZenGL =-----------}
+{-------------------------------}
+{                               }
+{ version:  0.2.1               }
+{ date:     2011.03.18          }
+{ license:  GNU LGPL version 3  }
+{ homepage: http://zengl.org    }
+{                               }
+{-------- developed by: --------}
+{                               }
+{     Kemka Andrey aka Andru    }
+{                               }
+{ mail: dr.andru@gmail.com      }
+{ JID:  dr.andru@googlemail.com }
+{ ICQ:  496929849               }
+{ www:  http://andru-kun.inf.ua }
+{                               }
+{-------------------------------}
 unit zglHeader;
 
 {$IFDEF FPC}
   {$MODE DELPHI}
   {$MACRO ON}
   {$PACKRECORDS C}
-
-  {$IFDEF CPUARM}
-    {$IFDEF WINCE}
-      {$ALIGN 4}
-    {$ENDIF}
+  {$IFDEF LINUX}
+    {$DEFINE LINUX_OR_DARWIN}
+  {$ENDIF}
+  {$IFDEF DARWIN}
+    {$DEFINE LINUX_OR_DARWIN}
   {$ENDIF}
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
   {$DEFINE WINDOWS}
 {$ENDIF}
-{$IFDEF DARWIN}
-  {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
-    {$DEFINE iOS}
-  {$ELSE}
-    {$DEFINE MACOSX}
-  {$IFEND}
-{$ENDIF}
 
 interface
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 uses
   MacOSAll;
-{$ENDIF}
-{$IFDEF WINCE}
-uses
-  Windows;
 {$ENDIF}
 
 type
@@ -65,7 +53,7 @@ type
 type
   zglTStringList = record
     Count : Integer;
-    Items : array of UTF8String;
+    Items : array of String;
 end;
 
 {$IFNDEF WINDOWS}
@@ -89,7 +77,7 @@ const
 {$IFDEF WINDOWS}
   libZenGL = 'ZenGL.dll';
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   libZenGL = 'libZenGL.dylib';
 {$ENDIF}
 
@@ -109,21 +97,10 @@ const
   SYS_UPDATE             = $000005;
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
-  SYS_CLOSE_QUERY        = $000008;
-
-  INPUT_MOUSE_MOVE       = $000040;
-  INPUT_MOUSE_PRESS      = $000041;
-  INPUT_MOUSE_RELEASE    = $000042;
-  INPUT_MOUSE_WHEEL      = $000043;
-  INPUT_KEY_PRESS        = $000050;
-  INPUT_KEY_RELEASE      = $000051;
-  INPUT_KEY_CHAR         = $000052;
-
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
   TEX_CURRENT_EFFECT     = $000013;
-
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
@@ -134,11 +111,11 @@ var
 
 const
   ZENGL_VERSION           = 1; // Major shr 16, ( Minor and $FF00 ) shr 8, Revision and $FF
-  ZENGL_VERSION_STRING    = 2; // PAnsiChar
-  ZENGL_VERSION_DATE      = 3; // PAnsiChar
+  ZENGL_VERSION_STRING    = 2; // PChar
+  ZENGL_VERSION_DATE      = 3; // PChar
 
-  DIRECTORY_APPLICATION   = 101; // PAnsiChar
-  DIRECTORY_HOME          = 102; // PAnsiChar
+  DIRECTORY_APPLICATION   = 101; // PChar
+  DIRECTORY_HOME          = 102; // PChar
 
   LOG_FILENAME            = 203; // PPAnsiChar
 
@@ -169,7 +146,6 @@ const
   RENDER_BATCHES_2D       = 701;
   RENDER_CURRENT_MODE     = 702;
   RENDER_CURRENT_TARGET   = 703;
-  RENDER_VRAM_USED        = 704;
 
   MANAGER_TIMER           = 800; // zglPTimerManager
   MANAGER_TEXTURE         = 801; // zglPTextureManager
@@ -197,7 +173,7 @@ const
   APP_USE_AUTOPAUSE     = $000100;
   APP_USE_LOG           = $000200;
   APP_USE_ENGLISH_INPUT = $000400;
-  APP_USE_DT_CORRECTION = $000800;
+  APP_USE_UTF8          = $000800;
   WND_USE_AUTOCENTER    = $001000;
   SND_CAN_PLAY          = $002000;
   SND_CAN_PLAY_FILE     = $004000;
@@ -208,10 +184,10 @@ var
   zgl_Disable : procedure( What : LongWord );
 
 // LOG
-  log_Add : procedure( const Message : UTF8String; Timings : Boolean = TRUE );
+  log_Add : procedure( const Message : AnsiString; Timings : Boolean = TRUE );
 
 // WINDOW
-  wnd_SetCaption : procedure( const NewCaption : UTF8String );
+  wnd_SetCaption : procedure( const NewCaption : String );
   wnd_SetSize    : procedure( Width, Height : Integer );
   wnd_SetPos     : procedure( X, Y : Integer );
   wnd_ShowCursor : procedure( Show : Boolean );
@@ -254,27 +230,27 @@ var
   zbuffer_Clear     : procedure;
 
 // SCISSOR
-  scissor_Begin : procedure( X, Y, Width, Height : Integer; ConsiderCamera : Boolean = TRUE );
+  scissor_Begin : procedure( X, Y, Width, Height : Integer );
   scissor_End   : procedure;
 
 // INI
-  ini_LoadFromFile  : function( const FileName : UTF8String ) : Boolean;
-  ini_SaveToFile    : procedure( const FileName : UTF8String );
-  ini_Add           : procedure( const Section, Key : UTF8String );
-  ini_Del           : procedure( const Section, Key : UTF8String );
-  ini_Clear         : procedure( const Section : UTF8String );
-  ini_IsSection     : function( const Section : UTF8String ) : Boolean;
-  ini_IsKey         : function( const Section, Key : UTF8String ) : Boolean;
-  _ini_ReadKeyStr   : function( const Section, Key : UTF8String ) : PAnsiChar;
-  ini_ReadKeyInt    : function( const Section, Key : UTF8String ) : Integer;
-  ini_ReadKeyFloat  : function( const Section, Key : UTF8String ) : Single;
-  ini_ReadKeyBool   : function( const Section, Key : UTF8String ) : Boolean;
-  ini_WriteKeyStr   : function( const Section, Key, Value : UTF8String ) : Boolean;
-  ini_WriteKeyInt   : function( const Section, Key : UTF8String; Value : Integer ) : Boolean;
-  ini_WriteKeyFloat : function( const Section, Key : UTF8String; Value : Single; Digits : Integer = 2 ) : Boolean;
-  ini_WriteKeyBool  : function( const Section, Key : UTF8String; Value : Boolean ) : Boolean;
+  ini_LoadFromFile  : function( const FileName : String ) : Boolean;
+  ini_SaveToFile    : procedure( const FileName : String );
+  ini_Add           : procedure( const Section, Key : AnsiString );
+  ini_Del           : procedure( const Section, Key : AnsiString );
+  ini_Clear         : procedure( const Section : AnsiString );
+  ini_IsSection     : function( const Section : AnsiString ) : Boolean;
+  ini_IsKey         : function( const Section, Key : AnsiString ) : Boolean;
+  _ini_ReadKeyStr   : function( const Section, Key : AnsiString ) : PAnsiChar;
+  ini_ReadKeyInt    : function( const Section, Key : AnsiString ) : Integer;
+  ini_ReadKeyFloat  : function( const Section, Key : AnsiString ) : Single;
+  ini_ReadKeyBool   : function( const Section, Key : AnsiString ) : Boolean;
+  ini_WriteKeyStr   : function( const Section, Key, Value : AnsiString ) : Boolean;
+  ini_WriteKeyInt   : function( const Section, Key : AnsiString; Value : Integer ) : Boolean;
+  ini_WriteKeyFloat : function( const Section, Key : AnsiString; Value : Single; Digits : Integer = 2 ) : Boolean;
+  ini_WriteKeyBool  : function( const Section, Key : AnsiString; Value : Boolean ) : Boolean;
 
-  function ini_ReadKeyStr( const Section, Key : UTF8String ) : UTF8String;
+  function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
 
 // TIMERS
 type
@@ -296,7 +272,7 @@ type
 end;
 
 var
-  timer_Add      : function( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
+  timer_Add      : function( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
   timer_Del      : procedure( var Timer : zglPTimer );
   timer_GetTicks : function : Double;
   timer_Reset    : procedure;
@@ -320,7 +296,7 @@ var
   mouse_DblClick   : function( Button : Byte ) : Boolean;
   mouse_Wheel      : function( Axis : Byte ) : Boolean;
   mouse_ClearState : procedure;
-  mouse_Lock       : procedure( X : Integer = -1; Y : Integer = -1 );
+  mouse_Lock       : procedure;
 
 // KEYBOARD
 const
@@ -448,23 +424,22 @@ const
   KA_DOWN     = 0;
   KA_UP       = 1;
 var
-  key_Down           : function( KeyCode : Byte ) : Boolean;
-  key_Up             : function( KeyCode : Byte ) : Boolean;
-  key_Press          : function( KeyCode : Byte ) : Boolean;
-  key_Last           : function( KeyAction : Byte ) : Byte;
-  key_BeginReadText  : procedure( const Text : UTF8String; MaxSymbols : Integer = -1 );
-  key_UpdateReadText : procedure( const Text : UTF8String; MaxSymbols : Integer = -1 );
-  _key_GetText       : function : PAnsiChar;
-  key_EndReadText    : procedure;
-  key_ClearState     : procedure;
+  key_Down          : function( KeyCode : Byte ) : Boolean;
+  key_Up            : function( KeyCode : Byte ) : Boolean;
+  key_Press         : function( KeyCode : Byte ) : Boolean;
+  key_Last          : function( KeyAction : Byte ) : Byte;
+  key_BeginReadText : procedure( const Text : String; MaxSymbols : Integer = -1 );
+  _key_GetText      : function : PChar;
+  key_EndReadText   : procedure;
+  key_ClearState    : procedure;
 
-  function key_GetText : UTF8String;
+  function key_GetText : String;
 
 // JOYSTICK
 type
   zglPJoyInfo = ^zglTJoyInfo;
   zglTJoyInfo = record
-    Name   : UTF8String;
+    Name   : AnsiString;
     Count  : record
       Axes    : Integer;
       Buttons : Integer;
@@ -528,14 +503,6 @@ type
     Radius : Single;
 end;
 
-// RESOURCES
-var
-  res_BeginQueue    : procedure( QueueID : Byte );
-  res_EndQueue      : procedure;
-  res_GetPercentage : function( QueueID : Byte ) : Integer;
-  res_GetCompleted  : function : Integer;
-  res_Proc          : procedure;
-
 // TEXTURES
 type
   zglPTextureCoord = ^zglTTextureCoord;
@@ -551,7 +518,6 @@ type
     FramesY       : Word;
     FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
-    Format        : Word;
 
     prev, next    : zglPTexture;
 end;
@@ -559,9 +525,9 @@ end;
 type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
-    Extension  : UTF8String;
-    FileLoader : procedure( const FileName : UTF8String; var pData : Pointer; var W, H, Format : Word );
-    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H, Format : Word );
+    Extension  : String;
+    FileLoader : procedure( const FileName : String; var pData : Pointer; var W, H : Word );
+    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H : Word );
 end;
 
 type
@@ -576,13 +542,6 @@ type
 end;
 
 const
-  TEX_FORMAT_RGBA       = $01;
-  TEX_FORMAT_RGBA_PVR2  = $10;
-  TEX_FORMAT_RGBA_PVR4  = $11;
-  TEX_FORMAT_RGBA_DXT1  = $20;
-  TEX_FORMAT_RGBA_DXT3  = $21;
-  TEX_FORMAT_RGBA_DXT5  = $22;
-
   TEX_MIPMAP            = $000001;
   TEX_CLAMP             = $000002;
   TEX_REPEAT            = $000004;
@@ -606,12 +565,12 @@ const
 var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
-  tex_Create         : function( var Texture : zglTTexture; pData : Pointer ) : Boolean;
+  tex_Create         : procedure( var Texture : zglTTexture; var pData : Pointer );
   tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-  tex_LoadFromFile   : function( const FileName : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+  tex_LoadFromFile   : function( const FileName : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
-  tex_SetMask        : procedure( var Texture : zglPTexture; Mask : zglPTexture );
+  tex_SetMask        : function( var Texture : zglPTexture; Mask : zglPTexture ) : zglPTexture;
   tex_SetData        : procedure( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
   tex_GetData        : procedure( Texture : zglPTexture; var pData : Pointer );
   tex_Filter         : procedure( Texture : zglPTexture; Flags : LongWord );
@@ -651,14 +610,14 @@ var
   atlas_Del               : procedure( var Atlas : zglPAtlas );
   atlas_GetFrameCoord     : procedure( Node : zglPAtlasNode; Frame : Word; var TexCoord : array of zglTPoint2D );
   atlas_InsertFromTexture : function( Atlas : zglPAtlas; Texture : zglPTexture ) : zglPAtlasNode;
-  atlas_InsertFromFile    : function( Atlas : zglPAtlas; const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
-  atlas_InsertFromMemory  : function( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+  atlas_InsertFromFile    : function( Atlas : zglPAtlas; const FileName : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+  atlas_InsertFromMemory  : function( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
 
 // RENDER TARGETS
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
-    Type_      : Byte;
+    _type      : Byte;
     Handle     : Pointer;
     Surface    : zglPTexture;
     Flags      : Byte;
@@ -717,27 +676,23 @@ const
   FX2D_VCA      = $000004;
   FX2D_VCHANGE  = $000008;
   FX2D_SCALE    = $000010;
-  FX2D_RPIVOT   = $000020;
 
 var
-  fx2d_SetColor         : procedure( Color : LongWord );
-  fx2d_SetVCA           : procedure( c1, c2, c3, c4 : LongWord; a1, a2, a3, a4 : Byte );
-  fx2d_SetVertexes      : procedure( x1, y1, x2, y2, x3, y3, x4, y4 : Single );
-  fx2d_SetScale         : procedure( scaleX, scaleY : Single );
-  fx2d_SetRotatingPivot : procedure( X, Y : Single );
+  fx2d_SetColor    : procedure( Color : LongWord );
+  fx2d_SetVCA      : procedure( c1, c2, c3, c4 : LongWord; a1, a2, a3, a4 : Byte );
+  fx2d_SetVertexes : procedure( x1, y1, x2, y2, x3, y3, x4, y4 : Single );
+  fx2d_SetScale    : procedure( scaleX, scaleY : Single );
 
 // Camera 2D
 type
   zglPCamera2D = ^zglTCamera2D;
   zglTCamera2D = record
-    X, Y   : Single;
-    Angle  : Single;
-    Zoom   : zglTPoint2D;
-    Center : zglTPoint2D;
+    X, Y  : Single;
+    Angle : Single;
+    Zoom  : zglTPoint2D;
 end;
 
 var
-  cam2d_Init  : procedure( var Camera : zglTCamera2D );
   cam2d_Set   : procedure( Camera : zglPCamera2D );
   cam2d_Get   : function : zglPCamera2D;
 
@@ -811,7 +766,6 @@ type
 
 var
   sengine2d_AddSprite : function( Texture : zglPTexture; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
-  sengine2d_AddCustom : function( Texture : zglPTexture; Size : LongWord; Layer : Integer; OnInit, OnDraw, OnProc, OnFree : Pointer ) : zglPSprite2D;
   sengine2d_DelSprite : procedure( ID : Integer );
   sengine2d_ClearAll  : procedure;
   sengine2d_Set       : procedure( SEngine : zglPSEngine2D );
@@ -836,7 +790,6 @@ const
   EMITTER_LINE      = 2;
   EMITTER_RECTANGLE = 3;
   EMITTER_CIRCLE    = 4;
-  EMITTER_RING      = 5;
 
 type
   PDiagramByte         = ^TDiagramByte;
@@ -867,37 +820,34 @@ type
   end;
 
   zglTParticle2D = record
-    _private   : record
-      lColorID     : Integer;
-      lAlphaID     : Integer;
-      lSizeXID     : Integer;
-      lSizeYID     : Integer;
-      lVelocityID  : Integer;
-      laVelocityID : Integer;
-      lSpinID      : Integer;
-                    end;
+    _lColorID     : Integer;
+    _lAlphaID     : Integer;
+    _lSizeXID     : Integer;
+    _lSizeYID     : Integer;
+    _lVelocityID  : Integer;
+    _laVelocityID : Integer;
+    _lSpinID      : Integer;
+    ID            : Integer;
 
-    ID         : Integer;
+    Life          : Single;
+    LifeTime      : Integer;
+    Time          : Double;
 
-    Life       : Single;
-    LifeTime   : Integer;
-    Time       : Double;
+    Frame         : Word;
+    Color         : LongWord;
+    Alpha         : Byte;
 
-    Frame      : Word;
-    Color      : LongWord;
-    Alpha      : Byte;
+    Position      : zglTPoint2D;
+    Size          : zglTPoint2D;
+    SizeS         : zglTPoint2D;
+    Angle         : Single;
+    Direction     : Single;
 
-    Position   : zglTPoint2D;
-    Size       : zglTPoint2D;
-    SizeS      : zglTPoint2D;
-    Angle      : Single;
-    Direction  : Single;
-
-    Velocity   : Single;
-    VelocityS  : Single;
-    aVelocity  : Single;
-    aVelocityS : Single;
-    Spin       : Single;
+    Velocity      : Single;
+    VelocityS     : Single;
+    aVelocity     : Single;
+    aVelocityS    : Single;
+    Spin          : Single;
   end;
 
   zglTEmitterPoint = record
@@ -913,26 +863,13 @@ type
   end;
 
   zglTEmitterRect = record
-    Direction : Single;
-    Spread    : Single;
-    Rect      : zglTRect;
+    Rect : zglTRect;
   end;
 
   zglPEmitterCircle = ^zglTEmitterCircle;
   zglTEmitterCircle = record
-    Direction : Single;
-    Spread    : Single;
-    cX, cY    : Single;
-    Radius    : Single;
-  end;
-
-  zglPEmitterRing = ^zglTEmitterRing;
-  zglTEmitterRing = record
-    Direction : Single;
-    Spread    : Single;
-    cX, cY    : Single;
-    Radius0   : Single;
-    Radius1   : Single;
+    cX, cY : Single;
+    Radius : Single;
   end;
 
   zglTParticleParams = record
@@ -966,31 +903,29 @@ type
   end;
 
   zglTEmitter2D = record
-    _private   : record
-      pengine    : zglPPEngine2D;
-      particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
-      list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
-      parCreated : Integer;
-      texFile    : UTF8String;
-      texHash    : LongWord;
-                 end;
+    _type       : Byte;
+    _pengine    : zglPPEngine2D;
+    _particle   : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglTParticle2D;
+    _list       : array[ 0..EMITTER_MAX_PARTICLES - 1 ] of zglPParticle2D;
+    _parCreated : Integer;
+    _texFile    : String;
+    _texHash    : LongWord;
 
-    ID         : Integer;
-    Type_      : Byte;
-    Params     : record
+    ID          : Integer;
+    Params      : record
       Layer    : Integer;
       LifeTime : Integer;
       Loop     : Boolean;
       Emission : Integer;
       Position : zglTPoint2D;
-                 end;
-    ParParams  : zglTParticleParams;
+                  end;
+    ParParams   : zglTParticleParams;
 
-    Life       : Single;
-    Time       : Double;
-    LastSecond : Double;
-    Particles  : Integer;
-    BBox       : record
+    Life        : Single;
+    Time        : Double;
+    LastSecond  : Double;
+    Particles   : Integer;
+    BBox        : record
       MinX, MaxX : Single;
       MinY, MaxY : Single;
                   end;
@@ -1000,7 +935,6 @@ type
       EMITTER_LINE: ( AsLine : zglTEmitterLine );
       EMITTER_RECTANGLE: ( AsRect : zglTEmitterRect );
       EMITTER_CIRCLE: ( AsCircle : zglTEmitterCircle );
-      EMITTER_RING: ( AsRing : zglTEmitterRing );
   end;
 
   zglTPEngine2D = record
@@ -1026,7 +960,7 @@ var
   pengine2d_ClearAll       : procedure;
   emitter2d_Add            : function : zglPEmitter2D;
   emitter2d_Del            : procedure( var Emitter : zglPEmitter2D );
-  emitter2d_LoadFromFile   : function( const FileName : UTF8String ) : zglPEmitter2D;
+  emitter2d_LoadFromFile   : function( const FileName : String ) : zglPEmitter2D;
   emitter2d_LoadFromMemory : function( const Memory : zglTMemory ) : zglPEmitter2D;
   emitter2d_Init           : procedure( Emitter : zglPEmitter2D );
   emitter2d_Free           : procedure( var Emitter : zglPEmitter2D );
@@ -1083,14 +1017,14 @@ const
 var
   font_Add            : function : zglPFont;
   font_Del            : procedure( var Font : zglPFont );
-  font_LoadFromFile   : function( const FileName : UTF8String ) : zglPFont;
+  font_LoadFromFile   : function( const FileName : String ) : zglPFont;
   font_LoadFromMemory : function( const Memory : zglTMemory ) : zglPFont;
-  text_Draw           : procedure( Font : zglPFont; X, Y : Single; const Text : UTF8String; Flags : LongWord = 0 );
-  text_DrawEx         : procedure( Font : zglPFont; X, Y, Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-  text_DrawInRect     : procedure( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
-  text_DrawInRectEx   : procedure( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-  text_GetWidth       : function( Font : zglPFont; const Text : UTF8String; Step : Single = 0.0 ) : Single;
-  text_GetHeight      : function( Font : zglPFont; Width : Single; const Text : UTF8String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+  text_Draw           : procedure( Font : zglPFont; X, Y : Single; const Text : String; Flags : LongWord = 0 );
+  text_DrawEx         : procedure( Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+  text_DrawInRect     : procedure( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+  text_DrawInRectEx   : procedure( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+  text_GetWidth       : function( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
+  text_GetHeight      : function( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
   textFx_SetLength    : procedure( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
 
 // Sound
@@ -1100,15 +1034,13 @@ const
   SND_FORMAT_STEREO8  = 3;
   SND_FORMAT_STEREO16 = 4;
 
-  SND_ALL        = -$000002;
-  SND_ALL_LOOPED = -$000003;
-  SND_STREAM     = -$000010;
+  SND_ALL           = -2;
+  SND_STREAM        = -3;
 
   SND_STATE_PLAYING = 1;
-  SND_STATE_LOOPED  = 2;
-  SND_STATE_PERCENT = 3;
-  SND_STATE_TIME    = 4;
-  SND_INFO_LENGTH   = 5;
+  SND_STATE_PERCENT = 2;
+  SND_STATE_TIME    = 3;
+  SND_INFO_LENGTH   = 4;
 
 type
   zglPSound        = ^zglTSound;
@@ -1118,7 +1050,7 @@ type
   zglPSoundManager = ^zglTSoundManager;
 
   zglTSoundChannel = record
-    Source     : Ptr;
+    Source     : LongWord;
     Speed      : Single;
     Volume     : Single;
     Position   : record
@@ -1142,15 +1074,12 @@ type
   zglTSoundStream = record
     _data      : Pointer;
     _file      : zglTFile;
-    _memory    : zglTMemory;
     _decoder   : zglPSoundDecoder;
     _playing   : Boolean;
     _paused    : Boolean;
     _waiting   : Boolean;
     _complete  : Double;
     _lastTime  : Double;
-
-    ID         : Integer;
 
     Buffer     : Pointer;
     BufferSize : LongWord;
@@ -1164,18 +1093,17 @@ type
   end;
 
   zglTSoundDecoder = record
-    Ext     : UTF8String;
-    Open    : function( var Stream : zglTSoundStream; const FileName : UTF8String ) : Boolean;
-    OpenMem : function( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
-    Read    : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
-    Loop    : procedure( var Stream : zglTSoundStream );
-    Close   : procedure( var Stream : zglTSoundStream );
+    Ext   : String;
+    Open  : function( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+    Read  : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
+    Loop  : procedure( var Stream : zglTSoundStream );
+    Close : procedure( var Stream : zglTSoundStream );
   end;
 
   zglTSoundFormat = record
-    Extension  : UTF8String;
+    Extension  : String;
     Decoder    : zglPSoundDecoder;
-    FileLoader : procedure( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+    FileLoader : procedure( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
     MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
   end;
 
@@ -1193,19 +1121,18 @@ var
   snd_Free           : procedure;
   snd_Add            : function( SourceCount : Integer ) : zglPSound;
   snd_Del            : procedure( var Sound : zglPSound );
-  snd_LoadFromFile   : function( const FileName : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
-  snd_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromFile   : function( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
   snd_Play           : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
   snd_Stop           : procedure( Sound : zglPSound; ID : Integer );
   snd_SetPos         : procedure( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
   snd_SetVolume      : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
   snd_SetSpeed       : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
   snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
-  snd_PlayFile       : function( const FileName : UTF8String; Loop : Boolean = FALSE ) : Integer;
-  snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : UTF8String; Loop : Boolean = FALSE ) : Integer;
-  snd_PauseStream      : procedure( ID : Integer );
-  snd_StopStream       : procedure( ID : Integer );
-  snd_ResumeStream     : procedure( ID : Integer );
+  snd_PlayFile       : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+  snd_PauseFile      : procedure( ID : Integer );
+  snd_StopFile       : procedure( ID : Integer );
+  snd_ResumeFile     : procedure( ID : Integer );
 
 // MATH
 const
@@ -1263,10 +1190,10 @@ const
   FSM_END    = $03;
 
 var
-  file_Open          : function( var FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
-  file_MakeDir       : function( const Directory : UTF8String ) : Boolean;
-  file_Remove        : function( const Name : UTF8String ) : Boolean;
-  file_Exists        : function( const Name : UTF8String ) : Boolean;
+  file_Open          : function( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
+  file_MakeDir       : function( const Directory : String ) : Boolean;
+  file_Remove        : function( const Name : String ) : Boolean;
+  file_Exists        : function( const Name : String ) : Boolean;
   file_Seek          : function( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
   file_GetPos        : function( FileHandle : zglTFile ) : LongWord;
   file_Read          : function( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -1274,21 +1201,19 @@ var
   file_GetSize       : function( FileHandle : zglTFile ) : LongWord;
   file_Flush         : procedure( const FileHandle : zglTFile );
   file_Close         : procedure( var FileHandle : zglTFile );
-  file_Find          : procedure( const Directory : UTF8String; var List : zglTFileList; FindDir : Boolean );
-  _file_GetName      : function( const FileName : UTF8String ) : PAnsiChar;
-  _file_GetExtension : function( const FileName : UTF8String ) : PAnsiChar;
-  _file_GetDirectory : function( const FileName : UTF8String ) : PAnsiChar;
-  file_SetPath       : procedure( const Path : UTF8String );
-  file_OpenArchive   : function( const FileName : UTF8String; const Password : UTF8String = '' ) : Boolean;
-  file_CloseArchive  : procedure;
+  file_Find          : procedure( const Directory : String; var List : zglTFileList; FindDir : Boolean );
+  _file_GetName      : function( const FileName : String ) : PChar;
+  _file_GetExtension : function( const FileName : String ) : PChar;
+  _file_GetDirectory : function( const FileName : String ) : PChar;
+  file_SetPath       : procedure( const Path : String );
 
-  function file_GetName( const FileName : UTF8String ) : UTF8String;
-  function file_GetExtension( const FileName : UTF8String ) : UTF8String;
-  function file_GetDirectory( const FileName : UTF8String ) : UTF8String;
+  function file_GetName( const FileName : String ) : String;
+  function file_GetExtension( const FileName : String ) : String;
+  function file_GetDirectory( const FileName : String ) : String;
 
 var
-  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : UTF8String );
-  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : UTF8String );
+  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : String );
+  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : String );
   mem_Seek         : function( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
   mem_Read         : function( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
   mem_Write        : function( var Memory : zglTMemory; const Buffer; Bytes : LongWord ) : LongWord;
@@ -1296,130 +1221,119 @@ var
   mem_Free         : procedure( var Memory : zglTMemory );
 
 // Utils
-function u_IntToStr( Value : Integer ) : UTF8String;
-function u_StrToInt( const Value : UTF8String ) : Integer;
-function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : UTF8String;
-function u_StrToFloat( const Value : UTF8String ) : Single;
-function u_BoolToStr( Value : Boolean ) : UTF8String;
-function u_StrToBool( const Value : UTF8String ) : Boolean;
-// RU: Только для латинских символов попадающих в диапазон 0..127
-// EN: Only for latin symbols in range 0..127
-function u_StrUp( const str : UTF8String ) : UTF8String;
-function u_StrDown( const str : UTF8String ) : UTF8String;
-
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
+function u_IntToStr( Value : Integer ) : String;
+function u_StrToInt( const Value : String ) : Integer;
+function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
+function u_StrToFloat( const Value : String ) : Single;
+function u_BoolToStr( Value : Boolean ) : String;
+function u_StrToBool( const Value : String ) : Boolean;
+// Только для английских символов попадающих в диапазон 0..127
+function u_StrUp( const str : String ) : String;
+function u_StrDown( const str : String ) : String;
+function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
+function u_CopyStr( const Str : String ) : String;
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
 
-{$IFDEF UNIX}
-function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
+{$IFDEF LINUX_OR_DARWIN}
+function dlopen ( Name : PChar; Flags : longint) : Pointer; cdecl; external 'dl';
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
-function dlsym  ( Lib : Pointer; Name : PAnsiChar) : Pointer; cdecl; external 'dl';
+function dlsym  ( Lib : Pointer; Name : Pchar) : Pointer; cdecl; external 'dl';
 {$ENDIF}
 
 {$IFDEF WINDOWS}
-{$IFNDEF WINCE}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 
 function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
-{$ELSE}
-function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
-function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
-function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
-
-function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PWideChar; uType : LongWord) : Integer; stdcall; external 'coredll.dll' name 'MessageBoxW';
-{$ENDIF}
 {$ENDIF}
 
 implementation
 
 var
-  zglLib : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF MACOSX}
+  zglLib : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  {$IFDEF DARWIN}
   mainBundle   : CFBundleRef;
   tmpCFURLRef  : CFURLRef;
   tmpCFString  : CFStringRef;
-  tmpPath      : array[ 0..8191 ] of AnsiChar;
+  tmpPath      : array[ 0..8191 ] of Char;
   outItemHit   : SInt16;
-  mainPath     : UTF8String;
+  mainPath     : AnsiString;
   {$ENDIF}
 
-function ini_ReadKeyStr( const Section, Key : UTF8String ) : UTF8String;
+function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
   var
     tmp : PAnsiChar;
 begin
   tmp := _ini_ReadKeyStr( Section, Key );
-  Result := u_CopyUTF8Str( tmp );
+  Result := u_CopyAnsiStr( tmp );
   zgl_FreeMem( Pointer( tmp ) );
 end;
 
-function key_GetText : UTF8String;
+function key_GetText : String;
   var
-    tmp : PAnsiChar;
+    tmp : PChar;
 begin
   tmp := _key_GetText();
-  Result := u_CopyUTF8Str( tmp );
+  Result := u_CopyStr( tmp );
   zgl_FreeMem( Pointer( tmp ) );
 end;
 
-function file_GetName( const FileName : UTF8String ) : UTF8String;
+function file_GetName( const FileName : String ) : String;
   var
-    tmp : PAnsiChar;
+    tmp : PChar;
 begin
   tmp := _file_GetName( FileName );
-  Result := u_CopyUTF8Str( tmp );
+  Result := u_CopyStr( tmp );
   zgl_FreeMem( Pointer( tmp ) );
 end;
 
-function file_GetExtension( const FileName : UTF8String ) : UTF8String;
+function file_GetExtension( const FileName : String ) : String;
   var
-    tmp : PAnsiChar;
+    tmp : PChar;
 begin
   tmp := _file_GetExtension( FileName );
-  Result := u_CopyUTF8Str( tmp );
+  Result := u_CopyStr( tmp );
   zgl_FreeMem( Pointer( tmp ) );
 end;
 
-function file_GetDirectory( const FileName : UTF8String ) : UTF8String;
+function file_GetDirectory( const FileName : String ) : String;
   var
-    tmp : PAnsiChar;
+    tmp : PChar;
 begin
   tmp := _file_GetDirectory( FileName );
-  Result := u_CopyUTF8Str( tmp );
+  Result := u_CopyStr( tmp );
   zgl_FreeMem( Pointer( tmp ) );
 end;
 
-function u_IntToStr( Value : Integer ) : UTF8String;
+function u_IntToStr( Value : Integer ) : String;
 begin
   Str( Value, Result );
 end;
 
-function u_StrToInt( const Value : UTF8String ) : Integer;
+function u_StrToInt( const Value : String ) : Integer;
   var
-    e : Integer;
+    E : Integer;
 begin
-  Val( Value, Result, e );
-  if e <> 0 Then
-    Result := 0;
+  Val( String( Value ), Result, E );
 end;
 
-function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : UTF8String;
+function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
 begin
   Str( Value:0:Digits, Result );
 end;
 
-function u_StrToFloat( const Value : UTF8String ) : Single;
+function u_StrToFloat( const Value : String ) : Single;
   var
-    e : Integer;
+    E : Integer;
 begin
-  Val( Value, Result, e );
-  if e <> 0 Then
+  Val( String( Value ), Result, E );
+  if E <> 0 Then
     Result := 0;
 end;
 
-function u_BoolToStr( Value : Boolean ) : UTF8String;
+function u_BoolToStr( Value : Boolean ) : String;
 begin
   if Value Then
     Result := 'TRUE'
@@ -1427,7 +1341,7 @@ begin
     Result := 'FALSE';
 end;
 
-function u_StrToBool( const Value : UTF8String ) : Boolean;
+function u_StrToBool( const Value : String ) : Boolean;
 begin
   if Value = '1' Then
     Result := TRUE
@@ -1438,29 +1352,25 @@ begin
       Result := FALSE;
 end;
 
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
+function u_CopyAnsiStr( const Str : AnsiString ) : AnsiString;
   var
     len : Integer;
 begin
   len := length( Str );
   SetLength( Result, len );
-  if len > 0 Then
-    System.Move( Str[ 1 ], Result[ 1 ], len );
+  System.Move( Str[ 1 ], Result[ 1 ], len );
 end;
 
-{$IFDEF WINCE}
-function u_GetPWideChar( const Str : UTF8String ) : PWideChar;
+function u_CopyStr( const Str : String ) : String;
   var
     len : Integer;
 begin
-  len := MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), nil, 0 );
-  GetMem( Result, len * 2 + 2 );
-  Result[ len ] := #0;
-  MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), Result, len );
+  len := length( Str );
+  SetLength( Result, len );
+  System.Move( Str[ 1 ], Result[ 1 ], len * SizeOf( Char ) );
 end;
-{$ENDIF}
 
-function u_StrUp( const Str : UTF8String ) : UTF8String;
+function u_StrUp( const str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -1468,12 +1378,12 @@ begin
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
-      Result[ i ] := AnsiChar( Byte( Str[ i ] ) - 32 )
+      Result[ i ] := Char( Byte( Str[ i ] ) - 32 )
     else
       Result[ i ] := Str[ i ];
 end;
 
-function u_StrDown( const Str : UTF8String ) : UTF8String;
+function u_StrDown( const str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -1481,23 +1391,20 @@ begin
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
-      Result[ i ] := AnsiChar( Byte( Str[ i ] ) + 32 )
+      Result[ i ] := Char( Byte( Str[ i ] ) + 32 )
     else
       Result[ i ] := Str[ i ];
 end;
 
+
 function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
-  {$IFDEF WINCE}
-  var
-    lib : PWideChar;
-  {$ENDIF}
 begin
   Result := FALSE;
   {$IFDEF LINUX}
   zglLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
   if not Assigned( zglLib ) Then
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
   tmpCFString := CFURLCopyFileSystemPath( tmpCFURLRef, kCFURLPOSIXPathStyle );
@@ -1505,15 +1412,9 @@ begin
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
   {$ENDIF}
-  {$IFDEF WINCE}
-  lib := u_GetPWideChar( LibraryName );
-  zglLib := dlopen( lib );
-  FreeMem( lib );
-  {$ELSE}
-  zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF UNIX}, $001 {$ENDIF} );
-  {$ENDIF}
+  zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
 
-  if zglLib <> {$IFDEF UNIX} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
+  if zglLib <> {$IFDEF LINUX_OR_DARWIN} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
     begin
       Result := TRUE;
       zgl_Init := dlsym( zglLib, 'zgl_Init' );
@@ -1580,7 +1481,6 @@ begin
       key_Press := dlsym( zglLib, 'key_Press' );
       key_Last := dlsym( zglLib, 'key_Last' );
       key_BeginReadText := dlsym( zglLib, 'key_BeginReadText' );
-      key_UpdateReadText := dlsym( zglLib, 'key_UpdateReadText' );
       _key_GetText := dlsym( zglLib, 'key_GetText' );
       key_EndReadText := dlsym( zglLib, 'key_EndReadText' );
       key_ClearState := dlsym( zglLib, 'key_ClearState' );
@@ -1592,12 +1492,6 @@ begin
       joy_Up := dlsym( zglLib, 'joy_Up' );
       joy_Press := dlsym( zglLib, 'joy_Press' );
       joy_ClearState := dlsym( zglLib, 'joy_ClearState' );
-
-      res_BeginQueue := dlsym( zglLib, 'res_BeginQueue' );
-      res_EndQueue := dlsym( zglLib, 'res_EndQueue' );
-      res_GetPercentage := dlsym( zglLib, 'res_GetPercentage' );
-      res_GetCompleted := dlsym( zglLib, 'res_GetCompleted' );
-      res_Proc := dlsym( zglLib, 'res_Proc' );
 
       tex_Add := dlsym( zglLib, 'tex_Add' );
       tex_Del := dlsym( zglLib, 'tex_Del' );
@@ -1640,9 +1534,7 @@ begin
       fx2d_SetVCA := dlsym( zglLib, 'fx2d_SetVCA' );
       fx2d_SetVertexes := dlsym( zglLib, 'fx2d_SetVertexes' );
       fx2d_SetScale := dlsym( zglLib, 'fx2d_SetScale' );
-      fx2d_SetRotatingPivot := dlsym( zglLib, 'fx2d_SetRotatingPivot' );
 
-      cam2d_Init := dlsym( zglLib, 'cam2d_Init' );
       cam2d_Set := dlsym( zglLib, 'cam2d_Set' );
       cam2d_Get := dlsym( zglLib, 'cam2d_Get' );
 
@@ -1658,7 +1550,6 @@ begin
       pr2d_TriList := dlsym( zglLib, 'pr2d_TriList' );
 
       sengine2d_AddSprite := dlsym( zglLib, 'sengine2d_AddSprite' );
-      sengine2d_AddCustom := dlsym( zglLib, 'sengine2d_AddCustom' );
       sengine2d_DelSprite := dlsym( zglLib, 'sengine2d_DelSprite' );
       sengine2d_ClearAll := dlsym( zglLib, 'sengine2d_ClearAll' );
       sengine2d_Set := dlsym( zglLib, 'sengine2d_Set' );
@@ -1715,10 +1606,9 @@ begin
       snd_SetSpeed := dlsym( zglLib, 'snd_SetSpeed' );
       snd_Get := dlsym( zglLib, 'snd_Get' );
       snd_PlayFile := dlsym( zglLib, 'snd_PlayFile' );
-      snd_PlayMemory := dlsym( zglLib, 'snd_PlayMemory' );
-      snd_PauseStream := dlsym( zglLib, 'snd_PauseStream' );
-      snd_StopStream := dlsym( zglLib, 'snd_StopStream' );
-      snd_ResumeStream := dlsym( zglLib, 'snd_ResumeStream' );
+      snd_PauseFile := dlsym( zglLib, 'snd_PauseFile' );
+      snd_StopFile := dlsym( zglLib, 'snd_StopFile' );
+      snd_ResumeFile := dlsym( zglLib, 'snd_ResumeFile' );
 
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );
@@ -1732,7 +1622,7 @@ begin
       tess_GetData := dlsym( zglLib, 'tess_GetData' );
 
       col2d_PointInRect := dlsym( zglLib, 'col2d_PointInRect' );
-      col2d_PointInTriangle := dlsym( zglLib, 'col2d_PointInTriangle' );
+      col2d_PointInTriangle := dlsym( zglLib, 'col2d_PointInriangle' );
       col2d_PointInCircle := dlsym( zglLib, 'col2d_PointInCircle' );
       col2d_Line := dlsym( zglLib, 'col2d_Line' );
       col2d_LineVsRect := dlsym( zglLib, 'col2d_LineVsRect' );
@@ -1763,8 +1653,6 @@ begin
       _file_GetExtension := dlsym( zglLib, 'file_GetExtension' );
       _file_GetDirectory := dlsym( zglLib, 'file_GetDirectory' );
       file_SetPath := dlsym( zglLib, 'file_SetPath' );
-      file_OpenArchive := dlsym( zglLib, 'file_OpenArchive' );
-      file_CloseArchive := dlsym( zglLib, 'file_CloseArchive' );
 
       mem_LoadFromFile := dlsym( zglLib, 'mem_LoadFromFile' );
       mem_SaveToFile := dlsym( zglLib, 'mem_SaveToFile' );
@@ -1784,7 +1672,7 @@ begin
           {$IFDEF WINDOWS}
           MessageBoxA( 0, 'Error while loading ZenGL', 'Error', $00000010 );
           {$ENDIF}
-          {$IFDEF MACOSX}
+          {$IFDEF DARWIN}
           StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading ZenGL', nil, outItemHit );
           {$ENDIF}
         end;

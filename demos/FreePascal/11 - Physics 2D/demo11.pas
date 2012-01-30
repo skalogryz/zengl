@@ -35,7 +35,7 @@ uses
   ;
 
 var
-  dirRes : UTF8String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
+  dirRes : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fnt    : zglPFont;
   space  : PcpSpace;
   bCount : Integer;
@@ -226,6 +226,12 @@ Begin
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
   zgl_Reg( SYS_EXIT, @Quit );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '11 - Physics Simple' );
 
