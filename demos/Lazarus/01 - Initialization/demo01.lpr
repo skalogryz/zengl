@@ -34,8 +34,8 @@ uses
   ;
 
 var
-  DirApp  : UTF8String;
-  DirHome : UTF8String;
+  DirApp  : String;
+  DirHome : String;
 
 procedure Init;
 begin
@@ -102,8 +102,8 @@ Begin
   //
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home
   // directory, or to executable file(not works for GNU/Linux).
-  DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-  DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
+  DirApp  := u_CopyStr( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+  DirHome := u_CopyStr( PChar( zgl_Get( DIRECTORY_HOME ) ) );
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
@@ -121,6 +121,12 @@ Begin
   // RU: Регистрируем процедуру, которая выполнится после завершения работы ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL shutdown.
   zgl_Reg( SYS_EXIT, @Quit );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   // RU: Устанавливаем заголовок окна.
   // EN: Set the caption of the window.
