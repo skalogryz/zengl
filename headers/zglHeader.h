@@ -247,7 +247,7 @@ ZGLEXTERN void ( *zbuffer_Clear )();
 // SCISSOR
 #ifdef __CPP__
 ZGLEXTERN void ( *__scissor_Begin )( int X, int Y, int Width, int Height, bool ConsiderCamera );
-static inline void ( *scissor_Begin )( int X, int Y, int Width, int Height, bool ConsiderCamera = TRUE );
+static inline void scissor_Begin( int X, int Y, int Width, int Height, bool ConsiderCamera = TRUE )
 {
   __scissor_Begin( X, Y, Width, Height, ConsiderCamera );
 }
