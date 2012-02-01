@@ -291,20 +291,20 @@ end;
 
 procedure pengine2d_Draw;
   var
-    i        : Integer;
-    oldBlend : Byte;
-    oldColor : Byte;
+    i            : Integer;
+    oldBlendMode : LongWord;
+    oldColorMode : LongWord;
 begin
-  oldBlend := b2dCurBlend;
-  oldColor := b2dCurColor;
+  oldBlendMode := b2dCurBlendMode;
+  oldColorMode := b2dCurColorMode;
 
   for i := 0 to pengine2d.Count.Emitters - 1 do
     emitter2d_Draw( pengine2d.List[ i ] );
 
-  if oldBlend <> b2dCurBlend Then
-    fx_SetBlendMode( oldBlend );
-  if oldColor <> b2dCurColor Then
-    fx_SetColorMode( oldColor );
+  if oldBlendMode <> b2dCurBlendMode Then
+    fx_SetBlendMode( oldBlendMode );
+  if oldColorMode <> b2dCurColorMode Then
+    fx_SetColorMode( oldColorMode );
 end;
 
 procedure pengine2d_Proc( dt : Double );
