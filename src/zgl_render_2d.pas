@@ -49,7 +49,8 @@ var
   b2dCurMode        : LongWord;
   b2dCurFX          : LongWord;
   b2dCurBlend       : LongWord;
-  b2dCurColor       : LongWord;
+  b2dCurBlendMode   : LongWord;
+  b2dCurColorMode   : LongWord;
   b2dCurColorMask   : LongWord;
   b2dCurTex         : zglPTexture;
   b2dCurSmooth      : LongWord;
@@ -79,12 +80,7 @@ end;
 procedure batch2d_End;
 begin
   batch2d_Flush();
-  b2dCurMode  := 0;
-  b2dCurFX    := 0;
-  b2dCurBlend := 0;
-  b2dCurColor := 0;
-  b2dCurTex   := nil;
-  b2dStarted  := FALSE;
+  b2dStarted := FALSE;
 end;
 
 procedure batch2d_Flush;
@@ -114,7 +110,7 @@ end;
 
 function batch2d_Check( Mode, FX : LongWord; Texture : zglPTexture ) : Boolean;
 begin
-  if ( Mode <> b2dCurMode ) or ( Texture <> b2dCurTex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dCurBlend <> 0 ) ) or ( b2dCurSmooth <> FX and PR2D_SMOOTH ) Then
+  if ( b2dCurMode <> Mode ) or ( b2dCurTex <> Texture ) or ( b2dCurBlend <> FX and FX_BLEND ) or ( b2dCurSmooth <> FX and PR2D_SMOOTH ) Then
     begin
       if not b2dNew Then
         batch2d_Flush();
@@ -124,9 +120,8 @@ begin
   b2dCurMode   := Mode;
   b2dCurTex    := Texture;
   b2dCurFX     := FX;
+  b2dCurBlend  := FX and FX_BLEND;
   b2dCurSmooth := FX and PR2D_SMOOTH;
-  if FX and FX_BLEND = 0 Then
-    b2dCurBlend := 0;
 
   Result := b2dNew;
   b2dNew := FALSE;
