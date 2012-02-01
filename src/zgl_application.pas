@@ -980,7 +980,7 @@ begin
                 if len > 0 Then
                   begin
                     SetLength( str, len );
-                    Move( c[ 0 ], str[ 1 ], len );
+                    System.Move( c[ 0 ], str[ 1 ], len );
                     key_InputText( str );
                   end;
               end;
