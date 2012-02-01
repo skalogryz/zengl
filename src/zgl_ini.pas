@@ -482,51 +482,56 @@ begin
       end;
 end;
 
-// TODO: optimize this code written at night... :)
 procedure ini_Process;
   var
-    lineEndCode : Byte;
+    lineEnd     : PByte;
+    iniEnd      : Ptr;
+    lastPos     : Ptr;
     newLine     : Boolean;
     newLineSize : Integer;
     str         : UTF8String;
-    lastPos     : LongWord;
     len         : Integer;
 begin
+  lineEnd := iniMem.Memory;
+  iniEnd  := Ptr( iniMem.Memory ) + iniMem.Size;
+  lastPos := Ptr( lineEnd );
   str     := '';
-  lastPos := 0;
-  while iniMem.Position < iniMem.Size do
+
+  while Ptr( lineEnd ) < iniEnd do
     begin
-      mem_Read( iniMem, lineEndCode, 1 );
-      newLine := lineEndCode = 10;
-      newLineSize := 1;
-      if ( not newLine ) and ( lineEndCode = 13 ) Then
+      newLine     := lineEnd^ = 10;
+      newLineSize := 0;
+      if ( not newLine ) and ( lineEnd^ = 13 ) Then
         begin
-          mem_Read( iniMem, lineEndCode, 1 );
-          newLine := lineEndCode = 10;
-          newLineSize := 2;
+          INC( lineEnd );
+          newLine     := lineEnd^ = 10;
+          newLineSize := 1;
         end;
 
       if newLine Then
         begin
-          len := iniMem.Position - lastPos - newLineSize;
-          if len = 0 Then
+          len := Ptr( lineEnd ) - lastPos - newLineSize;
+          if len <= 0 Then
             begin
-              INC( lastPos, newLineSize );
+              INC( lineEnd );
+              lastPos := Ptr( lineEnd );
               continue;
             end;
           SetLength( str, len );
-          Move( PByte( Ptr( iniMem.Memory ) + lastPos )^, str[ 1 ], len );
+          Move( PByte( lastPos )^, str[ 1 ], len );
           addData( str );
 
-          lastPos := iniMem.Position;
+          lastPos := Ptr( lineEnd ) + 1;
         end;
+
+      INC( lineEnd );
     end;
 
-  len := iniMem.Position - lastPos;
+  len := Ptr( lineEnd ) - lastPos;
   if len > 0 Then
     begin
       SetLength( str, len );
-      Move( PByte( Ptr( iniMem.Memory ) + lastPos )^, str[ 1 ], len );
+      Move( PByte( lastPos )^, str[ 1 ], len );
       addData( str );
     end;
 end;
