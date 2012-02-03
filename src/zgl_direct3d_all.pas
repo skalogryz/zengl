@@ -1501,6 +1501,7 @@ function gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; for
 begin
   if target = GL_TEXTURE_2D Then
     begin
+      Result := 0;
       d3dTexArray[ d3dTexCount - 1 ].Pool       := D3DPOOL_MANAGED;
       d3dTexArray[ d3dTexCount - 1 ].MagFilter  := lMagFilter;
       d3dTexArray[ d3dTexCount - 1 ].MinFilter  := lMinFilter;
@@ -1515,7 +1516,8 @@ begin
       d3dTexArray[ d3dTexCount - 1 ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
       d3d_FillTexture( data, r.pBits, width, height );
       d3dTexArray[ d3dTexCount - 1 ].Texture.UnlockRect( 0 );
-    end;
+    end else
+      Result := -1;
 end;
 
 procedure glTexCoord2f(s, t: GLfloat);
