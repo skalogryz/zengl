@@ -17,7 +17,7 @@
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="3"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Kemka Andrey aka Andru" ProductName="ZenGL" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" ProductVersion="0.3" FileDescription="Cross-platform game development library" OriginalFilename="ZenGL"/>
+      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.3.0"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -34,7 +34,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="50">
+    <Units Count="51">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -71,224 +71,227 @@
         <UnitName Value="zgl_fx"/>
       </Unit6>
       <Unit7>
-        <Filename Value="../zgl_gui_main.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_gui_main"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="../zgl_gui_process.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_gui_process"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="../zgl_gui_render.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_gui_render"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="../zgl_gui_types.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_gui_types"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="../zgl_gui_utils.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_gui_utils"/>
-      </Unit11>
-      <Unit12>
         <Filename Value="../zgl_ini.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_ini"/>
-      </Unit12>
-      <Unit13>
+      </Unit7>
+      <Unit8>
         <Filename Value="../zgl_keyboard.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_keyboard"/>
-      </Unit13>
-      <Unit14>
+      </Unit8>
+      <Unit9>
         <Filename Value="../zgl_log.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_log"/>
-      </Unit14>
-      <Unit15>
+      </Unit9>
+      <Unit10>
         <Filename Value="../zgl_main.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_main"/>
-      </Unit15>
-      <Unit16>
+      </Unit10>
+      <Unit11>
         <Filename Value="../zgl_math_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_math_2d"/>
-      </Unit16>
-      <Unit17>
+      </Unit11>
+      <Unit12>
         <Filename Value="../zgl_memory.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_memory"/>
-      </Unit17>
-      <Unit18>
+      </Unit12>
+      <Unit13>
         <Filename Value="../zgl_mouse.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_mouse"/>
-      </Unit18>
-      <Unit19>
+      </Unit13>
+      <Unit14>
         <Filename Value="../zgl_opengl.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_opengl"/>
-      </Unit19>
-      <Unit20>
+      </Unit14>
+      <Unit15>
         <Filename Value="../zgl_opengl_all.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_opengl_all"/>
-      </Unit20>
-      <Unit21>
+      </Unit15>
+      <Unit16>
         <Filename Value="../zgl_opengl_simple.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_opengl_simple"/>
-      </Unit21>
-      <Unit22>
+      </Unit16>
+      <Unit17>
         <Filename Value="../zgl_primitives_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_primitives_2d"/>
-      </Unit22>
-      <Unit23>
+      </Unit17>
+      <Unit18>
         <Filename Value="../zgl_render_target.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_render_target"/>
-      </Unit23>
-      <Unit24>
+      </Unit18>
+      <Unit19>
         <Filename Value="../zgl_screen.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_screen"/>
-      </Unit24>
-      <Unit25>
+      </Unit19>
+      <Unit20>
         <Filename Value="../zgl_sound.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sound"/>
-      </Unit25>
-      <Unit26>
+      </Unit20>
+      <Unit21>
         <Filename Value="../zgl_sound_dsound.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sound_dsound"/>
-      </Unit26>
-      <Unit27>
+      </Unit21>
+      <Unit22>
         <Filename Value="../zgl_sound_ogg.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sound_ogg"/>
-      </Unit27>
-      <Unit28>
+      </Unit22>
+      <Unit23>
         <Filename Value="../zgl_sound_openal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sound_openal"/>
-      </Unit28>
-      <Unit29>
+      </Unit23>
+      <Unit24>
         <Filename Value="../zgl_sound_wav.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sound_wav"/>
-      </Unit29>
-      <Unit30>
+      </Unit24>
+      <Unit25>
         <Filename Value="../zgl_sprite_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sprite_2d"/>
-      </Unit30>
-      <Unit31>
+      </Unit25>
+      <Unit26>
         <Filename Value="../zgl_text.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_text"/>
-      </Unit31>
-      <Unit32>
+      </Unit26>
+      <Unit27>
         <Filename Value="../zgl_textures.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_textures"/>
-      </Unit32>
-      <Unit33>
+      </Unit27>
+      <Unit28>
         <Filename Value="../zgl_textures_jpg.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_textures_jpg"/>
-      </Unit33>
-      <Unit34>
+      </Unit28>
+      <Unit29>
         <Filename Value="../zgl_textures_png.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_textures_png"/>
-      </Unit34>
-      <Unit35>
+      </Unit29>
+      <Unit30>
         <Filename Value="../zgl_textures_tga.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_textures_tga"/>
-      </Unit35>
-      <Unit36>
+      </Unit30>
+      <Unit31>
         <Filename Value="../zgl_timers.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_timers"/>
-      </Unit36>
-      <Unit37>
+      </Unit31>
+      <Unit32>
         <Filename Value="../zgl_types.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_types"/>
-      </Unit37>
-      <Unit38>
+      </Unit32>
+      <Unit33>
         <Filename Value="../zgl_utils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_utils"/>
-      </Unit38>
-      <Unit39>
+      </Unit33>
+      <Unit34>
         <Filename Value="../zgl_window.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_window"/>
-      </Unit39>
-      <Unit40>
+      </Unit34>
+      <Unit35>
         <Filename Value="../zgl_sengine_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_sengine_2d"/>
-      </Unit40>
-      <Unit41>
+      </Unit35>
+      <Unit36>
         <Filename Value="../zgl_grid_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_grid_2d"/>
-      </Unit41>
-      <Unit42>
+      </Unit36>
+      <Unit37>
         <Filename Value="../zgl_particles_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_particles_2d"/>
-      </Unit42>
-      <Unit43>
+      </Unit37>
+      <Unit38>
         <Filename Value="../zgl_texture_atlas.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_texture_atlas"/>
-      </Unit43>
-      <Unit44>
+      </Unit38>
+      <Unit39>
         <Filename Value="../zgl_joystick.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_joystick"/>
-      </Unit44>
-      <Unit45>
+      </Unit39>
+      <Unit40>
         <Filename Value="../zgl_opengles.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_opengles"/>
-      </Unit45>
-      <Unit46>
+      </Unit40>
+      <Unit41>
         <Filename Value="../zgl_opengles_all.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_opengles_all"/>
-      </Unit46>
-      <Unit47>
+      </Unit41>
+      <Unit42>
         <Filename Value="../zgl_resources.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_resources"/>
-      </Unit47>
-      <Unit48>
+      </Unit42>
+      <Unit43>
         <Filename Value="../zgl_lib_msvcrt.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_lib_msvcrt"/>
-      </Unit48>
-      <Unit49>
+      </Unit43>
+      <Unit44>
         <Filename Value="../zgl_lib_zip.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_lib_zip"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="../zgl_config.cfg"/>
+        <IsPartOfProject Value="True"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="../zgl_export_c.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_export_c"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="../zgl_fpc.cfg"/>
+        <IsPartOfProject Value="True"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="../zgl_render_2d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_render_2d"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="../zgl_textures_pvr.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_textures_pvr"/>
       </Unit49>
+      <Unit50>
+        <Filename Value="../zgl_touch.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_touch"/>
+      </Unit50>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="11"/>
+    <Version Value="9"/>
     <Target>
       <Filename Value="./ZenGL.dll"/>
     </Target>
@@ -313,15 +316,11 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="False"/>
         <UseLineInfoUnit Value="False"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
