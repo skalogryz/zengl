@@ -174,7 +174,7 @@ begin
       Form2.ProgressBar1.Position := i;
       Form2.ProgressBar1.Update();
 
-      c := font_GetCID( EditChars.Text, i, @j );
+      c := u_GetUTF8ID( EditChars.Text, i, @j );
       if not fg_CharsUse[ c ] Then
         begin
           fg_CharsUse[ c ] := TRUE;
@@ -368,7 +368,6 @@ begin
       zglInited := TRUE;
 
       zgl_Disable( APP_USE_LOG );
-      zgl_Enable( APP_USE_UTF8 );
 
       zgl_Reg( SYS_LOAD, @Init );
       zgl_Reg( SYS_DRAW, @Draw );
