@@ -2,20 +2,22 @@
 {----------------= Chipmunk =----------------}
 {--------------------------------------------}
 {                                            }
-{ author:            Scott Lembcke           }
-{ mail:              slembcke@gmail.com      }
+{ author:   Scott Lembcke                    }
+{ mail:     slembcke@gmail.com               }
 {                                            }
-{ chipmunk version:  5.3.2                   }
-{ license:           MIT                     }
-{ chipmunk homepage:                         }
+{ version:  5.3.2                            }
+{ license:  MIT                              }
+{ homepage:                                  }
 { http://code.google.com/p/chipmunk-physics/ }
 {                                            }
-{ header version:    0.99 beta 11            }
-{ date:              2012.01.29              }
-{ header homepage:                           }
+{------------------ header ------------------}
+{                                            }
+{ version:  0.99 beta 11                     }
+{ date:     2012.01.29                       }
+{ homepage:                                  }
 { http://code.google.com/p/chipmunk-pascal/  }
 {                                            }
-{----------- header written by: -------------}
+{------------ header written by: ------------}
 {                                            }
 {           Kemka Andrey aka Andru           }
 {                                            }
