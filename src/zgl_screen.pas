@@ -293,8 +293,6 @@ begin
 
   scrCurrModeW   := scrDesktopW;
   scrCurrModeH   := scrDesktopH;
-  wndWidth       := Round( UIScreen.mainScreen.bounds.size.width );
-  wndHeight      := Round( UIScreen.mainScreen.bounds.size.height );
   oglWidth       := scrDesktopW;
   oglHeight      := scrDesktopH;
   oglTargetW     := scrDesktopW;

@@ -304,8 +304,15 @@ begin
   wnd_Select();
 {$ENDIF}
 {$IFDEF iOS}
+  // always fullscreen
+  wndX      := Round( UIScreen.mainScreen.bounds.origin.x );
+  wndY      := Round( UIScreen.mainScreen.bounds.origin.y );
+  wndWidth  := Round( UIScreen.mainScreen.bounds.size.width );
+  wndHeight := Round( UIScreen.mainScreen.bounds.size.height );
+  wndFullScreen := TRUE;
+
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
-  wndHandle := zglCiOSWindow.alloc().initWithFrame( CGRectMake( wndX, wndY, Width, Height ) );
+  wndHandle := zglCiOSWindow.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   wndHandle.setMultipleTouchEnabled( TRUE );
   wndViewCtrl := zglCiOSViewController.alloc().init();
   wndHandle.addSubview( wndViewCtrl.view );
@@ -397,7 +404,7 @@ begin
     ChangeWindowAttributes( wndHandle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
   else
     ChangeWindowAttributes( wndHandle, kWindowResizableAttribute, kWindowNoTitleBarAttribute );
-  // Какой индус из Apple придумал, что необходимо менять kWindowResizableAttribute вместе с kWindowNoTitleBarAttribute...
+  // Apple and their magic driving me crazy...
   ChangeWindowAttributes( wndHandle, 0, kWindowResizableAttribute );
 
   aglSetCurrentContext( oglContext );
