@@ -91,10 +91,10 @@ ImageBase=4194304
 ExeDescription=
 [Directories]
 OutputDir=
-UnitOutputDir=../tmp
+UnitOutputDir=../../tmp
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=../;../../lib/zlib/delphi;../../lib/zip/delphi
+SearchPath=../../;../../../lib/zlib/delphi;../../../lib/zip/delphi
 Packages=vcl;rtl;vclx;vclactnband;dbrtl;adortl;vcldb;bdertl;vcldbx;visualclx;visualdbclx;dss;teeui;teedb;tee;ibxpress;dsnap;dsnapcon
 Conditionals=
 DebugSourceDirs=

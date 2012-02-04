@@ -20,7 +20,7 @@
 }
 library ZenGL;
 
-{$I ../zgl_config.cfg}
+{$I ../../zgl_config.cfg}
 
 uses
   zgl_main,
@@ -101,7 +101,7 @@ uses
   ;
 
 const
-// Ненавижу Apple! :)
+// I hate Apple! :)
   {$IFDEF MACOSX}
   prefix = '_';
   {$ELSE}
@@ -434,7 +434,7 @@ exports
   {$ENDIF}
   ;
 
-{$R ../ZenGL.res}
+{$R ../../ZenGL.res}
 
 begin
 end.

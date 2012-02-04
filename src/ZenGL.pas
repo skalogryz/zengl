@@ -104,7 +104,7 @@ uses
   ;
 
 const
-// Ненавижу Apple! :)
+// I hate Apple! :)
   {$IFDEF MACOSX}
   prefix = '_';
   {$ELSE}
