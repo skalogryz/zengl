@@ -84,9 +84,9 @@ unit zglChipmunk;
     {$L cpSpaceQuery}
     {$L cpSpaceStep}
     {$L cpVect}
-    {$IFDEF iOS}
+    {$IF DEFINED(iOS) and (not DEFINED(iPHONESIM))}
       {$LINKLIB libgcc_s.1.dylib}
-    {$ENDIF}
+    {$IFEND}
     {$IFNDEF STATIC}
       {$IFDEF WINDOWS}
         {$LINKLIB libmsvcrt.a}
@@ -109,6 +109,7 @@ uses
   {$ENDIF}
   ;
 
+{$IF ( not DEFINED(CHIPMUNK_STATIC) ) and ( not DEFINED(CHIPMUNK_LINK) )}
 const
 {$IFDEF LINUX}
   libChipmunk = {$IFDEF ANDROID} 'libchipmunk.so' {$ELSE} 'libchipmunk.so.5.3.2' {$ENDIF};
@@ -120,7 +121,6 @@ const
   libChipmunk = 'libchipmunk.5.3.2.dylib';
 {$ENDIF}
 
-{$IF ( not DEFINED(CHIPMUNK_STATIC) ) and ( not DEFINED(CHIPMUNK_LINK) )}
 function  cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
 procedure cpFree;
 {$IFEND}

@@ -59,9 +59,9 @@ unit zgl_sound_ogg;
   {$IFDEF MACOSX}
     {$LINKLIB libgcc.a}
   {$ENDIF}
-  {$IFDEF iOS}
+  {$IF DEFINED(iOS) and (not DEFINED(iPHONESIM))}
     {$LINKLIB libgcc_s.1.dylib}
-  {$ENDIF}
+  {$IFEND}
 {$ELSE}
   {$DEFINE USE_VORBIS}
 {$ENDIF}
