@@ -298,9 +298,6 @@ end;
 function gl_Initialize : Boolean;
   var
     err : LongWord;
-    {$IFDEF iOS}
-    frame : CGRect;
-    {$ENDIF}
 begin
 {$IFNDEF NO_EGL}
   oglSurface := eglCreateWindowSurface( oglDisplay, oglConfig, wndHandle, nil );
@@ -326,10 +323,7 @@ begin
     end;
 {$ENDIF}
 {$IFDEF iOS}
-  FillChar( frame, SizeOf( CGRect ), 0 );
-  frame.size.width  := oglWidth;
-  frame.size.height := oglHeight;
-  eglView := zglCiOSEAGLView.alloc().initWithFrame( frame );
+  eglView := zglCiOSEAGLView.alloc().initWithFrame( wndHandle.bounds );
   // iPhone Retina display
   if ( UIDevice.currentDevice.systemVersion.floatValue >= 3.2 ) and ( UIScreen.mainScreen.currentMode.size.width = 640 ) and ( UIScreen.mainScreen.currentMode.size.height = 960 ) Then
     begin
