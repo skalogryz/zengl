@@ -49,7 +49,7 @@ win32: clean
 	-Fu../../../lib/ogg/i386-win32 \
 	-Fu../../../lib/zlib/i386-win32 \
 	-Fu../../../lib/zip/i386-win32 \
-	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
+	-FE$(OUTPUT)i386-win32/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
 
 win64: clean
 	$(FPC) $(UNIT) $(INCLUDE) \
