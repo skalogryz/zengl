@@ -5,6 +5,13 @@ else
   ARCH  = i386
 endif
 
+# Get current OS
+ifeq ($(shell uname), Linux)
+  OS    = linux
+else ifeq ($(shell uname), Darwin)
+  OS    = darwin
+endif
+
 # Variables
 GCC     = gcc
 MINGW32 = i486-mingw32-gcc
@@ -18,32 +25,23 @@ UNIT    = demo06.c
 TARGET  = demo06
 TARGETW = demo06.exe
 TARGETM = demo06
-BUNDLE  = $(OUTPUT)$(TARGETM).app
 
 # Targets
 all: clean
-	$(GCC) $(UNIT) $(INCLUDE) $(LIBS) -o$(OUTPUT)$(ARCH)/$(TARGET) $(FLAGS)
-	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
+	$(GCC) $(UNIT) $(INCLUDE) $(LIBS) -o$(OUTPUT)$(ARCH)-$(OS)/$(TARGET) $(FLAGS)
+	strip $(OUTPUT)$(ARCH)-$(OS)/$(TARGET) --strip-unneeded -R .comment -R .note
 
 linux32: clean
-	$(GCC) $(UNIT) $(INCLUDE) $(LIBS) -o$(OUTPUT)i386/$(TARGET) $(FLAGS) -m32
-	strip $(OUTPUT)i386/$(TARGET) --strip-unneeded -R .comment -R .note
+	$(GCC) $(UNIT) $(INCLUDE) $(LIBS) -o$(OUTPUT)i386-linux/$(TARGET) $(FLAGS) -m32
+	strip $(OUTPUT)i386-linux/$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
-	$(MINGW32) $(UNIT) $(INCLUDE) -o$(OUTPUT)i386/$(TARGETW) $(FLAGS)
-	strip $(OUTPUT)i386/$(TARGETW) --strip-unneeded -R .comment -R .note
+	$(MINGW32) $(UNIT) $(INCLUDE) -o$(OUTPUT)i386-win32/$(TARGETW) $(FLAGS)
+	strip $(OUTPUT)i386-win32/$(TARGETW) --strip-unneeded -R .comment -R .note
 
 win64: clean
-	$(MINGW64) $(UNIT) $(INCLUDE) -o$(OUTPUT)x86_64/$(TARGETW) $(FLAGS)
-	strip $(OUTPUT)x86_64/$(TARGETW) --strip-unneeded -R .comment -R .note
-
-macos: clean
-	rm -Rf $(BUNDLE)
-	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
-	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
-	$(FPC) $(UNIT) $(INCLUDE) $(LIBSPPC) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min 10.4"
-	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
-	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
+	$(MINGW64) $(UNIT) $(INCLUDE) -o$(OUTPUT)x86_64-win64/$(TARGETW) $(FLAGS)
+	strip $(OUTPUT)x86_64-win64/$(TARGETW) --strip-unneeded -R .comment -R .note
 
 clean:
 	rm -f *.*~

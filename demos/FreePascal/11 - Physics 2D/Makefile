@@ -28,8 +28,8 @@ BUNDLE  = $(OUTPUT)$(TARGETM).app
 
 # Targets
 all: clean
-	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT)$(ARCH)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
-	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT)$(ARCH)-$(OS)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
+	strip $(OUTPUT)$(ARCH)-$(OS)/$(TARGET) --strip-unneeded -R .comment -R .note
 
 linux32: clean
 	$(FPC) $(UNIT) $(INCLUDE) \
@@ -39,7 +39,7 @@ linux32: clean
 	-Fu../../../lib/zlib/i386-linux \
 	-Fu../../../lib/zip/i386-linux \
 	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
-	strip $(OUTPUT)i386/$(TARGET) --strip-unneeded -R .comment -R .note
+	strip $(OUTPUT)i386-linux/$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
 	$(FPC) $(UNIT) $(INCLUDE) \
@@ -59,7 +59,7 @@ win64: clean
 	-Fu../../../lib/ogg/x86_64-win64 \
 	-Fu../../../lib/zlib/x86_64-win64 \
 	-Fu../../../lib/zip/x86_64-win64 \
-	-FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
+	-FE$(OUTPUT)x86_64-win64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
 
 macos: clean
 	rm -Rf $(BUNDLE)

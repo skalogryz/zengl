@@ -90,7 +90,7 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=../../../bin/i386
+OutputDir=../../../bin/i386-win32
 UnitOutputDir=../tmp
 PackageDLLOutputDir=
 PackageDCPOutputDir=
