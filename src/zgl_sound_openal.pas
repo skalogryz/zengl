@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -25,15 +25,7 @@ unit zgl_sound_openal;
 interface
 
 const
-{$IFDEF LINUX}
-  libopenal = 'libopenal.so';
-{$ENDIF}
-{$IFDEF WINDOWS}
   libopenal = 'openal32.dll';
-{$ENDIF}
-{$IFDEF DARWIN}
-  libopenal = '/System/Library/Frameworks/OpenAL.framework/OpenAL';
-{$ENDIF}
 
   ALC_DEFAULT_DEVICE_SPECIFIER              =$1004;
   ALC_DEVICE_SPECIFIER                      =$1005;
@@ -84,41 +76,8 @@ type
   ALCcontext  = record
 end;
 
-{$IFDEF ANDROID}
-  function alcGetString(device: PALCdevice; param: LongInt): PAnsiChar; cdecl; external libopenal;
-  function alGetError(device: PALCdevice): LongInt; cdecl; external libopenal;
-  // Device
-  function alcOpenDevice(const devicename: PAnsiChar): PALCdevice; cdecl; external libopenal;
-  function alcCloseDevice(device: PALCdevice): Boolean; cdecl; external libopenal;
-  // Context
-  function alcCreateContext(device: PALCdevice; const attrlist: PLongInt): PALCcontext; cdecl; external libopenal;
-  function alcMakeContextCurrent(context: PALCcontext): Boolean; cdecl; external libopenal;
-  procedure alcDestroyContext(context: PALCcontext); cdecl; external libopenal;
-  // Listener
-  procedure alListenerfv(param: LongInt; const values: PSingle); cdecl; external libopenal;
-  // Sources
-  procedure alGenSources(n: LongInt; sources: PLongWord); cdecl; external libopenal;
-  procedure alDeleteSources(n: LongInt; const sources: PLongWord); cdecl; external libopenal;
-  procedure alSourcei(sid: LongWord; param: LongInt; value: LongInt); cdecl; external libopenal;
-  procedure alSourcef(sid: LongWord; param: LongInt; value: Single); cdecl; external libopenal;
-  procedure alSourcefv(sid: LongWord; param: LongInt; const values: PSingle); cdecl; external libopenal;
-  procedure alGetSourcei(sid: LongWord; param: LongInt; var value: LongInt); cdecl; external libopenal;
-  procedure alSourcePlay(sid: LongWord); cdecl; external libopenal;
-  procedure alSourcePause(sid: LongWord); cdecl; external libopenal;
-  procedure alSourceStop(sid: LongWord); cdecl; external libopenal;
-  procedure alSourceRewind(sid: LongWord); cdecl; external libopenal;
-  //
-  procedure alSourceQueueBuffers(sid: LongWord; numEntries: LongInt; const bids: PLongWord); cdecl; external libopenal;
-  procedure alSourceUnqueueBuffers(sid: LongWord; numEntries: LongInt; bids: PLongWord); cdecl; external libopenal;
-  // Buffers
-  procedure alGenBuffers(n: LongInt; buffers: PLongWord); cdecl; external libopenal;
-  procedure alDeleteBuffers(n: LongInt; const buffers: PLongWord); cdecl; external libopenal;
-  procedure alBufferData(bid: LongWord; format: LongInt; data: Pointer; size: LongInt; freq: LongInt); cdecl; external libopenal;
-{$ENDIF}
-
 var
-  {$IFNDEF ANDROID}
-  oalLibrary : {$IFDEF WINDOWS} LongWord {$ELSE} Pointer {$ENDIF};
+  oalLibrary : LongWord;
 
   alcGetString           : function(device: PALCdevice; param: LongInt): PAnsiChar; cdecl;
   alGetError             : function(device: PALCdevice): LongInt; cdecl;
@@ -149,13 +108,12 @@ var
   alGenBuffers           : procedure(n: LongInt; buffers: PLongWord); cdecl;
   alDeleteBuffers        : procedure(n: LongInt; const buffers: PLongWord); cdecl;
   alBufferData           : procedure(bid: LongWord; format: LongInt; data: Pointer; size: LongInt; freq: LongInt); cdecl;
-  {$ENDIF}
 
-  oalDevice   : PALCdevice  = nil;
-  oalContext  : PALCcontext = nil;
-  oalSources  : array of LongWord;
-  oalSrcPtrs  : array of Pointer;
-  oalSrcState : array of LongWord;
+  oalDevice  : PALCdevice  = nil;
+  oalContext : PALCcontext = nil;
+  oalSources : array of LongWord;
+  oalSrcPtrs : array of Pointer;
+  oalSrcState: array of LongWord;
 
   // Параметры слушателя
   oalPosition    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
@@ -171,14 +129,8 @@ uses
 
 function InitOpenAL : Boolean;
 begin
-{$IFNDEF ANDROID}
   Result := FALSE;
-  oalLibrary := dlopen( libopenal {$IFDEF UNIX}, $001 {$ENDIF} );
-  {$IFDEF LINUX}
-  // Для надежности...
-  if oalLibrary = nil Then oalLibrary := dlopen( PAnsiChar( libopenal + '.1' ), $001 );
-  if oalLibrary = nil Then oalLibrary := dlopen( PAnsiChar( libopenal + '.0' ), $001 );
-  {$ENDIF}
+  oalLibrary := dlopen( libopenal );
 
   if oalLibrary <> LIB_ERROR Then
     begin
@@ -209,16 +161,11 @@ begin
       Result := TRUE;
     end else
       Result := FALSE;
-{$ELSE}
-  Result := TRUE;
-{$ENDIF}
 end;
 
 procedure FreeOpenAL;
 begin
-{$IFNDEF ANDROID}
   dlclose( oalLibrary );
-{$ENDIF}
 end;
 
 function oal_GetSource( Source : Pointer ) : LongWord;

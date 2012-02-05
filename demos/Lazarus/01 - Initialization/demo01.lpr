@@ -1,8 +1,6 @@
 program demo01;
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 
 // RU: Приложение можно собрать с ZenGL либо статично, либо используя so/dll/dylib.
 // Для этого закомментируйте объявление ниже. Преимущество статичной компиляции
@@ -34,8 +32,8 @@ uses
   ;
 
 var
-  DirApp  : UTF8String;
-  DirHome : UTF8String;
+  DirApp  : String;
+  DirHome : String;
 
 procedure Init;
 begin
@@ -69,32 +67,7 @@ end;
 
 Begin
   {$IFNDEF STATIC}
-    {$IFDEF LINUX}
-    // RU: В Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна
-    // быть предварительно установлена. Но zglLoad сначала проверить есть ли libZenGL.so
-    // рядом с исполняемым файлом.
-    //
-    // EN: Under GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be
-    // installed before it will be used. But zglLoad will check first if there is
-    // libZenGL.so near executable file.
-    zglLoad( libZenGL );
-    {$ENDIF}
-    {$IFDEF WIN32}
-    zglLoad( libZenGL );
-    {$ENDIF}
-    {$IFDEF DARWIN}
-    // RU: libZenGL.dylib следует предварительно поместить в каталог
-    // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложения.
-    // Также следует упомянуть, что лог-файл будет создаваться в корневом каталоге,
-    // поэтому либо отключайте его, либо указывайте свой путь и имя, как описано в справке.
-    //
-    // EN: libZenGL.dylib must be placed into this directory
-    // MyApp.app/Contents/Frameworks/, where MyApp.app - Bundle of your application.
-    // Also you must know, that log-file will be created in root directory, so you must
-    // disable a log, or choose your own path and name for it. How to do this you can find
-    // in help.
-    zglLoad( libZenGL );
-    {$ENDIF}
+  zglLoad( libZenGL );
   {$ENDIF}
 
   // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к
@@ -102,8 +75,8 @@ Begin
   //
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home
   // directory, or to executable file(not works for GNU/Linux).
-  DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-  DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
+  DirApp  := u_CopyStr( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+  DirHome := u_CopyStr( PChar( zgl_Get( DIRECTORY_HOME ) ) );
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
@@ -121,6 +94,12 @@ Begin
   // RU: Регистрируем процедуру, которая выполнится после завершения работы ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL shutdown.
   zgl_Reg( SYS_EXIT, @Quit );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   // RU: Устанавливаем заголовок окна.
   // EN: Set the caption of the window.
