@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -29,10 +29,9 @@ uses
 type
   zglPCamera2D = ^zglTCamera2D;
   zglTCamera2D = record
-    X, Y   : Single;
-    Angle  : Single;
-    Zoom   : zglTPoint2D;
-    Center : zglTPoint2D;
+    X, Y  : Single;
+    Angle : Single;
+    Zoom  : zglTPoint2D;
   end;
 
 type
@@ -47,12 +46,11 @@ type
     ZoomY  : Single;
   end;
 
-procedure cam2d_Init( var Camera : zglTCamera2D );
 procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
 
 var
-  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ); Center: ( X: 0; Y: 0 ) );
+  constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
   cam2d         : zglPCameraSystem;
   cam2dTarget   : array[ 1..2 ] of zglTCameraSystem;
 
@@ -60,25 +58,9 @@ implementation
 uses
   zgl_types,
   zgl_screen,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d;
-
-procedure cam2d_Init( var Camera : zglTCamera2D );
-begin
-  Camera.X        := 0;
-  Camera.Y        := 0;
-  Camera.Angle    := 0;
-  Camera.Zoom.X   := 1;
-  Camera.Zoom.Y   := 1;
-  Camera.Center.X := ( oglWidth - scrSubCX ) / 2;
-  Camera.Center.Y := ( oglHeight - scrSubCY ) / 2;
-end;
 
 procedure cam2d_Set( Camera : zglPCamera2D );
 begin
@@ -93,21 +75,21 @@ begin
       cam2d.Apply  := TRUE;
       cam2d.OnlyXY := ( cam2d.Global.Angle = 0 ) and ( cam2d.Global.Zoom.X = 1 ) and ( cam2d.Global.Zoom.Y = 1 );
       if ( cam2d.ZoomX <> cam2d.Global.Zoom.X ) or ( cam2d.ZoomY <> cam2d.Global.Zoom.Y ) Then
-        render2dClipR := Round( sqrt( sqr( ( oglWidth - scrSubCX ) / cam2d.Global.Zoom.X ) + sqr( ( oglHeight - scrSubCY ) / cam2d.Global.Zoom.Y ) ) ) div 2;
-      cam2d.CX     := cam2d.Global.X + Camera.Center.X;
-      cam2d.CY     := cam2d.Global.Y + Camera.Center.Y;
+        oglClipR := Round( sqrt( sqr( oglWidth / scrResCX / cam2d.Global.Zoom.X ) + sqr( oglHeight / scrResCY / cam2d.Global.Zoom.Y ) ) ) div 2;
+      cam2d.CX     := cam2d.Global.X + ( oglWidth / scrResCX ) / 2;
+      cam2d.CY     := cam2d.Global.Y + ( oglHeight / scrResCY ) / 2;
       cam2d.ZoomX  := cam2d.Global.Zoom.X;
       cam2d.ZoomY  := cam2d.Global.Zoom.Y;
 
       glPushMatrix();
       if not cam2d.OnlyXY Then
         begin
-          glTranslatef( Camera.Center.X, Camera.Center.Y, 0 );
+          glTranslatef( oglWidth / 2 - scrAddCX / scrResCX, oglHeight / 2 - scrAddCY / scrResCY, 0 );
           if ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
             glScalef( Camera.Zoom.X, Camera.Zoom.Y, 1 );
           if Camera.Angle <> 0 Then
             glRotatef( Camera.Angle, 0, 0, 1 );
-          glTranslatef( -Camera.Center.X, -Camera.Center.Y, 0 );
+          glTranslatef( -oglWidth / 2 + scrAddCX / scrResCX, -oglHeight / 2 + scrAddCY / scrResCY, 0 );
         end;
       if ( Camera.X <> 0 ) or ( Camera.Y <> 0 ) Then
         glTranslatef( -Camera.X, -Camera.Y, 0 );
@@ -128,15 +110,7 @@ end;
 
 initialization
   cam2d := @cam2dTarget[ TARGET_SCREEN ];
-  with cam2dTarget[ TARGET_SCREEN ] do
-    begin
-      Global := @constCamera2D;
-      OnlyXY := TRUE;
-    end;
-  with cam2dTarget[ TARGET_TEXTURE ] do
-    begin
-      Global := @constCamera2D;
-      OnlyXY := TRUE;
-    end;
+  cam2dTarget[ TARGET_SCREEN ].Global := @constCamera2D;
+  cam2dTarget[ TARGET_TEXTURE ].Global := @constCamera2D;
 
 end.

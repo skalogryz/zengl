@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -280,16 +280,17 @@ end;
 
 function col2d_RectInCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
 begin
-  Result := col2d_PointInCircle( Rect.X, Rect.Y, Circle ) and col2d_PointInCircle( Rect.X + Rect.W, Rect.Y, Circle ) and
-            col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle ) and col2d_PointInCircle( Rect.X, Rect.Y + Rect.H, Circle );
+  Result := col2d_PointInCircle( Rect.X, Rect.Y, Circle ) and col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle );
 end;
 
 function col2d_RectVsCircle( const Rect : zglTRect; const Circle : zglTCircle ) : Boolean;
 begin
+  // бред сидого программера :)
   Result := ( col2d_PointInCircle( Rect.X, Rect.Y, Circle ) or col2d_PointInCircle( Rect.X + Rect.W, Rect.Y, Circle ) or
               col2d_PointInCircle( Rect.X + Rect.W, Rect.Y + Rect.H, Circle ) or col2d_PointInCircle( Rect.X, Rect.Y + Rect.H, Circle ) ) or
-            ( col2d_PointInRect( Circle.cX - Circle.Radius, Circle.cY, Rect ) or col2d_PointInRect( Circle.cX + Circle.Radius, Circle.cY, Rect ) or
-              col2d_PointInRect( Circle.cX, Circle.cY - Circle.Radius, Rect ) or col2d_PointInRect( Circle.cX, Circle.cY + Circle.Radius, Rect ) );
+            ( col2d_PointInRect( Circle.cX, Circle.cY - Circle.Radius, Rect ) or
+              col2d_PointInRect( Circle.cX + Circle.Radius, Circle.cY - Circle.Radius, Rect ) or
+              col2d_PointInRect( Circle.cX, Circle.cY + Circle.Radius, Rect ) or col2d_PointInRect( Circle.cX - Circle.Radius, Circle.cY, Rect ) );
 end;
 
 function col2d_Circle( const Circle1, Circle2 : zglTCircle ) : Boolean;

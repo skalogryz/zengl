@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -64,8 +64,8 @@ procedure atlas_DelNode( var Node : zglPAtlasNode );
 
 procedure atlas_GetFrameCoord( Node : zglPAtlasNode; Frame : Word; var TexCoord : array of zglTPoint2D );
 function  atlas_InsertFromTexture( Atlas : zglPAtlas; Texture : zglPTexture ) : zglPAtlasNode;
-function  atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
-function  atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function  atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function  atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
 
 procedure atals_InsertDataToNode( var Node : zglPAtlasNode; pData : Pointer; RowLength, Width, Height : Word );
 
@@ -76,11 +76,7 @@ implementation
 uses
   zgl_main,
   zgl_log,
-  {$IFNDEF USE_GLES}
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d_all,
   zgl_file,
   zgl_utils;
 
@@ -266,13 +262,13 @@ begin
   FreeMem( pData );
 end;
 
-function atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function atlas_InsertFromFile( Atlas : zglPAtlas; const FileName : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
-    i      : Integer;
-    pData  : Pointer;
-    tex    : zglTTexture;
-    w, h   : Word;
-    format : Word;
+    i     : Integer;
+    pData : Pointer;
+    pABGR : Pointer;
+    tex   : zglTTexture;
+    w, h  : Word;
 begin
   Result := nil;
   pData  := nil;
@@ -285,7 +281,7 @@ begin
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
-      managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h, format );
+      managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
 
   if not Assigned( pData ) Then
     begin
@@ -300,42 +296,37 @@ begin
   tex.FramesX := 1;
   tex.FramesY := 1;
   tex.Flags   := Flags;
-  tex.Format  := format;
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
-  if tex.Format = TEX_FORMAT_RGBA Then
-    begin
-      if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
-        begin
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-          tex_CalcAlpha( pData, w, h );
-        end else
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-    end;
+  if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 
   Result := atlas_AddNode( @Atlas.root, Atlas.Texture, tex.Width, tex.Height );
   Result.FramesX := tex.FramesX;
   Result.FramesY := tex.FramesY;
-  atals_InsertDataToNode( Result, pData, tex.Width, tex.Width, tex.Height );
+  GetMem( pABGR, tex.Width * tex.Height * 4 );
+  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
+  atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
   FreeMem( pData );
+  FreeMem( pABGR );
 end;
 
-function atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
+function atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
-    i      : Integer;
-    pData  : Pointer;
-    tex    : zglTTexture;
-    w, h   : Word;
-    format : Word;
+    i     : Integer;
+    pData : Pointer;
+    pABGR : Pointer;
+    tex   : zglTTexture;
+    w, h  : Word;
 begin
   Result := nil;
   pData  := nil;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
-      managerTexture.Formats[ i ].MemLoader( Memory, pData, w, h, format );
+      managerTexture.Formats[ i ].MemLoader( Memory, pData, w, h );
 
   if not Assigned( pData ) Then
     begin
@@ -350,38 +341,31 @@ begin
   tex.FramesX := 1;
   tex.FramesY := 1;
   tex.Flags   := Flags;
-  tex.Format  := format;
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
-  if tex.Format = TEX_FORMAT_RGBA Then
-    begin
-      if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
-        begin
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-          tex_CalcAlpha( pData, w, h );
-        end else
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-    end;
+  if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 
   Result := atlas_AddNode( @Atlas.root, Atlas.Texture, tex.Width, tex.Height );
   Result.FramesX := tex.FramesX;
   Result.FramesY := tex.FramesY;
-  atals_InsertDataToNode( Result, pData, tex.Width, tex.Width, tex.Height );
+  GetMem( pABGR, tex.Width * tex.Height * 4 );
+  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
+  atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
   FreeMem( pData );
+  FreeMem( pABGR );
 end;
 
 procedure atals_InsertDataToNode( var Node : zglPAtlasNode; pData : Pointer; RowLength, Width, Height : Word );
 begin
-  {$IFNDEF USE_GLES}
   glEnable( GL_TEXTURE_2D );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, RowLength );
   glBindTexture( GL_TEXTURE_2D, Node.Texture.ID );
   glTexSubImage2D( GL_TEXTURE_2D, 0, Trunc( Node.Rect.X ), Trunc( Node.Rect.Y ), Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
   glDisable( GL_TEXTURE_2D );
-  {$ENDIF}
 end;
 
 end.
