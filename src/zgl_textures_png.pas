@@ -22,35 +22,31 @@ unit zgl_textures_png;
 
 {$I zgl_config.cfg}
 
+{$IFNDEF USE_PASZLIB}
+  {$L infback}
+  {$L inffast}
+  {$L inflate}
+  {$L inftrees}
+  {$L zutil}
+  {$L adler32}
+  {$L crc32}
+{$ENDIF}
+
 interface
 uses
-  {$IFDEF WINDESKTOP}
-  zgl_lib_msvcrt,
+  {$IFDEF WINDOWS}
+  zgl_msvcrt,
   {$ENDIF}
-  zgl_lib_zip,
+  {$IFDEF USE_PASZLIB}
+  zbase,
+  paszlib,
+  {$ENDIF}
+  zgl_types,
+  zgl_file,
   zgl_memory;
 
 const
-  PNG_EXTENSION : UTF8String = 'PNG';
-
-procedure png_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
-procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
-
-implementation
-uses
-  zgl_main,
-  zgl_types,
-  zgl_file,
-  zgl_log,
-  zgl_textures;
-
-threadvar
-  pngBitDepth     : Integer;
-  pngHastRNS      : Boolean;
-  pngPalette      : array[ 0..255, 0..2 ] of Byte;
-  pngPaletteAlpha : Byte;
-
-const
+  PNG_EXTENSION : array[ 0..3 ] of Char = ( 'P', 'N', 'G', #0 );
   PNG_SIGNATURE : array[ 0..7 ] of AnsiChar = ( #137, #80, #78, #71, #13, #10, #26, #10 );
 
   PNG_FILTER_NONE    = 0;
@@ -64,6 +60,21 @@ const
   PNG_COLOR_PALETTE        = 3;
   PNG_COLOR_GRAYSCALEALPHA = 4;
   PNG_COLOR_RGBALPHA       = 6;
+
+  ZLIB_VERSION = '1.2.5';
+
+  _z_errmsg: array[ 0..9 ] of PAnsiChar = (
+    '',                     // Z_OK             (0)
+    'need dictionary',      // Z_NEED_DICT      (2)
+    'stream end',           // Z_STREAM_END     (1)
+    'file error',           // Z_ERRNO          (-1)
+    'stream error',         // Z_STREAM_ERROR   (-2)
+    'data error',           // Z_DATA_ERROR     (-3)
+    'insufficient memory',  // Z_MEM_ERROR      (-4)
+    'buffer error',         // Z_BUF_ERROR      (-5)
+    'incompatible version', // Z_VERSION_ERROR  (-6)
+    ''
+  );
 
 type
   zglTPNGChunkName = array[ 0..3 ] of AnsiChar;
@@ -89,7 +100,73 @@ type
     R, G, B, A : Byte;
   end;
 
-procedure png_GetPixelInfo( var pngHeader : zglTPNGHeader; var pngRowSize, pngOffset : LongWord );
+{$IFNDEF USE_PASZLIB}
+type
+  TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
+  TFree = procedure( AppData, Block : Pointer ); cdecl;
+
+  z_stream_s = record
+    next_in   : PByte;     // next input byte
+    avail_in  : cuint;     // number of bytes available at next_in
+    total_in  : clong;     // total nb of input bytes read so far
+
+    next_out  : PByte;     // next output byte should be put here
+    avail_out : cuint;     // remaining free space at next_out
+    total_out : clong;     // total nb of bytes output so far
+
+    msg       : PAnsiChar; // last error message, NULL if no error
+    state     : Pointer;   // not visible by applications
+
+    zalloc    : TAlloc;    // used to allocate the internal state
+    zfree     : TFree;     // used to free the internal state
+    opaque    : Pointer;   // private data object passed to zalloc and zfree
+
+    data_type : Integer;   //  best guess about the data type: ascii or binary
+    adler     : culong;    // adler32 value of the uncompressed data
+    reserved  : culong;    // reserved for future use
+  end;
+{$ELSE}
+type z_stream_s = TZStream;
+{$ENDIF}
+
+procedure png_Load( var Data : Pointer; var W, H : Word );
+procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+
+implementation
+uses
+  zgl_main,
+  zgl_log;
+
+var
+  pngMem          : zglTMemory;
+  pngFail         : Boolean;
+  pngHeader       : zglTPNGHeader;
+  pngHeaderOk     : Boolean;
+  pngSignature    : array[ 0..7 ] of AnsiChar;
+  pngChunk        : zglTPNGChunk;
+  pngHasIDAT      : Boolean;
+  pngHastRNS      : Boolean;
+  pngPalette      : array[ 0..255, 0..2 ] of Byte;
+  pngPaletteAlpha : Byte;
+
+  pngZStream      : z_stream_s;
+  pngZData        : Pointer;
+
+  pngRowUsed      : Boolean = TRUE;
+  pngRowSize      : LongWord;
+  pngRowBuffer    : array[ Boolean ] of PByteArray;
+  pngOffset       : LongWord;
+
+  pngIDATEnd      : LongWord;
+
+{$IFNDEF USE_PASZLIB}
+function inflate( var strm : z_stream_s; flush : Integer ) : Integer; cdecl; external;
+function inflateEnd( var strm : z_stream_s ) : Integer; cdecl; external;
+function inflateInit_( var strm : z_stream_s; version : PAnsiChar; stream_size : Integer ) : Integer; cdecl; external;
+{$ENDIF}
+
+procedure png_GetPixelInfo;
 begin
   case pngHeader.ColorType of
     PNG_COLOR_GRAYSCALE:
@@ -126,75 +203,75 @@ begin
   end;
 end;
 
-procedure png_CopyNonInterlacedRGB( Src, Dest : PByte; Width : Integer );
+procedure png_CopyNonInterlacedRGB( Src, Dest : PByte );
   var
     i     : Integer;
     Color : PColor;
 begin
   Color := Pointer( Dest );
-  for i := 0 to Width - 1 do
+  for i := 0 to pngHeader.Width - 1 do
     begin
-      Color.R := Src^; INC( Src );
-      Color.G := Src^; INC( Src );
-      Color.B := Src^; INC( Src );
+      Color.R := Byte( Src^ ); INC( Src );
+      Color.G := Byte( Src^ ); INC( Src );
+      Color.B := Byte( Src^ ); INC( Src );
       Color.A := 255;
       INC( Color );
     end;
 end;
 
-procedure png_CopyNonInterlacedRGBAlpha( Src, Dest : PByte; Width : Integer );
+procedure png_CopyNonInterlacedRGBAlpha( Src, Dest : PByte );
 begin
-  Move( Src^, Dest^, Width * 4 );
+  Move( Src^, Dest^, pngHeader.Width * 4 );
 end;
 
-procedure png_CopyNonInterlacedPalette( Src, Dest : PByte; Width : Integer );
+procedure png_CopyNonInterlacedPalette( Src, Dest : PByte );
   var
     i : Integer;
     ByteData, N, K : Byte;
 begin
-  N := ( 8 div pngBitDepth );
-  K := ( 8 - pngBitDepth );
+  N := ( 8 div pngHeader.BitDepth );
+  K := ( 8 - pngHeader.BitDepth );
 
-  for i := 0 to Width - 1 do
+  for i := 0 to pngHeader.Width - 1 do
     begin
       ByteData := PByteArray( Src )^[ i div N ];
 
-      if pngBitDepth < 8 Then
+      if pngHeader.BitDepth < 8 Then
         begin
-          ByteData := ( ByteData Shr ( ( 8 - pngBitDepth ) - ( i mod N ) * pngBitDepth ) );
+          ByteData := ( ByteData Shr ( ( 8 - pngHeader.BitDepth ) - ( i mod N ) * pngHeader.BitDepth ) );
           ByteData := ByteData and ( $FF Shr K );
         end;
 
-      Byte( Dest^ ) := pngPalette[ ByteData, 0 ]; INC( Dest );
-      Byte( Dest^ ) := pngPalette[ ByteData, 1 ]; INC( Dest );
-      Byte( Dest^ ) := pngPalette[ ByteData, 2 ]; INC( Dest );
-      if ( pngPalette[ ByteData, 0 ] = pngPalette[ pngPaletteAlpha, 0 ] ) and
-         ( pngPalette[ ByteData, 1 ] = pngPalette[ pngPaletteAlpha, 1 ] ) and
-         ( pngPalette[ ByteData, 2 ] = pngPalette[ pngPaletteAlpha, 2 ] ) and pngHastRNS Then
-        Byte( Dest^ ) := 0
-      else
-        Byte( Dest^ ) := 255;
-      INC( Dest );
-    end;
+    Byte( Dest^ ) := pngPalette[ ByteData, 0 ]; INC( Dest );
+    Byte( Dest^ ) := pngPalette[ ByteData, 1 ]; INC( Dest );
+    Byte( Dest^ ) := pngPalette[ ByteData, 2 ]; INC( Dest );
+    if ( pngPalette[ ByteData, 0 ] = pngPalette[ pngPaletteAlpha, 0 ] ) and
+       ( pngPalette[ ByteData, 1 ] = pngPalette[ pngPaletteAlpha, 1 ] ) and
+       ( pngPalette[ ByteData, 2 ] = pngPalette[ pngPaletteAlpha, 2 ] ) and pngHastRNS Then
+      Byte( Dest^ ) := 0
+    else
+      Byte( Dest^ ) := 255;
+    INC( Dest );
+  end;
 end;
 
-procedure png_CopyNonInterlacedGrayscaleAlpha( Src, Dest : PByte; Width : Integer );
+procedure png_CopyNonInterlacedGrayscaleAlpha( Src, Dest : PByte );
   var
     i     : Integer;
     Color : PColor;
 begin
   Color := Pointer( Dest );
-  for i := 0 to Width - 1 do
+  for i := 0 to pngHeader.Width - 1 do
     begin
-      Color.R := Src^;
-      Color.G := Src^;
-      Color.B := Src^; INC( Src );
-      Color.A := Src^; INC( Src );
+      Color.R := Byte( Src^ );
+      Color.G := Byte( Src^ );
+      Color.B := Byte( Src^ ); INC( Src );
+      Color.A := Byte( Src^ ); INC( Src );
       INC( Color );
     end;
 end;
 
-procedure png_FilterRow( var pngRowBuffer : PByteArray; var pngRowBufferPrev : PByteArray; pngRowSize, pngOffset : LongWord );
+procedure png_FilterRow;
   var
     i                          : Integer;
     Paeth                      : Integer;
@@ -217,27 +294,27 @@ procedure png_FilterRow( var pngRowBuffer : PByteArray; var pngRowBufferPrev : P
         Result := c;
   end;
 begin
-  case pngRowBuffer[ 0 ] of
+  case pngRowBuffer[ pngRowUsed ][ 0 ] of
     PNG_FILTER_NONE:;
 
     PNG_FILTER_SUB:
       for i := pngOffset + 1 to pngRowSize do
-        pngRowBuffer[ i ] := ( pngRowBuffer[ i ] + pngRowBuffer[ i - pngOffset] ) and 255;
+        pngRowBuffer[ pngRowUsed ][ i ] := ( pngRowBuffer[ pngRowUsed ][ i ] + pngRowBuffer[ pngRowUsed ][ i - pngOffset] ) and 255;
 
     PNG_FILTER_UP:
       for i := 1 to pngRowSize do
-        pngRowBuffer[ i ] := ( pngRowBuffer[ i ] + pngRowBufferPrev[ i ] ) and 255;
+        pngRowBuffer[ pngRowUsed ][ i ] := ( pngRowBuffer[ pngRowUsed ][ i ] + pngRowBuffer[ not pngRowUsed ][ i ] ) and 255;
 
     PNG_FILTER_AVERAGE:
       for i := 1 to pngRowSize do
         begin
-          Above := pngRowBufferPrev[ i ];
+          Above := pngRowBuffer[ not pngRowUsed ][ i ];
           if i - 1 < pngOffset Then
             Left := 0
           else
-            Left := pngRowBuffer[ i - pngOffset ];
+            Left := pngRowBuffer[ pngRowUsed ][ i - pngOffset ];
 
-          pngRowBuffer[ i ] := ( pngRowBuffer[ i ] + ( Left + Above ) div 2 ) and $FF;
+          pngRowBuffer[ pngRowUsed ][ i ] := ( pngRowBuffer[ pngRowUsed ][ i ] + ( Left + Above ) div 2 ) and $FF;
         end;
 
     PNG_FILTER_PAETH:
@@ -246,32 +323,127 @@ begin
         AboveLeft := 0;
 
         for i := 1 to pngRowSize do
-          begin
+          Begin
             if i - 1 >= pngOffset Then
               begin
-                Left      := pngRowBuffer[ i - pngOffset];
-                AboveLeft := pngRowBufferPrev[ i - pngOffset];
+                Left      := pngRowBuffer[ pngRowUsed ][ i - pngOffset];
+                AboveLeft := pngRowBuffer[ not pngRowUsed ][ i - pngOffset];
               end;
 
-            Above := pngRowBufferPrev[ i ];
+            Above := pngRowBuffer[ not pngRowUsed ][ i ];
 
-            Paeth := pngRowBuffer[ i ];
+            Paeth := pngRowBuffer[ pngRowUsed ][ i ];
             PP    := PaethPredictor( Left, Above, AboveLeft );
 
-            pngRowBuffer[ i ] := ( Paeth + PP ) and $FF;
+            pngRowBuffer[ pngRowUsed ][ i ] := ( Paeth + PP ) and $FF;
           end;
       end;
   end;
 end;
 
-function png_ReadIHDR( var pngMem : zglTMemory; var pngHeader : zglTPNGheader; var Data : Pointer; Size : Integer ) : Boolean;
+function png_DecodeIDAT( Buffer : Pointer; Bytes : Integer ) : Integer;
+  var
+    IDATHeader : zglTPNGChunkName;
+begin
+  Result := -1;
+  with pngZStream do
+    begin
+      next_out  := Buffer;
+      avail_out := Bytes;
+
+      while avail_out > 0 do
+        begin
+          if ( pngMem.Position = pngIDATEnd ) and ( avail_out > 0 ) and ( avail_in = 0 ) Then
+            begin
+              mem_Seek( pngMem, 4, FSM_CUR );
+
+              mem_ReadSwap( pngMem, pngIDATEnd, 4 );
+              mem_Read( pngMem, IDATHeader, 4 );
+
+              if IDATHeader <> 'IDAT' Then
+                begin
+                  log_Add( 'PNG - IDAT chunk expected' );
+                  pngFail := TRUE;
+                  exit;
+                end;
+
+              INC( pngIDATEnd, pngMem.Position );
+            end;
+
+          if avail_in = 0 Then
+            begin
+              if pngMem.Position + 65535 > pngIDATEnd Then
+                avail_in := mem_Read( pngMem, pngZData^, pngIDATEnd - pngMem.Position )
+              else
+                avail_in := mem_Read( pngMem, pngZData^, 65535 );
+
+              if avail_in = 0 Then
+                begin
+                  Result := Bytes - avail_out;
+                  exit;
+                end;
+
+              next_in := pngZData;
+            end;
+
+          Result := inflate( pngZStream, 0 );
+
+          if Result < 0 Then
+            begin
+              log_Add( 'PNG - ZLib error: ' + _z_errmsg[ abs( Result ) + 2 ] );
+              pngFail := TRUE;
+              exit;
+            end else
+              Result := avail_In;
+        end;
+    end;
+end;
+
+procedure png_DecodeNonInterlaced( var Data : Pointer );
+  var
+    i     : Cardinal;
+    CopyP : procedure( Src, Dest : PByte );
+begin
+  CopyP := nil;
+  case pngHeader.ColorType of
+    PNG_COLOR_RGB:
+      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGB;
+    PNG_COLOR_PALETTE, PNG_COLOR_GRAYSCALE:
+      if ( pngHeader.BitDepth = 1 ) or ( pngHeader.BitDepth = 4 ) or ( pngHeader.BitDepth = 8 ) Then CopyP := png_CopyNonInterlacedPalette;
+    PNG_COLOR_RGBALPHA:
+      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGBAlpha;
+    PNG_COLOR_GRAYSCALEALPHA:
+      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedGrayscaleAlpha;
+  end;
+
+  if not Assigned( CopyP ) Then
+    begin
+      log_Add( 'PNG - Unsupported ColorType' );
+      pngFail := TRUE;
+      exit;
+    end;
+
+  for i := pngHeader.Height downto 1 do
+    begin
+      png_DecodeIDAT( @pngRowBuffer[ pngRowUsed ][ 0 ], pngRowsize + 1 );
+      if pngFail Then exit;
+
+      png_FilterRow();
+
+      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( Data ) + pngHeader.Width * 4 * ( i - 1 ) ) );
+
+      pngRowUsed := not pngRowUsed;
+    end;
+end;
+
+procedure png_ReadIHDR( var Data : Pointer );
   var
     i : Integer;
 begin
-  if Size < SizeOf( zglTPNGHeader ) Then
+  if pngChunk.Size < SizeOf( zglTPNGHeader ) Then
     begin
       log_Add( 'PNG - Invalid header size' );
-      Result := FALSE;
+      pngFail := TRUE;
       exit;
     end;
 
@@ -282,22 +454,21 @@ begin
   mem_Read( pngMem, pngHeader.CompressionMethod, 1 );
   mem_Read( pngMem, pngHeader.FilterMethod, 1 );
   mem_Read( pngMem, pngHeader.InterlaceMethod, 1 );
-  pngBitDepth := pngHeader.BitDepth;
-  GetMem( Data, pngHeader.Width * pngHeader.Height * 4 );
+  zgl_GetMem( Data, pngHeader.Width * pngHeader.Height * 4 );
 
-  mem_Seek( pngMem, Size - SizeOf( zglTPNGHeader ), FSM_CUR );
+  mem_Seek( pngMem, pngChunk.Size - SizeOf( zglTPNGHeader ), FSM_CUR );
 
   if ( pngHeader.CompressionMethod <> 0 ) Then
     begin
       log_Add( 'PNG - Invalid compression method' );
-      Result := FALSE;
+      pngFail := TRUE;
       exit;
     end;
 
   if pngHeader.InterlaceMethod <> 0 Then
     begin
       log_Add( 'PNG - Interlace not supported.' );
-      Result := FALSE;
+      pngFail := TRUE;
       exit;
     end;
 
@@ -308,105 +479,46 @@ begin
         pngPalette[ i, 1 ] := i;
         pngPalette[ i, 2 ] := i;
       end;
-
-  Result := TRUE;
+  pngHeaderOk := TRUE;
 end;
 
-procedure png_ReadPLTE( var pngMem : zglTMemory; Size : Integer );
+procedure png_ReadPLTE;
 begin
-  mem_Read( pngMem, pngPalette[ 0 ], Size );
+  mem_Read( pngMem, pngPalette[ 0 ], pngChunk.Size );
 end;
 
-function png_ReadIDAT( var pngMem : zglTMemory; pngHeader : zglTPNGHeader; var Data : Pointer; Size : Integer ) : Boolean;
-  var
-    i            : Cardinal;
-    CopyP        : procedure( Src, Dest : PByte; Width : Integer );
-    pngIDATEnd   : LongWord;
-    pngZStream   : z_stream_s;
-    pngRowUsed   : Boolean;
-    pngRowBuffer : array[ Boolean ] of PByteArray;
-    pngRowSize   : LongWord;
-    pngOffset    : LongWord;
+procedure png_ReadIDAT( var Data : Pointer );
 begin
-  Result     := TRUE;
-  CopyP      := nil;
-  pngRowUsed := TRUE;
-  pngIDATEnd := pngMem.Position + Size;
-  png_GetPixelInfo( pngHeader, pngRowSize, pngOffset );
+  zgl_GetMem( pngZData, 65535 );
+  inflateInit_( pngZStream, ZLIB_VERSION, SizeOf( z_stream_s ) );
 
-  zlib_Init( pngZStream );
+  png_GetPixelInfo;
+  pngIDATEnd := pngMem.Position + pngChunk.Size;
 
   zgl_GetMem( Pointer( pngRowBuffer[ FALSE ] ), pngRowSize + 1 );
   zgl_GetMem( Pointer( pngRowBuffer[ TRUE ] ), pngRowSize + 1 );
 
-  case pngHeader.ColorType of
-    PNG_COLOR_RGB:
-      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGB;
-    PNG_COLOR_PALETTE, PNG_COLOR_GRAYSCALE:
-      if ( pngHeader.BitDepth = 1 ) or ( pngHeader.BitDepth = 4 ) or ( pngHeader.BitDepth = 8 ) Then CopyP := png_CopyNonInterlacedPalette;
-    PNG_COLOR_RGBALPHA:
-      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGBAlpha;
-    PNG_COLOR_GRAYSCALEALPHA:
-      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedGrayscaleAlpha;
-  else
-    log_Add( 'PNG - Unsupported ColorType' );
-    Result := FALSE;
-  end;
+  png_DecodeNonInterlaced( Data );
 
-  if Result Then
-    for i := pngHeader.Height downto 1 do
-      begin
-        if png_DecodeIDAT( pngMem, pngZStream, pngIDATEnd, @pngRowBuffer[ pngRowUsed ][ 0 ], pngRowsize + 1 ) < 0 Then
-          begin
-            log_Add( 'PNG - Failed to decode IDAT chunk' );
-            Result := FALSE;
-            break;
-          end;
-
-        png_FilterRow( pngRowBuffer[ pngRowUsed ], pngRowBuffer[ not pngRowUsed ], pngRowSize, pngOffset );
-
-        CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( Data ) + pngHeader.Width * 4 * ( i - 1 ) ), pngHeader.Width );
-
-        pngRowUsed := not pngRowUsed;
-      end;
+  inflateEnd( pngZStream );
+  FreeMem( pngZData, 65535 );
 
   FreeMem( pngRowBuffer[ FALSE ] );
   FreeMem( pngRowBuffer[ TRUE ] );
-
-  zlib_Free( pngZStream );
 end;
 
-procedure png_ReadtRNS( var pngMem : zglTMemory; Size : Integer );
+procedure png_ReadtRNS;
 begin
-  mem_Read( pngMem, pngPaletteAlpha, Size );
+  mem_Read( pngMem, pngPaletteAlpha, 1 );
   pngHastRNS := TRUE;
 end;
 
-procedure png_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
-  var
-    pngMem : zglTMemory;
-begin
-  mem_LoadFromFile( pngMem, FileName );
-  png_LoadFromMemory( pngMem, Data, W, H, Format );
-  mem_Free( pngMem );
-end;
-
-procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
+procedure png_Load( var Data : Pointer; var W, H : Word );
   label _exit;
-  var
-    pngMem          : zglTMemory;
-    pngSignature    : array[ 0..7 ] of AnsiChar;
-    pngHeader       : zglTPNGHeader;
-    pngHasIDAT      : Boolean;
-    pngChunk        : zglTPNGChunk;
-    pngHeaderOk     : Boolean;
 begin
   {$IFDEF ENDIAN_BIG}
   forceNoSwap := TRUE;
   {$ENDIF}
-  pngMem      := Memory;
-  pngHasIDAT  := FALSE;
-  pngHeaderOk := FALSE;
   mem_Read( pngMem, pngSignature[ 0 ], 8 );
 
   if pngSignature <> PNG_SIGNATURE Then
@@ -416,6 +528,8 @@ begin
     end;
 
   repeat
+    if pngFail Then goto _exit;
+
     mem_ReadSwap( pngMem, pngChunk.Size, 4 );
     mem_Read( pngMem, pngChunk.Name, 4 );
 
@@ -434,24 +548,18 @@ begin
     if pngChunk.Name = 'IDAT' Then pngHasIDAT := TRUE;
 
     if pngChunk.Name = 'IHDR' Then
-      pngHeaderOk := png_ReadIHDR( pngMem, pngHeader, Data, pngChunk.Size )
+      png_ReadIHDR( Data )
     else
       if pngChunk.Name = 'PLTE' Then
-        png_ReadPLTE( pngMem, pngChunk.Size )
+        png_ReadPLTE()
       else
         if pngChunk.Name = 'IDAT' Then
-          begin
-            if not png_ReadIDAT( pngMem, pngHeader, Data, pngChunk.Size ) Then
-              begin
-                FreeMem( Data );
-                Data := nil;
-                goto _exit;
-              end;
-          end else
-            if pngChunk.Name = 'tRNS' Then
-              png_ReadtRNS( pngMem, pngChunk.Size )
-            else
-              mem_Seek( pngMem, pngChunk.Size, FSM_CUR );
+          png_ReadIDAT( Data )
+        else
+          if pngChunk.Name = 'tRNS' Then
+            png_ReadtRNS()
+          else
+            mem_Seek( pngMem, pngChunk.Size, FSM_CUR );
 
     mem_Seek( pngMem, 4, FSM_CUR );
   until ( pngChunk.Name = 'IEND' );
@@ -462,24 +570,46 @@ begin
       goto _exit;
     end;
 
-  W      := pngHeader.Width;
-  H      := pngHeader.Height;
-  Format := TEX_FORMAT_RGBA;
+  W := pngHeader.Width;
+  H := pngHeader.Height;
 
 _exit:
   begin
+    if pngFail Then
+      begin
+        FreeMem( Data );
+        Data := nil;
+      end;
+
+    pngFail     := FALSE;
+    pngHasIDAT  := FALSE;
     pngHastRNS  := FALSE;
+    pngHeaderOk := FALSE;
+    pngRowUsed  := TRUE;
     {$IFDEF ENDIAN_BIG}
     forceNoSwap := FALSE;
     {$ENDIF}
   end;
 end;
 
-{$IFDEF USE_PNG}
+procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+begin
+  mem_LoadFromFile( pngMem, FileName );
+  png_Load( Data, W, H );
+  mem_Free( pngMem );
+end;
+
+procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
+begin
+  pngMem.Size     := Memory.Size;
+  pngMem.Memory   := Memory.Memory;
+  pngMem.Position := Memory.Position;
+  png_Load( Data, W, H );
+end;
+
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION,   @PNG_EXTENSION[ 1 ] );
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @PNG_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @png_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @png_LoadFromMemory );
-{$ENDIF}
 
 end.
