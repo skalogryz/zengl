@@ -84,7 +84,7 @@ type
   zglCiOSViewController = objcclass(UIViewController)
   public
     function shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean; override;
-    procedure willRotateToInterfaceOrientation_duration( toInterfaceOrientation : UIInterfaceOrientation; duration : NSTimeInterval ); override;
+    procedure didRotateFromInterfaceOrientation( fromInterfaceOrientation : UIInterfaceOrientation ); override;
   end;
 
 type
@@ -1298,9 +1298,9 @@ begin
     end;
 end;
 
-procedure zglCiOSViewController.willRotateToInterfaceOrientation_duration( toInterfaceOrientation : UIInterfaceOrientation; duration : NSTimeInterval );
+procedure zglCiOSViewController.didRotateFromInterfaceOrientation( fromInterfaceOrientation : UIInterfaceOrientation );
 begin
-  scrOrientation := toInterfaceOrientation;
+  scrOrientation := Self.interfaceOrientation;
 
   if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
     begin
@@ -1316,9 +1316,10 @@ begin
       scrDesktopH := scrCurrModeW;
     end;
 
+  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
+
   if appWork Then
     app_POrientation( scrOrientation );
-  scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 end;
 
 procedure zglCiOSWindow.SetTouchPos_id( touch : UITouch; id : Byte );

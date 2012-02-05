@@ -305,10 +305,6 @@ begin
 {$ENDIF}
 {$IFDEF iOS}
   // always fullscreen
-  wndX      := Round( UIScreen.mainScreen.bounds.origin.x );
-  wndY      := Round( UIScreen.mainScreen.bounds.origin.y );
-  wndWidth  := Round( UIScreen.mainScreen.bounds.size.width );
-  wndHeight := Round( UIScreen.mainScreen.bounds.size.height );
   wndFullScreen := TRUE;
 
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );

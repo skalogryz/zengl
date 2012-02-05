@@ -275,30 +275,34 @@ begin
 
   if UIDevice.currentDevice.systemVersion.floatValue >= 3.2 Then
     begin
-      scrDesktopW := Round( UIScreen.mainScreen.currentMode.size.width );
-      scrDesktopH := Round( UIScreen.mainScreen.currentMode.size.height );
+      scrCurrModeW := Round( UIScreen.mainScreen.currentMode.size.width );
+      scrCurrModeH := Round( UIScreen.mainScreen.currentMode.size.height );
     end else
       begin
-        scrDesktopW := Round( UIScreen.mainScreen.bounds.size.width );
-        scrDesktopH := Round( UIScreen.mainScreen.bounds.size.height );
+        scrCurrModeW := Round( UIScreen.mainScreen.bounds.size.width );
+        scrCurrModeH := Round( UIScreen.mainScreen.bounds.size.height );
       end;
 
-  // here some magic...
-  if scrDesktopW > scrDesktopH Then
+  scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
+  if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
     begin
-      scrCurrModeH := scrDesktopH;
-      scrDesktopH  := scrDesktopW;
-      scrDesktopW  := scrCurrModeH;
+      wndPortrait := TRUE;
+      scrDesktopW := scrCurrModeW;
+      scrDesktopH := scrCurrModeH;
+    end;
+  if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
+    begin
+      wndPortrait := FALSE;
+      scrDesktopW := scrCurrModeH;
+      scrDesktopH := scrCurrModeW;
     end;
 
-  scrCurrModeW   := scrDesktopW;
-  scrCurrModeH   := scrDesktopH;
-  oglWidth       := scrDesktopW;
-  oglHeight      := scrDesktopH;
-  oglTargetW     := scrDesktopW;
-  oglTargetH     := scrDesktopH;
-  scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
-  wndPortrait    := ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown );
+  scrDesktopW := scrDesktopW;
+  scrDesktopH := scrDesktopH;
+  oglWidth    := scrDesktopW;
+  oglHeight   := scrDesktopH;
+  oglTargetW  := scrDesktopW;
+  oglTargetH  := scrDesktopH;
 {$ENDIF}
   scrInitialized := TRUE;
 end;

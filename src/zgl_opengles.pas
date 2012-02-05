@@ -323,7 +323,7 @@ begin
     end;
 {$ENDIF}
 {$IFDEF iOS}
-  eglView := zglCiOSEAGLView.alloc().initWithFrame( wndHandle.bounds );
+  eglView := zglCiOSEAGLView.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   // iPhone Retina display
   if ( UIDevice.currentDevice.systemVersion.floatValue >= 3.2 ) and ( UIScreen.mainScreen.currentMode.size.width = 640 ) and ( UIScreen.mainScreen.currentMode.size.height = 960 ) Then
     begin
