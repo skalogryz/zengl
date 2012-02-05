@@ -4,9 +4,7 @@
 // EN: Do not use this example! :)
 program demo10;
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 {$DEFINE STATIC}
 
 uses
@@ -35,7 +33,7 @@ uses
   ;
 
 var
-  dirRes      : UTF8String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
+  dirRes      : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fntMain     : zglPFont;
   texBack     : zglPTexture;
   texParticle : zglPTexture;
@@ -63,7 +61,7 @@ begin
 
       if i < 3 Then
         begin
-          Type_             := EMITTER_POINT;
+          _type             := EMITTER_POINT;
           Params.Loop       := TRUE;
           Params.LifeTime   := 1000;
           Params.Emission   := 10;
@@ -75,7 +73,7 @@ begin
         end else
           if i < 6 Then
             begin
-              Type_             := EMITTER_POINT;
+              _type             := EMITTER_POINT;
               Params.Loop       := TRUE;
               Params.LifeTime   := 1000;
               Params.Emission   := 10;
@@ -86,7 +84,7 @@ begin
               ParParams.LifeTimeV := 0;
             end else
               begin
-                Type_            := EMITTER_LINE;
+                _type            := EMITTER_LINE;
                 Params.Loop      := TRUE;
                 Params.LifeTime  := 1000;
                 Params.Emission  := 100;
@@ -218,7 +216,13 @@ begin
       begin
         emitter2d_Init( @eDiamond );
 
-        Type_             := EMITTER_RECTANGLE;
+        for j := 0 to EMITTER_MAX_PARTICLES - 1 do
+          begin
+            _list[ j ]    := @_particle[ j ];
+            _list[ j ].ID := j;
+          end;
+
+        _type             := EMITTER_RECTANGLE;
         Params.Loop       := TRUE;
         Params.LifeTime   := 1000;
         Params.Emission   := 2;
@@ -299,7 +303,7 @@ begin
       begin
         emitter2d_Init( @eRain );
 
-        Type_             := EMITTER_LINE;
+        _type             := EMITTER_LINE;
         Params.Loop       := TRUE;
         Params.LifeTime   := 1000;
         Params.Emission   := 250;
@@ -439,6 +443,12 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '10 - Particles 2D' );
 

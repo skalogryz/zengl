@@ -24,11 +24,6 @@ unit zgl_types;
 
 interface
 
-{$IFNDEF FPC}
-type
-  QWORD = UInt64;
-{$ENDIF}
-
 type
   Ptr = {$IFDEF CPU64} QWORD {$ELSE} LongWord {$ENDIF};
 
@@ -42,7 +37,7 @@ type
 type
   zglTStringList = record
     Count : Integer;
-    Items : array of UTF8String;
+    Items : array of String;
 end;
 
 {***********************************************************************}
@@ -54,14 +49,11 @@ type
   cchar   = cint8;    pcchar   = ^cchar;
   cschar  = cint8;    pcschar  = ^cschar;
   cuchar  = cuint8;   pcuchar  = ^cuchar;
-  cint16  = smallint; pcint16  = ^cint16;
-  cuint16 = word;     pcuint16 = ^cuint16;
   cint32  = longint;  pcint32  = ^cint32;
   cuint32 = longword; pcuint32 = ^cuint32;
   cint    = cint32;   pcint    = ^cint;
   csint   = cint32;   pcsint   = ^csint;
   cuint   = cuint32;  pcuint   = ^cuint;
-  cuint64 = qword;    pcuint64 = ^cuint64;
   cint64  = int64;    pcint64  = ^cint64;
   cbool   = longbool; pcbool   = ^cbool;
 {$IFDEF CPUx86_64}
