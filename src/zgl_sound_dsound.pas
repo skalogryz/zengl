@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -47,7 +47,6 @@ const
 
   DSBSTATUS_PLAYING           = $00000001;
   DSBSTATUS_BUFFERLOST        = $00000002;
-  DSBSTATUS_LOOPING           = $00000004;
 
   DSBPLAY_LOOPING             = $00000001;
 
