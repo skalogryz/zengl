@@ -315,7 +315,6 @@ begin
   wndHandle := zglCiOSWindow.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   wndHandle.setMultipleTouchEnabled( TRUE );
   wndViewCtrl := zglCiOSViewController.alloc().init();
-  wndHandle.addSubview( wndViewCtrl.view );
 
   wnd_Select();
 {$ENDIF}
@@ -499,10 +498,6 @@ begin
     end;
 {$ENDIF}
 {$IFDEF iOS}
-  if wndPortrait and scrCanPortrait Then
-    eglView.setFrame( CGRectMake( 0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height ) )
-  else
-    eglView.setFrame( CGRectMake( 0, 0, UIScreen.mainScreen.bounds.size.height, UIScreen.mainScreen.bounds.size.width ) );
   eglContext.renderbufferStorage_fromDrawable( GL_RENDERBUFFER, eglSurface );
 {$ENDIF}
   oglWidth  := Width;

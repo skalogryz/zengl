@@ -339,7 +339,8 @@ begin
                                     u_GetNSString( 'kEAGLColorFormatRGBA8' ),
                                     u_GetNSString( 'kEAGLDrawablePropertyColorFormat' ),
                                     nil ) );
-  wndViewCtrl.view.addSubview( eglView );
+  wndViewCtrl.setView( eglView );
+  wndHandle.addSubview( eglView );
 
   eglContext := EAGLContext.alloc().initWithAPI( kEAGLRenderingAPIOpenGLES1 );
   EAGLContext.setCurrentContext( eglContext );

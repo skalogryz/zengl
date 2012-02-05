@@ -537,6 +537,9 @@ procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boo
   {$ENDIF}
 begin
 {$IFDEF iOS}
+  Width      := scrDesktopW;
+  Height     := scrDesktopH;
+  Refresh    := REFRESH_DEFAULT;
   FullScreen := TRUE;
   VSync      := TRUE;
 {$ENDIF}
