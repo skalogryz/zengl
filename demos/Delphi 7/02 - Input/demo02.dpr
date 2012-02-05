@@ -24,10 +24,10 @@ uses
   ;
 
 var
-  dirRes     : UTF8String = '../data/';
+  dirRes     : String = '../data/';
   fullScreen : Boolean;
   fnt        : zglPFont;
-  something  : UTF8String;
+  something  : String;
   lineAlpha  : Byte;
 
 procedure Init;
