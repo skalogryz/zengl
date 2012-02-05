@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *

@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -41,11 +41,7 @@ procedure pr2d_TriList( Texture : zglPTexture; TriList, TexCoords : zglPPoints2D
 
 implementation
 uses
-  {$IFNDEF USE_GLES}
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d_all,
   zgl_render_2d;
 
 procedure pr2d_Pixel( X, Y : Single; Color : LongWord; Alpha : Byte = 255 );
@@ -73,9 +69,7 @@ begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
           glEnable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
           glEnable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
         end;
       glEnable( GL_BLEND );
 
@@ -102,9 +96,7 @@ begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
           glDisable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
           glDisable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
         end;
       glDisable( GL_BLEND );
     end;
@@ -112,17 +104,10 @@ end;
 
 procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
-  if FX and PR2D_FILL > 0 Then
-    begin
+ if FX and PR2D_FILL > 0 Then
+   begin
       if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
         begin
-          if FX and PR2D_SMOOTH > 0 Then
-            begin
-              glEnable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
-              glEnable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
-            end;
           glEnable( GL_BLEND );
           glBegin( GL_TRIANGLES );
         end;
@@ -160,14 +145,6 @@ begin
       if not b2dStarted Then
         begin
           glEnd();
-
-          if FX and PR2D_SMOOTH > 0 Then
-            begin
-              glDisable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
-              glDisable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
-            end;
           glDisable( GL_BLEND );
         end;
    end else
@@ -179,14 +156,6 @@ begin
 
       if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
-          if FX and PR2D_SMOOTH > 0 Then
-            begin
-              glEnable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
-              glEnable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
-            end;
-
           glEnable( GL_BLEND );
           glBegin( GL_LINES );
         end;
@@ -228,13 +197,6 @@ begin
 
       if not b2dStarted Then
         begin
-          if FX and PR2D_SMOOTH > 0 Then
-            begin
-              glDisable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
-              glDisable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
-            end;
           glEnd();
           glDisable( GL_BLEND );
         end;
@@ -258,9 +220,7 @@ begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
               glEnable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
               glEnable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
             end;
           glEnable( GL_BLEND );
 
@@ -281,9 +241,7 @@ begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
               glDisable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
               glDisable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
             end;
           glDisable( GL_BLEND );
         end;
@@ -294,9 +252,7 @@ begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
                 glEnable( GL_LINE_SMOOTH    );
-                {$IFNDEF USE_GLES}
                 glEnable( GL_POLYGON_SMOOTH );
-                {$ENDIF}
               end;
             glEnable( GL_BLEND );
 
@@ -318,9 +274,7 @@ begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
                 glDisable( GL_LINE_SMOOTH    );
-                {$IFNDEF USE_GLES}
                 glDisable( GL_POLYGON_SMOOTH );
-                {$ENDIF}
               end;
             glDisable( GL_BLEND );
           end;
@@ -344,9 +298,7 @@ begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
               glEnable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
               glEnable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
             end;
           glEnable( GL_BLEND );
 
@@ -367,9 +319,7 @@ begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
               glDisable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
               glDisable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
             end;
           glDisable( GL_BLEND );
         end;
@@ -380,9 +330,7 @@ begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
                 glEnable( GL_LINE_SMOOTH    );
-                {$IFNDEF USE_GLES}
                 glEnable( GL_POLYGON_SMOOTH );
-                {$ENDIF}
               end;
             glEnable( GL_BLEND );
 
@@ -404,9 +352,7 @@ begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
                 glDisable( GL_LINE_SMOOTH    );
-                {$IFNDEF USE_GLES}
                 glDisable( GL_POLYGON_SMOOTH );
-                {$ENDIF}
               end;
             glDisable( GL_BLEND );
           end;
@@ -428,9 +374,7 @@ begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
           glEnable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
           glEnable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
         end;
       if ( FX and FX_BLEND > 0 ) or ( mode = GL_LINES ) Then
         glEnable( GL_BLEND )
@@ -496,9 +440,7 @@ begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
           glDisable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
           glDisable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
         end;
       if mode = GL_TRIANGLES Then
         glDisable( GL_TEXTURE_2D );

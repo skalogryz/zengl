@@ -1,7 +1,7 @@
 {
  *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
- *  site: http://zengl.org
+ *  site: http://andru-kun.inf.ua
  *
  *  This file is part of ZenGL.
  *
@@ -26,22 +26,13 @@ interface
 
 uses
   zgl_types,
+  zgl_sound,
+  zgl_file,
   zgl_memory;
 
 const
-  WAV_EXTENSION : UTF8String = 'WAV';
+  WAV_EXTENSION : array[ 0..3 ] of Char = ( 'W', 'A', 'V', #0 );
 
-procedure wav_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
-
-implementation
-uses
-  zgl_main,
-  zgl_file,
-  zgl_sound,
-  zgl_log;
-
-const
   WAV_STANDARD  = $0001;
   WAV_IMA_ADPCM = $0011;
   WAV_MP3       = $0055;
@@ -62,23 +53,24 @@ type
     BitsPerSample    : Word;
  end;
 
-procedure wav_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-  var
-    wavMemory : zglTMemory;
-begin
-  mem_LoadFromFile( wavMemory, FileName );
-  wav_LoadFromMemory( wavMemory, Data, Size, Format, Frequency );
-  mem_Free( wavMemory );
-end;
-
+procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
 procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+
+implementation
+uses
+  zgl_main,
+  zgl_log;
+
+var
+  wavMemory : zglTMemory;
+  wavHeader : zglTWAVHeader;
+
+procedure wav_Load( var Data : Pointer; var Size, Format, Frequency : LongWord );
   var
-    wavMemory : zglTMemory;
-    wavHeader : zglTWAVHeader;
     chunkName : array[ 0..3 ] of AnsiChar;
     skip      : Integer;
 begin
-  wavMemory := Memory;
   mem_Read( wavMemory, wavHeader, SizeOf( zglTWAVHeader ) );
 
   Frequency := wavHeader.SampleRate;
@@ -116,11 +108,24 @@ begin
   until wavMemory.Position >= wavMemory.Size;
 end;
 
-{$IFDEF USE_WAV}
+procedure wav_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+begin
+  mem_LoadFromFile( wavMemory, FileName );
+  wav_Load( Data, Size, Format, Frequency );
+  mem_Free( wavMemory );
+end;
+
+procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+begin
+  wavMemory.Size     := Memory.Size;
+  wavMemory.Memory   := Memory.Memory;
+  wavMemory.Position := Memory.Position;
+  wav_Load( Data, Size, Format, Frequency );
+end;
+
 initialization
-  zgl_Reg( SND_FORMAT_EXTENSION,   @WAV_EXTENSION[ 1 ] );
+  zgl_Reg( SND_FORMAT_EXTENSION,   @WAV_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @wav_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @wav_LoadFromMemory );
-{$ENDIF}
 
 end.
