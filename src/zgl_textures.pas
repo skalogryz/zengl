@@ -69,12 +69,10 @@ type
   zglTTexture = record
     ID            : LongWord;
     Width, Height : Word;
+    Format        : Word;
     U, V          : Single;
-    FramesX       : Word;
-    FramesY       : Word;
     FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
-    Format        : Word;
 
     prev, next    : zglPTexture;
 end;
@@ -107,7 +105,7 @@ function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : Long
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
-procedure tex_CalcTexCoords( var Texture : zglTTexture );
+procedure tex_CalcTexCoords( var Texture : zglTTexture; FramesX : Integer = 1; FramesY : Integer = 1 );
 
 procedure tex_Filter( Texture : zglPTexture; Flags : LongWord );
 procedure tex_SetAnisotropy( Level : Byte );
@@ -175,12 +173,10 @@ begin
     Result := Result.next;
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTTexture ) );
-  Result.next.U       := 1;
-  Result.next.V       := 1;
-  Result.next.FramesX := 1;
-  Result.next.FramesY := 1;
-  Result.next.prev    := Result;
-  Result.next.next    := nil;
+  Result.next.U    := 1;
+  Result.next.V    := 1;
+  Result.next.prev := Result;
+  Result.next.next := nil;
   Result := Result.next;
   INC( managerTexture.Count.Items );
 end;
@@ -292,8 +288,8 @@ begin
   Result        := tex_Add();
   Result.Width  := Width;
   Result.Height := Height;
-  Result.Flags  := Flags;
   Result.Format := TEX_FORMAT_RGBA;
+  Result.Flags  := Flags;
   tex_CalcFlags( Result^, pData );
   tex_CalcTexCoords( Result^ );
   if not tex_Create( Result^, pData ) Then
@@ -352,8 +348,8 @@ begin
   Result        := tex_Add();
   Result.Width  := w;
   Result.Height := h;
-  Result.Flags  := Flags;
   Result.Format := format;
+  Result.Flags  := Flags;
   if Result.Format = TEX_FORMAT_RGBA Then
     begin
       if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
@@ -417,8 +413,8 @@ begin
   Result        := tex_Add();
   Result.Width  := w;
   Result.Height := h;
-  Result.Flags  := Flags;
   Result.Format := format;
+  Result.Flags  := Flags;
   if Result.Format = TEX_FORMAT_RGBA Then
     begin
       if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
@@ -452,13 +448,7 @@ begin
       res.FrameHeight := FrameHeight;
       res_AddToQueue( RES_TEXTURE_FRAMESIZE, TRUE, @res );
     end else
-      begin
-        Texture.FramesX := Round( Texture.Width ) div FrameWidth;
-        Texture.FramesY := Round( Texture.Height ) div FrameHeight;
-        if Texture.FramesX = 0 Then Texture.FramesX := 1;
-        if Texture.FramesY = 0 Then Texture.FramesY := 1;
-        tex_CalcTexCoords( Texture^ );
-      end;
+      tex_CalcTexCoords( Texture^, Round( Texture.Width ) div FrameWidth, Round( Texture.Height ) div FrameHeight );
 end;
 
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
@@ -504,14 +494,17 @@ begin
       end;
 end;
 
-procedure tex_CalcTexCoords( var Texture : zglTTexture );
+procedure tex_CalcTexCoords( var Texture : zglTTexture; FramesX : Integer = 1; FramesY : Integer = 1 );
   var
     i : Integer;
     tX, tY, u, v : Single;
 begin
-  SetLength( Texture.FramesCoord, Texture.FramesX * Texture.FramesY + 1 );
-  u := Texture.U / Texture.FramesX;
-  v := Texture.V / Texture.FramesY;
+  if FramesX <= 0 Then FramesX := 1;
+  if FramesY <= 0 Then FramesY := 1;
+
+  SetLength( Texture.FramesCoord, FramesX * FramesY + 1 );
+  u := Texture.U / FramesX;
+  v := Texture.V / FramesY;
 
   Texture.FramesCoord[ 0, 0 ].X := 0;
   Texture.FramesCoord[ 0, 0 ].Y := Texture.V;
@@ -521,14 +514,14 @@ begin
   Texture.FramesCoord[ 0, 2 ].Y := 0;
   Texture.FramesCoord[ 0, 3 ].X := 0;
   Texture.FramesCoord[ 0, 3 ].Y := 0;
-  for i := 1 to Texture.FramesX * Texture.FramesY do
+  for i := 1 to FramesX * FramesY do
     begin
-      tY := i div Texture.FramesX;
-      tX := i - tY * Texture.FramesX;
-      tY := Texture.FramesY - tY;
+      tY := i div FramesX;
+      tX := i - tY * FramesX;
+      tY := FramesY - tY;
       if tX = 0 Then
         begin
-          tX := Texture.FramesX;
+          tX := FramesX;
           tY := tY + 1;
         end;
       tX := tX * u;

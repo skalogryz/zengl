@@ -99,8 +99,8 @@ begin
   new.Layer   := Layer;
   new.X       := 0;
   new.Y       := 0;
-  new.W       := Texture.Width div Texture.FramesX;
-  new.H       := Texture.Height div Texture.FramesY;
+  new.W       := Round( Texture.FramesCoord[ 1, 1 ].X * Texture.Width );
+  new.H       := Round( Texture.FramesCoord[ 1, 2 ].Y * Texture.Height );
   new.Angle   := 0;
   new.Frame   := 1;
   new.Alpha   := 255;

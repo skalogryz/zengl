@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.02.01';
+  cs_Date     = '2012.02.07';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -129,11 +129,10 @@ const
 
   MANAGER_TIMER           = 800;
   MANAGER_TEXTURE         = 801;
-  MANAGER_ATLAS           = 802;
-  MANAGER_FONT            = 803;
-  MANAGER_RTARGET         = 804;
-  MANAGER_SOUND           = 805;
-  MANAGER_EMITTER2D       = 806;
+  MANAGER_FONT            = 802;
+  MANAGER_RTARGET         = 803;
+  MANAGER_SOUND           = 804;
+  MANAGER_EMITTER2D       = 805;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR    = $000001;
@@ -197,9 +196,6 @@ uses
   zgl_render_2d,
   zgl_resources,
   zgl_textures,
-  {$IFDEF USE_TEXTURE_ATLAS}
-  zgl_texture_atlas,
-  {$ENDIF}
   zgl_render_target,
   zgl_font,
   {$IFDEF USE_SENGINE}
@@ -328,16 +324,6 @@ begin
       p := managerRTarget.First.next;
       rtarget_Del( zglPRenderTarget( p ) );
     end;
-
-  {$IFDEF USE_TEXTURE_ATLAS}
-  if managerAtlas.Count <> 0 Then
-    log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
-  while managerAtlas.Count > 0 do
-    begin
-      p := managerAtlas.First.next;
-      atlas_Del( zglPAtlas( p ) );
-    end;
-  {$ENDIF}
 
   managerZeroTexture := nil;
   if managerTexture.Count.Items <> 0 Then
@@ -611,9 +597,6 @@ begin
     // Managers
     MANAGER_TIMER:     Result := Ptr( @managerTimer );
     MANAGER_TEXTURE:   Result := Ptr( @managerTexture );
-    {$IFDEF USE_TEXTURE_ATLAS}
-    MANAGER_ATLAS:     Result := Ptr( @managerAtlas );
-    {$ENDIF}
     MANAGER_FONT:      Result := Ptr( @managerFont );
     MANAGER_RTARGET:   Result := Ptr( @managerRTarget );
     {$IFDEF USE_SOUND}

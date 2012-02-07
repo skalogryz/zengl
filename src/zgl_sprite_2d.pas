@@ -505,7 +505,7 @@ begin
         end;
 
   // Текстурные координаты
-  fc := Texture.FramesX * Texture.FramesY;
+  fc := length( Texture.FramesCoord );
   if Frame > fc Then
     DEC( Frame, ( ( Frame - 1 ) div fc ) * fc )
   else
@@ -885,8 +885,10 @@ end;
 procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     w, h, tX, tY, tU, tV, u, v   : Single;
-    i, j, aI, aJ, bI, bJ, tI, tJ : Integer;
+    i, j, aI, aJ, bI, bJ : Integer;
     s, c, x1, y1, x2, y2, x3, y3, x4, y4 : Single;
+    tc  : zglPTextureCoord;
+    tci : zglPTexCoordIndex;
 begin
   if ( not Assigned( Texture ) ) or ( not Assigned( Tiles ) ) Then exit;
 
@@ -998,10 +1000,7 @@ begin
         glColor4ubv( @fx2dColorDef[ 0 ] );
       end;
 
-  u := Texture.U / Texture.FramesX;
-  v := Texture.V / Texture.FramesY;
-  if FX and FX2D_FLIPX > 0 Then tU := u else tU := 0;
-  if FX and FX2D_FLIPY > 0 Then tV := v else tV := 0;
+  tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
 
   w := Tiles.Size.W;
   h := Tiles.Size.H;
@@ -1009,27 +1008,18 @@ begin
     for j := aJ to bJ do
       begin
         // Текстурные координаты
-        tY := Tiles.Tiles[ i, j ] div Texture.FramesX;
-        tX := Tiles.Tiles[ i, j ] - tY * Texture.FramesX;
-        tY := Texture.FramesY - tY;
-        if tX = 0 Then
-          begin
-            tX := Texture.FramesX;
-            tY := tY + 1;
-          end;
-        tX := tX * u;
-        tY := tY * v;
+        tc := @Texture.FramesCoord[ Tiles.Tiles[ i, j ] ];
 
-        glTexCoord2f( tX - u + tU, tY - tV );
+        glTexCoord2fv( @tc[ tci[ 0 ] ] );
         glVertex2f( x + i * w, y + j * h );
 
-        glTexCoord2f( tX - tU, tY - tV );
+        glTexCoord2fv( @tc[ tci[ 1 ] ] );
         glVertex2f( x + i * w + w, y + j * h );
 
-        glTexCoord2f( tX - tU, tY - v + tV );
+        glTexCoord2fv( @tc[ tci[ 2 ] ] );
         glVertex2f( x + i * w + w, y + j * h + h );
 
-        glTexCoord2f( tX - u + tU, tY - v + tV );
+        glTexCoord2fv( @tc[ tci[ 3 ] ] );
         glVertex2f( x + i * w, y + j * h + h );
       end;
 

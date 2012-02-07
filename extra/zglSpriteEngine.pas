@@ -277,8 +277,8 @@ begin
   Y       := 0;
   if Assigned( Texture ) Then
     begin
-      W   := Texture.Width div Texture.FramesX;
-      H   := Texture.Height div Texture.FramesY;
+      W   := Round( Texture.FramesCoord[ 1, 1 ].X * Texture.Width );
+      H   := Round( Texture.FramesCoord[ 1, 2 ].Y * Texture.Height );
     end else
       begin
         W := 0;

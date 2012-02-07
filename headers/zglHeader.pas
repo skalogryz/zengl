@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.02.01           }
+{ date:     2012.02.07           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -173,11 +173,10 @@ const
 
   MANAGER_TIMER           = 800; // zglPTimerManager
   MANAGER_TEXTURE         = 801; // zglPTextureManager
-  MANAGER_ATLAS           = 802; // zglPAtlasManager
-  MANAGER_FONT            = 803; // zglPFontManager
-  MANAGER_RTARGET         = 804; // zglPRenderTargetManager
-  MANAGER_SOUND           = 805; // zglPSoundManager
-  MANAGER_EMITTER2D       = 806; // zglPEmitter2DManager
+  MANAGER_FONT            = 802; // zglPFontManager
+  MANAGER_RTARGET         = 803; // zglPRenderTargetManager
+  MANAGER_SOUND           = 804; // zglPSoundManager
+  MANAGER_EMITTER2D       = 805; // zglPEmitter2DManager
 
 var
   zgl_Get         : function( What : LongWord ) : Ptr;
@@ -546,12 +545,10 @@ type
   zglTTexture = record
     ID            : LongWord;
     Width, Height : Word;
+    Format        : Word;
     U, V          : Single;
-    FramesX       : Word;
-    FramesY       : Word;
     FramesCoord   : array of zglTTextureCoord;
     Flags         : LongWord;
-    Format        : Word;
 
     prev, next    : zglPTexture;
 end;
@@ -616,43 +613,6 @@ var
   tex_GetData        : procedure( Texture : zglPTexture; var pData : Pointer );
   tex_Filter         : procedure( Texture : zglPTexture; Flags : LongWord );
   tex_SetAnisotropy  : procedure( Level : Byte );
-
-// ATLASES
-type
-  zglPAtlasNode = ^zglTAtlasNode;
-  zglTAtlasNode = record
-    Leaf     : Boolean;
-    Texture  : zglPTexture;
-    TexCoord : zglTTextureCoord;
-    FramesX  : Word;
-    FramesY  : Word;
-    Rect     : zglTRect;
-    child    : array[ 0..1 ] of zglPAtlasNode;
-  end;
-
-type
-  zglPAtlas = ^zglTAtlas;
-  zglTAtlas = record
-    root       : zglTAtlasNode;
-    Texture    : zglPTexture;
-    Full       : Boolean;
-    prev, next : zglPAtlas;
-  end;
-
-type
-  zglPAtlasManager = ^zglTAtlasManager;
-  zglTAtlasManager = record
-    Count : Integer;
-    First : zglTAtlas;
-end;
-
-var
-  atlas_Add               : function( Width, Height : Word; Flags : LongWord ) : zglPAtlas;
-  atlas_Del               : procedure( var Atlas : zglPAtlas );
-  atlas_GetFrameCoord     : procedure( Node : zglPAtlasNode; Frame : Word; var TexCoord : array of zglTPoint2D );
-  atlas_InsertFromTexture : function( Atlas : zglPAtlas; Texture : zglPTexture ) : zglPAtlasNode;
-  atlas_InsertFromFile    : function( Atlas : zglPAtlas; const FileName : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
-  atlas_InsertFromMemory  : function( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
 
 // RENDER TARGETS
 type
@@ -1611,13 +1571,6 @@ begin
       tex_GetData := dlsym( zglLib, 'tex_GetData' );
       tex_Filter := dlsym( zglLib, 'tex_Filter' );
       tex_SetAnisotropy := dlsym( zglLib, 'tex_SetAnisotropy' );
-
-      atlas_Add := dlsym( zglLib, 'atlas_Add' );
-      atlas_Del := dlsym( zglLib, 'atlas_Del' );
-      atlas_GetFrameCoord := dlsym( zglLib, 'atlas_GetFrameCoord' );
-      atlas_InsertFromTexture := dlsym( zglLib, 'atlas_InsertFromTexture' );
-      atlas_InsertFromFile := dlsym( zglLib, 'atlas_InsertFromFile' );
-      atlas_InsertFromMemory := dlsym( zglLib, 'atlas_InsertFromMemory' );
 
       Set2DMode := dlsym( zglLib, 'Set2DMode' );
       Set3DMode := dlsym( zglLib, 'Set3DMode' );

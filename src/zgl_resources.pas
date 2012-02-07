@@ -546,13 +546,7 @@ begin
                 with item^, zglPTextureFrameSizeResource( Resource )^ do
                   begin
                     if Assigned( Texture ) Then
-                      begin
-                        Texture.FramesX := Round( Texture.Width ) div FrameWidth;
-                        Texture.FramesY := Round( Texture.Height ) div FrameHeight;
-                        if Texture.FramesX = 0 Then Texture.FramesX := 1;
-                        if Texture.FramesY = 0 Then Texture.FramesY := 1;
-                        tex_CalcTexCoords( Texture^ );
-                      end;
+                      tex_CalcTexCoords( Texture^, Round( Texture.Width ) div FrameWidth, Round( Texture.Height ) div FrameHeight );
 
                     FreeMem( Resource );
                     Resource := nil;

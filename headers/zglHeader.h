@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2012.02.01           */
+/* date:     2012.02.07           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -156,11 +156,10 @@ ZGLEXTERN void ( *zgl_Reg )( uint What, void *UserData );
 
 #define MANAGER_TIMER           800 // zglPTimerManager
 #define MANAGER_TEXTURE         801 // zglPTextureManager
-#define MANAGER_ATLAS           802 // zglPAtlasManager
-#define MANAGER_FONT            803 // zglPFontManager
-#define MANAGER_RTARGET         804 // zglPRenderTargetManager
-#define MANAGER_SOUND           805 // zglPSoundManager
-#define MANAGER_EMITTER2D       806 // zglPEmitter2DManager
+#define MANAGER_FONT            802 // zglPFontManager
+#define MANAGER_RTARGET         803 // zglPRenderTargetManager
+#define MANAGER_SOUND           804 // zglPSoundManager
+#define MANAGER_EMITTER2D       805 // zglPEmitter2DManager
 
 ZGLEXTERN size_t ( *zgl_Get )( uint What );
 ZGLEXTERN void ( *zgl_GetMem )( void **Mem, uint Size );
@@ -573,11 +572,9 @@ typedef struct
   ushort            Height;
   float             U;
   float             V;
-  ushort            FramesX;
-  ushort            FramesY;
+  ushort            Format;
   zglTTextureCoord *FramesCoord;
   uint              Flags;
-  ushort            Format;
 
   void*             prev;
   void*             next;
@@ -1434,14 +1431,7 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( tex_GetData, zglLib, "tex_GetData" );
     zglGetAddress( tex_Filter, zglLib, "tex_Filter" );
     zglGetAddress( tex_SetAnisotropy, zglLib, "tex_SetAnisotropy" );
-/*
-    zglGetAddress( atlas_Add, zglLib, "atlas_Add" );
-    zglGetAddress( atlas_Del, zglLib, "atlas_Del" );
-    zglGetAddress( atlas_GetFrameCoord, zglLib, "atlas_GetFrameCoord" );
-    zglGetAddress( atlas_InsertFromTexture, zglLib, "atlas_InsertFromTexture" );
-    zglGetAddress( atlas_InsertFromFile, zglLib, "atlas_InsertFromFile" );
-    zglGetAddress( atlas_InsertFromMemory, zglLib, "atlas_InsertFromMemory" );
-*/
+
     zglGetAddress( Set2DMode, zglLib, "Set2DMode" );
 #ifdef __CPP__
     zglGetAddress( __Set3DMode, zglLib, "Set3DMode" );
