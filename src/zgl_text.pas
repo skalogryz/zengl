@@ -64,7 +64,7 @@ uses
   zgl_opengles,
   zgl_opengles_all,
   {$ENDIF}
-  zgl_opengl_simple,
+  zgl_render,
   zgl_render_2d,
   zgl_fx,
   zgl_utils;

@@ -174,7 +174,7 @@ uses
   zgl_opengles,
   zgl_opengles_all,
   {$ENDIF}
-  zgl_opengl_simple,
+  zgl_render,
   zgl_render_2d,
   zgl_camera_2d,
   zgl_log,

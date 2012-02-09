@@ -28,7 +28,6 @@ uses
 
   zgl_screen,
   zgl_window,
-  zgl_opengl_simple,
 
   zgl_timers,
 
@@ -66,9 +65,11 @@ uses
   {$ENDIF}
   {$ENDIF}
 
+  zgl_render,
+  zgl_render_2d,
+
   zgl_fx,
   zgl_camera_2d,
-  zgl_render_2d,
 
   zgl_font,
   zgl_text,

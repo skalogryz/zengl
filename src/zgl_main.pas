@@ -182,7 +182,6 @@ uses
   zgl_opengles,
   zgl_opengles_all,
   {$ENDIF}
-  zgl_opengl_simple,
   {$IF DEFINED(LINUX) or DEFINED(WINDOWS) or DEFINED(iOS)}
   zgl_file,
   {$IFEND}
@@ -193,6 +192,7 @@ uses
   {$ENDIF}
   zgl_mouse,
   zgl_keyboard,
+  zgl_render,
   zgl_render_2d,
   zgl_resources,
   zgl_textures,

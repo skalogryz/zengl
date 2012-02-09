@@ -177,7 +177,7 @@ uses
   {$ELSE}
   zgl_opengles,
   {$ENDIF}
-  zgl_opengl_simple,
+  zgl_render,
   {$IF DEFINED(iOS) or DEFINED(ANDROID)}
   zgl_touch,
   {$IFEND}

@@ -110,9 +110,9 @@
         <UnitName Value="zgl_opengl_all"/>
       </Unit15>
       <Unit16>
-        <Filename Value="../zgl_opengl_simple.pas"/>
+        <Filename Value="../zgl_render.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengl_simple"/>
+        <UnitName Value="zgl_render"/>
       </Unit16>
       <Unit17>
         <Filename Value="../zgl_primitives_2d.pas"/>

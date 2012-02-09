@@ -125,7 +125,7 @@ uses
   zgl_main,
   zgl_window,
   zgl_screen,
-  zgl_opengl_simple,
+  zgl_render,
   zgl_render_2d,
   zgl_sprite_2d,
   zgl_log,
