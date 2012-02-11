@@ -53,16 +53,6 @@ function  gl_Initialize : Boolean;
 procedure gl_ResetState;
 procedure gl_LoadEx;
 
-{$IFDEF iOS}
-type
-  // dummy class, which does almost nothing... :)
-  zglCiOSEAGLView = objcclass(UIView)
-  public
-    class function layerClass: Pobjc_class; override;
-  end;
-{$ENDIF}
-
-
 var
   oglColor      : Byte;
   oglzDepth     : Byte;
@@ -120,7 +110,7 @@ var
   {$IFDEF iOS}
   eglContext      : EAGLContext;
   eglSurface      : CAEAGLLayer;
-  eglView         : zglCiOSEAGLView;
+  eglView         : UIView;
   eglFramebuffer  : GLuint;
   eglRenderbuffer : GLuint;
   {$ENDIF}
@@ -324,6 +314,7 @@ begin
 {$ENDIF}
 {$IFDEF iOS}
   eglView := zglCiOSEAGLView.alloc().initWithFrame( UIScreen.mainScreen.bounds );
+  eglView.setMultipleTouchEnabled( TRUE );
   // iPhone Retina display
   if ( UIDevice.currentDevice.systemVersion.floatValue >= 3.2 ) and ( UIScreen.mainScreen.currentMode.size.width = 640 ) and ( UIScreen.mainScreen.currentMode.size.height = 960 ) Then
     begin
@@ -482,12 +473,5 @@ begin
 {$IFEND}
   log_Add( 'Support WaitVSync: ' + u_BoolToStr( oglCanVSync ) );
 end;
-
-{$IFDEF iOS}
-class function zglCiOSEAGLView.layerClass : Pobjc_class;
-begin
-  Result := CAEAGLLayer.classClass;
-end;
-{$ENDIF}
 
 end.

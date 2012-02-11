@@ -309,7 +309,6 @@ begin
 
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
   wndHandle := zglCiOSWindow.alloc().initWithFrame( UIScreen.mainScreen.bounds );
-  wndHandle.setMultipleTouchEnabled( TRUE );
   wndViewCtrl := zglCiOSViewController.alloc().init();
 
   wnd_Select();

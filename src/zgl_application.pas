@@ -88,12 +88,12 @@ type
   end;
 
 type
-  zglCiOSWindow = objcclass(UIWindow)
+  zglCiOSEAGLView = objcclass(UIView)
   protected
-    procedure SetTouchPos_id( touch : UITouch; id : Byte ); message 'SetTouchPos:id:';
-    function  GetTouchID( touch : UITouch ) : Byte; message 'GetTouchID:';
-    procedure UpdateTouches( touches : NSSet ); message 'UpdateTouches:';
+    procedure UpdateTouch( ID : Integer ); message 'UpdateTouch:';
   public
+    class function layerClass: Pobjc_class; override;
+
     procedure touchesBegan_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesMoved_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesEnded_withEvent( touches : NSSet; event : UIevent ); override;
@@ -1322,164 +1322,109 @@ begin
     app_POrientation( scrOrientation );
 end;
 
-procedure zglCiOSWindow.SetTouchPos_id( touch : UITouch; id : Byte );
-  var
-    point : CGPoint;
+class function zglCiOSEAGLView.layerClass : Pobjc_class;
 begin
-  point   := touch.locationInView( Window );
-  point.x := point.x * eglView.contentScaleFactor();
-  point.y := point.y * eglView.contentScaleFactor();
+  Result := CAEAGLLayer.classClass;
+end;
 
-  case scrAngle of
-    0:
-      begin
-        touchX[ id ] := Round( point.x );
-        touchY[ id ] := Round( point.y );
-      end;
-    180:
-      begin
-        touchX[ id ] := Round( wndWidth - point.x );
-        touchY[ id ] := Round( wndHeight - point.y );
-      end;
-    270:
-      begin
-        touchX[ id ] := Round( point.y );
-        touchY[ id ] := Round( wndHeight - point.x );
-      end;
-    90:
-      begin
-        touchX[ id ] := Round( wndWidth - point.y );
-        touchY[ id ] := Round( point.x );
-      end;
+procedure zglCiOSEAGLView.UpdateTouch( ID : Integer );
+begin
+  if ( not touchDown[ ID ] ) and ( not touchTap[ ID ] ) and ( touchCanTap[ ID ] ) Then
+    begin
+      touchTap[ ID ]    := TRUE;
+      touchCanTap[ ID ] := FALSE;
+
+      if Assigned( touch_PPress ) Then
+        touch_PPress( ID );
     end;
 
-  touchX[ id ] := Round( ( touchX[ id ] - scrAddCX ) / scrResCX );
-  touchY[ id ] := Round( ( touchY[ id ] - scrAddCY ) / scrResCY );
-  mouseX := touchX[ id ];
-  mouseY := touchY[ id ];
-end;
+  if ( touchX[ ID ] = -1 ) and ( touchY[ ID ] = -1 ) Then
+    begin
+      touchDown[ ID ]   := FALSE;
+      touchTap[ ID ]    := FALSE;
+      touchCanTap[ ID ] := TRUE;
 
-function zglCiOSWindow.GetTouchID( touch : UITouch ) : Byte;
-  var
-    i : Integer;
-begin
-  for i := 0 to touchCount - 1 do
-    if touchList[ i ] = Pointer( touch ) Then
+      if Assigned( touch_PRelease ) Then
+        touch_PRelease( ID );
+    end else
       begin
-        Result := i;
-        exit;
-      end;
+        touchDown[ ID ] := TRUE;
 
-  for i := 0 to 255 do
-    if not Assigned( touchList[ i ] ) Then
-      begin
-        INC( touchCount );
-        Result := i;
-        exit;
+        if ( not touchTap[ ID ] ) and Assigned( touch_PMove ) Then
+          touch_PMove( ID, touchX[ ID ], touchY[ ID ] );
       end;
 end;
 
-procedure zglCiOSWindow.UpdateTouches( touches : NSSet );
+procedure zglCiOSEAGLView.touchesBegan_withEvent( touches : NSSet; event : UIevent );
   var
     i, j  : Integer;
-    id    : Byte;
     touch : UITouch;
 begin
-  for i := 0 to touches.count - 1 do
+  for i := 0 to MAX_TOUCH - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
-      id    := GetTouchID( touch );
-      SetTouchPos_id( touch, id );
-
-      case touch.phase of
-        UITouchPhaseBegan:
+      for j := 0 to MAX_TOUCH - 1 do
+        if ( touchX[ j ] = -1 ) and ( touchY[ j ] = -1 ) Then
           begin
-            touchList[ id ] := touch;
-            touchDown[ id ] := TRUE;
-            if touchCanTap[ id ] Then
-              begin
-                touchTap   [ id ] := TRUE;
-                touchCanTap[ id ] := FALSE;
-                if touch.tapCount = 2 Then
-                  touchDblTap[ id ] := TRUE;
-              end;
-
-            if Assigned( touch_PPress ) Then
-              touch_PPress( id );
+            touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
+            touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+            UpdateTouch( j );
+            break;
           end;
-        UITouchPhaseMoved:
-          begin
-            touchList[ id ] := touch;
-            touchDown[ id ] := TRUE;
-            if touchCanTap[ id ] Then
-              begin
-                touchTap   [ id ] := TRUE;
-                touchCanTap[ id ] := FALSE;
-                if touch.tapCount = 2 Then
-                  touchDblTap[ id ] := TRUE;
-              end;
-
-            if Assigned( touch_PMove ) Then
-              touch_PMove( id, touchX[ id ], touchY[ id ] );
-          end;
-        UITouchPhaseEnded, UITouchPhaseCancelled:
-          begin
-            touchList[ id ]   := nil;
-            touchDown[ id ]   := FALSE;
-            touchUp  [ id ]   := TRUE;
-            touchCanTap[ id ] := FALSE;
-
-            if Assigned( touch_PRelease ) Then
-              touch_PRelease( id );
-          end;
-      end;
     end;
 end;
 
-procedure zglCiOSWindow.touchesBegan_withEvent( touches : NSSet; event : UIevent );
-begin
-  UpdateTouches( event.touchesForWindow( Self ) );
-
-  // mouse emulation
-  mouseDown[ M_BLEFT ] := TRUE;
-  if mouseCanClick[ M_BLEFT ] Then
-    begin
-      mouseClick[ M_BLEFT ] := TRUE;
-      mouseCanClick[ M_BLEFT ] := FALSE;
-      if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
-        mouseDblClick[ M_BLEFT ] := TRUE;
-      mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
-    end;
-end;
-
-procedure zglCiOSWindow.touchesMoved_withEvent( touches : NSSet; event : UIevent );
-begin
-  UpdateTouches( event.touchesForWindow( Self ) );
-end;
-
-procedure zglCiOSWindow.touchesEnded_withEvent( touches : NSSet; event : UIevent );
+procedure zglCiOSEAGLView.touchesMoved_withEvent( touches : NSSet; event : UIevent );
   var
-    i : Integer;
+    i, j  : Integer;
+    touch : UITouch;
+    prevX : Integer;
+    prevY : Integer;
 begin
-  touchCount := 0;
-  for i := 0 to 255 do
+  for i := 0 to MAX_TOUCH - 1 do
     begin
-      if Assigned( touch_PRelease ) and Assigned( touchList[ i ] ) Then
-        touch_PRelease( i );
+      touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
-      touchList[ i ]   := nil;
-      touchDown[ i ]   := FALSE;
-      touchUp  [ i ]   := TRUE;
-      touchCanTap[ i ] := FALSE;
+      prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
+      prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+
+      for j := 0 to MAX_TOUCH - 1 do
+        if ( touchX[ j ] = prevX ) and ( touchY[ j ] = prevY ) Then
+          begin
+            touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
+            touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+            UpdateTouch( j );
+            break;
+          end;
     end;
-
-  // mouse emulation
-  mouseDown[ M_BLEFT ]     := FALSE;
-  mouseUp  [ M_BLEFT ]     := TRUE;
-  mouseCanClick[ M_BLEFT ] := TRUE;
 end;
 
-procedure zglCiOSWindow.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
+procedure zglCiOSEAGLView.touchesEnded_withEvent( touches : NSSet; event : UIevent );
+  var
+    i, j  : Integer;
+    touch : UITouch;
+    prevX : Integer;
+    prevY : Integer;
+begin
+  for i := 0 to MAX_TOUCH - 1 do
+    begin
+      touch := UITouch( touches.allObjects().objectAtIndex( i ) );
+
+      prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
+      prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+
+      for j := 0 to MAX_TOUCH - 1 do
+        if ( touchX[ j ] = prevX ) and ( touchY[ j ] = prevY ) Then
+          begin
+            touchX[ j ] := -1;
+            touchY[ j ] := -1;
+            UpdateTouch( j );
+            break;
+          end;
+    end;
+end;
+
+procedure zglCiOSEAGLView.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
 begin
   touchesEnded_withEvent( touches, event );
 end;
@@ -1566,6 +1511,15 @@ begin
         mouseX := Round( X );
         mouseY := Round( Y );
       end;
+
+  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+    begin
+      mouseLX := mouseX;
+      mouseLY := mouseY;
+
+      if Assigned( mouse_PMove ) Then
+        mouse_PMove( mouseX, mouseY );
+    end;
 
   touchX[ ID ] := mouseX;
   touchY[ ID ] := mouseY;

@@ -24,6 +24,9 @@ unit zgl_touch;
 
 interface
 
+const
+  MAX_TOUCH = 5;
+
 function touch_X( Finger : Byte ) : Integer;
 function touch_Y( Finger : Byte ) : Integer;
 function touch_Down( Finger : Byte ) : Boolean;
@@ -33,14 +36,14 @@ function touch_DblTap( Finger : Byte ) : Boolean;
 procedure touch_ClearState;
 
 var
-  touchX      : array[ 0..255 ] of Integer;
-  touchY      : array[ 0..255 ] of Integer;
-  touchDown   : array[ 0..255 ] of Boolean;
-  touchUp     : array[ 0..255 ] of Boolean;
-  touchTap    : array[ 0..255 ] of Boolean;
-  touchCanTap : array[ 0..255 ] of Boolean;
-  touchDblTap : array[ 0..255 ] of Boolean;
-  touchList   : array[ 0..255 ] of Pointer;
+  touchX      : array[ 0..MAX_TOUCH - 1 ] of Integer;
+  touchY      : array[ 0..MAX_TOUCH - 1 ] of Integer;
+  touchDown   : array[ 0..MAX_TOUCH - 1 ] of Boolean;
+  touchUp     : array[ 0..MAX_TOUCH - 1 ] of Boolean;
+  touchTap    : array[ 0..MAX_TOUCH - 1 ] of Boolean;
+  touchCanTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
+  touchDblTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
+  touchList   : array[ 0..MAX_TOUCH - 1 ] of Pointer;
   touchCount  : Integer;
 
   // callback
@@ -49,45 +52,61 @@ var
   touch_PRelease : procedure( Finger : Byte );
 
 implementation
-uses
-  zgl_screen;
 
 function touch_X( Finger : Byte ) : Integer;
 begin
-  Result := touchX[ Finger ];
+  if Finger > MAX_TOUCH - 1 Then
+    Result := -1
+  else
+    Result := touchX[ Finger ];
 end;
 
 function touch_Y( Finger : Byte ) : Integer;
 begin
-  Result := touchY[ Finger ];
+  if Finger > MAX_TOUCH - 1 Then
+    Result := -1
+  else
+    Result := touchY[ Finger ];
 end;
 
 function touch_Down( Finger : Byte ) : Boolean;
 begin
-  Result := touchDown[ Finger ];
+  if Finger > MAX_TOUCH - 1 Then
+    Result := FALSE
+  else
+    Result := touchDown[ Finger ];
 end;
 
 function touch_Up( Finger : Byte ) : Boolean;
 begin
-  Result := touchUp[ Finger ];
+  if Finger > MAX_TOUCH - 1 Then
+    Result := FALSE
+  else
+    Result := touchUp[ Finger ];
 end;
 
 function touch_Tap( Finger : Byte ) : Boolean;
 begin
-  Result := touchTap[ Finger ];
+  if Finger > MAX_TOUCH - 1 Then
+    Result := FALSE
+  else
+    Result := touchTap[ Finger ];
 end;
 
 function touch_DblTap( Finger : Byte ) : Boolean;
 begin
-  Result := touchDblTap[ Finger ];
+  if Finger > MAX_TOUCH - 1 Then
+    Result := FALSE
+  else
+    Result := touchDblTap[ Finger ];
 end;
 
 procedure touch_ClearState;
 begin
-  FillChar( touchUp[ 0 ], 256, 0 );
-  FillChar( touchTap[ 0 ], 256, 0 );
-  FillChar( touchDblTap[ 0 ], 256, 0 );
-  FillChar( touchCanTap[ 0 ], 256, 1 );
+  FillChar( touchUp[ 0 ], MAX_TOUCH, 0 );
+  FillChar( touchTap[ 0 ], MAX_TOUCH, 0 );
+  FillChar( touchDblTap[ 0 ], MAX_TOUCH, 0 );
+  FillChar( touchCanTap[ 0 ], MAX_TOUCH, 1 );
 end;
 
 end.
