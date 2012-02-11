@@ -106,6 +106,8 @@ procedure font_Del( var Font : zglPFont );
 begin
   if not Assigned( Font ) Then exit;
 
+  for i := 0 to Font.Count.Pages - 1 do
+    tex_Del( Font.Pages[ i ] );
   for i := 0 to 65535 do
     if Assigned( Font.CharDesc[ i ] ) Then
       FreeMem( Font.CharDesc[ i ] );

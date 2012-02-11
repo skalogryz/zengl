@@ -317,6 +317,14 @@ begin
       timer_Del( zglPTimer( p ) );
     end;
 
+  if managerFont.Count <> 0 Then
+    log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
+  while managerFont.Count > 0 do
+    begin
+      p := managerFont.First.next;
+      font_Del( zglPFont( p ) );
+    end;
+
   if managerRTarget.Count <> 0 Then
     log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 0 do
@@ -332,14 +340,6 @@ begin
     begin
       p := managerTexture.First.next;
       tex_Del( zglPTexture( p ) );
-    end;
-
-  if managerFont.Count <> 0 Then
-    log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
-  while managerFont.Count > 0 do
-    begin
-      p := managerFont.First.next;
-      font_Del( zglPFont( p ) );
     end;
 
   {$IFDEF USE_SENGINE}
