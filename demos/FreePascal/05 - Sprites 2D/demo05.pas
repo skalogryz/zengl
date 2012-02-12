@@ -63,7 +63,6 @@ begin
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png', $FF000000, TEX_DEFAULT_2D );
 
   texBack := tex_LoadFromFile( dirRes + 'back01.jpg' );
-  tex_SetFrameSize( texBack, 100, 100 );
 
   texGround := tex_LoadFromFile( dirRes + 'ground.png' );
   // RU: Указываем размер кадра в текстуре.
@@ -115,7 +114,7 @@ begin
 
       // RU: Рисуем задний фон с размерами 800х600 используя текстуру back.
       // EN: Render the background with size 800x600 and using texture "back".
-      asprite2d_Draw( texBack, 0, 0, 800, 600, 0, 0 );
+      ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
       // RU: Установить текущую камеру.
       // EN: Set the current camera.
