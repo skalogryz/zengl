@@ -109,4 +109,13 @@ begin
   FillChar( touchCanTap[ 0 ], MAX_TOUCH, 1 );
 end;
 
+var
+  i : Integer;
+initialization
+  for i := 0 to MAX_TOUCH - 1 do
+    begin
+      touchX[ i ] := -1;
+      touchY[ i ] := -1;
+    end;
+
 end.

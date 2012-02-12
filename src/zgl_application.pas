@@ -1360,7 +1360,7 @@ procedure zglCiOSEAGLView.touchesBegan_withEvent( touches : NSSet; event : UIeve
     i, j  : Integer;
     touch : UITouch;
 begin
-  for i := 0 to MAX_TOUCH - 1 do
+  for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
       for j := 0 to MAX_TOUCH - 1 do
@@ -1381,7 +1381,7 @@ procedure zglCiOSEAGLView.touchesMoved_withEvent( touches : NSSet; event : UIeve
     prevX : Integer;
     prevY : Integer;
 begin
-  for i := 0 to MAX_TOUCH - 1 do
+  for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
@@ -1403,18 +1403,22 @@ procedure zglCiOSEAGLView.touchesEnded_withEvent( touches : NSSet; event : UIeve
   var
     i, j  : Integer;
     touch : UITouch;
+    currX : Integer;
+    currY : Integer;
     prevX : Integer;
     prevY : Integer;
 begin
-  for i := 0 to MAX_TOUCH - 1 do
+  for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
+      currX := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
+      currY := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
       prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
       prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
 
       for j := 0 to MAX_TOUCH - 1 do
-        if ( touchX[ j ] = prevX ) and ( touchY[ j ] = prevY ) Then
+        if ( ( touchX[ j ] = currX ) and ( touchY[ j ] = currY ) ) or ( ( touchX[ j ] = prevX ) and ( touchY[ j ] = prevY ) ) Then
           begin
             touchX[ j ] := -1;
             touchY[ j ] := -1;
