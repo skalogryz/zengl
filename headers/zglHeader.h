@@ -281,6 +281,7 @@ typedef struct
 {
   bool   Active;
   bool   Custom;
+  void   *UserData;
   uint   Interval;
   double LastTick;
   void*  OnTimer;
@@ -572,9 +573,11 @@ typedef struct
   ushort            Height;
   float             U;
   float             V;
-  ushort            Format;
+  ushort            FramesX;
+  ushort            FramesY;
   zglTTextureCoord *FramesCoord;
   uint              Flags;
+  ushort            Format;
 
   void*             prev;
   void*             next;
@@ -1050,9 +1053,9 @@ ZGLEXTERN void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCha
 
 typedef struct
 {
-  size_t Source;
-  float  Speed;
-  float  Volume;
+  uint  Source;
+  float Speed;
+  float Volume;
 
   struct
   {

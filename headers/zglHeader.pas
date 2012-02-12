@@ -280,18 +280,21 @@ type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Active     : Boolean;
+    Custom     : Boolean;
+    UserData   : Pointer;
     Interval   : LongWord;
     LastTick   : Double;
     OnTimer    : procedure;
+    OnTimerEx  : procedure( Timer : zglPTimer );
 
-    Prev, Next : zglPTimer;
+    prev, next : zglPTimer;
 end;
 
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count   : Integer;
-    First   : zglTTimer;
+    Count : Integer;
+    First : zglTTimer;
 end;
 
 var
