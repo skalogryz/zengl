@@ -505,7 +505,7 @@ begin
         end;
 
   // Текстурные координаты
-  fc := length( Texture.FramesCoord );
+  fc := length( Texture.FramesCoord ) - 1;
   if Frame > fc Then
     DEC( Frame, ( ( Frame - 1 ) div fc ) * fc )
   else

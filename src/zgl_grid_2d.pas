@@ -178,7 +178,7 @@ begin
         ijV := 1;
       end;
 
-  i := length( Texture.FramesCoord );
+  i := length( Texture.FramesCoord ) - 1;
   if Frame > i Then
     DEC( Frame, ( ( Frame - 1 ) div i ) * i )
   else
