@@ -308,7 +308,7 @@ begin
   wndFullScreen := TRUE;
 
   UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
-  wndHandle := zglCiOSWindow.alloc().initWithFrame( UIScreen.mainScreen.bounds );
+  wndHandle := UIWindow.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   wndViewCtrl := zglCiOSViewController.alloc().init();
 
   wnd_Select();
