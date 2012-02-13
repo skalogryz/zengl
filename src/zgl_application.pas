@@ -1403,7 +1403,7 @@ begin
                   touchX[ j ] := Round( touch.locationInView( Self ).x );
                   touchY[ j ] := Round( touch.locationInView( Self ).y );
                 end;
-            touchActive[ ID ] := TRUE;
+            touchActive[ j ] := TRUE;
             UpdateTouch( j );
             break;
           end;
@@ -1443,7 +1443,7 @@ begin
                   touchX[ j ] := Round( touch.locationInView( Self ).x );
                   touchY[ j ] := Round( touch.locationInView( Self ).y );
                 end;
-            touchActive[ ID ] := TRUE;
+            touchActive[ j ] := TRUE;
             UpdateTouch( j );
             break;
           end;
@@ -1482,7 +1482,7 @@ begin
           begin
             touchX[ j ] := currX;
             touchY[ j ] := currY;
-            touchActive[ ID ] := FALSE;
+            touchActive[ j ] := FALSE;
             UpdateTouch( j );
             break;
           end;
