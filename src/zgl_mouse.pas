@@ -78,7 +78,11 @@ var
 implementation
 uses
   zgl_window,
-  zgl_screen;
+  zgl_screen
+  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
+  , zgl_touch
+  {$ENDIF}
+  ;
 
 function mouse_X : Integer;
 begin
@@ -141,6 +145,9 @@ begin
   FillChar( mouseDblClick[ 0 ], 3, 0 );
   FillChar( mouseCanClick[ 0 ], 3, 1 );
   FillChar( mouseWheel[ 0 ], 2, 0 );
+  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
+  touch_ClearState();
+  {$IFEND}
 end;
 
 procedure mouse_Lock( X : Integer = -1; Y : Integer = -1 );
