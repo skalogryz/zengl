@@ -1387,7 +1387,10 @@ procedure zglCiOSEAGLView.touchesBegan_withEvent( touches : NSSet; event : UIeve
   var
     i, j  : Integer;
     touch : UITouch;
+    scale : Single;
 begin
+  scale := eglView.contentScaleFactor;
+
   for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
@@ -1396,12 +1399,12 @@ begin
           begin
             if appFlags and CORRECT_RESOLUTION > 0 Then
               begin
-                touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
-                touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+                touchX[ j ] := Round( ( touch.locationInView( Self ).x * scale - scrAddCX ) / scrResCX );
+                touchY[ j ] := Round( ( touch.locationInView( Self ).y * scale - scrAddCY ) / scrResCY );
               end else
                 begin
-                  touchX[ j ] := Round( touch.locationInView( Self ).x );
-                  touchY[ j ] := Round( touch.locationInView( Self ).y );
+                  touchX[ j ] := Round( touch.locationInView( Self ).x * scale );
+                  touchY[ j ] := Round( touch.locationInView( Self ).y * scale );
                 end;
             touchActive[ j ] := TRUE;
             UpdateTouch( j );
@@ -1416,19 +1419,22 @@ procedure zglCiOSEAGLView.touchesMoved_withEvent( touches : NSSet; event : UIeve
     touch : UITouch;
     prevX : Integer;
     prevY : Integer;
+    scale : Single;
 begin
+  scale := eglView.contentScaleFactor;
+
   for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
       if appFlags and CORRECT_RESOLUTION > 0 Then
         begin
-          prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
-          prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+          prevX := Round( ( touch.previousLocationInView( Self ).x * scale - scrAddCX ) / scrResCX );
+          prevY := Round( ( touch.previousLocationInView( Self ).y * scale - scrAddCY ) / scrResCY );
         end else
           begin
-            prevX := Round( touch.previousLocationInView( Self ).x );
-            prevY := Round( touch.previousLocationInView( Self ).y );
+            prevX := Round( touch.previousLocationInView( Self ).x * scale );
+            prevY := Round( touch.previousLocationInView( Self ).y * scale );
           end;
 
       for j := 0 to MAX_TOUCH - 1 do
@@ -1436,12 +1442,12 @@ begin
           begin
             if appFlags and CORRECT_RESOLUTION > 0 Then
               begin
-                touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
-                touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+                touchX[ j ] := Round( ( touch.locationInView( Self ).x * scale - scrAddCX ) / scrResCX );
+                touchY[ j ] := Round( ( touch.locationInView( Self ).y * scale - scrAddCY ) / scrResCY );
               end else
                 begin
-                  touchX[ j ] := Round( touch.locationInView( Self ).x );
-                  touchY[ j ] := Round( touch.locationInView( Self ).y );
+                  touchX[ j ] := Round( touch.locationInView( Self ).x * scale );
+                  touchY[ j ] := Round( touch.locationInView( Self ).y * scale );
                 end;
             touchActive[ j ] := TRUE;
             UpdateTouch( j );
@@ -1458,23 +1464,26 @@ procedure zglCiOSEAGLView.touchesEnded_withEvent( touches : NSSet; event : UIeve
     currY : Integer;
     prevX : Integer;
     prevY : Integer;
+    scale : Single;
 begin
+  scale := eglView.contentScaleFactor;
+
   for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
       if appFlags and CORRECT_RESOLUTION > 0 Then
         begin
-          currX := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
-          currY := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
-          prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
-          prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+          currX := Round( ( touch.locationInView( Self ).x * scale - scrAddCX ) / scrResCX );
+          currY := Round( ( touch.locationInView( Self ).y * scale - scrAddCY ) / scrResCY );
+          prevX := Round( ( touch.previousLocationInView( Self ).x * scale - scrAddCX ) / scrResCX );
+          prevY := Round( ( touch.previousLocationInView( Self ).y * scale - scrAddCY ) / scrResCY );
         end else
           begin
-            currX := Round( touch.locationInView( Self ).x );
-            currY := Round( touch.locationInView( Self ).y );
-            prevX := Round( touch.previousLocationInView( Self ).x );
-            prevY := Round( touch.previousLocationInView( Self ).y );
+            currX := Round( touch.locationInView( Self ).x * scale );
+            currY := Round( touch.locationInView( Self ).y * scale );
+            prevX := Round( touch.previousLocationInView( Self ).x * scale );
+            prevY := Round( touch.previousLocationInView( Self ).y * scale );
           end;
 
       for j := 0 to MAX_TOUCH - 1 do
