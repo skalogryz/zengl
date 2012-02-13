@@ -1397,7 +1397,7 @@ begin
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
       for j := 0 to MAX_TOUCH - 1 do
-        if not touchActive[ j ] Then
+        if ( not touchActive[ j ] ) and ( not touchUp[ j ] ) Then
           begin
             if appFlags and CORRECT_RESOLUTION > 0 Then
               begin
