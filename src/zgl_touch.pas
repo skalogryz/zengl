@@ -79,7 +79,7 @@ end;
 
 function touch_Up( Finger : Byte ) : Boolean;
 begin
-  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
+  if Finger > MAX_TOUCH - 1 Then
     Result := FALSE
   else
     Result := touchUp[ Finger ];

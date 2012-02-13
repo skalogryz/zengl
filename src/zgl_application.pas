@@ -1319,6 +1319,7 @@ begin
   if not touchActive[ ID ] Then
     begin
       touchDown[ ID ]   := FALSE;
+      touchUp[ ID ]     := TRUE;
       touchTap[ ID ]    := FALSE;
       touchCanTap[ ID ] := TRUE;
 
@@ -1336,6 +1337,7 @@ begin
           end;
 
         touchDown[ ID ] := TRUE;
+        touchUp[ ID ]   := FALSE;
 
         if Assigned( touch_PMove ) Then
           touch_PMove( ID, touchX[ ID ], touchY[ ID ] );
@@ -1588,7 +1590,8 @@ begin
 
   if ( not touchDown[ ID ] ) and ( Pressure > 0 ) Then
     begin
-      touchDown[ ID ] = TRUE;
+      touchDown[ ID ] := TRUE;
+      touchUp[ ID ]   := FALSE;
 
       if Assigned( touch_PPress ) Then
         touch_PPress( ID );
@@ -1596,6 +1599,7 @@ begin
       if ( touchDown[ ID ] ) and ( Pressure = 0 ) Then
         begin
           touchDown[ ID ]   := FALSE;
+          touchUp[ ID ]     := TRUE;
           touchTap[ ID ]    := FALSE;
           touchCanTap[ ID ] := TRUE;
 
