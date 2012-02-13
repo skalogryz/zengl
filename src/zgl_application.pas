@@ -1356,7 +1356,7 @@ begin
             mouse_PMove( mouseX, mouseY );
         end;
 
-      if touchDown[ 0 ] Then
+      if ( touchDown[ 0 ] ) and ( not mouseDown[ M_BLEFT ] ) Then
         begin
           mouseDown[ M_BLEFT ] := TRUE;
           if mouseCanClick[ M_BLEFT ] Then
@@ -1371,7 +1371,7 @@ begin
                 mouse_PPress( M_BLEFT );
             end;
         end else
-          if mouseDown[ M_BLEFT ] Then
+          if ( not touchDown[ 0 ] ) and ( mouseDown[ M_BLEFT ] ) Then
             begin
               mouseDown[ M_BLEFT ]     := FALSE;
               mouseUp  [ M_BLEFT ]     := TRUE;
@@ -1621,7 +1621,7 @@ begin
             mouse_PMove( mouseX, mouseY );
         end;
 
-      if Pressure > 0 Then
+      if ( Pressure > 0 ) and ( not mouseDown[ M_BLEFT ] ) Then
         begin
           mouseDown[ M_BLEFT ] := TRUE;
           if mouseCanClick[ M_BLEFT ] Then
@@ -1636,7 +1636,7 @@ begin
                 mouse_PPress( M_BLEFT );
             end;
         end else
-          if mouseDown[ M_BLEFT ] Then
+          if ( Pressure <= 0 ) and ( mouseDown[ M_BLEFT ] ) Then
             begin
               mouseDown[ M_BLEFT ]     := FALSE;
               mouseUp  [ M_BLEFT ]     := TRUE;
