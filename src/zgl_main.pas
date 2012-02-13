@@ -626,17 +626,27 @@ begin
   {$ENDIF}
 {$ENDIF}
 {$IFDEF WINDOWS}
+  const
+    APPDATA : PWideChar = 'APPDATA'; // workaround for Delphi 7
   var
     fn  : PWideChar;
     len : Integer;
 begin
   wndINST := GetModuleHandle( nil );
-  GetMem( fn, 65535 * 2 );
-  GetModuleFileNameW( wndINST, fn, 65535 );
-  len := WideCharToMultiByte( CP_UTF8, 0, fn, 65535, nil, 0, nil, nil );
+  GetMem( fn, 32768 * 2 );
+  GetModuleFileNameW( wndINST, fn, 32768 );
+  len := WideCharToMultiByte( CP_UTF8, 0, fn, 32768, nil, 0, nil, nil );
   SetLength( appWorkDir, len );
-  WideCharToMultiByte( CP_UTF8, 0, fn, 65535, @appWorkDir[ 1 ], len, nil, nil );
+  WideCharToMultiByte( CP_UTF8, 0, fn, 32768, @appWorkDir[ 1 ], len, nil, nil );
   appWorkDir := file_GetDirectory( appWorkDir );
+  FreeMem( fn );
+
+  GetMem( fn, 32768 * 2 );
+  len := GetEnvironmentVariableW( APPDATA, fn, 32768 );
+  len := WideCharToMultiByte( CP_UTF8, 0, fn, len, nil, 0, nil, nil );
+  SetLength( appHomeDir, len + 1 );
+  WideCharToMultiByte( CP_UTF8, 0, fn, 32768, @appHomeDir[ 1 ], len, nil, nil );
+  appHomeDir[ len + 1 ] := '\';
   FreeMem( fn );
 {$ENDIF}
 {$IFDEF MACOSX}
