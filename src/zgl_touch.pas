@@ -43,7 +43,7 @@ var
   touchTap    : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchCanTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchDblTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
-  touchList   : array[ 0..MAX_TOUCH - 1 ] of Pointer;
+  touchActive : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchCount  : Integer;
 
   // callback
@@ -55,7 +55,7 @@ implementation
 
 function touch_X( Finger : Byte ) : Integer;
 begin
-  if Finger > MAX_TOUCH - 1 Then
+  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
     Result := -1
   else
     Result := touchX[ Finger ];
@@ -63,7 +63,7 @@ end;
 
 function touch_Y( Finger : Byte ) : Integer;
 begin
-  if Finger > MAX_TOUCH - 1 Then
+  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
     Result := -1
   else
     Result := touchY[ Finger ];
@@ -71,7 +71,7 @@ end;
 
 function touch_Down( Finger : Byte ) : Boolean;
 begin
-  if Finger > MAX_TOUCH - 1 Then
+  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
     Result := FALSE
   else
     Result := touchDown[ Finger ];
@@ -79,7 +79,7 @@ end;
 
 function touch_Up( Finger : Byte ) : Boolean;
 begin
-  if Finger > MAX_TOUCH - 1 Then
+  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
     Result := FALSE
   else
     Result := touchUp[ Finger ];
@@ -87,7 +87,7 @@ end;
 
 function touch_Tap( Finger : Byte ) : Boolean;
 begin
-  if Finger > MAX_TOUCH - 1 Then
+  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
     Result := FALSE
   else
     Result := touchTap[ Finger ];
@@ -95,7 +95,7 @@ end;
 
 function touch_DblTap( Finger : Byte ) : Boolean;
 begin
-  if Finger > MAX_TOUCH - 1 Then
+  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
     Result := FALSE
   else
     Result := touchDblTap[ Finger ];
@@ -108,14 +108,5 @@ begin
   FillChar( touchDblTap[ 0 ], MAX_TOUCH, 0 );
   FillChar( touchCanTap[ 0 ], MAX_TOUCH, 1 );
 end;
-
-var
-  i : Integer;
-initialization
-  for i := 0 to MAX_TOUCH - 1 do
-    begin
-      touchX[ i ] := -1;
-      touchY[ i ] := -1;
-    end;
 
 end.

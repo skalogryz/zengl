@@ -283,6 +283,13 @@ begin
         scrCurrModeH := Round( UIScreen.mainScreen.bounds.size.height );
       end;
 
+  if ( scrCurrModeW > scrCurrModeH ) Then
+    begin
+      scrDesktopH  := scrCurrModeW;
+      scrCurrModeW := scrCurrModeH;
+      scrCurrModeH := scrDesktopH;
+    end;
+
   scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
   if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
     begin

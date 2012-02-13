@@ -294,22 +294,6 @@ procedure app_ProcessOS;
 begin
 {$IFDEF USE_X11}
   XQueryPointer( scrDisplay, wndHandle, @root_return, @child_return, @root_x_return, @root_y_return, @mouseX, @mouseY, @mask_return );
-
-  mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
-  mouseDY := Round( ( mouseY - wndHeight div 2 ) / scrResCY );
-  mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
-  mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
-  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
-    begin
-      mouseLX := mouseX;
-      mouseLY := mouseY;
-
-      if Assigned( mouse_PMove ) Then
-        mouse_PMove( mouseX, mouseY );
-    end;
-
-  app_ProcessMessages();
-  keysRepeat := 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
   GetCursorPos( cursorpos );
@@ -322,11 +306,26 @@ begin
         mouseX := cursorpos.X - wndX - wndBrdSizeX;
         mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
       end;
+{$ENDIF}
+{$IFDEF MACOSX}
+  GetGlobalMouse( mPos );
+  mouseX := mPos.h - wndX;
+  mouseY := mPos.v - wndY;
+{$ENDIF}
 
-  mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
-  mouseDY := Round( ( mouseY - wndHeight div 2 ) / scrResCY );
-  mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
-  mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
+  if appFlags and CORRECT_RESOLUTION > 0 Then
+    begin
+      mouseDX := Round( ( mouseX - wndWidth div 2 - scrAddCX ) / scrResCX );
+      mouseDY := Round( ( mouseY - wndHeight div 2 - scrAddCY ) / scrResCY );
+      mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
+      mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
+    end else
+      begin
+        mouseDX := mouseX - wndWidth div 2;
+        mouseDY := mouseY - wndHeight div 2;
+        mouseX  := mouseX;
+        mouseY  := mouseY;
+      end;
   if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
     begin
       mouseLX := mouseX;
@@ -336,6 +335,11 @@ begin
         mouse_PMove( mouseX, mouseY );
     end;
 
+{$IFDEF USE_X11}
+  app_ProcessMessages();
+  keysRepeat := 0;
+{$ENDIF}
+{$IFDEF WINDOWS}
   while PeekMessageW( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
       TranslateMessage( m );
@@ -343,23 +347,6 @@ begin
     end;
 {$ENDIF}
 {$IFDEF MACOSX}
-  GetGlobalMouse( mPos );
-  mouseX := mPos.h - wndX;
-  mouseY := mPos.v - wndY;
-
-  mouseDX := Round( ( mouseX - wndWidth div 2 ) / scrResCX );
-  mouseDY := Round( ( mouseY - wndHeight div 2 ) / scrResCY );
-  mouseX  := Round( ( mouseX - scrAddCX ) / scrResCX );
-  mouseY  := Round( ( mouseY - scrAddCY ) / scrResCY );
-  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
-    begin
-      mouseLX := mouseX;
-      mouseLY := mouseY;
-
-      if Assigned( mouse_PMove ) Then
-        mouse_PMove( mouseX, mouseY );
-    end;
-
   while GetNextEvent( everyEvent, event ) do;
 {$ENDIF}
 {$IFDEF iOS}
@@ -1329,16 +1316,7 @@ end;
 
 procedure zglCiOSEAGLView.UpdateTouch( ID : Integer );
 begin
-  if ( not touchDown[ ID ] ) and ( not touchTap[ ID ] ) and ( touchCanTap[ ID ] ) Then
-    begin
-      touchTap[ ID ]    := TRUE;
-      touchCanTap[ ID ] := FALSE;
-
-      if Assigned( touch_PPress ) Then
-        touch_PPress( ID );
-    end;
-
-  if ( touchX[ ID ] = -1 ) and ( touchY[ ID ] = -1 ) Then
+  if not touchActive[ ID ] Then
     begin
       touchDown[ ID ]   := FALSE;
       touchTap[ ID ]    := FALSE;
@@ -1348,11 +1326,61 @@ begin
         touch_PRelease( ID );
     end else
       begin
+        if ( not touchDown[ ID ] ) and ( not touchTap[ ID ] ) and ( touchCanTap[ ID ] ) Then
+          begin
+            touchTap[ ID ]    := TRUE;
+            touchCanTap[ ID ] := FALSE;
+
+            if Assigned( touch_PPress ) Then
+              touch_PPress( ID );
+          end;
+
         touchDown[ ID ] := TRUE;
 
-        if ( not touchTap[ ID ] ) and Assigned( touch_PMove ) Then
+        if Assigned( touch_PMove ) Then
           touch_PMove( ID, touchX[ ID ], touchY[ ID ] );
       end;
+
+  // mouse emulation
+  if ID = 0 Then
+    begin
+      mouseX := touchX[ 0 ];
+      mouseY := touchY[ 0 ];
+
+      if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+        begin
+          mouseLX := mouseX;
+          mouseLY := mouseY;
+
+          if Assigned( mouse_PMove ) Then
+            mouse_PMove( mouseX, mouseY );
+        end;
+
+      if touchDown[ 0 ] Then
+        begin
+          mouseDown[ M_BLEFT ] := TRUE;
+          if mouseCanClick[ M_BLEFT ] Then
+            begin
+              mouseClick[ M_BLEFT ] := TRUE;
+              mouseCanClick[ M_BLEFT ] := FALSE;
+              if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+                mouseDblClick[ M_BLEFT ] := TRUE;
+              mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+
+              if Assigned( mouse_PPress ) Then
+                mouse_PPress( M_BLEFT );
+            end;
+        end else
+          if mouseDown[ M_BLEFT ] Then
+            begin
+              mouseDown[ M_BLEFT ]     := FALSE;
+              mouseUp  [ M_BLEFT ]     := TRUE;
+              mouseCanClick[ M_BLEFT ] := TRUE;
+
+              if Assigned( mouse_PRelease ) Then
+                mouse_PRelease( M_BLEFT );
+            end;
+    end;
 end;
 
 procedure zglCiOSEAGLView.touchesBegan_withEvent( touches : NSSet; event : UIevent );
@@ -1364,10 +1392,18 @@ begin
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
       for j := 0 to MAX_TOUCH - 1 do
-        if ( touchX[ j ] = -1 ) and ( touchY[ j ] = -1 ) Then
+        if not touchActive[ j ] Then
           begin
-            touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
-            touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+            if appFlags and CORRECT_RESOLUTION > 0 Then
+              begin
+                touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
+                touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+              end else
+                begin
+                  touchX[ j ] := Round( touch.locationInView( Self ).x );
+                  touchY[ j ] := Round( touch.locationInView( Self ).y );
+                end;
+            touchActive[ ID ] := TRUE;
             UpdateTouch( j );
             break;
           end;
@@ -1385,14 +1421,29 @@ begin
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
-      prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
-      prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+      if appFlags and CORRECT_RESOLUTION > 0 Then
+        begin
+          prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
+          prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+        end else
+          begin
+            prevX := Round( touch.previousLocationInView( Self ).x );
+            prevY := Round( touch.previousLocationInView( Self ).y );
+          end;
 
       for j := 0 to MAX_TOUCH - 1 do
         if ( touchX[ j ] = prevX ) and ( touchY[ j ] = prevY ) Then
           begin
-            touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
-            touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+            if appFlags and CORRECT_RESOLUTION > 0 Then
+              begin
+                touchX[ j ] := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
+                touchY[ j ] := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+              end else
+                begin
+                  touchX[ j ] := Round( touch.locationInView( Self ).x );
+                  touchY[ j ] := Round( touch.locationInView( Self ).y );
+                end;
+            touchActive[ ID ] := TRUE;
             UpdateTouch( j );
             break;
           end;
@@ -1412,16 +1463,26 @@ begin
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
 
-      currX := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
-      currY := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
-      prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
-      prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+      if appFlags and CORRECT_RESOLUTION > 0 Then
+        begin
+          currX := Round( ( touch.locationInView( Self ).x - scrAddCX ) / scrResCX );
+          currY := Round( ( touch.locationInView( Self ).y - scrAddCY ) / scrResCY );
+          prevX := Round( ( touch.previousLocationInView( Self ).x - scrAddCX ) / scrResCX );
+          prevY := Round( ( touch.previousLocationInView( Self ).y - scrAddCY ) / scrResCY );
+        end else
+          begin
+            currX := Round( touch.locationInView( Self ).x );
+            currY := Round( touch.locationInView( Self ).y );
+            prevX := Round( touch.previousLocationInView( Self ).x );
+            prevY := Round( touch.previousLocationInView( Self ).y );
+          end;
 
       for j := 0 to MAX_TOUCH - 1 do
         if ( ( touchX[ j ] = currX ) and ( touchY[ j ] = currY ) ) or ( ( touchX[ j ] = prevX ) and ( touchY[ j ] = prevY ) ) Then
           begin
-            touchX[ j ] := -1;
-            touchY[ j ] := -1;
+            touchX[ j ] := currX;
+            touchY[ j ] := currY;
+            touchActive[ ID ] := FALSE;
             UpdateTouch( j );
             break;
           end;
@@ -1508,47 +1569,74 @@ procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : 
 begin
   if appFlags and CORRECT_RESOLUTION > 0 Then
     begin
-      mouseX  := Round( ( X - scrAddCX ) / scrResCX );
-      mouseY  := Round( ( Y - scrAddCY ) / scrResCY );
+      touchX[ ID ]  := Round( ( X - scrAddCX ) / scrResCX );
+      touchY[ ID ]  := Round( ( Y - scrAddCY ) / scrResCY );
     end else
       begin
-        mouseX := Round( X );
-        mouseY := Round( Y );
+        touchX[ ID ] := Round( X );
+        touchY[ ID ] := Round( Y );
       end;
 
-  if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+  if ( not touchDown[ ID ] ) and ( Pressure > 0 ) Then
     begin
-      mouseLX := mouseX;
-      mouseLY := mouseY;
+      touchDown[ ID ] = TRUE;
 
-      if Assigned( mouse_PMove ) Then
-        mouse_PMove( mouseX, mouseY );
-    end;
-
-  touchX[ ID ] := mouseX;
-  touchY[ ID ] := mouseY;
-  if ( touchDown[ ID ] ) and ( Pressure > 0 ) Then exit;
-  touchDown[ ID ] := Pressure > 0;
-  if not touchDown[ ID ] Then
-    touchUp[ ID ] := TRUE;
-
-  mouseDown[ M_BLEFT ] := Pressure > 0;
-  if mouseDown[ M_BLEFT ] Then
-    begin
-      if mouseCanClick[ M_BLEFT ] Then
+      if Assigned( touch_PPress ) Then
+        touch_PPress( ID );
+    end else
+      if ( touchDown[ ID ] ) and ( Pressure = 0 ) Then
         begin
-          mouseClick[ M_BLEFT ] := TRUE;
-          mouseCanClick[ M_BLEFT ] := FALSE;
-          if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
-            mouseDblClick[ M_BLEFT ] := TRUE;
-          mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+          touchDown[ ID ]   := FALSE;
+          touchTap[ ID ]    := FALSE;
+          touchCanTap[ ID ] := TRUE;
+
+          if Assigned( touch_PRelease ) Then
+            touch_PRelease( ID );
         end;
-    end else
-      begin
-        mouseDown[ M_BLEFT ]     := FALSE;
-        mouseUp  [ M_BLEFT ]     := TRUE;
-        mouseCanClick[ M_BLEFT ] := TRUE;
-      end;
+
+  if Assigned( touch_PMove ) Then
+    touch_PMove( ID, touchX[ ID ], touchY[ ID ] );
+
+  // mouse emulation
+  if ID = 0 Then
+    begin
+      mouseX := touchX[ 0 ];
+      mouseY := touchY[ 0 ];
+
+      if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
+        begin
+          mouseLX := mouseX;
+          mouseLY := mouseY;
+
+          if Assigned( mouse_PMove ) Then
+            mouse_PMove( mouseX, mouseY );
+        end;
+
+      if Pressure > 0 Then
+        begin
+          mouseDown[ M_BLEFT ] := TRUE;
+          if mouseCanClick[ M_BLEFT ] Then
+            begin
+              mouseClick[ M_BLEFT ] := TRUE;
+              mouseCanClick[ M_BLEFT ] := FALSE;
+              if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+                mouseDblClick[ M_BLEFT ] := TRUE;
+              mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+
+              if Assigned( mouse_PPress ) Then
+                mouse_PPress( M_BLEFT );
+            end;
+        end else
+          if mouseDown[ M_BLEFT ] Then
+            begin
+              mouseDown[ M_BLEFT ]     := FALSE;
+              mouseUp  [ M_BLEFT ]     := TRUE;
+              mouseCanClick[ M_BLEFT ] := TRUE;
+
+              if Assigned( mouse_PRelease ) Then
+                mouse_PRelease( M_BLEFT );
+            end;
+    end;
 end;
 {$ENDIF}
 
