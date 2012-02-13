@@ -289,16 +289,19 @@ begin
       wndPortrait := TRUE;
       scrDesktopW := scrCurrModeW;
       scrDesktopH := scrCurrModeH;
-    end;
-  if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
-    begin
-      wndPortrait := FALSE;
-      scrDesktopW := scrCurrModeH;
-      scrDesktopH := scrCurrModeW;
-    end;
+    end else
+      if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
+        begin
+          wndPortrait := FALSE;
+          scrDesktopW := scrCurrModeH;
+          scrDesktopH := scrCurrModeW;
+        end else
+          begin
+            wndPortrait := scrCanPortrait;
+            scrDesktopW := scrCurrModeW;
+            scrDesktopH := scrCurrModeH;
+          end;
 
-  scrDesktopW := scrDesktopW;
-  scrDesktopH := scrDesktopH;
   oglWidth    := scrDesktopW;
   oglHeight   := scrDesktopH;
   oglTargetW  := scrDesktopW;
