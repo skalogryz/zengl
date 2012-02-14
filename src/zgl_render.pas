@@ -131,8 +131,8 @@ begin
           Y := Trunc( Y - cam2d.Global.Y );
         end else
           begin
-            X      := Trunc( ( X - cam2d.Global.Center.X ) * cam2d.Global.Zoom.X + cam2d.Global.Center.X - cam2d.Global.X );
-            Y      := Trunc( ( Y - cam2d.Global.Center.Y ) * cam2d.Global.Zoom.Y + cam2d.Global.Center.Y - cam2d.Global.Y );
+            X      := Trunc( ( X - cam2d.Global.Center.X - cam2d.Global.X ) * cam2d.Global.Zoom.X + cam2d.Global.Center.X );
+            Y      := Trunc( ( Y - cam2d.Global.Center.Y - cam2d.Global.Y ) * cam2d.Global.Zoom.Y + cam2d.Global.Center.Y );
             Width  := Trunc( Width  * cam2d.Global.Zoom.X );
             Height := Trunc( Height * cam2d.Global.Zoom.Y );
           end;
