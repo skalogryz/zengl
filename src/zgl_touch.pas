@@ -55,7 +55,7 @@ implementation
 
 function touch_X( Finger : Byte ) : Integer;
 begin
-  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
+  if Finger > MAX_TOUCH - 1 Then
     Result := -1
   else
     Result := touchX[ Finger ];
@@ -63,7 +63,7 @@ end;
 
 function touch_Y( Finger : Byte ) : Integer;
 begin
-  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
+  if Finger > MAX_TOUCH - 1 Then
     Result := -1
   else
     Result := touchY[ Finger ];
@@ -71,7 +71,7 @@ end;
 
 function touch_Down( Finger : Byte ) : Boolean;
 begin
-  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
+  if Finger > MAX_TOUCH - 1 Then
     Result := FALSE
   else
     Result := touchDown[ Finger ];
@@ -87,7 +87,7 @@ end;
 
 function touch_Tap( Finger : Byte ) : Boolean;
 begin
-  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
+  if Finger > MAX_TOUCH - 1 Then
     Result := FALSE
   else
     Result := touchTap[ Finger ];
@@ -95,7 +95,7 @@ end;
 
 function touch_DblTap( Finger : Byte ) : Boolean;
 begin
-  if ( Finger > MAX_TOUCH - 1 ) or ( not touchActive[ Finger ] ) Then
+  if Finger > MAX_TOUCH - 1 Then
     Result := FALSE
   else
     Result := touchDblTap[ Finger ];
