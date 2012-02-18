@@ -1293,6 +1293,11 @@ end;
 
 procedure zglCiOSViewController.didRotateFromInterfaceOrientation( fromInterfaceOrientation : UIInterfaceOrientation );
 begin
+  FillChar( touchActive[ 0 ], MAX_TOUCH, 0 );
+  FillChar( mouseDown[ 0 ], 3, 0 );
+  touch_ClearState();
+  mouse_ClearState();
+
   scrOrientation := Self.interfaceOrientation;
 
   if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
