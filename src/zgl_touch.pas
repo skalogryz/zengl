@@ -44,7 +44,6 @@ var
   touchCanTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchDblTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchActive : array[ 0..MAX_TOUCH - 1 ] of Boolean;
-  touchCount  : Integer;
 
   // callback
   touch_PMove    : procedure( Finger : Byte; X, Y : Integer );

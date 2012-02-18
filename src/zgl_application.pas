@@ -98,6 +98,7 @@ type
     procedure touchesMoved_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesEnded_withEvent( touches : NSSet; event : UIevent ); override;
     procedure touchesCancelled_withEvent( touches : NSSet; event : UIevent ); override;
+    procedure didMoveToSuperview; override;
   end;
 {$ENDIF}
 {$IFDEF ANDROID}
@@ -1177,6 +1178,11 @@ procedure zglCAppDelegate.applicationWillResignActive( application : UIApplicati
 begin
   if appAutoPause Then appPause := TRUE;
   if appWork Then app_PActivate( FALSE );
+
+  FillChar( touchActive[ 0 ], MAX_TOUCH, 0 );
+  FillChar( mouseDown[ 0 ], 3, 0 );
+  touch_ClearState();
+  mouse_ClearState();
 end;
 
 procedure zglCAppDelegate.applicationDidEnterBackground( application: UIApplication );
@@ -1503,6 +1509,14 @@ end;
 procedure zglCiOSEAGLView.touchesCancelled_withEvent( touches : NSSet; event : UIevent );
 begin
   touchesEnded_withEvent( touches, event );
+end;
+
+procedure zglCiOSEAGLView.didMoveToSuperview;
+begin
+  FillChar( touchActive[ 0 ], MAX_TOUCH, 0 );
+  FillChar( mouseDown[ 0 ], 3, 0 );
+  touch_ClearState();
+  mouse_ClearState();
 end;
 {$ENDIF}
 
