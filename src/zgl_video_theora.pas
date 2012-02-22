@@ -99,6 +99,11 @@ begin
   th_comment_init( @theoraComment );
   th_info_init( @theoraInfo );
 
+  theora_p := 0;
+  theora_processing_headers := 0;
+  videobuf_time := 0;
+  frames := 0;
+
   state := FALSE;
   while not state do
     begin
@@ -216,7 +221,7 @@ function theora_Update( Time : Double; Data : PByte ) : Integer;
   var
     Y, Cb, Cr, i, j : Integer;
 begin
-  if videobuf_time >= Time Then
+  if videobuf_time > Time Then
     begin
       Result := frames;
       exit;
@@ -304,6 +309,9 @@ begin
       th_decode_free( theoraDecCtx );
       th_comment_clear( @theoraComment );
       th_info_clear( @theoraInfo );
+
+      theoraSetupInfo := nil;
+      theoraDecCtx := nil;
     end;
   ogg_sync_clear( @oggSyncState );
 

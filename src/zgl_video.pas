@@ -99,6 +99,7 @@ begin
     Result := Result.next;
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTVideoStream ) );
+  Result.Frame     := -1;
   Result.next.prev := Result;
   Result.next.next := nil;
   Result := Result.next;
@@ -107,8 +108,9 @@ end;
 
 procedure video_Del( var Stream : zglPVideoStream );
 begin
-  if not Assigned( Stream ) Then
-    exit;
+  if not Assigned( Stream ) Then exit;
+
+  FreeMem( Stream._private.Data );
 
   if Assigned( Stream._private.Decoder ) Then
     Stream._private.Decoder.Close( Stream^ );
@@ -149,6 +151,7 @@ begin
       Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FFFFFFFF );
       GetMem( Result._private.Data, Result.Info.Width * Result.Info.Height * 4 );
       FillChar( Result._private.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
+      video_Update( Result, 0 );
     end else
       video_Del( Result );
 end;
@@ -162,6 +165,8 @@ procedure video_Update( var Stream : zglPVideoStream; Time : Double );
   var
     frame : Integer;
 begin
+  if not Assigned( Stream ) Then exit;
+
   frame := Stream.Frame;
   Stream._private.Decoder.Update( Stream^, Time, Stream._private.Data );
 
