@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.02.07';
+  cs_Date     = '2012.02.22';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -60,34 +60,35 @@ const
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
   SYS_CLOSE_QUERY        = $000008;
-
   {$IFDEF iOS}
-  SYS_iOS_MEMORY_WARNING     = $000080;
-  SYS_iOS_CHANGE_ORIENTATION = $000081;
+  SYS_iOS_MEMORY_WARNING     = $000010;
+  SYS_iOS_CHANGE_ORIENTATION = $000011;
   {$ENDIF}
 
-  INPUT_MOUSE_MOVE       = $000040;
-  INPUT_MOUSE_PRESS      = $000041;
-  INPUT_MOUSE_RELEASE    = $000042;
-  INPUT_MOUSE_WHEEL      = $000043;
-  INPUT_KEY_PRESS        = $000050;
-  INPUT_KEY_RELEASE      = $000051;
-  INPUT_KEY_CHAR         = $000052;
+  INPUT_MOUSE_MOVE       = $000020;
+  INPUT_MOUSE_PRESS      = $000021;
+  INPUT_MOUSE_RELEASE    = $000022;
+  INPUT_MOUSE_WHEEL      = $000023;
+  INPUT_KEY_PRESS        = $000030;
+  INPUT_KEY_RELEASE      = $000031;
+  INPUT_KEY_CHAR         = $000032;
   {$IFDEF iOS}
-  INPUT_TOUCH_MOVE       = $000060;
-  INPUT_TOUCH_PRESS      = $000061;
-  INPUT_TOUCH_RELEASE    = $000062;
+  INPUT_TOUCH_MOVE       = $000040;
+  INPUT_TOUCH_PRESS      = $000041;
+  INPUT_TOUCH_RELEASE    = $000042;
   {$ENDIF}
 
-  TEX_FORMAT_EXTENSION   = $000010;
-  TEX_FORMAT_FILE_LOADER = $000011;
-  TEX_FORMAT_MEM_LOADER  = $000012;
-  TEX_CURRENT_EFFECT     = $000013;
+  TEX_FORMAT_EXTENSION   = $000100;
+  TEX_FORMAT_FILE_LOADER = $000101;
+  TEX_FORMAT_MEM_LOADER  = $000102;
+  TEX_CURRENT_EFFECT     = $000103;
 
-  SND_FORMAT_EXTENSION   = $000020;
-  SND_FORMAT_FILE_LOADER = $000021;
-  SND_FORMAT_MEM_LOADER  = $000022;
-  SND_FORMAT_DECODER     = $000023;
+  SND_FORMAT_EXTENSION   = $000110;
+  SND_FORMAT_FILE_LOADER = $000111;
+  SND_FORMAT_MEM_LOADER  = $000112;
+  SND_FORMAT_DECODER     = $000113;
+
+  VIDEO_FORMAT_DECODER   = $000130;
 
   // zgl_Get
   ZENGL_VERSION           = 1;
@@ -206,7 +207,17 @@ uses
   {$ENDIF}
   {$IFDEF USE_SOUND}
   zgl_sound,
+  {$IFDEF USE_OGG}
+  zgl_lib_ogg,
   {$ENDIF}
+  {$ENDIF}
+  {$IFDEF USE_VIDEO}
+  zgl_video,
+  {$IFDEF USE_THEORA}
+  zgl_lib_theora,
+  {$ENDIF}
+  {$ENDIF}
+
   zgl_utils;
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
@@ -233,6 +244,19 @@ begin
   if not gl_Create() Then exit;
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Initialize() Then exit;
+
+  {$IFDEF USE_OGG}
+  if InitVorbis() Then
+    log_Add( 'Ogg: Initialized' )
+  else
+    log_Add( 'Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile );
+  {$ENDIF}
+  {$IFDEF USE_THEORA}
+  if InitTheora() Then
+    log_Add( 'Theora: Initialized' )
+  else
+    log_Add( 'Theora: Error while loading library: ' + libtheoradec );
+  {$ENDIF}
 
   wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
@@ -361,9 +385,26 @@ begin
   snd_Free();
   {$ENDIF}
 
+  {$IFDEF USE_VIDEO}
+  if managerVideo.Count.Items <> 0 Then
+    log_Add( 'Videos to free: ' + u_IntToStr( managerVideo.Count.Items ) );
+  while managerVideo.Count.Items > 0 do
+    begin
+      p := managerVideo.First.next;
+      video_Del( zglPVideoStream( p ) );
+    end;
+  {$ENDIF}
+
   scr_Destroy();
   gl_Destroy();
   if not appInitedToHandle Then wnd_Destroy();
+
+  {$IFDEF USE_OGG}
+  FreeVorbis();
+  {$ENDIF}
+  {$IFDEF USE_THEORA}
+  FreeTheora();
+  {$ENDIF}
 
   appInitialized := FALSE;
 
@@ -481,7 +522,7 @@ begin
     TEX_FORMAT_EXTENSION:
       begin
         SetLength( managerTexture.Formats, managerTexture.Count.Formats + 1 );
-        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( UTF8String( PAnsiChar( UserData ) ) );
+        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( PAnsiChar( UserData ) );
       end;
     TEX_FORMAT_FILE_LOADER:
       begin
@@ -502,7 +543,7 @@ begin
     SND_FORMAT_EXTENSION:
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
-        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( UTF8String( PAnsiChar( UserData ) ) );
+        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( PAnsiChar( UserData ) );
         managerSound.Formats[ managerSound.Count.Formats ].Decoder   := nil;
       end;
     SND_FORMAT_FILE_LOADER:
@@ -519,6 +560,15 @@ begin
         for i := 0 to managerSound.Count.Formats - 1 do
           if managerSound.Formats[ i ].Extension = zglPSoundDecoder( UserData ).Ext Then
             managerSound.Formats[ i ].Decoder := UserData;
+      end;
+    {$ENDIF}
+    // Video
+    {$IFDEF USE_VIDEO}
+    VIDEO_FORMAT_DECODER:
+      begin
+        SetLength( managerVideo.Decoders, managerVideo.Count.Decoders + 1 );
+        managerVideo.Decoders[ managerVideo.Count.Decoders ] := UserData;
+        INC( managerVideo.Count.Decoders );
       end;
     {$ENDIF}
   end;

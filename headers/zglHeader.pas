@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.02.07           }
+{ date:     2012.02.22           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -111,23 +111,25 @@ const
   SYS_ACTIVATE           = $000007;
   SYS_CLOSE_QUERY        = $000008;
 
-  INPUT_MOUSE_MOVE       = $000040;
-  INPUT_MOUSE_PRESS      = $000041;
-  INPUT_MOUSE_RELEASE    = $000042;
-  INPUT_MOUSE_WHEEL      = $000043;
-  INPUT_KEY_PRESS        = $000050;
-  INPUT_KEY_RELEASE      = $000051;
-  INPUT_KEY_CHAR         = $000052;
+  INPUT_MOUSE_MOVE       = $000020;
+  INPUT_MOUSE_PRESS      = $000021;
+  INPUT_MOUSE_RELEASE    = $000022;
+  INPUT_MOUSE_WHEEL      = $000023;
+  INPUT_KEY_PRESS        = $000030;
+  INPUT_KEY_RELEASE      = $000031;
+  INPUT_KEY_CHAR         = $000032;
 
-  TEX_FORMAT_EXTENSION   = $000010;
-  TEX_FORMAT_FILE_LOADER = $000011;
-  TEX_FORMAT_MEM_LOADER  = $000012;
-  TEX_CURRENT_EFFECT     = $000013;
+  TEX_FORMAT_EXTENSION   = $000100;
+  TEX_FORMAT_FILE_LOADER = $000101;
+  TEX_FORMAT_MEM_LOADER  = $000102;
+  TEX_CURRENT_EFFECT     = $000103;
 
-  SND_FORMAT_EXTENSION   = $000020;
-  SND_FORMAT_FILE_LOADER = $000021;
-  SND_FORMAT_MEM_LOADER  = $000022;
-  SND_FORMAT_DECODER     = $000023;
+  SND_FORMAT_EXTENSION   = $000110;
+  SND_FORMAT_FILE_LOADER = $000111;
+  SND_FORMAT_MEM_LOADER  = $000112;
+  SND_FORMAT_DECODER     = $000113;
+
+  VIDEO_FORMAT_DECODER   = $000130;
 
 var
   zgl_Reg : procedure( What : LongWord; UserData : Pointer );

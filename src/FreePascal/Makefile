@@ -16,26 +16,26 @@ endif
 FPC              = fpc
 DEFINES          = #-dUSE_EXPORT_C -Cccdecl
 FLAGS          	 = -O3 -XsX -CX -Sd $(DEFINES)
-LIBS             = -Fu../../lib/jpeg/$(ARCH)-$(OS) -Fu../../lib/ogg/$(ARCH)-$(OS) -Fu../../lib/zlib/$(ARCH)-$(OS) -Fu../../lib/zip/$(ARCH)-$(OS)
-LIBSPPC          = -Fu../../lib/jpeg/powerpc-$(OS) -Fu../../lib/ogg/powerpc-$(OS) -Fu../../lib/zlib/powerpc-$(OS) -Fu../../lib/zip/powerpc-$(OS)
+LIBS             = -Fu../../lib/jpeg/$(ARCH)-$(OS) -Fu../../lib/ogg/$(ARCH)-$(OS) -Fu../../lib/theora/$(ARCH)-$(OS) -Fu../../lib/zlib/$(ARCH)-$(OS) -Fu../../lib/zip/$(ARCH)-$(OS)
+LIBSPPC          = -Fu../../lib/jpeg/powerpc-$(OS) -Fu../../lib/ogg/powerpc-$(OS) -Fu../../lib/theora/powerpc-$(OS) -Fu../../lib/zlib/powerpc-$(OS) -Fu../../lib/zip/powerpc-$(OS)
 # Linux 32-bit
 LIBS_LINUX32   	 = -Fu../../lib/jpeg/i386-linux -Fu../../lib/ogg/i386-linux -Fu../../lib/zlib/i386-linux -Fu../../lib/zip/i386-linux
 # Win32
 BINUTILS_WIN32 	 = -XPi486-mingw32-
-LIBS_WIN32     	 = -Fu../../lib/jpeg/i386-win32 -Fu../../lib/msvcrt/i386 -Fu../../lib/ogg/i386-win32 -Fu../../lib/zlib/i386-win32 -Fu../../lib/zip/i386-win32
+LIBS_WIN32     	 = -Fu../../lib/jpeg/i386-win32 -Fu../../lib/msvcrt/i386 -Fu../../lib/ogg/i386-win32 -Fu../../lib/theora/i386-win32 -Fu../../lib/zlib/i386-win32 -Fu../../lib/zip/i386-win32
 # Win64
 BINUTILS_WIN64 	 = -XPx86_64-w64-mingw32-
-LIBS_WIN64     	 = -Fu../../lib/jpeg/x86_64-win64 -Fu../../lib/msvcrt/x86_64 -Fu../../lib/ogg/x86_64-win64 -Fu../../lib/zlib/x86_64-win64 -Fu../../lib/zip/x86_64-win64
+LIBS_WIN64     	 = -Fu../../lib/jpeg/x86_64-win64 -Fu../../lib/msvcrt/x86_64 -Fu../../lib/ogg/x86_64-win64 -Fu../../lib/theora/x86_64-win64 -Fu../../lib/zlib/x86_64-win64 -Fu../../lib/zip/x86_64-win64
 # WinCE
 WINCE_FLAGS      = -CpARMv4 -CfSOFT
 BINUTILS_WINCE 	 = -XParm-wince-cegcc-
-LIBS_WINCE     	 = -Fu../../lib/jpeg/arm-wince -Fu../../lib/ogg/arm-wince -Fu../../lib/zlib/arm-wince -Fu../../lib/zip/arm-wince
+LIBS_WINCE     	 = -Fu../../lib/jpeg/arm-wince -Fu../../lib/ogg/arm-wince -Fu../../lib/theora/arm-wince -Fu../../lib/zlib/arm-wince -Fu../../lib/zip/arm-wince
 # Android
 ANDROID_FLAGS    = -CpARMv5 -CfSOFT
 ANDROID_LIB    	 = -Fu$(ANDROID_NDK)/platforms/android-3/arch-arm/usr/lib
 ANDROID_STRIP    = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-strip
 BINUTILS_ANDROID = -XParm-linux-androideabi- -FD$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
-LIBS_ANDROID   	 = -Fu../../lib/jpeg/arm-linux -Fu../../lib/ogg/arm-linux -Fu../../lib/zlib/arm-linux -Fu../../lib/zip/arm-linux -Fu../../lib/chipmunk/arm-linux
+LIBS_ANDROID   	 = -Fu../../lib/jpeg/arm-linux -Fu../../lib/ogg/arm-linux -Fu../../lib/theora/arm-linux -Fu../../lib/zlib/arm-linux -Fu../../lib/zip/arm-linux -Fu../../lib/chipmunk/arm-linux
 
 OUTPUT           = ./
 DESTDIR          = /usr
