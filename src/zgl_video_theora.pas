@@ -203,8 +203,8 @@ end;
 
 function clamp( value : Integer ) : Integer; {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
-  if value > 255 Then
-    Result := 255
+  if value > 2088960 Then
+    Result := 2088960
   else
     if value < 0 Then
       Result := 0
@@ -265,9 +265,9 @@ begin
                 Cb := PByte( Ptr( ycbcr[ 1 ].data ) + ( i shr 1 ) )^ - 128;
                 Cr := PByte( Ptr( ycbcr[ 2 ].data ) + ( i shr 1 ) )^ - 128;
 
-                PByte( Ptr( Data ) + 0 )^ := clamp( ( Y + 13074 * Cr ) shr 13 );
-                PByte( Ptr( Data ) + 1 )^ := clamp( ( Y - 6660 * Cr - 3203 * Cb ) shr 13 );
-                PByte( Ptr( Data ) + 2 )^ := clamp( ( Y + 16531 * Cb ) shr 13 );
+                PByte( Ptr( Data ) + 0 )^ := clamp( Y + 13074 * Cr ) shr 13;
+                PByte( Ptr( Data ) + 1 )^ := clamp( Y - 6660 * Cr - 3203 * Cb ) shr 13;
+                PByte( Ptr( Data ) + 2 )^ := clamp( Y + 16531 * Cb ) shr 13;
                 INC( Data, 4 );
               end;
 
