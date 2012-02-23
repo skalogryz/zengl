@@ -128,6 +128,7 @@ begin
           begin
             glEnable( GL_BLEND );
             glEnable( GL_TEXTURE_2D );
+            glBegin( mode );
           end;
     end;
   while i <= length( Text ) do
