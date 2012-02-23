@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.02.22           }
+{ date:     2012.02.24           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1172,6 +1172,63 @@ var
   snd_StopStream       : procedure( ID : Integer );
   snd_ResumeStream     : procedure( ID : Integer );
 
+// Video
+type
+  zglPVideoStream  = ^zglTVideoStream;
+  zglPVideoDecoder = ^zglTVideoDecoder;
+  zglPVideoManager = ^zglTVideoManager;
+
+  zglTVideoStream = record
+    _private   : record
+      Data    : Pointer;
+      File_   : zglTFile;
+      Memory  : zglTMemory;
+      Decoder : zglPVideoDecoder;
+               end;
+
+    Data       : Pointer;
+    Texture    : zglPTexture;
+    Frame      : Integer;
+    Time       : Double;
+
+    Info       : record
+      Width     : Word;
+      Height    : Word;
+      FrameRate : Single;
+      Duration  : Double;
+                end;
+
+    Loop       : Boolean;
+
+    prev, next : zglPVideoStream;
+  end;
+
+  zglTVideoDecoder = record
+    Extension : UTF8String;
+    Open      : function( var Stream : zglTVideoStream; const FileName : UTF8String ) : Boolean;
+    OpenMem   : function( var Stream : zglTVideoStream; const Memory : zglTMemory ) : Boolean;
+    Update    : procedure( var Stream : zglTVideoStream; Time : Double; var Data : Pointer );
+    Loop      : procedure( var Stream : zglTVideoStream );
+    Close     : procedure( var Stream : zglTVideoStream );
+  end;
+
+  zglTVideoManager = record
+    Count    : record
+      Items    : Integer;
+      Decoders : Integer;
+              end;
+    First    : zglTVideoStream;
+    Decoders : array of zglPVideoDecoder;
+  end;
+
+var
+  video_Add        : function zglPVideoStream;
+  video_Del        : procedure( var Stream : zglPVideoStream );
+  video_OpenFile   : function( const FileName : UTF8String ) : zglPVideoStream;
+  video_OpenMemory : function( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
+  video_Update     : procedure( var Stream : zglPVideoStream; Time : Double );
+
+
 // MATH
 const
   pi      = 3.141592654;
@@ -1677,6 +1734,12 @@ begin
       snd_PauseStream := dlsym( zglLib, 'snd_PauseStream' );
       snd_StopStream := dlsym( zglLib, 'snd_StopStream' );
       snd_ResumeStream := dlsym( zglLib, 'snd_ResumeStream' );
+
+      video_Add := dlsym( zglLib, 'video_Add' );
+      video_Del := dlsym( zglLib, 'video_Del' );
+      video_OpenFile := dlsym( zglLib, 'video_OpenFile' );
+      video_OpenMemory := dlsym( zglLib, 'video_OpenMemory' );
+      video_Update := dlsym( zglLib, 'video_Update' );
 
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );
