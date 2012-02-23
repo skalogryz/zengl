@@ -1222,7 +1222,7 @@ type
   end;
 
 var
-  video_Add        : function zglPVideoStream;
+  video_Add        : function : zglPVideoStream;
   video_Del        : procedure( var Stream : zglPVideoStream );
   video_OpenFile   : function( const FileName : UTF8String ) : zglPVideoStream;
   video_OpenMemory : function( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
