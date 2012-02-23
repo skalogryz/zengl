@@ -43,6 +43,7 @@ type
       Decoder : zglPVideoDecoder;
                end;
 
+    Data       : Pointer;
     Texture    : zglPTexture;
     Frame      : Integer;
     Time       : Double;
@@ -149,16 +150,39 @@ begin
   if Result._private.Decoder.Open( Result^, FileName ) Then
     begin
       Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FFFFFFFF );
-      GetMem( Result._private.Data, Result.Info.Width * Result.Info.Height * 4 );
-      FillChar( Result._private.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
+      GetMem( Result.Data, Result.Info.Width * Result.Info.Height * 4 );
+      FillChar( Result.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
       video_Update( Result, 0 );
     end else
       video_Del( Result );
 end;
 
 function video_OpenMemory( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
+  var
+    i   : Integer;
+    ext : UTF8String;
 begin
+  Result := video_Add();
 
+  ext := u_StrUp( Extension );
+  for i := managerVideo.Count.Decoders - 1 downto 0 do
+    if ext = managerVideo.Decoders[ i ].Extension Then
+      Result._private.Decoder := managerVideo.Decoders[ i ];
+
+  if not Assigned( Result._private.Decoder ) Then
+    begin
+      video_Del( Result );
+      exit;
+    end;
+
+  if Result._private.Decoder.OpenMem( Result^, Memory ) Then
+    begin
+      Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FFFFFFFF );
+      GetMem( Result.Data, Result.Info.Width * Result.Info.Height * 4 );
+      FillChar( Result.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
+      video_Update( Result, 0 );
+    end else
+      video_Del( Result );
 end;
 
 procedure video_Update( var Stream : zglPVideoStream; Time : Double );
@@ -168,10 +192,10 @@ begin
   if not Assigned( Stream ) Then exit;
 
   frame := Stream.Frame;
-  Stream._private.Decoder.Update( Stream^, Time, Stream._private.Data );
+  Stream._private.Decoder.Update( Stream^, Time, Stream.Data );
 
   if Stream.Frame <> frame Then
-    tex_SetData( Stream.Texture, Stream._private.Data, 0, 0, Stream.Info.Width, Stream.Info.Height );
+    tex_SetData( Stream.Texture, Stream.Data, 0, 0, Stream.Info.Width, Stream.Info.Height );
 end;
 
 end.

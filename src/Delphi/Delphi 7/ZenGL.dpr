@@ -65,6 +65,11 @@ uses
   {$ENDIF}
   {$ENDIF}
 
+  {$IFDEF USE_VIDEO}
+  zgl_video,
+  zgl_video_theora,
+  {$ENDIF}
+
   zgl_render,
   zgl_render_2d,
 
@@ -333,6 +338,14 @@ exports
   snd_PauseStream          name prefix + 'snd_PauseStream',
   snd_StopStream           name prefix + 'snd_StopStream',
   snd_ResumeStream         name prefix + 'snd_ResumeStream',
+  {$ENDIF}
+
+  // Video
+  {$IFDEF USE_VIDEO}
+  video_Add                name prefix + 'video_Add',
+  video_Del                name prefix + 'video_Del',
+  video_OpenFile           name prefix + 'video_OpenFile',
+  video_OpenMemory         name prefix + 'video_OpenMemory',
   {$ENDIF}
 
   // Math

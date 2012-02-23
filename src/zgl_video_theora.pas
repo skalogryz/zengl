@@ -27,10 +27,6 @@ unit zgl_video_theora;
 {$ENDIf}
 
 interface
-uses
-  zgl_file,
-  zgl_memory,
-  zgl_video;
 
 const
   THEORA_EXTENSIONS : array[ 0..0 ] of UTF8String = ( 'OGV' );
@@ -39,10 +35,22 @@ implementation
 uses
   zgl_types,
   zgl_main,
+  zgl_file,
+  zgl_memory,
   zgl_lib_ogg,
   zgl_lib_theora,
-  zgl_log,
-  zgl_textures;
+  zgl_textures,
+  zgl_video,
+  zgl_log;
+
+type
+  zglTTheoraData = record
+    SyncState   : ogg_sync_state;
+    StreamState : ogg_stream_state;
+    DecoderCtx  : pth_dec_ctx;
+    Time        : Double;
+    YOffset     : cint;
+  end;
 
 var
   theoraDecoder : zglTVideoDecoder;
@@ -51,16 +59,8 @@ var
   oggSyncState   : ogg_sync_state;
   oggStreamState : ogg_stream_state;
   theoraDecCtx   : pth_dec_ctx;
-
-  theora_p                  : cint;
-  theora_processing_headers : cint;
-
-  videobuf_time : double;
-  frames        : cint;
-
-  ycbcr     : th_ycbcr_buffer;
-  y_offset  : cint;
-  uv_offset : cint;
+  videobuf_time  : double;
+  y_offset       : cint;
 
 function buffer_data( var file_ : zglTFile; oy : pogg_sync_state ) : cint;
   var
@@ -69,12 +69,6 @@ begin
   buffer := ogg_sync_buffer( oy, 4096 );
   Result := file_Read( file_, buffer^, 4096 );
   ogg_sync_wrote( oy, Result );
-end;
-
-procedure queue_page( page : pogg_page );
-begin
-  if theora_p <> 0 Then
-    ogg_stream_pagein( @oggStreamState, page );
 end;
 
 function theora_DecoderOpen( var Stream : zglTVideoStream; const FileName : UTF8String ) : Boolean;
@@ -88,6 +82,8 @@ function theora_DecoderOpen( var Stream : zglTVideoStream; const FileName : UTF8
     comment   : th_comment;
     info      : th_info;
     setupInfo : pth_setup_info;
+    isTheora  : Boolean;
+    headerin  : cint;
 begin
   file_Open( oggFile, FileName, FOM_OPENR );
 
@@ -96,10 +92,9 @@ begin
   th_info_init( @info );
   setupInfo := nil;
 
-  theora_p := 0;
-  theora_processing_headers := 0;
+  isTheora := FALSE;
+  headerin := 0;
   videobuf_time := 0;
-  frames := 0;
 
   state := FALSE;
   while not state do
@@ -110,7 +105,7 @@ begin
         begin
           if ogg_page_bos( @page ) = 0 Then
             begin
-              queue_page( @page );
+              ogg_stream_pagein( @oggStreamState, @page );
               state := TRUE;
               break;
             end;
@@ -119,23 +114,23 @@ begin
           ogg_stream_pagein( @test, @page );
           gotPacket := ogg_stream_packetpeek( @test, @packet );
 
-          theora_processing_headers := th_decode_headerin( @info, @comment, @setupInfo, @packet );
-          if ( gotPacket = 1 ) and ( theora_p = 0 ) and ( theora_processing_headers >= 0 ) Then
+          headerin := th_decode_headerin( @info, @comment, @setupInfo, @packet );
+          if ( gotPacket = 1 ) and ( not isTheora ) and ( headerin >= 0 ) Then
             begin
               oggStreamState := test;
-              theora_p       := 1;
-              if theora_processing_headers <> 0 Then
+              isTheora       := TRUE;
+              if headerin <> 0 Then
                 ogg_stream_packetout( @oggStreamState, nil );
             end else
               ogg_stream_clear( @test );
         end;
     end;
 
-  while ( theora_p <> 0 ) and ( theora_processing_headers <> 0 ) do
+  while isTheora and ( headerin <> 0 ) do
     begin
-      if theora_processing_headers <> 0 Then
+      if headerin <> 0 Then
         ret := ogg_stream_packetpeek( @oggStreamState, @packet );
-      while ( theora_processing_headers <> 0 ) and ( ret <> 0 ) do
+      while ( headerin <> 0 ) and ( ret <> 0 ) do
         begin
           if ret < 0 Then
             begin
@@ -143,21 +138,20 @@ begin
               continue;
             end;
 
-          theora_processing_headers := th_decode_headerin( @info, @comment, @setupInfo, @packet );
-          if theora_processing_headers < 0 Then
+          headerin := th_decode_headerin( @info, @comment, @setupInfo, @packet );
+          if headerin < 0 Then
             begin
               log_Add( 'Theora: Error parsing Theora stream headers' );
               Result := FALSE;
               exit;
             end else
-              if theora_processing_headers > 0 Then
+              if headerin > 0 Then
                 ogg_stream_packetout( @oggStreamState, nil );
-          INC( theora_p );
 
           ret := ogg_stream_packetpeek( @oggStreamState, @packet );
         end;
 
-      if not ( ( theora_p <> 0 ) and ( theora_processing_headers <> 0 ) ) Then break;
+      if not ( isTheora and ( headerin <> 0 ) ) Then break;
 
       if ogg_sync_pageout( @oggSyncState, @page ) <= 0 Then
         begin
@@ -168,21 +162,20 @@ begin
               exit;
             end;
         end else
-          queue_page( @page );
+          ogg_stream_pagein( @oggStreamState, @page );
     end;
 
-  if theora_p <> 0 Then
+  if isTheora Then
     begin
       theoraDecCtx          := th_decode_alloc( @info, setupInfo );
       Stream.Info.Width     := info.frame_width;
       Stream.Info.Height    := info.frame_height;
       Stream.Info.FrameRate := info.fps_numerator / info.fps_denominator;
 
-      y_offset  := info.pic_x + info.frame_width * info.pic_y;
-      uv_offset := y_offset div 2;
+      y_offset := info.pic_x + info.frame_width * info.pic_y;
 
       while ogg_sync_pageout( @oggSyncState, @page ) > 0 do
-        queue_page( @page );
+        ogg_stream_pagein( @oggStreamState, @page );
 
       Result := TRUE;
     end else
@@ -211,6 +204,7 @@ end;
 
 function theora_Update( Time : Double; Data : PByte ) : Integer;
   var
+    ycbcr      : th_ycbcr_buffer;
     Y, Cb, Cr  : Integer;
     i, j       : Integer;
     videoReady : Boolean;
@@ -218,40 +212,31 @@ function theora_Update( Time : Double; Data : PByte ) : Integer;
     page       : ogg_page;
     packet     : ogg_packet;
 begin
-  if videobuf_time > Time Then
-    begin
-      Result := frames;
-      exit;
-    end;
+  Result := 0;
+  if videobuf_time > Time Then exit;
 
   videoReady := FALSE;
   granulePos := -1;
 
-  while ( theora_p <> 0 ) and ( not videoReady ) do
-    begin
-      if ogg_stream_packetout( @oggStreamState, @packet ) > 0 Then
-        begin
-          if th_decode_packetin( theoraDecCtx, @packet, @granulePos ) >= 0 Then
-            begin
-              videobuf_time := th_granule_time( theoraDecCtx, granulePos );
-              videoReady    := Time < videobuf_time;
-              INC( frames );
-            end;
-        end else
-          break;
-    end;
+  while not videoReady do
+    if ogg_stream_packetout( @oggStreamState, @packet ) > 0 Then
+      begin
+        if th_decode_packetin( theoraDecCtx, @packet, @granulePos ) >= 0 Then
+          begin
+            videobuf_time := th_granule_time( theoraDecCtx, granulePos );
+            videoReady    := Time < videobuf_time;
+            INC( Result );
+          end;
+      end else
+        break;
 
-  if ( not videoReady ) and ( file_GetPos( oggFile ) = file_GetSize( oggFile ) ) Then
-    begin
-      Result := frames;
-      exit;
-    end;
+  if ( not videoReady ) and ( file_GetPos( oggFile ) = file_GetSize( oggFile ) ) Then exit;
 
   if not videoReady Then
     begin
       buffer_data( oggFile, @oggSyncState );
       while ogg_sync_pageout( @oggSyncState, @page ) > 0 do
-        queue_page( @page );
+        ogg_stream_pagein( @oggStreamState, @page );
 
       Result := theora_Update( Time, Data );
       exit;
@@ -260,6 +245,8 @@ begin
         th_decode_ycbcr_out( theoraDecCtx, ycbcr );
 
         INC( Data, ( ycbcr[ 0 ].height - 1 ) * ycbcr[ 0 ].width * 4 );
+        INC( ycbcr[ 0 ].data, y_offset );
+        INC( ycbcr[ 0 ].data, y_offset div 2 );
         for j := 0 to ycbcr[ 0 ].height - 1 do
           begin
             for i := 0 to ycbcr[ 0 ].width - 1 do
@@ -285,14 +272,12 @@ begin
           end;
         DEC( Data, ( ycbcr[ 0 ].height - 1 ) * ycbcr[ 0 ].width * 4 );
       end;
-
-  Result := frames;
 end;
 
 procedure theora_DecoderUpdate( var Stream : zglTVideoStream; Time : Double; var Data : Pointer );
 begin
   Stream.Time := Stream.Time + Time / 1000;
-  Stream.Frame := theora_Update( Stream.Time, Data );
+  INC( Stream.Frame, theora_Update( Stream.Time, Data ) );
 end;
 
 procedure theora_DecoderLoop( var Stream : zglTVideoStream );
@@ -301,20 +286,16 @@ end;
 
 procedure theora_DecoderClose( var Stream : zglTVideoStream );
 begin
-  if theora_p <> 0 Then
-    begin
-      ogg_stream_clear( @oggStreamState );
-      th_decode_free( theoraDecCtx );
-
-      theoraDecCtx := nil;
-    end;
+  ogg_stream_clear( @oggStreamState );
+  th_decode_free( theoraDecCtx );
+  theoraDecCtx := nil;
   ogg_sync_clear( @oggSyncState );
 
   file_Close( oggFile );
 end;
 
 initialization
-{$IFDEF USE_VIDEO}
+{$IFDEF USE_THEORA}
   theoraDecoder.Extension := THEORA_EXTENSIONS[ 0 ];
   theoraDecoder.Open      := theora_DecoderOpen;
   theoraDecoder.OpenMem   := theora_DecoderOpenMem;

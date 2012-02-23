@@ -81,7 +81,7 @@ uses
   zgl_screen
   {$IF DEFINED(iOS) or DEFINED(ANDROID)}
   , zgl_touch
-  {$ENDIF}
+  {$IFEND}
   ;
 
 function mouse_X : Integer;
