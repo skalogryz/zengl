@@ -229,7 +229,7 @@ begin
       while ogg_sync_pageout( @TheoraData.SyncState, @page ) > 0 do
         ogg_stream_pagein( @TheoraData.StreamState, @page );
 
-      Result := theora_Update( TheoraData, Time, Data );
+      INC( Result, theora_Update( TheoraData, Time, Data ) );
       exit;
     end else
       begin
