@@ -114,6 +114,9 @@ begin
   if Assigned( Stream._private.Decoder ) Then
     Stream._private.Decoder.Close( Stream^ );
 
+  if Assigned( Stream._private.Memory.Memory ) Then
+    mem_Free( Stream._private.Memory );
+
   FreeMem( Stream.Data );
 
   if managerTexture.Count.Items > 0 Then
