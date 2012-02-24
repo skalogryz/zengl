@@ -1043,6 +1043,8 @@ ZGLEXTERN void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCha
 #define SND_FORMAT_STEREO8  3
 #define SND_FORMAT_STEREO16 4
 
+#define SND_VOLUME_DEFAULT -1
+
 #define SND_ALL           -0x000002
 #define SND_ALL_LOOPED    -0x000003
 #define SND_STREAM        -0x000010
@@ -1162,19 +1164,19 @@ ZGLEXTERN void ( *snd_SetVolume )( zglPSound Sound, int ID, float Volume );
 ZGLEXTERN void ( *snd_SetSpeed )( zglPSound Sound, int ID, float Speed );
 ZGLEXTERN int ( *snd_Get )( zglPSound Sound, int ID, int What );
 #ifdef __CPP__
-ZGLEXTERN int ( *__snd_PlayFile )( const char *FileName, bool Loop );
-static inline int snd_PlayFile( const char *FileName, bool Loop = FALSE )
+ZGLEXTERN int ( *__snd_PlayFile )( const char *FileName, float Volume, bool Loop );
+static inline int snd_PlayFile( const char *FileName, float Volume = SND_VOLUME_DEFAULT, bool Loop = FALSE )
 {
-  return __snd_PlayFile( FileName, Loop );
+  return __snd_PlayFile( FileName, Volume, Loop );
 }
-ZGLEXTERN int ( *__snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
-static inline int snd_PlayMemory( zglTMemory Memory, const char *Extension, bool Loop = FALSE )
+ZGLEXTERN int ( *__snd_PlayMemory )( zglTMemory Memory, const char *Extension, float Volume, bool Loop );
+static inline int snd_PlayMemory( zglTMemory Memory, const char *Extension, float Volume = SND_VOLUME_DEFAULT, bool Loop = FALSE )
 {
-  return __snd_PlayMemory( Memory, Extension, Loop );
+  return __snd_PlayMemory( Memory, Extension, Volume, Loop );
 }
 #else
-ZGLEXTERN int ( *snd_PlayFile )( const char *FileName, bool Loop );
-ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop );
+ZGLEXTERN int ( *snd_PlayFile )( const char *FileName, float Volume, bool Loop );
+ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, float Volume, bool Loop );
 #endif
 ZGLEXTERN void ( *snd_PauseStream )( int ID );
 ZGLEXTERN void ( *snd_StopStream )( int ID );

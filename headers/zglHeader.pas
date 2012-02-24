@@ -1065,6 +1065,8 @@ const
   SND_FORMAT_STEREO8  = 3;
   SND_FORMAT_STEREO16 = 4;
 
+  SND_VOLUME_DEFAULT = -1;
+
   SND_ALL        = -$000002;
   SND_ALL_LOOPED = -$000003;
   SND_STREAM     = -$000010;
@@ -1166,8 +1168,8 @@ var
   snd_SetVolume      : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
   snd_SetSpeed       : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
   snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
-  snd_PlayFile       : function( const FileName : UTF8String; Loop : Boolean = FALSE ) : Integer;
-  snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : UTF8String; Loop : Boolean = FALSE ) : Integer;
+  snd_PlayFile       : function( const FileName : UTF8String; Volume : Single = SND_VOLUME_DEFAULT; Loop : Boolean = FALSE ) : Integer;
+  snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : UTF8String; Volume : Single = SND_VOLUME_DEFAULT; Loop : Boolean = FALSE ) : Integer;
   snd_PauseStream      : procedure( ID : Integer );
   snd_StopStream       : procedure( ID : Integer );
   snd_ResumeStream     : procedure( ID : Integer );
