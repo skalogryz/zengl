@@ -217,8 +217,23 @@ uses
   zgl_lib_theora,
   {$ENDIF}
   {$ENDIF}
-
   zgl_utils;
+
+procedure InitSoundVideo;
+begin
+  {$IFDEF USE_OGG}
+  if InitVorbis() Then
+    log_Add( 'Ogg: Initialized' )
+  else
+    log_Add( 'Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile );
+  {$ENDIF}
+  {$IFDEF USE_THEORA}
+  if InitTheora() Then
+    log_Add( 'Theora: Initialized' )
+  else
+    log_Add( 'Theora: Error while loading library: ' + libtheoradec );
+  {$ENDIF}
+end;
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
 begin
@@ -245,18 +260,7 @@ begin
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Initialize() Then exit;
 
-  {$IFDEF USE_OGG}
-  if InitVorbis() Then
-    log_Add( 'Ogg: Initialized' )
-  else
-    log_Add( 'Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile );
-  {$ENDIF}
-  {$IFDEF USE_THEORA}
-  if InitTheora() Then
-    log_Add( 'Theora: Initialized' )
-  else
-    log_Add( 'Theora: Error while loading library: ' + libtheoradec );
-  {$ENDIF}
+  InitSoundVideo();
 
   wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
@@ -312,6 +316,8 @@ begin
   wndDC     := GetDC( wndHandle );
   {$ENDIF}
   if not gl_Initialize() Then exit;
+
+  InitSoundVideo();
 
   wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
