@@ -152,7 +152,7 @@ begin
 
   if Result._private.Decoder.Open( Result^, FileName ) Then
     begin
-      Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FFFFFFFF );
+      Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FF000000 );
       GetMem( Result.Data, Result.Info.Width * Result.Info.Height * 4 );
       FillChar( Result.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
       video_Update( Result, 0 );
@@ -180,7 +180,7 @@ begin
 
   if Result._private.Decoder.OpenMem( Result^, Memory ) Then
     begin
-      Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FFFFFFFF );
+      Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FF000000 );
       GetMem( Result.Data, Result.Info.Width * Result.Info.Height * 4 );
       FillChar( Result.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
       video_Update( Result, 0 );
