@@ -111,10 +111,10 @@ procedure video_Del( var Stream : zglPVideoStream );
 begin
   if not Assigned( Stream ) Then exit;
 
-  FreeMem( Stream._private.Data );
-
   if Assigned( Stream._private.Decoder ) Then
     Stream._private.Decoder.Close( Stream^ );
+
+  FreeMem( Stream.Data );
 
   if managerTexture.Count.Items > 0 Then
     tex_Del( Stream.Texture );
