@@ -28,6 +28,7 @@ uses
 
   zgl_screen,
   zgl_window,
+  zgl_direct3d,
 
   zgl_timers,
 
@@ -36,48 +37,29 @@ uses
 
   zgl_mouse,
   zgl_keyboard,
-  {$IFDEF ANDROID}
-  zgl_touch,
-  {$ENDIF}
   {$IFDEF USE_JOYSTICK}
   zgl_joystick,
   {$ENDIF}
 
-  zgl_resources,
-
   zgl_textures,
-  {$IFDEF USE_JPG}
   zgl_textures_jpg,
-  {$ENDIF}
-  {$IFDEF USE_PNG}
   zgl_textures_png,
-  {$ENDIF}
-  {$IFDEF USE_TGA}
   zgl_textures_tga,
-  {$ENDIF}
 
+  {$IFDEF USE_TEXTURE_ATLAS}
+  zgl_texture_atlas,
+  {$ENDIF}
   zgl_render_target,
 
   {$IFDEF USE_SOUND}
   zgl_sound,
-  {$IFDEF USE_OGG}
+  zgl_sound_wav,
   zgl_sound_ogg,
   {$ENDIF}
-  {$IFDEF USE_WAV}
-  zgl_sound_wav,
-  {$ENDIF}
-  {$ENDIF}
-
-  {$IFDEF USE_VIDEO}
-  zgl_video,
-  zgl_video_theora,
-  {$ENDIF}
-
-  zgl_render,
-  zgl_render_2d,
 
   zgl_fx,
   zgl_camera_2d,
+  zgl_render_2d,
 
   zgl_font,
   zgl_text,
@@ -99,20 +81,10 @@ uses
 
   zgl_collision_2d,
 
-  zgl_utils
-
-  {$IFDEF USE_EXPORT_C}
-  , zgl_export_c
-  {$ENDIF}
-  ;
+  zgl_utils;
 
 const
-// I hate Apple! :)
-  {$IFDEF MACOSX}
-  prefix = '_';
-  {$ELSE}
   prefix = '';
-  {$ENDIF}
 
 exports
   // Main
@@ -186,21 +158,9 @@ exports
   key_Press                name prefix + 'key_Press',
   key_Last                 name prefix + 'key_Last',
   key_BeginReadText        name prefix + 'key_BeginReadText',
-  key_UpdateReadText       name prefix + 'key_UpdateReadText',
   _key_GetText             name prefix + 'key_GetText',
   key_EndReadText          name prefix + 'key_EndReadText',
   key_ClearState           name prefix + 'key_ClearState',
-
-  // Touch
-  {$IFDEF ANDROID}
-  touch_X                   name prefix + 'touch_X',
-  touch_Y                   name prefix + 'touch_Y',
-  touch_Down                name prefix + 'touch_Down',
-  touch_Up                  name prefix + 'touch_Up',
-  touch_Tap                 name prefix + 'touch_Tap',
-  touch_DblTap              name prefix + 'touch_DblTap',
-  touch_ClearState          name prefix + 'touch_ClearState',
-  {$ENDIF}
 
   // Joystick
   {$IFDEF USE_JOYSTICK}
@@ -212,12 +172,6 @@ exports
   joy_Press                name prefix + 'joy_Press',
   joy_ClearState           name prefix + 'joy_ClearState',
   {$ENDIF}
-
-  res_BeginQueue           name prefix + 'res_BeginQueue',
-  res_EndQueue             name prefix + 'res_EndQueue',
-  res_GetPercentage        name prefix + 'res_GetPercentage',
-  res_GetCompleted         name prefix + 'res_GetCompleted',
-  res_Proc                 name prefix + 'res_Proc',
 
   // Textures
   tex_Add                  name prefix + 'tex_Add',
@@ -232,6 +186,16 @@ exports
   tex_GetData              name prefix + 'tex_GetData',
   tex_Filter               name prefix + 'tex_Filter',
   tex_SetAnisotropy        name prefix + 'tex_SetAnisotropy',
+
+  // Texture Atlases
+  {$IFDEF USE_TEXTURE_ATLAS}
+  atlas_Add                name prefix + 'atlas_Add',
+  atlas_Del                name prefix + 'atlas_Del',
+  atlas_GetFrameCoord      name prefix + 'atlas_GetFrameCoord',
+  atlas_InsertFromTexture  name prefix + 'atlas_InsertFromTexture',
+  atlas_InsertFromFile     name prefix + 'atlas_InsertFromFile',
+  atlas_InsertFromMemory   name prefix + 'atlas_InsertFromMemory',
+  {$ENDIF}
 
   // OpenGL
   Set2DMode                name prefix + 'Set2DMode',
@@ -260,10 +224,8 @@ exports
   fx2d_SetVCA              name prefix + 'fx2d_SetVCA',
   fx2d_SetVertexes         name prefix + 'fx2d_SetVertexes',
   fx2d_SetScale            name prefix + 'fx2d_SetScale',
-  fx2d_SetRotatingPivot    name prefix + 'fx2d_SetRotatingPivot',
 
   // Camera 2D
-  cam2d_Init               name prefix + 'cam2d_Init',
   cam2d_Set                name prefix + 'cam2d_Set',
   cam2d_Get                name prefix + 'cam2d_Get',
 
@@ -283,7 +245,6 @@ exports
   // Sprite Engine 2D
   {$IFDEF USE_SENGINE}
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
-  sengine2d_AddCustom      name prefix + 'sengine2d_AddCustom',
   sengine2d_DelSprite      name prefix + 'sengine2d_DelSprite',
   sengine2d_ClearAll       name prefix + 'sengine2d_ClearAll',
   sengine2d_Set            name prefix + 'sengine2d_Set',
@@ -348,18 +309,9 @@ exports
   snd_Get                  name prefix + 'snd_Get',
   snd_SetSpeed             name prefix + 'snd_SetSpeed',
   snd_PlayFile             name prefix + 'snd_PlayFile',
-  snd_PlayMemory           name prefix + 'snd_PlayMemory',
-  snd_PauseStream          name prefix + 'snd_PauseStream',
-  snd_StopStream           name prefix + 'snd_StopStream',
-  snd_ResumeStream         name prefix + 'snd_ResumeStream',
-  {$ENDIF}
-
-  // Video
-  {$IFDEF USE_VIDEO}
-  video_Add                name prefix + 'video_Add',
-  video_Del                name prefix + 'video_Del',
-  video_OpenFile           name prefix + 'video_OpenFile',
-  video_OpenMemory         name prefix + 'video_OpenMemory',
+  snd_PauseFile            name prefix + 'snd_PauseFile',
+  snd_StopFile             name prefix + 'snd_StopFile',
+  snd_ResumeFile           name prefix + 'snd_ResumeFile',
   {$ENDIF}
 
   // Math
@@ -411,10 +363,6 @@ exports
   _file_GetExtension       name prefix + 'file_GetExtension',
   _file_GetDirectory       name prefix + 'file_GetDirectory',
   file_SetPath             name prefix + 'file_SetPath',
-  {$IFDEF USE_ZIP}
-  file_OpenArchive         name prefix + 'file_OpenArchive',
-  file_CloseArchive        name prefix + 'file_CloseArchive',
-  {$ENDIF}
 
   mem_LoadFromFile         name prefix + 'mem_LoadFromFile',
   mem_SaveToFile           name prefix + 'mem_SaveToFile',
@@ -426,34 +374,9 @@ exports
   mem_Free                 name prefix + 'mem_Free',
 
   u_SortList               name prefix + 'u_SortList'
-
-  {$IFDEF USE_EXPORT_C}
-  ,
-  _wnd_SetCaption          name prefix + '_wnd_SetCaption',
-  _log_Add                 name prefix + '_log_Add',
-  _key_BeginReadText       name prefix + '_key_BeginReadText',
-  _key_UpdateReadText      name prefix + '_key_UpdateReadText',
-  _tex_LoadFromFile        name prefix + '_tex_LoadFromFile',
-  _tex_LoadFromMemory      name prefix + '_tex_LoadFromMemory',
-  _font_LoadFromFile       name prefix + '_font_LoadFromFile',
-  _text_Draw               name prefix + '_text_Draw',
-  _text_DrawEx             name prefix + '_text_DrawEx',
-  _text_DrawInRect         name prefix + '_text_DrawInRect',
-  _text_DrawInRectEx       name prefix + '_text_DrawInRectEx',
-  _text_GetWidth           name prefix + '_text_GetWidth',
-  _text_GetHeight          name prefix + '_text_GetHeight',
-  {$IFDEF USE_SOUND}
-  _snd_LoadFromFile        name prefix + '_snd_LoadFromFile',
-  _snd_LoadFromMemory      name prefix + '_snd_LoadFromMemory',
-  _snd_PlayFile            name prefix + '_snd_PlayFile',
-  _snd_PlayMemory          name prefix + '_snd_PlayMemory'
-  {$ENDIF}
-  {$ENDIF}
   ;
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 
 begin
 end.

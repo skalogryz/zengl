@@ -1,8 +1,6 @@
 program demo05;
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 {$DEFINE STATIC}
 
 uses
@@ -37,7 +35,7 @@ type
 end;
 
 var
-  dirRes      : UTF8String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
+  dirRes      : String {$IFNDEF DARWIN} = '../data/' {$ENDIF};
   fntMain     : zglPFont;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
@@ -52,9 +50,10 @@ procedure Init;
   var
     i : Integer;
 begin
-  // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует инициализировать её стандартными значениями.
-  // EN: Camera must be initialized, because camera structure is zero-filled by default.
-  cam2d_Init( camMain );
+  // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует для масштаба установить 1.
+  // EN: Zoom must be set to 1, because camera structure is zero-filled by default.
+  camMain.Zoom.X := 1;
+  camMain.Zoom.Y := 1;
 
   // RU: Загружаем текстуру.
   // $FF000000 - указывает на то, что бы использовать альфа-канал из изображения.
@@ -261,6 +260,12 @@ Begin
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   wnd_SetCaption( '05 - Sprites 2D' );
 
