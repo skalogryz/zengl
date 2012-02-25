@@ -189,28 +189,30 @@ begin
 
   {$IFNDEF FPC}
   if SizeOf( Char ) = 2 Then
-    begin
-      len := 2;
-      wndCaptionW := PWideChar( wndCaption );
-    end else
+    len := 2
+  else
   {$ENDIF}
   len := 1;
-  if len = 1 Then
-    begin
-      if appFlags and APP_USE_UTF8 = 0 Then
-        wndCaption := AnsiToUtf8( wndCaption );
-      len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
-      if Assigned( wndCaptionW ) Then
-        FreeMem( wndCaptionW );
-      GetMem( wndCaptionW, len * 2 + 2 );
-      wndCaptionW[ len ] := #0;
-      MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
-      if appFlags and APP_USE_UTF8 = 0 Then
-        wndCaption := wndCaptionW;
-    end;
-
   if wndHandle <> 0 Then
-    SetWindowTextW( wndHandle, wndCaptionW );
+    begin
+      if len = 1 Then
+        begin
+          if appFlags and APP_USE_UTF8 = 0 Then
+            wndCaption := AnsiToUtf8( wndCaption );
+          len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
+          if Assigned( wndCaptionW ) Then
+            FreeMem( wndCaptionW );
+          GetMem( wndCaptionW, len * 2 + 2 );
+          wndCaptionW[ len ] := #0;
+          MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
+
+          SetWindowTextW( wndHandle, wndCaptionW );
+        end else
+          begin
+            wndCaptionW := PWideChar( u_GetPChar( wndCaption ) );
+            SetWindowTextW( wndHandle, wndCaptionW );
+          end;
+    end;
 end;
 
 procedure wnd_SetSize( Width, Height : Integer );
