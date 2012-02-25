@@ -40,7 +40,6 @@ const
   FX2D_VCA        = $000004;
   FX2D_VCHANGE    = $000008;
   FX2D_SCALE      = $000010;
-  FX2D_RPIVOT     = $000020;
 
   FX_BLEND        = $100000;
   FX_COLOR        = $200000;
@@ -53,7 +52,6 @@ procedure fx2d_SetColor( Color : LongWord );
 procedure fx2d_SetVCA( c1, c2, c3, c4 : LongWord; a1, a2, a3, a4 : Byte );
 procedure fx2d_SetVertexes( x1, y1, x2, y2, x3, y3, x4, y4 : Single );
 procedure fx2d_SetScale( scaleX, scaleY : Single );
-procedure fx2d_SetRotatingPivot( X, Y : Single );
 
 var
   // FX2D_COLORMIX
@@ -75,18 +73,10 @@ var
   // FX2D_SCALE
   fx2dSX, fx2dSY : Single;
 
-  // FX2D_RPIVOT
-  fx2dRPX, fx2dRPY : Single;
-
 implementation
 uses
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
   zgl_render_2d;
 
 procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
@@ -215,12 +205,6 @@ procedure fx2d_SetScale( scaleX, scaleY : Single );
 begin
   fx2dSX := scaleX;
   fx2dSY := scaleY;
-end;
-
-procedure fx2d_SetRotatingPivot( X, Y : Single );
-begin
-  fx2dRPX := X;
-  fx2dRPY := Y;
 end;
 
 initialization

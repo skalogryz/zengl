@@ -44,11 +44,11 @@
   <CompilerOptions>
     <Version Value="9"/>
     <Target>
-      <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo06"/>
+      <Filename Value="../../../bin/$(TargetCPU)/demo06"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

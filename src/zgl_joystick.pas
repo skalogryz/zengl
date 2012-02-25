@@ -27,7 +27,7 @@ interface
 uses
   BaseUnix;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
 uses
   Windows;
 {$ENDIF}
@@ -53,13 +53,13 @@ const
   JSIOCGAXES    = -2147390959;
   JSIOCGBUTTONS = -2147390958;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   type
-    PJOYCAPSW = ^TJOYCAPSW;
-    TJOYCAPSW = packed record
+    PJOYCAPS = ^TJOYCAPS;
+    TJOYCAPS = packed record
       wMid: Word;
       wPid: Word;
-      szPname: array[ 0..31 ] of WideChar;
+      szPname: array[ 0..31 ] of AnsiChar;
       wXmin: LongWord;
       wXmax: LongWord;
       wYmin: LongWord;
@@ -79,8 +79,8 @@ const
       wMaxAxes: LongWord;
       wNumAxes: LongWord;
       wMaxButtons: LongWord;
-      szRegKey: array[ 0..31 ] of WideChar;
-      szOEMVxD: array[ 0..259 ] of WideChar;
+      szRegKey: array[ 0..31 ] of AnsiChar;
+      szOEMVxD: array[ 0..259 ] of AnsiChar;
   end;
 
   type
@@ -130,14 +130,14 @@ const
   JOYCAPS_POVCTS  = 64;
 
   function joyGetNumDevs : LongWord; stdcall; external 'winmm.dll' name 'joyGetNumDevs';
-  function joyGetDevCapsW( uJoyID : LongWord; lpCaps : PJOYCAPSW; uSize : LongWord ) : LongWord; stdcall; external 'winmm.dll' name 'joyGetDevCapsW';
+  function joyGetDevCaps( uJoyID : LongWord; lpCaps : PJOYCAPS; uSize : LongWord ) : LongWord; stdcall; external 'winmm.dll' name 'joyGetDevCapsA';
   function joyGetPosEx( uJoyID : LongWord; lpInfo : PJOYINFOEX ) : LongWord; stdcall; external 'winmm.dll' name 'joyGetPosEx';
 {$ENDIF}
 
 type
   zglPJoyInfo = ^zglTJoyInfo;
   zglTJoyInfo = record
-    Name   : UTF8String;
+    Name   : AnsiString;
     Count  : record
       Axes    : Integer;
       Buttons : Integer;
@@ -162,8 +162,8 @@ type
     device  : LongInt;
     axesMap : array[ 0..ABS_MAX - 1 ] of Byte;
     {$ENDIF}
-    {$IFDEF WINDESKTOP}
-    caps    : TJOYCAPSW;
+    {$IFDEF WINDOWS}
+    caps    : TJOYCAPS;
     axesMap : array[ 0..5 ] of Byte;
     {$ENDIF}
     Info    : zglTJoyInfo;
@@ -189,8 +189,8 @@ const
 {$IFDEF LINUX}
   JS_AXIS : array[ 0..17 ] of Byte = ( JOY_AXIS_X, JOY_AXIS_Y, JOY_AXIS_Z, JOY_AXIS_U, JOY_AXIS_V, JOY_AXIS_R, JOY_AXIS_Z, JOY_AXIS_R, 0, 0, 0, 0, 0, 0, 0, 0, JOY_POVX, JOY_POVY );
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-  JS_AXIS : array[ 0..5 ] of LongWord = ( 17 {X}, 19 {Y}, 21 {Z}, 26 {R}, 28 {U}, 30 {V} );
+{$IFDEF WINDOWS}
+  JS_AXIS : array[ 0..5 ] of LongWord = ( 9 {X}, 11 {Y}, 13 {Z}, 18 {R}, 20 {U}, 22 {V} );
 {$ENDIF}
 
 function  joy_Init : Byte;
@@ -218,7 +218,7 @@ var
 function joy_Init : Byte;
   var
     i, j : Integer;
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
     axis : Integer;
     caps : PLongWord;
   {$ENDIF}
@@ -270,12 +270,12 @@ begin
           break;
     end;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   j := joyGetNumDevs();
   for i := 0 to j - 1 do
-    if joyGetDevCapsW( i, @joyArray[ i ].caps, SizeOf( TJOYCAPSW ) ) = 0 Then
+    if joyGetDevCaps( i, @joyArray[ i ].caps, SizeOf( TJOYCAPS ) ) = 0 Then
       begin
-        joyArray[ i ].Info.Name          := u_GetUTF8String( joyArray[ i ].caps.szPname );
+        joyArray[ i ].Info.Name          := joyArray[ i ].caps.szPname;
         joyArray[ i ].Info.Count.Axes    := joyArray[ i ].caps.wNumAxes;
         joyArray[ i ].Info.Count.Buttons := joyArray[ i ].caps.wNumButtons;
 
@@ -345,7 +345,7 @@ procedure joy_Proc;
   {$IFDEF LINUX}
     event : js_event;
   {$ENDIF}
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
     j, a  : Integer;
     btn   : Integer;
     state : TJOYINFOEX;
@@ -389,7 +389,7 @@ begin
         end;
     end;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   state.dwSize := SizeOf( TJOYINFOEX );
   for i := 0 to joyCount - 1 do
     begin

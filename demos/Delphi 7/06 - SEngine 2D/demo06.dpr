@@ -34,20 +34,8 @@ uses
   {$ENDIF}
   ;
 
-type
-  zglPMikuSprite = ^zglTMikuSprite;
-  zglTMikuSprite = record
-    // RU: Обязательная часть нового типа спрайта.
-    // EN: New type should start with this.
-    Sprite : zglTSprite2D;
-
-    // RU: Новые параметры.
-    // EN: New params.
-    Speed  : zglTPoint2D;
-  end;
-
 var
-  dirRes    : UTF8String = '../data/';
+  dirRes    : String = '../data/';
   fntMain   : zglPFont;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
@@ -55,32 +43,36 @@ var
   sengine2d : zglTSEngine2D;
 
 // Miku
-procedure MikuInit( var Miku : zglTMikuSprite );
+procedure MikuInit( const Sprite : zglPSprite2D );
 begin
-  with Miku, Miku.Sprite do
+  Sprite.X := 800 + random( 800 );
+  Sprite.Y := random( 600 - 128 );
+  // RU: Задаем скорость движения. В пользовательском параметре Data выделим память под структуру zglTPoint2D.
+  // EN: Set the moving speed. Allocate memory for structure zglTPoint2D in userspace parameter "Data".
+  zgl_GetMem( Sprite.Data, SizeOf( zglTPoint2D ) );
+  with zglTPoint2D( Sprite.Data^ ) do
     begin
-      X := 800 + random( 800 );
-      Y := random( 600 - 128 );
-
-      // RU: Задаем скорость движения.
-      // EN: Set the moving speed.
-      Speed.X := -random( 10 ) / 5 - 0.5;
-      Speed.Y := ( random( 10 ) - 5 ) / 5;
+      X := -random( 10 ) / 5 - 0.5;
+      Y := ( random( 10 ) - 5 ) / 5;
     end;
 end;
 
-procedure MikuDraw( var Miku : zglTMikuSprite );
+procedure MikuDraw( const Sprite : zglPSprite2D );
 begin
-  with Miku.Sprite do
+  with Sprite^ do
     asprite2d_Draw( Texture, X, Y, W, H, Angle, Round( Frame ), Alpha, FxFlags );
 end;
 
-procedure MikuProc( var Miku : zglTMikuSprite );
+procedure MikuProc( const Sprite : zglPSprite2D );
+  var
+    speed : zglPPoint2D;
 begin
-  with Miku, Miku.Sprite do
+  with Sprite^ do
     begin
-      X := X + Speed.X;
-      Y := Y + Speed.Y;
+      speed := Data;
+
+      X := X + speed.X;
+      Y := Y + speed.Y;
       Frame := Frame + ( abs( speed.X ) + abs( speed.Y ) ) / 25;
       if Frame > 8 Then
         Frame := 1;
@@ -94,8 +86,11 @@ begin
     end;
 end;
 
-procedure MikuFree( var Miku : zglTMikuSprite );
+procedure MikuFree( const Sprite : zglPSprite2D );
 begin
+  // RU: Очистим ранее выделенную память.
+  // EN: Free the memory allocated for Data.
+  zgl_FreeMem( Sprite.Data );
 end;
 
 // RU: Добавить 100 спрайтов.
@@ -109,7 +104,7 @@ begin
   // EN: For adding sprite to sprite engine must be set next parameters: texture, layer(Z-coordinate) and
   // pointers to Initialization, Render, Process and Destroy functions.
   for i := 1 to 100 do
-    sengine2d_AddCustom( texMiku, SizeOf( zglTMikuSprite ), random( 10 ), @MikuInit, @MikuDraw, @MikuProc, @MikuFree );
+    sengine2d_AddSprite( texMiku, random( 10 ), @MikuInit, @MikuDraw, @MikuProc, @MikuFree );
 end;
 
 // RU: Удалить 100 спрайтов.

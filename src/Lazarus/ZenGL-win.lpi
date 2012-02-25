@@ -15,9 +15,10 @@
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="3"/>
+      <MinorVersionNr Value="2"/>
+      <RevisionNr Value="6"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.3.0"/>
+      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.2.6"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -34,7 +35,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="50">
+    <Units Count="44">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -116,9 +117,9 @@
         <UnitName Value="zgl_opengl_all"/>
       </Unit15>
       <Unit16>
-        <Filename Value="../zgl_render.pas"/>
+        <Filename Value="../zgl_opengl_simple.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_render"/>
+        <UnitName Value="zgl_opengl_simple"/>
       </Unit16>
       <Unit17>
         <Filename Value="../zgl_primitives_2d.pas"/>
@@ -226,9 +227,9 @@
         <UnitName Value="zgl_particles_2d"/>
       </Unit37>
       <Unit38>
-        <Filename Value="../zgl_touch.pas"/>
+        <Filename Value="../zgl_texture_atlas.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_touch"/>
+        <UnitName Value="zgl_texture_atlas"/>
       </Unit38>
       <Unit39>
         <Filename Value="../zgl_joystick.pas"/>
@@ -236,53 +237,23 @@
         <UnitName Value="zgl_joystick"/>
       </Unit39>
       <Unit40>
-        <Filename Value="../zgl_opengles.pas"/>
+        <Filename Value="../zgl_msvcrt.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengles"/>
+        <UnitName Value="zgl_msvcrt"/>
       </Unit40>
       <Unit41>
-        <Filename Value="../zgl_opengles_all.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengles_all"/>
-      </Unit41>
-      <Unit42>
-        <Filename Value="../zgl_resources.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_resources"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="../zgl_lib_msvcrt.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_lib_msvcrt"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="../zgl_lib_zip.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_lib_zip"/>
-      </Unit44>
-      <Unit45>
         <Filename Value="../zgl_config.cfg"/>
         <IsPartOfProject Value="True"/>
-      </Unit45>
-      <Unit46>
-        <Filename Value="../zgl_export_c.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_export_c"/>
-      </Unit46>
-      <Unit47>
+      </Unit41>
+      <Unit42>
         <Filename Value="../zgl_fpc.cfg"/>
         <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
+      </Unit42>
+      <Unit43>
         <Filename Value="../zgl_render_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_render_2d"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="../zgl_textures_pvr.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_textures_pvr"/>
-      </Unit49>
+      </Unit43>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -292,7 +263,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp"/>
     </SearchPaths>
     <Parsing>

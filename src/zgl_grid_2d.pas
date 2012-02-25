@@ -45,13 +45,8 @@ implementation
 uses
   zgl_application,
   zgl_screen,
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
   zgl_render_2d,
   zgl_camera_2d;
 
@@ -178,17 +173,14 @@ begin
         ijV := 1;
       end;
 
-  i := length( Texture.FramesCoord ) - 1;
-  if Frame > i Then
-    DEC( Frame, ( ( Frame - 1 ) div i ) * i )
-  else
-    if Frame < 1 Then
-      INC( Frame, ( abs( Frame ) div i + 1 ) * i );
-
-  tX := Texture.FramesCoord[ Frame, 0 ].X;
-  tY := Texture.V - Texture.FramesCoord[ Frame, 0 ].Y;
-  u  := ( Texture.FramesCoord[ Frame, 1 ].X - Texture.FramesCoord[ Frame, 0 ].X ) / ( Grid.Cols - 1 );
-  v  := ( Texture.FramesCoord[ Frame, 0 ].Y - Texture.FramesCoord[ Frame, 2 ].Y ) / ( Grid.Rows - 1 );
+  u := Texture.U / Texture.FramesX;
+  v := Texture.V / Texture.FramesY;
+  tY := ( Frame - 1 ) div Texture.FramesX;
+  tX := ( Frame - 1 ) - tY * Texture.FramesX;
+  tX := tX * u;
+  tY := tY * v;
+  u := u / ( Grid.Cols - 1 );
+  v := v / ( Grid.Rows - 1 );
 
   if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
