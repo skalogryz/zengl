@@ -52,7 +52,6 @@ type
     StreamState : ogg_stream_state;
     DecoderCtx  : pth_dec_ctx;
     Time        : Double;
-    YOffset     : cint;
   end;
 
 var
@@ -165,7 +164,6 @@ begin
   if isTheora Then
     begin
       TheoraData.DecoderCtx := th_decode_alloc( @info, setupInfo );
-      TheoraData.YOffset    := info.pic_x + info.frame_width * info.pic_y;
 
       Width     := info.frame_width;
       Height    := info.frame_height;
@@ -236,9 +234,6 @@ begin
         th_decode_ycbcr_out( TheoraData.DecoderCtx, ycbcr );
 
         INC( Data, ( ycbcr[ 0 ].height - 1 ) * ycbcr[ 0 ].width * 4 );
-        INC( ycbcr[ 0 ].data, TheoraData.YOffset );
-        INC( ycbcr[ 1 ].data, TheoraData.YOffset div 2 );
-        INC( ycbcr[ 2 ].data, TheoraData.YOffset div 2 );
         for j := 0 to ycbcr[ 0 ].height - 1 do
           begin
             for i := 0 to ycbcr[ 0 ].width - 1 do
