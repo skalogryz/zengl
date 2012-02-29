@@ -163,7 +163,7 @@ var
   {$ENDIF}
   {$IFDEF ANDROID}
   appRestore : Boolean;
-  {$ENDI}
+  {$ENDIF}
   appShowCursor : Boolean;
 
   appdt : Double;
