@@ -64,6 +64,9 @@ const
   SYS_iOS_MEMORY_WARNING     = $000010;
   SYS_iOS_CHANGE_ORIENTATION = $000011;
   {$ENDIF}
+  {$IFDEF ANDROID}
+  SYS_ANDROID_RESTORE = $00000015;
+  {$ENDIF}
 
   INPUT_MOUSE_MOVE       = $000020;
   INPUT_MOUSE_PRESS      = $000021;
@@ -479,6 +482,13 @@ begin
       begin
         app_POrientation := UserData;
         if not Assigned( UserData ) Then app_POrientation := app_ZeroOrientation;
+      end;
+    {$ENDIF}
+    {$IFDEF ANDROID}
+    SYS_ANDROID_RESTORE:
+      begin
+        app_PRestore := UserData;
+        if not Assigned( UserData ) Then app_PRestore := app_ZeroProc;
       end;
     {$ENDIF}
     // Input events

@@ -143,6 +143,9 @@ var
   app_PMemoryWarn  : procedure;
   app_POrientation : procedure( orientation : UIInterfaceOrientation );
   {$ENDIF}
+  {$IFDEF ANDROID}
+  app_PRestore : procedure;
+  {$ENDIF}
 
   {$IFDEF USE_X11}
   appCursor : TCursor = None;
@@ -158,6 +161,9 @@ var
   appPoolInitialized : Boolean;
   appDelegate        : zglCAppDelegate;
   {$ENDIF}
+  {$IFDEF ANDROID}
+  appRestore : Boolean;
+  {$ENDI}
   appShowCursor : Boolean;
 
   appdt : Double;
@@ -1543,6 +1549,11 @@ procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; va
 begin
   isCopy     := 0;
   appWorkDir := env^.GetStringUTFChars( @env, path, isCopy );
+
+  if appRestore Then
+    app_PRestore();
+
+  appRestore := TRUE;
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( var env : JNIEnv; var thiz : jobject; Width, Height : jint );
