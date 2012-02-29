@@ -22,10 +22,6 @@ unit zgl_video_theora;
 
 {$I zgl_config.cfg}
 
-{$IFDEF USE_THEORA_STATIC}
-  {$LINKLIB libtheoradec.a}
-{$ENDIf}
-
 interface
 
 const
