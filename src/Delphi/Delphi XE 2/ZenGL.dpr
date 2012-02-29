@@ -67,7 +67,9 @@ uses
 
   {$IFDEF USE_VIDEO}
   zgl_video,
+  {$IFDEF USE_THEORA}
   zgl_video_theora,
+  {$ENDIF}
   {$ENDIF}
 
   zgl_render,
