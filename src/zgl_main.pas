@@ -225,16 +225,20 @@ uses
 procedure InitSoundVideo;
 begin
   {$IFDEF USE_OGG}
-  if InitVorbis() Then
-    log_Add( 'Ogg: Initialized' )
+  if not InitVorbis() Then
+    {$IFNDEF USE_OGG_STATIC}
+    log_Add( 'Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile )
+    {$ENDIF}
   else
-    log_Add( 'Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile );
+    log_Add( 'Ogg: Initialized' );
   {$ENDIF}
   {$IFDEF USE_THEORA}
-  if InitTheora() Then
-    log_Add( 'Theora: Initialized' )
+  if not InitTheora() Then
+    {$IFNDEF USE_THEORA_STATIC}
+    log_Add( 'Theora: Error while loading library: ' + libtheoradec )
+    {$ENDIF}
   else
-    log_Add( 'Theora: Error while loading library: ' + libtheoradec );
+    log_Add( 'Theora: Initialized' );
   {$ENDIF}
 end;
 
