@@ -36,6 +36,7 @@ uses
   zgl_utils
   ;
 
+{$IFNDEF USE_THEORA_STATIC}
 const
 {$IFDEF LINUX}
   libtheoradec  = 'libtheoradec.so.1';
@@ -45,6 +46,7 @@ const
 {$ENDIF}
 {$IFDEF MACOSX}
   libtheoradec  = 'libtheoradec.1.dylib';
+{$ENDIF}
 {$ENDIF}
 
 type
