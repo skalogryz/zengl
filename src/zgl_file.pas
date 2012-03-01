@@ -114,12 +114,14 @@ uses
 
 var
   filePath : UTF8String = '';
-  {$IFDEF WINDOWS}
-  wideStr : PWideChar;
-  {$ENDIF}
   {$IFDEF iOS}
   iosFileManager : NSFileManager;
   {$ENDIF}
+
+{$IFDEF WINDOWS}
+threadvar
+  wideStr : PWideChar;
+{$ENDIF}
 
 function GetDir( const Path : UTF8String ) : UTF8String;
   var
