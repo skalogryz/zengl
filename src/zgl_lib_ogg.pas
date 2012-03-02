@@ -338,6 +338,12 @@ var
   vorbisInit : Boolean;
 
 implementation
+{$IFDEF MACOSX}
+{$IFNDEF USE_OGG_STATIC}
+uses
+  zgl_application;
+{$ENDIF}
+{$ENDIF}
 
 {$IFNDEF USE_OGG_STATIC}
 var
@@ -364,7 +370,7 @@ begin
   oggLibrary := dlopen( libogg );
   {$ENDIF}
   {$IFDEF MACOSX}
-  oggLibrary := dlopen( PAnsiChar( app_WorkDir + 'Contents/Frameworks/' + libogg ), $001 );
+  oggLibrary := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libogg ), $001 );
   {$ENDIF}
 
   if oggLibrary <> LIB_ERROR Then
@@ -415,8 +421,8 @@ begin
       vorbisfileLibrary := dlopen( libvorbisfile );
       {$ENDIF}
       {$IFDEF MACOSX}
-      vorbisLibrary     := dlopen( PAnsiChar( app_WorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
-      vorbisfileLibrary := dlopen( PAnsiChar( app_WorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );
+      vorbisLibrary     := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
+      vorbisfileLibrary := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );
       {$ENDIF}
 
       if ( vorbisLibrary <> LIB_ERROR ) and ( vorbisfileLibrary <> LIB_ERROR ) Then
