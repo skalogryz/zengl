@@ -259,6 +259,7 @@ type
 
 function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
 function AudioSessionSetProperty( inID : PAnsiChar; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
 {$ENDIF}
 
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
@@ -404,14 +405,15 @@ begin
   {$ENDIF}
   {$IFDEF iOS}
   log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
-  oalDevice := alcOpenDevice( nil );
-  if Assigned( oalDevice ) and ( sndAllowBackgroundMusic = 1 ) Then
+  if sndAllowBackgroundMusic = 1 Then
     begin
       AudioSessionInitialize( nil, nil, kAudioSessionEndInterruption, nil );
       sessionCategory := LongWord( kAudioSessionCategory_MediaPlayback );
       AudioSessionSetProperty( kAudioSessionProperty_AudioCategory, SizeOf( sessionCategory ), @sessionCategory );
       AudioSessionSetProperty( kAudioSessionProperty_OverrideCategoryMixWithOthers, SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+      AudioSessionSetActive( TRUE );
     end;
+  oalDevice := alcOpenDevice( nil );
   {$ELSE}
   if not Assigned( oalDevice ) Then
     begin
