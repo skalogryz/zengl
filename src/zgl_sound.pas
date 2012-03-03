@@ -405,7 +405,8 @@ begin
   {$ENDIF}
   {$IFDEF iOS}
   log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
-  if sndAllowBackgroundMusic = 1 Then
+  oalDevice := alcOpenDevice( nil );
+  if Assigned( oalDevice ) and ( sndAllowBackgroundMusic = 1 ) Then
     begin
       AudioSessionInitialize( nil, nil, kAudioSessionEndInterruption, nil );
       sessionCategory := LongWord( kAudioSessionCategory_MediaPlayback );
@@ -413,7 +414,6 @@ begin
       AudioSessionSetProperty( kAudioSessionProperty_OverrideCategoryMixWithOthers, SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
       AudioSessionSetActive( TRUE );
     end;
-  oalDevice := alcOpenDevice( nil );
   {$ELSE}
   if not Assigned( oalDevice ) Then
     begin
