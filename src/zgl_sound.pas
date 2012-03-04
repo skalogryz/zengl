@@ -218,7 +218,7 @@ const
 var
   sndAllowBackgroundMusic : LongWord;
 
-function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : Pointer; inClientData : Pointer ) : Pointer; cdecl; external;
 function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
 function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
 {$ENDIF}
@@ -377,7 +377,7 @@ begin
   {$IFDEF iOS}
   log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
   oalDevice := alcOpenDevice( nil );
-  if AudioSessionInitialize( nil, nil, 0, nil ) = nil Then
+  if AudioSessionInitialize( nil, nil, nil, nil ) = nil Then
     begin
       sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
       AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
