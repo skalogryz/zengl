@@ -19,7 +19,7 @@ FLAGS          	 = -O3 -XsX -CX -Sd $(DEFINES)
 LIBS             = -Fu../../lib/jpeg/$(ARCH)-$(OS) -Fu../../lib/ogg/$(ARCH)-$(OS) -Fu../../lib/theora/$(ARCH)-$(OS) -Fu../../lib/zlib/$(ARCH)-$(OS) -Fu../../lib/zip/$(ARCH)-$(OS)
 LIBSPPC          = -Fu../../lib/jpeg/powerpc-$(OS) -Fu../../lib/ogg/powerpc-$(OS) -Fu../../lib/theora/powerpc-$(OS) -Fu../../lib/zlib/powerpc-$(OS) -Fu../../lib/zip/powerpc-$(OS)
 # Linux 32-bit
-LIBS_LINUX32   	 = -Fu../../lib/jpeg/i386-linux -Fu../../lib/ogg/i386-linux -Fu../../lib/zlib/i386-linux -Fu../../lib/zip/i386-linux
+LIBS_LINUX32   	 = -Fu../../lib/jpeg/i386-linux -Fu../../lib/ogg/i386-linux -Fu../../lib/theora/i386-linux -Fu../../lib/zlib/i386-linux -Fu../../lib/zip/i386-linux
 # Win32
 BINUTILS_WIN32 	 = -XPi486-mingw32-
 LIBS_WIN32     	 = -Fu../../lib/jpeg/i386-win32 -Fu../../lib/msvcrt/i386 -Fu../../lib/ogg/i386-win32 -Fu../../lib/theora/i386-win32 -Fu../../lib/zlib/i386-win32 -Fu../../lib/zip/i386-win32

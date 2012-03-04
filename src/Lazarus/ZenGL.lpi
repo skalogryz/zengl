@@ -286,7 +286,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp"/>
     </SearchPaths>
     <Parsing>
