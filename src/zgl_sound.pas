@@ -21,6 +21,9 @@
 unit zgl_sound;
 
 {$I zgl_config.cfg}
+{$IFDEF iOS}
+  {$LINKFRAMEWORK AudioToolbox}
+{$ENDIF}
 
 interface
 
@@ -220,6 +223,19 @@ uses
   zgl_log,
   zgl_utils;
 
+{$IFDEF iOS}
+const
+  kAudioSessionCategory_AmbientSound                  = 'ibma';
+  kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
+
+type
+  AudioSessionInterruptionListener = ( kAudioSessionBeginInterruption = 1, kAudioSessionEndInterruption = 0 );
+
+function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
+{$ENDIF}
+
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
   var
     Status : {$IFDEF USE_OPENAL} LongInt {$ELSE} LongWord {$ENDIF};
@@ -332,6 +348,9 @@ function snd_Init : Boolean;
   {$IFDEF ANDROID}
     attr : array[ 0..2 ] of Integer;
   {$ENDIF}
+  {$IFDEF iOS}
+    sessionCategory : LongWord;
+  {$ENDIF}
 begin
   Result := FALSE;
 
@@ -361,6 +380,17 @@ begin
   {$IFDEF iOS}
   log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
   oalDevice := alcOpenDevice( nil );
+  if Assigned( oalDevice ) and ( sndAllowBackgroundMusic = 1 ) Then
+    begin
+      if AudioSessionInitialize( nil, nil, kAudioSessionEndInterruption, nil ) = nil Then
+        begin
+          sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
+          AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
+          AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+          AudioSessionSetActive( TRUE );
+        end else
+          log_Add( 'Unable to initialize Audio Session' );
+    end;
   {$ELSE}
   if not Assigned( oalDevice ) Then
     begin
