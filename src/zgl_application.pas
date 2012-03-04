@@ -1193,6 +1193,10 @@ end;
 
 procedure zglCAppDelegate.applicationWillResignActive( application : UIApplication );
 begin
+  {$IFDEF USE_SOUND}
+  if sndInitialized Then AudioSessionSetActive( FALSE );
+  {$ENDIF}
+
   if appAutoPause Then appPause := TRUE;
   if appWork Then app_PActivate( FALSE );
 
@@ -1218,6 +1222,10 @@ end;
 
 procedure zglCAppDelegate.applicationDidBecomeActive( application: UIApplication );
 begin
+  {$IFDEF USE_SOUND}
+  if sndInitialized Then AudioSessionSetActive( TRUE );
+  {$ENDIF}
+
   appPause := FALSE;
   if appWork Then app_PActivate( TRUE );
 end;

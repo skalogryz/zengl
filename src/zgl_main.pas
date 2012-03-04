@@ -807,7 +807,11 @@ begin
     scrCanLandscape := TRUE;
 
   if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
-    sndAllowBackgroundMusic := 1;
+    begin
+      sndAllowBackgroundMusic := 1;
+      if sndInitialized Then
+        AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+    end;
 {$ENDIF}
 end;
 
@@ -857,7 +861,11 @@ begin
     scrCanLandscape := FALSE;
 
   if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
-    sndAllowBackgroundMusic := 0;
+    begin
+      sndAllowBackgroundMusic := 0;
+      if sndInitialized Then
+        AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+    end;
 {$ENDIF}
 end;
 

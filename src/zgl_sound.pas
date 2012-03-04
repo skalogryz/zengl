@@ -204,14 +204,24 @@ var
   sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 
-  {$IFDEF iOS}
-  sndAllowBackgroundMusic : LongWord;
-  {$ENDIF}
-
   sfThread : array[ 1..SND_MAX ] of LongWord;
   {$IFNDEF FPC}
   sfThreadID : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
+
+{$IFDEF iOS}
+const
+  kAudioSessionCategory_AmbientSound                  = 'ibma';
+  kAudioSessionProperty_AudioCategory                 = 'taca';
+  kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
+
+var
+  sndAllowBackgroundMusic : LongWord;
+
+function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
+{$ENDIF}
 
 implementation
 uses
@@ -222,20 +232,6 @@ uses
   zgl_resources,
   zgl_log,
   zgl_utils;
-
-{$IFDEF iOS}
-const
-  kAudioSessionCategory_AmbientSound                  = 'ibma';
-  kAudioSessionProperty_AudioCategory                 = 'taca';
-  kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
-
-type
-  AudioSessionInterruptionListener = ( kAudioSessionBeginInterruption = 1, kAudioSessionEndInterruption = 0 );
-
-function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : AudioSessionInterruptionListener; inClientData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
-{$ENDIF}
 
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
   var
@@ -381,17 +377,14 @@ begin
   {$IFDEF iOS}
   log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
   oalDevice := alcOpenDevice( nil );
-  if Assigned( oalDevice ) and ( sndAllowBackgroundMusic = 1 ) Then
+  if AudioSessionInitialize( nil, nil, 0, nil ) = nil Then
     begin
-      if AudioSessionInitialize( nil, nil, kAudioSessionEndInterruption, nil ) = nil Then
-        begin
-          sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
-          AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
-          AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
-          AudioSessionSetActive( TRUE );
-        end else
-          log_Add( 'Unable to initialize Audio Session' );
-    end;
+      sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
+      AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
+      AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+      AudioSessionSetActive( TRUE );
+    end else
+      log_Add( 'Unable to initialize Audio Session' );
   {$ELSE}
   if not Assigned( oalDevice ) Then
     begin
