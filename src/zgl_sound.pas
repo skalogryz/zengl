@@ -332,9 +332,6 @@ function snd_Init : Boolean;
   {$IFDEF ANDROID}
     attr : array[ 0..2 ] of Integer;
   {$ENDIF}
-  {$IFDEF iOS}
-    sessionCategory : LongWord;
-  {$ENDIF}
 begin
   Result := FALSE;
 
