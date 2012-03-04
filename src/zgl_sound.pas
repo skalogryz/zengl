@@ -226,6 +226,7 @@ uses
 {$IFDEF iOS}
 const
   kAudioSessionCategory_AmbientSound                  = 'ibma';
+  kAudioSessionProperty_AudioCategory                 = 'taca';
   kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
 
 type
