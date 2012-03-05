@@ -348,6 +348,7 @@ exports
   video_Del                name prefix + 'video_Del',
   video_OpenFile           name prefix + 'video_OpenFile',
   video_OpenMemory         name prefix + 'video_OpenMemory',
+  video_Update             name prefix + 'video_Update',
   {$ENDIF}
 
   // Math
