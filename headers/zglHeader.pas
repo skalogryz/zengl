@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.02.24           }
+{ date:     2012.03.07           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1162,14 +1162,14 @@ var
   snd_Del            : procedure( var Sound : zglPSound );
   snd_LoadFromFile   : function( const FileName : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
   snd_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; SourceCount : Integer = 8 ) : zglPSound;
-  snd_Play           : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
+  snd_Play           : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
   snd_Stop           : procedure( Sound : zglPSound; ID : Integer );
   snd_SetPos         : procedure( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
   snd_SetVolume      : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
   snd_SetSpeed       : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
   snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
-  snd_PlayFile       : function( const FileName : UTF8String; Volume : Single = SND_VOLUME_DEFAULT; Loop : Boolean = FALSE ) : Integer;
-  snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : UTF8String; Volume : Single = SND_VOLUME_DEFAULT; Loop : Boolean = FALSE ) : Integer;
+  snd_PlayFile       : function( const FileName : UTF8String; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
+  snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : UTF8String; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
   snd_PauseStream      : procedure( ID : Integer );
   snd_StopStream       : procedure( ID : Integer );
   snd_ResumeStream     : procedure( ID : Integer );

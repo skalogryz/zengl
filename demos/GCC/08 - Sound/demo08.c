@@ -85,14 +85,14 @@ void Proc()
     //
     // EN: In this case, we begin to play the sound directly in these coordinates, but they can be changed later using procedure snd_SetPos.
     // Important: OpenAL can position only mono-sounds.
-    snd_Play( sound, FALSE, CalcX2D( (float)mouse_X() ), CalcY2D( (float)mouse_Y() ), FALSE );
+    snd_Play( sound, FALSE, CalcX2D( (float)mouse_X() ), CalcY2D( (float)mouse_Y() ), FALSE, SND_VOLUME_DEFAULT );
 
     r.X = ( SCREEN_WIDTH - 128 ) / 2;
     r.Y = ( SCREEN_HEIGHT - 128 ) / 2;
     r.W = 128;
     r.H = 128;
     if ( col2d_PointInRect( (float)mouse_X(), (float)mouse_Y(), r ) && ( audio == 0 ) )
-      audio = snd_PlayFile( "../data/music.ogg", FALSE );
+      audio = snd_PlayFile( "../data/music.ogg", FALSE, SND_VOLUME_DEFAULT );
   }
 
   // RU: Получаем в процентах позицию проигрывания аудиопотока и ставим громкость для плавных переходов.

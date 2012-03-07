@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2012.02.07           */
+/* date:     2012.03.07           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1148,15 +1148,15 @@ static inline zglPSound snd_LoadFromMemory( zglTMemory Memory, const char *Exten
 {
   return __snd_LoadFromMemory( Memory, Extension, SourceCount );
 }
-ZGLEXTERN int ( *__snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z );
-static inline int snd_Play( zglPSound Sound, bool Loop = FALSE, float X = 0.0, float Y = 0.0, float Z = 0.0 )
+ZGLEXTERN int ( *__snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z, float Volume );
+static inline int snd_Play( zglPSound Sound, bool Loop = FALSE, float X = 0.0, float Y = 0.0, float Z = 0.0, float Volume = SND_VOLUME_DEFAULT )
 {
-  return __snd_Play( Sound, Loop, X, Y, Z );
+  return __snd_Play( Sound, Loop, X, Y, Z, Volume );
 }
 #else
 ZGLEXTERN zglPSound ( *snd_LoadFromFile )( const char *FileName, int SourceCount );
 ZGLEXTERN zglPSound ( *snd_LoadFromMemory )( zglTMemory Memory, const char *Extension, int SourceCount );
-ZGLEXTERN int ( *snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z );
+ZGLEXTERN int ( *snd_Play )( zglPSound Sound, bool Loop, float X, float Y, float Z, float Volume );
 #endif
 ZGLEXTERN void ( *snd_Stop )( zglPSound Sound, int ID );
 ZGLEXTERN void ( *snd_SetPos )( zglPSound Sound, int ID, float X, float Y, float Z );
@@ -1164,19 +1164,19 @@ ZGLEXTERN void ( *snd_SetVolume )( zglPSound Sound, int ID, float Volume );
 ZGLEXTERN void ( *snd_SetSpeed )( zglPSound Sound, int ID, float Speed );
 ZGLEXTERN int ( *snd_Get )( zglPSound Sound, int ID, int What );
 #ifdef __CPP__
-ZGLEXTERN int ( *__snd_PlayFile )( const char *FileName, float Volume, bool Loop );
-static inline int snd_PlayFile( const char *FileName, float Volume = SND_VOLUME_DEFAULT, bool Loop = FALSE )
+ZGLEXTERN int ( *__snd_PlayFile )( const char *FileName, bool Loop, float Volume );
+static inline int snd_PlayFile( const char *FileName, bool Loop = FALSE, float Volume = SND_VOLUME_DEFAULT )
 {
-  return __snd_PlayFile( FileName, Volume, Loop );
+  return __snd_PlayFile( FileName, Loop, Volume );
 }
-ZGLEXTERN int ( *__snd_PlayMemory )( zglTMemory Memory, const char *Extension, float Volume, bool Loop );
-static inline int snd_PlayMemory( zglTMemory Memory, const char *Extension, float Volume = SND_VOLUME_DEFAULT, bool Loop = FALSE )
+ZGLEXTERN int ( *__snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop, float Volume );
+static inline int snd_PlayMemory( zglTMemory Memory, const char *Extension, bool Loop = FALSE, float Volume = SND_VOLUME_DEFAULT )
 {
-  return __snd_PlayMemory( Memory, Extension, Volume, Loop );
+  return __snd_PlayMemory( Memory, Extension, Loop, Volume );
 }
 #else
-ZGLEXTERN int ( *snd_PlayFile )( const char *FileName, float Volume, bool Loop );
-ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, float Volume, bool Loop );
+ZGLEXTERN int ( *snd_PlayFile )( const char *FileName, bool Loop, float Volume );
+ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, bool Loop, float Volume );
 #endif
 ZGLEXTERN void ( *snd_PauseStream )( int ID );
 ZGLEXTERN void ( *snd_StopStream )( int ID );
