@@ -130,6 +130,7 @@ var
   scrCurrent   : LongInt;
   scrModeCount : LongInt;
   scrModeList  : PXRRScreenSize;
+  scrRotation  : Word;
   {$ENDIF}
   {$IFDEF WINDOWS}
   scrSettings : DEVMODEW;
@@ -201,10 +202,6 @@ end;
 {$ENDIF}
 
 procedure scr_Init;
-  {$IFDEF USE_X11}
-  var
-    rotation : Word;
-  {$ENDIF}
   {$IFDEF iOS}
   var
     i            : Integer;
@@ -230,7 +227,7 @@ begin
 
   scrModeList := XRRSizes( scrDisplay, XRRRootToScreen( scrDisplay, wndRoot ), @scrModeCount );
   scrSettings := XRRGetScreenInfo( scrDisplay, wndRoot );
-  scrDesktop  := XRRConfigCurrentConfiguration( scrSettings, @rotation );
+  scrDesktop  := XRRConfigCurrentConfiguration( scrSettings, @scrRotation );
 {$ENDIF}
 {$IFDEF WINDOWS}
   scrMonitor := MonitorFromWindow( wndHandle, MONITOR_DEFAULTTOPRIMARY );
@@ -460,7 +457,7 @@ procedure scr_Reset;
 begin
   scrChanging := TRUE;
 {$IFDEF USE_X11}
-  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, 1, 0 );
+  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, scrRotation, CurrentTime );
 {$ENDIF}
 {$IFDEF WINDOWS}
   ChangeDisplaySettingsExW( scrMonInfo.szDevice, {$IFDEF WINDESKTOP}DEVMODEW( nil^ ){$ELSE}scrDesktop{$ENDIF}, 0, CDS_FULLSCREEN, nil );
@@ -606,7 +603,7 @@ begin
           scrCurrent    := scrDesktop;
           wndFullScreen := FALSE;
         end;
-      XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, 1, 0 );
+      XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, scrRotation, CurrentTime );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
