@@ -490,7 +490,8 @@ begin
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
 {$ENDIF}
 {$IFDEF iOS}
-  WriteLn( 'ERROR: ' + ErrStr );
+  // Crashes on iOS 5.1
+  //WriteLn( 'ERROR: ' + ErrStr );
 {$ENDIF}
 
   log_Add( 'ERROR: ' + ErrStr );
@@ -518,7 +519,8 @@ begin
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
 {$ENDIF}
 {$IFDEF iOS}
-  WriteLn( 'WARNING: ' + ErrStr );
+  // Crashes on iOS 5.1
+  //WriteLn( 'WARNING: ' + ErrStr );
 {$ENDIF}
 
   log_Add( 'WARNING: ' + ErrStr );

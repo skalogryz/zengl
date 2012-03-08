@@ -109,7 +109,7 @@ procedure log_Add( const Message : UTF8String; Timings : Boolean = TRUE );
     str : UTF8String;
 begin
   if not appLog Then exit;
-  {$IF DEFINED(LINUX) or DEFINED(iOS)}
+  {$IF DEFINED(LINUX)} // or DEFINED(iOS)} // Crashes on iOS 5.1
   if ( appLog ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
     writeln( Message );
   {$IFEND}
