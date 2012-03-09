@@ -689,11 +689,8 @@ end;
 
 {$IFDEF MACOSX}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
-  var
-    len : Integer;
 begin
-  len := length( FileName );
-  if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
+  if ( length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := appWorkDir + 'Contents/Resources/' + FileName
   else
     Result := FileName;
@@ -701,11 +698,8 @@ end;
 {$ENDIF}
 {$IFDEF WINCE}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
-  var
-    len : Integer;
 begin
-  len := length( FileName );
-  if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) and ( FileName[ 1 ] <> '\' ) Then
+  if ( length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) and ( FileName[ 1 ] <> '\' ) Then
     Result := appWorkDir + FileName
   else
     Result := FileName;
@@ -713,11 +707,8 @@ end;
 {$ENDIF}
 {$IFDEF iOS}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
-  var
-    len : Integer;
 begin
-  len := length( FileName );
-  if ( len > 0 ) and ( FileName[ 1 ] <> '/' ) Then
+  if ( length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := appWorkDir + FileName
   else
     Result := FileName;

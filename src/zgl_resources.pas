@@ -669,8 +669,7 @@ begin
                           MemLoader( Memory, Sound.Data, Sound.Size, Format, Sound.Frequency );
                         end;
 
-
-                    if not Assigned( Sound.Data ) Then
+                    if Assigned( Sound.Data ) Then
                       begin
                         snd_Create( Sound^, Format );
                         if IsFromFile Then
