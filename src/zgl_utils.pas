@@ -87,9 +87,13 @@ function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 
 function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
 function dlsym  ( Lib : Pointer; Name : PAnsiChar) : Pointer; cdecl; external 'dl';
 
-function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ):longint;cdecl;external 'libc';
+function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ) : longint; cdecl; external 'libc';
+
+function printf( format : PAnsiChar; const args : array of const ) : Integer; cdecl; external 'libc';
 {$ENDIF}
 {$IFDEF ANDROID}
+function __android_log_write( prio : LongInt; tag, text : PAnsiChar ) : LongInt; cdecl; external 'liblog.so' name '__android_log_write';
+
 type
   ppthread_t      = ^pthread_t;
   ppthread_attr_t = ^pthread_attr_t;
@@ -478,9 +482,9 @@ procedure u_Error( const ErrStr : UTF8String );
     wideStr : PWideChar;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
-  WriteLn( 'ERROR: ' + ErrStr );
-{$ENDIF}
+{$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
+  printf( PAnsiChar( 'ERROR: ' + ErrStr ), [ nil ] );
+{$IFEND}
 {$IFDEF WINDOWS}
   wideStr := u_GetPWideChar( ErrStr );
   MessageBoxW( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
@@ -489,9 +493,8 @@ begin
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
 {$ENDIF}
-{$IFDEF iOS}
-  // Crashes on iOS 5.1
-  //WriteLn( 'ERROR: ' + ErrStr );
+{$IFDEF ANDROID}
+  __android_log_write( 3, 'ZenGL', PAnsiChar( 'ERROR: ' + ErrStr ) );
 {$ENDIF}
 
   log_Add( 'ERROR: ' + ErrStr );
@@ -507,9 +510,9 @@ procedure u_Warning( const ErrStr : UTF8String );
     wideStr : PWideChar;
   {$ENDIF}
 begin
-{$IFDEF LINUX}
-  WriteLn( 'WARNING: ' + ErrStr );
-{$ENDIF}
+{$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
+  printf( PAnsiChar( 'WARNING: ' + ErrStr ), [ nil ] );
+{$IFEND}
 {$IFDEF WINDOWS}
   wideStr := u_GetPWideChar( ErrStr );
   MessageBoxW( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
@@ -518,9 +521,8 @@ begin
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
 {$ENDIF}
-{$IFDEF iOS}
-  // Crashes on iOS 5.1
-  //WriteLn( 'WARNING: ' + ErrStr );
+{$IFDEF ANDROID}
+  __android_log_write( 3, 'ZenGL', PAnsiChar( 'WARNING: ' + ErrStr ) );
 {$ENDIF}
 
   log_Add( 'WARNING: ' + ErrStr );

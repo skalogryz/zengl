@@ -44,10 +44,6 @@ uses
   zgl_main,
   zgl_timers;
 
-{$IFDEF ANDROID}
-function __android_log_write( prio : LongInt; tag, text : PAnsiChar ) : LongInt; cdecl; external 'liblog.so' name '__android_log_write';
-{$ENDIF}
-
 procedure log_Init;
   var
     i  : Integer;
@@ -109,9 +105,9 @@ procedure log_Add( const Message : UTF8String; Timings : Boolean = TRUE );
     str : UTF8String;
 begin
   if not appLog Then exit;
-  {$IF DEFINED(LINUX)} // or DEFINED(iOS)} // Crashes on iOS 5.1
+  {$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
   if ( appLog ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
-    writeln( Message );
+    printf( PAnsiChar( Message + #10 ), [ nil ] );
   {$IFEND}
   if Timings Then
     str := log_Timing + Message + #13#10
