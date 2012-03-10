@@ -315,8 +315,10 @@ begin
 {$IFDEF iOS}
   eglView := zglCiOSEAGLView.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   eglView.setMultipleTouchEnabled( TRUE );
-  // iPhone Retina display
-  if ( UIDevice.currentDevice.systemVersion.floatValue >= 3.2 ) and ( UIScreen.mainScreen.currentMode.size.width = 640 ) and ( UIScreen.mainScreen.currentMode.size.height = 960 ) Then
+  // Retina display
+  if ( UIDevice.currentDevice.systemVersion.floatValue >= 3.2 ) and
+     ( ( ( UIScreen.mainScreen.currentMode.size.width = 640 ) and ( UIScreen.mainScreen.currentMode.size.height = 960 ) ) or // iPhone
+       ( ( UIScreen.mainScreen.currentMode.size.width = 1536 ) and ( UIScreen.mainScreen.currentMode.size.height = 2048 ) ) ) Then // iPad
     begin
       eglView.setContentScaleFactor( 2 );
       log_Add( 'Retina display detected' );
