@@ -35,11 +35,12 @@ uses
   {$IFDEF FPC}
   procedure __chkstk_ms; cdecl; public name '___chkstk_ms';
   function kernel32_MoveFileExA( lpExistingFileName : PAnsiChar; lpNewFileName : PAnsiChar; dwFlags : DWORD ) : Boolean; stdcall; public name '_MoveFileExA@12'; public name '__imp_MoveFileExA';
-  {$IFDEF WIN64}
   {$IFDEF NAME_MANGLING}
+  {$IFDEF WIN64}
   function msvcrt_pow( x, y : Double ) : Double; cdecl; public name 'pow';
   function msvcrt_ldexp( x : Double; exp : cint ) : Double; cdecl; public name 'ldexp';
   {$ENDIF}
+  function msvcrt_memcmp( ptr1 : Pointer; ptr2 : Pointer; num : csize_t ) : cint; cdecl; public name '_memcmp';
   {$ENDIF}
 
   {$ELSE}
@@ -80,7 +81,7 @@ uses
   procedure _setmode; cdecl; external 'msvcrt.dll';
   procedure _stricmp; external 'msvcrt.dll';
   procedure realloc; cdecl; external 'msvcrt.dll';
-  procedure memcmp; cdecl; external 'msvcrt.dll';
+  function memcmp( ptr1 : Pointer; ptr2 : Pointer; num : csize_t ) : cint; cdecl; external 'msvcrt.dll';
   procedure mktime; cdecl; external 'msvcrt.dll';
   procedure fputc; cdecl; external 'msvcrt.dll';
   procedure localtime; cdecl; external 'msvcrt.dll';
@@ -107,8 +108,9 @@ begin
   Result := MoveFileExA( lpExistingFileName, lpNewFileName, dwFlags );
 end;
 
-{$IFDEF WIN64}
 {$IFDEF NAME_MANGLING}
+
+{$IFDEF WIN64}
 function msvcrt_pow( x, y : Double ) : Double;
 begin
   Result := pow( x, y );
@@ -119,6 +121,11 @@ begin
   Result := ldexp( x, exp );
 end;
 {$ENDIF}
+
+function msvcrt_memcmp( ptr1 : Pointer; ptr2 : Pointer; num : csize_t ) : cint;
+begin
+  Result := memcmp( ptr1, ptr2, num );
+end;
 {$ENDIF}
 
 {$ELSE}
