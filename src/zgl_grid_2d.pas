@@ -282,8 +282,8 @@ begin
         ijV := 1;
       end;
 
-  u  := 1 / ( Texture.Width  / Texture.U / Texture.U );
-  v  := 1 / ( Texture.Height / Texture.V / Texture.V );
+  u  := 1 / Texture.Width;
+  v  := 1 / Texture.Height;
   tX := u * ( CutRect.X / Texture.U );
   tY := v * ( CutRect.Y / Texture.V );
   u  := u * ( CutRect.W / Texture.U ) / ( Grid.Cols - 1 );
