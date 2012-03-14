@@ -34,6 +34,7 @@ public class ZenGL extends GLSurfaceView
 	private native void zglNativeSurfaceChanged( int width, int height );
 	private native void zglNativeDrawFrame();
 	private native void zglNativeActivate( boolean Activate );
+	private native Boolean zglNativeCloseQuery();
 	private native void zglNativeTouch( int ID, float X, float Y, float Pressure );
 
 	private zglCRenderer Renderer;
@@ -51,6 +52,11 @@ public class ZenGL extends GLSurfaceView
 		SourceDir = appSourceDir;
 		Renderer = new zglCRenderer();
 		setRenderer( Renderer );
+	}
+	
+	public Boolean onCloseQuery()
+	{
+		return zglNativeCloseQuery();
 	}
 
 	@Override

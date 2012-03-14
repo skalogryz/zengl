@@ -106,6 +106,7 @@ procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; va
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( var env : JNIEnv; var thiz : jobject; Width, Height : jint ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( var env : JNIEnv; var thiz : jobject ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeActivate( var env : JNIEnv; var thiz : jobject; Activate : jboolean ); cdecl;
+function  Java_zengl_android_ZenGL_zglNativeCloseQuery( var env : JNIEnv; var thiz : jobject ) : Boolean;
 procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
 {$ENDIF}
 
@@ -1559,7 +1560,10 @@ begin
   appWorkDir := env^.GetStringUTFChars( @env, path, isCopy );
 
   if appRestore Then
-    app_PRestore();
+    begin
+      gl_ResetState();
+      app_PRestore();
+    end;
 
   appRestore := TRUE;
 end;
@@ -1623,6 +1627,11 @@ begin
         appPause := TRUE;
         if appWork Then app_PActivate( FALSE );
       end;
+end;
+
+function Java_zengl_android_ZenGL_zglNativeCloseQuery( var env : JNIEnv; var thiz : jobject ) : Boolean;
+begin
+  Result := app_PCloseQuery();
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat );
@@ -1714,6 +1723,9 @@ initialization
 {$IFDEF iOS}
   app_PMemoryWarn  := app_ZeroProc;
   app_POrientation := app_ZeroOrientation;
+{$ENDIF}
+{$IFDEF ANDROID}
+  app_PRestore := app_ZeroProc;
 {$ENDIF}
 
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE {$IFDEF WINDESKTOP} or APP_USE_DT_CORRECTION {$ENDIF};
