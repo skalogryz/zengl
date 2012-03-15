@@ -163,7 +163,7 @@ var
   appDelegate        : zglCAppDelegate;
   {$ENDIF}
   {$IFDEF ANDROID}
-  appRestore : Boolean;
+  appJVM : PJavaVM;
   {$ENDIF}
   appShowCursor : Boolean;
 
@@ -1559,13 +1559,11 @@ begin
   isCopy     := 0;
   appWorkDir := env^.GetStringUTFChars( @env, path, isCopy );
 
-  if appRestore Then
+  if appInitialized Then
     begin
       gl_ResetState();
       app_PRestore();
     end;
-
-  appRestore := TRUE;
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( var env : JNIEnv; var thiz : jobject; Width, Height : jint );
@@ -1584,8 +1582,21 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( var env : JNIEnv; var thiz : jobject );
   var
-    t : Double;
+    t           : Double;
+    classObject : JClass;
+    classMethod : JMethodID;
 begin
+  if not appWork Then
+    begin
+      zgl_Destroy();
+
+      env.GetObjectClass( @env, classObject );
+      env.GetMethodID( @env, classObject, 'Finish', '()V' );
+      env.CallVoidMethod( @env, classObject, classMethod );
+
+      exit;
+    end;
+
   res_Proc();
   {$IFDEF USE_JOYSTICK}
   joy_Proc();

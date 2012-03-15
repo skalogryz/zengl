@@ -23,6 +23,7 @@ package zengl.android;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.*;
@@ -131,7 +132,13 @@ public class ZenGL extends GLSurfaceView
 
 		return true;
 	}
-
+	
+	public void Finish()
+	{
+		Activity activity = (Activity)getContext();
+		activity.finish();
+	}
+	
 	class zglCRenderer implements Renderer
 	{
 		public void onSurfaceCreated( GL10 gl, EGLConfig config )

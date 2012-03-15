@@ -1,0 +1,6 @@
+Java_zengl_android_ZenGL_zglNativeSurfaceCreated,
+Java_zengl_android_ZenGL_zglNativeSurfaceChanged,
+Java_zengl_android_ZenGL_zglNativeDrawFrame,
+Java_zengl_android_ZenGL_zglNativeActivate,
+Java_zengl_android_ZenGL_zglNativeCloseQuery,
+Java_zengl_android_ZenGL_zglNativeTouch;
