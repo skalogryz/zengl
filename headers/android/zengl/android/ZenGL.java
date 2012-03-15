@@ -198,6 +198,9 @@ public class ZenGL extends GLSurfaceView
 			HideKeyboard();
 		else if ( keyCode == KeyEvent.KEYCODE_DEL )
 			zglNativeBackspace();
+		else if ( keyCode == KeyEvent.KEYCODE_BACK )
+			if ( zglNativeCloseQuery() )
+				Finish();
 
 		return super.onKeyDown( keyCode, event );
 	}
