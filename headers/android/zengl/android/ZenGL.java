@@ -43,6 +43,7 @@ public class ZenGL extends GLSurfaceView
 	private native boolean zglNativeCloseQuery();
 	private native void zglNativeTouch( int ID, float X, float Y, float Pressure );
 	private native void zglNativeInputText( String Text );
+	private native void zglNativeBackspace();
 
 	private static final int KEYBOARD_NOTHING = 0;
 	private static final int KEYBOARD_SHOW = 1;
@@ -195,6 +196,8 @@ public class ZenGL extends GLSurfaceView
 	{
 		if ( keyCode == KeyEvent.KEYCODE_ENTER )
 			HideKeyboard();
+		else if ( keyCode == KeyEvent.KEYCODE_DEL )
+			zglNativeBackspace();
 
 		return super.onKeyDown( keyCode, event );
 	}

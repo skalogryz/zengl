@@ -111,6 +111,7 @@ procedure Java_zengl_android_ZenGL_zglNativeActivate( var env : JNIEnv; var thiz
 function  Java_zengl_android_ZenGL_zglNativeCloseQuery( var env : JNIEnv; var thiz : jobject ) : Boolean;
 procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeInputText( var env : JNIEnv; var thiz : jobject; text : jstring ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeBackspace( var env : JNIEnv; var thiz : jobject ); cdecl;
 // FreePascal 2.6.x doesn't work well with JNI, so workarounds are needed
 function  Java_zengl_android_ZenGL_workaroundIsWork( var env : JNIEnv; var thiz : jobject ) : Boolean; cdecl;
 procedure Java_zengl_android_ZenGL_workaroundDestroy( var env : JNIEnv; var thiz : jobject ); cdecl;
@@ -1750,6 +1751,11 @@ end;
 procedure Java_zengl_android_ZenGL_zglNativeInputText( var env : JNIEnv; var thiz : jobject; text : jstring );
 begin
   key_InputText( appEnv^.GetStringUTFChars( appEnv, text, nil ) );
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeBackspace( var env : JNIEnv; var thiz : jobject );
+begin
+  u_Backspace( keysText );
 end;
 
 function Java_zengl_android_ZenGL_workaroundIsWork( var env : JNIEnv; var thiz : jobject ) : Boolean;

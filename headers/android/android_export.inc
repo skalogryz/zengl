@@ -7,6 +7,7 @@ Java_zengl_android_ZenGL_zglNativeActivate,
 Java_zengl_android_ZenGL_zglNativeCloseQuery,
 Java_zengl_android_ZenGL_zglNativeTouch,
 Java_zengl_android_ZenGL_zglNativeInputText,
+Java_zengl_android_ZenGL_zglNativeBackspace,
 
 Java_zengl_android_ZenGL_workaroundIsWork,
 Java_zengl_android_ZenGL_workaroundDestroy,
