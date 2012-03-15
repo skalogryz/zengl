@@ -370,7 +370,7 @@ type va_list=pointer;
 
       NewStringUTF:function(Env:PJNIEnv;const UTF:pchar):JString;{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
       GetStringUTFLength:function(Env:PJNIEnv;Str:JString):JSize;{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
-      GetStringUTFChars:function(Env:PJNIEnv;Str:JString;var IsCopy:JBoolean):pchar;{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
+      GetStringUTFChars:function(Env:PJNIEnv;Str:JString; IsCopy:PJBoolean):pchar;{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
       ReleaseStringUTFChars:procedure(Env:PJNIEnv;Str:JString;const Chars:pchar);{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
 
       GetArrayLength:function(Env:PJNIEnv;AArray:JArray):JSize;{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
@@ -514,7 +514,7 @@ function JNI_GetCreatedJavaVMs(vm:PPJavaVM;ASize:jsize;p:Pjsize):jint;{$ifdef ms
 
 const curVM:PJavaVM=nil;
       curEnv:PJNIEnv=nil;
-      
+
 (*
 function JNI_OnLoad(vm:PJavaVM;reserved:pointer):jint;{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
 procedure JNI_OnUnload(vm:PJavaVM;reserved:pointer);{$ifdef mswindows}stdcall;{$else}cdecl;{$endif}

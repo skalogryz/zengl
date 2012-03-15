@@ -102,12 +102,19 @@ type
   end;
 {$ENDIF}
 {$IFDEF ANDROID}
+function  JNI_OnLoad( vm : PJavaVM; reserved : Pointer ) : jint; cdecl;
+function  JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint; cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; var thiz : jobject; path : jstring ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( var env : JNIEnv; var thiz : jobject; Width, Height : jint ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( var env : JNIEnv; var thiz : jobject ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeActivate( var env : JNIEnv; var thiz : jobject; Activate : jboolean ); cdecl;
 function  Java_zengl_android_ZenGL_zglNativeCloseQuery( var env : JNIEnv; var thiz : jobject ) : Boolean;
 procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeInputText( var env : JNIEnv; var thiz : jobject; text : jstring ); cdecl;
+// FreePascal 2.6.x doesn't work well with JNI, so workarounds is needed
+function  Java_zengl_android_ZenGL_workaroundIsWork( var env : JNIEnv; var thiz : jobject ) : Boolean; cdecl;
+procedure Java_zengl_android_ZenGL_workaroundDestroy( var env : JNIEnv; var thiz : jobject ); cdecl;
+function  Java_zengl_android_ZenGL_workaroundKeyboardState( var env : JNIEnv; var thiz : jobject ) : Integer; cdecl;
 {$ENDIF}
 
 procedure app_ZeroProc;
@@ -163,7 +170,11 @@ var
   appDelegate        : zglCAppDelegate;
   {$ENDIF}
   {$IFDEF ANDROID}
-  appJVM : PJavaVM;
+  appJVM          : PJavaVM;
+  appEnv          : PJNIEnv;
+  appClass        : JClass;
+  appFinish       : JMethodID;
+  appShowKeyboard : JMethodID;
   {$ENDIF}
   appShowCursor : Boolean;
 
@@ -1552,12 +1563,29 @@ end;
 {$ENDIF}
 
 {$IFDEF ANDROID}
-procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; var thiz : jobject; path : jstring );
-  var
-    isCopy : jboolean;
+function JNI_OnLoad( vm : PJavaVM; reserved : Pointer) : jint;
 begin
-  isCopy     := 0;
-  appWorkDir := env^.GetStringUTFChars( @env, path, isCopy );
+  // environment
+  appJVM := vm;
+  appJVM^.GetEnv( appJVM, @appEnv, JNI_VERSION_1_6 );
+
+  // class
+  appClass := appEnv^.FindClass( appEnv, 'zengl/android/ZenGL' );
+
+  // methods
+  appFinish       := appEnv^.GetMethodID( appEnv, appClass, 'Finish', '()V' );
+  appShowKeyboard := appEnv^.GetMethodID( appEnv, appClass, 'ShowKeyboard', '()V' );
+
+  Result := JNI_VERSION_1_6;
+end;
+
+function JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint;
+begin
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( var env : JNIEnv; var thiz : jobject; path : jstring );
+begin
+  appWorkDir := appEnv^.GetStringUTFChars( appEnv, path, nil );
 
   if appInitialized Then
     begin
@@ -1582,20 +1610,16 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( var env : JNIEnv; var thiz : jobject );
   var
-    t           : Double;
-    classObject : JClass;
-    classMethod : JMethodID;
+    t : Double;
 begin
-  if not appWork Then
+  // Waiting for better times...
+  {if not appWork Then
     begin
       zgl_Destroy();
-
-      env.GetObjectClass( @env, classObject );
-      env.GetMethodID( @env, classObject, 'Finish', '()V' );
-      env.CallVoidMethod( @env, classObject, classMethod );
-
+      appJVM^.AttachCurrentThread( appJVM, @appEnv, nil );
+      appEnv^.CallVoidMethod( appEnv, appClass, appShowKeyboard );
       exit;
-    end;
+    end;}
 
   res_Proc();
   {$IFDEF USE_JOYSTICK}
@@ -1661,6 +1685,8 @@ begin
     begin
       touchDown[ ID ] := TRUE;
       touchUp[ ID ]   := FALSE;
+      if touchCanTap[ ID ] Then
+        touchTap[ ID ] := TRUE;
 
       if Assigned( touch_PPress ) Then
         touch_PPress( ID );
@@ -1719,6 +1745,27 @@ begin
                 mouse_PRelease( M_BLEFT );
             end;
     end;
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeInputText( var env : JNIEnv; var thiz : jobject; text : jstring );
+begin
+  key_InputText( appEnv^.GetStringUTFChars( appEnv, text, nil ) );
+end;
+
+function Java_zengl_android_ZenGL_workaroundIsWork( var env : JNIEnv; var thiz : jobject ) : Boolean;
+begin
+  Result := appWork;
+end;
+
+procedure Java_zengl_android_ZenGL_workaroundDestroy( var env : JNIEnv; var thiz : jobject );
+begin
+  zgl_Destroy();
+end;
+
+function Java_zengl_android_ZenGL_workaroundKeyboardState( var env : JNIEnv; var thiz : jobject ) : Integer;
+begin
+  Result := keyAndroidState;
+  keyAndroidState := KEYBOARD_NOTHING;
 end;
 {$ENDIF}
 

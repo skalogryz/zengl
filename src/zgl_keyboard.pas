@@ -26,18 +26,22 @@ unit zgl_keyboard;
 {$ENDIF}
 
 interface
-{$IFDEF USE_X11}
-  uses X, Xlib, keysym;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
-{$IFDEF iOS}
-  uses iPhoneAll, CGGeometry;
-{$ENDIF}
+uses
+  {$IFDEF USE_X11}
+  X, Xlib, keysym;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows;
+  {$ENDIF}
+  {$IFDEF MACOSX}
+  MacOSAll;
+  {$ENDIF}
+  {$IFDEF iOS}
+  iPhoneAll, CGGeometry;
+  {$ENDIF}
+  {$IFDEF ANDROID}
+  jni;
+  {$ENDIF}
 
 const
   K_SYSRQ      = $B7;
@@ -164,6 +168,12 @@ const
   KA_DOWN      = 0;
   KA_UP        = 1;
 
+  {$IFDEF ANDROID}
+  KEYBOARD_NOTHING = 0;
+  KEYBOARD_SHOW    = 1;
+  KEYBOARD_HIDE    = 2;
+  {$ENDIF}
+
 function  key_Down( KeyCode : Byte ) : Boolean;
 function  key_Up( KeyCode : Byte ) : Boolean;
 function  key_Press( KeyCode : Byte ) : Boolean;
@@ -234,6 +244,9 @@ var
   keysTextFrame   : CGRect;
   keysTextChanged : Boolean;
   {$ENDIF}
+  {$IFDEF ANDROID}
+  keyAndroidState : Integer;
+  {$ENDIF}
 
   // callback
   key_PPress     : procedure( KeyCode : Byte );
@@ -270,17 +283,21 @@ begin
 end;
 
 procedure key_BeginReadText( const Text : UTF8String; MaxSymbols : Integer = -1 );
+  {$IFDEF ANDROID}
+  var
+    env : PJNIEnv;
+  {$ENDIF}
 begin
-  {$IFDEF iOS}
+{$IFDEF iOS}
   if Assigned( keysTextField ) and ( keysText <> Text ) Then
     keysTextField.setText( u_GetNSString( Text ) );
-  {$ENDIF}
+{$ENDIF}
 
   keysText    := u_CopyUTF8Str( Text );
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
 
-  {$IFDEF iOS}
+{$IFDEF iOS}
   if not Assigned( keysTextField ) Then
     begin
       keysTextFrame := wndHandle.frame;
@@ -300,14 +317,19 @@ begin
       wndHandle.addSubview( keysTextField );
     end;
 
-    if appFlags and APP_USE_ENGLISH_INPUT > 0 Then
-      keysTextTraits.setKeyboardType( UIKeyboardTypeASCIICapable )
-    else
-      keysTextTraits.setKeyboardType( UIKeyboardTypeDefault );
+  if appFlags and APP_USE_ENGLISH_INPUT > 0 Then
+    keysTextTraits.setKeyboardType( UIKeyboardTypeASCIICapable )
+  else
+    keysTextTraits.setKeyboardType( UIKeyboardTypeDefault );
 
-    wndHandle.addSubview( keysTextField );
-    keysTextField.becomeFirstResponder();
-  {$ENDIF}
+  wndHandle.addSubview( keysTextField );
+  keysTextField.becomeFirstResponder();
+{$ENDIF}
+{$IFDEF ANDROID}
+  // Waiting for better times...
+  //appEnv^.CallVoidMethod( appEnv, appClass, appShowKeyboard );
+  keyAndroidState := KEYBOARD_SHOW;
+{$ENDIF}
 end;
 
 procedure key_UpdateReadText( const Text : UTF8String; MaxSymbols : Integer = -1 );
@@ -334,10 +356,13 @@ begin
   keysText    := '';
   keysCanText := FALSE;
 
-  {$IFDEF iOS}
+{$IFDEF iOS}
   if Assigned( keysTextField ) Then
     keysTextField.removeFromSuperview();
-  {$ENDIF}
+{$ENDIF}
+{$IFDEF ANDROID}
+  keyAndroidState := KEYBOARD_HIDE;
+{$ENDIF}
 end;
 
 procedure key_ClearState;

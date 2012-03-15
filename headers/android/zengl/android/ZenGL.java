@@ -26,7 +26,12 @@ import javax.microedition.khronos.opengles.GL10;
 import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.text.InputType;
 import android.view.*;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 
 public class ZenGL extends GLSurfaceView
 {
@@ -35,11 +40,21 @@ public class ZenGL extends GLSurfaceView
 	private native void zglNativeSurfaceChanged( int width, int height );
 	private native void zglNativeDrawFrame();
 	private native void zglNativeActivate( boolean Activate );
-	private native Boolean zglNativeCloseQuery();
+	private native boolean zglNativeCloseQuery();
 	private native void zglNativeTouch( int ID, float X, float Y, float Pressure );
+	private native void zglNativeInputText( String Text );
+
+	private static final int KEYBOARD_NOTHING = 0;
+	private static final int KEYBOARD_SHOW = 1;
+	private static final int KEYBOARD_HIDE = 2;
+	
+	private native boolean workaroundIsWork();
+	private native void workaroundDestroy();
+	private native int workaroundKeyboardState();
 
 	private zglCRenderer Renderer;
 	private String SourceDir;
+	private InputMethodManager InputManager;
 
 	public ZenGL( Context context, String appName, String appSourceDir )
 	{
@@ -53,6 +68,10 @@ public class ZenGL extends GLSurfaceView
 		SourceDir = appSourceDir;
 		Renderer = new zglCRenderer();
 		setRenderer( Renderer );
+		
+		InputManager = (InputMethodManager)context.getSystemService( Context.INPUT_METHOD_SERVICE );
+		setFocusable( true );
+		setFocusableInTouchMode( true );
 	}
 	
 	public Boolean onCloseQuery()
@@ -63,6 +82,7 @@ public class ZenGL extends GLSurfaceView
 	@Override
 	public void onPause()
 	{
+		HideKeyboard();
 		zglNativeActivate( false );
 	}
 
@@ -135,10 +155,50 @@ public class ZenGL extends GLSurfaceView
 	
 	public void Finish()
 	{
-		Activity activity = (Activity)getContext();
-		activity.finish();
+		workaroundDestroy();
+		((Activity)getContext()).finish();
+		System.exit( 0 );
 	}
 	
+	public void ShowKeyboard()
+	{
+		InputManager.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_NOT_ALWAYS );
+	}
+	
+	public void HideKeyboard()
+	{
+		InputManager.hideSoftInputFromWindow( this.getWindowToken(), 0 );
+	}
+	
+	@Override
+	public InputConnection onCreateInputConnection( EditorInfo outAttrs )
+	{
+	    outAttrs.actionLabel = "";
+	    outAttrs.hintText = "";
+	    outAttrs.initialCapsMode = 0;
+	    outAttrs.initialSelEnd = outAttrs.initialSelStart = -1;
+	    outAttrs.label = "";
+	    outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI;        
+	    outAttrs.inputType = InputType.TYPE_NULL;        
+
+		return new zglInputConnection( this, false );
+	}
+	
+	@Override
+	public boolean onCheckIsTextEditor()
+	{
+		return true;
+	}
+	
+	@Override
+	public boolean onKeyDown( int keyCode, KeyEvent event ) 
+	{
+		if ( keyCode == KeyEvent.KEYCODE_ENTER )
+			HideKeyboard();
+
+		return super.onKeyDown( keyCode, event );
+	}
+
 	class zglCRenderer implements Renderer
 	{
 		public void onSurfaceCreated( GL10 gl, EGLConfig config )
@@ -154,7 +214,43 @@ public class ZenGL extends GLSurfaceView
 
 		public void onDrawFrame( GL10 gl )
 		{
+			if ( !workaroundIsWork() )
+			{
+				Finish();
+				return;
+			}
+			
+			switch ( workaroundKeyboardState() )
+			{
+				case KEYBOARD_SHOW:
+				{
+					ShowKeyboard();
+					break;
+				}
+				case KEYBOARD_HIDE:
+				{
+					HideKeyboard();
+					break;
+				}
+			}
+
 			zglNativeDrawFrame();
+		}
+	}
+	
+	class zglInputConnection extends BaseInputConnection
+	{
+		public zglInputConnection( View targetView, boolean fullEditor )
+		{
+			super( targetView, fullEditor );
+		}
+
+		@Override
+		public boolean commitText( CharSequence text, int newCursorPosition )
+		{
+			zglNativeInputText( (String)text );
+
+			return true;
 		}
 	}
 }
