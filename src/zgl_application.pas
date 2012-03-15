@@ -111,7 +111,7 @@ procedure Java_zengl_android_ZenGL_zglNativeActivate( var env : JNIEnv; var thiz
 function  Java_zengl_android_ZenGL_zglNativeCloseQuery( var env : JNIEnv; var thiz : jobject ) : Boolean;
 procedure Java_zengl_android_ZenGL_zglNativeTouch( var env : JNIEnv; var thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeInputText( var env : JNIEnv; var thiz : jobject; text : jstring ); cdecl;
-// FreePascal 2.6.x doesn't work well with JNI, so workarounds is needed
+// FreePascal 2.6.x doesn't work well with JNI, so workarounds are needed
 function  Java_zengl_android_ZenGL_workaroundIsWork( var env : JNIEnv; var thiz : jobject ) : Boolean; cdecl;
 procedure Java_zengl_android_ZenGL_workaroundDestroy( var env : JNIEnv; var thiz : jobject ); cdecl;
 function  Java_zengl_android_ZenGL_workaroundKeyboardState( var env : JNIEnv; var thiz : jobject ) : Integer; cdecl;
