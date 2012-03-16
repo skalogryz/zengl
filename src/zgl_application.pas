@@ -1589,7 +1589,7 @@ end;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring );
 begin
   appWorkDir := appEnv^.GetStringUTFChars( appEnv, AppDirectory, nil );
-  appHomeDir := appEnv^.GetStringUTFChars( appEnv, HomeDirectory, nil );
+  appHomeDir := appEnv^.GetStringUTFChars( appEnv, HomeDirectory, nil ) + '/';
 
   if appInitialized Then
     begin
