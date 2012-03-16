@@ -35,7 +35,7 @@ import android.view.inputmethod.InputMethodManager;
 
 public class ZenGL extends GLSurfaceView
 {
-	private native void Main();
+	private native void Main();	
 	private native void zglNativeSurfaceCreated( String Path );
 	private native void zglNativeSurfaceChanged( int width, int height );
 	private native void zglNativeDrawFrame();
@@ -44,14 +44,6 @@ public class ZenGL extends GLSurfaceView
 	private native void zglNativeTouch( int ID, float X, float Y, float Pressure );
 	private native void zglNativeInputText( String Text );
 	private native void zglNativeBackspace();
-
-	private static final int KEYBOARD_NOTHING = 0;
-	private static final int KEYBOARD_SHOW = 1;
-	private static final int KEYBOARD_HIDE = 2;
-	
-	private native boolean workaroundIsWork();
-	private native void workaroundDestroy();
-	private native int workaroundKeyboardState();
 
 	private zglCRenderer Renderer;
 	private String SourceDir;
@@ -156,7 +148,6 @@ public class ZenGL extends GLSurfaceView
 	
 	public void Finish()
 	{
-		workaroundDestroy();
 		((Activity)getContext()).finish();
 		System.exit( 0 );
 	}
@@ -220,26 +211,6 @@ public class ZenGL extends GLSurfaceView
 
 		public void onDrawFrame( GL10 gl )
 		{
-			if ( !workaroundIsWork() )
-			{
-				Finish();
-				return;
-			}
-			
-			switch ( workaroundKeyboardState() )
-			{
-				case KEYBOARD_SHOW:
-				{
-					ShowKeyboard();
-					break;
-				}
-				case KEYBOARD_HIDE:
-				{
-					HideKeyboard();
-					break;
-				}
-			}
-
 			zglNativeDrawFrame();
 		}
 	}

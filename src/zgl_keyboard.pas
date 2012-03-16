@@ -244,9 +244,6 @@ var
   keysTextFrame   : CGRect;
   keysTextChanged : Boolean;
   {$ENDIF}
-  {$IFDEF ANDROID}
-  keyAndroidState : Integer;
-  {$ENDIF}
 
   // callback
   key_PPress     : procedure( KeyCode : Byte );
@@ -326,9 +323,7 @@ begin
   keysTextField.becomeFirstResponder();
 {$ENDIF}
 {$IFDEF ANDROID}
-  // Waiting for better times...
-  //appEnv^.CallVoidMethod( appEnv, appClass, appShowKeyboard );
-  keyAndroidState := KEYBOARD_SHOW;
+  appEnv^.CallVoidMethod( appEnv, appObject, appShowKeyboard );
 {$ENDIF}
 end;
 
@@ -361,7 +356,7 @@ begin
     keysTextField.removeFromSuperview();
 {$ENDIF}
 {$IFDEF ANDROID}
-  keyAndroidState := KEYBOARD_HIDE;
+  appEnv^.CallVoidMethod( appEnv, appObject, appHideKeyboard );
 {$ENDIF}
 end;
 
