@@ -20,6 +20,8 @@
 */
 package zengl.android;
 
+import java.io.File;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -37,7 +39,7 @@ public class ZenGL extends GLSurfaceView
 {
 	private native void Main();
 	private native void zglNativeDestroy();
-	private native void zglNativeSurfaceCreated( String Path );
+	private native void zglNativeSurfaceCreated( String AppDirectory, String HomeDirectory );
 	private native void zglNativeSurfaceChanged( int width, int height );
 	private native void zglNativeDrawFrame();
 	private native void zglNativeActivate( boolean Activate );
@@ -49,6 +51,7 @@ public class ZenGL extends GLSurfaceView
 	private boolean IsDestroy;
 	private zglCRenderer Renderer;
 	private String SourceDir;
+	private String DataDir;
 	private InputMethodManager InputManager;
 
 	public ZenGL( Context context, String appName, String appSourceDir )
@@ -61,6 +64,7 @@ public class ZenGL extends GLSurfaceView
 		System.loadLibrary( appName );
 
 		SourceDir = appSourceDir;
+		DataDir = context.getFilesDir().getAbsolutePath();
 		Renderer = new zglCRenderer();
 		setRenderer( Renderer );
 		
@@ -211,7 +215,7 @@ public class ZenGL extends GLSurfaceView
 	{
 		public void onSurfaceCreated( GL10 gl, EGLConfig config )
 		{
-			zglNativeSurfaceCreated( SourceDir );
+			zglNativeSurfaceCreated( SourceDir, DataDir );
 		}
 
 		public void onSurfaceChanged( GL10 gl, int width, int height )

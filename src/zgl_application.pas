@@ -105,7 +105,7 @@ type
 function  JNI_OnLoad( vm : PJavaVM; reserved : Pointer ) : jint; cdecl;
 function  JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint; cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject ); cdecl;
-procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; path : jstring ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( env : PJNIEnv; thiz : jobject; Width, Height : jint ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( env : PJNIEnv; thiz : jobject ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeActivate( env : PJNIEnv; thiz : jobject; Activate : jboolean ); cdecl;
@@ -1586,9 +1586,10 @@ begin
   zgl_Destroy();
 end;
 
-procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; path : jstring );
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring );
 begin
-  appWorkDir := appEnv^.GetStringUTFChars( appEnv, path, nil );
+  appWorkDir := appEnv^.GetStringUTFChars( appEnv, AppDirectory, nil );
+  appHomeDir := appEnv^.GetStringUTFChars( appEnv, HomeDirectory, nil );
 
   if appInitialized Then
     begin
