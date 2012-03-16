@@ -104,6 +104,7 @@ type
 {$IFDEF ANDROID}
 function  JNI_OnLoad( vm : PJavaVM; reserved : Pointer ) : jint; cdecl;
 function  JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint; cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; path : jstring ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( env : PJNIEnv; thiz : jobject; Width, Height : jint ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( env : PJNIEnv; thiz : jobject ); cdecl;
@@ -1580,6 +1581,11 @@ function JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint;
 begin
 end;
 
+procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject );
+begin
+  zgl_Destroy();
+end;
+
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; path : jstring );
 begin
   appWorkDir := appEnv^.GetStringUTFChars( appEnv, path, nil );
@@ -1588,6 +1594,7 @@ begin
     begin
       gl_ResetState();
       app_PRestore();
+      timer_Reset();
     end;
 end;
 
@@ -1613,7 +1620,6 @@ begin
   appObject := thiz;
   if not appWork Then
     begin
-      zgl_Destroy();
       appEnv^.CallVoidMethod( appEnv, appObject, appFinish );
       exit;
     end;
@@ -1653,11 +1659,14 @@ begin
       FillChar( mouseDown[ 0 ], 3, 0 );
       mouse_ClearState();
       touch_ClearState();
+
+      timer_Reset();
     end else
       begin
         appFocus := FALSE;
         appPause := TRUE;
         if appWork Then app_PActivate( FALSE );
+        snd_MainLoop();
       end;
 end;
 

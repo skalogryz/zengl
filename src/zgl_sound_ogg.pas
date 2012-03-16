@@ -66,6 +66,11 @@ begin
   Result := 0;
 end;
 
+function ogg_CloseMem( datasource : pointer ) : cint; cdecl;
+begin
+  Result := 0;
+end;
+
 function ogg_GetPos( datasource : pointer ) : clong; cdecl;
 begin
   Result := file_GetPos( zglTFile( datasource^ ) );
@@ -134,6 +139,7 @@ begin
       FillChar( vc, SizeOf( vc ), 0 );
       vc.read  := @ogg_ReadMem;
       vc.seek  := @ogg_SeekMem;
+      vc.close := @ogg_CloseMem;
       vc.tell  := @ogg_GetPosMem;
       if ov_open_callbacks( @Stream._memory, vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, vc ) >= 0 Then
         begin

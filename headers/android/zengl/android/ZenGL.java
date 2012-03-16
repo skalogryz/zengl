@@ -35,7 +35,8 @@ import android.view.inputmethod.InputMethodManager;
 
 public class ZenGL extends GLSurfaceView
 {
-	private native void Main();	
+	private native void Main();
+	private native void zglNativeDestroy();
 	private native void zglNativeSurfaceCreated( String Path );
 	private native void zglNativeSurfaceChanged( int width, int height );
 	private native void zglNativeDrawFrame();
@@ -45,6 +46,7 @@ public class ZenGL extends GLSurfaceView
 	private native void zglNativeInputText( String Text );
 	private native void zglNativeBackspace();
 
+	private boolean IsDestroy;
 	private zglCRenderer Renderer;
 	private String SourceDir;
 	private InputMethodManager InputManager;
@@ -63,8 +65,9 @@ public class ZenGL extends GLSurfaceView
 		setRenderer( Renderer );
 		
 		InputManager = (InputMethodManager)context.getSystemService( Context.INPUT_METHOD_SERVICE );
-		setFocusable( true );
 		setFocusableInTouchMode( true );
+		
+		Main();
 	}
 	
 	public Boolean onCloseQuery()
@@ -75,13 +78,17 @@ public class ZenGL extends GLSurfaceView
 	@Override
 	public void onPause()
 	{
-		HideKeyboard();
+		if ( InputManager.isAcceptingText() )
+			HideKeyboard();
+		
+		super.onPause();
 		zglNativeActivate( false );
 	}
 
 	@Override
 	public void onResume()
 	{
+		super.onResume();
 		zglNativeActivate( true );
 	}
 
@@ -148,6 +155,7 @@ public class ZenGL extends GLSurfaceView
 	
 	public void Finish()
 	{
+		zglNativeDestroy();
 		((Activity)getContext()).finish();
 		System.exit( 0 );
 	}
@@ -191,7 +199,10 @@ public class ZenGL extends GLSurfaceView
 			zglNativeBackspace();
 		else if ( keyCode == KeyEvent.KEYCODE_BACK )
 			if ( zglNativeCloseQuery() )
-				Finish();
+			{
+				IsDestroy = true;
+				return true;
+			}
 
 		return super.onKeyDown( keyCode, event );
 	}
@@ -201,7 +212,6 @@ public class ZenGL extends GLSurfaceView
 		public void onSurfaceCreated( GL10 gl, EGLConfig config )
 		{
 			zglNativeSurfaceCreated( SourceDir );
-			Main();
 		}
 
 		public void onSurfaceChanged( GL10 gl, int width, int height )
@@ -211,6 +221,9 @@ public class ZenGL extends GLSurfaceView
 
 		public void onDrawFrame( GL10 gl )
 		{
+			if ( IsDestroy )
+				Finish();
+
 			zglNativeDrawFrame();
 		}
 	}
