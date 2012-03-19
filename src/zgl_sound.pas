@@ -291,7 +291,7 @@ begin
     if GetStatusPlaying( sfSource[ i ] ) = 1 Then
       begin
         {$IFNDEF ANDROID}
-        EnterCriticalsection( sfCS[ i ] );
+        EnterCriticalSection( sfCS[ i ] );
         {$ELSE}
         pthread_mutex_lock( @sfCS[ i ] );
         {$ENDIF}
@@ -497,7 +497,10 @@ begin
     end;
 
   for i := 1 to SND_MAX do
-    snd_StopStream( i );
+    begin
+      snd_StopStream( i );
+      while sfEvent[ i ] <> EVENT_STATE_NULL do;
+    end;
 
   for i := 1 to SND_MAX do
     if Assigned( sfStream[ i ]._decoder ) Then
@@ -1419,8 +1422,6 @@ begin
 
 {$IFDEF USE_OPENAL}
   processed := 0;
-  while ( processed < 1 ) and sfStream[ id ]._playing do
-    alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
 {$ENDIF}
   while sfStream[ id ]._playing do
     begin
@@ -1467,8 +1468,13 @@ begin
                 alSourcePlay( sfSource[ id ] );
             end;
           {$ELSE}
-          sfSource[ id ].SetCurrentPosition( sfStream[ id ].BufferSize );
+          sfSource[ id ].Stop();
+          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
+          dsu_FillData( sfSource[ id ], sfStream[ ID ].Buffer, bytesRead );
+
           sfLastPos[ id ] := 0;
+          sfSource[ id ].SetCurrentPosition( 0 );
+          sfSource[ id ].Play( 0, 0, DSBPLAY_LOOPING );
           {$ENDIF}
 
           sfStream[ id ]._complete := sfSeek[ id ];
@@ -1511,14 +1517,16 @@ begin
       b1Size := 0;
       b2Size := 0;
 
-      if sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) <> DS_OK Then break;
-      sfLastPos[ id ] := position;
+      if sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) = DS_OK Then
+        begin
+          sfLastPos[ id ] := position;
 
-      bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], block1, b1Size, _end );
-      if ( b2Size <> 0 ) and ( not _end ) Then
-        INC( bytesRead, sfStream[ ID ]._decoder.Read( sfStream[ id ], block2, b2Size, _end ) );
+          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], block1, b1Size, _end );
+          if ( b2Size <> 0 ) and ( not _end ) Then
+            INC( bytesRead, sfStream[ ID ]._decoder.Read( sfStream[ id ], block2, b2Size, _end ) );
 
-      sfSource[ id ].Unlock( block1, b1Size, block2, b2Size );
+          sfSource[ id ].Unlock( block1, b1Size, block2, b2Size );
+        end;
       {$ENDIF}
       if _end Then
         begin
