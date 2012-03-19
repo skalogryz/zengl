@@ -34,7 +34,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="50">
+    <Units Count="54">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -283,6 +283,26 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_textures_pvr"/>
       </Unit49>
+      <Unit50>
+        <Filename Value="../zgl_video.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_video"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="../zgl_video_theora.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_video_theora"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="../zgl_lib_ogg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_lib_ogg"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="../zgl_lib_theora.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_lib_theora"/>
+      </Unit53>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
