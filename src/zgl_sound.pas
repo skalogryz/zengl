@@ -290,6 +290,10 @@ begin
   for i := 1 to SND_MAX do
     if GetStatusPlaying( sfSource[ i ] ) = 1 Then
       begin
+        {$IFNDEF ANDROID}
+        EnterCriticalsection( sfCS[ i ] );
+        {$ELSE}
+        {$ENDIF}
         if timer_GetTicks() - sfStream[ i ]._lastTime >= 10 Then
           begin
             sfStream[ i ]._complete := timer_GetTicks() - sfStream[ i ]._lastTime + sfStream[ i ]._complete;
@@ -297,6 +301,10 @@ begin
               sfStream[ i ]._complete := sfStream[ i ].Length;
             sfStream[ i ]._lastTime := timer_GetTicks();
           end;
+        {$IFNDEF ANDROID}
+        LeaveCriticalsection( sfCS[ i ] );
+        {$ELSE}
+        {$ENDIF}
       end else
         sfStream[ i ]._lastTime := timer_GetTicks();
 
@@ -1433,10 +1441,9 @@ begin
       EnterCriticalsection( sfCS[ id ] );
     {$ELSE}
     {$ENDIF}
-      if ( sfSeek[ id ] > 0 ) Then
+      if sfSeek[ id ] > 0 Then
         begin
           sfStream[ id ]._decoder.Seek( sfStream[ id ], sfSeek[ id ] );
-          sfStream[ id ]._complete := sfSeek[ id ];
           sfSeek[ id ] := 0;
 
           {$IFDEF USE_OPENAL}
@@ -1459,6 +1466,9 @@ begin
           sfSource[ id ].SetCurrentPosition( sfStream[ id ].BufferSize );
           sfLastPos[ id ] := 0;
           {$ENDIF}
+
+          sfStream[ id ]._complete := sfSeek[ id ];
+          sfStream[ id ]._lastTime := timer_GetTicks();
 
         {$IFNDEF ANDROID}
           {$IFDEF FPC}
