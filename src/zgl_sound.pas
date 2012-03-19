@@ -1517,7 +1517,7 @@ begin
       b1Size := 0;
       b2Size := 0;
 
-      if sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) = DS_OK Then
+      if ( fillSize > 0 {some drivers don't know what is standard...} ) and ( sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) = DS_OK ) Then
         begin
           sfLastPos[ id ] := position;
 
