@@ -208,7 +208,7 @@ var
   sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 
-  sfCS     : array[ 1..SND_MAX ] of TRTLCriticalSection;
+  sfCS     : array[ 1..SND_MAX ] of {$IFNDEF ANDROID} TRTLCriticalSection {$ELSE} pthread_mutex_t {$ENDIF};
   sfThread : array[ 1..SND_MAX ] of LongWord;
   sfEvent  : array[ 1..SND_MAX ] of {$IFNDEF ANDROID}{$IFDEF FPC} PRTLEvent {$ELSE} THandle {$ENDIF} {$ELSE} Pointer {$ENDIF};
   {$IFNDEF FPC}
@@ -293,6 +293,7 @@ begin
         {$IFNDEF ANDROID}
         EnterCriticalsection( sfCS[ i ] );
         {$ELSE}
+        pthread_mutex_lock( @sfCS[ i ] );
         {$ENDIF}
         if timer_GetTicks() - sfStream[ i ]._lastTime >= 10 Then
           begin
@@ -304,6 +305,7 @@ begin
         {$IFNDEF ANDROID}
         LeaveCriticalsection( sfCS[ i ] );
         {$ELSE}
+        pthread_mutex_unlock( @sfCS[ i ] );
         {$ENDIF}
       end else
         sfStream[ i ]._lastTime := timer_GetTicks();
@@ -1235,6 +1237,7 @@ begin
   sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcStream, @sfStream[ ID ].ID, 0, sfThreadID[ ID ] );
   {$ENDIF}
 {$ELSE}
+  pthread_mutex_init( @sfCS[ ID ], nil );
   sfEvent[ ID ] := @sfEventSem[ ID ];
   sem_init( sfEvent[ ID ], 0, 0 );
   pthread_create( @sfThread[ ID ], nil, @snd_ProcStream, @sfStream[ ID ].ID );
@@ -1440,6 +1443,7 @@ begin
     {$IFNDEF ANDROID}
       EnterCriticalsection( sfCS[ id ] );
     {$ELSE}
+      pthread_mutex_lock( @sfCS[ id ] );
     {$ENDIF}
       if sfSeek[ id ] > 0 Then
         begin
@@ -1479,6 +1483,7 @@ begin
     {$IFNDEF ANDROID}
       LeaveCriticalsection( sfCS[ id ] );
     {$ELSE}
+      pthread_mutex_unlock( @sfCS[ id ] );
     {$ENDIF}
 
       {$IFDEF USE_OPENAL}
@@ -1555,6 +1560,7 @@ begin
 
   EndThread( 0 );
 {$ELSE}
+  pthread_mutex_destroy( @sfCS[ ID ] );
   sem_destroy( sfEvent[ id ] );
   sfEvent[ id ] := EVENT_STATE_NULL;
 {$ENDIF}

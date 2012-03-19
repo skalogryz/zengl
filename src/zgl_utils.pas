@@ -96,11 +96,17 @@ function printf( format : PAnsiChar; const args : array of const ) : Integer; cd
 function __android_log_write( prio : LongInt; tag, text : PAnsiChar ) : LongInt; cdecl; external 'liblog.so' name '__android_log_write';
 
 type
-  ppthread_t      = ^pthread_t;
-  ppthread_attr_t = ^pthread_attr_t;
-  psem_t          = ^sem_t;
+  ppthread_t           = ^pthread_t;
+  ppthread_attr_t      = ^pthread_attr_t;
+  ppthread_mutex_t     = ^pthread_mutex_t;
+  ppthread_mutexattr_t = ^pthread_mutexattr_t;
+  psem_t               = ^sem_t;
 
 function pthread_create( __thread : ppthread_t; __attr : ppthread_attr_t; __start_routine : Pointer; __arg : Pointer ) : LongInt; cdecl; external;
+function pthread_mutex_init( __mutex : ppthread_mutex_t; __mutex_attr : ppthread_mutexattr_t ) : LongInt; cdecl; external;
+function pthread_mutex_destroy( __mutex : ppthread_mutex_t ) : LongInt; cdecl; external;
+function pthread_mutex_lock( __mutex : ppthread_mutex_t ) : LongInt; cdecl; external;
+function pthread_mutex_unlock( __mutex : ppthread_mutex_t ) : LongInt; cdecl; external;
 function sem_init( __sem : psem_t; __pshared : LongInt; __value : DWORD ) : LongInt; cdecl; external;
 function sem_destroy ( __sem : psem_t ) : LongInt; cdecl; external;
 function sem_wait( __sem : psem_t ) : LongInt; cdecl; external;
