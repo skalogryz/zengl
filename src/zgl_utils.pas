@@ -43,6 +43,7 @@ uses
 
 const
   LIB_ERROR  = {$IFDEF UNIX} nil {$ELSE} 0 {$ENDIF};
+  EVENT_STATE_NULL = {$IFDEF FPC} nil {$ELSE} 0 {$ENDIF};
 
 function u_IntToStr( Value : Integer ) : UTF8String;
 function u_StrToInt( const Value : UTF8String ) : Integer;
@@ -104,6 +105,7 @@ function sem_init( __sem : psem_t; __pshared : LongInt; __value : DWORD ) : Long
 function sem_destroy ( __sem : psem_t ) : LongInt; cdecl; external;
 function sem_wait( __sem : psem_t ) : LongInt; cdecl; external;
 function sem_post( __sem : psem_t ) : LongInt; cdecl; external;
+function sem_timedwait( __sem : psem_t; __abs_timeout : ptimespec ) : LongInt; cdecl; external;
 {$ENDIF}
 {$IFDEF WINDESKTOP}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';

@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2012.03.07           */
+/* date:     2012.03.19           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1181,6 +1181,7 @@ ZGLEXTERN int ( *snd_PlayMemory )( zglTMemory Memory, const char *Extension, boo
 ZGLEXTERN void ( *snd_PauseStream )( int ID );
 ZGLEXTERN void ( *snd_StopStream )( int ID );
 ZGLEXTERN void ( *snd_ResumeStream )( int ID );
+ZGLEXTERN void ( *snd_SeekStream )( int ID, double Milliseconds );
 
 // MATH
 #define pi      3.141592654
@@ -1591,6 +1592,7 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( snd_PauseStream, zglLib, "snd_PauseStream" );
     zglGetAddress( snd_StopStream, zglLib, "snd_StopStream" );
     zglGetAddress( snd_ResumeStream, zglLib, "snd_ResumeStream" );
+    zglGetAddress( snd_SeekStream, zglLib, "snd_SeekStream" );
 
     zglGetAddress( m_Cos, zglLib, "m_Cos" );
     zglGetAddress( m_Sin, zglLib, "m_Sin" );

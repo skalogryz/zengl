@@ -173,6 +173,13 @@ begin
   Result := bytesRead;
 end;
 
+procedure ogg_DecoderSeek( var Stream : zglTSoundStream; Milliseconds : Double );
+begin
+  if not vorbisInit Then exit;
+
+  ov_time_seek( zglTOggStream( Stream._data^ ).vf, {$IFDEF USE_VORBIS} Milliseconds / 1000 {$ELSE} Round( Milliseconds ) {$ENDIF} );
+end;
+
 procedure ogg_DecoderLoop( var Stream : zglTSoundStream );
 begin
   if not vorbisInit Then exit;
@@ -259,6 +266,7 @@ initialization
   oggDecoder.Open    := ogg_DecoderOpen;
   oggDecoder.OpenMem := ogg_DecoderOpenMem;
   oggDecoder.Read    := ogg_DecoderRead;
+  oggDecoder.Seek    := ogg_DecoderSeek;
   oggDecoder.Loop    := ogg_DecoderLoop;
   oggDecoder.Close   := ogg_DecoderClose;
   zgl_Reg( SND_FORMAT_EXTENSION,   @OGG_EXTENSION[ 1 ] );

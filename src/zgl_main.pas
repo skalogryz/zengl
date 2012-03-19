@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.03.07';
+  cs_Date     = '2012.03.19';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;

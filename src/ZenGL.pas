@@ -354,6 +354,7 @@ exports
   snd_PauseStream          name prefix + 'snd_PauseStream',
   snd_StopStream           name prefix + 'snd_StopStream',
   snd_ResumeStream         name prefix + 'snd_ResumeStream',
+  snd_SeekStream           name prefix + 'snd_SeekStream',
   {$ENDIF}
 
   // Video

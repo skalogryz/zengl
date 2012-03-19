@@ -285,18 +285,19 @@ type
   end;
 
 {$IFDEF USE_OGG_STATIC}
-  function  ogg_sync_init(oy: pogg_sync_state): cint; cdecl; external;
-  function  ogg_sync_clear(oy: pogg_sync_state): cint; cdecl; external;
-  function  ogg_sync_buffer(oy: pogg_sync_state; size: clong): pointer; cdecl; external;
-  function  ogg_sync_wrote(oy: pogg_sync_state; bytes: clong): cint; cdecl; external;
-  function  ogg_sync_pageout(oy: pogg_sync_state; og: pogg_page): cint; cdecl; external;
-  function  ogg_stream_pagein(os: pogg_stream_state; og: pogg_page): cint; cdecl; external;
-  function  ogg_stream_packetout(os: pogg_stream_state; op: pogg_packet): cint; cdecl; external;
-  function  ogg_stream_packetpeek(os: pogg_stream_state; op: pogg_packet): cint; cdecl; external;
-  function  ogg_stream_init(os: pogg_stream_state; serialno: cint): cint; cdecl; external;
-  function  ogg_stream_clear(os: pogg_stream_state): cint; cdecl; external;
-  function  ogg_page_bos(og: pogg_page): cint; cdecl; external;
-  function  ogg_page_serialno(og: pogg_page): cint; cdecl; external;
+  function ogg_sync_init(oy: pogg_sync_state): cint; cdecl; external;
+  function ogg_sync_clear(oy: pogg_sync_state): cint; cdecl; external;
+  function ogg_sync_buffer(oy: pogg_sync_state; size: clong): pointer; cdecl; external;
+  function ogg_sync_wrote(oy: pogg_sync_state; bytes: clong): cint; cdecl; external;
+  function ogg_sync_pageseek(oy: pogg_sync_state; og: pogg_page): cint; cdecl; external;
+  function ogg_sync_pageout(oy: pogg_sync_state; og: pogg_page): cint; cdecl; external;
+  function ogg_stream_pagein(os: pogg_stream_state; og: pogg_page): cint; cdecl; external;
+  function ogg_stream_packetout(os: pogg_stream_state; op: pogg_packet): cint; cdecl; external;
+  function ogg_stream_packetpeek(os: pogg_stream_state; op: pogg_packet): cint; cdecl; external;
+  function ogg_stream_init(os: pogg_stream_state; serialno: cint): cint; cdecl; external;
+  function ogg_stream_clear(os: pogg_stream_state): cint; cdecl; external;
+  function ogg_page_bos(og: pogg_page): cint; cdecl; external;
+  function ogg_page_serialno(og: pogg_page): cint; cdecl; external;
 
   function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
   function ov_open_callbacks(datasource: pointer; var vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
@@ -304,12 +305,14 @@ type
   function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; {$IFDEF USE_VORBIS} bigendianp: cbool; word: cint; sgned: cbool; {$ENDIF} bitstream: pcint): clong; cdecl; external;
   function ov_pcm_seek(var vf: OggVorbis_File; pos: cint64): cint; cdecl; external;
   function ov_pcm_total(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl; external;
+  function ov_time_seek(var vf: OggVorbis_File; {$IFDEF USE_VORBIS} time: double {$ELSE} ms: ogg_int64_t {$ENDIF}): cint; cdecl; external;
 {$ELSE}
   var
     ogg_sync_init         : function(oy: pogg_sync_state): cint; cdecl;
     ogg_sync_clear        : function(oy: pogg_sync_state): cint; cdecl;
     ogg_sync_buffer       : function(oy: pogg_sync_state; size: clong): pointer; cdecl;
     ogg_sync_wrote        : function(oy: pogg_sync_state; bytes: clong): cint; cdecl;
+    ogg_sync_pageseek     : function(oy: pogg_sync_state; og: pogg_page): cint; cdecl;
     ogg_sync_pageout      : function(oy: pogg_sync_state; og: pogg_page): cint; cdecl;
     ogg_stream_pagein     : function(os: pogg_stream_state; og: pogg_page): cint; cdecl;
     ogg_stream_packetout  : function(os: pogg_stream_state; op: pogg_packet): cint; cdecl;
@@ -325,6 +328,7 @@ type
     ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl;
     ov_pcm_seek       : function(var vf: OggVorbis_File; pos: cint64): cint; cdecl;
     ov_pcm_total      : function(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl;
+    ov_time_seek      : function(var vf: OggVorbis_File; {$IFDEF USE_VORBIS} time: double {$ELSE} ms: ogg_int64_t {$ENDIF}): cint; cdecl;
 {$ENDIF}
 
 function  InitOgg : Boolean;
@@ -379,6 +383,7 @@ begin
       ogg_sync_clear        := dlsym( oggLibrary, 'ogg_sync_clear' );
       ogg_sync_buffer       := dlsym( oggLibrary, 'ogg_sync_buffer' );
       ogg_sync_wrote        := dlsym( oggLibrary, 'ogg_sync_wrote' );
+      ogg_sync_pageseek     := dlsym( oggLibrary, 'ogg_sync_pageseek' );
       ogg_sync_pageout      := dlsym( oggLibrary, 'ogg_sync_pageout' );
       ogg_stream_pagein     := dlsym( oggLibrary, 'ogg_stream_pagein' );
       ogg_stream_packetout  := dlsym( oggLibrary, 'ogg_stream_packetout' );
@@ -433,6 +438,7 @@ begin
           ov_read           := dlsym( vorbisfileLibrary, 'ov_read' );
           ov_pcm_seek       := dlsym( vorbisfileLibrary, 'ov_pcm_seek' );
           ov_pcm_total      := dlsym( vorbisfileLibrary, 'ov_pcm_total' );
+          ov_time_seek      := dlsym( vorbisfileLibrary, 'ov_time_seek' );
           Result            := TRUE;
         end else
           Result := FALSE;

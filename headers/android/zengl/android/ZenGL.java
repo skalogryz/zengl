@@ -20,8 +20,6 @@
 */
 package zengl.android;
 
-import java.io.File;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 

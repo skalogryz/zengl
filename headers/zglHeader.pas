@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.03.07           }
+{ date:     2012.03.19           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1136,6 +1136,7 @@ type
     OpenMem : function( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
     Read    : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
     Loop    : procedure( var Stream : zglTSoundStream );
+    Seek    : procedure( var Stream : zglTSoundStream; Milliseconds : Double );
     Close   : procedure( var Stream : zglTSoundStream );
   end;
 
@@ -1170,9 +1171,10 @@ var
   snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
   snd_PlayFile       : function( const FileName : UTF8String; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
   snd_PlayMemory     : function( const Memory : zglTMemory; const Extension : UTF8String; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
-  snd_PauseStream      : procedure( ID : Integer );
-  snd_StopStream       : procedure( ID : Integer );
-  snd_ResumeStream     : procedure( ID : Integer );
+  snd_PauseStream    : procedure( ID : Integer );
+  snd_StopStream     : procedure( ID : Integer );
+  snd_ResumeStream   : procedure( ID : Integer );
+  snd_SeekStream     : procedure( ID : Integer; Milliseconds : Double );
 
 // Video
 type
@@ -1736,6 +1738,7 @@ begin
       snd_PauseStream := dlsym( zglLib, 'snd_PauseStream' );
       snd_StopStream := dlsym( zglLib, 'snd_StopStream' );
       snd_ResumeStream := dlsym( zglLib, 'snd_ResumeStream' );
+      snd_SeekStream := dlsym( zglLib, 'snd_SeekStream' );
 
       video_Add := dlsym( zglLib, 'video_Add' );
       video_Del := dlsym( zglLib, 'video_Del' );
