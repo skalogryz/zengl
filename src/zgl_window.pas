@@ -40,7 +40,7 @@ interface
   uses MacOSAll;
 {$ENDIF}
 {$IFDEF iOS}
-  uses iPhoneAll, CGGeometry, CGAffineTransforms;
+  uses iPhoneAll, CGGeometry;
 {$ENDIF}
 
 function  wnd_Create( Width, Height : Integer ) : Boolean;
