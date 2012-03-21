@@ -39,6 +39,7 @@ uses
   {$IFDEF USE_ZIP}
   zgl_lib_zip,
   {$ENDIF}
+  zgl_threads,
   zgl_utils,
   zgl_types;
 
@@ -146,17 +147,11 @@ function  res_GetCompleted : Integer;
 var
   resUseThreaded     : Boolean;
   resCompleted       : Integer;
-  resThread          : array[ 0..255 ] of {$IFNDEF ANDROID} LongWord {$ELSE} ppthread_t {$ENDIF};
-  {$IFNDEF FPC}
-  resThreadID        : array[ 0..255 ] of LongWord;
-  {$ENDIF}
+  resThread          : array[ 0..255 ] of zglTThread;
   resQueueStackID    : array of Byte;
   resQueueID         : array[ 0..255 ] of Byte;
   resQueueCurrentID  : Byte;
-  resQueueState      : array[ 0..255 ] of {$IFNDEF ANDROID}{$IFDEF FPC} PRTLEvent {$ELSE} THandle {$ENDIF} {$ELSE} Pointer {$ENDIF};
-  {$IFDEF ANDROID}
-  resQueueStateSem   : array[ 0..255 ] of sem_t;
-  {$ENDIF}
+  resQueueState      : array[ 0..255 ] of zglTSemaphore;
   resQueueSize       : array[ 0..255 ] of Integer;
   resQueueMax        : array[ 0..255 ] of Integer;
   resQueuePercentage : array[ 0..255 ] of Integer;
@@ -180,20 +175,11 @@ procedure res_Free;
     i : Integer;
 begin
   for i := 0 to 255 do
-    if resQueueState[ i ] <> EVENT_STATE_NULL Then
+    if resQueueState[ i ] <> nil Then
       begin
-      {$IFNDEF ANDROID}
-        {$IFDEF FPC}
-        RTLEventSetEvent( resQueueState[ i ] );
-        {$ELSE}
-        SetEvent( resQueueState[ i ] );
-        {$ENDIF}
-      {$ELSE}
-        resQueueState[ i ] := @resQueueStateSem[ i ];
-        sem_post( resQueueState[ i ] );
-      {$ENDIF}
+        thread_SemPost( resQueueState[ i ] );
         resQueueSize[ i ] := 0;
-        while resQueueState[ i ] <> EVENT_STATE_NULL do;
+        while resQueueState[ i ] <> nil do;
       end;
 end;
 
@@ -208,7 +194,7 @@ begin
   size := 0;
   max  := 0;
   for id := 0 to 255 do
-    if resQueueState[ id ] <> EVENT_STATE_NULL Then
+    if resQueueState[ id ] <> nil Then
       begin
         if resQueueSize[ id ] <= 0 Then continue;
 
@@ -272,17 +258,7 @@ begin
                       tex_GetData( Texture, tData );
                       tex_GetData( Mask, mData );
                       item.Prepared := TRUE;
-
-                    {$IFNDEF ANDROID}
-                      {$IFDEF FPC}
-                      RTLEventSetEvent( resQueueState[ id ] );
-                      {$ELSE}
-                      SetEvent( resQueueState[ id ] );
-                      {$ENDIF}
-                    {$ELSE}
-                      sem_post( resQueueState[ id ] );
-                    {$ENDIF}
-
+                      thread_SemPost( resQueueState[ id ] );
                       break;
                     end;
                 RES_FONT:
@@ -292,17 +268,7 @@ begin
                         for i := 0 to Font.Count.Pages - 1 do
                           Font.Pages[ i ] := tex_Add();
                         item.Prepared := TRUE;
-
-                      {$IFNDEF ANDROID}
-                        {$IFDEF FPC}
-                        RTLEventSetEvent( resQueueState[ id ] );
-                        {$ELSE}
-                        SetEvent( resQueueState[ id ] );
-                        {$ENDIF}
-                      {$ELSE}
-                        sem_post( resQueueState[ id ] );
-                      {$ENDIF}
-
+                        thread_SemPost( resQueueState[ id ] );
                         item.Ready := FALSE;
                       end;
               end;
@@ -455,15 +421,7 @@ begin
   item^.IsFromFile := FromFile;
   item^.Type_      := Type_;
 
-{$IFNDEF ANDROID}
-  {$IFDEF FPC}
-  RTLEventSetEvent( resQueueState[ resQueueCurrentID ] );
-  {$ELSE}
-  SetEvent( resQueueState[ resQueueCurrentID ] );
-  {$ENDIF}
-{$ELSE}
-  sem_post( resQueueState[ resQueueCurrentID ] );
-{$ENDIF}
+  thread_SemPost( resQueueState[ resQueueCurrentID ] );
 end;
 
 function res_ProcQueue( data : Pointer ) : LongInt;
@@ -741,52 +699,22 @@ begin
             end;
         end;
 
-    {$IFNDEF ANDROID}
-      {$IFDEF FPC}
-      RTLEventWaitFor( resQueueState[ id ] );
-      RTLEventResetEvent( resQueueState[ id ] );
-      {$ELSE}
-      WaitForSingleObject( resQueueState[ id ], INFINITE );
-      {$ENDIF}
-    {$ELSE}
-      sem_wait( resQueueState[ id ] );
-    {$ENDIF}
+      thread_SemWait( resQueueState[ id ] );
     end;
 
-{$IFNDEF ANDROID}
-  {$IFDEF FPC}
-  RTLEventDestroy( resQueueState[ id ] );
-  {$ELSE}
-  CloseHandle( resQueueState[ id ] );
-  {$ENDIF}
-{$ELSE}
-  sem_destroy( resQueueState[ id ] );
-{$ENDIF}
-  resQueueState[ id ] := EVENT_STATE_NULL;
-
+  thread_SemDestroy( resQueueState[ id ] );
   EndThread( 0 );
 end;
 
 procedure res_BeginQueue( QueueID : Byte );
 begin
-  if resQueueState[ QueueID ] = EVENT_STATE_NULL Then
+  if resQueueState[ QueueID ] = nil Then
     begin
       resQueueID[ QueueID ]         := QueueID;
       resQueueItems[ QueueID ].prev := @resQueueItems[ QueueID ];
       resQueueItems[ QueueID ].next := nil;
-    {$IFNDEF ANDROID}
-      {$IFDEF FPC}
-      resQueueState[ QueueID ] := RTLEventCreate();
-      resThread[ QueueID ]     := LongWord( BeginThread( @res_ProcQueue, @resQueueID[ QueueID ] ) );
-      {$ELSE}
-      resQueueState[ QueueID ] := CreateEvent( nil, FALSE, FALSE, nil );
-      resThread[ QueueID ]     := BeginThread( nil, 0, @res_ProcQueue, @resQueueID[ QueueID ], 0, resThreadID[ QueueID ] );
-      {$ENDIF}
-    {$ELSE}
-      resQueueState[ QueueID ] := @resQueueStateSem[ QueueID ];
-      sem_init( resQueueState[ QueueID ], 0, 0 );
-      pthread_create( @resThread[ QueueID ], nil, @res_ProcQueue, @resQueueID[ QueueID ] );
-    {$ENDIF}
+      resQueueState[ QueueID ]      := thread_SemInit();
+      resThread[ QueueID ]          := thread_Create( @res_ProcQueue, @resQueueID[ QueueID ] );
     end;
 
   SetLength( resQueueStackID, Length( resQueueStackID ) + 1 );

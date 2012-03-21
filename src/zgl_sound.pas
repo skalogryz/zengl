@@ -28,9 +28,6 @@ unit zgl_sound;
 interface
 
 uses
-  {$IF DEFINED(UNIX) and (not DEFINED(ANDROID))}
-  cthreads,
-  {$IFEND}
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
@@ -47,6 +44,7 @@ uses
   {$ELSE}
   zgl_sound_dsound,
   {$ENDIF}
+  zgl_threads,
   zgl_file,
   zgl_memory;
 
@@ -208,15 +206,9 @@ var
   sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 
-  sfCS     : array[ 1..SND_MAX ] of {$IFNDEF ANDROID} TRTLCriticalSection {$ELSE} pthread_mutex_t {$ENDIF};
-  sfThread : array[ 1..SND_MAX ] of LongWord;
-  sfEvent  : array[ 1..SND_MAX ] of {$IFNDEF ANDROID}{$IFDEF FPC} PRTLEvent {$ELSE} THandle {$ENDIF} {$ELSE} Pointer {$ENDIF};
-  {$IFNDEF FPC}
-  sfThreadID : array[ 1..SND_MAX ] of LongWord;
-  {$ENDIF}
-  {$IFDEF ANDROID}
-  sfEventSem : array[ 1..SND_MAX ] of sem_t;
-  {$ENDIF}
+  sfThread : array[ 1..SND_MAX ] of zglTThread;
+  sfMutex  : array[ 1..SND_MAX ] of zglTMutex;
+  sfSem    : array[ 1..SND_MAX ] of zglTSemaphore;
 
 {$IFDEF iOS}
 const
@@ -288,27 +280,21 @@ begin
   if not sndInitialized Then exit;
 
   for i := 1 to SND_MAX do
-    if GetStatusPlaying( sfSource[ i ] ) = 1 Then
-      begin
-        {$IFNDEF ANDROID}
-        EnterCriticalSection( sfCS[ i ] );
-        {$ELSE}
-        pthread_mutex_lock( @sfCS[ i ] );
-        {$ENDIF}
-        if timer_GetTicks() - sfStream[ i ]._lastTime >= 10 Then
-          begin
-            sfStream[ i ]._complete := timer_GetTicks() - sfStream[ i ]._lastTime + sfStream[ i ]._complete;
-            if sfStream[ i ]._complete > sfStream[ i ].Length Then
-              sfStream[ i ]._complete := sfStream[ i ].Length;
-            sfStream[ i ]._lastTime := timer_GetTicks();
-          end;
-        {$IFNDEF ANDROID}
-        LeaveCriticalsection( sfCS[ i ] );
-        {$ELSE}
-        pthread_mutex_unlock( @sfCS[ i ] );
-        {$ENDIF}
-      end else
-        sfStream[ i ]._lastTime := timer_GetTicks();
+    begin
+      thread_MutexLock( sfMutex[ i ] );
+      if GetStatusPlaying( sfSource[ i ] ) = 1 Then
+        begin
+          if timer_GetTicks() - sfStream[ i ]._lastTime >= 10 Then
+            begin
+              sfStream[ i ]._complete := timer_GetTicks() - sfStream[ i ]._lastTime + sfStream[ i ]._complete;
+              if sfStream[ i ]._complete > sfStream[ i ].Length Then
+                sfStream[ i ]._complete := sfStream[ i ].Length;
+              sfStream[ i ]._lastTime := timer_GetTicks();
+            end;
+        end else
+          sfStream[ i ]._lastTime := timer_GetTicks();
+      thread_MutexUnlock( sfMutex[ i ] );
+    end;
 
   if appFocus Then
     begin
@@ -477,6 +463,9 @@ begin
   log_Add( 'DirectSound: sound system initialized' );
 {$ENDIF}
 
+  for i := 1 to SND_MAX do
+    sfMutex[ i ] := thread_MutexInit();
+
   sndInitialized := TRUE;
   Result         := TRUE;
 end;
@@ -499,7 +488,8 @@ begin
   for i := 1 to SND_MAX do
     begin
       snd_StopStream( i );
-      while sfEvent[ i ] <> EVENT_STATE_NULL do;
+      while sfSem[ i ] <> nil do;
+      thread_MutexDestroy( sfMutex[ i ] );
     end;
 
   for i := 1 to SND_MAX do
@@ -1130,6 +1120,7 @@ begin
 
   if ID = SND_STREAM Then
     begin
+      thread_MutexLock( sfMutex[ What ] );
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ Ptr( Sound ) ] );
         SND_STATE_LOOPED: Result := Byte( sfStream[ Ptr( Sound ) ].Loop );
@@ -1137,6 +1128,7 @@ begin
         SND_STATE_PERCENT: Result := Round( 100 / sfStream[ Ptr( Sound ) ].Length * sfStream[ Ptr( Sound ) ]._complete );
         SND_INFO_LENGTH: Result := Round( sfStream[ Ptr( Sound ) ].Length );
       end;
+      thread_MutexUnlock( sfMutex[ What ] );
     end else
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
@@ -1150,7 +1142,7 @@ function snd_GetStreamID : Integer;
     i : Integer;
 begin
   for i := 1 to SND_MAX do
-    if ( not sfStream[ i ]._playing ) and ( sfEvent[ i ] = EVENT_STATE_NULL ) Then
+    if ( not sfStream[ i ]._playing ) and ( sfSem[ i ] = nil ) Then
       begin
         Result := i;
         exit;
@@ -1229,22 +1221,8 @@ begin
   sfStream[ ID ]._complete := 0;
   sfStream[ ID ]._lastTime := timer_GetTicks;
 
-{$IFNDEF ANDROID}
-  {$IFDEF FPC}
-  InitCriticalSection( sfCS[ ID ] );
-  sfEvent[ ID ]  := RTLEventCreate();
-  sfThread[ ID ] := LongWord( BeginThread( @snd_ProcStream, @sfStream[ ID ].ID ) );
-  {$ELSE}
-  InitializeCriticalSection( sfCS[ ID ] );
-  sfEvent[ ID ]  := CreateEvent( nil, FALSE, FALSE, nil );
-  sfThread[ ID ] := BeginThread( nil, 0, @snd_ProcStream, @sfStream[ ID ].ID, 0, sfThreadID[ ID ] );
-  {$ENDIF}
-{$ELSE}
-  pthread_mutex_init( @sfCS[ ID ], nil );
-  sfEvent[ ID ] := @sfEventSem[ ID ];
-  sem_init( sfEvent[ ID ], 0, 0 );
-  pthread_create( @sfThread[ ID ], nil, @snd_ProcStream, @sfStream[ ID ].ID );
-{$ENDIF}
+  sfSem[ ID ]    := thread_SemInit();
+  sfThread[ ID ] := thread_Create( @snd_ProcStream, @sfStream[ ID ].ID );
 end;
 
 function snd_PlayFile( const FileName : UTF8String; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
@@ -1348,15 +1326,7 @@ begin
   sfSource[ ID ].Stop();
 {$ENDIF}
 
-{$IFNDEF ANDROID}
-  {$IFDEF FPC}
-  RTLEventSetEvent( sfEvent[ ID ] );
-  {$ELSE}
-  SetEvent( sfEvent[ ID ] );
-  {$ENDIF}
-{$ELSE}
-  sem_post( sfEvent[ ID ] );
-{$ENDIF}
+  thread_SemPost( sfSem[ ID ] );
 end;
 
 procedure snd_ResumeStream( ID : Integer );
@@ -1376,27 +1346,10 @@ procedure snd_SeekStream( ID : Integer; Milliseconds : Double );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) Then exit;
 
-{$IFNDEF ANDROID}
-  EnterCriticalsection( sfCS[ ID ] );
-{$ELSE}
-{$ENDIF}
-
+  thread_MutexLock( sfMutex[ ID ] );
   sfSeek[ ID ] := Milliseconds;
-
-{$IFNDEF ANDROID}
-  {$IFDEF FPC}
-  RTLEventSetEvent( sfEvent[ ID ] );
-  {$ELSE}
-  SetEvent( sfEvent[ ID ] );
-  {$ENDIF}
-{$ELSE}
-  sem_post( sfEvent[ ID ] );
-{$ENDIF}
-
-{$IFNDEF ANDROID}
-  LeaveCriticalsection( sfCS[ ID ] );
-{$ELSE}
-{$ENDIF}
+  thread_SemPost( sfSem[ ID ] );
+  thread_MutexUnlock( sfMutex[ ID ] );
 end;
 
 function snd_ProcStream( data : Pointer ) : LongInt;
@@ -1404,9 +1357,6 @@ function snd_ProcStream( data : Pointer ) : LongInt;
     id        : Integer;
     _end      : Boolean;
     bytesRead : Integer;
-  {$IFDEF ANDROID}
-    time : TimeSpec;
-  {$ENDIF}
   {$IFDEF USE_OPENAL}
     processed : LongInt;
     buffer    : LongWord;
@@ -1427,25 +1377,10 @@ begin
     begin
       if not sndInitialized Then break;
 
-    {$IFNDEF ANDROID}
-      {$IFDEF FPC}
-      RTLEventWaitFor( sfEvent[ id ], 100 );
-      {$ELSE}
-      WaitForSingleObject( sfEvent[ id ], 100 );
-      {$ENDIF}
-    {$ELSE}
-      time.tv_sec := 0;
-      time.tv_nsec := 100000000;
-      sem_timedwait( sfEvent[ id ], @time );
-    {$ENDIF}
-
+      thread_SemWait( sfSem[ id ], 100 );
       while ( sfStream[ id ]._playing ) and ( sfStream[ id ]._paused ) do u_Sleep( 10 );
 
-    {$IFNDEF ANDROID}
-      EnterCriticalsection( sfCS[ id ] );
-    {$ELSE}
-      pthread_mutex_lock( @sfCS[ id ] );
-    {$ENDIF}
+      thread_MutexLock( sfMutex[ id ] );
       if sfSeek[ id ] > 0 Then
         begin
           sfStream[ id ]._decoder.Seek( sfStream[ id ], sfSeek[ id ] );
@@ -1479,18 +1414,8 @@ begin
 
           sfStream[ id ]._complete := sfSeek[ id ];
           sfStream[ id ]._lastTime := timer_GetTicks();
-
-        {$IFNDEF ANDROID}
-          {$IFDEF FPC}
-          RTLEventResetEvent( sfEvent[ id ] );
-          {$ENDIF}
-        {$ENDIF}
         end;
-    {$IFNDEF ANDROID}
-      LeaveCriticalsection( sfCS[ id ] );
-    {$ELSE}
-      pthread_mutex_unlock( @sfCS[ id ] );
-    {$ENDIF}
+      thread_MutexUnlock( sfMutex[ id ] );
 
       {$IFDEF USE_OPENAL}
       alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
@@ -1556,22 +1481,8 @@ begin
         end;
     end;
 
-{$IFNDEF ANDROID}
-  {$IFDEF FPC}
-  DoneCriticalsection( sfCS[ id ] );
-  RTLEventDestroy( sfEvent[ id ] );
-  {$ELSE}
-  DeleteCriticalSection( sfCS[ id ] );
-  CloseHandle( sfEvent[ id ] );
-  {$ENDIF}
-  sfEvent[ id ] := EVENT_STATE_NULL;
-
+  thread_SemDestroy( sfSem[ id ] );
   EndThread( 0 );
-{$ELSE}
-  pthread_mutex_destroy( @sfCS[ ID ] );
-  sem_destroy( sfEvent[ id ] );
-  sfEvent[ id ] := EVENT_STATE_NULL;
-{$ENDIF}
 end;
 
 end.
