@@ -489,7 +489,7 @@ begin
     begin
       snd_StopStream( i );
       while sfEvent[ i ] <> nil do;
-      thread_EventDestroy( sfEvent[ i ] );
+      thread_CSDone( sfCS[ i ] );
     end;
 
   for i := 1 to SND_MAX do
