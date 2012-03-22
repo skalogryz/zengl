@@ -207,8 +207,8 @@ var
   {$ENDIF}
 
   sfThread : array[ 1..SND_MAX ] of zglTThread;
-  sfMutex  : array[ 1..SND_MAX ] of zglTMutex;
-  sfSem    : array[ 1..SND_MAX ] of zglTSemaphore;
+  sfCS     : array[ 1..SND_MAX ] of zglTCriticalSection;
+  sfEvent  : array[ 1..SND_MAX ] of zglTEvent;
 
 {$IFDEF iOS}
 const
@@ -281,7 +281,7 @@ begin
 
   for i := 1 to SND_MAX do
     begin
-      thread_MutexLock( sfMutex[ i ] );
+      thread_CSEnter( sfCS[ i ] );
       if GetStatusPlaying( sfSource[ i ] ) = 1 Then
         begin
           if timer_GetTicks() - sfStream[ i ]._lastTime >= 10 Then
@@ -293,7 +293,7 @@ begin
             end;
         end else
           sfStream[ i ]._lastTime := timer_GetTicks();
-      thread_MutexUnlock( sfMutex[ i ] );
+      thread_CSLeave( sfCS[ i ] );
     end;
 
   if appFocus Then
@@ -464,7 +464,7 @@ begin
 {$ENDIF}
 
   for i := 1 to SND_MAX do
-    sfMutex[ i ] := thread_MutexInit();
+    thread_CSInit( sfCS[ i ] );
 
   sndInitialized := TRUE;
   Result         := TRUE;
@@ -488,8 +488,8 @@ begin
   for i := 1 to SND_MAX do
     begin
       snd_StopStream( i );
-      while sfSem[ i ] <> nil do;
-      thread_MutexDestroy( sfMutex[ i ] );
+      while sfEvent[ i ] <> nil do;
+      thread_EventDestroy( sfEvent[ i ] );
     end;
 
   for i := 1 to SND_MAX do
@@ -1120,7 +1120,7 @@ begin
 
   if ID = SND_STREAM Then
     begin
-      thread_MutexLock( sfMutex[ What ] );
+      thread_CSEnter( sfCS[ What ] );
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ Ptr( Sound ) ] );
         SND_STATE_LOOPED: Result := Byte( sfStream[ Ptr( Sound ) ].Loop );
@@ -1128,7 +1128,7 @@ begin
         SND_STATE_PERCENT: Result := Round( 100 / sfStream[ Ptr( Sound ) ].Length * sfStream[ Ptr( Sound ) ]._complete );
         SND_INFO_LENGTH: Result := Round( sfStream[ Ptr( Sound ) ].Length );
       end;
-      thread_MutexUnlock( sfMutex[ What ] );
+      thread_CSLeave( sfCS[ What ] );
     end else
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
@@ -1142,7 +1142,7 @@ function snd_GetStreamID : Integer;
     i : Integer;
 begin
   for i := 1 to SND_MAX do
-    if ( not sfStream[ i ]._playing ) and ( sfSem[ i ] = nil ) Then
+    if ( not sfStream[ i ]._playing ) and ( sfEvent[ i ] = nil ) Then
       begin
         Result := i;
         exit;
@@ -1221,8 +1221,8 @@ begin
   sfStream[ ID ]._complete := 0;
   sfStream[ ID ]._lastTime := timer_GetTicks;
 
-  sfSem[ ID ]    := thread_SemInit();
-  sfThread[ ID ] := thread_Create( @snd_ProcStream, @sfStream[ ID ].ID );
+  thread_EventCreate( sfEvent[ ID ] );
+  thread_Create( sfThread[ ID ], @snd_ProcStream, @sfStream[ ID ].ID );
 end;
 
 function snd_PlayFile( const FileName : UTF8String; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
@@ -1326,7 +1326,7 @@ begin
   sfSource[ ID ].Stop();
 {$ENDIF}
 
-  thread_SemPost( sfSem[ ID ] );
+  thread_EventSet( sfEvent[ ID ] );
 end;
 
 procedure snd_ResumeStream( ID : Integer );
@@ -1346,10 +1346,10 @@ procedure snd_SeekStream( ID : Integer; Milliseconds : Double );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) Then exit;
 
-  thread_MutexLock( sfMutex[ ID ] );
+  thread_CSEnter( sfCS[ ID ] );
   sfSeek[ ID ] := Milliseconds;
-  thread_SemPost( sfSem[ ID ] );
-  thread_MutexUnlock( sfMutex[ ID ] );
+  thread_EventSet( sfEvent[ ID ] );
+  thread_CSLeave( sfCS[ ID ] );
 end;
 
 function snd_ProcStream( data : Pointer ) : LongInt;
@@ -1370,17 +1370,15 @@ begin
   Result := 0;
   id := PInteger( data )^;
 
-{$IFDEF USE_OPENAL}
-  processed := 0;
-{$ENDIF}
   while sfStream[ id ]._playing do
     begin
       if not sndInitialized Then break;
 
-      thread_SemWait( sfSem[ id ], 100 );
+      thread_EventWait( sfEvent[ id ], 100 );
+      thread_EventReset( sfEvent[ id ] );
       while ( sfStream[ id ]._playing ) and ( sfStream[ id ]._paused ) do u_Sleep( 10 );
 
-      thread_MutexLock( sfMutex[ id ] );
+      thread_CSEnter( sfCS[ id ] );
       if sfSeek[ id ] > 0 Then
         begin
           sfStream[ id ]._decoder.Seek( sfStream[ id ], sfSeek[ id ] );
@@ -1415,7 +1413,7 @@ begin
           sfStream[ id ]._complete := sfSeek[ id ];
           sfStream[ id ]._lastTime := timer_GetTicks();
         end;
-      thread_MutexUnlock( sfMutex[ id ] );
+      thread_CSLeave( sfCS[ id ] );
 
       {$IFDEF USE_OPENAL}
       alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
@@ -1481,7 +1479,7 @@ begin
         end;
     end;
 
-  thread_SemDestroy( sfSem[ id ] );
+  thread_EventDestroy( sfEvent[ id ] );
   EndThread( 0 );
 end;
 

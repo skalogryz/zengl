@@ -210,7 +210,7 @@ end;
 {$IFDEF iOS}
 function u_GetNSString( const Str : UTF8String ) : NSString;
 begin
-  Result := NSString( CFStr( PAnsiChar( Str ) ) );
+  Result := NSString.stringWithUTF8String( PAnsiChar( Str ) );
 end;
 {$ENDIF}
 

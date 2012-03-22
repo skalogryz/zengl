@@ -23,164 +23,121 @@ unit zgl_threads;
 {$I zgl_config.cfg}
 
 interface
-uses
-  {$IFDEF UNIX}
-  {$IFNDEF ANDROID}
-  cthreads,
-  {$ENDIF}
-  UnixType
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Windows
-  {$ENDIF}
-  ;
+{$IFDEF UNIX}
+  uses cthreads;
+{$ENDIF}
+{$IFNDEF FPC}
+  uses Windows;
+{$ENDIF}
 
 type
-  {$IFNDEF ANDROID}
-  zglTThreadCallback = function( Data : Pointer ) : LongInt;
-  {$ELSE}
-  zglTThreadCallback = function( Data : Pointer ) : Pointer; cdecl;
-  {$ENDIF}
+  zglTThreadCallback = TThreadFunc;
 
-  zglPThread = ^zglTThread;
   zglTThread = record
-    ID     : LongWord;
-    Handle : LongWord;
+    ID     : {$IFDEF FPC} TThreadID {$ELSE} LongWord {$ENDIF};
+    Handle : THandle;
   end;
 
-  zglTMutex     = Pointer;
-  zglTSemaphore = Pointer;
+  zglTCriticalSection = TRTLCriticalSection;
+  zglTEvent           = Pointer;
 
-function  thread_Create( Callback : zglTThreadCallback; Data : Pointer ) : zglTThread;
-function  thread_MutexInit : zglTMutex;
-procedure thread_MutexDestroy( var Mutex : zglTMutex );
-procedure thread_MutexLock( var Mutex : zglTMutex );
-procedure thread_MutexUnlock( var Mutex : zglTMutex );
-function  thread_SemInit : zglTSemaphore;
-procedure thread_SemDestroy( var Semaphore : zglTSemaphore );
-procedure thread_SemPost( var Semaphore : zglTSemaphore );
-procedure thread_SemWait( var Semaphore : zglTSemaphore; Milliseconds : LongWord = $FFFFFFFF );
+procedure thread_Create( var Thread : zglTThread; Callback : zglTThreadCallback; Data : Pointer = nil );
+procedure thread_CSInit( var CS : TRTLCriticalSection );
+procedure thread_CSDone( var CS : TRTLCriticalSection );
+procedure thread_CSEnter( var CS : TRTLCriticalSection );
+procedure thread_CSLeave( var CS : TRTLCriticalSection );
+procedure thread_EventCreate( var Event : zglTEvent );
+procedure thread_EventDestroy( var Event : zglTEvent );
+procedure thread_EventSet( var Event : zglTEvent );
+procedure thread_EventReset( var Event : zglTEvent );
+procedure thread_EventWait( var Event : zglTEvent; Milliseconds : LongWord = $FFFFFFFF );
 
 implementation
 
-{$IFDEF UNIX}
-const
-  libpthread = {$IFNDEF ANDROID} 'libpthread' {$ELSE} 'libc' {$ENDIF};
-
-type
-  ppthread_t           = ^pthread_t;
-  ppthread_attr_t      = ^pthread_attr_t;
-  ppthread_mutex_t     = ^pthread_mutex_t;
-  ppthread_mutexattr_t = ^pthread_mutexattr_t;
-  psem_t               = ^sem_t;
-
-function pthread_create( __thread : ppthread_t; __attr : ppthread_attr_t; __start_routine : Pointer; __arg : Pointer ) : LongInt; cdecl; external libpthread;
-function pthread_mutex_init( __mutex : ppthread_mutex_t; __mutex_attr : ppthread_mutexattr_t ) : LongInt; cdecl; external libpthread;
-function pthread_mutex_destroy( __mutex : ppthread_mutex_t ) : LongInt; cdecl; external libpthread;
-function pthread_mutex_lock( __mutex : ppthread_mutex_t ) : LongInt; cdecl; external libpthread;
-function pthread_mutex_unlock( __mutex : ppthread_mutex_t ) : LongInt; cdecl; external libpthread;
-function sem_init( __sem : psem_t; __pshared : LongInt; __value : DWORD ) : LongInt; cdecl; external libpthread;
-function sem_destroy ( __sem : psem_t ) : LongInt; cdecl; external libpthread;
-function sem_wait( __sem : psem_t ) : LongInt; cdecl; external libpthread;
-function sem_post( __sem : psem_t ) : LongInt; cdecl; external libpthread;
-function sem_timedwait( __sem : psem_t; __abs_timeout : ptimespec ) : LongInt; cdecl; external libpthread;
-{$ENDIF}
-
-function thread_Create( Callback : zglTThreadCallback; Data : Pointer ) : zglTThread;
+procedure thread_Create( var Thread : zglTThread; Callback : zglTThreadCallback; Data : Pointer = nil );
 begin
-{$IFNDEF ANDROID}
   {$IFDEF FPC}
-  Result.Handle := BeginThread( TThreadFunc( Callback ), Data, TThreadID( Result.ID ) );
+  Thread.Handle := BeginThread( Callback, Data, Thread.ID );
   {$ELSE}
-  Result.Handle := BeginThread( nil, 0, Pointer( Callback ), Data, 0, Result.ID );
+  Thread.Handle := BeginThread( nil, 0, Callback, Data, 0, Thread.ID );
   {$ENDIF}
-{$ELSE}
-  Result := nil;
-  pthread_create( @Result, nil, Pointer( Callback ), Data );
-{$ENDIF}
 end;
 
-function thread_MutexInit : zglTMutex;
+procedure thread_CSInit( var CS : TRTLCriticalSection );
 begin
-{$IFDEF UNIX}
-  Result := nil;
-  pthread_mutex_init( @Result, nil );
-{$ELSE}
-  Result := Pointer( CreateMutex( nil, FALSE, nil ) );
-{$ENDIF}
-end;
-
-procedure thread_MutexDestroy( var Mutex : zglTMutex );
-begin
-{$IFDEF UNIX}
-  pthread_mutex_destroy( @Mutex );
-  Mutex := nil;
-{$ELSE}
-  CloseHandle( LongWord( Mutex ) );
-{$ENDIF}
-end;
-
-procedure thread_MutexLock( var Mutex : zglTMutex );
-begin
-{$IFDEF UNIX}
-  pthread_mutex_lock( @Mutex );
-{$ELSE}
-  WaitForSingleObject( LongWord( Mutex ), INFINITE );
-{$ENDIF}
-end;
-
-procedure thread_MutexUnlock( var Mutex : zglTMutex );
-begin
-{$IFDEF UNIX}
-  pthread_mutex_unlock( @Mutex );
-{$ELSE}
-  ReleaseMutex( LongWord( Mutex ) );
-{$ENDIF}
-end;
-
-function thread_SemInit : zglTSemaphore;
-begin
-{$IFDEF UNIX}
-  sem_init( @Result, 0, 0 );
-{$ELSE}
-  Result := Pointer( CreateSemaphore( nil, 0, 1, nil ) );
-{$ENDIF}
-end;
-
-procedure thread_SemDestroy( var Semaphore : zglTSemaphore );
-begin
-{$IFDEF UNIX}
-  sem_destroy( Semaphore );
-  FreeMem( Semaphore );
-  Semaphore := nil;
-{$ELSE}
-  CloseHandle( LongWord( Semaphore ) );
-  Semaphore := nil;
-{$ENDIF}
-end;
-
-procedure thread_SemPost( var Semaphore : zglTSemaphore );
-begin
-{$IFDEF UNIX}
-  sem_post( Semaphore );
-{$ELSE}
-  ReleaseSemaphore( LongWord( Semaphore ), 1, nil );
-{$ENDIF}
-end;
-
-procedure thread_SemWait( var Semaphore : zglTSemaphore; Milliseconds : LongWord = $FFFFFFFF );
-  {$IFDEF UNIX}
-  var
-    time : TimeSpec;
+  {$IFDEF FPC}
+  InitCriticalSection( CS );
+  {$ELSE}
+  InitializeCriticalSection( CS );
   {$ENDIF}
+end;
+
+procedure thread_CSDone( var CS : TRTLCriticalSection );
 begin
-{$IFDEF UNIX}
-  time.tv_sec := Milliseconds mod 1000000;
-  time.tv_nsec := ( Milliseconds mod 1000000 ) * 1000000;
-  sem_timedwait( Semaphore, @time );
-{$ELSE}
-  WaitForSingleObject( LongWord( Semaphore ), Milliseconds );
-{$ENDIF}
+  {$IFDEF FPC}
+  DoneCriticalSection( CS );
+  {$ELSE}
+  DeleteCriticalSection( CS );
+  {$ENDIF}
+end;
+
+procedure thread_CSEnter( var CS : TRTLCriticalSection );
+begin
+  EnterCriticalSection( CS );
+end;
+
+procedure thread_CSLeave( var CS : TRTLCriticalSection );
+begin
+  LeaveCriticalSection( CS );
+end;
+
+procedure thread_EventCreate( var Event : zglTEvent );
+begin
+  {$IFDEF FPC}
+  Event := Pointer( RTLEventCreate() );
+  {$ELSE}
+  Event := Pointer( CreateEvent( nil, TRUE, FALSE, nil ) );
+  {$ENDIF}
+end;
+
+procedure thread_EventDestroy( var Event : zglTEvent );
+begin
+  {$IFDEF FPC}
+  RTLEventDestroy( PRTLEvent( Event ) );
+  {$ELSE}
+  CloseHandle( LongWord( Event ) );
+  {$ENDIF}
+  Event := nil;
+end;
+
+procedure thread_EventSet( var Event : zglTEvent );
+begin
+  {$IFDEF FPC}
+  RTLEventSetEvent( PRTLEvent( Event ) );
+  {$ELSE}
+  SetEvent( LongWord( Event ) );
+  {$ENDIF}
+end;
+
+procedure thread_EventReset( var Event : zglTEvent );
+begin
+  {$IFDEF FPC}
+  RTLEventResetEvent( PRTLEvent( Event ) );
+  {$ELSE}
+  ResetEvent( LongWord( Event ) );
+  {$ENDIF}
+end;
+
+procedure thread_EventWait( var Event : zglTEvent; Milliseconds : LongWord = $FFFFFFFF );
+begin
+  {$IFDEF FPC}
+  if Milliseconds = $FFFFFFFF Then
+    RTLeventWaitFor( PRTLEvent( Event ) )
+  else
+    RTLeventWaitFor( PRTLEvent( Event ), Milliseconds );
+  {$ELSE}
+  WaitForSingleObject( LongWord( Event ), Milliseconds );
+  {$ENDIF}
 end;
 
 end.

@@ -151,7 +151,7 @@ var
   resQueueStackID    : array of Byte;
   resQueueID         : array[ 0..255 ] of Byte;
   resQueueCurrentID  : Byte;
-  resQueueState      : array[ 0..255 ] of zglTSemaphore;
+  resQueueState      : array[ 0..255 ] of zglTEvent;
   resQueueSize       : array[ 0..255 ] of Integer;
   resQueueMax        : array[ 0..255 ] of Integer;
   resQueuePercentage : array[ 0..255 ] of Integer;
@@ -177,7 +177,7 @@ begin
   for i := 0 to 255 do
     if resQueueState[ i ] <> nil Then
       begin
-        thread_SemPost( resQueueState[ i ] );
+        thread_EventSet( resQueueState[ i ] );
         resQueueSize[ i ] := 0;
         while resQueueState[ i ] <> nil do;
       end;
@@ -258,7 +258,7 @@ begin
                       tex_GetData( Texture, tData );
                       tex_GetData( Mask, mData );
                       item.Prepared := TRUE;
-                      thread_SemPost( resQueueState[ id ] );
+                      thread_EventSet( resQueueState[ id ] );
                       break;
                     end;
                 RES_FONT:
@@ -268,7 +268,7 @@ begin
                         for i := 0 to Font.Count.Pages - 1 do
                           Font.Pages[ i ] := tex_Add();
                         item.Prepared := TRUE;
-                        thread_SemPost( resQueueState[ id ] );
+                        thread_EventSet( resQueueState[ id ] );
                         item.Ready := FALSE;
                       end;
               end;
@@ -421,7 +421,7 @@ begin
   item^.IsFromFile := FromFile;
   item^.Type_      := Type_;
 
-  thread_SemPost( resQueueState[ resQueueCurrentID ] );
+  thread_EventSet( resQueueState[ resQueueCurrentID ] );
 end;
 
 function res_ProcQueue( data : Pointer ) : LongInt;
@@ -699,10 +699,11 @@ begin
             end;
         end;
 
-      thread_SemWait( resQueueState[ id ] );
+      thread_EventWait( resQueueState[ id ] );
+      thread_EventReset( resQueueState[ id ] );
     end;
 
-  thread_SemDestroy( resQueueState[ id ] );
+  thread_EventDestroy( resQueueState[ id ] );
   EndThread( 0 );
 end;
 
@@ -713,8 +714,8 @@ begin
       resQueueID[ QueueID ]         := QueueID;
       resQueueItems[ QueueID ].prev := @resQueueItems[ QueueID ];
       resQueueItems[ QueueID ].next := nil;
-      resQueueState[ QueueID ]      := thread_SemInit();
-      resThread[ QueueID ]          := thread_Create( @res_ProcQueue, @resQueueID[ QueueID ] );
+      thread_EventCreate( resQueueState[ QueueID ] );
+      thread_Create( resThread[ QueueID ], @res_ProcQueue, @resQueueID[ QueueID ] );
     end;
 
   SetLength( resQueueStackID, Length( resQueueStackID ) + 1 );
