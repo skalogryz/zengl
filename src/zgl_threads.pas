@@ -35,7 +35,7 @@ type
 
   zglTThread = record
     ID     : {$IFDEF FPC} TThreadID {$ELSE} LongWord {$ENDIF};
-    Handle : THandle;
+    Handle : {$IFDEF FPC} TThreadID {$ELSE} THandle {$ENDIF};
   end;
 
   zglTCriticalSection = TRTLCriticalSection;
