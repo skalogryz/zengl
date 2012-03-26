@@ -1367,8 +1367,10 @@ function snd_ProcStream( data : Pointer ) : LongInt;
     fillSize       : LongWord;
   {$ENDIF}
 begin
-  Result := 0;
-  id := PInteger( data )^;
+  Result    := 0;
+  id        := PInteger( data )^;
+  _end      := FALSE;
+  bytesRead := 0;
 
   while sfStream[ id ]._playing do
     begin
