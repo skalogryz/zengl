@@ -41,7 +41,7 @@ type
     Manager : zglPSEngine2D;
     Texture : zglPTexture;
     Destroy : Boolean;
-    Layer   : LongWord;
+    Layer   : Integer;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
@@ -87,7 +87,7 @@ function sengine2d_AddCustom( Texture : zglPTexture; Size : LongWord; Layer : In
     new : zglPSprite2D;
 begin
   if sengine2d.Count + 1 > length( sengine2d.List ) Then
-    SetLength( sengine2d.List, length( sengine2d.List ) + 16384 );
+    SetLength( sengine2d.List, length( sengine2d.List ) + 1024 );
 
   zgl_GetMem( Pointer( new ), Size );
   sengine2d.List[ sengine2d.Count ] := new;
@@ -218,7 +218,7 @@ begin
           if s.Layer < l Then
             begin
               sengine2d_Sort( 0, sengine2d.Count - 1 );
-              // TODO: наверное сделать выбор вкл./выкл. устойчивой сортировки
+              // TODO: provide parameter for enabling/disabling stable sorting
               l := sengine2d.List[ 0 ].Layer;
               a := 0;
               for b := 0 to sengine2d.Count - 1 do

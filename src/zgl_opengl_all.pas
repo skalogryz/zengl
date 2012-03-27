@@ -442,8 +442,8 @@ const
   procedure glXDestroyContext(dpy: PDisplay; ctx: GLXContext); cdecl; external libGL;
   function  glXMakeCurrent(dpy: PDisplay; drawable: GLXDrawable; ctx: GLXContext): Boolean; cdecl; external libGL;
   procedure glXSwapBuffers(dpy: PDisplay; drawable: GLXDrawable); cdecl; external libGL;
-  function  glXQueryExtension(dpy: PDisplay; var errorb, event: Integer): Boolean; cdecl; external libGL;
-  function  glXQueryVersion(dpy: PDisplay; var major, minor: Integer): Boolean; cdecl; external libGL;
+  function  glXQueryExtension(dpy: PDisplay; out errorb, event: Integer): Boolean; cdecl; external libGL;
+  function  glXQueryVersion(dpy: PDisplay; out major, minor: Integer): Boolean; cdecl; external libGL;
   function  glXIsDirect(dpy: PDisplay; ctx: GLXContext): Boolean; cdecl; external libGL;
   function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PAnsiChar; cdecl; external libGL;
 
@@ -566,8 +566,6 @@ uses
 
 function InitGL : Boolean;
 begin
-  Result := FALSE;
-
   // Страшно, да :)
   {$IFDEF FPC}
     { according to bug 7570, this is necessary on all x86 platforms,

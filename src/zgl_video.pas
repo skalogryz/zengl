@@ -43,7 +43,7 @@ type
       Decoder : zglPVideoDecoder;
                end;
 
-    Data       : Pointer;
+    Data       : PByteArray;
     Texture    : zglPTexture;
     Frame      : Integer;
     Time       : Double;
@@ -64,7 +64,8 @@ type
     Extension : UTF8String;
     Open      : function( var Stream : zglTVideoStream; const FileName : UTF8String ) : Boolean;
     OpenMem   : function( var Stream : zglTVideoStream; const Memory : zglTMemory ) : Boolean;
-    Update    : procedure( var Stream : zglTVideoStream; Time : Double; var Data : Pointer );
+    Update    : procedure( var Stream : zglTVideoStream; Milliseconds : Double; Data : PByteArray );
+    Seek      : procedure( var Stream : zglTVideoStream; Milliseconds : Double );
     Loop      : procedure( var Stream : zglTVideoStream );
     Close     : procedure( var Stream : zglTVideoStream );
   end;
@@ -83,7 +84,8 @@ procedure video_Del( var Stream : zglPVideoStream );
 
 function  video_OpenFile( const FileName : UTF8String ) : zglPVideoStream;
 function  video_OpenMemory( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
-procedure video_Update( var Stream : zglPVideoStream; Time : Double );
+procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double );
+procedure video_Seek( var Stream : zglPVideoStream; Milliseconds : Double );
 
 var
   managerVideo : zglTVideoManager;
@@ -154,7 +156,7 @@ begin
     begin
       Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FF000000 );
       GetMem( Result.Data, Result.Info.Width * Result.Info.Height * 4 );
-      FillChar( Result.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
+      FillChar( Result.Data[ 0 ], Result.Info.Width * Result.Info.Height * 4, 255 );
       video_Update( Result, 0 );
     end else
       video_Del( Result );
@@ -182,23 +184,31 @@ begin
     begin
       Result.Texture := tex_CreateZero( Result.Info.Width, Result.Info.Height, $FF000000 );
       GetMem( Result.Data, Result.Info.Width * Result.Info.Height * 4 );
-      FillChar( Result.Data^, Result.Info.Width * Result.Info.Height * 4, 255 );
+      FillChar( Result.Data[ 0 ], Result.Info.Width * Result.Info.Height * 4, 255 );
       video_Update( Result, 0 );
     end else
       video_Del( Result );
 end;
 
-procedure video_Update( var Stream : zglPVideoStream; Time : Double );
+procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double );
   var
     frame : Integer;
 begin
   if not Assigned( Stream ) Then exit;
 
   frame := Stream.Frame;
-  Stream._private.Decoder.Update( Stream^, Time, Stream.Data );
+  Stream._private.Decoder.Update( Stream^, Milliseconds, Stream.Data );
 
   if Stream.Frame <> frame Then
     tex_SetData( Stream.Texture, Stream.Data, 0, 0, Stream.Info.Width, Stream.Info.Height );
+end;
+
+procedure video_Seek( var Stream : zglPVideoStream; Milliseconds : Double );
+begin
+  if not Assigned( Stream ) Then exit;
+
+  Stream._private.Decoder.Seek( Stream^, Milliseconds );
+  video_Update( Stream, 0 );
 end;
 
 end.

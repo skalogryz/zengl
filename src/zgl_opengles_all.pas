@@ -787,10 +787,10 @@ begin
     end;
 
   glEnableClientState( GL_COLOR_ARRAY );
-  glColorPointer( 4, GL_UNSIGNED_BYTE, 24, Pointer( Ptr( @bVertices[ 0 ] ) + 8 ) );
+  glColorPointer( 4, GL_UNSIGNED_BYTE, 24, @bVertices[ 0 ].Color );
 
   glEnableClientState( GL_VERTEX_ARRAY );
-  glVertexPointer( 3, GL_FLOAT, 24, Pointer( Ptr( @bVertices[ 0 ] ) + 12 ) );
+  glVertexPointer( 3, GL_FLOAT, 24, @bVertices[ 0 ].X );
 
   glDrawArrays( RenderMode, 0, bSize );
 
@@ -802,10 +802,10 @@ end;
 
 procedure glColor4ub(red, green, blue, alpha: GLubyte);
 begin
-  PByte( Ptr( @bColor ) + 0 )^ := red;
-  PByte( Ptr( @bColor ) + 1 )^ := green;
-  PByte( Ptr( @bColor ) + 2 )^ := blue;
-  PByte( Ptr( @bColor ) + 3 )^ := alpha;
+  PByteArray( @bColor )[ 0 ] := red;
+  PByteArray( @bColor )[ 1 ] := green;
+  PByteArray( @bColor )[ 2 ] := blue;
+  PByteArray( @bColor )[ 3 ] := alpha;
 end;
 
 procedure glColor4ubv(v: PGLubyte);
@@ -815,10 +815,10 @@ end;
 
 procedure glColor4f(red, green, blue, alpha: GLfloat);
 begin
-  PByte( Ptr( @bColor ) + 0 )^ := Round( red * 255 );
-  PByte( Ptr( @bColor ) + 1 )^ := Round( green * 255 );
-  PByte( Ptr( @bColor ) + 2 )^ := Round( blue * 255 );
-  PByte( Ptr( @bColor ) + 3 )^ := Round( alpha * 255 );
+  PByteArray( @bColor )[ 0 ] := Round( red * 255 );
+  PByteArray( @bColor )[ 1 ] := Round( green * 255 );
+  PByteArray( @bColor )[ 2 ] := Round( blue * 255 );
+  PByteArray( @bColor )[ 3 ] := Round( alpha * 255 );
 end;
 
 {$IFDEF ANDROID}

@@ -26,6 +26,7 @@ interface
 
 uses
   CFByteOrders,
+  zgl_types,
   zgl_file,
   zgl_memory;
 
@@ -44,7 +45,6 @@ const
   PVR_PVRTC4    = $19;
 
 type
-  zglPPVRHeader = ^zglTPVRHeader;
   zglTPVRHeader = record
     HeaderLength : LongWord;
     Height       : LongWord;
@@ -62,17 +62,15 @@ type
   end;
 
 
-procedure pvr_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
-procedure pvr_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
+procedure pvr_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
+procedure pvr_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
 
 implementation
 uses
-  zgl_types,
   zgl_main,
-  zgl_log,
   zgl_textures;
 
-procedure pvr_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
+procedure pvr_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
   var
     pvrMem : zglTMemory;
 begin
@@ -81,7 +79,7 @@ begin
   mem_Free( pvrMem );
 end;
 
-procedure pvr_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
+procedure pvr_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
   var
     pvrMem    : zglTMemory;
     pvrHeader : zglTPVRHeader;
@@ -105,7 +103,7 @@ begin
   end;
 
   GetMem( Data, size );
-  Move( Pointer( Ptr( pvrMem.Memory ) + pvrMem.Position )^, Data^, size );
+  Move( PByteArray( pvrMem.Memory )[ pvrMem.Position ], Data[ 0 ], size );
 end;
 
 {$IFDEF USE_PVR}

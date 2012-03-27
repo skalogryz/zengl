@@ -117,13 +117,13 @@ type
     name  : PAnsiChar;
   end;
 
-function zip_open( path : PAnsiChar; flags : Integer; var errorp : cint ) : Pzip; cdecl; external;
+function zip_open( path : PAnsiChar; flags : Integer; out errorp : cint ) : Pzip; cdecl; external;
 function zip_close( archive : Pzip ) : cint; cdecl; external;
 function zip_set_default_password( archive : Pzip; password : PAnsiChar ) : cint; cdecl; external;
-function zip_stat( archive : Pzip; fname : PAnsiChar; flags : cint; var sb : Tzip_stat ) : Integer; cdecl; external;
+function zip_stat( archive : Pzip; fname : PAnsiChar; flags : cint; out sb : Tzip_stat ) : Integer; cdecl; external;
 
 function zip_fopen( archive : Pzip; fname : PAnsiChar; flags : cint ) : Pzip_file; cdecl; external;
-function zip_fread( file_ : Pzip_file; var buf; nbytes : cuint64 ) : cint; cdecl; external;
+function zip_fread( file_ : Pzip_file; out buf; nbytes : cuint64 ) : cint; cdecl; external;
 function zip_fclose( file_ : Pzip_file ) : cint; cdecl; external;
 
 function zip_get_num_entries( archive : Pzip; flags : cint ) : cuint64; cdecl; external;
@@ -166,9 +166,9 @@ type
     reserved  : culong;    // reserved for future use
   end;
 
-procedure zlib_Init( var strm : z_stream_s ); cdecl; external;
+procedure zlib_Init( out strm : z_stream_s ); cdecl; external;
 procedure zlib_Free( var strm : z_stream_s ); cdecl; external;
-function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; var pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl; external;
+function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; out pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl; external;
 
 {$IFDEF USE_ZIP}
 threadvar

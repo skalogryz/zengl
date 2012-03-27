@@ -34,7 +34,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="55">
+    <Units Count="56">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -308,10 +308,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_threads"/>
       </Unit54>
+      <Unit55>
+        <Filename Value="../zgl_tiles_2d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_tiles_2d"/>
+      </Unit55>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <Target>
       <Filename Value="./ZenGL.dll"/>
     </Target>
@@ -336,23 +341,22 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
+        <GenerateDebugInfo Value="False"/>
         <UseLineInfoUnit Value="False"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
     <Other>
       <Verbosity>
-        <ShowNotes Value="False"/>
-        <ShowHints Value="False"/>
-        <ShowGenInfo Value="False"/>
+        <ShowSummary Value="True"/>
       </Verbosity>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

@@ -34,8 +34,8 @@ type
     Position : LongWord;
 end;
 
-procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : UTF8String );
-procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String );
+function  mem_LoadFromFile( out Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
+function  mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
 function  mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
 function  mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
@@ -53,27 +53,35 @@ uses
   zgl_main,
   zgl_file;
 
-procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : UTF8String );
+function mem_LoadFromFile( out Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
   var
     f : zglTFile;
 begin
+  Result := FALSE;
   if not file_Exists( FileName ) Then exit;
 
-  file_Open( f, FileName, FOM_OPENR );
-  Memory.Size     := file_GetSize( f );
-  Memory.Position := 0;
-  zgl_GetMem( Memory.Memory, Memory.Size );
-  file_Read( f, Memory.Memory^, Memory.Size );
-  file_Close( f );
+  if file_Open( f, FileName, FOM_OPENR ) Then
+    begin
+      Memory.Size     := file_GetSize( f );
+      Memory.Position := 0;
+      zgl_GetMem( Memory.Memory, Memory.Size );
+      file_Read( f, Memory.Memory^, Memory.Size );
+      file_Close( f );
+      Result := TRUE;
+    end;
 end;
 
-procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String );
+function mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
   var
     f : zglTFile;
 begin
-  file_Open( f, FileName, FOM_CREATE );
-  file_Write( f, Memory.Memory^, Memory.Size );
-  file_Close( f );
+  Result := file_Open( f, FileName, FOM_CREATE );
+
+  if Result Then
+    begin
+      file_Write( f, Memory.Memory^, Memory.Size );
+      file_Close( f );
+    end;
 end;
 
 function mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
@@ -101,7 +109,7 @@ begin
       if Result > 0 Then
         begin
           if Result > Bytes Then Result := Bytes;
-          Move( Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Buffer, Result );
+          Move( PByteArray( Memory.Memory )[ Memory.Position ], Buffer, Result );
           INC( Memory.Position, Result );
           exit;
         end;
@@ -111,8 +119,7 @@ end;
 
 function mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
   var
-    i     : LongWord;
-    pData : array of Byte;
+    i : LongWord;
 begin
   {$IFDEF ENDIAN_BIG}
   if forceNoSwap Then
@@ -127,14 +134,11 @@ begin
       if Result > 0 Then
         begin
           if Result > Bytes Then Result := Bytes;
-          SetLength( pData, Result );
           for i := 0 to Result - 1 do
             begin
-              pData[ Result - i - 1 ] := PByte( Ptr( Memory.Memory ) + Memory.Position )^;
+              PByteArray( @Buffer )[ Result - i - 1 ] := PByteArray( Memory.Memory )[ Memory.Position ];
               INC( Memory.Position );
             end;
-          Move( pData[ 0 ], Buffer, Result );
-          SetLength( pData, 0 );
           exit;
         end;
     end;
@@ -150,7 +154,7 @@ begin
     end;
   if Memory.Position + Bytes > Memory.Size Then
     mem_SetSize( Memory, Memory.Position + Bytes );
-  Move( Buffer, Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Bytes );
+  Move( Buffer, PByteArray( Memory.Memory )[ Memory.Position ], Bytes );
   INC( Memory.Position, Bytes );
   Result := Bytes;
 end;

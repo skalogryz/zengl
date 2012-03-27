@@ -154,7 +154,6 @@ var
   scrDesktopW     : Integer;
   scrDesktopH     : Integer;
   scrOrientation  : UIInterfaceOrientation;
-  scrAngle        : Integer;
   scrCanLandscape : Boolean;
   scrCanPortrait  : Boolean;
   {$ENDIF}
@@ -316,14 +315,13 @@ end;
 
 function scr_Create : Boolean;
 begin
-  Result := FALSE;
-
   scr_Init();
 {$IFDEF USE_X11}
   if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
     begin
       u_Error( 'DefaultDepth not set to 24-bit.' );
       zgl_Exit();
+      Result := FALSE;
       exit;
     end;
 
@@ -348,6 +346,7 @@ begin
     begin
       u_Error( 'Desktop not set to 32-bit mode.' );
       zgl_Exit();
+      Result := FALSE;
       exit;
     end;
 {$ENDIF}

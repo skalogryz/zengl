@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.03.22           }
+{ date:     2012.03.27           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -22,18 +22,17 @@ unit zglHeader;
 
 {$IFDEF FPC}
   {$MODE DELPHI}
-  {$MACRO ON}
-  {$PACKRECORDS C}
-
-  {$IFDEF CPUARM}
-    {$IFDEF WINCE}
-      {$ALIGN 4}
-    {$ENDIF}
-  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
   {$DEFINE WINDOWS}
+{$ENDIF}
+{$IFDEF WINDOWS}
+  {$IF DEFINED(WIN32) or DEFINED(WIN64)}
+    {$DEFINE WINDESKTOP}
+  {$ELSE}
+    {$DEFINE WINMOBILE}
+  {$IFEND}
 {$ENDIF}
 {$IFDEF DARWIN}
   {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
@@ -42,25 +41,34 @@ unit zglHeader;
     {$DEFINE MACOSX}
   {$IFEND}
 {$ENDIF}
+{$IF DEFINED(LINUX) and DEFINED(CPUARM)}
+  {$DEFINE ANDROID}
+{$IFEND}
 
 interface
 {$IFDEF MACOSX}
 uses
   MacOSAll;
 {$ENDIF}
-{$IFDEF WINCE}
+{$IFDEF WINMOBILE}
 uses
   Windows;
 {$ENDIF}
 
 type
   Ptr     = {$IFDEF CPU64}QWORD{$ELSE}LongWord{$ENDIF};
-  PPtr    = ^Ptr;
   {$IFDEF WINDOWS}
-  HANDLE  = LongWord;
-  HDC     = LongWord;
-  HGLRC   = LongWord;
+  HANDLE  = Ptr;
+  HDC     = Ptr;
+  HGLRC   = Ptr;
   {$ENDIF}
+
+  PByteArray     = ^TByteArray;
+  TByteArray     = array[ 0..65535 ] of Byte;
+  PWordArray     = ^TWordArray;
+  TWordArray     = array[ 0..32767 ] of Word;
+  PLongWordArray = ^TLongWordArray;
+  TLongWordArray = array[ 0..16383 ] of LongWord;
 
 type
   zglTStringList = record
@@ -68,12 +76,10 @@ type
     Items : array of UTF8String;
 end;
 
-{$IFNDEF WINDOWS}
-type zglTFile = LongInt;
-{$ELSE}
-type zglTFile = LongWord;
-{$ENDIF}
-type zglTFileList = zglTStringList;
+type
+  zglTFile     = Ptr;
+  zglTFileList = zglTStringList;
+
 type
   zglPMemory = ^zglTMemory;
   zglTMemory = record
@@ -182,7 +188,7 @@ const
 
 var
   zgl_Get         : function( What : LongWord ) : Ptr;
-  zgl_GetMem      : procedure( var Mem : Pointer; Size : LongWord );
+  zgl_GetMem      : procedure( out Mem : Pointer; Size : LongWord );
   zgl_FreeMem     : procedure( var Mem : Pointer );
   zgl_FreeStrList : procedure( var List : zglTStringList );
 
@@ -562,8 +568,8 @@ type
   zglPTextureFormat = ^zglTTextureFormat;
   zglTTextureFormat = record
     Extension  : UTF8String;
-    FileLoader : procedure( const FileName : UTF8String; var pData : Pointer; var W, H, Format : Word );
-    MemLoader  : procedure( const Memory : zglTMemory; var pData : Pointer; var W, H, Format : Word );
+    FileLoader : procedure( const FileName : UTF8String; out pData : PByteArray; out W, H, Format : Word );
+    MemLoader  : procedure( const Memory : zglTMemory; out pData : PByteArray; out W, H, Format : Word );
 end;
 
 type
@@ -608,14 +614,14 @@ const
 var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
-  tex_Create         : function( var Texture : zglTTexture; pData : Pointer ) : Boolean;
+  tex_Create         : function( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
   tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromFile   : function( const FileName : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
   tex_SetMask        : procedure( var Texture : zglPTexture; Mask : zglPTexture );
-  tex_SetData        : procedure( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
-  tex_GetData        : procedure( Texture : zglPTexture; var pData : Pointer );
+  tex_SetData        : procedure( Texture : zglPTexture; pData : PByteArray; X, Y, Width, Height : Word; Stride : Integer = 0 );
+  tex_GetData        : procedure( Texture : zglPTexture; out pData : PByteArray );
   tex_Filter         : procedure( Texture : zglPTexture; Flags : LongWord );
   tex_SetAnisotropy  : procedure( Level : Byte );
 
@@ -702,7 +708,7 @@ type
 end;
 
 var
-  cam2d_Init  : procedure( var Camera : zglTCamera2D );
+  cam2d_Init  : procedure( out Camera : zglTCamera2D );
   cam2d_Set   : procedure( Camera : zglPCamera2D );
   cam2d_Get   : function : zglPCamera2D;
 
@@ -739,7 +745,7 @@ type
     Manager : zglPSEngine2D;
     Texture : zglPTexture;
     Destroy : Boolean;
-    Layer   : LongWord;
+    Layer   : Integer;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
@@ -1067,15 +1073,18 @@ const
 
   SND_VOLUME_DEFAULT = -1;
 
-  SND_ALL        = -$000002;
-  SND_ALL_LOOPED = -$000003;
-  SND_STREAM     = -$000010;
+  SND_SOUNDS             = nil;
+  SND_STREAM             = nil;
+  SND_ALL_SOURCES        = -1;
+  SND_ALL_SOURCES_LOOPED = -2;
+  SND_ALL_STREAMS        = -3;
+  SND_ALL_STREAMS_LOOPED = -4;
 
   SND_STATE_PLAYING = 1;
   SND_STATE_LOOPED  = 2;
   SND_STATE_PERCENT = 3;
   SND_STATE_TIME    = 4;
-  SND_INFO_LENGTH   = 5;
+  SND_INFO_DURATION = 5;
 
 type
   zglPSound        = ^zglTSound;
@@ -1098,9 +1107,9 @@ type
     SourceCount : LongWord;
     Channel     : array of zglTSoundChannel;
 
-    Data        : Pointer;
+    Data        : PByteArray;
     Size        : LongWord;
-    Length      : Double;
+    Duration    : Double;
     Frequency   : LongWord;
 
     prev, next  : zglPSound;
@@ -1119,13 +1128,13 @@ type
 
     ID         : Integer;
 
-    Buffer     : Pointer;
+    Buffer     : PByteArray;
     BufferSize : LongWord;
 
     Bits       : LongWord;
     Frequency  : LongWord;
     Channels   : LongWord;
-    Length     : Double;
+    Duration   : Double;
 
     Loop       : Boolean;
   end;
@@ -1134,7 +1143,7 @@ type
     Ext     : UTF8String;
     Open    : function( var Stream : zglTSoundStream; const FileName : UTF8String ) : Boolean;
     OpenMem : function( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
-    Read    : function( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
+    Read    : function( var Stream : zglTSoundStream; Buffer : PByteArray; Bytes : LongWord; out _End : Boolean ) : LongWord;
     Loop    : procedure( var Stream : zglTSoundStream );
     Seek    : procedure( var Stream : zglTSoundStream; Milliseconds : Double );
     Close   : procedure( var Stream : zglTSoundStream );
@@ -1143,8 +1152,8 @@ type
   zglTSoundFormat = record
     Extension  : UTF8String;
     Decoder    : zglPSoundDecoder;
-    FileLoader : procedure( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-    MemLoader  : procedure( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+    FileLoader : procedure( const FileName : UTF8String; out Data : PByteArray; out Size, Format, Frequency : LongWord );
+    MemLoader  : procedure( const Memory : zglTMemory; out Data : PByteArray; out Size, Format, Frequency : LongWord );
   end;
 
   zglTSoundManager = record
@@ -1211,7 +1220,8 @@ type
     Extension : UTF8String;
     Open      : function( var Stream : zglTVideoStream; const FileName : UTF8String ) : Boolean;
     OpenMem   : function( var Stream : zglTVideoStream; const Memory : zglTMemory ) : Boolean;
-    Update    : procedure( var Stream : zglTVideoStream; Time : Double; var Data : Pointer );
+    Update    : procedure( var Stream : zglTVideoStream; Milliseconds : Double; Data : PByteArray );
+    Seek      : procedure( var Stream : zglTVideoStream; Milliseconds : Double );
     Loop      : procedure( var Stream : zglTVideoStream );
     Close     : procedure( var Stream : zglTVideoStream );
   end;
@@ -1230,7 +1240,8 @@ var
   video_Del        : procedure( var Stream : zglPVideoStream );
   video_OpenFile   : function( const FileName : UTF8String ) : zglPVideoStream;
   video_OpenMemory : function( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
-  video_Update     : procedure( var Stream : zglPVideoStream; Time : Double );
+  video_Update     : procedure( var Stream : zglPVideoStream; Milliseconds : Double );
+  video_Seek       : procedure( var Stream : zglPVideoStream; Milliseconds : Double );
 
 
 // MATH
@@ -1253,7 +1264,7 @@ var
 
   tess_Triangulate : procedure( Contour : zglPPoints2D; iLo, iHi : Integer; AddHoles : Boolean = FALSE );
   tess_AddHole     : procedure( Contour : zglPPoints2D; iLo, iHi : Integer; LastHole : Boolean = TRUE );
-  tess_GetData     : function( var TriPoints : zglPPoints2D ) : Integer;
+  tess_GetData     : function( out TriPoints : zglPPoints2D ) : Integer;
 
 // COLLISION 2D
   col2d_PointInRect     : function( X, Y : Single; const Rect : zglTRect ) : Boolean;
@@ -1289,7 +1300,7 @@ const
   FSM_END    = $03;
 
 var
-  file_Open          : function( var FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
+  file_Open          : function( out FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
   file_MakeDir       : function( const Directory : UTF8String ) : Boolean;
   file_Remove        : function( const Name : UTF8String ) : Boolean;
   file_Exists        : function( const Name : UTF8String ) : Boolean;
@@ -1300,7 +1311,7 @@ var
   file_GetSize       : function( FileHandle : zglTFile ) : LongWord;
   file_Flush         : procedure( const FileHandle : zglTFile );
   file_Close         : procedure( var FileHandle : zglTFile );
-  file_Find          : procedure( const Directory : UTF8String; var List : zglTFileList; FindDir : Boolean );
+  file_Find          : procedure( const Directory : UTF8String; out List : zglTFileList; FindDir : Boolean );
   _file_GetName      : function( const FileName : UTF8String ) : PAnsiChar;
   _file_GetExtension : function( const FileName : UTF8String ) : PAnsiChar;
   _file_GetDirectory : function( const FileName : UTF8String ) : PAnsiChar;
@@ -1313,8 +1324,8 @@ var
   function file_GetDirectory( const FileName : UTF8String ) : UTF8String;
 
 var
-  mem_LoadFromFile : procedure( var Memory : zglTMemory; const FileName : UTF8String );
-  mem_SaveToFile   : procedure( var Memory : zglTMemory; const FileName : UTF8String );
+  mem_LoadFromFile : function( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
+  mem_SaveToFile   : function( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
   mem_Seek         : function( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
   mem_Read         : function( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
   mem_Write        : function( var Memory : zglTMemory; const Buffer; Bytes : LongWord ) : LongWord;
@@ -1745,6 +1756,7 @@ begin
       video_OpenFile := dlsym( zglLib, 'video_OpenFile' );
       video_OpenMemory := dlsym( zglLib, 'video_OpenMemory' );
       video_Update := dlsym( zglLib, 'video_Update' );
+      video_Seek := dlsym( zglLib, 'video_Seek' );
 
       m_Cos := dlsym( zglLib, 'm_Cos' );
       m_Sin := dlsym( zglLib, 'm_Sin' );

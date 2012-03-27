@@ -129,6 +129,11 @@ begin
         srcBlend := GL_ZERO;
         dstBlend := GL_SRC_COLOR;
       end;
+  else
+    begin
+      srcBlend := GL_SRC_ALPHA;
+      dstBlend := GL_ONE_MINUS_SRC_ALPHA;
+    end;
   end;
   if SeparateAlpha and oglSeparate Then
     glBlendFuncSeparate( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
@@ -158,7 +163,7 @@ end;
 
 procedure fx_SetColorMask( R, G, B, Alpha : Boolean );
   var
-    mask : Integer;
+    mask : LongWord;
 begin
   mask := Byte( R ) + Byte( G ) shl 1 + Byte( B ) shl 2 + Byte( Alpha ) shl 3;
   if mask <> b2dCurColorMask Then

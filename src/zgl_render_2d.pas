@@ -58,7 +58,6 @@ var
 
 implementation
 uses
-  zgl_screen,
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,

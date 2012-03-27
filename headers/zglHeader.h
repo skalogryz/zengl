@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 alpha            */
-/* date:     2012.03.22           */
+/* date:     2012.03.27           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1045,15 +1045,18 @@ ZGLEXTERN void ( *textFx_SetLength )( int Length, zglPPoint2D LastCoord, zglPCha
 
 #define SND_VOLUME_DEFAULT -1
 
-#define SND_ALL           -0x000002
-#define SND_ALL_LOOPED    -0x000003
-#define SND_STREAM        -0x000010
+#define SND_SOUNDS             NULL
+#define SND_STREAM             NULL
+#define SND_ALL_SOURCES        -1
+#define SND_ALL_SOURCES_LOOPED -2
+#define SND_ALL_STREAMS        -3
+#define SND_ALL_STREAMS_LOOPED -4
 
 #define SND_STATE_PLAYING 1
 #define SND_STATE_LOOPED  2
 #define SND_STATE_PERCENT 3
 #define SND_STATE_TIME    4
-#define SND_INFO_LENGTH   5
+#define SND_INFO_DURATION 5
 
 typedef struct
 {
@@ -1075,9 +1078,9 @@ typedef struct
   uint              SourceCount;
   zglTSoundChannel *Channel;
 
-  void*             Data;
+  byte*             Data;
   uint              Size;
-  double            Length;
+  double            Duration;
   uint              Frequency;
 
   void*             prev;
@@ -1269,8 +1272,8 @@ ZGLEXTERN char* ( *file_GetExtension )( const char *FileName );
 ZGLEXTERN char* ( *file_GetDirectory )( const char *FileName );
 ZGLEXTERN void ( *file_SetPath )( const char *Path );
 
-ZGLEXTERN void ( *mem_LoadFromFile )( zglTMemory *Memory, const char *FileName );
-ZGLEXTERN void ( *mem_SaveToFile )( zglTMemory *Memory, const char *FileName );
+ZGLEXTERN bool ( *mem_LoadFromFile )( zglTMemory *Memory, const char *FileName );
+ZGLEXTERN bool ( *mem_SaveToFile )( zglTMemory *Memory, const char *FileName );
 ZGLEXTERN uint ( *mem_Seek )( zglTMemory *Memory, int Offset, int Mode );
 ZGLEXTERN uint ( *mem_Read )( zglTMemory *Memory, void *Buffer, uint Bytes );
 ZGLEXTERN uint ( *mem_Write )( zglTMemory *Memory, void *Buffer, uint Bytes );

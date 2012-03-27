@@ -24,33 +24,31 @@ unit zgl_sound_ogg;
 
 interface
 uses
+  zgl_types,
   zgl_memory;
 
 const
   OGG_EXTENSION : UTF8String = 'OGG';
 
-procedure ogg_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure ogg_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out Size, Format, Frequency : LongWord );
+procedure ogg_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out Size, Format, Frequency : LongWord );
 
 implementation
 uses
-  zgl_types,
   zgl_lib_ogg,
   zgl_main,
   zgl_sound,
-  zgl_file,
-  zgl_log,
-  zgl_utils;
+  zgl_file;
 
 var
   oggDecoder : zglTSoundDecoder;
 
-function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
+function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer ) : csize_t; cdecl;
 begin
   Result := file_Read( zglTFile( datasource^ ), ptr^, size * nmemb );
 end;
 
-function ogg_Seek( datasource : pointer; offset : cint64; whence : cint) : cint; cdecl;
+function ogg_Seek( datasource : pointer; offset : cint64; whence : cint ) : cint; cdecl;
 begin
   case whence of
     0: file_Seek( zglTFile( datasource^ ), offset, FSM_SET );
@@ -77,12 +75,12 @@ begin
 end;
 
 
-function ogg_ReadMem( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
+function ogg_ReadMem( ptr : pointer; size, nmemb : csize_t; datasource : pointer ) : csize_t; cdecl;
 begin
   Result := mem_Read( zglTMemory( datasource^ ), ptr^, size * nmemb );
 end;
 
-function ogg_SeekMem( datasource : pointer; offset : cint64; whence : cint) : cint; cdecl;
+function ogg_SeekMem( datasource : pointer; offset : cint64; whence : cint ) : cint; cdecl;
 begin
   case whence of
     0: mem_Seek( zglTMemory( datasource^ ), offset, FSM_SET );
@@ -117,7 +115,7 @@ begin
           Stream.Bits       := 16;
           Stream.Frequency  := vi.rate;
           Stream.Channels   := vi.channels;
-          Stream.Length     := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
+          Stream.Duration   := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
           Stream.BufferSize := 64 * 1024;
           zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
           Result := TRUE;
@@ -141,13 +139,13 @@ begin
       vc.seek  := @ogg_SeekMem;
       vc.close := @ogg_CloseMem;
       vc.tell  := @ogg_GetPosMem;
-      if ov_open_callbacks( @Stream._memory, vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, vc ) >= 0 Then
+      if ov_open_callbacks( @Stream._memory, vf, Pointer( @PByteArray( Memory.Memory )[ Memory.Position ] ), Memory.Size - Memory.Position, vc ) >= 0 Then
         begin
           vi                := ov_info( vf, -1 );
           Stream.Bits       := 16;
           Stream.Frequency  := vi.rate;
           Stream.Channels   := vi.channels;
-          Stream.Length     := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
+          Stream.Duration   := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
           Stream.BufferSize := 64 * 1024;
           zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
           Result := TRUE;
@@ -156,16 +154,16 @@ begin
     end;
 end;
 
-function ogg_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
+function ogg_DecoderRead( var Stream : zglTSoundStream; Buffer : PByteArray; Bytes : LongWord; out _End : Boolean ) : LongWord;
   var
-    bytesRead : Integer;
+    bytesRead : LongWord;
 begin
   Result := 0;
   if not vorbisInit Then exit;
 
   bytesRead := 0;
   repeat
-    Result := ov_read( zglTOggStream( Stream._data^ ).vf, Pointer( Ptr( Buffer ) + bytesRead ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
+    Result := ov_read( zglTOggStream( Stream._data^ ).vf, Pointer( @Buffer[ bytesRead ] ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
     bytesRead := bytesRead + Result;
   until ( Result = 0 ) or ( bytesRead = Bytes );
 
@@ -195,13 +193,13 @@ begin
   ov_clear( zglTOggStream( Stream._data^ ).vf );
 end;
 
-function decoderRead( var VorbisFile : OggVorbis_File; const Buffer : Pointer; const Bytes : LongWord; var _End : Boolean ) : LongWord;
+function decoderRead( var VorbisFile : OggVorbis_File; Buffer : PByteArray; Bytes : LongWord; out _End : Boolean ) : LongWord;
   var
-    bytesRead : Integer;
+    bytesRead : LongWord;
 begin
   bytesRead := 0;
   repeat
-    Result := ov_read( VorbisFile, Pointer( Ptr( Buffer ) + bytesRead ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
+    Result := ov_read( VorbisFile, Pointer( @Buffer[ bytesRead ] ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
     bytesRead := bytesRead + Result;
   until ( Result = 0 ) or ( bytesRead = Bytes );
 
@@ -209,7 +207,7 @@ begin
   Result := bytesRead;
 end;
 
-procedure ogg_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure ogg_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out Size, Format, Frequency : LongWord );
   var
     oggMemory : zglTMemory;
 begin
@@ -218,7 +216,7 @@ begin
   mem_Free( oggMemory );
 end;
 
-procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure ogg_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out Size, Format, Frequency : LongWord );
   var
     bytesRead : Integer;
     buffer    : Pointer;
@@ -231,7 +229,7 @@ begin
   if not vorbisInit Then exit;
 
   FillChar( _vc, SizeOf( _vc ), 0 );
-  if ov_open_callbacks( nil, _vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, _vc ) >= 0 Then
+  if ov_open_callbacks( nil, _vf, Pointer( @PByteArray( Memory.Memory )[ Memory.Position ] ), Memory.Size - Memory.Position, _vc ) >= 0 Then
     begin
       _vi       := ov_info( _vf, -1 );
       Frequency := _vi.rate;
@@ -250,7 +248,7 @@ begin
       _vi := nil;
       ov_clear( _vf );
 
-      if ov_open_callbacks( nil, _vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, _vc ) >= 0 Then
+      if ov_open_callbacks( nil, _vf, Pointer( @PByteArray( Memory.Memory )[ Memory.Position ] ), Memory.Size - Memory.Position, _vc ) >= 0 Then
         begin
           GetMem( Data, Size );
           decoderRead( _vf, Data, Size, _end );

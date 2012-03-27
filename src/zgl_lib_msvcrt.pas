@@ -132,7 +132,6 @@ end;
 
 procedure _llmul; cdecl;
 asm
-  { from Delphi's System.pas __llmul }
   push  edx
   push  eax
 

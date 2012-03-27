@@ -137,7 +137,7 @@ var
   alSourcei              : procedure(sid: LongWord; param: LongInt; value: LongInt); cdecl;
   alSourcef              : procedure(sid: LongWord; param: LongInt; value: Single); cdecl;
   alSourcefv             : procedure(sid: LongWord; param: LongInt; const values: PSingle); cdecl;
-  alGetSourcei           : procedure(sid: LongWord; param: LongInt; var value: LongInt); cdecl;
+  alGetSourcei           : procedure(sid: LongWord; param: LongInt; out value: LongInt); cdecl;
   alSourcePlay           : procedure(sid: LongWord); cdecl;
   alSourcePause          : procedure(sid: LongWord); cdecl;
   alSourceStop           : procedure(sid: LongWord); cdecl;

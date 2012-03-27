@@ -40,7 +40,6 @@ uses
   zgl_log;
 
 type
-  zglPTheoraData = ^zglTTheoraData;
   zglTTheoraData = record
     File_       : zglTFile;
     Memory      : zglTMemory;
@@ -188,7 +187,7 @@ begin
       Result := value;
 end;
 
-function theora_Update( var TheoraData : zglTTheoraData; Time : Double; Data : PByte ) : Integer;
+function theora_Update( var TheoraData : zglTTheoraData; Time : Double; Data : PByteArray ) : Integer;
   var
     ycbcr      : th_ycbcr_buffer;
     Y, Cb, Cr  : Integer;
@@ -227,24 +226,24 @@ begin
       exit;
     end else
       begin
-        th_decode_ycbcr_out( TheoraData.DecoderCtx, ycbcr );
+        th_decode_ycbcr_out( TheoraData.DecoderCtx, @ycbcr );
 
-        INC( Data, ( ycbcr[ 0 ].height - 1 ) * ycbcr[ 0 ].width * 4 );
+        INC( PByte( Data ), ( ycbcr[ 0 ].height - 1 ) * ycbcr[ 0 ].width * 4 );
         for j := 0 to ycbcr[ 0 ].height - 1 do
           begin
             for i := 0 to ycbcr[ 0 ].width - 1 do
               begin
-                Y  := 9535 * ( PByte( Ptr( ycbcr[ 0 ].data ) + i )^ - 16 );
-                Cb := PByte( Ptr( ycbcr[ 1 ].data ) + ( i shr 1 ) )^ - 128;
-                Cr := PByte( Ptr( ycbcr[ 2 ].data ) + ( i shr 1 ) )^ - 128;
+                Y  := 9535 * ( PByteArray( ycbcr[ 0 ].data )[ i ] - 16 );
+                Cb := PByteArray( ycbcr[ 1 ].data )[ i shr 1 ] - 128;
+                Cr := PByteArray( ycbcr[ 2 ].data )[ i shr 1 ] - 128;
 
-                PByte( Ptr( Data ) + 0 )^ := clamp( Y + 13074 * Cr ) shr 13;
-                PByte( Ptr( Data ) + 1 )^ := clamp( Y - 6660 * Cr - 3203 * Cb ) shr 13;
-                PByte( Ptr( Data ) + 2 )^ := clamp( Y + 16531 * Cb ) shr 13;
-                INC( Data, 4 );
+                Data[ 0 ] := clamp( Y + 13074 * Cr ) shr 13;
+                Data[ 1 ] := clamp( Y - 6660 * Cr - 3203 * Cb ) shr 13;
+                Data[ 2 ] := clamp( Y + 16531 * Cb ) shr 13;
+                INC( PByte( Data ), 4 );
               end;
 
-            DEC( Data, ycbcr[ 0 ].width * 8 );
+            DEC( PByte( Data ), ycbcr[ 0 ].width * 8 );
             INC( ycbcr[ 0 ].data, ycbcr[ 0 ].stride );
 
             if j and 1 > 0 Then
@@ -254,6 +253,12 @@ begin
               end;
           end;
       end;
+end;
+
+procedure theora_Seek( var TheoraData : zglTTheoraData; Time : Double );
+begin
+  //TheoraData.Time := Time;
+  //file_Seek( TheoraData.File_, Round( file_GetSize( TheoraData.File_ ) / 50 * Time ), FSM_SET );
 end;
 
 function theora_DecoderOpen( var Stream : zglTVideoStream; const FileName : UTF8String ) : Boolean;
@@ -274,10 +279,16 @@ begin
   Result := theora_Open( zglTTheoraData( Stream._private.Data^ ), Stream.Info.Width, Stream.Info.Height, Stream.Info.FrameRate );
 end;
 
-procedure theora_DecoderUpdate( var Stream : zglTVideoStream; Time : Double; var Data : Pointer );
+procedure theora_DecoderUpdate( var Stream : zglTVideoStream; Milliseconds : Double; Data : PByteArray );
 begin
-  Stream.Time := Stream.Time + Time / 1000;
+  Stream.Time := Stream.Time + Milliseconds / 1000;
   INC( Stream.Frame, theora_Update( zglTTheoraData( Stream._private.Data^ ), Stream.Time, Data ) );
+end;
+
+procedure theora_DecoderSeek( var Stream : zglTVideoStream; Milliseconds : Double );
+begin
+  Stream.Time := Milliseconds / 1000;
+  theora_Seek( zglTTheoraData( Stream._private.Data^ ), Stream.Time );
 end;
 
 procedure theora_DecoderLoop( var Stream : zglTVideoStream );
@@ -304,6 +315,7 @@ initialization
   theoraDecoder.Open      := theora_DecoderOpen;
   theoraDecoder.OpenMem   := theora_DecoderOpenMem;
   theoraDecoder.Update    := theora_DecoderUpdate;
+  theoraDecoder.Seek      := theora_DecoderSeek;
   theoraDecoder.Loop      := theora_DecoderLoop;
   theoraDecoder.Close     := theora_DecoderClose;
   zgl_Reg( VIDEO_FORMAT_DECODER, @theoraDecoder );

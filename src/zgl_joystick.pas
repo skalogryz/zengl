@@ -205,7 +205,6 @@ procedure joy_ClearState;
 
 implementation
 uses
-  zgl_types,
   zgl_file,
   zgl_log,
   zgl_math_2d,
@@ -223,8 +222,6 @@ function joy_Init : Byte;
     caps : PLongWord;
   {$ENDIF}
 begin
-  Result := 0;
-
 {$IFDEF LINUX}
   for i := 0 to 15 do
     begin
@@ -305,7 +302,7 @@ begin
           begin
             caps^ := caps^ or JOY_HAS_V;
             joyArray[ i ].axesMap[ axis ] := JOY_AXIS_V;
-            INC( axis );
+            //INC( axis );
           end;
         if joyArray[ i ].caps.wCaps and JOYCAPS_HASPOV > 0 Then
           begin

@@ -24,7 +24,6 @@ unit zgl_font;
 
 interface
 uses
-  zgl_types,
   zgl_textures,
   zgl_math_2d,
   zgl_file,
@@ -177,6 +176,8 @@ function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
     fntMem : zglTMemory;
     res    : zglTFontResource;
 begin
+  Result := nil;
+
   if resUseThreaded Then
     begin
       Result     := font_Add();

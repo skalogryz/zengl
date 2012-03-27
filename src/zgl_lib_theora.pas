@@ -32,8 +32,10 @@ uses
   zgl_lib_msvcrt,
   {$ENDIF}
   zgl_lib_ogg,
-  zgl_types,
-  zgl_utils
+  zgl_types
+  {$IFNDEF USE_THEORA_STATIC}
+  , zgl_utils
+  {$ENDIF}
   ;
 
 {$IFNDEF USE_THEORA_STATIC}
@@ -62,7 +64,8 @@ type
     data   : pcuchar;
   end;
 
-  th_ycbcr_buffer = array[ 0..2 ] of th_img_plane;
+  pth_ycbcr_buffer = ^th_ycbcr_buffer;
+  th_ycbcr_buffer  = array[ 0..2 ] of th_img_plane;
 
   pth_info = ^th_info;
   th_info  = record
@@ -116,7 +119,7 @@ type
   function th_decode_alloc( const _info : pth_info; const _setup : pth_setup_info ) : pth_dec_ctx; cdecl; external;
   procedure th_decode_free( _dec : pth_dec_ctx ); cdecl; external;
   function th_decode_packetin( _dec : pth_dec_ctx; const _op : pogg_packet; _granpos : pogg_int64_t ) : cint; cdecl; external;
-  function th_decode_ycbcr_out( _dec : pth_dec_ctx; var _ycbcr : th_ycbcr_buffer ) : cint; cdecl; external;
+  function th_decode_ycbcr_out( _dec : pth_dec_ctx; _ycbcr : pth_ycbcr_buffer ) : cint; cdecl; external;
 {$ELSE}
   var
     th_info_init        : procedure( _info : pth_info ); cdecl;
@@ -129,7 +132,7 @@ type
     th_decode_alloc     : function( const _info : pth_info; const _setup : pth_setup_info ) : pth_dec_ctx; cdecl;
     th_decode_free      : procedure( _dec : pth_dec_ctx ); cdecl;
     th_decode_packetin  : function( _dec : pth_dec_ctx; const _op : pogg_packet; _granpos : pogg_int64_t ) : cint; cdecl;
-    th_decode_ycbcr_out : function( _dec : pth_dec_ctx; var _ycbcr : th_ycbcr_buffer ) : cint; cdecl;
+    th_decode_ycbcr_out : function( _dec : pth_dec_ctx; _ycbcr : pth_ycbcr_buffer ) : cint; cdecl;
 {$ENDIF}
 
 function  InitTheora : Boolean;

@@ -47,7 +47,7 @@ type
     ZoomY  : Single;
   end;
 
-procedure cam2d_Init( var Camera : zglTCamera2D );
+procedure cam2d_Init( out Camera : zglTCamera2D );
 procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
 
@@ -58,7 +58,6 @@ var
 
 implementation
 uses
-  zgl_types,
   zgl_screen,
   {$IFNDEF USE_GLES}
   zgl_opengl,
@@ -69,7 +68,7 @@ uses
   {$ENDIF}
   zgl_render_2d;
 
-procedure cam2d_Init( var Camera : zglTCamera2D );
+procedure cam2d_Init( out Camera : zglTCamera2D );
 begin
   Camera.X        := 0;
   Camera.Y        := 0;

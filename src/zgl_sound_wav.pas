@@ -31,8 +31,8 @@ uses
 const
   WAV_EXTENSION : UTF8String = 'WAV';
 
-procedure wav_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
-procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out Size, Format, Frequency : LongWord );
+procedure wav_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out Size, Format, Frequency : LongWord );
 
 implementation
 uses
@@ -47,7 +47,6 @@ const
   WAV_MP3       = $0055;
 
 type
-  zglPWAVHeader = ^zglTWAVHeader;
   zglTWAVHeader = record
     RIFFHeader       : array[ 1..4 ] of AnsiChar;
     FileSize         : Integer;
@@ -62,7 +61,7 @@ type
     BitsPerSample    : Word;
  end;
 
-procedure wav_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out Size, Format, Frequency : LongWord );
   var
     wavMemory : zglTMemory;
 begin
@@ -71,7 +70,7 @@ begin
   mem_Free( wavMemory );
 end;
 
-procedure wav_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : LongWord );
+procedure wav_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out Size, Format, Frequency : LongWord );
   var
     wavMemory : zglTMemory;
     wavHeader : zglTWAVHeader;
@@ -102,12 +101,12 @@ begin
       begin
         mem_Read( wavMemory, Size, 4 );
 
-        zgl_GetMem( Data, Size );
-        mem_Read( wavMemory, Data^, Size );
+        zgl_GetMem( Pointer( Data ), Size );
+        mem_Read( wavMemory, Data[ 0 ], Size );
 
         if wavHeader.FormatCode = WAV_IMA_ADPCM Then log_Add( 'Unsupported wav format - IMA ADPCM' );
         if wavHeader.FormatCode = WAV_MP3 Then       log_Add( 'Unsupported wav format - MP3' );
-        wavHeader.FormatCode := WAV_STANDARD; // на всякий случай, а то расплодилось убогих wav-редакторов...
+        wavHeader.FormatCode := WAV_STANDARD; // just for case, because some wav-encoders write here garbage...
       end else
         begin
           mem_Read( wavMemory, skip, 4 );

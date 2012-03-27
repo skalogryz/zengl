@@ -41,14 +41,9 @@ uses
   {$ENDIF}
   zgl_types;
 
-{$IFDEF UNIX}
-type zglTFile = Ptr;
-{$ENDIF}
-{$IFDEF WINDOWS}
-type zglTFile = THandle;
-{$ENDIF}
-
-type zglTFileList = zglTStringList;
+type
+  zglTFile     = Ptr;
+  zglTFileList = zglTStringList;
 
 const
   FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} Ptr( -1 ) {$ENDIF};
@@ -63,7 +58,7 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-function  file_Open( var FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
+function  file_Open( out FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
 function  file_MakeDir( const Directory : UTF8String ) : Boolean;
 function  file_Remove( const Name : UTF8String ) : Boolean;
 function  file_Exists( const Name : UTF8String ) : Boolean;
@@ -74,7 +69,7 @@ function  file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : 
 function  file_GetSize( FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
-procedure file_Find( const Directory : UTF8String; var List : zglTFileList; FindDir : Boolean );
+procedure file_Find( const Directory : UTF8String; out List : zglTFileList; FindDir : Boolean );
 function  file_GetName( const FileName : UTF8String ) : UTF8String;
 function  file_GetExtension( const FileName : UTF8String ) : UTF8String;
 function  file_GetDirectory( const FileName : UTF8String ) : UTF8String;
@@ -93,15 +88,6 @@ function _file_GetDirectory( const FileName : UTF8String ) : PAnsiChar;
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
 {$IFEND}
 
-{$IFDEF UNIX}
-const
-  { read/write search permission for everyone }
-  MODE_MKDIR = S_IWUSR or S_IRUSR or
-               S_IWGRP or S_IRGRP or
-               S_IWOTH or S_IROTH or
-               S_IXUSR or S_IXGRP or S_IXOTH;
-{$ENDIF}
-
 implementation
 uses
   {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
@@ -111,6 +97,15 @@ uses
   zgl_resources,
   zgl_log,
   zgl_utils;
+
+{$IFDEF UNIX}
+const
+  { read/write search permission for everyone }
+  MODE_MKDIR = S_IWUSR or S_IRUSR or
+               S_IWGRP or S_IRGRP or
+               S_IWOTH or S_IROTH or
+               S_IXUSR or S_IXGRP or S_IXOTH;
+{$ENDIF}
 
 var
   filePath : UTF8String = '';
@@ -134,11 +129,18 @@ begin
     Result := u_CopyUTF8Str( Path );
 end;
 
-function file_Open( var FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
+function file_Open( out FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
 begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
     begin
+      if ( Mode = FOM_CREATE ) or ( Mode = FOM_OPENRW ) Then
+        begin
+          FileHandle := 0;
+          Result := FALSE;
+          exit;
+        end;
+
       zgl_GetMem( Pointer( FileHandle ), SizeOf( zglZipFile ) );
       zglPZipFile( FileHandle ).file_ := zip_fopen( zipCurrent, PAnsiChar( filePath + FileName ), ZIP_FL_UNCHANGED );
       if not Assigned( zglPZipFile( FileHandle ).file_ ) Then
@@ -147,11 +149,6 @@ begin
         zglPZipFile( FileHandle ).name := u_GetPAnsiChar( filePath + FileName );
 
       Result := FileHandle <> 0;
-      if ( Mode = FOM_CREATE ) or ( Mode = FOM_OPENRW ) Then
-        begin
-          FileHandle := 0;
-          Result := FALSE;
-        end;
       exit;
     end;
   {$ENDIF}
@@ -367,6 +364,8 @@ begin
     FSM_SET: Result := FpLseek( FileHandle, Offset, SEEK_SET );
     FSM_CUR: Result := FpLseek( FileHandle, Offset, SEEK_CUR );
     FSM_END: Result := FpLseek( FileHandle, Offset, SEEK_END );
+  else
+    Result := 0;
   end;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -374,6 +373,8 @@ begin
     FSM_SET: Result := SetFilePointer( FileHandle, Offset, nil, FILE_BEGIN );
     FSM_CUR: Result := SetFilePointer( FileHandle, Offset, nil, FILE_CURRENT );
     FSM_END: Result := SetFilePointer( FileHandle, Offset, nil, FILE_END );
+  else
+    Result := 0;
   end;
 {$ENDIF}
 end;
@@ -464,7 +465,7 @@ begin
   {$ENDIF}
 
 {$IFDEF UNIX}
-  // Весьма безумная реализация 8)
+  // Crazy implementation 8)
   tmp    := FpLseek( FileHandle, 0, SEEK_CUR );
   Result := FpLseek( FileHandle, 0, SEEK_END );
   FpLseek( FileHandle, tmp, SEEK_SET );
@@ -510,7 +511,7 @@ begin
   FileHandle := FILE_ERROR;
 end;
 
-procedure file_Find( const Directory : UTF8String; var List : zglTFileList; FindDir : Boolean );
+procedure file_Find( const Directory : UTF8String; out List : zglTFileList; FindDir : Boolean );
   var
   {$IF DEFINED(LINUX) or DEFINED(MACOSX)}
     dir    : PDir;
@@ -627,7 +628,7 @@ begin
     u_SortList( List, 0, List.Count - 1 );
 end;
 
-procedure GetStr( const Str : UTF8String; var Result : UTF8String; const d : AnsiChar; const b : Boolean );
+function GetStr( const Str : UTF8String; const d : AnsiChar; const b : Boolean ) : UTF8String;
   var
     i, pos, l : Integer;
 begin
@@ -649,12 +650,12 @@ function file_GetName( const FileName : UTF8String ) : UTF8String;
   var
     tmp : UTF8String;
 begin
-  GetStr( FileName, Result, '/', FALSE );
+  Result := GetStr( FileName, '/', FALSE );
   {$IFDEF WINDOWS}
   if Result = FileName Then
-    GetStr( FileName, Result, '\', FALSE );
+    Result := GetStr( FileName, '\', FALSE );
   {$ENDIF}
-  GetStr( Result, tmp, '.', FALSE );
+  tmp := GetStr( Result, '.', FALSE );
   if Result <> tmp Then
     Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
@@ -663,22 +664,22 @@ function file_GetExtension( const FileName : UTF8String ) : UTF8String;
   var
     tmp : UTF8String;
 begin
-  GetStr( FileName, tmp, '/', FALSE );
+  tmp := GetStr( FileName, '/', FALSE );
   {$IFDEF WINDOWS}
   if tmp = FileName Then
-    GetStr( FileName, tmp, '\', FALSE );
+    tmp := GetStr( FileName, '\', FALSE );
   {$ENDIF}
-  GetStr( tmp, Result, '.', FALSE );
+  Result := GetStr( tmp, '.', FALSE );
   if tmp = Result Then
     Result := '';
 end;
 
 function file_GetDirectory( const FileName : UTF8String ) : UTF8String;
 begin
-  GetStr( FileName, Result, '/', TRUE );
+  Result := GetStr( FileName, '/', TRUE );
   {$IFDEF WINDOWS}
   if Result = '' Then
-    GetStr( FileName, Result, '\', TRUE );
+    Result := GetStr( FileName, '\', TRUE );
   {$ENDIF}
 end;
 

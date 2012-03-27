@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.03.22';
+  cs_Date     = '2012.03.27';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -168,7 +168,7 @@ procedure zgl_Exit;
 procedure zgl_Reg( What : LongWord; UserData : Pointer );
 function  zgl_Get( What : LongWord ) : Ptr;
 procedure zgl_GetSysDir;
-procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
+procedure zgl_GetMem( out Mem : Pointer; Size : LongWord );
 procedure zgl_FreeMem( var Mem : Pointer );
 procedure zgl_FreeStrList( var List : zglTStringList );
 procedure zgl_Enable( What : LongWord );
@@ -343,7 +343,8 @@ begin
   if appWorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( appFPSAll / appWorkTime ) ) );
 
-  app_PExit();
+  if Assigned( app_PExit ) Then
+    app_PExit();
   res_Free();
 
   if managerTimer.Count <> 0 Then
@@ -439,60 +440,52 @@ begin
     SYS_APP_INIT:
       begin
         app_PInit := UserData;
-        if not Assigned( UserData ) Then app_PInit := app_Init;
+        if not Assigned( UserData ) Then app_PInit := @app_Init;
       end;
     SYS_APP_LOOP:
       begin
         app_PLoop := UserData;
-        if not Assigned( UserData ) Then app_PLoop := app_MainLoop;
+        if not Assigned( UserData ) Then app_PLoop := @app_MainLoop;
       end;
     SYS_LOAD:
       begin
         app_PLoad := UserData;
-        if not Assigned( UserData ) Then app_PLoad := app_ZeroProc;
       end;
     SYS_DRAW:
       begin
         app_PDraw := UserData;
-        if not Assigned( UserData ) Then app_PDraw := app_ZeroProc;
       end;
     SYS_UPDATE:
       begin
         app_PUpdate := UserData;
-        if not Assigned( UserData ) Then app_PUpdate := app_ZeroUpdate;
       end;
     SYS_EXIT:
       begin
         app_PExit := UserData;
-        if not Assigned( UserData ) Then app_PExit := app_ZeroProc;
       end;
     SYS_ACTIVATE:
       begin
         app_PActivate := UserData;
-        if not Assigned( UserData ) Then app_PActivate := app_ZeroActivate;
       end;
     SYS_CLOSE_QUERY:
       begin
         app_PCloseQuery := UserData;
-        if not Assigned( UserData ) Then app_PCloseQuery := app_ZeroCloseQuery;
+        if not Assigned( app_PCloseQuery ) Then app_PCloseQuery := @app_CloseQuery;
       end;
     {$IFDEF iOS}
     SYS_iOS_MEMORY_WARNING:
       begin
         app_PMemoryWarn := UserData;
-        if not Assigned( UserData ) Then app_PMemoryWarn := app_ZeroProc;
       end;
     SYS_iOS_CHANGE_ORIENTATION:
       begin
         app_POrientation := UserData;
-        if not Assigned( UserData ) Then app_POrientation := app_ZeroOrientation;
       end;
     {$ENDIF}
     {$IFDEF ANDROID}
     SYS_ANDROID_RESTORE:
       begin
         app_PRestore := UserData;
-        if not Assigned( UserData ) Then app_PRestore := app_ZeroProc;
       end;
     {$ENDIF}
     // Input events
@@ -556,7 +549,6 @@ begin
     TEX_CURRENT_EFFECT:
       begin
         tex_CalcCustomEffect := UserData;
-        if not Assigned( tex_CalcCustomEffect ) Then tex_CalcCustomEffect := zeroce;
       end;
     // Sound
     {$IFDEF USE_SOUND}
@@ -743,7 +735,7 @@ begin
   appGotSysDirs := TRUE;
 end;
 
-procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
+procedure zgl_GetMem( out Mem : Pointer; Size : LongWord );
 begin
   if Size > 0 Then
     begin

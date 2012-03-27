@@ -24,8 +24,7 @@ unit zgl_log;
 
 interface
 uses
-  zgl_file,
-  zgl_utils;
+  zgl_file;
 
 procedure log_Init;
 procedure log_Close;
@@ -42,7 +41,8 @@ implementation
 uses
   zgl_application,
   zgl_main,
-  zgl_timers;
+  zgl_timers,
+  zgl_utils;
 
 procedure log_Init;
   var

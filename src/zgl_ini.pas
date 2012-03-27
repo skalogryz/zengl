@@ -69,7 +69,7 @@ function  ini_WriteKeyBool( const Section, Key : UTF8String; Value : Boolean ) :
 
 procedure ini_CopyKey( var k1, k2 : zglTINIKey );
 procedure ini_CopySection( var s1, s2 : zglTINISection );
-function  ini_GetID( const S, K : UTF8String; var idS, idK : Integer ) : Boolean;
+function  ini_GetID( const S, K : UTF8String; out idS, idK : Integer ) : Boolean;
 procedure ini_Process;
 procedure ini_Free;
 
@@ -131,6 +131,7 @@ begin
         INC( iniRec.Section[ s ].Keys );
         k := iniRec.Section[ s ].Keys - 1;
 
+        j := 0;
         SetLength( iniRec.Section[ s ].Key, iniRec.Section[ s ].Keys );
         for i := 1 to len do
           if str[ i ] = '=' Then
@@ -456,7 +457,7 @@ begin
     ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
 end;
 
-function ini_GetID( const S, K : UTF8String; var idS, idK : Integer ) : Boolean;
+function ini_GetID( const S, K : UTF8String; out idS, idK : Integer ) : Boolean;
   var
     h1, h2 : LongWord;
     i, j   : Integer;

@@ -89,6 +89,7 @@ uses
   zgl_particles_2d,
   {$ENDIF}
   zgl_sprite_2d,
+  zgl_tiles_2d,
   zgl_grid_2d,
 
   zgl_file,
@@ -350,6 +351,7 @@ exports
   video_OpenFile           name prefix + 'video_OpenFile',
   video_OpenMemory         name prefix + 'video_OpenMemory',
   video_Update             name prefix + 'video_Update',
+  video_Seek               name prefix + 'video_Seek',
   {$ENDIF}
 
   // Math

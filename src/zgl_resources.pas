@@ -75,7 +75,7 @@ type
     Texture          : zglPTexture;
     FileLoader       : zglTTextureFileLoader;
     MemLoader        : zglTTextureMemLoader;
-    pData            : Pointer;
+    pData            : PByteArray;
     TransparentColor : LongWord;
     Flags            : LongWord;
     Format           : Word;
@@ -95,8 +95,8 @@ type
   zglTTextureMaskResource = record
     Texture : zglPTexture;
     Mask    : zglPTexture;
-    tData   : Pointer;
-    mData   : Pointer;
+    tData   : PByteArray;
+    mData   : PByteArray;
   end;
 
 type
@@ -105,7 +105,7 @@ type
     FileName : UTF8String;
     Memory   : zglTMemory;
     Font     : zglPFont;
-    pData    : array of Pointer;
+    pData    : array of PByteArray;
     Format   : array of Word;
     Width    : array of Word;
     Height   : array of Word;
@@ -160,8 +160,6 @@ var
 implementation
 uses
   zgl_main,
-  zgl_window,
-  zgl_screen,
   zgl_application,
   zgl_file,
   zgl_log;
@@ -525,7 +523,7 @@ begin
                       for j := 0 to Texture.Height - 1 do
                         begin
                           for i := 0 to Texture.Width - 1 do
-                            PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
+                            tData[ i * 4 + 3 ] := mData[ i * 4 ];
                           INC( PByte( tData ), rW * 4 );
                           INC( PByte( mData ), mW * 4 );
                         end;
@@ -569,7 +567,7 @@ begin
                                       if file_Exists( tmp ) Then
                                         begin
                                           managerTexture.Formats[ j ].FileLoader( tmp, pData[ i ], Width[ i ], Height[ i ], Format[ i ] );
-                                          log_ADd( 'Texture loaded: "' + tmp + '"'  );
+                                          log_Add( 'Texture loaded: "' + tmp + '"'  );
                                           break;
                                         end;
                                     end;

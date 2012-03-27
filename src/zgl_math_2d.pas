@@ -66,7 +66,7 @@ end;
 function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 
-procedure m_SinCos( Angle : Single; var s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+procedure m_SinCos( Angle : Single; out s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
@@ -79,7 +79,7 @@ function  m_Orientation( x, y, x1, y1, x2, y2 : Single ) : Integer;
 {$IFDEF USE_TRIANGULATION}
 procedure tess_Triangulate( Contour : zglPPoints2D; iLo, iHi : Integer; AddHoles : Boolean = FALSE );
 procedure tess_AddHole( Contour : zglPPoints2D; iLo, iHi : Integer; LastHole : Boolean = TRUE );
-function  tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
+function  tess_GetData( out TriPoints : zglPPoints2D ) : Integer;
 {$ENDIF}
 
 var
@@ -123,7 +123,7 @@ begin
   if a > b Then Result := a else Result := b;
 end;
 
-procedure m_SinCos( Angle : Single; var s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+procedure m_SinCos( Angle : Single; out s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 {$IFDEF USE_ASM}
 asm
 {$IFDEF CPUi386}
@@ -337,7 +337,7 @@ begin
     end;
 end;
 
-function tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
+function tess_GetData( out TriPoints : zglPPoints2D ) : Integer;
 begin
   if not tessFinish Then
     begin

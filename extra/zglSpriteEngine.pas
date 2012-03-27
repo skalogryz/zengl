@@ -50,7 +50,7 @@ type
     Manager : zglCSEngine2D;
     Texture : zglPTexture;
     Kill    : Boolean;
-    Layer   : LongWord;
+    Layer   : Integer;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;

@@ -32,8 +32,12 @@ type
 type
   Ptr = {$IFDEF CPU64} QWORD {$ELSE} LongWord {$ENDIF};
 
-  PByteArray = ^TByteArray;
-  TByteArray = array[ 0..65535 ] of Byte;
+  PByteArray     = ^TByteArray;
+  TByteArray     = array[ 0..65535 ] of Byte;
+  PWordArray     = ^TWordArray;
+  TWordArray     = array[ 0..32767 ] of Word;
+  PLongWordArray = ^TLongWordArray;
+  TLongWordArray = array[ 0..16383 ] of LongWord;
 
 type
   zglPTexCoordIndex = ^zglTTexCoordIndex;

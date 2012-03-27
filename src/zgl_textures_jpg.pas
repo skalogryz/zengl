@@ -95,8 +95,8 @@ const
   {$ENDIF}
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
-procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
+procedure jpg_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
 
 implementation
 uses
@@ -105,7 +105,6 @@ uses
 
 {$IFDEF USE_LIBJPEG}
 type
-  zglPJPGData = ^zglTJPGData;
   zglTJPGData = record
     Memory  : Pointer;
     MemSize : LongWord;
@@ -114,7 +113,7 @@ type
     GetMem  : function( Size : Integer ) : PByte; cdecl;
   end;
 
-  procedure jpgturbo_Load( var jpgData : zglTJPGData; var Data : Pointer ); cdecl; external {$IFDEF ANDROID} 'zenjpeg' {$ENDIF};
+  procedure jpgturbo_Load( var jpgData : zglTJPGData; out Data : Pointer ); cdecl; external {$IFDEF ANDROID} 'zenjpeg' {$ENDIF};
 {$ENDIF}
 
 {$IFDEF USE_OLEPICTURE}
@@ -235,12 +234,12 @@ end;
 {$ENDIF}
 
 {$IFDEF USE_OLEPICTURE}
-procedure jpg_FillData( var jpg : zglTJPGData; var Data : Pointer );
+procedure jpg_FillData( var jpg : zglTJPGData; out Data : PByteArray );
   var
     bi   : BITMAPINFO;
     bmp  : HBITMAP;
     DC   : HDC;
-    p    : Pointer;
+    p    : PByteArray;
     W, H : Longint;
     i    : Integer;
 begin
@@ -257,7 +256,7 @@ begin
   bi.bmiHeader.biHeight      := jpg.Height;
   bi.bmiHeader.biCompression := BI_RGB;
   bi.bmiHeader.biPlanes      := 1;
-  bmp := CreateDIBSection( DC, bi, DIB_RGB_COLORS, p, 0, 0 );
+  bmp := CreateDIBSection( DC, bi, DIB_RGB_COLORS, Pointer( p ), 0, 0 );
   SelectObject( DC, bmp );
   jpg.Buffer.Render( DC, 0, 0, jpg.Width, jpg.Height, 0, H, W, -H, nil );
 
@@ -265,10 +264,10 @@ begin
 
   for i := 0 to jpg.Width * jpg.Height - 1 do
     begin
-      PByte( Ptr( Data ) + i * 4 + 0 )^ := PByte( Ptr( p ) + i * 4 + 2 )^;
-      PByte( Ptr( Data ) + i * 4 + 1 )^ := PByte( Ptr( p ) + i * 4 + 1 )^;
-      PByte( Ptr( Data ) + i * 4 + 2 )^ := PByte( Ptr( p ) + i * 4 + 0 )^;
-      PByte( Ptr( Data ) + i * 4 + 3 )^ := 255;
+      Data[ i * 4 ]     := p[ i * 4 + 2 ];
+      Data[ i * 4 + 1 ] := p[ i * 4 + 1 ];
+      Data[ i * 4 + 2 ] := p[ i * 4 ];
+      Data[ i * 4 + 3 ] := 255;
     end;
 
   DeleteObject( bmp );
@@ -276,7 +275,7 @@ begin
 end;
 {$ENDIF}
 
-procedure jpg_LoadFromFile( const FileName : UTF8String; var Data : Pointer; var W, H, Format : Word );
+procedure jpg_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
   var
     jpgMem : zglTMemory;
 begin
@@ -285,7 +284,7 @@ begin
   mem_Free( jpgMem );
 end;
 
-procedure jpg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H, Format : Word );
+procedure jpg_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
   var
     jpg : zglTJPGData;
   {$IFDEF USE_OLEPICTURE}
@@ -305,9 +304,9 @@ begin
   try
     g := GlobalAlloc( GMEM_FIXED, Memory.Size - Memory.Position );
     m := GlobalLock( g );
-    Move( Pointer( Ptr( Memory.Memory ) + Memory.Position )^, m^, Memory.Size - Memory.Position );
+    Move( PByteArray( Memory.Memory )[ Memory.Position ], PByte( m )^, Memory.Size - Memory.Position );
     GlobalUnlock( g );
-    if CreateStreamOnHGlobal( Ptr( m ), FALSE, jpg.Stream ) = S_OK Then
+    if CreateStreamOnHGlobal( HGLOBAL( m ), FALSE, jpg.Stream ) = S_OK Then
       if OleLoadPicture( jpg.Stream, 0, FALSE, IPicture, jpg.Buffer ) = S_OK Then jpg_FillData( jpg, Data );
   finally
     if g <> 0 Then GlobalFree( g );

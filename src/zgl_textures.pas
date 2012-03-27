@@ -25,6 +25,7 @@ unit zgl_textures;
 interface
 
 uses
+  zgl_types,
   zgl_math_2d,
   zgl_memory;
 
@@ -61,8 +62,8 @@ type
   zglPTextureCoord = ^zglTTextureCoord;
   zglTTextureCoord = array[ 0..3 ] of zglTPoint2D;
 
-  zglTTextureFileLoader = procedure( const FileName : UTF8String; var pData : Pointer; var W, H, Format : Word );
-  zglTTextureMemLoader  = procedure( const Memory : zglTMemory; var pData : Pointer; var W, H, Format : Word );
+  zglTTextureFileLoader = procedure( const FileName : UTF8String; out pData : PByteArray; out W, H, Format : Word );
+  zglTTextureMemLoader  = procedure( const Memory : zglTMemory; out pData : PByteArray; out W, H, Format : Word );
 
 type
   zglPTexture = ^zglTTexture;
@@ -99,7 +100,7 @@ end;
 function  tex_Add : zglPTexture;
 procedure tex_Del( var Texture : zglPTexture );
 
-function  tex_Create( var Texture : zglTTexture; pData : Pointer ) : Boolean;
+function  tex_Create( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
 function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
@@ -110,28 +111,24 @@ procedure tex_CalcTexCoords( var Texture : zglTTexture; FramesX : Integer = 1; F
 procedure tex_Filter( Texture : zglPTexture; Flags : LongWord );
 procedure tex_SetAnisotropy( Level : Byte );
 
-procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
-procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single; PixelSize : Integer );
-procedure tex_CalcGrayScale( var pData : Pointer; Width, Height : Word );
-procedure tex_CalcInvert( var pData : Pointer; Width, Height : Word );
-procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord; Width, Height : Word );
-procedure tex_CalcAlpha( var pData : Pointer; Width, Height : Word );
+procedure tex_CalcFlags( var Texture : zglTTexture; var pData : PByteArray );
+procedure tex_CalcPOT( var pData : PByteArray; var Width, Height : Word; var U, V : Single; PixelSize : Integer );
+procedure tex_CalcGrayScale( pData : PByteArray; Width, Height : Word );
+procedure tex_CalcInvert( pData : PByteArray; Width, Height : Word );
+procedure tex_CalcTransparent( pData : PByteArray; TransparentColor : LongWord; Width, Height : Word );
+procedure tex_CalcAlpha( pData : PByteArray; Width, Height : Word );
 
-procedure tex_SetData( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
-procedure tex_GetData( Texture : zglPTexture; var pData : Pointer );
-
-procedure zeroce( var pData : Pointer; Width, Height : Word );
+procedure tex_SetData( Texture : zglPTexture; pData : PByteArray; X, Y, Width, Height : Word; Stride : Integer = 0 );
+procedure tex_GetData( Texture : zglPTexture; out pData : PByteArray );
 
 var
   managerTexture       : zglTTextureManager;
   managerZeroTexture   : zglPTexture;
-  tex_CalcCustomEffect : procedure( var pData : Pointer; Width, Height : Word ) = zeroce;
+  tex_CalcCustomEffect : procedure( pData : PByteArray; Width, Height : Word );
 
 implementation
 uses
-  zgl_types,
   zgl_main,
-  zgl_screen,
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
@@ -144,8 +141,6 @@ uses
   zgl_file,
   zgl_log,
   zgl_utils;
-
-procedure zeroce; begin end;
 
 function tex_GetVRAM( Texture : zglPTexture ) : LongWord;
   var
@@ -163,6 +158,8 @@ begin
     TEX_FORMAT_RGBA_DXT3: Result := size;
     TEX_FORMAT_RGBA_DXT5: Result := size;
     {$ENDIF}
+  else
+    Result := 0;
   end;
 end;
 
@@ -203,7 +200,7 @@ begin
   DEC( managerTexture.Count.Items );
 end;
 
-function tex_Create( var Texture : zglTTexture; pData : Pointer ) : Boolean;
+function tex_Create( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
   var
     width  : Integer;
     height : Integer;
@@ -279,20 +276,20 @@ end;
 function tex_CreateZero( Width, Height : Word; Color, Flags : LongWord ) : zglPTexture;
   var
     i     : LongWord;
-    pData : Pointer;
+    pData : PLongWordArray;
 begin
   GetMem( pData, Width * Height * 4 );
   for i := 0 to Width * Height - 1 do
-    Move( Color, Pointer( Ptr( pData ) + i * 4 )^, 4 );
+    pData[ i ] := Color;
 
   Result        := tex_Add();
   Result.Width  := Width;
   Result.Height := Height;
   Result.Format := TEX_FORMAT_RGBA;
   Result.Flags  := Flags;
-  tex_CalcFlags( Result^, pData );
+  tex_CalcFlags( Result^, PByteArray( pData ) );
   tex_CalcTexCoords( Result^ );
-  if not tex_Create( Result^, pData ) Then
+  if not tex_Create( Result^, PByteArray( pData ) ) Then
     begin
       tex_Del( Result );
       Result := managerZeroTexture;
@@ -305,7 +302,7 @@ function tex_LoadFromFile( const FileName : UTF8String; TransparentColor, Flags 
   var
     i      : Integer;
     ext    : UTF8String;
-    pData  : Pointer;
+    pData  : PByteArray;
     w, h   : Word;
     format : Word;
     res    : zglTTextureResource;
@@ -376,7 +373,7 @@ function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8St
   var
     i      : Integer;
     ext    : UTF8String;
-    pData  : Pointer;
+    pData  : PByteArray;
     w, h   : Word;
     format : Word;
     res    : zglTTextureResource;
@@ -454,8 +451,8 @@ end;
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
   var
     i, j   : Integer;
-    tData  : Pointer;
-    mData  : Pointer;
+    tData  : PByteArray;
+    mData  : PByteArray;
     rW, mW : Integer;
     res    : zglTTextureMaskResource;
 begin
@@ -481,7 +478,7 @@ begin
         for j := 0 to Texture.Height - 1 do
           begin
             for i := 0 to Texture.Width - 1 do
-              PByte( Ptr( tData ) + i * 4 + 3 )^ := PByte( Ptr( mData ) + i * 4 )^;
+              tData[ i * 4 + 3 ] := mData[ i * 4 ];
             INC( PByte( tData ), rW * 4 );
             INC( PByte( mData ), mW * 4 );
           end;
@@ -635,7 +632,7 @@ begin
     oglAnisotropy := Level;
 end;
 
-procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
+procedure tex_CalcFlags( var Texture : zglTTexture; var pData : PByteArray );
 begin
   if Texture.Format = TEX_FORMAT_RGBA Then
     begin
@@ -643,7 +640,7 @@ begin
         tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
       if Texture.Flags and TEX_INVERT > 0 Then
         tex_CalcInvert( pData, Texture.Width, Texture.Height );
-      if Texture.Flags and TEX_CUSTOM_EFFECT > 0 Then
+      if ( Texture.Flags and TEX_CUSTOM_EFFECT > 0 ) and ( Assigned( tex_CalcCustomEffect ) ) Then
         tex_CalcCustomEffect( pData, Texture.Width, Texture.Height );
     end;
 
@@ -662,11 +659,11 @@ begin
     end;
 end;
 
-procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single; PixelSize : Integer );
+procedure tex_CalcPOT( var pData : PByteArray; var Width, Height : Word; var U, V : Single; PixelSize : Integer );
   var
-    i, j : LongWord;
-    w, h : Word;
-    data : array of Byte;
+    i, j : Integer;
+    w, h : Integer;
+    data : PByteArray;
 begin
   w := u_GetPOT( Width );
   h := u_GetPOT( Height );
@@ -679,64 +676,59 @@ begin
   U := Width  / w;
   V := Height / h;
 
-  SetLength( data, Width * Height * PixelSize );
-  Move( pData^, Pointer( data )^, Width * Height * PixelSize );
-  FreeMem( pData );
+  data := pData;
   GetMem( pData, w * h * PixelSize );
 
   for i := 0 to Height - 1 do
-    Move( data[ i * Width * PixelSize ], PLongWord( Ptr( pData ) + i * w * PixelSize )^, Width * PixelSize );
+    Move( data[ i * Width * PixelSize ], pData[ i * w * PixelSize ], Width * PixelSize );
 
   for i := Height to h - 1 do
-    Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * PixelSize )^, PByte( Ptr( pData ) + i * w * PixelSize )^, Width * PixelSize );
+    Move( pData[ ( Height - 1 ) * w * PixelSize ], pData[ i * w * PixelSize ], Width * PixelSize );
 
   if PixelSize = 4 Then
     begin
       for i := 0 to h - 1 do
         for j := Width to w - 1 do
-          PLongWord( Ptr( pData ) + j * 4 + i * w * 4 )^ := PLongWord( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
+          PLongWordArray( pData )[ j + i * w ] := PLongWordArray( pData )[ Width - 1 + i * w ];
     end else
       for i := 0 to h - 1 do
         for j := Width to w - 1 do
-          PWord( Ptr( pData ) + j * 2 + i * w * 2 )^ := PWord( Ptr( pData ) + ( Width - 1 ) * 2 + i * w * 2 )^;
+          PWordArray( pData )[ j + i * w ] := PWordArray( pData )[ Width - 1 + i * w ];
 
   Width  := w;
   Height := h;
-  SetLength( data, 0 );
+  FreeMem( data );
 end;
 
-procedure tex_CalcGrayScale( var pData : Pointer; Width, Height : Word );
+procedure tex_CalcGrayScale( pData : PByteArray; Width, Height : Word );
   var
     i    : Integer;
-    p    : Ptr;
     gray : Byte;
 begin
   for i := 0 to Width * Height - 1 do
     begin
-      p := Ptr( pData ) + i * 4;
-      gray := Round( PByte( p + 0 )^ * 0.299 + PByte( p + 1 )^ * 0.587 + PByte( p + 2 )^ * 0.114 );
-
-      PByte( p + 0 )^ := gray;
-      PByte( p + 1 )^ := gray;
-      PByte( p + 2 )^ := gray;
+      gray       := Round( pData[ 0 ] * 0.299 + pData[ 1 ] * 0.587 + pData[ 2 ] * 0.114 );
+      pData[ 0 ] := gray;
+      pData[ 1 ] := gray;
+      pData[ 2 ] := gray;
+      INC( PByte( pData ), 4 );
     end;
 end;
 
-procedure tex_CalcInvert( var pData : Pointer; Width, Height : Word );
+procedure tex_CalcInvert( pData : PByteArray; Width, Height : Word );
   var
     i : Integer;
-    p : Ptr;
 begin
   for i := 0 to Width * Height - 1 do
     begin
-      p := Ptr( pData ) + i * 4;
-      PByte( p + 0 )^ := 255 - PByte( p + 0 )^;
-      PByte( p + 1 )^ := 255 - PByte( p + 1 )^;
-      PByte( p + 2 )^ := 255 - PByte( p + 2 )^;
+      pData[ 0 ] := 255 - pData[ 0 ];
+      pData[ 1 ] := 255 - pData[ 1 ];
+      pData[ 2 ] := 255 - pData[ 2 ];
+      INC( PByte( pData ), 4 );
     end;
 end;
 
-procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord; Width, Height : Word );
+procedure tex_CalcTransparent( pData : PByteArray; TransparentColor : LongWord; Width, Height : Word );
   var
     i       : Integer;
     r, g, b : Byte;
@@ -747,102 +739,105 @@ begin
   g := ( TransparentColor and $FF00   ) shr 8;
   b := ( TransparentColor and $FF     );
   for i := 0 to Width * Height - 1 do
-    if ( PByte( Ptr( pData ) + i * 4 )^ = r ) and ( PByte( Ptr( pData ) + i * 4 + 1 )^ = g ) and ( PByte( Ptr( pData ) + i * 4 + 2 )^ = b ) Then
-      PByte( Ptr( pData ) + i * 4 + 3 )^ := 0;
+    begin
+      if ( pData[ 0 ] = r ) and ( pData[ 1 ] = g ) and ( pData[ 2 ] = b ) Then
+        pData[ 3 ] := 0;
+      INC( PByte( pData ), 4 );
+    end;
 end;
 
-procedure tex_CalcAlpha( var pData : Pointer; Width, Height : Word );
+procedure tex_CalcAlpha( pData : PByteArray; Width, Height : Word );
   var
     i : Integer;
 begin
   for i := 0 to Width * Height - 1 do
-    if ( PByte( Ptr( pData ) + i * 4 + 3 )^ = 0 ) Then
+    if pData[ i * 4 + 3 ] = 0 Then
       begin
-        PLongWord( Ptr( pData ) + i * 4 )^ := 0;
+        PLongWordArray(pData)[ i ] := 0;
 
         // bottom
         if i + Width <= Width * Height - 1 Then
-          if PByte( Ptr( pData ) + ( i + Width ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i + Width ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + Width ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i + Width ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i + Width ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i + Width ) * 4 + 2 ];
               continue;
             end;
 
         // bottom right
         if ( i + 1 <= Width * Height - 1 ) and ( i + Width <= Width * Height - 1 ) Then
-          if PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i + Width + 1 ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i + Width + 1 ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i + Width + 1 ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i + Width + 1 ) * 4 + 2 ];
               continue;
             end;
 
         // right
         if i + 1 <= Width * Height - 1 Then
-          if PByte( Ptr( pData ) + ( i + 1 ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i + 1 ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + 1 ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i + 1 ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i + 1 ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i + 1 ) * 4 + 2 ];
               continue;
             end;
 
         // top right
         if ( i + 1 <= Width * Height - 1 ) and ( i - Width > 0 ) Then
-          if PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i - Width + 1 ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i - Width + 1 ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i - Width + 1 ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i - Width + 1 ) * 4 + 2 ];
               continue;
             end;
 
         // top
         if i - Width > 0 Then
-          if PByte( Ptr( pData ) + ( i - Width ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i - Width ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - Width ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i - Width ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i - Width ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i - Width ) * 4 + 2 ];
               continue;
             end;
 
         // top left
         if ( i - 1 > 0 ) and ( i - Width > 0 ) Then
-          if PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i - Width - 1 ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i - Width - 1 ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i - Width - 1 ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i - Width - 1 ) * 4 + 2 ];
               continue;
             end;
 
         // left
         if i - 1 > 0 Then
-          if PByte( Ptr( pData ) + ( i - 1 ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i - 1 ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - 1 ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i - 1 ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i - 1 ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i - 1 ) * 4 + 2 ];
               continue;
             end;
 
         // bottom left
         if ( i - 1 > 0 ) and ( i + Width <= Width * Height - 1 ) Then
-          if PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 3 )^ > 0 Then
+          if pData[ ( i + Width - 1 ) * 4 + 3 ] > 0 Then
             begin
-              PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 )^;
-              PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 1 )^;
-              PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 2 )^;
+              pData[ i * 4 ]     := pData[ ( i + Width - 1 ) * 4 ];
+              pData[ i * 4 + 1 ] := pData[ ( i + Width - 1 ) * 4 + 1 ];
+              pData[ i * 4 + 2 ] := pData[ ( i + Width - 1 ) * 4 + 2 ];
               continue;
             end;
       end;
 end;
 
-procedure tex_SetData( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
+procedure tex_SetData( Texture : zglPTexture; pData : PByteArray; X, Y, Width, Height : Word; Stride : Integer = 0 );
 begin
   batch2d_Flush();
 
@@ -860,7 +855,7 @@ begin
   glDisable( GL_TEXTURE_2D );
 end;
 
-procedure tex_GetData( Texture : zglPTexture; var pData : Pointer );
+procedure tex_GetData( Texture : zglPTexture; out pData : PByteArray );
 begin
   batch2d_Flush();
 

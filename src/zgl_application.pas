@@ -46,6 +46,7 @@ uses
 
 procedure app_Init;
 procedure app_MainLoop;
+function  app_CloseQuery : Boolean;
 procedure app_ProcessOS;
 {$IFDEF LINUX}
 function app_ProcessMessages : LongWord;
@@ -113,14 +114,6 @@ function  Java_zengl_android_ZenGL_zglNativeCloseQuery( env : PJNIEnv; thiz : jo
 procedure Java_zengl_android_ZenGL_zglNativeTouch( env : PJNIEnv; thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeInputText( env : PJNIEnv; thiz : jobject; text : jstring ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeBackspace( env : PJNIEnv; thiz : jobject ); cdecl;
-{$ENDIF}
-
-procedure app_ZeroProc;
-procedure app_ZeroUpdate( dt : Double );
-procedure app_ZeroActivate( activate : Boolean );
-function  app_ZeroCloseQuery : Boolean;
-{$IFDEF iOS}
-procedure app_ZeroOrientation( orientation : UIInterfaceOrientation );
 {$ENDIF}
 
 var
@@ -213,19 +206,12 @@ uses
   {$ENDIF}
   zgl_utils;
 
-procedure app_ZeroProc; begin end;
-procedure app_ZeroUpdate( dt : Double ); begin end;
-procedure app_ZeroActivate( activate : Boolean ); begin end;
-function  app_ZeroCloseQuery : Boolean; begin Result := TRUE; end;
-{$IFDEF iOS}
-procedure app_ZeroOrientation( orientation : UIInterfaceOrientation ); begin end;
-{$ENDIF}
-
 procedure app_Draw;
 begin
   SetCurrentMode();
   scr_Clear();
-  app_PDraw();
+  if Assigned( app_PDraw ) Then
+    app_PDraw();
   scr_Flush();
   if not appPause Then
     INC( appFPSCount );
@@ -243,7 +229,8 @@ procedure app_Init;
 begin
   SetCurrentMode();
   scr_Clear();
-  app_PLoad();
+  if Assigned( app_PLoad ) Then
+    app_PLoad();
   scr_Flush();
 
   res_Init();
@@ -280,15 +267,21 @@ begin
       t := timer_GetTicks();
       {$IFDEF WINDESKTOP}
       // Workaround for bug with unstable time between frames...
-      if ( scrVSync ) and ( appFPS > 0 ) and ( appFPS = scrRefresh ) and ( appFlags and APP_USE_DT_CORRECTION > 0 ) Then
+      if Assigned( app_PUpdate ) and ( scrVSync ) and ( appFPS > 0 ) and ( appFPS = scrRefresh ) and ( appFlags and APP_USE_DT_CORRECTION > 0 ) Then
         app_PUpdate( 1000 / appFPS )
       else
       {$ENDIF}
-      app_PUpdate( timer_GetTicks() - appdt );
+      if Assigned( app_PUpdate ) Then
+        app_PUpdate( timer_GetTicks() - appdt );
       appdt := t;
 
       app_Draw();
     end;
+end;
+
+function  app_CloseQuery : Boolean;
+begin
+  Result := TRUE;
 end;
 
 procedure app_ProcessOS;
@@ -389,8 +382,8 @@ function app_ProcessMessages;
     mWheel  : Integer;
     bounds  : HIRect;
     SCAKey  : LongWord;
+    i       : Integer;
   {$ENDIF}
-    i   : Integer;
     len : Integer;
     c   : array[ 0..5 ] of AnsiChar;
     str : UTF8String;
@@ -414,7 +407,8 @@ begin
           begin
             appFocus := TRUE;
             appPause := FALSE;
-            if appWork Then app_PActivate( TRUE );
+            if appWork and Assigned( app_PActivate ) Then
+              app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -424,11 +418,12 @@ begin
           begin
             appFocus := FALSE;
             if appAutoPause Then appPause := TRUE;
-            if appWork Then app_PActivate( FALSE );
+            if appWork and Assigned( app_PActivate ) Then
+              app_PActivate( FALSE );
           end;
         ConfigureNotify:
           begin
-            // Для особо одаренных оконных менеджеров :)
+            // For specially stupid window managers :)
             if wndFullScreen and ( ( event.xconfigure.x <> 0 ) or ( event.xconfigure.y <> 0 ) ) Then
               wnd_SetPos( 0, 0 );
             if ( event.xconfigure.width <> wndWidth ) or ( event.xconfigure.height <> wndHeight ) Then
@@ -447,7 +442,7 @@ begin
                       mouseCanClick[ M_BLEFT ] := FALSE;
                       if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
                         mouseDblClick[ M_BLEFT ] := TRUE;
-                      mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+                      mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
                     end;
 
                   if Assigned( mouse_PPress ) Then
@@ -627,7 +622,8 @@ begin
           begin
             appFocus := TRUE;
             appPause := FALSE;
-            if appWork Then app_PActivate( TRUE );
+            if appWork and Assigned( app_PActivate ) Then
+              app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -641,7 +637,8 @@ begin
                 if appAutoPause Then appPause := TRUE;
                 if appWork Then
                   begin
-                    app_PActivate( FALSE );
+                    if Assigned( app_PActivate ) Then
+                      app_PActivate( FALSE );
                     if ( wndFullScreen ) and ( not wndFirst ) Then
                       begin
                         scr_Reset();
@@ -882,7 +879,8 @@ begin
           begin
             appFocus := TRUE;
             appPause := FALSE;
-            app_PActivate( TRUE );
+            if Assigned( app_PActivate ) Then
+              app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -894,7 +892,8 @@ begin
           begin
             appFocus := FALSE;
             if appAutoPause Then appPause := TRUE;
-            app_PActivate( FALSE );
+            if Assigned( app_PActivate ) Then
+              app_PActivate( FALSE );
             if wndFullScreen Then scr_Reset();
           end;
         kEventWindowCollapsed:
@@ -1189,7 +1188,8 @@ begin
       timer_MainLoop();
 
   t := timer_GetTicks();
-  app_PUpdate( timer_GetTicks() - appdt );
+  if Assigned( app_PUpdate ) Then
+    app_PUpdate( timer_GetTicks() - appdt );
   appdt := t;
 
   app_Draw();
@@ -1210,7 +1210,8 @@ begin
   {$ENDIF}
 
   if appAutoPause Then appPause := TRUE;
-  if appWork Then app_PActivate( FALSE );
+  if appWork and Assigned( app_PActivate ) Then
+    app_PActivate( FALSE );
 
   FillChar( touchActive[ 0 ], MAX_TOUCH, 0 );
   FillChar( mouseDown[ 0 ], 3, 0 );
@@ -1239,7 +1240,8 @@ begin
   {$ENDIF}
 
   appPause := FALSE;
-  if appWork Then app_PActivate( TRUE );
+  if appWork and Assigned( app_PActivate ) Then
+    app_PActivate( TRUE );
 end;
 
 procedure zglCAppDelegate.applicationDidReceiveMemoryWarning;
@@ -1299,33 +1301,8 @@ end;
 
 function zglCiOSViewController.shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean;
 begin
-  Result := FALSE;
-  if scrCanPortrait Then
-    begin
-      if interfaceOrientation = UIInterfaceOrientationPortrait Then
-        begin
-          scrAngle := 0;
-          Result   := TRUE;
-        end;
-      if interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown Then
-        begin
-          scrAngle := 180;
-          Result   := TRUE;
-        end;
-    end;
-  if scrCanLandscape Then
-    begin
-      if interfaceOrientation = UIInterfaceOrientationLandscapeLeft Then
-        begin
-          scrAngle := 90;
-          Result   := TRUE;
-        end;
-      if interfaceOrientation = UIInterfaceOrientationLandscapeRight Then
-        begin
-          scrAngle := 270;
-          Result   := TRUE;
-        end;
-    end;
+  Result := ( scrCanPortrait and ( ( interfaceOrientation = UIInterfaceOrientationPortrait ) or ( interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) ) or
+            ( scrCanLandscape and ( ( interfaceOrientation = UIInterfaceOrientationLandscapeLeft ) or ( interfaceOrientation = UIInterfaceOrientationLandscapeRight ) ) );
 end;
 
 procedure zglCiOSViewController.didRotateFromInterfaceOrientation( fromInterfaceOrientation : UIInterfaceOrientation );
@@ -1415,7 +1392,7 @@ begin
               mouseCanClick[ M_BLEFT ] := FALSE;
               if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
                 mouseDblClick[ M_BLEFT ] := TRUE;
-              mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+              mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
 
               if Assigned( mouse_PPress ) Then
                 mouse_PPress( M_BLEFT );
@@ -1579,6 +1556,7 @@ end;
 
 function JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint;
 begin
+  Result := 0;
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject );
@@ -1642,7 +1620,8 @@ begin
       timer_MainLoop();
 
   t := timer_GetTicks();
-  app_PUpdate( timer_GetTicks() - appdt );
+  if Assigned( app_PUpdate ) Then
+    app_PUpdate( timer_GetTicks() - appdt );
   appdt := t;
 
   app_Draw();
@@ -1654,7 +1633,8 @@ begin
     begin
       appFocus := TRUE;
       appPause := FALSE;
-      if appWork Then app_PActivate( TRUE );
+      if appWork and Assigned( app_PActivate ) Then
+        app_PActivate( TRUE );
       FillChar( keysDown[ 0 ], 256, 0 );
       key_ClearState();
       FillChar( mouseDown[ 0 ], 3, 0 );
@@ -1666,7 +1646,8 @@ begin
       begin
         appFocus := FALSE;
         appPause := TRUE;
-        if appWork Then app_PActivate( FALSE );
+        if appWork and Assigned( app_PActivate ) Then
+          app_PActivate( FALSE );
         snd_MainLoop();
       end;
 end;
@@ -1736,7 +1717,7 @@ begin
               mouseCanClick[ M_BLEFT ] := FALSE;
               if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
                 mouseDblClick[ M_BLEFT ] := TRUE;
-              mouseDblCTime[ M_BLEFT ] := timer_GetTicks;
+              mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
 
               if Assigned( mouse_PPress ) Then
                 mouse_PPress( M_BLEFT );
@@ -1766,21 +1747,9 @@ end;
 {$ENDIF}
 
 initialization
-  app_PInit       := app_Init;
-  app_PLoop       := app_MainLoop;
-  app_PLoad       := app_ZeroProc;
-  app_PDraw       := app_ZeroProc;
-  app_PExit       := app_ZeroProc;
-  app_PUpdate     := app_ZeroUpdate;
-  app_PActivate   := app_ZeroActivate;
-  app_PCloseQuery := app_ZeroCloseQuery;
-{$IFDEF iOS}
-  app_PMemoryWarn  := app_ZeroProc;
-  app_POrientation := app_ZeroOrientation;
-{$ENDIF}
-{$IFDEF ANDROID}
-  app_PRestore := app_ZeroProc;
-{$ENDIF}
+  app_PInit       := @app_Init;
+  app_PLoop       := @app_MainLoop;
+  app_PCloseQuery := @app_CloseQuery;
 
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE {$IFDEF WINDESKTOP} or APP_USE_DT_CORRECTION {$ENDIF};
 {$IFDEF iOS}

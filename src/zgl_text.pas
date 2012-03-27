@@ -339,7 +339,11 @@ function text_GetHeight( Font : zglPFont; Width : Single; const Text : UTF8Strin
   var
     Rect : zglTRect;
 begin
-  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then
+    begin
+      Result := 0;
+      exit;
+    end;
 
   Rect.X    := 0;
   Rect.Y    := 0;

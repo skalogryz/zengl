@@ -106,7 +106,6 @@ var
 
 implementation
 uses
-  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_log,
@@ -401,6 +400,7 @@ end;
 
 function gl_Initialize : Boolean;
 begin
+  Result := FALSE;
 {$IFDEF LINUX}
   oglContext := glXCreateContext( scrDisplay, oglVisualInfo, nil, TRUE );
   if not Assigned( oglContext ) Then
