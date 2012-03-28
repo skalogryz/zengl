@@ -26,6 +26,30 @@ interface
 uses
   zgl_memory;
 
+function  ini_LoadFromFile( const FileName : UTF8String ) : Boolean;
+procedure ini_SaveToFile( const FileName : UTF8String );
+procedure ini_Add( const Section, Key : UTF8String );
+procedure ini_Del( const Section, Key : UTF8String );
+procedure ini_Clear( const Section : UTF8String );
+function  ini_IsSection( const Section : UTF8String ) : Boolean;
+function  ini_IsKey( const Section, Key : UTF8String ) : Boolean;
+function  ini_ReadKeyStr( const Section, Key : UTF8String ) : UTF8String;
+function  ini_ReadKeyInt( const Section, Key : UTF8String ) : Integer;
+function  ini_ReadKeyFloat( const Section, Key : UTF8String ) : Single;
+function  ini_ReadKeyBool( const Section, Key : UTF8String ) : Boolean;
+function  ini_WriteKeyStr( const Section, Key, Value : UTF8String ) : Boolean;
+function  ini_WriteKeyInt( const Section, Key : UTF8String; Value : Integer ) : Boolean;
+function  ini_WriteKeyFloat( const Section, Key : UTF8String; Value : Single; Digits : Integer = 2 ) : Boolean;
+function  ini_WriteKeyBool( const Section, Key : UTF8String; Value : Boolean ) : Boolean;
+
+function _ini_ReadKeyStr( const Section, Key : UTF8String ) : PAnsiChar;
+
+implementation
+uses
+  zgl_types,
+  zgl_file,
+  zgl_utils;
+
 type
   zglPINIKey = ^zglTINIKey;
   zglTINIKey = record
@@ -51,39 +75,9 @@ type
     Section  : array of zglTINISection;
 end;
 
-function  ini_LoadFromFile( const FileName : UTF8String ) : Boolean;
-procedure ini_SaveToFile( const FileName : UTF8String );
-procedure ini_Add( const Section, Key : UTF8String );
-procedure ini_Del( const Section, Key : UTF8String );
-procedure ini_Clear( const Section : UTF8String );
-function  ini_IsSection( const Section : UTF8String ) : Boolean;
-function  ini_IsKey( const Section, Key : UTF8String ) : Boolean;
-function  ini_ReadKeyStr( const Section, Key : UTF8String ) : UTF8String;
-function  ini_ReadKeyInt( const Section, Key : UTF8String ) : Integer;
-function  ini_ReadKeyFloat( const Section, Key : UTF8String ) : Single;
-function  ini_ReadKeyBool( const Section, Key : UTF8String ) : Boolean;
-function  ini_WriteKeyStr( const Section, Key, Value : UTF8String ) : Boolean;
-function  ini_WriteKeyInt( const Section, Key : UTF8String; Value : Integer ) : Boolean;
-function  ini_WriteKeyFloat( const Section, Key : UTF8String; Value : Single; Digits : Integer = 2 ) : Boolean;
-function  ini_WriteKeyBool( const Section, Key : UTF8String; Value : Boolean ) : Boolean;
-
-procedure ini_CopyKey( var k1, k2 : zglTINIKey );
-procedure ini_CopySection( var s1, s2 : zglTINISection );
-function  ini_GetID( const S, K : UTF8String; out idS, idK : Integer ) : Boolean;
-procedure ini_Process;
-procedure ini_Free;
-
-function _ini_ReadKeyStr( const Section, Key : UTF8String ) : PAnsiChar;
-
 var
   iniRec : zglTINI;
   iniMem : zglTMemory;
-
-implementation
-uses
-  zgl_types,
-  zgl_file,
-  zgl_utils;
 
 function delSpaces( const str : UTF8String ) : UTF8String;
   var
@@ -146,6 +140,111 @@ begin
         iniRec.Section[ s ].Key[ k ].Value := copy( str, j + 1, len - j );
         iniRec.Section[ s ].Key[ k ].Value := delSpaces( iniRec.Section[ s ].Key[ k ].Value );
       end;
+end;
+
+procedure ini_CopyKey( var k1, k2 : zglTINIKey );
+begin
+  k1.Hash  := k2.Hash;
+  k1.Name  := k2.Name;
+  k1.Value := k2.Value;
+end;
+
+procedure ini_CopySection( var s1, s2 : zglTINISection );
+  var
+    i : Integer;
+begin
+  s1.Hash := s2.Hash;
+  s1.Name := s2.Name;
+  s1.Keys := s2.Keys;
+  SetLength( s1.Key, s1.Keys );
+  for i := 0 to s1.Keys - 1 do
+    ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
+end;
+
+function ini_GetID( const S, K : UTF8String; out idS, idK : Integer ) : Boolean;
+  var
+    h1, h2 : LongWord;
+    i, j   : Integer;
+begin
+  idS := -1;
+  idK := -1;
+  h1  := u_Hash( S );
+  h2  := u_Hash( K );
+
+  Result := FALSE;
+  for i := 0 to iniRec.Sections - 1 do
+    if h1 = iniRec.Section[ i ].Hash Then
+      begin
+        idS := i;
+        for j := 0 to iniRec.Section[ i ].Keys - 1 do
+          if h2 = iniRec.Section[ i ].Key[ j ].Hash Then
+            begin
+              idK := j;
+              Result := TRUE;
+              exit;
+            end;
+        exit;
+      end;
+end;
+
+procedure ini_Process;
+  var
+    lineEnd     : PByte;
+    iniEnd      : Ptr;
+    lastPos     : Ptr;
+    newLine     : Boolean;
+    newLineSize : Integer;
+    str         : UTF8String;
+    len         : Integer;
+begin
+  lineEnd := iniMem.Memory;
+  iniEnd  := Ptr( iniMem.Memory ) + iniMem.Size;
+  lastPos := Ptr( lineEnd );
+  str     := '';
+
+  while Ptr( lineEnd ) < iniEnd do
+    begin
+      newLine     := lineEnd^ = 10;
+      newLineSize := 0;
+      if ( not newLine ) and ( lineEnd^ = 13 ) Then
+        begin
+          INC( lineEnd );
+          newLine     := lineEnd^ = 10;
+          newLineSize := 1;
+        end;
+
+      if newLine Then
+        begin
+          len := Ptr( lineEnd ) - lastPos - newLineSize;
+          if len <= 0 Then
+            begin
+              INC( lineEnd );
+              lastPos := Ptr( lineEnd );
+              continue;
+            end;
+          SetLength( str, len );
+          Move( PByte( lastPos )^, str[ 1 ], len );
+          addData( str );
+
+          lastPos := Ptr( lineEnd ) + 1;
+        end;
+
+      INC( lineEnd );
+    end;
+
+  len := Ptr( lineEnd ) - lastPos;
+  if len > 0 Then
+    begin
+      SetLength( str, len );
+      Move( PByte( lastPos )^, str[ 1 ], len );
+      addData( str );
+    end;
+end;
+
+procedure ini_Free;
+begin
+  iniRec.Sections := 0;
+  SetLength( iniRec.Section, 0 );
 end;
 
 function ini_LoadFromFile( const FileName : UTF8String ) : Boolean;
@@ -436,111 +535,6 @@ begin
         ini_WriteKeyBool( Section, Key, Value );
         Result := FALSE;
       end;
-end;
-
-procedure ini_CopyKey( var k1, k2 : zglTINIKey );
-begin
-  k1.Hash  := k2.Hash;
-  k1.Name  := k2.Name;
-  k1.Value := k2.Value;
-end;
-
-procedure ini_CopySection( var s1, s2 : zglTINISection );
-  var
-    i : Integer;
-begin
-  s1.Hash := s2.Hash;
-  s1.Name := s2.Name;
-  s1.Keys := s2.Keys;
-  SetLength( s1.Key, s1.Keys );
-  for i := 0 to s1.Keys - 1 do
-    ini_CopyKey( s1.Key[ i ], s2.Key[ i ] );
-end;
-
-function ini_GetID( const S, K : UTF8String; out idS, idK : Integer ) : Boolean;
-  var
-    h1, h2 : LongWord;
-    i, j   : Integer;
-begin
-  idS := -1;
-  idK := -1;
-  h1  := u_Hash( S );
-  h2  := u_Hash( K );
-
-  Result := FALSE;
-  for i := 0 to iniRec.Sections - 1 do
-    if h1 = iniRec.Section[ i ].Hash Then
-      begin
-        idS := i;
-        for j := 0 to iniRec.Section[ i ].Keys - 1 do
-          if h2 = iniRec.Section[ i ].Key[ j ].Hash Then
-            begin
-              idK := j;
-              Result := TRUE;
-              exit;
-            end;
-        exit;
-      end;
-end;
-
-procedure ini_Process;
-  var
-    lineEnd     : PByte;
-    iniEnd      : Ptr;
-    lastPos     : Ptr;
-    newLine     : Boolean;
-    newLineSize : Integer;
-    str         : UTF8String;
-    len         : Integer;
-begin
-  lineEnd := iniMem.Memory;
-  iniEnd  := Ptr( iniMem.Memory ) + iniMem.Size;
-  lastPos := Ptr( lineEnd );
-  str     := '';
-
-  while Ptr( lineEnd ) < iniEnd do
-    begin
-      newLine     := lineEnd^ = 10;
-      newLineSize := 0;
-      if ( not newLine ) and ( lineEnd^ = 13 ) Then
-        begin
-          INC( lineEnd );
-          newLine     := lineEnd^ = 10;
-          newLineSize := 1;
-        end;
-
-      if newLine Then
-        begin
-          len := Ptr( lineEnd ) - lastPos - newLineSize;
-          if len <= 0 Then
-            begin
-              INC( lineEnd );
-              lastPos := Ptr( lineEnd );
-              continue;
-            end;
-          SetLength( str, len );
-          Move( PByte( lastPos )^, str[ 1 ], len );
-          addData( str );
-
-          lastPos := Ptr( lineEnd ) + 1;
-        end;
-
-      INC( lineEnd );
-    end;
-
-  len := Ptr( lineEnd ) - lastPos;
-  if len > 0 Then
-    begin
-      SetLength( str, len );
-      Move( PByte( lastPos )^, str[ 1 ], len );
-      addData( str );
-    end;
-end;
-
-procedure ini_Free;
-begin
-  iniRec.Sections := 0;
-  SetLength( iniRec.Section, 0 );
 end;
 
 function _ini_ReadKeyStr( const Section, Key : UTF8String ) : PAnsiChar;
