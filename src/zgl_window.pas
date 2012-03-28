@@ -51,7 +51,6 @@ procedure wnd_SetCaption( const NewCaption : UTF8String );
 procedure wnd_SetSize( Width, Height : Integer );
 procedure wnd_SetPos( X, Y : Integer );
 procedure wnd_ShowCursor( Show : Boolean );
-procedure wnd_Select;
 
 var
   wndX          : Integer;
@@ -140,6 +139,25 @@ begin
   XSetWMNormalHints( scrDisplay, wndHandle, @sizehints );
 end;
 {$ENDIF}
+
+procedure wnd_Select;
+begin
+{$IFDEF USE_X11}
+  XMapWindow( scrDisplay, wndHandle );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  BringWindowToTop( wndHandle );
+{$ENDIF}
+{$IFDEF MACOSX}
+  SelectWindow( wndHandle );
+  ShowWindow( wndHandle );
+  if wndFullScreen Then
+    wnd_SetPos( 0, 0 );
+{$ENDIF}
+{$IFDEF iOS}
+  wndHandle.makeKeyAndVisible();
+{$ENDIF}
+end;
 
 function wnd_Create( Width, Height : Integer ) : Boolean;
   {$IFDEF MACOSX}
@@ -572,25 +590,6 @@ begin
 begin
   appShowCursor := Show;
 {$IFEND}
-end;
-
-procedure wnd_Select;
-begin
-{$IFDEF USE_X11}
-  XMapWindow( scrDisplay, wndHandle );
-{$ENDIF}
-{$IFDEF WINDOWS}
-  BringWindowToTop( wndHandle );
-{$ENDIF}
-{$IFDEF MACOSX}
-  SelectWindow( wndHandle );
-  ShowWindow( wndHandle );
-  if wndFullScreen Then
-    wnd_SetPos( 0, 0 );
-{$ENDIF}
-{$IFDEF iOS}
-  wndHandle.makeKeyAndVisible();
-{$ENDIF}
 end;
 
 initialization

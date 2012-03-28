@@ -39,7 +39,6 @@ unit zgl_textures_jpg;
 {$ENDIF}
 
 interface
-
 uses
   {$IFDEF WINDOWS}
   Windows,

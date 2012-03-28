@@ -168,12 +168,6 @@ const
   KA_DOWN      = 0;
   KA_UP        = 1;
 
-  {$IFDEF ANDROID}
-  KEYBOARD_NOTHING = 0;
-  KEYBOARD_SHOW    = 1;
-  KEYBOARD_HIDE    = 2;
-  {$ENDIF}
-
 function  key_Down( KeyCode : Byte ) : Boolean;
 function  key_Up( KeyCode : Byte ) : Boolean;
 function  key_Press( KeyCode : Byte ) : Boolean;
@@ -185,7 +179,6 @@ procedure key_EndReadText;
 procedure key_ClearState;
 
 procedure key_InputText( const Text : UTF8String );
-function  scancode_to_utf8( ScanCode : Byte ) : Byte;
 {$IFDEF USE_X11}
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
 function Xutf8LookupString( ic : PXIC; event : PXKeyPressedEvent; buffer_return : PAnsiChar; bytes_buffer : Integer; keysym_return : PKeySym; status_return : PStatus ) : integer; cdecl; external;
@@ -209,23 +202,6 @@ procedure doKeyPress( KeyCode : LongWord );
 
 function _key_GetText : PAnsiChar;
 
-{$IFDEF MACOSX}
-type
-  zglTModifier = record
-    bit : Integer;
-    key : Integer;
-  end;
-const
-  Modifier : array[ 0..7 ] of zglTModifier = ( ( bit: $010000; key: K_NUMLOCK ),
-                                               ( bit: $008000; key: K_CTRL_R  ),
-                                               ( bit: $004000; key: K_ALT_R   ),
-                                               ( bit: $002000; key: K_SHIFT_R ),
-                                               ( bit: $001000; key: K_CTRL_L  ),
-                                               ( bit: $000800; key: K_ALT_L   ),
-                                               ( bit: $000200; key: K_SHIFT_L ),
-                                               ( bit: $000100; key: K_SUPER   ) );
-{$ENDIF}
-
 var
   keysDown     : array[ 0..255 ] of Boolean;
   keysUp       : array[ 0..255 ] of Boolean;
@@ -236,7 +212,7 @@ var
   keysMax      : Integer;
   keysLast     : array[ 0..1 ] of Byte;
   {$IFDEF USE_X11}
-  keysRepeat : Integer; // Костыль, да :)
+  keysRepeat : Integer; // Workaround, yeah... :)
   {$ENDIF}
   {$IFDEF iOS}
   keysTextField   : zglCiOSTextField;
@@ -258,6 +234,24 @@ uses
   zgl_window,
   {$ENDIF}
   zgl_utils;
+
+{$IFDEF MACOSX}
+type
+  zglTModifier = record
+    bit : Integer;
+    key : Integer;
+  end;
+
+const
+  Modifier : array[ 0..7 ] of zglTModifier = ( ( bit: $010000; key: K_NUMLOCK ),
+                                               ( bit: $008000; key: K_CTRL_R  ),
+                                               ( bit: $004000; key: K_ALT_R   ),
+                                               ( bit: $002000; key: K_SHIFT_R ),
+                                               ( bit: $001000; key: K_CTRL_L  ),
+                                               ( bit: $000800; key: K_ALT_L   ),
+                                               ( bit: $000200; key: K_SHIFT_L ),
+                                               ( bit: $000100; key: K_SUPER   ) );
+{$ENDIF}
 
 function key_Down( KeyCode : Byte ) : Boolean;
 begin
@@ -377,36 +371,6 @@ begin
   keysLast[ KA_UP   ] := 0;
 end;
 
-procedure key_InputText( const Text : UTF8String );
-  var
-    c : AnsiChar;
-begin
-  if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
-    begin
-      {$IFNDEF iOS}
-      if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
-        begin
-          c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
-          if c <> #0 Then
-            keysText := keysText + UTF8String( c );
-        end else
-      {$ENDIF}
-          keysText := keysText + Text;
-    end;
-
-  if Assigned( key_PInputChar ) Then
-    begin
-      if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
-        begin
-          c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
-          if c <> #0 Then
-            key_PInputChar( c );
-        end else
-          key_PInputChar( Text );
-    end;
-end;
-
-// Костыли мои костыли :)
 function scancode_to_utf8( ScanCode : Byte ) : Byte;
 begin
   Result := 0;
@@ -503,9 +467,37 @@ begin
     end;
 end;
 
+procedure key_InputText( const Text : UTF8String );
+  var
+    c : AnsiChar;
+begin
+  if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
+    begin
+      {$IFNDEF iOS}
+      if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
+        begin
+          c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
+          if c <> #0 Then
+            keysText := keysText + UTF8String( c );
+        end else
+      {$ENDIF}
+          keysText := keysText + Text;
+    end;
+
+  if Assigned( key_PInputChar ) Then
+    begin
+      if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
+        begin
+          c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
+          if c <> #0 Then
+            key_PInputChar( c );
+        end else
+          key_PInputChar( Text );
+    end;
+end;
+
 {$IFDEF USE_X11}
-// Большинство сканкодов можно получить простым преобразованием, закомментированные
-// оставил себе на память :)
+// Most of scancodes can be get via simple trick. Commented lines were left just in case.
 function xkey_to_scancode( XKey, KeyCode : Integer ) : Byte;
 begin
   case XKey of

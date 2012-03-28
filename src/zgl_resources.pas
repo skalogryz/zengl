@@ -145,8 +145,17 @@ function  res_GetPercentage( QueueID : Byte ) : Integer;
 function  res_GetCompleted : Integer;
 
 var
-  resUseThreaded     : Boolean;
-  resCompleted       : Integer;
+  resUseThreaded : Boolean;
+  resCompleted   : Integer;
+
+implementation
+uses
+  zgl_main,
+  zgl_application,
+  zgl_file,
+  zgl_log;
+
+var
   resThread          : array[ 0..255 ] of zglTThread;
   resQueueStackID    : array of Byte;
   resQueueID         : array[ 0..255 ] of Byte;
@@ -156,13 +165,6 @@ var
   resQueueMax        : array[ 0..255 ] of Integer;
   resQueuePercentage : array[ 0..255 ] of Integer;
   resQueueItems      : array[ 0..255 ] of zglTResourceItem;
-
-implementation
-uses
-  zgl_main,
-  zgl_application,
-  zgl_file,
-  zgl_log;
 
 procedure res_Init;
 begin

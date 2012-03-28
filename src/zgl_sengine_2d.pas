@@ -64,8 +64,6 @@ procedure sengine2d_Set( SEngine : zglPSEngine2D );
 function  sengine2d_Get : zglPSEngine2D;
 procedure sengine2d_Draw;
 procedure sengine2d_Proc;
-procedure sengine2d_Sort( iLo, iHi : Integer );
-procedure sengine2d_SortID( iLo, iHi : Integer );
 
 implementation
 uses
@@ -187,60 +185,6 @@ begin
     end;
 end;
 
-procedure sengine2d_Proc;
-  var
-    i, a, b, l : Integer;
-    s          : zglPSprite2D;
-begin
-  i := 0;
-  while i < sengine2d.Count do
-    begin
-      s := sengine2d.List[ i ];
-      if Assigned( s.OnProc ) Then
-        s.OnProc( s^ );
-
-      if Assigned( s ) Then
-        begin
-          if s.Destroy Then
-            sengine2d_DelSprite( s.ID )
-          else
-            INC( i );
-        end;
-    end;
-
-  if sengine2d.Count > 1 Then
-    begin
-      l := 0;
-      for i := 0 to sengine2d.Count - 1 do
-        begin
-          s := sengine2d.List[ i ];
-          if s.Layer > l Then l := s.Layer;
-          if s.Layer < l Then
-            begin
-              sengine2d_Sort( 0, sengine2d.Count - 1 );
-              // TODO: provide parameter for enabling/disabling stable sorting
-              l := sengine2d.List[ 0 ].Layer;
-              a := 0;
-              for b := 0 to sengine2d.Count - 1 do
-                begin
-                  s := sengine2d.List[ b ];
-                  if ( l <> s.Layer ) Then
-                    begin
-                      sengine2d_SortID( a, b - 1 );
-                      a := b;
-                      l := s.Layer;
-                    end;
-                  if b = sengine2d.Count - 1 Then
-                    sengine2d_SortID( a, b );
-                end;
-              for a := 0 to sengine2d.Count - 1 do
-                sengine2d.List[ a ].ID := a;
-              break;
-            end;
-        end;
-    end;
-end;
-
 procedure sengine2d_Sort( iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
@@ -293,6 +237,60 @@ begin
 
   if hi > iLo Then sengine2d_SortID( iLo, hi );
   if lo < iHi Then sengine2d_SortID( lo, iHi );
+end;
+
+procedure sengine2d_Proc;
+  var
+    i, a, b, l : Integer;
+    s          : zglPSprite2D;
+begin
+  i := 0;
+  while i < sengine2d.Count do
+    begin
+      s := sengine2d.List[ i ];
+      if Assigned( s.OnProc ) Then
+        s.OnProc( s^ );
+
+      if Assigned( s ) Then
+        begin
+          if s.Destroy Then
+            sengine2d_DelSprite( s.ID )
+          else
+            INC( i );
+        end;
+    end;
+
+  if sengine2d.Count > 1 Then
+    begin
+      l := 0;
+      for i := 0 to sengine2d.Count - 1 do
+        begin
+          s := sengine2d.List[ i ];
+          if s.Layer > l Then l := s.Layer;
+          if s.Layer < l Then
+            begin
+              sengine2d_Sort( 0, sengine2d.Count - 1 );
+              // TODO: provide parameter for enabling/disabling stable sorting
+              l := sengine2d.List[ 0 ].Layer;
+              a := 0;
+              for b := 0 to sengine2d.Count - 1 do
+                begin
+                  s := sengine2d.List[ b ];
+                  if ( l <> s.Layer ) Then
+                    begin
+                      sengine2d_SortID( a, b - 1 );
+                      a := b;
+                      l := s.Layer;
+                    end;
+                  if b = sengine2d.Count - 1 Then
+                    sengine2d_SortID( a, b );
+                end;
+              for a := 0 to sengine2d.Count - 1 do
+                sengine2d.List[ a ].ID := a;
+              break;
+            end;
+        end;
+    end;
 end;
 
 initialization

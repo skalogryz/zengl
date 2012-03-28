@@ -54,42 +54,6 @@ const
 
   RT_FORCE_PBUFFER = $100000;
 
-{$IFNDEF USE_GLES}
-{$IFDEF USE_X11}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Handle  : Integer;
-    Context : GLXContext;
-    PBuffer : GLXPBuffer;
-end;
-{$ENDIF}
-{$IFDEF WINDOWS}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Handle : THandle;
-    DC     : HDC;
-    RC     : HGLRC;
-end;
-{$ENDIF}
-{$IFDEF MACOSX}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Context : TAGLContext;
-    PBuffer : TAGLPbuffer;
-end;
-{$ENDIF}
-{$ENDIF}
-
-type
-  zglPFBO = ^zglTFBO;
-  zglTFBO = record
-    FrameBuffer  : LongWord;
-    RenderBuffer : LongWord;
-end;
-
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
@@ -130,6 +94,42 @@ uses
   zgl_sprite_2d,
   zgl_log,
   zgl_utils;
+
+{$IFNDEF USE_GLES}
+{$IFDEF USE_X11}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Handle  : Integer;
+    Context : GLXContext;
+    PBuffer : GLXPBuffer;
+end;
+{$ENDIF}
+{$IFDEF WINDOWS}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Handle : THandle;
+    DC     : HDC;
+    RC     : HGLRC;
+end;
+{$ENDIF}
+{$IFDEF MACOSX}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Context : TAGLContext;
+    PBuffer : TAGLPbuffer;
+end;
+{$ENDIF}
+{$ENDIF}
+
+type
+  zglPFBO = ^zglTFBO;
+  zglTFBO = record
+    FrameBuffer  : LongWord;
+    RenderBuffer : LongWord;
+end;
 
 var
   lRTarget : zglPRenderTarget;

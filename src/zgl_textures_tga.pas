@@ -32,6 +32,15 @@ uses
 const
   TGA_EXTENSION : UTF8String = 'TGA';
 
+procedure tga_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
+procedure tga_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
+
+implementation
+uses
+  zgl_main,
+  zgl_log,
+  zgl_textures;
+
 type
   zglPTGAHeader = ^zglTTGAHeader;
   zglTTGAHeader = packed record
@@ -42,25 +51,16 @@ type
       FirstEntry : Word;
       Length     : Word;
       EntrySize  : Byte;
-    end;
-    ImgSpec: packed record
+                end;
+    ImgSpec   : packed record
       X      : Word;
       Y      : Word;
       Width  : Word;
       Height : Word;
       Depth  : Byte;
       Desc   : Byte;
-    end;
+                end;
 end;
-
-procedure tga_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
-procedure tga_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
-
-implementation
-uses
-  zgl_main,
-  zgl_log,
-  zgl_textures;
 
 procedure tga_FlipVertically( Data : PByteArray; w, h : Integer );
   var

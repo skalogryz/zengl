@@ -240,27 +240,17 @@ procedure pengine2d_Proc( dt : Double );
 function  pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
-function  pengine2d_LoadTexture( const FileName : UTF8String ) : zglPTexture;
-
-procedure pengine2d_Sort( iLo, iHi : Integer );
-procedure pengine2d_SortID( iLo, iHi : Integer );
 
 function  emitter2d_Add : zglPEmitter2D;
 procedure emitter2d_Del( var Emitter : zglPEmitter2D );
-
-function emitter2d_Load( const FileName : UTF8String ) : zglPEmitter2D;
-function emitter2d_LoadFromFile( const FileName : UTF8String ) : zglPEmitter2D;
-function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
-
+function  emitter2d_Load( const FileName : UTF8String ) : zglPEmitter2D;
+function  emitter2d_LoadFromFile( const FileName : UTF8String ) : zglPEmitter2D;
+function  emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
 procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : UTF8String );
-
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
 procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 procedure emitter2d_Draw( Emitter : zglPEmitter2D );
 procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
-procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
-
-procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
 
 var
   managerEmitter2D : zglTEmitter2DManager;
@@ -297,6 +287,60 @@ end;
 function pengine2d_Get : zglPPEngine2D;
 begin
   Result := pengine2d;
+end;
+
+procedure pengine2d_Sort( iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t : zglPEmitter2D;
+begin
+  lo   := iLo;
+  hi   := iHi;
+  mid  := pengine2d.List[ ( lo + hi ) shr 1 ].Params.Layer;
+
+  with pengine2d^ do
+  repeat
+    while List[ lo ].Params.Layer < mid do INC( lo );
+    while List[ hi ].Params.Layer > mid do DEC( hi );
+    if lo <= hi then
+      begin
+        t          := List[ lo ];
+        List[ lo ] := List[ hi ];
+        List[ hi ] := t;
+        INC( lo );
+        DEC( hi );
+      end;
+  until lo > hi;
+
+  if hi > iLo Then pengine2d_Sort( iLo, hi );
+  if lo < iHi Then pengine2d_Sort( lo, iHi );
+end;
+
+procedure pengine2d_SortID( iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t : zglPEmitter2D;
+begin
+  lo   := iLo;
+  hi   := iHi;
+  mid  := pengine2d.List[ ( lo + hi ) shr 1 ].ID;
+
+  with pengine2d^ do
+  repeat
+    while List[ lo ].ID < mid do INC( lo );
+    while List[ hi ].ID > mid do DEC( hi );
+    if lo <= hi then
+      begin
+        t          := List[ lo ];
+        List[ lo ] := List[ hi ];
+        List[ hi ] := t;
+        INC( lo );
+        DEC( hi );
+      end;
+  until lo > hi;
+
+  if hi > iLo Then pengine2d_SortID( iLo, hi );
+  if lo < iHi Then pengine2d_SortID( lo, iHi );
 end;
 
 procedure pengine2d_Draw;
@@ -347,7 +391,7 @@ begin
           if e.Params.Layer < l Then
             begin
               pengine2d_Sort( 0, pengine2d.Count.Emitters - 1 );
-              // TODO: наверное сделать выбор вкл./выкл. устойчивой сортировки
+              // TODO: provide parameter for enabling/disabling stable sorting
               l := pengine2d.List[ 0 ].Params.Layer;
               a := 0;
               for b := 0 to pengine2d.Count.Emitters - 1 do
@@ -505,58 +549,89 @@ begin
     Result := tex_LoadFromFile( FileName );
 end;
 
-procedure pengine2d_Sort( iLo, iHi : Integer );
+procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
   var
-    lo, hi, mid : Integer;
-    t : zglPEmitter2D;
+    coeff        : Single;
+    speed        : Single;
+    iLife        : Single;
+    r, g, b      : Byte;
+    rn, gn, bn   : Byte;
+    rp, gp, bp   : Byte;
+    prevB, nextB : PDiagramByte;
+    prevL, nextL : PDiagramLW;
+    prevS, nextS : PDiagramSingle;
 begin
-  lo   := iLo;
-  hi   := iHi;
-  mid  := pengine2d.List[ ( lo + hi ) shr 1 ].Params.Layer;
+  with Particle^, Particle._private do
+    begin
+      Time  := Time + dt;
+      iLife := Time / LifeTime;
+      Life  := 1 - iLife;
+      if Life > 0 Then
+        begin
+          // Frame
+          Frame := Params.Frame[ 0 ] + Round( ( Params.Frame[ 1 ] - Params.Frame[ 0 ] ) * iLife );
 
-  with pengine2d^ do
-  repeat
-    while List[ lo ].Params.Layer < mid do INC( lo );
-    while List[ hi ].Params.Layer > mid do DEC( hi );
-    if lo <= hi then
-      begin
-        t          := List[ lo ];
-        List[ lo ] := List[ hi ];
-        List[ hi ] := t;
-        INC( lo );
-        DEC( hi );
-      end;
-  until lo > hi;
+          // Color
+          if length( Params.Color ) > 0 Then
+            begin
+              while iLife > Params.Color[ lColorID ].Life do INC( lColorID );
+              prevL := @Params.Color[ lColorID - 1 ];
+              nextL := @Params.Color[ lColorID ];
+              coeff := ( iLife - prevL.Life ) / ( nextL.Life - prevL.Life );
+              rn    :=   nextL.Value             shr 16;
+              gn    := ( nextL.Value and $FF00 ) shr 8;
+              bn    :=   nextL.Value and $FF;
+              rp    :=   prevL.Value             shr 16;
+              gp    := ( prevL.Value and $FF00 ) shr 8;
+              bp    :=   prevL.Value and $FF;
+              r     := rp + Round( ( rn - rp ) * coeff );
+              g     := gp + Round( ( gn - gp ) * coeff );
+              b     := bp + Round( ( bn - bp ) * coeff );
+              Color := r shl 16 + g shl 8 + b;
+            end else
+              Color := $FFFFFF;
 
-  if hi > iLo Then pengine2d_Sort( iLo, hi );
-  if lo < iHi Then pengine2d_Sort( lo, iHi );
-end;
+          // Alpha
+          while iLife > Params.Alpha[ lAlphaID ].Life do INC( lAlphaID );
+          prevB := @Params.Alpha[ lAlphaID - 1 ];
+          nextB := @Params.Alpha[ lAlphaID ];
+          Alpha := prevB.Value + Round( ( nextB.Value - prevB.Value ) * ( iLife - prevB.Life ) / ( nextB.Life - prevB.Life ) );
 
-procedure pengine2d_SortID( iLo, iHi : Integer );
-  var
-    lo, hi, mid : Integer;
-    t : zglPEmitter2D;
-begin
-  lo   := iLo;
-  hi   := iHi;
-  mid  := pengine2d.List[ ( lo + hi ) shr 1 ].ID;
+          // Size
+          while iLife > Params.SizeXD[ lSizeXID ].Life do INC( lSizeXID );
+          while iLife > Params.SizeYD[ lSizeYID ].Life do INC( lSizeYID );
+          prevS  := @Params.SizeXD[ lSizeXID - 1 ];
+          nextS  := @Params.SizeXD[ lSizeXID ];
+          Size.X := SizeS.X * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
+          prevS  := @Params.SizeYD[ lSizeYID - 1 ];
+          nextS  := @Params.SizeYD[ lSizeYID ];
+          Size.Y := SizeS.Y * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
 
-  with pengine2d^ do
-  repeat
-    while List[ lo ].ID < mid do INC( lo );
-    while List[ hi ].ID > mid do DEC( hi );
-    if lo <= hi then
-      begin
-        t          := List[ lo ];
-        List[ lo ] := List[ hi ];
-        List[ hi ] := t;
-        INC( lo );
-        DEC( hi );
-      end;
-  until lo > hi;
+          // Velocity
+          while iLife > Params.VelocityD[ lVelocityID ].Life do INC( lVelocityID );
+          prevS      := @Params.VelocityD[ lVelocityID - 1 ];
+          nextS      := @Params.VelocityD[ lVelocityID ];
+          Velocity   := VelocityS * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
+          coeff      := dt / 1000;
+          speed      := Velocity * coeff;
+          Direction  := Direction + aVelocity * coeff;
+          Position.X := Position.X + cos( Direction ) * speed;
+          Position.Y := Position.Y + sin( Direction ) * speed;
 
-  if hi > iLo Then pengine2d_SortID( iLo, hi );
-  if lo < iHi Then pengine2d_SortID( lo, iHi );
+          // Angular Velocity
+          while iLife > Params.aVelocityD[ laVelocityID ].Life do INC( laVelocityID );
+          prevS     := @Params.aVelocityD[ laVelocityID - 1 ];
+          nextS     := @Params.aVelocityD[ laVelocityID ];
+          aVelocity := aVelocityS * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
+
+          // Spin
+          while iLife > Params.SpinD[ lSpinID ].Life do INC( lSpinID );
+          prevS := @Params.SpinD[ lSpinID - 1 ];
+          nextS := @Params.SpinD[ lSpinID ];
+          Angle := Angle + Spin * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) ) * coeff * rad2deg;
+        end else
+          Life := 0;
+    end;
 end;
 
 function emitter2d_Add : zglPEmitter2D;
@@ -1105,6 +1180,35 @@ begin
     end;
 end;
 
+procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
+  var
+    lo, hi, mid : Integer;
+    t           : zglPParticle2D;
+begin
+  if not Assigned( Emitter ) Then exit;
+
+  lo   := iLo;
+  hi   := iHi;
+  mid  := Emitter._private.list[ ( lo + hi ) shr 1 ].ID;
+
+  with Emitter^, Emitter._private do
+    repeat
+      while list[ lo ].ID < mid do INC( lo );
+      while list[ hi ].ID > mid do DEC( hi );
+      if lo <= hi then
+        begin
+          t          := list[ lo ];
+          list[ lo ] := list[ hi ];
+          list[ hi ] := t;
+          INC( lo );
+          DEC( hi );
+        end;
+    until lo > hi;
+
+  if hi > iLo Then emitter2d_Sort( Emitter, iLo, hi );
+  if lo < iHi Then emitter2d_Sort( Emitter, lo, iHi );
+end;
+
 procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
   var
     i        : Integer;
@@ -1253,120 +1357,6 @@ begin
           parCreated := 0;
           LastSecond := Time;
         end;
-    end;
-end;
-
-procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
-  var
-    lo, hi, mid : Integer;
-    t           : zglPParticle2D;
-begin
-  if not Assigned( Emitter ) Then exit;
-
-  lo   := iLo;
-  hi   := iHi;
-  mid  := Emitter._private.list[ ( lo + hi ) shr 1 ].ID;
-
-  with Emitter^, Emitter._private do
-    repeat
-      while list[ lo ].ID < mid do INC( lo );
-      while list[ hi ].ID > mid do DEC( hi );
-      if lo <= hi then
-        begin
-          t          := list[ lo ];
-          list[ lo ] := list[ hi ];
-          list[ hi ] := t;
-          INC( lo );
-          DEC( hi );
-        end;
-    until lo > hi;
-
-  if hi > iLo Then emitter2d_Sort( Emitter, iLo, hi );
-  if lo < iHi Then emitter2d_Sort( Emitter, lo, iHi );
-end;
-
-procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
-  var
-    coeff        : Single;
-    speed        : Single;
-    iLife        : Single;
-    r, g, b      : Byte;
-    rn, gn, bn   : Byte;
-    rp, gp, bp   : Byte;
-    prevB, nextB : PDiagramByte;
-    prevL, nextL : PDiagramLW;
-    prevS, nextS : PDiagramSingle;
-begin
-  with Particle^, Particle._private do
-    begin
-      Time  := Time + dt;
-      iLife := Time / LifeTime;
-      Life  := 1 - iLife;
-      if Life > 0 Then
-        begin
-          // Frame
-          Frame := Params.Frame[ 0 ] + Round( ( Params.Frame[ 1 ] - Params.Frame[ 0 ] ) * iLife );
-
-          // Color
-          if length( Params.Color ) > 0 Then
-            begin
-              while iLife > Params.Color[ lColorID ].Life do INC( lColorID );
-              prevL := @Params.Color[ lColorID - 1 ];
-              nextL := @Params.Color[ lColorID ];
-              coeff := ( iLife - prevL.Life ) / ( nextL.Life - prevL.Life );
-              rn    :=   nextL.Value             shr 16;
-              gn    := ( nextL.Value and $FF00 ) shr 8;
-              bn    :=   nextL.Value and $FF;
-              rp    :=   prevL.Value             shr 16;
-              gp    := ( prevL.Value and $FF00 ) shr 8;
-              bp    :=   prevL.Value and $FF;
-              r     := rp + Round( ( rn - rp ) * coeff );
-              g     := gp + Round( ( gn - gp ) * coeff );
-              b     := bp + Round( ( bn - bp ) * coeff );
-              Color := r shl 16 + g shl 8 + b;
-            end else
-              Color := $FFFFFF;
-
-          // Alpha
-          while iLife > Params.Alpha[ lAlphaID ].Life do INC( lAlphaID );
-          prevB := @Params.Alpha[ lAlphaID - 1 ];
-          nextB := @Params.Alpha[ lAlphaID ];
-          Alpha := prevB.Value + Round( ( nextB.Value - prevB.Value ) * ( iLife - prevB.Life ) / ( nextB.Life - prevB.Life ) );
-
-          // Size
-          while iLife > Params.SizeXD[ lSizeXID ].Life do INC( lSizeXID );
-          while iLife > Params.SizeYD[ lSizeYID ].Life do INC( lSizeYID );
-          prevS  := @Params.SizeXD[ lSizeXID - 1 ];
-          nextS  := @Params.SizeXD[ lSizeXID ];
-          Size.X := SizeS.X * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
-          prevS  := @Params.SizeYD[ lSizeYID - 1 ];
-          nextS  := @Params.SizeYD[ lSizeYID ];
-          Size.Y := SizeS.Y * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
-
-          // Velocity
-          while iLife > Params.VelocityD[ lVelocityID ].Life do INC( lVelocityID );
-          prevS      := @Params.VelocityD[ lVelocityID - 1 ];
-          nextS      := @Params.VelocityD[ lVelocityID ];
-          Velocity   := VelocityS * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
-          coeff      := dt / 1000;
-          speed      := Velocity * coeff;
-          Direction  := Direction + aVelocity * coeff;
-          Position.X := Position.X + cos( Direction ) * speed;
-          Position.Y := Position.Y + sin( Direction ) * speed;
-
-          // Angular Velocity
-          while iLife > Params.aVelocityD[ laVelocityID ].Life do INC( laVelocityID );
-          prevS     := @Params.aVelocityD[ laVelocityID - 1 ];
-          nextS     := @Params.aVelocityD[ laVelocityID ];
-          aVelocity := aVelocityS * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) );
-
-          // Spin
-          while iLife > Params.SpinD[ lSpinID ].Life do INC( lSpinID );
-          prevS := @Params.SpinD[ lSpinID - 1 ];
-          nextS := @Params.SpinD[ lSpinID ];
-          Angle := Angle + Spin * ( prevS.Value + ( nextS.Value - prevS.Value ) * ( iLife - prevS.Life ) / ( nextS.Life - prevS.Life ) ) * coeff * rad2deg;
-        end else
-          Life := 0;
     end;
 end;
 

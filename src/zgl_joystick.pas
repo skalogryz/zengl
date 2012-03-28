@@ -27,10 +27,6 @@ interface
 uses
   BaseUnix;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-uses
-  Windows;
-{$ENDIF}
 
 {$IFDEF LINUX}
 type

@@ -25,14 +25,23 @@ unit zgl_textures_pvr;
 interface
 
 uses
-  CFByteOrders,
   zgl_types,
-  zgl_file,
   zgl_memory;
 
 const
   PVR_EXTENSION : UTF8String = 'PVR';
 
+procedure pvr_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
+procedure pvr_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
+
+implementation
+uses
+  CFByteOrders,
+  zgl_main,
+  zgl_file,
+  zgl_textures;
+
+const
   PVR_RGBA_4444 = $10;
   PVR_RGBA_5551 = $11;
   PVR_RGBA_8888 = $12;
@@ -60,15 +69,6 @@ type
     PVRTag       : LongWord;
     NumSurfs     : LongWord;
   end;
-
-
-procedure pvr_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
-procedure pvr_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
-
-implementation
-uses
-  zgl_main,
-  zgl_textures;
 
 procedure pvr_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
   var

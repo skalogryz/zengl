@@ -41,7 +41,6 @@ uses
   {$ELSE}
   zgl_sound_dsound,
   {$ENDIF}
-  zgl_threads,
   zgl_file,
   zgl_memory;
 
@@ -59,15 +58,12 @@ const
   SND_ALL_SOURCES_LOOPED = -2;
   SND_ALL_STREAMS        = -3;
   SND_ALL_STREAMS_LOOPED = -4;
-  SND_ERROR              = {$IFDEF USE_OPENAL} 0 {$ELSE} nil {$ENDIF};
 
   SND_STATE_PLAYING = 1;
   SND_STATE_LOOPED  = 2;
   SND_STATE_PERCENT = 3;
   SND_STATE_TIME    = 4;
   SND_INFO_DURATION = 5;
-
-  SND_MAX           = 8;
 
 type
   zglPSound        = ^zglTSound;
@@ -177,20 +173,37 @@ procedure snd_PauseStream( ID : Integer );
 procedure snd_StopStream( ID : Integer );
 procedure snd_ResumeStream( ID : Integer );
 procedure snd_SeekStream( ID : Integer; Milliseconds : Double );
-function  snd_ProcStream( data : Pointer ) : LongInt;
 
 var
   managerSound : zglTSoundManager;
 
-  sndActive      : Boolean;
   sndInitialized : Boolean = FALSE;
-  sndVolume      : Single  = 1;
   sndCanPlay     : Boolean = TRUE;
   sndCanPlayFile : Boolean = TRUE;
-  sndAutoPaused  : Boolean;
+
+implementation
+uses
+  zgl_application,
+  zgl_main,
+  {$IFDEF WINDOWS}
+  zgl_window,
+  {$ENDIF}
+  zgl_timers,
+  zgl_resources,
+  zgl_threads,
+  zgl_log,
+  zgl_utils;
+
+const
+  SND_ERROR = {$IFDEF USE_OPENAL} 0 {$ELSE} nil {$ENDIF};
+  SND_MAX   = 8;
+
+var
+  sndAutoPaused : Boolean;
+  sndVolume     : Single  = 1;
+  sfVolume      : Single = 1;
 
   sfStream    : array[ 1..SND_MAX ] of zglTSoundStream;
-  sfVolume    : Single = 1;
   sfVolumes   : array[ 1..SND_MAX ] of Single;
   sfPositions : array[ 1..SND_MAX, 0..2 ] of Single;
   sfSeek      : array[ 1..SND_MAX ] of Double;
@@ -223,18 +236,6 @@ function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStr
 function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
 function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
 {$ENDIF}
-
-implementation
-uses
-  zgl_application,
-  zgl_main,
-  {$IFDEF WINDOWS}
-  zgl_window,
-  {$ENDIF}
-  zgl_timers,
-  zgl_resources,
-  zgl_log,
-  zgl_utils;
 
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
   var
@@ -1211,6 +1212,139 @@ begin
   Result := -1;
 end;
 
+function snd_ProcStream( data : Pointer ) : LongInt;
+  var
+    id        : Integer;
+    _end      : Boolean;
+    bytesRead : Integer;
+  {$IFDEF USE_OPENAL}
+    processed : LongInt;
+    buffer    : LongWord;
+  {$ELSE}
+    block1, block2 : Pointer;
+    b1Size, b2Size : LongWord;
+    position       : LongWord;
+    fillSize       : LongWord;
+  {$ENDIF}
+begin
+  Result    := 0;
+  id        := PInteger( data )^;
+  _end      := FALSE;
+  bytesRead := 0;
+
+  while sfStream[ id ]._playing do
+    begin
+      if not sndInitialized Then break;
+
+      thread_EventWait( sfEvent[ id ], 100 );
+      thread_EventReset( sfEvent[ id ] );
+      while ( sfStream[ id ]._playing ) and ( sfStream[ id ]._paused ) do u_Sleep( 10 );
+
+      thread_CSEnter( sfCS[ id ] );
+      if sfSeek[ id ] > 0 Then
+        begin
+          sfStream[ id ]._decoder.Seek( sfStream[ id ], sfSeek[ id ] );
+          sfSeek[ id ] := 0;
+
+          {$IFDEF USE_OPENAL}
+          alSourceStop( sfSource[ id ] );
+          alSourceRewind( sfSource[ id ] );
+          alSourcei( sfSource[ id ], AL_BUFFER, AL_NONE );
+
+          for processed := 0 to 1 do
+            begin
+              bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
+              if bytesRead <= 0 Then break;
+
+              alBufferData( sfBuffers[ id, processed ], sfFormat[ sfStream[ id ].Channels ], sfStream[ id ].Buffer, bytesRead, sfStream[ id ].Frequency );
+              alSourceQueueBuffers( sfSource[ id ], 1, @sfBuffers[ id, processed ] );
+
+              if processed = 0 Then
+                alSourcePlay( sfSource[ id ] );
+            end;
+          {$ELSE}
+          sfSource[ id ].Stop();
+          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
+          dsu_FillData( sfSource[ id ], sfStream[ ID ].Buffer, bytesRead );
+
+          sfLastPos[ id ] := 0;
+          sfSource[ id ].SetCurrentPosition( 0 );
+          sfSource[ id ].Play( 0, 0, DSBPLAY_LOOPING );
+          {$ENDIF}
+
+          sfStream[ id ]._complete := sfSeek[ id ];
+          sfStream[ id ]._lastTime := timer_GetTicks();
+        end;
+      thread_CSLeave( sfCS[ id ] );
+
+      {$IFDEF USE_OPENAL}
+      alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
+      while ( processed > 0 ) and sfStream[ id ]._playing do
+        begin
+          alSourceUnQueueBuffers( sfSource[ id ], 1, @buffer );
+
+          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
+          alBufferData( buffer, sfFormat[ sfStream[ id ].Channels ], sfStream[ id ].Buffer, bytesRead, sfStream[ id ].Frequency );
+          alSourceQueueBuffers( sfSource[ id ], 1, @buffer );
+
+          if _end Then break;
+
+          DEC( processed );
+        end;
+      {$ELSE}
+      while LongWord( sfSource[ id ].GetCurrentPosition( @position, @b1Size ) ) = DSERR_BUFFERLOST do
+        sfSource[ id ].Restore();
+
+      fillSize := ( sfStream[ id ].BufferSize + position - sfLastPos[ id ] ) mod sfStream[ id ].BufferSize;
+
+      block1 := nil;
+      block2 := nil;
+      b1Size := 0;
+      b2Size := 0;
+
+      if ( fillSize > 0 {some drivers don't know what is standard...} ) and ( sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) = DS_OK ) Then
+        begin
+          sfLastPos[ id ] := position;
+
+          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], block1, b1Size, _end );
+          if ( b2Size <> 0 ) and ( not _end ) Then
+            INC( bytesRead, sfStream[ ID ]._decoder.Read( sfStream[ id ], block2, b2Size, _end ) );
+
+          sfSource[ id ].Unlock( block1, b1Size, block2, b2Size );
+        end;
+      {$ENDIF}
+      if _end Then
+        begin
+          if sfStream[ id ].Loop Then
+            begin
+              sfStream[ id ]._decoder.Loop( sfStream[ id ] );
+              sfStream[ id ]._complete := 0;
+              sfStream[ id ]._lastTime := timer_GetTicks();
+            end else
+              begin
+                {$IFNDEF USE_OPENAL}
+                sfNotifyPos[ id ].dwOffset := bytesRead;
+                ResetEvent( sfNotifyEvent[ id ] );
+                WaitForSingleObject( sfNotifyEvent[ id ], INFINITE );
+                sfSource[ id ].Stop();
+                {$ENDIF}
+                while ( sfStream[ id ]._playing ) and ( sfStream[ id ]._complete < sfStream[ id ].Duration ) do
+                  begin
+                    sfStream[ id ]._complete := timer_GetTicks() - sfStream[ id ]._lastTime + sfStream[ id ]._complete;
+                    sfStream[ id ]._lastTime := timer_GetTicks();
+                    u_Sleep( 10 );
+                  end;
+                if sfStream[ id ]._complete > sfStream[ id ].Duration Then
+                  sfStream[ id ]._complete := sfStream[ id ].Duration;
+                sfStream[ id ]._playing := FALSE;
+              end;
+        end;
+    end;
+
+  thread_EventDestroy( sfEvent[ id ] );
+  EndThread( 0 );
+end;
+
 procedure snd_PlayStream( ID : Integer; Loop : Boolean; Volume : Single );
   var
     _end      : Boolean;
@@ -1412,139 +1546,6 @@ begin
   sfSeek[ ID ] := Milliseconds;
   thread_EventSet( sfEvent[ ID ] );
   thread_CSLeave( sfCS[ ID ] );
-end;
-
-function snd_ProcStream( data : Pointer ) : LongInt;
-  var
-    id        : Integer;
-    _end      : Boolean;
-    bytesRead : Integer;
-  {$IFDEF USE_OPENAL}
-    processed : LongInt;
-    buffer    : LongWord;
-  {$ELSE}
-    block1, block2 : Pointer;
-    b1Size, b2Size : LongWord;
-    position       : LongWord;
-    fillSize       : LongWord;
-  {$ENDIF}
-begin
-  Result    := 0;
-  id        := PInteger( data )^;
-  _end      := FALSE;
-  bytesRead := 0;
-
-  while sfStream[ id ]._playing do
-    begin
-      if not sndInitialized Then break;
-
-      thread_EventWait( sfEvent[ id ], 100 );
-      thread_EventReset( sfEvent[ id ] );
-      while ( sfStream[ id ]._playing ) and ( sfStream[ id ]._paused ) do u_Sleep( 10 );
-
-      thread_CSEnter( sfCS[ id ] );
-      if sfSeek[ id ] > 0 Then
-        begin
-          sfStream[ id ]._decoder.Seek( sfStream[ id ], sfSeek[ id ] );
-          sfSeek[ id ] := 0;
-
-          {$IFDEF USE_OPENAL}
-          alSourceStop( sfSource[ id ] );
-          alSourceRewind( sfSource[ id ] );
-          alSourcei( sfSource[ id ], AL_BUFFER, AL_NONE );
-
-          for processed := 0 to 1 do
-            begin
-              bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
-              if bytesRead <= 0 Then break;
-
-              alBufferData( sfBuffers[ id, processed ], sfFormat[ sfStream[ id ].Channels ], sfStream[ id ].Buffer, bytesRead, sfStream[ id ].Frequency );
-              alSourceQueueBuffers( sfSource[ id ], 1, @sfBuffers[ id, processed ] );
-
-              if processed = 0 Then
-                alSourcePlay( sfSource[ id ] );
-            end;
-          {$ELSE}
-          sfSource[ id ].Stop();
-          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
-          dsu_FillData( sfSource[ id ], sfStream[ ID ].Buffer, bytesRead );
-
-          sfLastPos[ id ] := 0;
-          sfSource[ id ].SetCurrentPosition( 0 );
-          sfSource[ id ].Play( 0, 0, DSBPLAY_LOOPING );
-          {$ENDIF}
-
-          sfStream[ id ]._complete := sfSeek[ id ];
-          sfStream[ id ]._lastTime := timer_GetTicks();
-        end;
-      thread_CSLeave( sfCS[ id ] );
-
-      {$IFDEF USE_OPENAL}
-      alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
-      while ( processed > 0 ) and sfStream[ id ]._playing do
-        begin
-          alSourceUnQueueBuffers( sfSource[ id ], 1, @buffer );
-
-          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], sfStream[ id ].Buffer, sfStream[ id ].BufferSize, _end );
-          alBufferData( buffer, sfFormat[ sfStream[ id ].Channels ], sfStream[ id ].Buffer, bytesRead, sfStream[ id ].Frequency );
-          alSourceQueueBuffers( sfSource[ id ], 1, @buffer );
-
-          if _end Then break;
-
-          DEC( processed );
-        end;
-      {$ELSE}
-      while LongWord( sfSource[ id ].GetCurrentPosition( @position, @b1Size ) ) = DSERR_BUFFERLOST do
-        sfSource[ id ].Restore();
-
-      fillSize := ( sfStream[ id ].BufferSize + position - sfLastPos[ id ] ) mod sfStream[ id ].BufferSize;
-
-      block1 := nil;
-      block2 := nil;
-      b1Size := 0;
-      b2Size := 0;
-
-      if ( fillSize > 0 {some drivers don't know what is standard...} ) and ( sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) = DS_OK ) Then
-        begin
-          sfLastPos[ id ] := position;
-
-          bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], block1, b1Size, _end );
-          if ( b2Size <> 0 ) and ( not _end ) Then
-            INC( bytesRead, sfStream[ ID ]._decoder.Read( sfStream[ id ], block2, b2Size, _end ) );
-
-          sfSource[ id ].Unlock( block1, b1Size, block2, b2Size );
-        end;
-      {$ENDIF}
-      if _end Then
-        begin
-          if sfStream[ id ].Loop Then
-            begin
-              sfStream[ id ]._decoder.Loop( sfStream[ id ] );
-              sfStream[ id ]._complete := 0;
-              sfStream[ id ]._lastTime := timer_GetTicks();
-            end else
-              begin
-                {$IFNDEF USE_OPENAL}
-                sfNotifyPos[ id ].dwOffset := bytesRead;
-                ResetEvent( sfNotifyEvent[ id ] );
-                WaitForSingleObject( sfNotifyEvent[ id ], INFINITE );
-                sfSource[ id ].Stop();
-                {$ENDIF}
-                while ( sfStream[ id ]._playing ) and ( sfStream[ id ]._complete < sfStream[ id ].Duration ) do
-                  begin
-                    sfStream[ id ]._complete := timer_GetTicks() - sfStream[ id ]._lastTime + sfStream[ id ]._complete;
-                    sfStream[ id ]._lastTime := timer_GetTicks();
-                    u_Sleep( 10 );
-                  end;
-                if sfStream[ id ]._complete > sfStream[ id ].Duration Then
-                  sfStream[ id ]._complete := sfStream[ id ].Duration;
-                sfStream[ id ]._playing := FALSE;
-              end;
-        end;
-    end;
-
-  thread_EventDestroy( sfEvent[ id ] );
-  EndThread( 0 );
 end;
 
 end.

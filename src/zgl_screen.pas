@@ -45,13 +45,11 @@ const
 
 procedure scr_Init;
 function  scr_Create : Boolean;
-procedure scr_GetResList;
 procedure scr_Destroy;
 procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
-procedure scr_SetWindowedMode;
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
 procedure scr_CorrectResolution( Width, Height : Word );
 procedure scr_SetViewPort;
@@ -59,16 +57,15 @@ procedure scr_SetVSync( VSync : Boolean );
 procedure scr_SetFSAA( FSAA : Byte );
 procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 
-{$IFDEF USE_X11}
-function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:PAnsiChar; para4:Pchar):PXIM;cdecl;external;
-function XCloseIM(im : PXIM) : TStatus;cdecl;external;
-function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
-procedure XDestroyIC(ic : PXIC);cdecl;external;
-{$ENDIF}
-{$IFDEF WINDOWS}
-const
-  MONITOR_DEFAULTTOPRIMARY = $00000001;
+type
+  zglPResolutionList = ^zglTResolutionList;
+  zglTResolutionList = record
+    Count  : Integer;
+    Width  : array of Integer;
+    Height : array of Integer;
+end;
 
+{$IFDEF WINDOWS}
 type
   HMONITOR = THANDLE;
   MONITORINFOEX = record
@@ -79,23 +76,6 @@ type
     szDevice  : array[ 0..CCHDEVICENAME - 1 ] of WideChar;
   end;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
-function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
-function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
-{$ENDIF}
-{$IFDEF WINCE}
-function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'coredll.dll';
-function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'coredll.dll' name 'GetMonitorInfo';
-function ChangeDisplaySettingsExW( lpszDeviceName : PWideChar; lpDevMode : DEVMODEW; handle : HWND; dwflags : DWORD; lParam : Pointer ) : LongInt; stdcall; external 'coredll.dll' name 'ChangeDisplaySettingsEx';
-{$ENDIF}
-
-type
-  zglPResolutionList = ^zglTResolutionList;
-  zglTResolutionList = record
-    Count  : Integer;
-    Width  : array of Integer;
-    Height : array of Integer;
-end;
 
 var
   scrWidth       : Integer = 800;
@@ -179,6 +159,26 @@ uses
   zgl_camera_2d,
   zgl_log,
   zgl_utils;
+
+{$IFDEF USE_X11}
+function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:PAnsiChar; para4:Pchar):PXIM;cdecl;external;
+function XCloseIM(im : PXIM) : TStatus;cdecl;external;
+function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
+procedure XDestroyIC(ic : PXIC);cdecl;external;
+{$ENDIF}
+{$IFDEF WINDOWS}
+const
+  MONITOR_DEFAULTTOPRIMARY = $00000001;
+{$ENDIF}
+{$IFDEF WINDESKTOP}
+function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
+function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
+{$ENDIF}
+{$IFDEF WINCE}
+function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'coredll.dll';
+function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'coredll.dll' name 'GetMonitorInfo';
+function ChangeDisplaySettingsExW( lpszDeviceName : PWideChar; lpDevMode : DEVMODEW; handle : HWND; dwflags : DWORD; lParam : Pointer ) : LongInt; stdcall; external 'coredll.dll' name 'ChangeDisplaySettingsEx';
+{$ENDIF}
 
 {$IFDEF WINDOWS}
 function GetDisplayColors : Integer;
@@ -313,48 +313,6 @@ begin
   scrInitialized := TRUE;
 end;
 
-function scr_Create : Boolean;
-begin
-  scr_Init();
-{$IFDEF USE_X11}
-  if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
-    begin
-      u_Error( 'DefaultDepth not set to 24-bit.' );
-      zgl_Exit();
-      Result := FALSE;
-      exit;
-    end;
-
-  appXIM := XOpenIM( scrDisplay, nil, nil, nil );
-  if not Assigned( appXIM ) Then
-    log_Add( 'XOpenIM - Fail' )
-  else
-    log_Add( 'XOpenIM - ok' );
-
-  appXIC := XCreateIC( appXIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
-  if not Assigned( appXIC ) Then
-    log_Add( 'XCreateIC - Fail' )
-  else
-    log_Add( 'XCreateIC - ok' );
-{$ENDIF}
-{$IFDEF WINDOWS}
-  if ( not wndFullScreen ) and ( scrDesktop.dmBitsPerPel <> 32 ) Then
-    scr_SetWindowedMode();
-{$ENDIF}
-{$IFDEF MACOSX}
-  if CGDisplayBitsPerPixel( scrDisplay ) <> 32 Then
-    begin
-      u_Error( 'Desktop not set to 32-bit mode.' );
-      zgl_Exit();
-      Result := FALSE;
-      exit;
-    end;
-{$ENDIF}
-  log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
-  scr_GetResList();
-  Result := TRUE;
-end;
-
 procedure scr_GetResList;
   var
     i : Integer;
@@ -433,6 +391,48 @@ begin
   scrResList.Width[ 0 ] := scrDesktopW;
   scrResList.Height[ 0 ] := scrDesktopH;
 {$ENDIF}
+end;
+
+function scr_Create : Boolean;
+begin
+  scr_Init();
+{$IFDEF USE_X11}
+  if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
+    begin
+      u_Error( 'DefaultDepth not set to 24-bit.' );
+      zgl_Exit();
+      Result := FALSE;
+      exit;
+    end;
+
+  appXIM := XOpenIM( scrDisplay, nil, nil, nil );
+  if not Assigned( appXIM ) Then
+    log_Add( 'XOpenIM - Fail' )
+  else
+    log_Add( 'XOpenIM - ok' );
+
+  appXIC := XCreateIC( appXIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
+  if not Assigned( appXIC ) Then
+    log_Add( 'XCreateIC - Fail' )
+  else
+    log_Add( 'XCreateIC - ok' );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  if ( not wndFullScreen ) and ( scrDesktop.dmBitsPerPel <> 32 ) Then
+    scr_SetWindowedMode();
+{$ENDIF}
+{$IFDEF MACOSX}
+  if CGDisplayBitsPerPixel( scrDisplay ) <> 32 Then
+    begin
+      u_Error( 'Desktop not set to 32-bit mode.' );
+      zgl_Exit();
+      Result := FALSE;
+      exit;
+    end;
+{$ENDIF}
+  log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
+  scr_GetResList();
+  Result := TRUE;
 end;
 
 procedure scr_Destroy;
