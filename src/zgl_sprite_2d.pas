@@ -89,10 +89,8 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  // Текстурные координаты
   tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
 
-  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       if FX and FX2D_RPIVOT = 0 Then
@@ -289,11 +287,9 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  // Текстурные координаты
   tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
   tc  := @Texture.FramesCoord[ 0 ];
 
-  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       if FX and FX2D_RPIVOT = 0 Then
@@ -491,7 +487,6 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  // Текстурные координаты
   fc := length( Texture.FramesCoord ) - 1;
   if Frame > fc Then
     DEC( Frame, ( ( Frame - 1 ) div fc ) * fc )
@@ -501,7 +496,6 @@ begin
   tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
   tc  := @Texture.FramesCoord[ Frame ];
 
-  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       if FX and FX2D_RPIVOT = 0 Then
@@ -698,10 +692,8 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  // Текстурные координаты
-  // бред, ога :)
-  tU := 1 / ( Texture.Width  / Texture.U / Texture.U );
-  tV := 1 / ( Texture.Height / Texture.V / Texture.V );
+  tU := 1 / Texture.Width;
+  tV := 1 / Texture.Height;
   tX := tU * ( CutRect.X / Texture.U );
   tY := tV * ( Texture.Height / Texture.V - CutRect.Y / Texture.V );
   tW := tX + tU * ( CutRect.W / Texture.U );
@@ -710,7 +702,6 @@ begin
   if FX and FX2D_FLIPX > 0 Then tU := tW - tX else tU := 0;
   if FX and FX2D_FLIPY > 0 Then tV := tH - tY else tV := 0;
 
-  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
       if FX and FX2D_RPIVOT = 0 Then

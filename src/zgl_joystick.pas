@@ -250,7 +250,7 @@ begin
                 break;
               end;
 
-          // Проверяем реально ли это джойстик, т.к. на ноутбуках могут попасться и акселерометры :)
+          // Checking if joystick is a real one, because laptops with accelerometer can be detected as a joystick :)
           if ( joyArray[ joyCount ].Info.Count.Axes >= 2 ) and ( joyArray[ joyCount ].Info.Count.Buttons > 0 ) Then
             begin
               log_Add( 'Joy: Find "' + joyArray[ joyCount ].Info.Name + '" (ID: ' + u_IntToStr( joyCount ) +
@@ -394,7 +394,7 @@ begin
         begin
           for j := 0 to joyArray[ i ].Info.Count.Axes - 1 do
             begin
-              // Скажем "нет" if'ам, и сделаем все хитрожопо :)
+              // Say "no" to if's, and do everything trciky :)
               a     := joyArray[ i ].axesMap[ j ];
               pcaps := @joyArray[ i ].caps;
               INC( pcaps, JS_AXIS[ a ] );

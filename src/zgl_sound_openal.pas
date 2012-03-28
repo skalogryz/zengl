@@ -77,12 +77,12 @@ function oal_GetSource( Source : Pointer ) : LongWord;
 type
   PALCdevice = ^ALCdevice;
   ALCdevice  = record
-end;
+  end;
 
 type
   PALCcontext = ^ALCcontext;
   ALCcontext  = record
-end;
+  end;
 
 {$IFDEF ANDROID}
   function alcGetString(device: PALCdevice; param: LongInt): PAnsiChar; cdecl; external libopenal;
@@ -157,12 +157,10 @@ var
   oalSrcPtrs  : array of Pointer;
   oalSrcState : array of LongWord;
 
-  // Параметры слушателя
-  oalPosition    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);  //позиция
-  oalVelocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 ); //движение
-  oalOrientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
+  oalPosition    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0);
+  oalVelocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 );
+  oalOrientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 );
 
-  // Форматы звука для количества каналов
   oalFormat  : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
 
 implementation
@@ -175,7 +173,7 @@ begin
   Result := FALSE;
   oalLibrary := dlopen( libopenal {$IFDEF UNIX}, $001 {$ENDIF} );
   {$IFDEF LINUX}
-  // Для надежности...
+  // Just in case...
   if oalLibrary = nil Then oalLibrary := dlopen( PAnsiChar( libopenal + '.1' ), $001 );
   if oalLibrary = nil Then oalLibrary := dlopen( PAnsiChar( libopenal + '.0' ), $001 );
   {$ENDIF}

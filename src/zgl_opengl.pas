@@ -70,12 +70,8 @@ var
   oglCanAnisotropy : Boolean;
   oglCanS3TC       : Boolean;
   oglCanAutoMipMap : Boolean;
-  oglCanARB        : Boolean; // ARBvp/ARBfp шейдеры
-  oglCanGLSL       : Boolean; // GLSL шейдеры
-  oglCanVBO        : Boolean;
   oglCanFBO        : Boolean;
   oglCanPBuffer    : Boolean;
-  oglMaxLights     : Integer;
   oglMaxTexSize    : Integer;
   oglMaxFBOSize    : Integer;
   oglMaxAnisotropy : Integer;
