@@ -44,9 +44,9 @@ const
   REFRESH_DEFAULT = 1;
 
 procedure scr_Init;
+procedure scr_Reset;
 function  scr_Create : Boolean;
 procedure scr_Destroy;
-procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
@@ -393,6 +393,54 @@ begin
 {$ENDIF}
 end;
 
+procedure scr_Reset;
+begin
+  scrChanging := TRUE;
+{$IFDEF USE_X11}
+  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, scrRotation, CurrentTime );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  ChangeDisplaySettingsExW( scrMonInfo.szDevice, {$IFDEF WINDESKTOP}DEVMODEW( nil^ ){$ELSE}scrDesktop{$ENDIF}, 0, CDS_FULLSCREEN, nil );
+{$ENDIF}
+{$IFDEF MACOSX}
+  CGDisplaySwitchToMode( scrDisplay, scrDesktop );
+  //CGDisplayRelease( scrDisplay );
+{$ENDIF}
+end;
+
+procedure scr_SetWindowedMode;
+  {$IFDEF WINDOWS}
+  var
+    settings : DEVMODEW;
+  {$ENDIF}
+begin
+  {$IFDEF USE_X11}
+  scr_Reset();
+  XMapWindow( scrDisplay, wndHandle );
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  if scrDesktop.dmBitsPerPel <> 32 Then
+    begin
+      settings              := scrDesktop;
+      settings.dmBitsPerPel := 32;
+
+      if ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
+        begin
+          u_Error( 'Desktop doesn''t support 32-bit color mode.' );
+          zgl_Exit();
+        end else
+          ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
+
+      scrRefresh := GetDisplayRefresh();
+    end else
+      scr_Reset();
+  {$ENDIF}
+  {$IFDEF MACOSX}
+  scr_Reset();
+  ShowMenuBar();
+  {$ENDIF}
+end;
+
 function scr_Create : Boolean;
 begin
   scr_Init();
@@ -452,21 +500,6 @@ begin
   scrInitialized := FALSE;
 end;
 
-procedure scr_Reset;
-begin
-  scrChanging := TRUE;
-{$IFDEF USE_X11}
-  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, scrRotation, CurrentTime );
-{$ENDIF}
-{$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scrMonInfo.szDevice, {$IFDEF WINDESKTOP}DEVMODEW( nil^ ){$ELSE}scrDesktop{$ENDIF}, 0, CDS_FULLSCREEN, nil );
-{$ENDIF}
-{$IFDEF MACOSX}
-  CGDisplaySwitchToMode( scrDisplay, scrDesktop );
-  //CGDisplayRelease( scrDisplay );
-{$ENDIF}
-end;
-
 procedure scr_Clear;
 begin
   batch2d_Flush();
@@ -495,39 +528,6 @@ begin
   eglContext.presentRenderbuffer( GL_RENDERBUFFER );
   {$ENDIF}
 {$ENDIF}
-end;
-
-procedure scr_SetWindowedMode;
-  {$IFDEF WINDOWS}
-  var
-    settings : DEVMODEW;
-  {$ENDIF}
-begin
-  {$IFDEF USE_X11}
-  scr_Reset();
-  XMapWindow( scrDisplay, wndHandle );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  if scrDesktop.dmBitsPerPel <> 32 Then
-    begin
-      settings              := scrDesktop;
-      settings.dmBitsPerPel := 32;
-
-      if ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
-        begin
-          u_Error( 'Desktop doesn''t support 32-bit color mode.' );
-          zgl_Exit();
-        end else
-          ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
-
-      scrRefresh := GetDisplayRefresh();
-    end else
-      scr_Reset();
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  scr_Reset();
-  ShowMenuBar();
-  {$ENDIF}
 end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
