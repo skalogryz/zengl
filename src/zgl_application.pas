@@ -1330,7 +1330,7 @@ begin
 
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 
-  if appWork Then
+  if appWork and Assigned( app_POrientation ) Then
     app_POrientation( scrOrientation );
 end;
 
