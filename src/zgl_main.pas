@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.03.28';
+  cs_Date     = '2012.04.02';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -411,7 +411,7 @@ begin
 
   scr_Destroy();
   gl_Destroy();
-  if not appInitedToHandle Then wnd_Destroy();
+  wnd_Destroy();
 
   {$IFDEF USE_OGG}
   FreeVorbis();

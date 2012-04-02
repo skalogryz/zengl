@@ -235,14 +235,16 @@ end;
 {$IFDEF USE_OLEPICTURE}
 procedure jpg_FillData( var jpg : zglTJPGData; out Data : PByteArray );
   var
-    bi   : BITMAPINFO;
-    bmp  : HBITMAP;
-    DC   : HDC;
-    p    : PByteArray;
-    W, H : Longint;
-    i    : Integer;
+    bi     : BITMAPINFO;
+    bmp    : HBITMAP;
+    mainDC : HDC;
+    DC     : HDC;
+    p      : PByteArray;
+    W, H   : Longint;
+    i      : Integer;
 begin
-  DC := CreateCompatibleDC( GetDC( 0 ) );
+  mainDC := GetDC( 0 );
+  DC := CreateCompatibleDC( mainDC );
   jpg.Buffer.get_Width ( W );
   jpg.Buffer.get_Height( H );
   jpg.Width  := MulDiv( W, GetDeviceCaps( DC, LOGPIXELSX ), 2540 );
@@ -270,7 +272,8 @@ begin
     end;
 
   DeleteObject( bmp );
-  DeleteDC    ( DC );
+  ReleaseDC( 0, mainDC );
+  DeleteDC( DC );
 end;
 {$ENDIF}
 

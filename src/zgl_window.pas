@@ -337,7 +337,8 @@ end;
 procedure wnd_Destroy;
 begin
 {$IFDEF USE_X11}
-  XDestroyWindow( scrDisplay, wndHandle );
+  if not appInitedToHandle Then
+    XDestroyWindow( scrDisplay, wndHandle );
   XSync( scrDisplay, X_FALSE );
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -347,20 +348,24 @@ begin
       wndDC := 0;
     end;
 
-  if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
+  if not appInitedToHandle Then
     begin
-      u_Error( 'Cannot destroy window' );
-      wndHandle := 0;
-    end;
+      if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
+        begin
+          u_Error( 'Cannot destroy window' );
+          wndHandle := 0;
+        end;
 
-  if not UnRegisterClassW( wndClassName, wndINST ) Then
-    begin
-      u_Error( 'Cannot unregister window class' );
-      wndINST := 0;
+      if not UnRegisterClassW( wndClassName, wndINST ) Then
+        begin
+          u_Error( 'Cannot unregister window class' );
+          wndINST := 0;
+        end;
     end;
 {$ENDIF}
 {$IFDEF MACOSX}
-  ReleaseWindow( wndHandle );
+  if not appInitedToHandle Then
+    ReleaseWindow( wndHandle );
 {$ENDIF}
   wndHandle := {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF};
 end;

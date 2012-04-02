@@ -357,7 +357,9 @@
     </Linking>
     <Other>
       <Verbosity>
-        <ShowSummary Value="True"/>
+        <ShowNotes Value="False"/>
+        <ShowHints Value="False"/>
+        <ShowGenInfo Value="False"/>
       </Verbosity>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
