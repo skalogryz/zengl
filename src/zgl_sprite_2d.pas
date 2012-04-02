@@ -692,12 +692,12 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  tU := 1 / Texture.Width;
-  tV := 1 / Texture.Height;
-  tX := tU * ( CutRect.X / Texture.U );
-  tY := tV * ( Texture.Height / Texture.V - CutRect.Y / Texture.V );
-  tW := tX + tU * ( CutRect.W / Texture.U );
-  tH := tY + tV * ( -CutRect.H / Texture.V );
+  tU := 1 / ( Texture.Width  / Texture.U );
+  tV := 1 / ( Texture.Height / Texture.V );
+  tX := tU * CutRect.X;
+  tY := tV * ( Texture.Height - CutRect.Y );
+  tW := tX + tU * CutRect.W;
+  tH := tY - tV * CutRect.H;
 
   if FX and FX2D_FLIPX > 0 Then tU := tW - tX else tU := 0;
   if FX and FX2D_FLIPY > 0 Then tV := tH - tY else tV := 0;

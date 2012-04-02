@@ -282,12 +282,12 @@ begin
         ijV := 1;
       end;
 
-  u  := 1 / Texture.Width;
-  v  := 1 / Texture.Height;
-  tX := u * ( CutRect.X / Texture.U );
-  tY := v * ( CutRect.Y / Texture.V );
-  u  := u * ( CutRect.W / Texture.U ) / ( Grid.Cols - 1 );
-  v  := v * ( CutRect.H / Texture.V ) / ( Grid.Rows - 1 );
+  u  := 1 / ( Texture.Width  / Texture.U );
+  v  := 1 / ( Texture.Height / Texture.V );
+  tX := u * CutRect.X;
+  tY := v * CutRect.Y;
+  u  := u * CutRect.W / ( Grid.Cols - 1 );
+  v  := v * CutRect.H / ( Grid.Rows - 1 );
 
   if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
