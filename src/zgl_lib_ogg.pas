@@ -324,7 +324,7 @@ type
     ov_clear          : function(var vf: OggVorbis_File): cint; cdecl;
     ov_open_callbacks : function(datasource: pointer; out vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl;
     ov_info           : function(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl;
-    ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl;
+    ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; {$IFDEF USE_VORBIS} bigendianp: cbool; word: cint; sgned: cbool; {$ENDIF} bitstream: pcint): clong; cdecl;
     ov_pcm_seek       : function(var vf: OggVorbis_File; pos: cint64): cint; cdecl;
     ov_pcm_total      : function(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl;
     ov_time_seek      : function(var vf: OggVorbis_File; {$IFDEF USE_VORBIS} time: double {$ELSE} ms: ogg_int64_t {$ENDIF}): cint; cdecl;

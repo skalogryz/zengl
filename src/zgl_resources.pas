@@ -27,9 +27,6 @@ uses
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF ANDROID}
-  UnixType,
-  {$ENDIF}
   zgl_memory,
   zgl_textures,
   zgl_font,
