@@ -156,8 +156,10 @@ var
   appMinimized : Boolean;
   {$ENDIF}
   {$IFDEF iOS}
+threadvar
   appPool            : NSAutoreleasePool;
   appPoolInitialized : Boolean;
+var
   appDelegate        : zglCAppDelegate;
   {$ENDIF}
   {$IFDEF ANDROID}

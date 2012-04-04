@@ -434,6 +434,10 @@ function res_ProcQueue( data : Pointer ) : LongInt;
     name : UTF8String;
     tmp  : UTF8String;
 begin
+  {$IFDEF iOS}
+  app_InitPool();
+  {$ENDIF}
+
   Result := 0;
   id     := PByte( data )^;
   item   := nil;
@@ -699,6 +703,10 @@ begin
       thread_EventWait( resQueueState[ id ] );
       thread_EventReset( resQueueState[ id ] );
     end;
+
+  {$IFDEF iOS}
+  app_FreePool();
+  {$ENDIF}
 
   thread_EventDestroy( resQueueState[ id ] );
   EndThread( 0 );
