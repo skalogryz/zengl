@@ -174,6 +174,20 @@ procedure snd_StopStream( ID : Integer );
 procedure snd_ResumeStream( ID : Integer );
 procedure snd_SeekStream( ID : Integer; Milliseconds : Double );
 
+{$IFDEF iOS}
+const
+  kAudioSessionCategory_AmbientSound                  = 'ibma';
+  kAudioSessionProperty_AudioCategory                 = 'taca';
+  kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
+
+var
+  sndAllowBackgroundMusic : LongWord;
+
+function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : Pointer; inClientData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
+function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
+{$ENDIF}
+
 var
   managerSound : zglTSoundManager;
 
@@ -222,20 +236,6 @@ var
   sfThread : array[ 1..SND_MAX ] of zglTThread;
   sfCS     : array[ 1..SND_MAX ] of zglTCriticalSection;
   sfEvent  : array[ 1..SND_MAX ] of zglTEvent;
-
-{$IFDEF iOS}
-const
-  kAudioSessionCategory_AmbientSound                  = 'ibma';
-  kAudioSessionProperty_AudioCategory                 = 'taca';
-  kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
-
-var
-  sndAllowBackgroundMusic : LongWord;
-
-function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : Pointer; inClientData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
-{$ENDIF}
 
 function GetStatusPlaying( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
   var
