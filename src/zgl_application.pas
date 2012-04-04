@@ -1214,6 +1214,7 @@ begin
     app_PActivate( FALSE );
 
   FillChar( touchActive[ 0 ], MAX_TOUCH, 0 );
+  FillChar( touchDown[ 0 ], MAX_TOUCH, 0 );
   FillChar( mouseDown[ 0 ], 3, 0 );
   touch_ClearState();
   mouse_ClearState();
@@ -1308,6 +1309,7 @@ end;
 procedure zglCiOSViewController.didRotateFromInterfaceOrientation( fromInterfaceOrientation : UIInterfaceOrientation );
 begin
   FillChar( touchActive[ 0 ], MAX_TOUCH, 0 );
+  FillChar( touchDown[ 0 ], MAX_TOUCH, 0 );
   FillChar( mouseDown[ 0 ], 3, 0 );
   touch_ClearState();
   mouse_ClearState();
