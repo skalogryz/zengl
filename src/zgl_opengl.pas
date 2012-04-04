@@ -298,10 +298,10 @@ begin
       log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil )  );
     end;
 
-  wndFirst := FALSE;
   wglMakeCurrent( wndDC, 0 );
   wglDeleteContext( oglContext );
   wnd_Destroy();
+  wndFirst := FALSE;
 {$ENDIF}
 {$IFDEF MACOSX}
   if not InitAGL() Then

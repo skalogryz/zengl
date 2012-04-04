@@ -348,7 +348,7 @@ begin
       wndDC := 0;
     end;
 
-  if not appInitedToHandle Then
+  if wndFirst or ( not appInitedToHandle ) Then
     begin
       if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
         begin
