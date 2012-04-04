@@ -235,24 +235,6 @@ uses
   {$ENDIF}
   zgl_utils;
 
-{$IFDEF MACOSX}
-type
-  zglTModifier = record
-    bit : Integer;
-    key : Integer;
-  end;
-
-const
-  Modifier : array[ 0..7 ] of zglTModifier = ( ( bit: $010000; key: K_NUMLOCK ),
-                                               ( bit: $008000; key: K_CTRL_R  ),
-                                               ( bit: $004000; key: K_ALT_R   ),
-                                               ( bit: $002000; key: K_SHIFT_R ),
-                                               ( bit: $001000; key: K_CTRL_L  ),
-                                               ( bit: $000800; key: K_ALT_L   ),
-                                               ( bit: $000200; key: K_SHIFT_L ),
-                                               ( bit: $000100; key: K_SUPER   ) );
-{$ENDIF}
-
 function key_Down( KeyCode : Byte ) : Boolean;
 begin
   Result := keysDown[ KeyCode ];
