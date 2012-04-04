@@ -114,7 +114,6 @@ uses
   zgl_application,
   zgl_main,
   {$ENDIF}
-  zgl_font,
   zgl_log;
 
 function u_IntToStr( Value : Integer ) : UTF8String;
