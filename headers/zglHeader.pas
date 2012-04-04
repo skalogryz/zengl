@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 alpha            }
-{ date:     2012.03.27           }
+{ date:     2012.04.04           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -267,6 +267,7 @@ var
 // INI
   ini_LoadFromFile  : function( const FileName : UTF8String ) : Boolean;
   ini_SaveToFile    : procedure( const FileName : UTF8String );
+  ini_Free          : procedure;
   ini_Add           : procedure( const Section, Key : UTF8String );
   ini_Del           : procedure( const Section, Key : UTF8String );
   ini_Clear         : procedure( const Section : UTF8String );
@@ -1581,6 +1582,7 @@ begin
 
       ini_LoadFromFile := dlsym( zglLib, 'ini_LoadFromFile' );
       ini_SaveToFile := dlsym( zglLib, 'ini_SaveToFile' );
+      ini_Free := dlsym( zglLib, 'ini_Free' );
       ini_Add := dlsym( zglLib, 'ini_Add' );
       ini_Del := dlsym( zglLib, 'ini_Del' );
       ini_Clear := dlsym( zglLib, 'ini_Clear' );

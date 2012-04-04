@@ -147,6 +147,7 @@ exports
   // INI
   ini_LoadFromFile         name prefix + 'ini_LoadFromFile',
   ini_SaveToFile           name prefix + 'ini_SaveToFile',
+  ini_Free                 name prefix + 'ini_Free',
   ini_Add                  name prefix + 'ini_Add',
   ini_Del                  name prefix + 'ini_Del',
   ini_Clear                name prefix + 'ini_Clear',

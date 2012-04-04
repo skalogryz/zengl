@@ -28,6 +28,7 @@ uses
 
 function  ini_LoadFromFile( const FileName : UTF8String ) : Boolean;
 procedure ini_SaveToFile( const FileName : UTF8String );
+procedure ini_Free;
 procedure ini_Add( const Section, Key : UTF8String );
 procedure ini_Del( const Section, Key : UTF8String );
 procedure ini_Clear( const Section : UTF8String );
@@ -241,12 +242,6 @@ begin
     end;
 end;
 
-procedure ini_Free;
-begin
-  iniRec.Sections := 0;
-  SetLength( iniRec.Section, 0 );
-end;
-
 function ini_LoadFromFile( const FileName : UTF8String ) : Boolean;
 begin
   Result := FALSE;
@@ -285,6 +280,12 @@ begin
         end;
     end;
   file_Close( f );
+end;
+
+procedure ini_Free;
+begin
+  iniRec.Sections := 0;
+  SetLength( iniRec.Section, 0 );
 end;
 
 procedure ini_Add( const Section, Key : UTF8String );
