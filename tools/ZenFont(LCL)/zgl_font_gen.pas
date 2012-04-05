@@ -800,6 +800,26 @@ begin
 end;
 
 procedure fontgen_SaveFont( Font : zglPFont; const FileName : String );
+  type
+    zglPTGAHeader = ^zglTTGAHeader;
+    zglTTGAHeader = packed record
+      IDLength  : Byte;
+      CPalType  : Byte;
+      ImageType : Byte;
+      CPalSpec  : packed record
+        FirstEntry : Word;
+        Length     : Word;
+        EntrySize  : Byte;
+                  end;
+      ImgSpec   : packed record
+        X      : Word;
+        Y      : Word;
+        Width  : Word;
+        Height : Word;
+        Depth  : Byte;
+        Desc   : Byte;
+                  end;
+  end;
   var
     TGA  : zglTTGAHeader;
     F    : zglTFile;
