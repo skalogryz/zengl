@@ -312,7 +312,7 @@ begin
   eglView := zglCiOSEAGLView.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   eglView.setMultipleTouchEnabled( TRUE );
   // Retina display
-  if UIScreen.mainScreen.instancesRespondToSelector( objcselector( 'scale' ) ) and ( UIScreen.mainScreen.scale > 1 ) Then
+  if UIScreen.mainScreen.respondsToSelector( objcselector( 'scale' ) ) and ( UIScreen.mainScreen.scale > 1 ) Then
     begin
       eglView.setContentScaleFactor( UIScreen.mainScreen.scale );
       log_Add( 'Retina display detected' );
