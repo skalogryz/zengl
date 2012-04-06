@@ -142,6 +142,8 @@ end;
 
 procedure wnd_Select;
 begin
+  if appInitedToHandle Then exit;
+
 {$IFDEF USE_X11}
   XMapWindow( scrDisplay, wndHandle );
 {$ENDIF}
@@ -380,6 +382,8 @@ procedure wnd_Update;
     FullScreen : Boolean;
   {$ENDIF}
 begin
+  if appInitedToHandle Then exit;
+
 {$IFDEF USE_X11}
   XSync( scrDisplay, X_TRUE );
   wnd_SetHints();
@@ -452,6 +456,8 @@ procedure wnd_SetCaption( const NewCaption : UTF8String );
     str : CFStringRef;
   {$ENDIF}
 begin
+  if appInitedToHandle Then exit;
+
   wndCaption := u_CopyUTF8Str( NewCaption );
 {$IFDEF USE_X11}
   if wndHandle <> 0 Then
@@ -532,6 +538,8 @@ procedure wnd_SetPos( X, Y : Integer );
     mode : LongWord;
   {$ENDIF}
 begin
+  if appInitedToHandle Then exit;
+
   wndX := X;
   wndY := Y;
 {$IFDEF USE_X11}
@@ -572,6 +580,8 @@ procedure wnd_ShowCursor( Show : Boolean );
     mask   : TPixmap;
     xcolor : TXColor;
 begin
+  if appInitedToHandle Then exit;
+
   appShowCursor := Show;
 
   if wndHandle = 0 Then exit;
@@ -593,6 +603,8 @@ begin
 {$ENDIF}
 {$IF DEFINED(WINDOWS) or DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(ANDROID)}
 begin
+  if appInitedToHandle Then exit;
+
   appShowCursor := Show;
 {$IFEND}
 end;
