@@ -312,10 +312,9 @@ begin
   eglView := zglCiOSEAGLView.alloc().initWithFrame( UIScreen.mainScreen.bounds );
   eglView.setMultipleTouchEnabled( TRUE );
   // Retina display
-  if ( ( scrCurrModeW = 640 ) and ( scrCurrModeH = 960 ) ) or // iPhone
-     ( ( scrCurrModeW = 1536 ) and ( scrCurrModeH = 2048 ) ) Then // iPad
+  if UIScreen.mainScreen.instancesRespondToSelector( objcselector( 'scale' ) ) and ( UIScreen.mainScreen.scale > 1 ) Then
     begin
-      eglView.setContentScaleFactor( 2 );
+      eglView.setContentScaleFactor( UIScreen.mainScreen.scale );
       log_Add( 'Retina display detected' );
     end;
 
