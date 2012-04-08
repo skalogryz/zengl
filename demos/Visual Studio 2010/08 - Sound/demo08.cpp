@@ -74,7 +74,7 @@ void Proc()
 	// EN: Check if music playing(1 - playing, 0 - not playing). Sounds also can be checked this way - just use zglPSound and ID:
 	// snd_Get( Sound, ID...
 	// ID returns by function snd_Play.
-	state = snd_Get( (zglPSound)audio, SND_STREAM, SND_STATE_PLAYING );
+	state = snd_Get( SND_STREAM, audio, SND_STATE_PLAYING );
 	if ( state == 0 )
 		audio = 0;
 
@@ -97,11 +97,11 @@ void Proc()
 
 	// RU: Получаем в процентах позицию проигрывания аудиопотока и ставим громкость для плавных переходов.
 	// EN: Get position in percent's for audio stream and set volume for smooth playing.
-	p = snd_Get( (zglPSound)audio, SND_STREAM, SND_STATE_PERCENT );
+	p = snd_Get( SND_STREAM, audio, SND_STATE_PERCENT );
 	if ( ( p >= 0 ) && ( p < 25 ) )
-		snd_SetVolume( (zglPSound)audio, SND_STREAM, ( 1.0f / 24.0f ) * p );
+		snd_SetVolume( SND_STREAM, audio, ( 1.0f / 24.0f ) * p );
 	if ( ( p >= 75 ) && ( p < 100 ) )
-		snd_SetVolume( (zglPSound)audio, SND_STREAM, 1 - ( 1.0f / 24.0f ) * ( p - 75 ) );
+		snd_SetVolume( SND_STREAM, audio, 1 - ( 1.0f / 24.0f ) * ( p - 75 ) );
 
 	if ( key_Press( K_ESCAPE ) ) zgl_Exit();
 	key_ClearState();
