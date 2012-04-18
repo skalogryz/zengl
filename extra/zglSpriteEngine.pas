@@ -1,16 +1,16 @@
 unit zglSpriteEngine;
 
-// RU: Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
-// EN: If project doesn't compile statically with ZenGL then comment define below
-{$DEFINE STATIC}
+{$I zglCustomConfig.cfg}
 
 interface
-
 uses
-  {$IFNDEF STATIC}
-  zglHeader
-  {$ELSE}
+  {$IFDEF USE_ZENGL_STATIC}
+  zgl_main,
+  zgl_fx,
+  zgl_sprite_2d,
   zgl_textures
+  {$ELSE}
+  zglHeader
   {$ENDIF}
   ;
 
@@ -68,12 +68,6 @@ type
   end;
 
 implementation
-{$IFDEF STATIC}
-uses
-  zgl_main,
-  zgl_fx,
-  zgl_sprite_2d;
-{$ENDIF}
 
 destructor zglCSEngine2D.Destroy;
 begin
@@ -233,7 +227,7 @@ begin
           if s.Layer < l Then
             begin
               SortByLayer( 0, FCount - 1 );
-              // TODO: наверное сделать выбор вкл./выкл. устойчивой сортировки
+              // TODO: provide parameter for enabling/disabling stable sorting
               l := FList[ 0 ].Layer;
               a := 0;
               for b := 0 to FCount - 1 do
