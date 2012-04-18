@@ -1,5 +1,5 @@
 {
- *  Copyright © Kemka Andrey aka Andru
+ *  Copyright © Andrey Kemka aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *

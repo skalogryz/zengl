@@ -1,5 +1,5 @@
 {
- *  Copyright © Kemka Andrey aka Andru
+ *  Copyright © Andrey Kemka aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -45,8 +45,8 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.3 alpha';
-  cs_Date     = '2012.04.04';
+  cs_ZenGL    = 'ZenGL 0.3 beta 1';
+  cs_Date     = '2012.04.18';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;

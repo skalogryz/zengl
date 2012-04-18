@@ -2,14 +2,14 @@
 {-----------= ZenGL =------------}
 {--------------------------------}
 {                                }
-{ version:  0.3 alpha            }
-{ date:     2012.04.04           }
+{ version:  0.3 beta 1           }
+{ date:     2012.04.18           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
 {-------- developed by: ---------}
 {                                }
-{     Kemka Andrey aka Andru     }
+{     Andrey Kemka aka Andru     }
 {                                }
 { mail:  dr.andru@gmail.com      }
 { JID:   dr.andru@googlemail.com }
@@ -592,6 +592,8 @@ const
   TEX_FORMAT_RGBA_DXT3  = $21;
   TEX_FORMAT_RGBA_DXT5  = $22;
 
+  TEX_NO_COLORKEY       = $FF000000;
+
   TEX_MIPMAP            = $000001;
   TEX_CLAMP             = $000002;
   TEX_REPEAT            = $000004;
@@ -617,8 +619,8 @@ var
   tex_Del            : procedure( var Texture : zglPTexture );
   tex_Create         : function( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
   tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-  tex_LoadFromFile   : function( const FileName : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+  tex_LoadFromFile   : function( const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+  tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_SetFrameSize   : procedure( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
   tex_SetMask        : procedure( var Texture : zglPTexture; Mask : zglPTexture );
   tex_SetData        : procedure( Texture : zglPTexture; pData : PByteArray; X, Y, Width, Height : Word; Stride : Integer = 0 );

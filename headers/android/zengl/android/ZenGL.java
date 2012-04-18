@@ -1,5 +1,5 @@
 /*
- *  Copyright © Kemka Andrey aka Andru
+ *  Copyright © Andrey Kemka aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://andru-kun.inf.ua
  *
@@ -65,13 +65,13 @@ public class ZenGL extends GLSurfaceView
 		DataDir = context.getFilesDir().getAbsolutePath();
 		Renderer = new zglCRenderer();
 		setRenderer( Renderer );
-		
+
 		InputManager = (InputMethodManager)context.getSystemService( Context.INPUT_METHOD_SERVICE );
 		setFocusableInTouchMode( true );
-		
+
 		Main();
 	}
-	
+
 	public Boolean onCloseQuery()
 	{
 		return zglNativeCloseQuery();
@@ -82,7 +82,7 @@ public class ZenGL extends GLSurfaceView
 	{
 		if ( InputManager.isAcceptingText() )
 			HideKeyboard();
-		
+
 		super.onPause();
 		zglNativeActivate( false );
 	}
@@ -154,24 +154,24 @@ public class ZenGL extends GLSurfaceView
 
 		return true;
 	}
-	
+
 	public void Finish()
 	{
 		zglNativeDestroy();
 		((Activity)getContext()).finish();
 		System.exit( 0 );
 	}
-	
+
 	public void ShowKeyboard()
 	{
 		InputManager.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_NOT_ALWAYS );
 	}
-	
+
 	public void HideKeyboard()
 	{
 		InputManager.hideSoftInputFromWindow( this.getWindowToken(), 0 );
 	}
-	
+
 	@Override
 	public InputConnection onCreateInputConnection( EditorInfo outAttrs )
 	{
@@ -180,20 +180,20 @@ public class ZenGL extends GLSurfaceView
 	    outAttrs.initialCapsMode = 0;
 	    outAttrs.initialSelEnd = outAttrs.initialSelStart = -1;
 	    outAttrs.label = "";
-	    outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI;        
-	    outAttrs.inputType = InputType.TYPE_NULL;        
+	    outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+	    outAttrs.inputType = InputType.TYPE_NULL;
 
 		return new zglInputConnection( this, false );
 	}
-	
+
 	@Override
 	public boolean onCheckIsTextEditor()
 	{
 		return true;
 	}
-	
+
 	@Override
-	public boolean onKeyDown( int keyCode, KeyEvent event ) 
+	public boolean onKeyDown( int keyCode, KeyEvent event )
 	{
 		if ( keyCode == KeyEvent.KEYCODE_ENTER )
 			HideKeyboard();
@@ -229,7 +229,7 @@ public class ZenGL extends GLSurfaceView
 			zglNativeDrawFrame();
 		}
 	}
-	
+
 	class zglInputConnection extends BaseInputConnection
 	{
 		public zglInputConnection( View targetView, boolean fullEditor )

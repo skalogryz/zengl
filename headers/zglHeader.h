@@ -2,14 +2,14 @@
 /*-----------= ZenGL =------------*/
 /*--------------------------------*/
 /*                                */
-/* version:  0.3 alpha            */
-/* date:     2012.03.27           */
+/* version:  0.3 beta 1           */
+/* date:     2012.04.17           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
 /*-------- developed by: ---------*/
 /*                                */
-/*     Kemka Andrey aka Andru     */
+/*     Andrey Kemka aka Andru     */
 /*                                */
 /* mail:  dr.andru@gmail.com      */
 /* JID:   dr.andru@googlemail.com */
@@ -613,6 +613,8 @@ end;
 #define TEX_FORMAT_RGBA_DXT3  0x21
 #define TEX_FORMAT_RGBA_DXT5  0x22
 
+#define TEX_NO_COLORKEY       0xFF000000
+
 #define TEX_MIPMAP            0x000001
 #define TEX_CLAMP             0x000002
 #define TEX_REPEAT            0x000004
@@ -643,12 +645,12 @@ static inline zglPTexture tex_CreateZero( ushort Width, ushort Height, uint Colo
   return __tex_CreateZero( Width, Height, Color, Flags );
 }
 ZGLEXTERN zglPTexture ( *__tex_LoadFromFile )( const char *FileName, uint TransparentColor, uint Flags );
-static inline zglPTexture tex_LoadFromFile( const char *FileName, uint TransparentColor = 0xFF000000, uint Flags = TEX_DEFAULT_2D )
+static inline zglPTexture tex_LoadFromFile( const char *FileName, uint TransparentColor = TEX_NO_COLORKEY, uint Flags = TEX_DEFAULT_2D )
 {
   return __tex_LoadFromFile( FileName, TransparentColor, Flags );
 }
 ZGLEXTERN zglPTexture ( *__tex_LoadFromMemory )( const zglTMemory Memory, const char *Extension, uint TransparentColor, uint Flags );
-static inline zglPTexture tex_LoadFromMemory( const zglTMemory Memory, const char *Extension, uint TransparentColor = 0xFF000000, uint Flags = TEX_DEFAULT_2D )
+static inline zglPTexture tex_LoadFromMemory( const zglTMemory Memory, const char *Extension, uint TransparentColor = TEX_NO_COLORKEY, uint Flags = TEX_DEFAULT_2D )
 {
   return __tex_LoadFromMemory( Memory, Extension, TransparentColor, Flags );
 }

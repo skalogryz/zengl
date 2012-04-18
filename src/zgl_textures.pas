@@ -1,5 +1,5 @@
 {
- *  Copyright © Kemka Andrey aka Andru
+ *  Copyright © Andrey Kemka aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -37,6 +37,8 @@ const
   TEX_FORMAT_RGBA_DXT1  = $20;
   TEX_FORMAT_RGBA_DXT3  = $21;
   TEX_FORMAT_RGBA_DXT5  = $22;
+
+  TEX_NO_COLORKEY       = $FF000000;
 
   TEX_MIPMAP            = $000001;
   TEX_CLAMP             = $000002;
@@ -102,8 +104,8 @@ procedure tex_Del( var Texture : zglPTexture );
 
 function  tex_Create( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
 function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = $FF000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
 procedure tex_CalcTexCoords( var Texture : zglTTexture; FramesX : Integer = 1; FramesY : Integer = 1 );
