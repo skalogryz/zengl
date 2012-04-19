@@ -105,7 +105,7 @@ end;
 
 Begin
   {$IFNDEF USE_ZENGL_STATIC}
-  zglLoad( libZenGL );
+  if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
 
   randomize();

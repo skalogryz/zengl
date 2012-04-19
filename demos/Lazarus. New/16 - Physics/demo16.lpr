@@ -208,10 +208,10 @@ Begin
   randomize();
 
   {$IFNDEF USE_ZENGL_STATIC}
-  zglLoad( libZenGL );
+  if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
   {$IFNDEF USE_CHIPMUNK_STATIC}
-  cpLoad( libChipmunk );
+  if not cpLoad( libChipmunk ) Then exit;
   {$ENDIF}
 
   timer_Add( @Proc, 16 );
