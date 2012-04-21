@@ -484,7 +484,7 @@ static inline void key_UpdateReadText( const char *Text, int MaxSymbols = -1 )
 ZGLEXTERN void ( *key_BeginReadText )( const char *Text, int MaxSymbols );
 ZGLEXTERN void ( *key_UpdateReadText )( const char *Text, int MaxSymbols );
 #endif
-ZGLEXTERN char * ( *key_GetText )();
+ZGLEXTERN const char * ( *key_GetText )();
 ZGLEXTERN void ( *key_EndReadText )();
 ZGLEXTERN void ( *key_ClearState )();
 

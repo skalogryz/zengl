@@ -34,8 +34,6 @@ begin
 end;
 
 procedure Draw;
-  var
-    w : Single;
 begin
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 

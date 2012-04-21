@@ -88,7 +88,7 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  wnd_SetCaption( '05 - Primitives 2D' );
+  wnd_SetCaption( '05 - Primitives' );
 
   wnd_ShowCursor( TRUE );
 
