@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 beta 1           */
-/* date:     2012.04.17           */
+/* date:     2012.04.21           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -155,6 +155,7 @@ ZGLEXTERN void ( *zgl_Reg )( uint What, void *UserData );
 #define RENDER_BATCHES_2D       701
 #define RENDER_CURRENT_MODE     702
 #define RENDER_CURRENT_TARGET   703
+#define RENDER_VRAM_USED        704
 
 #define MANAGER_TIMER           800 // zglPTimerManager
 #define MANAGER_TEXTURE         801 // zglPTextureManager
@@ -1274,6 +1275,9 @@ ZGLEXTERN char* ( *file_GetExtension )( const char *FileName );
 ZGLEXTERN char* ( *file_GetDirectory )( const char *FileName );
 ZGLEXTERN void ( *file_SetPath )( const char *Path );
 
+ZGLEXTERN bool ( *file_OpenArchive )( char *FileName, char *Password );
+ZGLEXTERN void ( *file_CloseArchive )();
+
 ZGLEXTERN bool ( *mem_LoadFromFile )( zglTMemory *Memory, const char *FileName );
 ZGLEXTERN bool ( *mem_SaveToFile )( zglTMemory *Memory, const char *FileName );
 ZGLEXTERN uint ( *mem_Seek )( zglTMemory *Memory, int Offset, int Mode );
@@ -1281,6 +1285,9 @@ ZGLEXTERN uint ( *mem_Read )( zglTMemory *Memory, void *Buffer, uint Bytes );
 ZGLEXTERN uint ( *mem_Write )( zglTMemory *Memory, void *Buffer, uint Bytes );
 ZGLEXTERN void ( *mem_SetSize )( zglTMemory *Memory, uint Size );
 ZGLEXTERN void ( *mem_Free )( zglTMemory *Memory );
+
+// Utils
+ZGLEXTERN void ( *u_Sleep )( unsigned int Milliseconds );
 
 #ifdef __LINUX__
   #define libZenGL "libZenGL.so"
@@ -1648,6 +1655,9 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( file_GetDirectory, zglLib, "file_GetDirectory" );
     zglGetAddress( file_SetPath, zglLib, "file_SetPath" );
 
+    zglGetAddress( file_OpenArchive, zglLib, "_file_OpenArchive" );
+    zglGetAddress( file_CloseArchive, zglLib, "file_CloseArchive" );
+
     zglGetAddress( mem_LoadFromFile, zglLib, "mem_LoadFromFile" );
     zglGetAddress( mem_SaveToFile, zglLib, "mem_SaveToFile" );
     zglGetAddress( mem_Seek, zglLib, "mem_Seek" );
@@ -1657,6 +1667,7 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( mem_Free, zglLib, "mem_Free" );
 
 //    zglGetAddress( u_SortList, zglLib, "u_SortList" );
+    zglGetAddress( u_Sleep, zglLib, "u_Sleep" );
 
     return TRUE;
   }

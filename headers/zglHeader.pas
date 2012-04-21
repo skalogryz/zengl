@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 beta 1           }
-{ date:     2012.04.18           }
+{ date:     2012.04.21           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1348,8 +1348,11 @@ function u_StrUp( const str : UTF8String ) : UTF8String;
 function u_StrDown( const str : UTF8String ) : UTF8String;
 
 function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
+
 var
   u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
+  u_Sleep    : procedure( Milliseconds : LongWord );
+  u_Hash     : function( const Str : UTF8String ) : LongWord;
 
 {$IFDEF UNIX}
 function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -1817,6 +1820,8 @@ begin
       mem_Free := dlsym( zglLib, 'mem_Free' );
 
       u_SortList := dlsym( zglLib, 'u_SortList' );
+      u_Hash := dlsym( zglLib, 'u_Hash' );
+      u_Sleep := dlsym( zglLib, 'u_Sleep' );
     end else
       if Error Then
         begin

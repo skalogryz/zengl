@@ -80,7 +80,7 @@ procedure u_Warning( const ErrStr : UTF8String );
 
 function u_GetPOT( Value : Integer ) : Integer;
 
-procedure u_Sleep( Msec : LongWord );
+procedure u_Sleep( Milliseconds : LongWord );
 
 {$IFDEF UNIX}
 function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -527,19 +527,19 @@ begin
   Result := Result + 1;
 end;
 
-procedure u_Sleep( Msec : LongWord );
+procedure u_Sleep( Milliseconds : LongWord );
   {$IFDEF UNIX}
   var
     tv : TimeVal;
   {$ENDIF}
 begin
 {$IFDEF UNIX}
-  tv.tv_sec  := Msec div 1000;
-  tv.tv_usec := ( Msec mod 1000 ) * 1000;
+  tv.tv_sec  := Milliseconds div 1000;
+  tv.tv_usec := ( Milliseconds mod 1000 ) * 1000;
   select( 0, nil, nil, nil, tv );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Sleep( Msec );
+  Sleep( Milliseconds );
 {$ENDIF}
 end;
 

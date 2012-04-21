@@ -65,6 +65,10 @@ function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE ) : Integer
 function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
 {$ENDIF}
 
+{$IFDEF USE_ZIP}
+function _file_OpenArchive( FileName : PAnsiChar; Password : PAnsiChar = '' ) : Boolean;
+{$ENDIF}
+
 implementation
 
 procedure _wnd_SetCaption( NewCaption : PAnsiChar );
@@ -151,6 +155,13 @@ end;
 function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
 begin
   Result := snd_PlayMemory( Memory, Extension, Loop );
+end;
+{$ENDIF}
+
+{$IFDEF USE_ZIP}
+function _file_OpenArchive( FileName : PAnsiChar; Password : PAnsiChar = '' ) : Boolean;
+begin
+  Result := file_OpenArchive( FileName, Password );
 end;
 {$ENDIF}
 

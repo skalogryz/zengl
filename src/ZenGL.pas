@@ -432,7 +432,9 @@ exports
   mem_SetSize              name prefix + 'mem_SetSize',
   mem_Free                 name prefix + 'mem_Free',
 
-  u_SortList               name prefix + 'u_SortList'
+  u_SortList               name prefix + 'u_SortList',
+  u_Hash                   name prefix + 'u_Hash',
+  u_Sleep                  name prefix + 'u_Sleep'
 
   {$IFDEF USE_EXPORT_C}
   ,
@@ -448,12 +450,17 @@ exports
   _text_DrawInRect         name prefix + '_text_DrawInRect',
   _text_DrawInRectEx       name prefix + '_text_DrawInRectEx',
   _text_GetWidth           name prefix + '_text_GetWidth',
-  _text_GetHeight          name prefix + '_text_GetHeight',
+  _text_GetHeight          name prefix + '_text_GetHeight'
   {$IFDEF USE_SOUND}
+  ,
   _snd_LoadFromFile        name prefix + '_snd_LoadFromFile',
   _snd_LoadFromMemory      name prefix + '_snd_LoadFromMemory',
   _snd_PlayFile            name prefix + '_snd_PlayFile',
   _snd_PlayMemory          name prefix + '_snd_PlayMemory'
+  {$ENDIF}
+  {$IFDEF USE_ZIP}
+  ,
+  _file_OpenArchive
   {$ENDIF}
   {$ENDIF}
   ;
