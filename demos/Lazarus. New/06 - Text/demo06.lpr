@@ -97,9 +97,10 @@ begin
   batch2d_End();
 end;
 
-procedure Proc;
+procedure Timer;
 begin
   if key_Press( K_ESCAPE ) Then zgl_Exit();
+
   key_ClearState();
 end;
 
@@ -110,7 +111,7 @@ Begin
 
   randomize();
 
-  timer_Add( @Proc, 16 );
+  timer_Add( @Timer, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
