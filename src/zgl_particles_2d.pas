@@ -1249,7 +1249,7 @@ begin
       if ( Time >= Params.LifeTime ) and ( not Params.Loop ) Then
         exit;
 
-      parCount    := Round( ( Time - LastSecond ) * ( Params.Emission / 1000 ) - parCreated );
+      parCount   := Round( ( Time - LastSecond ) * ( Params.Emission / 1000 ) - parCreated );
       if Particles + parCount > EMITTER_MAX_PARTICLES Then
         parCount := EMITTER_MAX_PARTICLES - ( Particles + parCount );
       parCreated := parCreated + parCount;
