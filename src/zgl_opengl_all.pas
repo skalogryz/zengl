@@ -566,7 +566,7 @@ uses
 
 function InitGL : Boolean;
 begin
-  // Страшно, да :)
+  // Scary, yeah :)
   {$IFDEF FPC}
     { according to bug 7570, this is necessary on all x86 platforms,
       maybe we've to fix the sse control word as well }
