@@ -109,7 +109,8 @@ begin
   size      := Header.ImgSpec.Width * Header.ImgSpec.Height * pixelSize;
   GetMem( Data, size );
 
-  for i := 0 to size - 1 do
+  i := 0;
+  while i < size do
     begin
       mem_Read( tgaMem, packetHdr, 1 );
       packetLen := ( packetHdr and $7F ) + 1;
@@ -117,12 +118,16 @@ begin
         begin
           mem_Read( tgaMem, packet[ 0 ], pixelSize );
           for j := 0 to ( packetLen * pixelSize ) - 1 do
-            Data[ i ] := packet[ j mod pixelSize ];
+            begin
+              Data[ i ] := packet[ j mod pixelSize ];
+              INC( i );
+            end;
         end else
           for j := 0 to ( packetLen * pixelSize ) - 1 do
             begin
               mem_Read( tgaMem, packet[ j mod pixelSize ], 1 );
               Data[ i ] := packet[ j mod pixelSize ];
+              INC( i );
             end;
     end;
 
@@ -150,7 +155,7 @@ begin
     begin
       for i := size - 1 downto 0 do
         begin
-          entry             := Data[ i ];
+          entry := Data[ i ];
           Data[ i * 3 ]     := Palette[ entry * 3 - base ];
           Data[ i * 3 + 1 ] := Palette[ entry * 3 + 1 - base ];
           Data[ i * 3 + 2 ] := Palette[ entry * 3 + 2 - base ];
@@ -158,7 +163,7 @@ begin
     end else
       for i := size - 1 downto 0 do
         begin
-          entry             := Data[ i ];
+          entry := Data[ i ];
           Data[ i * 3 ]     := entry;
           Data[ i * 3 + 1 ] := entry;
           Data[ i * 3 + 2 ] := entry;
@@ -193,12 +198,14 @@ begin
   tgaMem := Memory;
   mem_Read( tgaMem, tgaHeader, SizeOf( zglTTGAHeader ) );
 
+  tgaPalette := nil;
   if tgaHeader.CPalType = 1 then
-    with tgaHeader.CPalSpec do
-      begin
-        GetMem( tgaPalette, Length * EntrySize shr 3 );
-        mem_Read( tgaMem, tgaPalette[ 0 ], Length * EntrySize shr 3 );
-      end;
+    begin
+      with tgaHeader.CPalSpec do
+        size := Length * EntrySize shr 3;
+      GetMem( tgaPalette, size );
+      mem_Read( tgaMem, tgaPalette[ 0 ], size );
+    end;
 
   if tgaHeader.ImageType >= 9 Then
     tga_RLEDecode( tgaMem, tgaHeader, tgaData )
