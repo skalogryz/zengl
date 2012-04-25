@@ -485,7 +485,8 @@ end;
 
 procedure scr_Destroy;
 begin
-  scr_Reset();
+  if wndFullScreen Then
+    scr_Reset();
   {$IFDEF USE_X11}
   XRRFreeScreenConfigInfo( scrSettings );
 
