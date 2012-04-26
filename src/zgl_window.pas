@@ -170,12 +170,12 @@ begin
   else
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
-  SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
-
   appWork := TRUE;
   wnd_SetCaption( wndCaption );
   wnd_SetSize( wndWidth, wndHeight );
+
+  SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
+  SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 
   if ( not wndFullScreen ) and ( appFlags and WND_USE_AUTOCENTER > 0 ) Then
     wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2 );

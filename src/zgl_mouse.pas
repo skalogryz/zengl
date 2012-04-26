@@ -85,11 +85,23 @@ end;
 
 function mouse_Down( Button : Byte ) : Boolean;
 begin
-  case Button of
-    M_BLEFT:   Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
-    M_BMIDDLE: Result := GetAsyncKeyState( VK_MBUTTON ) and $8000 <> 0;
-    M_BRIGHT:  Result := GetAsyncKeyState( VK_RBUTTON ) and $8000 <> 0;
-  end;
+  if GetSystemMetrics( SM_SWAPBUTTON ) = 0 Then
+    begin
+      case Button of
+        M_BLEFT:   Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
+        M_BMIDDLE: Result := GetAsyncKeyState( VK_MBUTTON ) and $8000 <> 0;
+        M_BRIGHT:  Result := GetAsyncKeyState( VK_RBUTTON ) and $8000 <> 0;
+      else
+        Result := FALSE;
+      end;
+    end else
+      case Button of
+        M_BLEFT:   Result := GetAsyncKeyState( VK_RBUTTON ) and $8000 <> 0;
+        M_BMIDDLE: Result := GetAsyncKeyState( VK_MBUTTON ) and $8000 <> 0;
+        M_BRIGHT:  Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
+      else
+        Result := FALSE;
+      end;
 end;
 
 function mouse_Up( Button : Byte ) : Boolean;
