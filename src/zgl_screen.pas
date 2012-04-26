@@ -338,7 +338,8 @@ end;
 
 procedure scr_Destroy;
 begin
-  scr_Reset();
+  if wndFullScreen Then
+    scr_Reset();
   {$IFDEF LINUX}
   XRRFreeScreenConfigInfo( scrSettings );
 
