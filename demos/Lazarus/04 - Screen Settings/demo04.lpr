@@ -1,4 +1,4 @@
-program demo03;
+program demo04;
 
 {$I zglCustomConfig.cfg}
 
