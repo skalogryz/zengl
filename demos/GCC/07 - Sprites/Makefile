@@ -21,10 +21,9 @@ INCLUDE = -I../../../headers
 LIBS    = -ldl -lm
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
-UNIT    = demo05.c
-TARGET  = demo05
-TARGETW = demo05.exe
-TARGETM = demo05
+UNIT    = demo07.c
+TARGET  = demo07
+TARGETW = demo07.exe
 
 # Targets
 all: clean

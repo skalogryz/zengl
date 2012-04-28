@@ -1,5 +1,7 @@
-#include <math.h>
 #define ZGL_IMPORT
+
+#include <math.h>
+#include <memory.h>
 #include "zglHeader.h"
 
 typedef struct
@@ -18,6 +20,19 @@ zglPTexture   texLogo;
 zglPTexture   texMiku;
 int           time;
 zglTSEngine2D sengine2d;
+
+char resource[256];
+
+char* GetResource( char* FileName )
+{
+#ifndef __MACOSX__
+  memset( &resource[ 0 ], 256, 0 );
+  sprintf_s( resource, "../data/%s", FileName );
+  return resource;
+#else
+  return FileName;
+#endif
+}
 
 // Miku
 void MikuInit( zglPMiku Miku )
@@ -42,10 +57,11 @@ void MikuProc( zglPMiku Miku )
   Miku->Frame += ( abs( Miku->Speed.X ) + abs( Miku->Speed.Y ) ) / 25.0f;
   if ( Miku->Frame > 8 )
     Miku->Frame = 1;
+
   // RU: Если спрайт выходит за пределы по X, сразу же удаляем его.
   // EN: Delete the sprite if it goes beyond X.
-  if ( Miku->X < -128 )
-    sengine2d_DelSprite( Miku->ID );
+  if ( Miku->X < -128 ) sengine2d_DelSprite( Miku->ID );
+
   // RU: Если спрайт выходит за пределы по Y, ставим его в очередь на удаление.
   // EN: Add sprite to queue for delete if it goes beyond Y.
   if ( Miku->Y < -128 )
@@ -62,10 +78,8 @@ void MikuFree( zglPMiku Miku )
 // EN: Add 100 sprites.
 void AddMiku()
 {
-  // RU: При добавлении спрайта в менеджер спрайтов указывается текстура, слой(положение по Z) и
-  // указатели на основные функции - Инициализация, Рендер, Обработка и Уничтожение.
-  // EN: For adding sprite to sprite engine must be set next parameters: texture, layer(Z-coordinate) and
-  // pointers to Initialization, Render, Process and Destroy functions.
+  // RU: При добавлении спрайта в менеджер спрайтов указывается текстура, слой(положение по Z) и указатели на основные функции - Инициализация, Рендер, Обработка и Уничтожение.
+  // EN: For adding sprite to sprite engine must be set next parameters: texture, layer(Z-coordinate) and pointers to Initialization, Render, Process and Destroy functions.
   for ( int i = 1; i <= 100; i++ )
     sengine2d_AddCustom( texMiku, sizeof( zglTMiku ), rand() % 10, (zglSpriteFunc)&MikuInit, (zglSpriteFunc)&MikuDraw, (zglSpriteFunc)&MikuProc, (zglSpriteFunc)&MikuFree );
 }
@@ -85,20 +99,21 @@ void DelMiku()
 
 void Init()
 {
-  texLogo = tex_LoadFromFile( "../data/zengl.png", 0xFF000000, TEX_DEFAULT_2D );
+  texLogo = tex_LoadFromFile( GetResource( "zengl.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
 
-  texMiku = tex_LoadFromFile( "../data/miku.png", 0xFF000000, TEX_DEFAULT_2D );
+  texMiku = tex_LoadFromFile( GetResource( "miku.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   tex_SetFrameSize( &texMiku, 128, 128 );
 
   // RU: Устанавливаем текущим менеджером спрайтов свой.
   // EN: Set own sprite engine as current.
   sengine2d_Set( &sengine2d );
+
   // RU: Создадим 1000 спрайтов Miku-chan :)
   // EN: Create 1000 sprites of Miku-chan :)
   for ( int i = 0; i < 10; i++ )
     AddMiku();
 
-  fntMain = font_LoadFromFile( "../data/font.zfi" );
+  fntMain = font_LoadFromFile( GetResource( "font.zfi" ) );
 }
 
 void Draw()
@@ -138,12 +153,15 @@ void Timer()
   // RU: Выполняем обработку всех спрайтов в текущем спрайтовом менеджере.
   // EN: Process all sprites contained in current sprite engine.
   sengine2d_Proc();
+
   // RU: По нажатию пробела очистить все спрайты.
   // EN: Delete all sprites if space was pressed.
   if ( key_Press( K_SPACE ) ) sengine2d_ClearAll();
   if ( key_Press( K_UP ) ) AddMiku();
   if ( key_Press( K_DOWN ) ) DelMiku();
+
   if ( key_Press( K_ESCAPE ) ) zgl_Exit();
+
   key_ClearState();
 }
 
@@ -157,7 +175,7 @@ void Quit()
 
 int main()
 {
-  zglLoad( libZenGL );
+  if ( !zglLoad( libZenGL ) ) return 0;
 
   srand( 0xDeaDBeeF );
 
@@ -168,7 +186,7 @@ int main()
   zgl_Reg( SYS_DRAW, (void*)&Draw );
   zgl_Reg( SYS_EXIT, (void*)&Quit );
 
-  wnd_SetCaption( "06 - SEngine 2D" );
+  wnd_SetCaption( "08 - Sprite Engine" );
 
   wnd_ShowCursor( TRUE );
 

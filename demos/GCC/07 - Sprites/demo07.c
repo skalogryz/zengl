@@ -1,5 +1,7 @@
-#include <math.h>
 #define ZGL_IMPORT
+
+#include <memory.h>
+#include <math.h>
 #include "zglHeader.h"
 
 typedef struct
@@ -19,6 +21,19 @@ TTux         tux[21];
 int          time;
 zglTCamera2D camMain;
 
+char resource[256];
+
+char* GetResource( char* FileName )
+{
+#ifndef __MACOSX__
+  memset( &resource[ 0 ], 256, 0 );
+  sprintf_s( resource, "../data/%s", FileName );
+  return resource;
+#else
+  return FileName;
+#endif
+}
+
 void Init()
 {
   // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует инициализировать её стандартными значениями.
@@ -26,24 +41,23 @@ void Init()
   cam2d_Init( &camMain );
 
   // RU: Загружаем текстуру.
-  // 0xFF000000 - указывает на то, что бы использовать альфа-канал из изображения.
-  // TEX_DEFAULT_2D - комплекс флагов, необходимых для 2D-спрайтов. Описание есть в справке.
-  //
+  //     TEX_NO_COLORKEY - указывает на то, что бы использовать альфа-канал из изображения.
+  //     TEX_DEFAULT_2D - комплекс флагов, необходимых для 2D-спрайтов. Описание есть в справке.
   // EN: Load the texture.
-  // 0xFF000000 - means that alpha channel must be used from file, without colorkey.
-  // TEX_DEFAULT_2D - complex of flags that needed for 2D sprites. Description can be found in help.
-  texLogo = tex_LoadFromFile( "../data/zengl.png", 0xFF000000, TEX_DEFAULT_2D );
+  //     TEX_NO_COLORKEY - means that alpha channel must be used from file, without colorkey.
+  //     TEX_DEFAULT_2D - complex of flags that needed for 2D sprites. Description can be found in help.
+  texLogo = tex_LoadFromFile( GetResource( "zengl.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
 
-  texBack = tex_LoadFromFile( "../data/back01.jpg", 0xFF000000, TEX_DEFAULT_2D );
+  texBack = tex_LoadFromFile( GetResource( "back01.jpg" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
 
-  texGround = tex_LoadFromFile( "../data/ground.png", 0xFF000000, TEX_DEFAULT_2D );
+  texGround = tex_LoadFromFile( GetResource( "ground.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   // RU: Указываем размер кадра в текстуре.
   // EN: Set the size of single frame for texture.
   tex_SetFrameSize( &texGround, 32, 32 );
 
-  texTuxWalk = tex_LoadFromFile( "../data/tux_walking.png", 0xFF000000, TEX_DEFAULT_2D );
+  texTuxWalk = tex_LoadFromFile( GetResource( "tux_walking.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   tex_SetFrameSize( &texTuxWalk, 64, 64 );
-  texTuxStand = tex_LoadFromFile( "../data/tux_stand.png", 0xFF000000, TEX_DEFAULT_2D );
+  texTuxStand = tex_LoadFromFile( GetResource( "tux_stand.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   tex_SetFrameSize( &texTuxStand, 64, 64 );
 
   for ( int i = 0; i < 10; i++ )
@@ -67,7 +81,7 @@ void Init()
 
   // RU: Загружаем шрифт.
   // EN: Load the font.
-  fntMain = font_LoadFromFile( "../data/font.zfi" );
+  fntMain = font_LoadFromFile( GetResource( "font.zfi" ) );
 }
 
 void Draw()
@@ -77,10 +91,8 @@ void Draw()
   batch2d_Begin();
   if ( time > 255 )
   {
-    // RU: Для увеличения быстродействия можно отключить очистку буфера цвета,
-    // учитывая что экран полностью заполнен.
-    // EN: Rendering perfomance can be increased by disabling clearing the color buffer.
-    // This is a good idea because screen is full of objects.
+    // RU: Для увеличения быстродействия можно отключить очистку буфера цвета, учитывая что экран полностью заполнен.
+    // EN: Rendering perfomance can be increased by disabling clearing the color buffer. This is a good idea because screen is full of objects.
     zgl_Disable( COLOR_BUFFER_CLEAR );
 
     // RU: Рисуем задний фон с размерами 800х600 используя текстуру back.
@@ -113,7 +125,8 @@ void Draw()
         // EN: Render red penguin using fx2d-function and flag FX_COLOR.
         fx2d_SetColor( 0xFF0000 );
         asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame / 2, 255, FX_BLEND | FX_COLOR );
-      } else if ( i == 7 )
+      }
+      else if ( i == 7 )
       {
         t = text_GetWidth( fntMain, "???", 0 ) * 0.75f + 4;
         pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain->MaxHeight + 4, t, (float)fntMain->MaxHeight, 0x000000, 200, PR2D_FILL );
@@ -143,22 +156,22 @@ void Draw()
         // EN: Render "big" penguin. It must be shifted up, because FX2D_SCALE scale sprite relative to the center.
         fx2d_SetScale( 1.25, 1.25 );
         asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y - 8, 64, 64, 0, tux[ i ].Frame / 2, 255, FX_BLEND | FX2D_FLIPX | FX2D_SCALE );
-      } else if ( i == 17 )
+      }
+      else if ( i == 17 )
       {
-        // RU: Рисуем "высокого" пингвина используя вместо флага FX2D_SCALE флаг FX2D_VCHANGE и функцию fx2d_SetVertexes
-        // для смещения координат двух верхних вершин спрайта.
-        // EN: Render "tall" penguin using flag FX2D_VCHANGE instead of FX2D_SCALE, and function fx2d_SetVertexes for
-        // shifting upper vertexes of sprite.
+        // RU: Рисуем "высокого" пингвина используя вместо флага FX2D_SCALE флаг FX2D_VCHANGE и функцию fx2d_SetVertexes для смещения координат двух верхних вершин спрайта.
+        // EN: Render "tall" penguin using flag FX2D_VCHANGE instead of FX2D_SCALE, and function fx2d_SetVertexes for shifting upper vertexes of sprite.
         fx2d_SetVertexes( 0, -16, 0, -16, 0, 0, 0, 0 );
         asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame / 2, 255, FX_BLEND | FX2D_FLIPX | FX2D_VCHANGE );
-      } else
+      }
+      else
         asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame / 2, 255, FX_BLEND | FX2D_FLIPX );
 
     // RU: Сбросить камеру.
     // EN: Reset the camera.
     cam2d_Set( NULL );
 
-    // RU: Рисуем учатоск земли по центру экрана.
+    // RU: Рисуем участок земли по центру экрана.
     // EN: Render piece of ground in the center of screen.
     asprite2d_Draw( texGround, 11 * 32, 300 - 16, 32, 32, 0, 1, 255, FX_BLEND );
     asprite2d_Draw( texGround, 12 * 32, 300 - 16, 32, 32, 0, 2, 255, FX_BLEND );
@@ -220,7 +233,7 @@ void Timer()
 
 int main()
 {
-  zglLoad( libZenGL );
+  if ( !zglLoad( libZenGL ) ) return 0;
 
   srand( 0xDeaDBeeF );
 
@@ -229,7 +242,7 @@ int main()
   zgl_Reg( SYS_LOAD, (void*)&Init );
   zgl_Reg( SYS_DRAW, (void*)&Draw );
 
-  wnd_SetCaption( "05 - Sprites 2D" );
+  wnd_SetCaption( "07 - Sprites" );
 
   wnd_ShowCursor( TRUE );
 

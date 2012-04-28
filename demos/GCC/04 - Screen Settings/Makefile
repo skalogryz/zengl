@@ -18,13 +18,12 @@ MINGW32 = i486-mingw32-gcc
 MINGW64 = x86_64-w64-mingw32-gcc
 FLAGS   = -O3 -std=c99 -Wall
 INCLUDE = -I../../../headers
-LIBS    = -ldl -lm
+LIBS    = -ldl
 OUTPUT  = ../../../bin/
 TMP     = ../tmp/
-UNIT    = demo09.c
-TARGET  = demo09
-TARGETW = demo09.exe
-TARGETM = demo09
+UNIT    = demo04.c
+TARGET  = demo04
+TARGETW = demo04.exe
 
 # Targets
 all: clean

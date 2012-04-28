@@ -24,7 +24,6 @@ TMP     = ../tmp/
 UNIT    = demo03.c
 TARGET  = demo03
 TARGETW = demo03.exe
-TARGETM = demo03
 
 # Targets
 all: clean
