@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -24,6 +24,7 @@ unit zgl_render_2d;
 
 interface
 uses
+  zgl_opengl_all,
   zgl_textures;
 
 procedure batch2d_Begin;
@@ -36,13 +37,6 @@ function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
 
 var
   render2dClip      : Boolean;
-  render2dClipX     : Integer;
-  render2dClipY     : Integer;
-  render2dClipW     : Integer;
-  render2dClipH     : Integer;
-  render2dClipXW    : Integer;
-  render2dClipYH    : Integer;
-  render2dClipR     : Integer;
   b2dStarted        : Boolean;
   b2dNew            : Boolean;
   b2dBatches        : LongWord;
@@ -58,13 +52,8 @@ var
 
 implementation
 uses
-  {$IFNDEF USE_GLES}
+  zgl_screen,
   zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
   zgl_fx,
   zgl_camera_2d,
   zgl_primitives_2d;
@@ -100,9 +89,7 @@ begin
         begin
           b2dCurSmooth := 0;
           glDisable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
           glDisable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
         end;
     end;
 end;
@@ -129,11 +116,11 @@ end;
 function sprite2d_InScreenSimple( X, Y, W, H, Angle : Single ) : Boolean;
 begin
   if Angle <> 0 Then
-    Result := ( ( X + W + H / 2 > render2dClipX ) and ( X - W - H / 2 < render2dClipXW ) and
-                ( Y + H + W / 2 > render2dClipY ) and ( Y - W - H / 2 < render2dClipYH ) )
+    Result := ( ( X + W + H / 2 > oglClipX ) and ( X - W - H / 2 < oglClipX + oglClipW / scrResCX ) and
+                ( Y + H + W / 2 > oglClipY ) and ( Y - W - H / 2 < oglClipY + oglClipH / scrResCY ) )
   else
-    Result := ( ( X + W > render2dClipX ) and ( X < render2dClipXW ) and
-                ( Y + H > render2dClipY ) and ( Y < render2dClipYH ) );
+    Result := ( ( X + W > oglClipX ) and ( X < oglClipX + oglClipW / scrResCX ) and
+                ( Y + H > oglClipY ) and ( Y < oglClipY + oglClipH / scrResCY ) );
 end;
 
 function sprite2d_InScreenCamera( X, Y, W, H, Angle : Single ) : Boolean;
@@ -146,14 +133,14 @@ begin
       sy   := Y + H / 2;
       srad := ( W + H ) / 2;
 
-      Result := sqr( sx - cam2d.CX ) + sqr( sy - cam2d.CY ) < sqr( srad + render2dClipR );
+      Result := sqr( sx - cam2d.CX ) + sqr( sy - cam2d.CY ) < sqr( srad + oglClipR );
     end else
       if Angle <> 0 Then
-        Result := ( ( X + W + H / 2 > render2dClipX + cam2d.Global.X ) and ( X - W - H / 2 < render2dClipXW + cam2d.Global.X ) and
-                    ( Y + H + W / 2 > render2dClipY + cam2d.Global.Y ) and ( Y - W - H / 2 < render2dClipYH + cam2d.Global.Y ) )
+        Result := ( ( X + W + H / 2 > oglClipX + cam2d.Global.X ) and ( X - W - H / 2 < oglClipX + oglClipW / scrResCX + cam2d.Global.X ) and
+                    ( Y + H + W / 2 > oglClipY + cam2d.Global.Y ) and ( Y - W - H / 2 < oglClipY + oglClipH / scrResCY + cam2d.Global.Y ) )
       else
-        Result := ( ( X + W > render2dClipX + cam2d.Global.X ) and ( X < render2dClipXW + cam2d.Global.X ) and
-                    ( Y + H > render2dClipY + cam2d.Global.Y ) and ( Y < render2dClipYH + cam2d.Global.Y ) );
+        Result := ( ( X + W > oglClipX + cam2d.Global.X ) and ( X < oglClipX + oglClipW / scrResCX + cam2d.Global.X ) and
+                    ( Y + H > oglClipY + cam2d.Global.Y ) and ( Y < oglClipY + oglClipH / scrResCY + cam2d.Global.Y ) );
 end;
 
 initialization

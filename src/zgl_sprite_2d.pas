@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -30,22 +30,30 @@ uses
   zgl_textures,
   zgl_math_2d;
 
+type
+  zglPTiles2D = ^zglTTiles2D;
+  zglTTiles2D = record
+    Count : record
+      X, Y : Integer;
+            end;
+    Size  : record
+      W, H : Single;
+            end;
+    Tiles : array of array of Integer;
+  end;
+
 procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 
 implementation
 uses
   zgl_application,
   zgl_screen,
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
   zgl_render_2d,
   zgl_camera_2d;
 
@@ -89,27 +97,18 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
+  // Текстурные координаты
   tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
 
+  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      if FX and FX2D_RPIVOT = 0 Then
-        begin
-          x1 := -W / 2;
-          y1 := -H / 2;
-          x2 := -x1;
-          y2 := -y1;
-          cX :=  X + x2;
-          cY :=  Y + y2;
-        end else
-          begin
-            x1 := -fx2dRPX;
-            y1 := -fx2dRPY;
-            x2 := W + x1;
-            y2 := H + y1;
-            cX := X + fx2dRPX;
-            cY := Y + fx2dRPY;
-          end;
+      x1 := -W / 2;
+      y1 := -H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -287,28 +286,19 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
+  // Текстурные координаты
   tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
   tc  := @Texture.FramesCoord[ 0 ];
 
+  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      if FX and FX2D_RPIVOT = 0 Then
-        begin
-          x1 := -W / 2;
-          y1 := -H / 2;
-          x2 := -x1;
-          y2 := -y1;
-          cX :=  X + x2;
-          cY :=  Y + y2;
-        end else
-          begin
-            x1 := -fx2dRPX;
-            y1 := -fx2dRPY;
-            x2 := W + x1;
-            y2 := H + y1;
-            cX := X + fx2dRPX;
-            cY := Y + fx2dRPY;
-          end;
+      x1 := -W / 2;
+      y1 := -H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -487,7 +477,8 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  fc := length( Texture.FramesCoord ) - 1;
+  // Текстурные координаты
+  fc := Texture.FramesX * Texture.FramesY;
   if Frame > fc Then
     DEC( Frame, ( ( Frame - 1 ) div fc ) * fc )
   else
@@ -496,25 +487,15 @@ begin
   tci := @FLIP_TEXCOORD[ FX and FX2D_FLIPX + FX and FX2D_FLIPY ];
   tc  := @Texture.FramesCoord[ Frame ];
 
+  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      if FX and FX2D_RPIVOT = 0 Then
-        begin
-          x1 := -W / 2;
-          y1 := -H / 2;
-          x2 := -x1;
-          y2 := -y1;
-          cX :=  X + x2;
-          cY :=  Y + y2;
-        end else
-          begin
-            x1 := -fx2dRPX;
-            y1 := -fx2dRPY;
-            x2 := W + x1;
-            y2 := H + y1;
-            cX := X + fx2dRPX;
-            cY := Y + fx2dRPY;
-          end;
+      x1 := -W / 2;
+      y1 := -H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -692,35 +673,27 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  tU := 1 / ( Texture.Width  / Texture.U );
-  tV := 1 / ( Texture.Height / Texture.V );
-  tX := tU * CutRect.X;
-  tY := tV * ( Texture.Height - CutRect.Y );
-  tW := tX + tU * CutRect.W;
-  tH := tY - tV * CutRect.H;
+  // Текстурные координаты
+  // бред, ога :)
+  tU := 1 / ( Texture.Width  / Texture.U / Texture.U );
+  tV := 1 / ( Texture.Height / Texture.V / Texture.V );
+  tX := tU * ( CutRect.X / Texture.U );
+  tY := tV * ( Texture.Height / Texture.V - CutRect.Y / Texture.V );
+  tW := tX + tU * ( CutRect.W / Texture.U );
+  tH := tY + tV * ( -CutRect.H / Texture.V );
 
   if FX and FX2D_FLIPX > 0 Then tU := tW - tX else tU := 0;
   if FX and FX2D_FLIPY > 0 Then tV := tH - tY else tV := 0;
 
+  // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      if FX and FX2D_RPIVOT = 0 Then
-        begin
-          x1 := -W / 2;
-          y1 := -H / 2;
-          x2 := -x1;
-          y2 := -y1;
-          cX :=  X + x2;
-          cY :=  Y + y2;
-        end else
-          begin
-            x1 := -fx2dRPX;
-            y1 := -fx2dRPY;
-            x2 := W + x1;
-            y2 := H + y1;
-            cX := X + fx2dRPX;
-            cY := Y + fx2dRPY;
-          end;
+      x1 := -W / 2;
+      y1 := -H / 2;
+      x2 := -x1;
+      y2 := -y1;
+      cX :=  X + x2;
+      cY :=  Y + y2;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -848,6 +821,129 @@ begin
 
         glTexCoord2f( tX + tU, tH - tV );
         glVertex2fv( @quad[ 3 ] );
+      end;
+
+  if not b2dStarted Then
+    begin
+      glEnd();
+
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_BLEND );
+      glDisable( GL_ALPHA_TEST );
+    end;
+end;
+
+procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; Tiles : zglPTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+  var
+    w, h, tX, tY, tU, tV, u, v   : Single;
+    i, j, aI, aJ, bI, bJ, tI, tJ : Integer;
+begin
+  if ( not Assigned( Texture ) ) or ( not Assigned( Tiles ) ) Then exit;
+
+  i  := Round( Tiles.Size.W );
+  j  := Round( Tiles.Size.H );
+  tX := X;
+  tY := Y;
+
+  if tX < 0 Then
+    begin
+      aI := Round( -tX ) div i;
+      bI := Round( oglClipW / scrResCX ) div i + aI;
+    end else
+      begin
+        aI := 0;
+        bI := Round( oglClipW / scrResCX ) div i - Round( tX ) div i;
+      end;
+
+  if tY < 0 Then
+    begin
+      aJ := Round( -tY ) div j;
+      bJ := Round( oglClipH / scrResCY ) div j + aJ;
+    end else
+      begin
+        aJ := 0;
+        bJ := Round( oglClipH / scrResCY ) div j - Round( tY ) div j;
+      end;
+
+  if not cam2d.OnlyXY Then
+    begin
+      tI := oglClipR div i - Round( oglWidth / scrResCX ) div i div 2 + 3;
+      tJ := oglClipR div j - Round( oglHeight / scrResCY ) div j div 2 + 3;
+      DEC( aI, tI );
+      INC( bI, tI );
+      DEC( aJ, tJ );
+      INC( bJ, tJ );
+    end;
+  if tX >= 0 Then
+    INC( aI, Round( ( cam2d.Global.X - tX ) / i ) - 1 )
+  else
+    INC( aI, Round( cam2d.Global.X / i ) - 1 );
+  INC( bI, Round( ( cam2d.Global.X ) / i ) + 1 );
+  if tY >= 0 Then
+    INC( aJ, Round( ( cam2d.Global.Y - tY ) / j ) - 1 )
+  else
+    INC( aJ, Round( cam2d.Global.Y / j ) - 1 );
+  INC( bJ, Round( cam2d.Global.Y / j ) + 1 );
+  if aI < 0 Then aI := 0;
+  if aJ < 0 Then aJ := 0;
+  if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;
+  if bJ >= Tiles.Count.Y Then bJ := Tiles.Count.Y - 1;
+
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+    begin
+      if FX and FX_BLEND > 0 Then
+        glEnable( GL_BLEND )
+      else
+        glEnable( GL_ALPHA_TEST );
+      glEnable( GL_TEXTURE_2D );
+      glBindTexture( GL_TEXTURE_2D, Texture^.ID );
+
+      glBegin( GL_QUADS );
+    end;
+
+  if FX and FX_COLOR > 0 Then
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
+
+  u := Texture.U / Texture.FramesX;
+  v := Texture.V / Texture.FramesY;
+  if FX and FX2D_FLIPX > 0 Then tU := u else tU := 0;
+  if FX and FX2D_FLIPY > 0 Then tV := v else tV := 0;
+
+  w := Tiles.Size.W;
+  h := Tiles.Size.H;
+  for i := aI to bI do
+    for j := aJ to bJ do
+      begin
+        // Текстурные координаты
+        tY := Tiles.Tiles[ i, j ] div Texture.FramesX;
+        tX := Tiles.Tiles[ i, j ] - tY * Texture.FramesX;
+        tY := Texture.FramesY - tY;
+        if tX = 0 Then
+          begin
+            tX := Texture.FramesX;
+            tY := tY + 1;
+          end;
+        tX := tX * u;
+        tY := tY * v;
+
+        glTexCoord2f( tX - u + tU, tY - tV );
+        glVertex2f( x + i * w, y + j * h );
+
+        glTexCoord2f( tX - tU, tY - tV );
+        glVertex2f( x + i * w + w, y + j * h );
+
+        glTexCoord2f( tX - tU, tY - v + tV );
+        glVertex2f( x + i * w + w, y + j * h + h );
+
+        glTexCoord2f( tX - u + tU, tY - v + tV );
+        glVertex2f( x + i * w, y + j * h + h );
       end;
 
   if not b2dStarted Then

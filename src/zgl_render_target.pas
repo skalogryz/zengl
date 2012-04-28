@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -24,22 +24,17 @@ unit zgl_render_target;
 
 interface
 uses
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   X, XLib, XUtil,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
   zgl_textures;
 
 const
@@ -54,10 +49,44 @@ const
 
   RT_FORCE_PBUFFER = $100000;
 
+{$IFDEF LINUX}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Handle  : Integer;
+    Context : GLXContext;
+    PBuffer : GLXPBuffer;
+end;
+{$ENDIF}
+{$IFDEF WINDOWS}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Handle : THandle;
+    DC     : HDC;
+    RC     : HGLRC;
+end;
+{$ENDIF}
+{$IFDEF DARWIN}
+type
+  zglPPBuffer = ^zglTPBuffer;
+  zglTPBuffer = record
+    Context : TAGLContext;
+    PBuffer : TAGLPbuffer;
+end;
+{$ENDIF}
+
+type
+  zglPFBO = ^zglTFBO;
+  zglTFBO = record
+    FrameBuffer  : LongWord;
+    RenderBuffer : LongWord;
+end;
+
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
-    Type_      : Byte;
+    _type      : Byte;
     Handle     : Pointer;
     Surface    : zglPTexture;
     Flags      : Byte;
@@ -89,84 +118,49 @@ uses
   zgl_main,
   zgl_window,
   zgl_screen,
-  zgl_render,
+  zgl_opengl_simple,
   zgl_render_2d,
   zgl_sprite_2d,
   zgl_log,
   zgl_utils;
 
-{$IFNDEF USE_GLES}
-{$IFDEF USE_X11}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Handle  : Integer;
-    Context : GLXContext;
-    PBuffer : GLXPBuffer;
-end;
-{$ENDIF}
-{$IFDEF WINDOWS}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Handle : THandle;
-    DC     : HDC;
-    RC     : HGLRC;
-end;
-{$ENDIF}
-{$IFDEF MACOSX}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Context : TAGLContext;
-    PBuffer : TAGLPbuffer;
-end;
-{$ENDIF}
-{$ENDIF}
-
-type
-  zglPFBO = ^zglTFBO;
-  zglTFBO = record
-    FrameBuffer  : LongWord;
-    RenderBuffer : LongWord;
-end;
-
 var
   lRTarget : zglPRenderTarget;
   lGLW     : Integer;
   lGLH     : Integer;
+  lClipW   : Integer;
+  lClipH   : Integer;
   lResCX   : Single;
   lResCY   : Single;
 
 function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
   var
-    i, type_ : Integer;
+    i, _type : Integer;
     pFBO     : zglPFBO;
-{$IFNDEF USE_GLES}
     pPBuffer : zglPPBuffer;
-  {$IFDEF USE_X11}
+{$IFDEF LINUX}
     n            : Integer;
     fbconfig     : GLXFBConfig;
     visualinfo   : PXVisualInfo;
     pbufferiAttr : array[ 0..15 ] of Integer;
     fbconfigAttr : array[ 0..31 ] of Integer;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+{$ENDIF}
+{$IFDEF WINDOWS}
     pbufferiAttr : array[ 0..31 ] of Integer;
     pbufferfAttr : array[ 0..15 ] of Single;
     pixelFormat  : array[ 0..63 ] of Integer;
     nPixelFormat : LongWord;
-  {$ENDIF}
-  {$IFDEF MACOSX}
+{$ENDIF}
+{$IFDEF DARWIN}
     pbufferdAttr : array[ 0..31 ] of LongWord;
     pixelFormat  : TAGLPixelFormat;
-  {$ENDIF}
+{$ENDIF}
   procedure FreePBuffer( var Target : zglPRenderTarget; Stage : Integer );
   begin
     oglCanPBuffer := FALSE;
     FreeMem( Target.next.Handle );
     FreeMem( Target.next );
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
     if Stage = 4 Then
       case oglPBufferMode of
         1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
@@ -177,7 +171,7 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
     if Stage = 2 Then
       wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
     if Stage = 2 Then
       aglDestroyPixelFormat( pixelFormat );
     if Stage = 3 Then
@@ -185,7 +179,6 @@ function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
   {$ENDIF}
     Target := nil;
   end;
-{$ENDIF}
   procedure FreeFBO( var Target : zglPRenderTarget; Stage : Integer );
   begin
     oglCanFBO := FALSE;
@@ -202,14 +195,14 @@ begin
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
 
-  type_ := RT_TYPE_FBO;
+  _type := RT_TYPE_FBO;
 
   // GeForce FX sucks: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
   if gl_IsSupported( 'GeForce FX', oglRenderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
-    type_ := RT_TYPE_PBUFFER;
+    _type := RT_TYPE_PBUFFER;
 
   if Surface.Width > oglMaxFBOSize Then
-    type_ := RT_TYPE_PBUFFER;
+    _type := RT_TYPE_PBUFFER;
 
   if ( not oglCanFBO ) or ( Flags and RT_FORCE_PBUFFER > 0 ) Then
     if not oglCanPBuffer Then
@@ -219,11 +212,50 @@ begin
         FreeMem( Result.next );
         exit;
       end else
-        type_ := RT_TYPE_PBUFFER;
+        _type := RT_TYPE_PBUFFER;
 
-  case type_ of
-    {$IFNDEF USE_GLES}
-    {$IFDEF USE_X11}
+  case _type of
+    RT_TYPE_FBO:
+      begin
+        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
+        pFBO := Result.next.Handle;
+
+        glGenFramebuffers( 1, @pFBO.FrameBuffer );
+        glBindFramebuffer( GL_FRAMEBUFFER, pFBO.FrameBuffer );
+        if glIsFrameBuffer( pFBO.FrameBuffer ) = GL_FALSE Then
+          begin
+            log_Add( 'FBO: Gen FrameBuffer - Error' );
+            FreeFBO( Result, 1 );
+            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
+            exit;
+          end;
+
+        glGenRenderbuffers( 1, @pFBO.RenderBuffer );
+        glBindRenderbuffer( GL_RENDERBUFFER, pFBO.RenderBuffer );
+        if glIsRenderBuffer( pFBO.RenderBuffer ) = GL_FALSE Then
+          begin
+            log_Add( 'FBO: Gen RenderBuffer - Error' );
+            FreeFBO( Result, 2 );
+            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
+            exit;
+          end;
+
+        glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+        if Flags and RT_USE_DEPTH > 0 Then
+          begin
+            case oglzDepth of
+              24: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+              32: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+            else
+              glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
+            end;
+            glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, pFBO.RenderBuffer );
+          end;
+
+        glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
+        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+      end;
+    {$IFDEF LINUX}
     RT_TYPE_PBUFFER:
       begin
         zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
@@ -399,7 +431,7 @@ begin
         wglMakeCurrent( wndDC, oglContext );
       end;
     {$ENDIF}
-    {$IFDEF MACOSX}
+    {$IFDEF DARWIN}
     RT_TYPE_PBUFFER:
       begin
         zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
@@ -463,68 +495,8 @@ begin
           end;
       end;
     {$ENDIF}
-    {$ENDIF}
-    RT_TYPE_FBO:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
-        pFBO := Result.next.Handle;
-
-        glGenFramebuffers( 1, @pFBO.FrameBuffer );
-        glBindFramebuffer( GL_FRAMEBUFFER, pFBO.FrameBuffer );
-        if glIsFrameBuffer( pFBO.FrameBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'FBO: Gen FrameBuffer - Error' );
-            FreeFBO( Result, 1 );
-            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
-            exit;
-          end;
-
-        glGenRenderbuffers( 1, @pFBO.RenderBuffer );
-        glBindRenderbuffer( GL_RENDERBUFFER, pFBO.RenderBuffer );
-        if glIsRenderBuffer( pFBO.RenderBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'FBO: Gen RenderBuffer - Error' );
-            FreeFBO( Result, 2 );
-            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
-            exit;
-          end;
-
-        glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        if Flags and RT_USE_DEPTH > 0 Then
-          begin
-            {$IFNDEF USE_GLES}
-            case oglzDepth of
-              24: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-              32: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            else
-              glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            end;
-            {$ELSE}
-            if oglzDepth > 16 Then
-              begin
-                if ( oglzDepth = 32 ) and ( oglCanFBODepth32 ) Then
-                  glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) )
-                else
-                  if ( oglzDepth = 24 ) and ( oglCanFBODepth24 ) Then
-                    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) )
-                  else
-                    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-              end else
-                glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            {$ENDIF}
-            glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, pFBO.RenderBuffer );
-          end;
-
-        glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
-        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-        {$IFDEF iOS}
-        glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-        glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-        glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-        {$ENDIF}
-      end;
   end;
-  Result.next.Type_   := type_;
+  Result.next._type   := _type;
   Result.next.Surface := Surface;
   Result.next.Flags   := Flags;
 
@@ -540,11 +512,17 @@ begin
 
   tex_Del( Target.Surface );
 
-  case Target.Type_ of
-    {$IFNDEF USE_GLES}
+  case Target._type of
+    RT_TYPE_FBO:
+      begin
+        if glIsRenderBuffer( zglPFBO( Target.Handle ).RenderBuffer ) = GL_TRUE Then
+          glDeleteRenderbuffers( 1, @zglPFBO( Target.Handle ).RenderBuffer );
+        if glIsFramebuffer( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
+          glDeleteFramebuffers( 1, @zglPFBO( Target.Handle ).FrameBuffer );
+      end;
     RT_TYPE_PBUFFER:
       begin
-        {$IFDEF USE_X11}
+        {$IFDEF LINUX}
         case oglPBufferMode of
           1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
           2: glXDestroyGLXPbufferSGIX( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
@@ -558,18 +536,10 @@ begin
         if zglPPBuffer( Target.Handle ).Handle <> 0 Then
           wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
         {$ENDIF}
-        {$IFDEF MACOSX}
+        {$IFDEF DARWIN}
         aglDestroyContext( zglPPBuffer( Target.Handle ).Context );
         aglDestroyPBuffer( zglPPBuffer( Target.Handle ).PBuffer );
         {$ENDIF}
-      end;
-    {$ENDIF}
-    RT_TYPE_FBO:
-      begin
-        if glIsRenderBuffer( zglPFBO( Target.Handle ).RenderBuffer ) = GL_TRUE Then
-          glDeleteRenderbuffers( 1, @zglPFBO( Target.Handle ).RenderBuffer );
-        if glIsFramebuffer( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
-          glDeleteFramebuffers( 1, @zglPFBO( Target.Handle ).FrameBuffer );
       end;
   end;
 
@@ -592,28 +562,28 @@ begin
 
   if Assigned( Target ) Then
     begin
-      lRTarget := Target;
-      lGLW     := oglWidth;
-      lGLH     := oglHeight;
-      lResCX   := scrResCX;
-      lResCY   := scrResCY;
+      lRTarget   := Target;
+      lGLW       := oglWidth;
+      lGLH       := oglHeight;
+      lClipW     := oglClipW;
+      lClipH     := oglClipH;
+      lResCX     := scrResCX;
+      lResCY     := scrResCY;
 
-      case Target.Type_ of
-        {$IFNDEF USE_GLES}
+      case Target._type of
         RT_TYPE_PBUFFER:
           begin
-            {$IFDEF USE_X11}
+            {$IFDEF LINUX}
             glXMakeCurrent( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
             {$ENDIF}
             {$IFDEF WINDOWS}
             wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
             {$ENDIF}
-            {$IFDEF MACOSX}
+            {$IFDEF DARWIN}
             aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
             aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( oglContext ) );
             {$ENDIF}
           end;
-        {$ENDIF}
         RT_TYPE_FBO:
           begin
             glBindFramebuffer( GL_FRAMEBUFFER, zglPFBO( Target.Handle ).FrameBuffer );
@@ -647,8 +617,7 @@ begin
     end else
       if Assigned( lRTarget ) Then
         begin
-          case lRTarget.Type_ of
-            {$IFNDEF USE_GLES}
+          case lRTarget._type of
             RT_TYPE_PBUFFER:
               begin
                 glEnable( GL_TEXTURE_2D );
@@ -656,27 +625,21 @@ begin
                 glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
                 glDisable( GL_TEXTURE_2D );
 
-                {$IFDEF USE_X11}
+                {$IFDEF LINUX}
                 glXMakeCurrent( scrDisplay, wndHandle, oglContext );
                 {$ENDIF}
                 {$IFDEF WINDOWS}
                 wglMakeCurrent( wndDC, oglContext );
                 {$ENDIF}
-                {$IFDEF MACOSX}
+                {$IFDEF DARWIN}
                 aglSwapBuffers( zglPPBuffer( lRTarget.Handle ).Context );
                 aglSetCurrentContext( oglContext );
                 {$ENDIF}
               end;
-            {$ENDIF}
             RT_TYPE_FBO:
               begin
                 glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
                 glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-                {$IFDEF iOS}
-                glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-                glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-                glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-                {$ENDIF}
               end;
           end;
 
@@ -687,6 +650,8 @@ begin
           oglTargetH := oglHeight;
           if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
             begin
+              oglClipW := lClipW;
+              oglClipH := lClipH;
               scrResCX := lResCX;
               scrResCY := lResCY;
             end;

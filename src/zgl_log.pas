@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -24,30 +24,30 @@ unit zgl_log;
 
 interface
 uses
-  zgl_file;
+  zgl_file,
+  zgl_utils;
 
 procedure log_Init;
 procedure log_Close;
-procedure log_Add( const Message : UTF8String; Timings : Boolean = TRUE );
+procedure log_Add( const Message : AnsiString; Timings : Boolean = TRUE );
 procedure log_Flush;
-function  log_Timing : UTF8String;
+function  log_Timing : AnsiString;
 
 var
   log      : zglTFile = FILE_ERROR;
   logStart : LongWord;
-  logFile  : PAnsiChar;
+  logFile  : PChar;
 
 implementation
 uses
   zgl_application,
   zgl_main,
-  zgl_timers,
-  zgl_utils;
+  zgl_timers;
 
 procedure log_Init;
   var
     i  : Integer;
-    es : UTF8String;
+    es : String;
 begin
   if ( appFlags and APP_USE_LOG = 0 ) Then exit;
   if log <> FILE_ERROR Then exit;
@@ -56,30 +56,20 @@ begin
 
   {$IFDEF LINUX}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( 'log.txt' )
+    logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( 'log.txt' )
+    logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( appWorkDir + '../log.txt' )
-  {$ENDIF}
-  {$IFDEF WINCE}
-  if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( 'log.txt' )
-  {$ENDIF}
-  {$IFDEF iOS}
-  if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( appHomeDir + 'log.txt' )
+    logFile := u_GetPChar( appWorkDir + '../log.txt' )
   {$ENDIF}
   else
-    logFile := u_GetPAnsiChar( logFile );
+    logFile := u_GetPChar( logFile );
 
-  {$IFNDEF ANDROID}
   file_Open( log, logFile, FOM_CREATE );
-  {$ENDIF}
   // crazy code :)
   es := '';
   for i := 0 to length( cs_ZenGL + ' (' + cs_Date + ')' ) + 7 do
@@ -100,25 +90,21 @@ begin
     file_Close( log );
 end;
 
-procedure log_Add( const Message : UTF8String; Timings : Boolean = TRUE );
+procedure log_Add( const Message : AnsiString; Timings : Boolean = TRUE );
   var
-    str : UTF8String;
+    str : AnsiString;
 begin
   if not appLog Then exit;
-  {$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
+  {$IFDEF LINUX}
   if ( appLog ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
-    printf( PAnsiChar( Message + #10 ), [ nil ] );
-  {$IFEND}
+    writeln( Message );
+  {$ENDIF}
   if Timings Then
     str := log_Timing + Message + #13#10
   else
     str := Message + #13#10;
 
-  {$IFNDEF ANDROID}
   file_Write( log, str[ 1 ], length( str ) );
-  {$ELSE}
-  __android_log_write( 3, 'ZenGL', PAnsiChar( log_Timing + Message ) );
-  {$ENDIF}
 
   {$IFDEF USE_LOG_FLUSH}
   log_Flush();
@@ -131,12 +117,12 @@ begin
     file_Flush( log );
 end;
 
-function log_Timing : UTF8String;
+function log_Timing : AnsiString;
   var
     v : LongWord;
 begin
   v := Round( timer_GetTicks() ) - logstart;
-  case v of
+  case V of
     0..9:               Result := '[0000000' + u_IntToStr( v ) + 'ms] ';
     10..99:             Result := '[000000'  + u_IntToStr( v ) + 'ms] ';
     100..999:           Result := '[00000'   + u_IntToStr( v ) + 'ms] ';
