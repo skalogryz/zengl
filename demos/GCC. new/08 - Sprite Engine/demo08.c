@@ -1,5 +1,6 @@
 #define ZGL_IMPORT
 
+#include <math.h>
 #include <memory.h>
 #include "zglHeader.h"
 
@@ -98,9 +99,9 @@ void DelMiku()
 
 void Init()
 {
-  texLogo = tex_LoadFromFile( GetResource( "zengl.png" ), 0xFF000000, TEX_DEFAULT_2D );
+  texLogo = tex_LoadFromFile( GetResource( "zengl.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
 
-  texMiku = tex_LoadFromFile( GetResource( "miku.png" ), 0xFF000000, TEX_DEFAULT_2D );
+  texMiku = tex_LoadFromFile( GetResource( "miku.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   tex_SetFrameSize( &texMiku, 128, 128 );
 
   // RU: Устанавливаем текущим менеджером спрайтов свой.

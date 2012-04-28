@@ -59,7 +59,7 @@ int main()
 
   srand( 0xDeaDBeeF );
 
-  timer_Add( (void*)&Timer, 1000, FALSE, NULL );
+  timer_Add( (void*)&Timer, 16, FALSE, NULL );
 
   zgl_Reg( SYS_LOAD, (void*)&Init );
   zgl_Reg( SYS_DRAW, (void*)&Draw );

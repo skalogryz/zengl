@@ -41,23 +41,23 @@ void Init()
   cam2d_Init( &camMain );
 
   // RU: Загружаем текстуру.
-  //     0xFF000000 - указывает на то, что бы использовать альфа-канал из изображения.
+  //     TEX_NO_COLORKEY - указывает на то, что бы использовать альфа-канал из изображения.
   //     TEX_DEFAULT_2D - комплекс флагов, необходимых для 2D-спрайтов. Описание есть в справке.
   // EN: Load the texture.
-  //     0xFF000000 - means that alpha channel must be used from file, without colorkey.
+  //     TEX_NO_COLORKEY - means that alpha channel must be used from file, without colorkey.
   //     TEX_DEFAULT_2D - complex of flags that needed for 2D sprites. Description can be found in help.
-  texLogo = tex_LoadFromFile( GetResource( "zengl.png" ), 0xFF000000, TEX_DEFAULT_2D );
+  texLogo = tex_LoadFromFile( GetResource( "zengl.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
 
-  texBack = tex_LoadFromFile( GetResource( "back01.jpg" ), 0xFF000000, TEX_DEFAULT_2D );
+  texBack = tex_LoadFromFile( GetResource( "back01.jpg" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
 
-  texGround = tex_LoadFromFile( GetResource( "ground.png" ), 0xFF000000, TEX_DEFAULT_2D );
+  texGround = tex_LoadFromFile( GetResource( "ground.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   // RU: Указываем размер кадра в текстуре.
   // EN: Set the size of single frame for texture.
   tex_SetFrameSize( &texGround, 32, 32 );
 
-  texTuxWalk = tex_LoadFromFile( GetResource( "tux_walking.png" ), 0xFF000000, TEX_DEFAULT_2D );
+  texTuxWalk = tex_LoadFromFile( GetResource( "tux_walking.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   tex_SetFrameSize( &texTuxWalk, 64, 64 );
-  texTuxStand = tex_LoadFromFile( GetResource( "tux_stand.png" ), 0xFF000000, TEX_DEFAULT_2D );
+  texTuxStand = tex_LoadFromFile( GetResource( "tux_stand.png" ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   tex_SetFrameSize( &texTuxStand, 64, 64 );
 
   for ( int i = 0; i < 10; i++ )

@@ -1,11 +1,11 @@
-// RU: Этот дефайн необходим только в главном модуле
-// EN: This define is needed only in main unit
+// RU: Этот дефайн необходим только в главном модуле.
+// EN: This define is needed only in main unit.
 #define ZGL_IMPORT
 
 #include "zglHeader.h"
 
-char* DirApp;
-char* DirHome;
+const char* DirApp;
+const char* DirHome;
 
 void Init()
 {
@@ -21,8 +21,8 @@ void Draw()
 
 void Update( double dt )
 {
-	// RU: Эта функция наземенима для реализация плавного движения чего-либо, т.к. таймеры зачастую ограничены FPS.
-	// EN: This function is the best way to implement smooth moving of something, because timers are restricted by FPS.
+	// RU: Эта функция наземенима для реализация плавного движения чего-либо, т.к. точность таймеров ограничена FPS.
+	// EN: This function is the best way to implement smooth moving of something, because accuracy of timers are restricted by FPS.
 }
 
 void Timer()
@@ -36,7 +36,7 @@ void Timer()
 
 void Quit()
 {
-	//
+  //
 }
 
 int CALLBACK WinMain (
@@ -46,33 +46,28 @@ int CALLBACK WinMain (
 	__in int nShowCmd
 	)
 {
-	zglLoad( libZenGL );
+	if ( !zglLoad( libZenGL ) ) return 0;
 
-	// RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к
-	// домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
-	// Ни в коем случаи не следует чистить память, т.к. данные char* хранится на стороне ZenGL.
-	//
-	// EN: For loading/creating your own options/profiles/etc. you can get path to user home
-	// directory, or to executable file(not works for GNU/Linux).
-	// No need to free memory, because these char* stored on ZenGL side.
-	DirApp  = (char*)zgl_Get( DIRECTORY_APPLICATION );
-	DirHome = (char*)zgl_Get( DIRECTORY_HOME );
+	// RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
+	// EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
+	DirApp  = (const char*)zgl_Get( DIRECTORY_APPLICATION );
+	DirHome = (const char*)zgl_Get( DIRECTORY_HOME );
 
 	// RU: Создаем таймер с интервалом 1000мс.
 	// EN: Create a timer with interval 1000ms.
 	timer_Add( (void*)&Timer, 1000 );
 
-	// RU: Регистрируем функцию, что выполнится сразу после инициализации ZenGL.
-	// EN: Register the function, that will be executed after ZenGL initialization.
+	// RU: Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
+	// EN: Register the procedure, that will be executed after ZenGL initialization.
 	zgl_Reg( SYS_LOAD, (void*)&Init );
-	// RU: Регистрируем функцию, где будет происходить рендер.
-	// EN: Register the render function.
+	// RU: Регистрируем процедуру, где будет происходить рендер.
+	// EN: Register the render procedure.
 	zgl_Reg( SYS_DRAW, (void*)&Draw );
-	// RU: Регистрируем функцию, которая будет принимать разницу времени между кадрами.
-	// EN: Register the function, that will get delta time between the frames.
+	// RU: Регистрируем процедуру, которая будет принимать разницу времени между кадрами.
+	// EN: Register the procedure, that will get delta time between the frames.
 	zgl_Reg( SYS_UPDATE, (void*)&Update );
-	// RU: Регистрируем функцию, которая выполнится после завершения работы ZenGL.
-	// EN: Register the function, that will be executed after ZenGL shutdown.
+	// RU: Регистрируем процедуру, которая выполнится после завершения работы ZenGL.
+	// EN: Register the procedure, that will be executed after ZenGL shutdown.
 	zgl_Reg( SYS_EXIT, (void*)&Quit );
 
 	// RU: Устанавливаем заголовок окна.

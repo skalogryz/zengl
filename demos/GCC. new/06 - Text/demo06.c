@@ -29,7 +29,7 @@ void Init()
   //{
   //  char texture[32];
   //  sprintf_s( texture, "font-page%i.png", i );
-  //  fntMain->Pages[ i ] = tex_LoadFromFile( GetResource( texture ) );
+  //  fntMain->Pages[ i ] = tex_LoadFromFile( GetResource( texture ), TEX_NO_COLORKEY, TEX_DEFAULT_2D );
   //}
 }
 
