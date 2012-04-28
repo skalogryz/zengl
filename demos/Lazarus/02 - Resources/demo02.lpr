@@ -107,7 +107,11 @@ begin
   // EN: Loading resources from files in memory need additional set their extension.
   //     As an example TMemoryStream will be used instead of mem_LoadFromFile/mem_Free, just for showing how zglTMemory works.
   memStream := TMemoryStream.Create();
+  {$IFNDEF MACOSX}
   memStream.LoadFromFile( dirRes + 'back01.jpg' );
+  {$ELSE}
+  memStream.LoadFromFile( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Resources/back01.jpg' );
+  {$ENDIF}
   memory.Position := memStream.Position;
   memory.Memory   := memStream.Memory;
   memory.Size     := memStream.Size;
