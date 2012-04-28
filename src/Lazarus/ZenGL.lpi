@@ -13,8 +13,163 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
-    <BuildModes Count="1">
-      <Item1 Name="default" Default="True"/>
+    <BuildModes Count="4">
+      <Item1 Name="Release" Default="True"/>
+      <Item2 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="./libZenGL"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="../tmp"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' Then
+  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min 10.4&quot;';"/>
+          <BuildMacros>
+            <Count Value="1"/>
+            <Item1>
+              <Identifier Value="MacOSX"/>
+            </Item1>
+          </BuildMacros>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+              <CStyleOperator Value="False"/>
+              <CPPInline Value="False"/>
+              <UseAnsiStrings Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+              <ExecutableType Value="Library"/>
+            </Options>
+          </Linking>
+          <Other>
+            <Verbosity>
+              <ShowNotes Value="False"/>
+              <ShowHints Value="False"/>
+              <ShowGenInfo Value="False"/>
+            </Verbosity>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="C/C++ Support, Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="./libZenGL"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="../tmp"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' Then
+  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min 10.4&quot;';"/>
+          <BuildMacros>
+            <Count Value="1"/>
+            <Item1>
+              <Identifier Value="MacOSX"/>
+            </Item1>
+          </BuildMacros>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+              <CStyleOperator Value="False"/>
+              <CPPInline Value="False"/>
+              <UseAnsiStrings Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+              <ExecutableType Value="Library"/>
+            </Options>
+          </Linking>
+          <Other>
+            <Verbosity>
+              <ShowNotes Value="False"/>
+              <ShowHints Value="False"/>
+              <ShowGenInfo Value="False"/>
+            </Verbosity>
+            <CustomOptions Value="-dUSE_EXPORT_C -Cccdecl"/>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+      <Item4 Name="C/C++ Support, Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="./libZenGL"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="../tmp"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' Then
+  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min 10.4&quot;';"/>
+          <BuildMacros>
+            <Count Value="1"/>
+            <Item1>
+              <Identifier Value="MacOSX"/>
+            </Item1>
+          </BuildMacros>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+              <CStyleOperator Value="False"/>
+              <CPPInline Value="False"/>
+              <UseAnsiStrings Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+              <ExecutableType Value="Library"/>
+            </Options>
+          </Linking>
+          <Other>
+            <Verbosity>
+              <ShowNotes Value="False"/>
+              <ShowHints Value="False"/>
+              <ShowGenInfo Value="False"/>
+            </Verbosity>
+            <CustomOptions Value="-dUSE_EXPORT_C -Cccdecl"/>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item4>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
