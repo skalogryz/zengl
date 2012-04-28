@@ -10,7 +10,7 @@ ifeq ($(shell uname), Linux)
   OS    = linux
 else ifeq ($(shell uname), Darwin)
   OS    = darwin
-	ARCH  = i386
+  ARCH  = i386
 endif
 
 # Variables
