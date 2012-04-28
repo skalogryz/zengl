@@ -27,7 +27,7 @@
             <UnitOutputDirectory Value="../tmp"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min 10.4&quot;';"/>
+  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
           <BuildMacros>
             <Count Value="1"/>
             <Item1>
@@ -75,7 +75,7 @@
             <UnitOutputDirectory Value="../tmp"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min 10.4&quot;';"/>
+  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
           <BuildMacros>
             <Count Value="1"/>
             <Item1>
@@ -133,7 +133,7 @@
             <UnitOutputDirectory Value="../tmp"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min 10.4&quot;';"/>
+  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
           <BuildMacros>
             <Count Value="1"/>
             <Item1>
