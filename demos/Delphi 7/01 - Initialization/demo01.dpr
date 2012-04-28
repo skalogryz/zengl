@@ -32,8 +32,8 @@ uses
   ;
 
 var
-  DirApp  : UTF8String;
-  DirHome : UTF8String;
+  DirApp  : String;
+  DirHome : String;
 
 procedure Init;
 begin
@@ -67,32 +67,7 @@ end;
 
 Begin
   {$IFNDEF STATIC}
-    {$IFDEF LINUX}
-    // RU: ¬ Linux все библиотеки прин€то хранить в /usr/lib, поэтому libZenGL.so должна
-    // быть предварительно установлена. Ќо zglLoad сначала проверить есть ли libZenGL.so
-    // р€дом с исполн€емым файлом.
-    //
-    // EN: Under GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be
-    // installed before it will be used. But zglLoad will check first if there is
-    // libZenGL.so near executable file.
-    zglLoad( libZenGL );
-    {$ENDIF}
-    {$IFDEF WIN32}
-    zglLoad( libZenGL );
-    {$ENDIF}
-    {$IFDEF DARWIN}
-    // RU: libZenGL.dylib следует предварительно поместить в каталог
-    // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложени€.
-    // “акже следует упом€нуть, что лог-файл будет создаватьс€ в корневом каталоге,
-    // поэтому либо отключайте его, либо указывайте свой путь и им€, как описано в справке.
-    //
-    // EN: libZenGL.dylib must be placed into this directory
-    // MyApp.app/Contents/Frameworks/, where MyApp.app - Bundle of your application.
-    // Also you must know, that log-file will be created in root directory, so you must
-    // disable a log, or choose your own path and name for it. How to do this you can find
-    // in help.
-    zglLoad( libZenGL );
-    {$ENDIF}
+  zglLoad( libZenGL );
   {$ENDIF}
 
   // RU: ƒл€ загрузки/создани€ каких-то своих настроек/профилей/etc. можно получить путь к
@@ -100,8 +75,8 @@ Begin
   //
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home
   // directory, or to executable file(not works for GNU/Linux).
-  DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-  DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
+  DirApp  := u_CopyStr( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+  DirHome := u_CopyStr( PChar( zgl_Get( DIRECTORY_HOME ) ) );
 
   // RU: —оздаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
