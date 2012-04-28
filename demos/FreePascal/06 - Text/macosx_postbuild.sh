@@ -1,1 +1,1 @@
-cp ../../../bin/data/font.* ../../../bin/demo06.app/Contents/Resources/
+cp ../../../bin/data/font* ../../../bin/demo06.app/Contents/Resources/
