@@ -54,7 +54,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-MAINICON                ICON                    "demo01.ico"
+MAINICON                ICON                    "demo02.ico"
 #endif    // Russian resources
 /////////////////////////////////////////////////////////////////////////////
 
