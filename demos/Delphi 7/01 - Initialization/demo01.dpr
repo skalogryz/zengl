@@ -4,9 +4,7 @@ program demo01;
 // EN: This file contains some options(e.g. whether to use static compilation) and defines of OS for which is compilation going.
 {$I zglCustomConfig.cfg}
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 
 uses
   {$IFDEF USE_ZENGL_STATIC}
@@ -62,25 +60,7 @@ Begin
   // RU:  од ниже загружает библиотеку если статическа€ компил€ци€ не используетс€.
   // EN: Code below loads a library if static compilation is not used.
   {$IFNDEF USE_ZENGL_STATIC}
-    {$IFDEF LINUX}
-    // RU: ¬ GNU/Linux все библиотеки прин€то хранить в /usr/lib, поэтому libZenGL.so должна быть предварительно установлена.
-    // Ќо zglLoad сначала проверить есть ли libZenGL.so р€дом с исполн€емым файлом.
-    //
-    // EN: In GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be installed before it will be used.
-    // But zglLoad will check first if there is libZenGL.so near executable file.
-    if not zglLoad( libZenGL ) Then exit;
-    {$ENDIF}
-    {$IFDEF WINDOWS}
-    if not zglLoad( libZenGL ) Then exit;
-    {$ENDIF}
-    {$IFDEF DARWIN}
-    // RU: libZenGL.dylib следует предварительно поместить в каталог MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложени€.
-    // “акже следует упом€нуть, что лог-файл будет создаватьс€ в корневом каталоге поэтому либо отключайте его, либо указывайте свой путь и им€, как описано в справке.
-    //
-    // EN: libZenGL.dylib must be placed into this directory MyApp.app/Contents/Frameworks/, where MyApp.app - Bundle of your application.
-    // Also you must know, that log-file will be created in root directory, so you must disable a log, or choose your own path and name for it. How to do this you can find in documentation.
-    if not zglLoad( libZenGL ) Then exit;
-    {$ENDIF}
+  if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
 
   // RU: ƒл€ загрузки/создани€ каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользовател€, или к исполн€емому файлу(не работает дл€ GNU/Linux).

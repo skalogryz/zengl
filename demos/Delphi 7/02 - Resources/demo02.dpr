@@ -2,9 +2,7 @@ program demo02;
 
 {$I zglCustomConfig.cfg}
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 
 uses
   {$IFDEF UNIX}

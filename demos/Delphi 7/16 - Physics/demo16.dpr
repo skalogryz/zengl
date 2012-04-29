@@ -4,9 +4,7 @@ program demo16;
 // EN: This file contains "option" USE_CHIPMUNK_STATIC for static compilation with Chipmunk
 {$I zglCustomConfig.cfg}
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 
 uses
   zglChipmunk,
