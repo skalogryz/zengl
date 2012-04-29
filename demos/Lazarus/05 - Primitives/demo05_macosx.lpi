@@ -87,6 +87,9 @@
         <UseMsgFile Value="True"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
+      <ExecuteAfter>
+        <Command Value="sh macosx_postbuild.sh"/>
+      </ExecuteAfter>
     </Other>
   </CompilerOptions>
   <Debugging>

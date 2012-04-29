@@ -67,6 +67,7 @@ macosx: clean
 	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
 	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM) -TDARWIN -Pi386 -k"-macosx_version_min" -k"10.4"
 	mv $(OUTPUT)$(TARGETM) $(BUNDLE)/Contents/MacOS/
+	sh macosx_postbuild.sh
 
 macosx_uni: clean
 	rm -Rf $(BUNDLE)
@@ -75,6 +76,7 @@ macosx_uni: clean
 	$(FPC) $(UNIT) $(INCLUDE) $(LIBSPPC) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min" -k"10.4"
 	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
 	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
+	sh macosx_postbuild.sh
 
 clean:
 	rm -f *.*~
