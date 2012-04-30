@@ -9,7 +9,7 @@ uses
   zgl_screen,
   zgl_window,
   zgl_timers,
-  zgl_keyboard,
+  zgl_touch,
   zgl_render_2d,
   zgl_fx,
   zgl_textures,
@@ -163,7 +163,8 @@ begin
       pr2d_Rect( 0, 0, 256, 64, $000000, 200, PR2D_FILL );
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
-      text_Draw( fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)' );
+      text_Draw( fntMain, 0, 40, 'Tap at the top - Add Miku' );
+      text_Draw( fntMain, 0, 60, 'Tap at the bottom - Delete Miku' );
     end;
   batch2d_End();
 end;
@@ -176,15 +177,22 @@ begin
   // EN: Process all sprites contained in current sprite engine.
   sengine2d.Proc();
 
-  // RU: По нажатию пробела очистить все спрайты.
-  // EN: Delete all sprites if space was pressed.
-  if key_Press( K_SPACE ) Then sengine2d.ClearAll();
-  if key_Press( K_UP ) Then AddMiku();
-  if key_Press( K_DOWN ) Then DelMiku();
+  // RU: По двойному тапу очистить все спрайты.
+  // EN: Delete all sprites if there was double tap.
+  if touch_DblTap( 0 ) Then
+    sengine2d.ClearAll()
+  else
+    begin
+      if touch_Tap( 0 ) Then
+        begin
+          if touch_Y( 0 ) < 300 Then
+            AddMiku()
+          else
+            DelMiku();
+        end;
+    end;
 
-  if key_Press( K_ESCAPE ) Then zgl_Exit();
-
-  key_ClearState();
+  touch_ClearState();
 end;
 
 procedure Quit;
