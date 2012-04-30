@@ -29,6 +29,7 @@ var
   bCount  : Integer;
   Bodies  : array of PcpBody;
   Shapes  : array of PcpShape;
+  balls   : Boolean;
 
 // RU: Добавить объект "шар"
 //     x, y - координаты центра
@@ -169,16 +170,22 @@ begin
   cpDrawSpace( space, TRUE );
 
   text_Draw( fntMain, 10, 5,  'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
-  text_Draw( fntMain, 10, 25, 'Use your finger: Tap - box, Double tap - ball' );
+  text_Draw( fntMain, 10, 25, 'Double tap to change the shape type' );
   batch2d_End();
 end;
 
 procedure Timer;
 begin
-  if touch_Tap( 0 ) Then
-    cpAddBox( touch_X( 0 ) - 10, touch_Y( 0 ) - 10, 48, 32, 1, 0.5, 0.5 );
   if touch_DblTap( 0 ) Then
-    cpAddBall( touch_X( 0 ), touch_Y( 0 ), 16, 1, 0.5, 0.9 );
+    balls := not balls;
+
+  if touch_Tap( 0 ) Then
+    begin
+      if balls Then
+        cpAddBox( touch_X( 0 ) - 10, touch_Y( 0 ) - 10, 48, 32, 1, 0.5, 0.5 )
+      else
+        cpAddBall( touch_X( 0 ), touch_Y( 0 ), 16, 1, 0.5, 0.9 );
+    end;
 
   touch_ClearState();
 end;
