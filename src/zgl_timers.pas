@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -23,23 +23,25 @@ unit zgl_timers;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF LINUX}
-uses UnixType;
-{$ENDIF}
-{$IFDEF WINDOWS}
-uses Windows;
-{$ENDIF}
+uses
+  {$IFDEF LINUX}
+  Unix
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll
+  {$ENDIF}
+  ;
 
 type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Active     : Boolean;
-    Custom     : Boolean;
-    UserData   : Pointer;
     Interval   : LongWord;
     LastTick   : Double;
     OnTimer    : procedure;
-    OnTimerEx  : procedure( Timer : zglPTimer );
 
     prev, next : zglPTimer;
 end;
@@ -51,7 +53,7 @@ type
     First : zglTTimer;
 end;
 
-function  timer_Add( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
+function  timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
 procedure timer_Del( var Timer : zglPTimer );
 
 procedure timer_MainLoop;
@@ -61,60 +63,35 @@ procedure timer_Reset;
 var
   managerTimer  : zglTTimerManager;
   canKillTimers : Boolean = TRUE;
+  timersToKill  : Word = 0;
+  aTimersToKill : array[ 0..1023 ] of zglPTimer;
+  {$IFDEF LINUX}
+  t_tmr     : TimeVal;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  t_frequency : int64;
+  t_freq      : Single;
+  {$ENDIF}
+  t_start   : Double;
 
 implementation
 uses
   zgl_application,
   zgl_main;
 
-{$IFDEF LINUX}
-function fpGetTimeOfDay( val : PTimeVal; tzp : Pointer ) : Integer; cdecl; external 'libc' name 'gettimeofday';
-{$ENDIF}
-{$IFDEF DARWIN}
-type
-  mach_timebase_info_t = record
-    numer : LongWord;
-    denom : LongWord;
-  end;
-
-  function mach_timebase_info( var info : mach_timebase_info_t ) : Integer; cdecl; external 'libc';
-  function mach_absolute_time : QWORD; cdecl; external 'libc';
-{$ENDIF}
-
-var
-  timersToKill  : Word = 0;
-  aTimersToKill : array[ 0..1023 ] of zglPTimer;
-
-  {$IFDEF LINUX}
-  timerTimeVal : TimeVal;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  timerFrequency : Int64;
-  timerFreq      : Single;
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  timerTimebaseInfo : mach_timebase_info_t;
-  {$ENDIF}
-  timerStart : Double;
-
-function timer_Add( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
+function timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
 begin
   Result := @managerTimer.First;
   while Assigned( Result.next ) do
     Result := Result.next;
 
   zgl_GetMem( Pointer( Result.next ), SizeOf( zglTTimer ) );
-  Result.next.Active    := TRUE;
-  Result.next.Custom    := UseSenderForCallback;
-  Result.next.UserData  := UserData;
-  Result.next.Interval  := Interval;
-  if UseSenderForCallback Then
-    Result.next.OnTimerEx := OnTimer
-  else
-    Result.next.OnTimer := OnTimer;
-  Result.next.LastTick  := timer_GetTicks();
-  Result.next.prev      := Result;
-  Result.next.next      := nil;
+  Result.next.Active   := TRUE;
+  Result.next.Interval := Interval;
+  Result.next.OnTimer  := OnTimer;
+  Result.next.LastTick := timer_GetTicks();
+  Result.next.prev     := Result;
+  Result.next.next     := nil;
   Result := Result.next;
   INC( managerTimer.Count );
 end;
@@ -159,10 +136,7 @@ begin
             while t >= timer.LastTick + timer.Interval do
               begin
                 timer.LastTick := timer.LastTick + timer.Interval;
-                if timer.Custom Then
-                  timer.OnTimerEx( timer )
-                else
-                  timer.OnTimer();
+                timer.OnTimer();
                 if t < timer_GetTicks() - timer.Interval Then
                   break
                 else
@@ -185,26 +159,27 @@ function timer_GetTicks : Double;
     t : int64;
     m : LongWord;
   {$ENDIF}
+  {$IFDEF DARWIN}
+  var
+    t : UnsignedWide;
+  {$ENDIF}
 begin
 {$IFDEF LINUX}
-  fpGetTimeOfDay( @timerTimeVal, nil );
+  fpGetTimeOfDay( @t_tmr, nil );
   {$Q-}
   // FIXME: почему-то overflow вылетает с флагом -Co
-  Result := timerTimeVal.tv_sec * 1000 + timerTimeVal.tv_usec / 1000 - timerStart;
+  Result := t_tmr.tv_sec * 1000 + t_tmr.tv_usec / 1000 - t_start;
   {$Q+}
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   m := SetThreadAffinityMask( GetCurrentThread(), 1 );
-  {$ENDIF}
   QueryPerformanceCounter( t );
-  Result := 1000 * t * timerFreq - timerStart;
-  {$IFDEF WINDESKTOP}
+  Result := 1000 * T * t_freq - t_start;
   SetThreadAffinityMask( GetCurrentThread(), m );
-  {$ENDIF}
 {$ENDIF}
 {$IFDEF DARWIN}
-  Result := mach_absolute_time() * timerTimebaseInfo.numer / timerTimebaseInfo.denom / 1000000 - timerStart;
+  Microseconds( t );
+  Result := t.int / 1000 - t_start;
 {$ENDIF}
 end;
 
@@ -223,15 +198,10 @@ end;
 
 initialization
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), 1 );
-  {$ENDIF}
-  QueryPerformanceFrequency( timerFrequency );
-  timerFreq := 1 / timerFrequency;
+  QueryPerformanceFrequency( t_frequency );
+  t_freq := 1 / t_frequency;
 {$ENDIF}
-{$IFDEF DARWIN}
-  mach_timebase_info( timerTimebaseInfo );
-{$ENDIF}
-  timerStart := timer_GetTicks();
+  t_start := timer_GetTicks();
 
 end.

@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -21,35 +21,33 @@
 unit zgl_screen;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
-  {$modeswitch objectivec1}
-{$ENDIF}
 
 interface
-{$IFDEF USE_X11}
-  uses X, XLib, XRandr, UnixType;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
-{$IFDEF iOS}
-  uses iPhoneAll, CFBase, CFString;
-{$ENDIF}
+uses
+  {$IFDEF LINUX}
+  X, XLib, XRandr, UnixType
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll
+  {$ENDIF}
+  ;
 
 const
   REFRESH_MAXIMUM = 0;
   REFRESH_DEFAULT = 1;
 
 procedure scr_Init;
-procedure scr_Reset;
 function  scr_Create : Boolean;
+procedure scr_GetResList;
 procedure scr_Destroy;
+procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
+procedure scr_SetWindowedMode;
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
 procedure scr_CorrectResolution( Width, Height : Word );
 procedure scr_SetViewPort;
@@ -57,15 +55,16 @@ procedure scr_SetVSync( VSync : Boolean );
 procedure scr_SetFSAA( FSAA : Byte );
 procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 
-type
-  zglPResolutionList = ^zglTResolutionList;
-  zglTResolutionList = record
-    Count  : Integer;
-    Width  : array of Integer;
-    Height : array of Integer;
-end;
-
+{$IFDEF LINUX}
+function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:Pchar; para4:Pchar):PXIM;cdecl;external;
+function XCloseIM(im : PXIM) : TStatus;cdecl;external;
+function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
+procedure XDestroyIC(ic : PXIC);cdecl;external;
+{$ENDIF}
 {$IFDEF WINDOWS}
+const
+  MONITOR_DEFAULTTOPRIMARY = $00000001;
+
 type
   HMONITOR = THANDLE;
   MONITORINFOEX = record
@@ -75,7 +74,18 @@ type
     dwFlags   : LongWord;
     szDevice  : array[ 0..CCHDEVICENAME - 1 ] of WideChar;
   end;
+
+function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
+function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
 {$ENDIF}
+
+type
+  zglPResolutionList = ^zglTResolutionList;
+  zglTResolutionList = record
+    Count  : Integer;
+    Width  : array of Integer;
+    Height : array of Integer;
+end;
 
 var
   scrWidth       : Integer = 800;
@@ -85,12 +95,6 @@ var
   scrResList     : zglTResolutionList;
   scrInitialized : Boolean;
   scrChanging    : Boolean;
-
-  // Viewport
-  scrViewportX : Integer;
-  scrViewportY : Integer;
-  scrViewportW : Integer;
-  scrViewportH : Integer;
 
   // Resolution Correct
   scrResW  : Integer;
@@ -102,7 +106,7 @@ var
   scrSubCX : Integer = 0;
   scrSubCY : Integer = 0;
 
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   scrDisplay   : PDisplay;
   scrDefault   : cint;
   scrSettings  : Pointer;
@@ -110,7 +114,6 @@ var
   scrCurrent   : LongInt;
   scrModeCount : LongInt;
   scrModeList  : PXRRScreenSize;
-  scrRotation  : Word;
   {$ENDIF}
   {$IFDEF WINDOWS}
   scrSettings : DEVMODEW;
@@ -118,7 +121,7 @@ var
   scrMonitor  : HMONITOR;
   scrMonInfo  : MONITORINFOEX;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   scrDisplay   : CGDirectDisplayID;
   scrDesktop   : CFDictionaryRef;
   scrDesktopW  : Integer;
@@ -127,58 +130,19 @@ var
   scrModeCount : CFIndex;
   scrModeList  : CFArrayRef;
   {$ENDIF}
-  {$IFDEF iOS}
-  scrDisplayLink  : CADisplayLink;
-  scrCurrModeW    : Integer;
-  scrCurrModeH    : Integer;
-  scrDesktopW     : Integer;
-  scrDesktopH     : Integer;
-  scrOrientation  : UIInterfaceOrientation;
-  scrCanLandscape : Boolean;
-  scrCanPortrait  : Boolean;
-  {$ENDIF}
-  {$IFDEF ANDROID}
-  scrDesktopW : Integer;
-  scrDesktopH : Integer;
-  {$ENDIF}
 
 implementation
 uses
   zgl_main,
   zgl_application,
   zgl_window,
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
-  zgl_render,
+  zgl_opengl_simple,
   zgl_render_2d,
   zgl_camera_2d,
   zgl_log,
   zgl_utils;
-
-{$IFDEF USE_X11}
-function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:PAnsiChar; para4:Pchar):PXIM;cdecl;external;
-function XCloseIM(im : PXIM) : TStatus;cdecl;external;
-function XCreateIC(para1 : PXIM; para2 : array of const):PXIC;cdecl;external;
-procedure XDestroyIC(ic : PXIC);cdecl;external;
-{$ENDIF}
-{$IFDEF WINDOWS}
-const
-  MONITOR_DEFAULTTOPRIMARY = $00000001;
-{$ENDIF}
-{$IFDEF WINDESKTOP}
-function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
-function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
-{$ENDIF}
-{$IFDEF WINCE}
-function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'coredll.dll';
-function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'coredll.dll' name 'GetMonitorInfo';
-function ChangeDisplaySettingsExW( lpszDeviceName : PWideChar; lpDevMode : DEVMODEW; handle : HWND; dwflags : DWORD; lParam : Pointer ) : LongInt; stdcall; external 'coredll.dll' name 'ChangeDisplaySettingsEx';
-{$ENDIF}
 
 {$IFDEF WINDOWS}
 function GetDisplayColors : Integer;
@@ -201,14 +165,13 @@ end;
 {$ENDIF}
 
 procedure scr_Init;
-  {$IFDEF iOS}
+  {$IFDEF LINUX}
   var
-    i            : Integer;
-    orientations : NSArray;
-    tmp          : array[ 0..255 ] of AnsiChar;
+    rotation : Word;
   {$ENDIF}
 begin
-{$IFDEF USE_X11}
+  scrInitialized := TRUE;
+{$IFDEF LINUX}
   log_Init();
 
   if Assigned( scrDisplay ) Then
@@ -226,7 +189,7 @@ begin
 
   scrModeList := XRRSizes( scrDisplay, XRRRootToScreen( scrDisplay, wndRoot ), @scrModeCount );
   scrSettings := XRRGetScreenInfo( scrDisplay, wndRoot );
-  scrDesktop  := XRRConfigCurrentConfiguration( scrSettings, @scrRotation );
+  scrDesktop  := XRRConfigCurrentConfiguration( scrSettings, @rotation );
 {$ENDIF}
 {$IFDEF WINDOWS}
   scrMonitor := MonitorFromWindow( wndHandle, MONITOR_DEFAULTTOPRIMARY );
@@ -245,7 +208,7 @@ begin
       dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
     end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   scrDisplay  := CGMainDisplayID();
   scrDesktop  := CGDisplayCurrentMode( scrDisplay );
   scrDesktopW := CGDisplayPixelsWide( scrDisplay );
@@ -254,75 +217,62 @@ begin
   scrModeList  := CGDisplayAvailableModes( scrDisplay );
   scrModeCount := CFArrayGetCount( scrModeList );
 {$ENDIF}
-{$IFDEF iOS}
-  if not appInitialized Then exit;
+end;
 
-  app_InitPool();
+function scr_Create : Boolean;
+begin
+  Result := FALSE;
+{$IFDEF LINUX}
+  scr_Init();
 
-  orientations := NSBundle.mainBundle.infoDictionary.objectForKey( u_GetNSString( 'UISupportedInterfaceOrientations' ) );
-  for i := 0 to orientations.count() - 1 do
+  if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
     begin
-      CFStringGetCString( CFStringRef( orientations.objectAtIndex( i ) ), @tmp[ 0 ], 255, kCFStringEncodingUTF8 );
-      if ( tmp = 'UIInterfaceOrientationLandscapeLeft' ) or ( tmp = 'UIInterfaceOrientationLandscapeRight' ) Then
-        scrCanLandscape := TRUE;
-      if ( tmp = 'UIInterfaceOrientationPortrait' ) or ( tmp = 'UIInterfaceOrientationPortraitUpsideDown' ) Then
-        scrCanPortrait := TRUE;
+      u_Error( 'DefaultDepth not set to 24-bit.' );
+      zgl_Exit();
+      exit;
     end;
 
-  if UIDevice.currentDevice.systemVersion.floatValue >= 3.2 Then
-    begin
-      scrCurrModeW := Round( UIScreen.mainScreen.currentMode.size.width );
-      scrCurrModeH := Round( UIScreen.mainScreen.currentMode.size.height );
-    end else
-      begin
-        scrCurrModeW := Round( UIScreen.mainScreen.bounds.size.width );
-        scrCurrModeH := Round( UIScreen.mainScreen.bounds.size.height );
-      end;
+  appXIM := XOpenIM( scrDisplay, nil, nil, nil );
+  if not Assigned( appXIM ) Then
+    log_Add( 'XOpenIM - Fail' )
+  else
+    log_Add( 'XOpenIM - ok' );
 
-  if ( scrCurrModeW > scrCurrModeH ) Then
-    begin
-      scrDesktopH  := scrCurrModeW;
-      scrCurrModeW := scrCurrModeH;
-      scrCurrModeH := scrDesktopH;
-    end;
-
-  scrOrientation := UIApplication.sharedApplication.statusBarOrientation();
-  if scrCanPortrait and ( ( scrOrientation = UIInterfaceOrientationPortrait ) or ( scrOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) Then
-    begin
-      wndPortrait := TRUE;
-      scrDesktopW := scrCurrModeW;
-      scrDesktopH := scrCurrModeH;
-    end else
-      if scrCanLandscape and ( ( scrOrientation = UIInterfaceOrientationLandscapeLeft ) or ( scrOrientation = UIInterfaceOrientationLandscapeRight ) ) Then
-        begin
-          wndPortrait := FALSE;
-          scrDesktopW := scrCurrModeH;
-          scrDesktopH := scrCurrModeW;
-        end else
-          begin
-            wndPortrait := scrCanPortrait;
-            scrDesktopW := scrCurrModeW;
-            scrDesktopH := scrCurrModeH;
-          end;
-
-  oglWidth    := scrDesktopW;
-  oglHeight   := scrDesktopH;
-  oglTargetW  := scrDesktopW;
-  oglTargetH  := scrDesktopH;
+  appXIC := XCreateIC( appXIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
+  if not Assigned( appXIC ) Then
+    log_Add( 'XCreateIC - Fail' )
+  else
+    log_Add( 'XCreateIC - ok' );
 {$ENDIF}
-  scrInitialized := TRUE;
+{$IFDEF WINDOWS}
+  scr_Init();
+  if ( not wndFullScreen ) and ( scrDesktop.dmBitsPerPel <> 32 ) Then
+    scr_SetWindowedMode();
+{$ENDIF}
+{$IFDEF DARWIN}
+  scr_Init();
+  if CGDisplayBitsPerPixel( scrDisplay ) <> 32 Then
+    begin
+      u_Error( 'Desktop not set to 32-bit mode.' );
+      zgl_Exit();
+      exit;
+    end;
+{$ENDIF}
+  log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
+  scr_GetResList();
+  Result := TRUE;
 end;
 
 procedure scr_GetResList;
   var
     i : Integer;
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
     tmpSettings : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
     tmpSettings : DEVMODEW;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
     tmpSettings   : UnivPtr;
     width, height : Integer;
   {$ENDIF}
@@ -335,7 +285,7 @@ procedure scr_GetResList;
       if ( scrResList.Width[ j ] = Width ) and ( scrResList.Height[ j ] = Height ) Then Result := TRUE;
   end;
 begin
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   tmpSettings := scrModeList;
   for i := 0 to scrModeCount - 1 do
     begin
@@ -367,7 +317,7 @@ begin
       INC( i );
     end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   tmpSettings := scrModeList;
   for i := 0 to scrModeCount - 1 do
     begin
@@ -384,27 +334,59 @@ begin
         end;
     end;
 {$ENDIF}
-{$IFDEF iOS}
-  scrResList.Count := 1;
-  SetLength( scrResList.Width, 1 );
-  SetLength( scrResList.Height, 1 );
-  scrResList.Width[ 0 ] := scrDesktopW;
-  scrResList.Height[ 0 ] := scrDesktopH;
-{$ENDIF}
+end;
+
+procedure scr_Destroy;
+begin
+  if wndFullScreen Then
+    scr_Reset();
+  {$IFDEF LINUX}
+  XRRFreeScreenConfigInfo( scrSettings );
+
+  XDestroyIC( appXIC );
+  XCloseIM( appXIM );
+  {$ENDIF}
+
+  scrResList.Count := 0;
+  SetLength( scrResList.Width, 0 );
+  SetLength( scrResList.Height, 0 );
+
+  scrInitialized := FALSE;
 end;
 
 procedure scr_Reset;
 begin
   scrChanging := TRUE;
-{$IFDEF USE_X11}
-  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, scrRotation, CurrentTime );
+{$IFDEF LINUX}
+  XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, 1, 0 );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scrMonInfo.szDevice, {$IFDEF WINDESKTOP}DEVMODEW( nil^ ){$ELSE}scrDesktop{$ENDIF}, 0, CDS_FULLSCREEN, nil );
+  ChangeDisplaySettingsExW( scrMonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   CGDisplaySwitchToMode( scrDisplay, scrDesktop );
   //CGDisplayRelease( scrDisplay );
+{$ENDIF}
+end;
+
+procedure scr_Clear;
+begin
+  batch2d_Flush();
+  glClear( GL_COLOR_BUFFER_BIT * Byte( appFlags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( appFlags and DEPTH_BUFFER_CLEAR > 0 ) or
+           GL_STENCIL_BUFFER_BIT * Byte( appFlags and STENCIL_BUFFER_CLEAR > 0 ) );
+end;
+
+procedure scr_Flush;
+begin
+  batch2d_Flush();
+{$IFDEF LINUX}
+  glXSwapBuffers( scrDisplay, wndHandle );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  SwapBuffers( wndDC );
+{$ENDIF}
+{$IFDEF DARWIN}
+  aglSwapBuffers( oglContext );
 {$ENDIF}
 end;
 
@@ -414,7 +396,7 @@ procedure scr_SetWindowedMode;
     settings : DEVMODEW;
   {$ENDIF}
 begin
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   scr_Reset();
   XMapWindow( scrDisplay, wndHandle );
   {$ENDIF}
@@ -435,127 +417,31 @@ begin
     end else
       scr_Reset();
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   scr_Reset();
   ShowMenuBar();
   {$ENDIF}
 end;
 
-function scr_Create : Boolean;
-begin
-  scr_Init();
-{$IFDEF USE_X11}
-  if DefaultDepth( scrDisplay, scrDefault ) < 24 Then
-    begin
-      u_Error( 'DefaultDepth not set to 24-bit.' );
-      zgl_Exit();
-      Result := FALSE;
-      exit;
-    end;
-
-  appXIM := XOpenIM( scrDisplay, nil, nil, nil );
-  if not Assigned( appXIM ) Then
-    log_Add( 'XOpenIM - Fail' )
-  else
-    log_Add( 'XOpenIM - ok' );
-
-  appXIC := XCreateIC( appXIM, [ XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0 ] );
-  if not Assigned( appXIC ) Then
-    log_Add( 'XCreateIC - Fail' )
-  else
-    log_Add( 'XCreateIC - ok' );
-{$ENDIF}
-{$IFDEF WINDOWS}
-  if ( not wndFullScreen ) and ( scrDesktop.dmBitsPerPel <> 32 ) Then
-    scr_SetWindowedMode();
-{$ENDIF}
-{$IFDEF MACOSX}
-  if CGDisplayBitsPerPixel( scrDisplay ) <> 32 Then
-    begin
-      u_Error( 'Desktop not set to 32-bit mode.' );
-      zgl_Exit();
-      Result := FALSE;
-      exit;
-    end;
-{$ENDIF}
-  log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
-  scr_GetResList();
-  Result := TRUE;
-end;
-
-procedure scr_Destroy;
-begin
-  if wndFullScreen Then
-    scr_Reset();
-  {$IFDEF USE_X11}
-  XRRFreeScreenConfigInfo( scrSettings );
-
-  XDestroyIC( appXIC );
-  XCloseIM( appXIM );
-  {$ENDIF}
-
-  scrResList.Count := 0;
-  SetLength( scrResList.Width, 0 );
-  SetLength( scrResList.Height, 0 );
-
-  scrInitialized := FALSE;
-end;
-
-procedure scr_Clear;
-begin
-  batch2d_Flush();
-  glClear( GL_COLOR_BUFFER_BIT * Byte( appFlags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( appFlags and DEPTH_BUFFER_CLEAR > 0 ) or
-           GL_STENCIL_BUFFER_BIT * Byte( appFlags and STENCIL_BUFFER_CLEAR > 0 ) );
-end;
-
-procedure scr_Flush;
-begin
-  batch2d_Flush();
-{$IFNDEF USE_GLES}
-  {$IFDEF LINUX}
-  glXSwapBuffers( scrDisplay, wndHandle );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  SwapBuffers( wndDC );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  aglSwapBuffers( oglContext );
-  {$ENDIF}
-{$ELSE}
-  {$IFNDEF NO_EGL}
-  eglSwapBuffers( oglDisplay, oglSurface );
-  {$ENDIF}
-  {$IFDEF iOS}
-  eglContext.presentRenderbuffer( GL_RENDERBUFFER );
-  {$ENDIF}
-{$ENDIF}
-end;
-
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
-  {$IFDEF USE_X11}
   var
+  {$IFDEF LINUX}
     modeToSet : Integer;
     mode      : PXRRScreenSize;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  var
     i : Integer;
     r : Integer;
   {$ENDIF}
-  {$IFDEF MACOSX}
-  var
+  {$IFDEF DARWIN}
     b : Integer;
   {$ENDIF}
 begin
-{$IFDEF iOS}
-  Width      := scrDesktopW;
-  Height     := scrDesktopH;
-  Refresh    := REFRESH_DEFAULT;
-  FullScreen := TRUE;
-  VSync      := TRUE;
-{$ENDIF}
-
   scrChanging   := TRUE;
+  oglWidth      := Width;
+  oglHeight     := Height;
+  oglTargetW    := Width;
+  oglTargetH    := Height;
   wndWidth      := Width;
   wndHeight     := Height;
   scrRefresh    := Refresh;
@@ -574,16 +460,9 @@ begin
         scrHeight := zgl_Get( DESKTOP_HEIGHT );
       end;
 
-  if not appInitialized Then
-    begin
-      oglWidth   := Width;
-      oglHeight  := Height;
-      oglTargetW := Width;
-      oglTargetH := Height;
-      exit;
-    end;
+  if not appInitialized Then exit;
   scr_SetVSync( scrVSync );
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   if wndFullScreen Then
     begin
       scrCurrent := -1;
@@ -603,7 +482,7 @@ begin
           scrCurrent    := scrDesktop;
           wndFullScreen := FALSE;
         end;
-      XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, scrRotation, CurrentTime );
+      XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, 1, 0 );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
@@ -652,7 +531,7 @@ begin
     end else
       scr_SetWindowedMode();
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if wndFullScreen Then
     begin
       //CGDisplayCapture( scrDisplay );
@@ -686,14 +565,10 @@ end;
 
 procedure scr_CorrectResolution( Width, Height : Word );
 begin
-  scrResW        := Width;
-  scrResH        := Height;
-  scrResCX       := wndWidth  / Width;
-  scrResCY       := wndHeight / Height;
-  render2dClipW  := Width;
-  render2dClipH  := Height;
-  render2dClipXW := render2dClipX + render2dClipW;
-  render2dClipYH := render2dClipY + render2dClipH;
+  scrResW  := Width;
+  scrResH  := Height;
+  scrResCX := wndWidth  / Width;
+  scrResCY := wndHeight / Height;
 
   if scrResCX < scrResCY Then
     begin
@@ -731,63 +606,43 @@ begin
     begin
       if ( appFlags and CORRECT_RESOLUTION > 0 ) and ( oglMode = 2 ) Then
         begin
-          scrViewportX := scrAddCX;
-          scrViewportY := scrAddCY;
-          scrViewportW := wndWidth- scrAddCX * 2;
-          scrViewportH := wndHeight - scrAddCY * 2;
+          oglClipX := 0;
+          oglClipY := 0;
+          oglClipW := wndWidth - scrAddCX * 2;
+          oglClipH := wndHeight - scrAddCY * 2;
+          glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
         end else
           begin
-            scrViewportX := 0;
-            scrViewportY := 0;
-            scrViewportW := wndWidth;
-            scrViewportH := wndHeight;
+            oglClipX := 0;
+            oglClipY := 0;
+            oglClipW := wndWidth;
+            oglClipH := wndHeight;
+            glViewPort( 0, 0, oglClipW, oglClipH );
           end;
     end else
       begin
-        scrViewportX := 0;
-        scrViewportY := 0;
-        scrViewportW := oglTargetW;
-        scrViewportH := oglTargetH;
+        oglClipX := 0;
+        oglClipY := 0;
+        oglClipW := oglWidth;
+        oglClipH := oglHeight;
+        glViewPort( 0, 0, oglTargetW, oglTargetH );
       end;
-
-  if appFlags and CORRECT_RESOLUTION > 0 Then
-    begin
-      render2dClipW  := scrResW;
-      render2dClipH  := scrResH;
-      render2dClipXW := render2dClipX + render2dClipW;
-      render2dClipYH := render2dClipY + render2dClipH;
-    end else
-      begin
-        render2dClipW  := scrViewportW;
-        render2dClipH  := scrViewportH;
-        render2dClipXW := render2dClipX + render2dClipW;
-        render2dClipYH := render2dClipY + render2dClipH;
-      end;
-
-  glViewPort( scrViewportX, scrViewportY, scrViewportW, scrViewportH );
 end;
 
 procedure scr_SetVSync( VSync : Boolean );
 begin
   scrVSync := VSync;
-{$IFNDEF USE_GLES}
-  {$IFDEF USE_X11}
+{$IFDEF LINUX}
   if oglCanVSync Then
     glXSwapIntervalSGI( Integer( scrVSync ) );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+{$ENDIF}
+{$IFDEF WINDOWS}
   if oglCanVSync Then
     wglSwapInterval( Integer( scrVSync ) );
-  {$ENDIF}
-  {$IFDEF MACOSX}
+{$ENDIF}
+{$IFDEF DARWIN}
   if Assigned( oglContext ) Then
     aglSetInt( oglContext, AGL_SWAP_INTERVAL, Byte( scrVSync ) );
-  {$ENDIF}
-{$ELSE}
-  {$IFNDEF NO_EGL}
-  if oglCanVSync Then
-    eglSwapInterval( oglDisplay, Integer( scrVSync ) );
-  {$ENDIF}
 {$ENDIF}
 end;
 
@@ -814,7 +669,7 @@ procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );
-  glReadPixels( X, oglHeight - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+  glReadPixels( X, oglClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
 
 end.

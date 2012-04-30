@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -21,10 +21,10 @@
 unit zgl_opengl_all;
 
 {$I zgl_config.cfg}
-{$IFDEF UNIX}
+{$IFDEF LINUX_OR_DARWIN}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   {$LINKFRAMEWORK OpenGL}
 {$ENDIF}
 
@@ -36,19 +36,19 @@ uses
   {$IFDEF WINDOWS}
   Windows
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   MacOSAll
   {$ENDIF}
   ;
 
 function InitGL : Boolean;
 procedure FreeGL;
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 function InitAGL : Boolean;
 procedure FreeAGL;
 {$ENDIF}
-function gl_GetProc( const Proc : UTF8String ) : Pointer;
-function gl_IsSupported( const Extension, SearchIn : UTF8String ) : Boolean;
+function gl_GetProc( const Proc : AnsiString ) : Pointer;
+function gl_IsSupported( const Extension, SearchIn : AnsiString ) : Boolean;
 
 const
   {$IFDEF LINUX}
@@ -59,7 +59,7 @@ const
   libGL  = 'opengl32.dll';
   libGLU = 'glu32.dll';
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   libGL  = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
   libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
   libAGL = '/System/Library/Frameworks/AGL.framework/AGL';
@@ -81,7 +81,6 @@ const
   GL_UNSIGNED_SHORT                 = $1403;
   GL_UNSIGNED_INT                   = $1405;
   GL_FLOAT                          = $1406;
-  GL_UNSIGNED_SHORT_4_4_4_4         = $8033;
 
   // PixelFormat
   GL_RGBA                           = $1908;
@@ -176,8 +175,6 @@ const
   GL_COMPRESSED_RGB_ARB             = $84ED;
   GL_COMPRESSED_RGBA_ARB            = $84EE;
   GL_COMPRESSED_RGB_S3TC_DXT1_EXT   = $83F0;
-  GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  = $83F1;
-  GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  = $83F2;
   GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  = $83F3;
   // Texture Env Mode
   GL_MODULATE                       = $2100;
@@ -377,8 +374,6 @@ var
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
 var
-  //
-  glCompressedTexImage2D : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
   // FBO
   glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
   glBindRenderbuffer: procedure(target: GLenum; renderbuffer: GLuint); stdcall;
@@ -396,7 +391,7 @@ var
   // Triangulation
   {$IFDEF USE_TRIANGULATION}
   procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
-  function  gluErrorString(error: Integer): PAnsiChar; stdcall external libGLU;
+  function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
   function  gluNewTess: Integer; stdcall external libGLU;
   procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
   procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
@@ -442,13 +437,13 @@ const
   procedure glXDestroyContext(dpy: PDisplay; ctx: GLXContext); cdecl; external libGL;
   function  glXMakeCurrent(dpy: PDisplay; drawable: GLXDrawable; ctx: GLXContext): Boolean; cdecl; external libGL;
   procedure glXSwapBuffers(dpy: PDisplay; drawable: GLXDrawable); cdecl; external libGL;
-  function  glXQueryExtension(dpy: PDisplay; out errorb, event: Integer): Boolean; cdecl; external libGL;
-  function  glXQueryVersion(dpy: PDisplay; out major, minor: Integer): Boolean; cdecl; external libGL;
+  function  glXQueryExtension(dpy: PDisplay; var errorb, event: Integer): Boolean; cdecl; external libGL;
+  function  glXQueryVersion(dpy: PDisplay; var major, minor: Integer): Boolean; cdecl; external libGL;
   function  glXIsDirect(dpy: PDisplay; ctx: GLXContext): Boolean; cdecl; external libGL;
-  function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PAnsiChar; cdecl; external libGL;
+  function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PChar; cdecl; external libGL;
 
 var
-  glXGetProcAddressARB: function(name: PAnsiChar): Pointer; cdecl;
+  glXGetProcAddressARB: function(name: PChar): Pointer; cdecl;
   glXSwapIntervalSGI: function( interval: Integer): Integer; cdecl;
   // PBuffer
   glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
@@ -493,7 +488,7 @@ var
   wglReleasePbufferDCARB: function(hPbuffer: THandle; hDC: HDC): GLint; stdcall;
   wglDestroyPbufferARB: function(hPbuffer: THandle): BOOL; stdcall;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 const
   AGL_NONE         = 0;
   AGL_BUFFER_SIZE  = 2;
@@ -552,8 +547,8 @@ var
 {$ENDIF}
 
 var
-  oglLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF MACOSX}
+  oglLibrary : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  {$IFDEF DARWIN}
   aglLibrary : Pointer;
   {$ENDIF}
 
@@ -566,7 +561,9 @@ uses
 
 function InitGL : Boolean;
 begin
-  // Scary, yeah :)
+  Result := FALSE;
+
+  // Страшно, да :)
   {$IFDEF FPC}
     { according to bug 7570, this is necessary on all x86 platforms,
       maybe we've to fix the sse control word as well }
@@ -578,7 +575,7 @@ begin
     Set8087CW($133F);
   {$ENDIF}
 
-  oglLibrary := dlopen( libGL {$IFDEF UNIX}, $001 {$ENDIF} );
+  oglLibrary := dlopen( libGL {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
   {$IFDEF LINUX}
   glXGetProcAddressARB := gl_GetProc( 'glXGetProcAddress' );
   {$ENDIF}
@@ -591,7 +588,7 @@ begin
   dlclose( oglLibrary );
 end;
 
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
 function aglSetInt;
   var
     i : Integer;
@@ -631,7 +628,7 @@ begin
 end;
 {$ENDIF}
 
-function gl_GetProc( const Proc : UTF8String ) : Pointer;
+function gl_GetProc( const Proc : AnsiString ) : Pointer;
 begin
   {$IFDEF WINDOWS}
   Result := wglGetProcAddress( PAnsiChar( Proc ) );
@@ -653,7 +650,7 @@ begin
   {$ENDIF}
 end;
 
-function gl_IsSupported( const Extension, SearchIn: UTF8String ) : Boolean;
+function gl_IsSupported( const Extension, SearchIn: AnsiString ) : Boolean;
   var
     extPos: Integer;
 begin

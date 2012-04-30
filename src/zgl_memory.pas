@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -34,8 +34,8 @@ type
     Position : LongWord;
 end;
 
-function  mem_LoadFromFile( out Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
-function  mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
+procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
+procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
 function  mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
 function  mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
@@ -44,7 +44,7 @@ procedure mem_SetSize( var Memory : zglTMemory; Size : LongWord );
 procedure mem_Free( var Memory : zglTMemory );
 
 {$IFDEF ENDIAN_BIG}
-threadvar
+var
   forceNoSwap : Boolean;
 {$ENDIF}
 
@@ -53,35 +53,27 @@ uses
   zgl_main,
   zgl_file;
 
-function mem_LoadFromFile( out Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
+procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
   var
     f : zglTFile;
 begin
-  Result := FALSE;
   if not file_Exists( FileName ) Then exit;
 
-  if file_Open( f, FileName, FOM_OPENR ) Then
-    begin
-      Memory.Size     := file_GetSize( f );
-      Memory.Position := 0;
-      zgl_GetMem( Memory.Memory, Memory.Size );
-      file_Read( f, Memory.Memory^, Memory.Size );
-      file_Close( f );
-      Result := TRUE;
-    end;
+  file_Open( f, FileName, FOM_OPENR );
+  Memory.Size     := file_GetSize( f );
+  Memory.Position := 0;
+  zgl_GetMem( Memory.Memory, Memory.Size );
+  file_Read( f, Memory.Memory^, Memory.Size );
+  file_Close( f );
 end;
 
-function mem_SaveToFile( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
+procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
   var
     f : zglTFile;
 begin
-  Result := file_Open( f, FileName, FOM_CREATE );
-
-  if Result Then
-    begin
-      file_Write( f, Memory.Memory^, Memory.Size );
-      file_Close( f );
-    end;
+  file_Open( f, FileName, FOM_CREATE );
+  file_Write( f, Memory.Memory^, Memory.Size );
+  file_Close( f );
 end;
 
 function mem_Seek( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
@@ -97,7 +89,7 @@ end;
 function mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 begin
   {$IFDEF ENDIAN_BIG}
-  if ( Bytes <= 4 ) and ( not forceNoSwap ) Then
+  if ( Bytes <=4 ) and ( not forceNoSwap ) Then
     begin
       Result := mem_ReadSwap( Memory, Buffer, Bytes );
       exit;
@@ -109,7 +101,7 @@ begin
       if Result > 0 Then
         begin
           if Result > Bytes Then Result := Bytes;
-          Move( PByteArray( Memory.Memory )[ Memory.Position ], Buffer, Result );
+          Move( Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Buffer, Result );
           INC( Memory.Position, Result );
           exit;
         end;
@@ -119,7 +111,8 @@ end;
 
 function mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
   var
-    i : LongWord;
+    i     : LongWord;
+    pData : array of Byte;
 begin
   {$IFDEF ENDIAN_BIG}
   if forceNoSwap Then
@@ -134,11 +127,14 @@ begin
       if Result > 0 Then
         begin
           if Result > Bytes Then Result := Bytes;
+          SetLength( pData, Result );
           for i := 0 to Result - 1 do
             begin
-              PByteArray( @Buffer )[ Result - i - 1 ] := PByteArray( Memory.Memory )[ Memory.Position ];
+              pData[ Result - i - 1 ] := PByte( Ptr( Memory.Memory ) + Memory.Position )^;
               INC( Memory.Position );
             end;
+          Move( pData[ 0 ], Buffer, Result );
+          SetLength( pData, 0 );
           exit;
         end;
     end;
@@ -154,7 +150,7 @@ begin
     end;
   if Memory.Position + Bytes > Memory.Size Then
     mem_SetSize( Memory, Memory.Position + Bytes );
-  Move( Buffer, PByteArray( Memory.Memory )[ Memory.Position ], Bytes );
+  Move( Buffer, Pointer( Ptr( Memory.Memory ) + Memory.Position )^, Bytes );
   INC( Memory.Position, Bytes );
   Result := Bytes;
 end;
