@@ -408,17 +408,6 @@ begin
       begin
         if keysCanText Then
         case winkey_to_scancode( wParam ) of
-          K_SYSRQ, K_PAUSE,
-          K_ESCAPE, K_ENTER, K_KP_ENTER,
-          K_UP, K_DOWN, K_LEFT, K_RIGHT,
-          K_INSERT, K_DELETE, K_HOME, K_END,
-          K_PAGEUP, K_PAGEDOWN,
-          K_CTRL_L, K_CTRL_R,
-          K_ALT_L, K_ALT_R,
-          K_SHIFT_L, K_SHIFT_R,
-          K_SUPER_L, K_SUPER_R,
-          K_APP_MENU,
-          K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
