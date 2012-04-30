@@ -7,7 +7,7 @@ uses
   zgl_screen,
   zgl_window,
   zgl_timers,
-  zgl_mouse,
+  zgl_touch,
   zgl_keyboard,
   zgl_primitives_2d,
   zgl_font,
@@ -49,7 +49,7 @@ begin
 
   // RU: Координаты "пальцев" можно получить при помощи функций touch_X и touch_Y.
   // EN: "Finger" coordinates can be got using functions touch_X and touch_Y.
-  text_Draw( fntMain, 0, 16, 'First finger X, Y: ' + u_IntToStr( touch( 0 ) ) + '; ' + u_IntToStr( touch_Y( 0 ) ) );
+  text_Draw( fntMain, 0, 16, 'First finger X, Y: ' + u_IntToStr( touch_X( 0 ) ) + '; ' + u_IntToStr( touch_Y( 0 ) ) );
   text_Draw( fntMain, 0, 32, 'Second finger X, Y: ' + u_IntToStr( touch_X( 1 ) ) + '; ' + u_IntToStr( touch_Y( 1 ) ) );
 
   // RU: Выводим введённый пользователем текст.
@@ -57,7 +57,7 @@ begin
   pr2d_Rect( inputRect.X, inputRect.Y, inputRect.W, inputRect.H, $FFFFFF, 255 );
   if trackInput Then
     begin
-      text_Draw( fntMain, 400, 300 - 100, 'Press Enter to stop track text input:', TEXT_HALIGN_CENTER );
+      text_Draw( fntMain, 400, 300 - 100, 'Press Done to stop track text input:', TEXT_HALIGN_CENTER );
       w := text_GetWidth( fntMain, userInput );
       pr2d_Rect( 400 + w / 2 + 2, 300 - 70, 10, 20, $FFFFFF, lineAlpha, PR2D_FILL );
     end else
@@ -80,8 +80,8 @@ begin
       key_BeginReadText( userInput, 24 );
     end;
 
-  // RU: Если был нажат Enter прекращаем отслеживать ввод текста.
-  // EN: Finish to track text input if Enter was pressed.
+  // RU: Если была нажата кнопка Done прекращаем отслеживать ввод текста.
+  // EN: Finish to track text input if Done was pressed.
   if key_Press( K_ENTER ) Then
     begin
       trackInput := FALSE;
