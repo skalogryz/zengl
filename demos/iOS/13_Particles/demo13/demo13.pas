@@ -427,7 +427,7 @@ Begin
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
 
-  scr_SetOptions( 800, 600, 0, FALSE, FALSE );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
 
   zgl_Init;
 End.

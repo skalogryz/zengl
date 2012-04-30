@@ -76,7 +76,7 @@ Begin
 
   // RU: Указываем первоначальные настройки.
   // EN: Set screen options.
-  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
 
   // RU: Инициализируем ZenGL.
   // EN: Initialize ZenGL.

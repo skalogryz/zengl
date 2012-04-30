@@ -7,21 +7,32 @@ uses
   zgl_screen,
   zgl_window,
   zgl_timers,
-  zgl_keyboard,
+  zgl_touch,
   zgl_font,
   zgl_text,
+  zgl_primitives_2d,
   zgl_sprite_2d,
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
+  zgl_math_2d,
+  zgl_collision_2d,
   zgl_utils
   ;
 
 var
-  dirRes  : UTF8String 'data/';
+  dirRes  : UTF8String = 'data/';
 
   fntMain : zglPFont;
   texBack : zglPTexture;
+
+  correctAspect : Boolean = TRUE;
+  useLandscape  : Boolean = TRUE;
+  usePortrait   : Boolean = TRUE;
+
+  correctRect   : zglTRect;
+  landscapeRect : zglTRect;
+  portraitRect  : zglTRect;
 
 procedure Init;
 begin
@@ -33,67 +44,107 @@ begin
 end;
 
 procedure Draw;
+  var
+    w   : Single;
+    str : UTF8String;
 begin
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
-  text_Draw( fntMain, 0, 0, 'Escape - Exit' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 1, 'F1 - Fullscreen with desktop resolution and correction of aspect' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 2, 'F2 - Fullscreen with desktop resolution and simple scaling' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 3, 'F3 - Fullscreen with resolution 800x600' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 4, 'F4 - Windowed mode' );
+  str := 'Tap here to toggle' + #10 + 'Correction of aspect';
+  correctRect.X := 64;
+  correctRect.Y := 100;
+  correctRect.W := text_GetWidth( fntMain, str ) + 8;
+  correctRect.H := 64;
+  if correctAspect Then
+    begin
+      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $FFFFFF, 25, PR2D_FILL );
+      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $00FF00, 255 );
+    end else
+      begin
+        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $000000, 155, PR2D_FILL );
+        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $FFFFFF, 255 );
+      end;
+  text_DrawInRect( fntMain, correctRect, str, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
+
+  str := 'Tap here to toggle support of' + #10 + 'Landscape mode';
+  landscapeRect.X := 260;
+  landscapeRect.Y := 100;
+  landscapeRect.W := text_GetWidth( fntMain, str ) + 8;
+  landscapeRect.H := 64;
+  if useLandscape Then
+    begin
+      pr2d_Rect( landscapeRect.X, landscapeRect.Y, landscapeRect.W, landscapeRect.H, $FFFFFF, 25, PR2D_FILL );
+      pr2d_Rect( landscapeRect.X, landscapeRect.Y, landscapeRect.W, landscapeRect.H, $00FF00, 255 );
+    end else
+      begin
+        pr2d_Rect( landscapeRect.X, landscapeRect.Y, landscapeRect.W, landscapeRect.H, $000000, 155, PR2D_FILL );
+        pr2d_Rect( landscapeRect.X, landscapeRect.Y, landscapeRect.W, landscapeRect.H, $FFFFFF, 255 );
+      end;
+  text_DrawInRect( fntMain, landscapeRect, str, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
+
+  str := 'Tap here to toggle support of' + #10 + 'Portrait mode';
+  portraitRect.W := text_GetWidth( fntMain, str ) + 8;
+  portraitRect.H := 64;
+  portraitRect.X := 800 - portraitRect.W - 64;
+  portraitRect.Y := 100;
+  if usePortrait Then
+    begin
+      pr2d_Rect( portraitRect.X, portraitRect.Y, portraitRect.W, portraitRect.H, $FFFFFF, 25, PR2D_FILL );
+      pr2d_Rect( portraitRect.X, portraitRect.Y, portraitRect.W, portraitRect.H, $00FF00, 255 );
+    end else
+      begin
+        pr2d_Rect( portraitRect.X, portraitRect.Y, portraitRect.W, portraitRect.H, $000000, 155, PR2D_FILL );
+        pr2d_Rect( portraitRect.X, portraitRect.Y, portraitRect.W, portraitRect.H, $FFFFFF, 255 );
+      end;
+  text_DrawInRect( fntMain, portraitRect, str, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
 end;
 
 procedure Timer;
 begin
-  // RU: Рекомендуемый к использованию полноэкранный режим. Основная идея - переключиться в полноэкранный режим используя текущее разрешение рабочего стола пользователя, но при этом
-  //     сохранить пропорции изображения. Это позволит избежать некоторых проблем с LCD.
-  // EN: Recommended fullscreen mode for using. Main idea is switching to fullscreen mode using current desktop resolution of user and saving the aspect. This will avoid some problems
-  //     with LCD's.
-  if key_Press( K_F1 ) Then
+  if touch_Tap( 0 ) Then
     begin
-      // RU: Включить коррекцию пропорций.
-      // EN: Enable aspect correction.
-      zgl_Enable( CORRECT_RESOLUTION );
-      // RU: Установить разрешение под которое изначально написано приложение.
-      // EN: Set resolution for what application was wrote.
-      scr_CorrectResolution( 800, 600 );
-      scr_SetOptions( zgl_Get( DESKTOP_WIDTH ), zgl_Get( DESKTOP_HEIGHT ), REFRESH_MAXIMUM, TRUE, FALSE );
+      // RU: Данный пример использует соотношение сторон 4:3, что стандартно для iPad'а в альбомной ориентации и при масштабировании(с 800х600 до 1024х768 или 2048х1536) проблем не вызывает.
+      //     На iPhone же использование соотношения 4:3 без коррекции по ширине и высоте можно наблюдать эффект растягивания. То же самое и для портретной ориентации.
+      // EN: This demo uses aspect 4:3, which is standard aspect for iPad'а in landscape orientation and scaling(from 800х600 to 1024х768 or 2048х1536) won't cause a problem.
+      //     Using aspect 4:3 without correction for width and height will cause a stretching effect for iPhone or portrait orientation.
+      if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), correctRect ) Then
+        begin
+          correctAspect := not correctAspect;
+          if correctAspect Then
+            begin
+              zgl_Enable( CORRECT_WIDTH );
+              zgl_Enable( CORRECT_HEIGHT );
+              scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
+            end else
+              begin
+                zgl_Disable( CORRECT_WIDTH );
+                zgl_Disable( CORRECT_HEIGHT );
+                scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
+              end;
+        end;
+
+      // RU: Помимо стандартных настроек для iOS приложения в Info.plist, поддерживаемыми режимами ориентации можно управлять непосредственно через zgl_Enable/zgl_Disable.
+      // EN: Besides the standard options for iOS application in Info.plist, support of orientations can be controlled using zgl_Enable/zgl_Disable.
+      if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), landscapeRect ) Then
+        begin
+          useLandscape := not useLandscape;
+          if useLandscape Then
+            zgl_Enable( SCR_ORIENTATION_LANDSCAPE )
+          else
+            zgl_Disable( SCR_ORIENTATION_LANDSCAPE );
+        end;
+
+      if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), portraitRect ) Then
+        begin
+          usePortrait := not usePortrait;
+          if usePortrait Then
+            zgl_Enable( SCR_ORIENTATION_PORTRAIT )
+          else
+            zgl_Disable( SCR_ORIENTATION_PORTRAIT );
+        end;
     end;
 
-  // RU: Схожий режим с предыдущим за одним исключением - отключена коррекция по ширине и высоте. Например, отключение коррекции по высоте может пригодиться при соотошении
-  //     сторон 5:4(разрешение экрана 1280x1024), т.к. можно заполнить всю область экрана без существенных искажений.
-  // EN: Similar mode to previous one with one exception - disabled correction for width and height. E.g. this can be useful for aspect 5:4(resolution 1280x1024),
-  //     because screen can be filled without significant distortion.
-  if key_Press( K_F2 ) Then
-    begin
-      zgl_Enable( CORRECT_RESOLUTION );
-      zgl_Disable( CORRECT_WIDTH );
-      zgl_Disable( CORRECT_HEIGHT );
-      scr_CorrectResolution( 800, 600 );
-      scr_SetOptions( zgl_Get( DESKTOP_WIDTH ), zgl_Get( DESKTOP_HEIGHT ), REFRESH_MAXIMUM, TRUE, FALSE );
-    end;
-
-  // RU: Переключение в полноэкранный режим используя указанные размеры. В наше время такой подход имеет два больших недостатка на LCD:
-  //     - если указываемое разрешение не является родным для LCD, то без специальных настройках в драйверах пользователь будет наблюдать пикселизацию
-  //     - на широкоэкранных мониторах картинка с соотношением 4:3 будет смотрется растянутой
-  // EN: Switching to fullscreen mode using set values. Nowadays this method two main problems with LCD:
-  //     - if used resolution is not main for LCD, then without special options in drivers user will see pixelization
-  //     - picture with aspect 4:3 will be stretched on widescreen monitors
-  if key_Press( K_F3 ) Then
-    begin
-      zgl_Disable( CORRECT_RESOLUTION );
-      scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, FALSE );
-    end;
-
-  // RU: Оконный режим.
-  // EN: Windowed mode.
-  if key_Press( K_F4 ) Then
-    begin
-      zgl_Disable( CORRECT_RESOLUTION );
-      scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
-    end;
-
-  key_ClearState();
+  touch_ClearState();
 end;
 
 Begin
@@ -102,7 +153,7 @@ Begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
 
   zgl_Init();
 End.
