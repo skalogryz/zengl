@@ -408,6 +408,7 @@ begin
       begin
         if keysCanText Then
         case winkey_to_scancode( wParam ) of
+          K_ENTER:;
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
