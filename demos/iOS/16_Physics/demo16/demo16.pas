@@ -181,7 +181,7 @@ begin
 
   if touch_Tap( 0 ) Then
     begin
-      if balls Then
+      if not balls Then
         cpAddBox( touch_X( 0 ) - 10, touch_Y( 0 ) - 10, 48, 32, 1, 0.5, 0.5 )
       else
         cpAddBall( touch_X( 0 ), touch_Y( 0 ), 16, 1, 0.5, 0.9 );
