@@ -81,7 +81,7 @@ begin
   r.Y := ( SCREEN_HEIGHT - 128 ) / 2;
   r.W := 128;
   r.H := 128;
-  if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
+  if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), r ) Then
     begin
       fx_SetBlendMode( FX_BLEND_ADD );
       ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 132 ) / 2, ( SCREEN_HEIGHT - 132 ) / 2, 132, 132, 0, 155 );
