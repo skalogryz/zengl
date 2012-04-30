@@ -1358,6 +1358,7 @@ begin
       touchDown[ ID ]   := FALSE;
       touchUp[ ID ]     := TRUE;
       touchTap[ ID ]    := FALSE;
+      touchDblTap[ ID ] := FALSE;
       touchCanTap[ ID ] := TRUE;
 
       if Assigned( touch_PRelease ) Then
@@ -1371,7 +1372,8 @@ begin
 
             if Assigned( touch_PPress ) Then
               touch_PPress( ID );
-          end;
+          end else
+            touchDblTap[ M_BLEFT ] := touchDown[ ID ] and ( not touchCanTap[ ID ] );
 
         touchDown[ ID ] := TRUE;
         touchUp[ ID ]   := FALSE;
@@ -1402,9 +1404,6 @@ begin
             begin
               mouseClick[ M_BLEFT ] := TRUE;
               mouseCanClick[ M_BLEFT ] := FALSE;
-              if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
-                mouseDblClick[ M_BLEFT ] := TRUE;
-              mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
 
               if Assigned( mouse_PPress ) Then
                 mouse_PPress( M_BLEFT );
@@ -1418,7 +1417,13 @@ begin
 
               if Assigned( mouse_PRelease ) Then
                 mouse_PRelease( M_BLEFT );
-            end;
+            end else
+              if touchDown[ 0 ] Then
+                begin
+                  if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
+                   mouseDblClick[ M_BLEFT ] := TRUE;
+                  mouseDblCTime[ M_BLEFT ] := timer_GetTicks();
+                end;
     end;
 end;
 
@@ -1434,7 +1439,7 @@ begin
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
       for j := 0 to MAX_TOUCH - 1 do
-        if ( not touchActive[ j ] ) and ( not touchUp[ j ] ) Then
+        if ( ( not touchActive[ j ] ) and ( not touchUp[ j ] ) ) or ( touch.tapCount = 2 ) Then
           begin
             if appFlags and CORRECT_RESOLUTION > 0 Then
               begin
