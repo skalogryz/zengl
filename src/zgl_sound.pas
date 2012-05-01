@@ -1182,15 +1182,18 @@ begin
 
   if Sound = SND_STREAM Then
     begin
-      thread_CSEnter( sfCS[ What ] );
-      case What of
-        SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ ID ] );
-        SND_STATE_LOOPED: Result := Byte( sfStream[ ID ].Loop );
-        SND_STATE_TIME: Result := Round( sfStream[ ID ]._complete );
-        SND_STATE_PERCENT: Result := Round( 100 / sfStream[ ID ].Duration * sfStream[ ID ]._complete );
-        SND_INFO_DURATION: Result := Round( sfStream[ ID ].Duration );
-      end;
-      thread_CSLeave( sfCS[ What ] );
+      if ( ID > 0 ) and ( ID < SND_MAX ) Then
+        begin
+          thread_CSEnter( sfCS[ What ] );
+          case What of
+            SND_STATE_PLAYING: Result := GetStatusPlaying( sfSource[ ID ] );
+            SND_STATE_LOOPED: Result := Byte( sfStream[ ID ].Loop );
+            SND_STATE_TIME: Result := Round( sfStream[ ID ]._complete );
+            SND_STATE_PERCENT: Result := Round( 100 / sfStream[ ID ].Duration * sfStream[ ID ]._complete );
+            SND_INFO_DURATION: Result := Round( sfStream[ ID ].Duration );
+          end;
+          thread_CSLeave( sfCS[ What ] );
+        end;
     end else
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );

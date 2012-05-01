@@ -119,7 +119,7 @@ begin
       r.W := 128;
       r.H := 128;
       if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), r ) and ( audio = 0 ) Then
-        audio := snd_PlayFile( dirRes + 'music.ogg');
+        audio := snd_PlayFile( dirRes + 'music.ogg' );
     end;
 
   // RU: Получаем в процентах позицию проигрывания аудиопотока и ставим громкость для плавных переходов.

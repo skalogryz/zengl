@@ -419,7 +419,7 @@ begin
 end;
 
 Begin
-  randomize;
+  randomize();
 
   timer_Add( @Timer, 16 );
 

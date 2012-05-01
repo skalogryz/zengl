@@ -199,7 +199,7 @@ begin
 end;
 
 Begin
-  randomize;
+  randomize();
 
   timer_Add( @Timer, 16 );
   timer_Add( @AddMiku, 1000 );
