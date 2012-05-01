@@ -1,12 +1,11 @@
-program demo01;
+library demo01;
 
 // RU: Этот файл содержит некоторые настройки(например использовать ли статическую компиляцию) и определения ОС под которую происходит компиляция.
 // EN: This file contains some options(e.g. whether to use static compilation) and defines of OS for which is compilation going.
 {$I zglCustomConfig.cfg}
 
 uses
-  // RU: Для iOS нельзя использовать сторонние динамические библиотеки, поэтому ZenGL модули необходимо подключать напрямую.
-  // EN: There is no possibility to use third party dynamic libraries on iOS, and that is why ZenGL units should be included directly.
+  zgl_application,
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -20,11 +19,6 @@ var
 
 procedure Init;
 begin
-  // RU: Т.к. разрешения устройств отличаются от используемого в примерах, нужно включить коррекцию. Подробнее смотрите пример "04 - Screen Settings".
-  // EN: Correction should be enabled because of difference between used resolution in demos and on devices. See demo "04 - Screen Settings" for more details.
-  zgl_Enable( CORRECT_RESOLUTION );
-  scr_CorrectResolution( 800, 600 );
-
   // RU: Тут можно выполнять загрузку основных ресурсов.
   // EN: Here can be loading of main resources.
 end;
@@ -46,9 +40,12 @@ begin
   //
 end;
 
-Begin
+procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
+begin
   // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
+  //     На Android DIRECTORY_APPLICATION возвращает полный путь к apk-файлу
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
+  //     On Android DIRECTORY_APPLICATION returns full path to apk-file
   DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
   DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
 
@@ -68,9 +65,17 @@ Begin
 
   // RU: Указываем первоначальные настройки.
   // EN: Set screen options.
-  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
+end;
 
-  // RU: Инициализируем ZenGL.
-  // EN: Initialize ZenGL.
-  zgl_Init();
+exports
+  // RU: Эта функция должна быть реализована проектом, который использует ZenGL
+  // EN: This function should be implemented by project which is use ZenGL
+  Java_zengl_android_ZenGL_Main,
+
+  // RU: Функции реализуемые ZenGL, которые должны быть экспортированы
+  // EN: Functions which are implemented by ZenGL and should be exported
+  {$I android_export.inc}
+
+Begin
 End.

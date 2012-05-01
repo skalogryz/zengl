@@ -30,7 +30,7 @@ void TextureCalcEffect( byte *pData, short Width, short Height )
 void Init()
 {
 	// RU: Более детальное рассмотрение параметров функций загрузки ресурсов есть в соответствующих примерах, тут же показана лишь основная суть.
-	// EN: Description with more detail about parameters of functions can be found in other demos, here is only main idea shown.
+	// EN: Description with more details about parameters of functions can be found in other demos, here is only main idea shown.
 
 	snd_Init();
 

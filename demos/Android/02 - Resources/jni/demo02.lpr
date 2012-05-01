@@ -1,11 +1,9 @@
-program demo02;
+library demo02;
 
 {$I zglCustomConfig.cfg}
 
 uses
-  cthreads,
-  Classes,
-
+  zgl_application,
   zgl_types,
   zgl_main,
   zgl_screen,
@@ -40,7 +38,7 @@ uses
   ;
 
 var
-  dirRes : UTF8String = 'data/';
+  dirRes : UTF8String = 'assets/';
 
   memory : zglTMemory;
 
@@ -54,6 +52,8 @@ var
   sndClick : zglPSound;
   sndMusic : zglPSound;
 
+  resLoaded : Boolean;
+
 procedure TextureCalcEffect( pData : PByteArray; Width, Height : Word );
 begin
   u_Sleep( 1000 );
@@ -61,8 +61,7 @@ end;
 
 procedure Init;
   var
-    i         : Integer;
-    memStream : TMemoryStream;
+    i : Integer;
 begin
   zgl_Enable( CORRECT_RESOLUTION );
   scr_CorrectResolution( 800, 600 );
@@ -70,7 +69,13 @@ begin
   // RU: Более детальное рассмотрение параметров функций загрузки ресурсов есть в соответствующих примерах, тут же показана лишь основная суть.
   // EN: Description with more details about parameters of functions can be found in other demos, here is only main idea shown.
 
-  snd_Init();
+  //snd_Init();
+
+  // RU: Основное отличие приложений Android от других заключается в том, что все ресурсы хранятся зачастую хранятся внутри apk-файла(обычный zip-архив).
+  //     Поэтому перед загрузкой любых ресурсов необходимо сначала "открыть" этот apk-файл, а потом "закрыть".
+  // EN: Main difference between Android application and others is containing resources in apk-file(just a zip archive).
+  //     And that is why before loading of any resources this apk-file should be "opened" first, and then "closed".
+  file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
 
   // RU: Функции загрузки ресурсов именуются в формате "$(префикс)_LoadFrom$(откуда)", где "$(префикс)" может быть tex, snd, font и т.д., а "$(откуда)" - File и Memory.
   // EN: Functions for loading resources named in format "$(prefix)_LoadFrom$(where)", where "$(prefix)" can be tex, snd, font and so on, and $(where) - File and Memory.
@@ -78,40 +83,25 @@ begin
   texLogo  := tex_LoadFromFile( dirRes + 'zengl.png' );
   sndClick := snd_LoadFromFile( dirRes + 'click.wav' );
 
+  // RU: Не забываем "закрыть" apk-файл.
+  // EN: Don't forget to "close" apk-file.
+  file_CloseArchive();
+
   // RU: Многопоточная загрузка ресурсов позволяет составить очередь и не ожидать загрузки выполняя другие операции, например рендеринг какой-то анимации.
   //     Процесс загрузки в многопоточном режиме практически ничем не отличается от обычного за исключением вызова функций старта и окончания очереди.
   // EN: Multithreaded resource loading allows to make queue and do something while loading, e.g. rendering some animation.
   //     Loading resources in multithreaded mode has almost no difference with standard mode, except using functions for beginning and ending queues.
   res_BeginQueue( 0 );
+  file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
   // RU: Между res_BeginQueue и res_EndQueue могут использоваться все обычные функции загрузки ресурсов.
   //     Для задержки экрана загрузки ресурсы будут загружены несколько раз, а для текстуры будет использована обработка с задержкой.
   // EN: All standard functions for loading resources can be used between res_BeginQueue and res_EndQueue.
   //     Just for holding loading screen resources will be loaded multiple times, and texture will be post-processed with delay.
   zgl_Reg( TEX_CURRENT_EFFECT, @TextureCalcEffect );
   for i := 0 to 3 do
-    begin
       texTest  := tex_LoadFromFile( dirRes + 'back01.jpg', TEX_NO_COLORKEY, TEX_DEFAULT_2D or TEX_CUSTOM_EFFECT );
-      sndMusic := snd_LoadFromFile( dirRes + 'music.ogg' );
-    end;
-  res_EndQueue();
-
-  // RU: Загружая ресурсы из файлов в памяти необходимо дополнительно указывать их расширение.
-  //     В качестве примера будет использован TMemoryStream вместо mem_LoadFromFile/mem_Free что бы показать как устроен zglTMemory.
-  // EN: Loading resources from files in memory need additional set their extension.
-  //     As an example TMemoryStream will be used instead of mem_LoadFromFile/mem_Free, just for showing how zglTMemory works.
-  memStream := TMemoryStream.Create();
-  memStream.LoadFromFile( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) + dirRes + 'back01.jpg' );
-  memory.Position := memStream.Position;
-  memory.Memory   := memStream.Memory;
-  memory.Size     := memStream.Size;
-  texTest := tex_LoadFromMemory( memory, 'JPG' );
-  memStream.Free();
-
-  // RU: Для загрузки ресурсов из zip-архива необходимо его сначала "открыть" и потом "закрыть" :) Для этого существуют функции file_OpenArchive и file_CloseArchive.
-  // EN: For loading resources from zip-archive this archive should be "opened" first and then "closed" :) There are functions file_OpenArchive and file_CloseArchive for this.
-  file_OpenArchive( dirRes + 'zengl.zip' );
-  texLogo := tex_LoadFromFile( 'zengl.png' );
   file_CloseArchive();
+  res_EndQueue();
 end;
 
 procedure Draw;
@@ -130,11 +120,17 @@ begin
   text_Draw( fntMain, 0, 16, 'VRAM Used: ' + u_FloatToStr( zgl_Get( RENDER_VRAM_USED ) / 1024 / 1024 ) + 'Mb' );
 end;
 
-Begin
+procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
+begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
   scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
+end;
 
-  zgl_Init();
+exports
+  Java_zengl_android_ZenGL_Main,
+  {$I android_export.inc}
+
+Begin
 End.

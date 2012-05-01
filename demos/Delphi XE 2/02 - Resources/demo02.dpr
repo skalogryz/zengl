@@ -73,7 +73,7 @@ procedure Init;
     memStream : TMemoryStream;
 begin
   // RU: Ѕолее детальное рассмотрение параметров функций загрузки ресурсов есть в соответствующих примерах, тут же показана лишь основна€ суть.
-  // EN: Description with more detail about parameters of functions can be found in other demos, here is only main idea shown.
+  // EN: Description with more details about parameters of functions can be found in other demos, here is only main idea shown.
 
   snd_Init();
 
