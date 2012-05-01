@@ -1578,6 +1578,7 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject );
 begin
+  appWork := FALSE;
   zgl_Destroy();
 end;
 
