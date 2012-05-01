@@ -5,6 +5,7 @@ library demo03;
 uses
   zgl_application,
   zgl_main,
+  zgl_file,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -20,7 +21,7 @@ uses
   ;
 
 var
-  dirRes  : UTF8String = 'data/';
+  dirRes  : UTF8String = 'assets/';
 
   fntMain   : zglPFont;
 
@@ -34,7 +35,11 @@ begin
   zgl_Enable( CORRECT_RESOLUTION );
   scr_CorrectResolution( 800, 600 );
 
+  file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+
+  file_CloseArchive();
 
   inputRect.X := 400 - 192;
   inputRect.Y := 300 - 100 - 32;

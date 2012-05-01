@@ -547,13 +547,13 @@ procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boo
     b : Integer;
   {$ENDIF}
 begin
-{$IFDEF iOS}
+{$IF DEFINED(iOS) or DEFINED(ANDROID)}
   Width      := scrDesktopW;
   Height     := scrDesktopH;
   Refresh    := REFRESH_DEFAULT;
   FullScreen := TRUE;
   VSync      := TRUE;
-{$ENDIF}
+{$IFEND}
 
   scrChanging   := TRUE;
   wndWidth      := Width;
