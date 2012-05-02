@@ -131,13 +131,9 @@ var
 implementation
 uses
   zgl_main,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_screen,
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_resources,
   zgl_file,
@@ -209,9 +205,7 @@ function tex_Create( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
     size   : LongWord;
 begin
   if Texture.Flags and TEX_COMPRESS >= 1 Then
-  {$IFNDEF USE_GLES}
     if not oglCanS3TC Then
-  {$ENDIF}
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
   width  := Round( Texture.Width / Texture.U );
@@ -225,11 +219,7 @@ begin
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-  {$IFDEF USE_GLES}
-  if ( ( not oglCanPVRTC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_DXT1 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT3 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT5 ) ) ) or
-  {$ELSE}
   if ( ( not oglCanS3TC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_PVR2 ) or ( Texture.Format = TEX_FORMAT_RGBA_PVR4 ) ) ) or
-  {$ENDIF}
     ( ( width > oglMaxTexSize ) or ( height > oglMaxTexSize ) ) Then
     begin
       glDisable( GL_TEXTURE_2D );
@@ -238,7 +228,6 @@ begin
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-  {$IFNDEF USE_GLES}
   if ( not oglCanAutoMipMap ) and ( Texture.Flags and TEX_MIPMAP > 0 ) Then
     begin
       if Texture.Flags and TEX_COMPRESS = 0 Then
@@ -246,28 +235,18 @@ begin
       else
         gluBuild2DMipmaps( GL_TEXTURE_2D, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
     end else
-  {$ENDIF}
       begin
         if Texture.Flags and TEX_COMPRESS = 0 Then
           begin
             case Texture.Format of
               TEX_FORMAT_RGBA: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
               TEX_FORMAT_RGBA_4444: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, pData );
-              {$IFDEF USE_GLES}
-              TEX_FORMAT_RGBA_PVR2: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, width, height, 0, size, pData );
-              TEX_FORMAT_RGBA_PVR4: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, width, height, 0, size, pData );
-              {$ELSE}
               TEX_FORMAT_RGBA_DXT1: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, width, height, 0, size, pData );
               TEX_FORMAT_RGBA_DXT3: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, width, height, 0, size, pData );
               TEX_FORMAT_RGBA_DXT5: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, size, pData );
-              {$ENDIF}
             end;
-          {$IFDEF USE_GLES}
-          end;
-          {$ELSE}
           end else
             glTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
-          {$ENDIF}
       end;
 
   oglVRAMUsed := oglVRAMUsed + size;
@@ -846,14 +825,10 @@ begin
   if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then exit;
 
   glEnable( GL_TEXTURE_2D );
-  {$IFNDEF USE_GLES}
   glPixelStorei( GL_UNPACK_ROW_LENGTH, Stride );
-  {$ENDIF}
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glTexSubImage2D( GL_TEXTURE_2D, 0, X, Texture.Height - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
-  {$IFNDEF USE_GLES}
   glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
-  {$ENDIF}
   glDisable( GL_TEXTURE_2D );
 end;
 
@@ -869,38 +844,10 @@ begin
 
   GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * 4 );
 
-  {$IFNDEF USE_GLES}
   glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glDisable( GL_TEXTURE_2D );
-  {$ELSE}
-  if not oglCanFBO Then exit;
-
-  if oglReadPixelsFBO = 0 Then
-    begin
-      glGenFramebuffers( 1, @oglReadPixelsFBO );
-      glBindFramebuffer( GL_FRAMEBUFFER, oglReadPixelsFBO );
-    end;
-
-  glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture.ID, 0 );
-
-  glReadPixels( 0, 0, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ), GL_RGBA, GL_UNSIGNED_BYTE, pData );
-
-  if oglTarget = TARGET_SCREEN Then
-    begin
-      {$IFNDEF iOS}
-      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-      {$ELSE}
-      glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-      glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-      glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-      {$ENDIF}
-    end else
-      begin
-        // TODO:
-      end;
-  {$ENDIF}
 end;
 
 end.

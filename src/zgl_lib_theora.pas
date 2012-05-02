@@ -28,9 +28,7 @@ unit zgl_lib_theora;
 
 interface
 uses
-  {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
-  {$ENDIF}
   zgl_lib_ogg,
   zgl_types
   {$IFNDEF USE_THEORA_STATIC}
@@ -40,15 +38,7 @@ uses
 
 {$IFNDEF USE_THEORA_STATIC}
 const
-{$IFDEF LINUX}
-  libtheoradec  = 'libtheoradec.so.1';
-{$ENDIF}
-{$IFDEF WINDOWS}
   libtheoradec  = 'libtheoradec-1.dll';
-{$ENDIF}
-{$IFDEF MACOSX}
-  libtheoradec  = 'libtheoradec.1.dylib';
-{$ENDIF}
 {$ENDIF}
 
 type
@@ -142,16 +132,10 @@ var
   theoraInit : Boolean;
 
 implementation
-{$IFDEF MACOSX}
-{$IFNDEF USE_THEORA_STATIC}
-uses
-  zgl_application;
-{$ENDIF}
-{$ENDIF}
 
 {$IFNDEF USE_THEORA_STATIC}
 var
-  theoraLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  theoraLibrary : HMODULE;
 {$ENDIF}
 
 function InitTheora : Boolean;
@@ -172,15 +156,7 @@ begin
 {$IFDEF USE_THEORA_STATIC}
   Result := TRUE;
 {$ELSE}
-  {$IFDEF LINUX}
-  theoraLibrary := dlopen( libtheoradec, $001 );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   theoraLibrary := dlopen( libtheoradec );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  theoraLibrary := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libtheoradec ), $001 );
-  {$ENDIF}
 
   if theoraLibrary <> LIB_ERROR Then
     begin

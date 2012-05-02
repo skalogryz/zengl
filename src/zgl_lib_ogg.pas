@@ -23,77 +23,41 @@ unit zgl_lib_ogg;
 {$I zgl_config.cfg}
 
 {$IFDEF USE_OGG_STATIC}
-  {$IFDEF USE_VORBIS}
-    {$L bitwise}
-    {$L framing}
-    {$L analysis}
-    {$L bitrate}
-    {$L block}
-    {$L codebook}
-    {$L envelope}
-    {$L floor0}
-    {$L floor1}
-    {$L info}
-    {$L lookup}
-    {$L lpc}
-    {$L lsp}
-    {$L mapping0}
-    {$L mdct}
-    {$L psy}
-    {$L registry}
-    {$L res0}
-    {$L sharedbook}
-    {$L smallft}
-    {$L synthesis}
-    {$L vorbisfile}
-    {$L window}
-  {$ENDIF}
-  {$IFDEF UNIX}
-    {$LINKLIB m}
-  {$ENDIF}
-  {$IFDEF MACOSX}
-    {$LINKLIB libgcc.a}
-  {$ENDIF}
+  {$L bitwise}
+  {$L framing}
+  {$L analysis}
+  {$L bitrate}
+  {$L block}
+  {$L codebook}
+  {$L envelope}
+  {$L floor0}
+  {$L floor1}
+  {$L info}
+  {$L lookup}
+  {$L lpc}
+  {$L lsp}
+  {$L mapping0}
+  {$L mdct}
+  {$L psy}
+  {$L registry}
+  {$L res0}
+  {$L sharedbook}
+  {$L smallft}
+  {$L synthesis}
+  {$L vorbisfile}
+  {$L window}
 {$ENDIF}
-
-{$IF DEFINED(USE_TREMOLO)}
-  {$LINKLIB libtremolo.a}
-{$ELSEIF DEFINED(USE_TREMOR)}
-  {$LINKLIB libtremor.a}
-{$IFEND}
-{$IF DEFINED(iOS) and (not DEFINED(iPHONESIM))}
-  {$LINKLIB libgcc_s.1.dylib}
-{$IFEND}
 
 interface
 uses
-  {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
-  {$ENDIF}
   zgl_types
   ;
 
 const
-{$IFDEF LINUX}
-  libogg        = 'libogg.so.0';
-  libvorbis     = 'libvorbis.so.0';
-  libvorbisfile = 'libvorbisfile.so.3';
-{$ENDIF}
-{$IFDEF WINDOWS}
   libogg        = 'libogg-0.dll';
   libvorbis     = 'libvorbis-0.dll';
   libvorbisfile = 'libvorbisfile-3.dll';
-{$ENDIF}
-{$IFDEF MACOSX}
-  libogg        = 'libogg.0.dylib';
-  libvorbis     = 'libvorbis.0.dylib';
-  libvorbisfile = 'libvorbisfile.3.dylib';
-{$ENDIF}
-{$IFDEF ENDIAN_BIG}
-  BIG_ENDIAN = TRUE;
-{$ELSE}
-  BIG_ENDIAN = FALSE;
-{$ENDIF}
 
 type
   ppcfloat     = ^pcfloat;
@@ -268,8 +232,8 @@ type
     ready_state     : cint;
     current_serialno: clong;
     current_link    : cint;
-    bittrack        : {$IFDEF USE_VORBIS} cdouble {$ELSE} ogg_int64_t {$ENDIF};
-    samptrack       : {$IFDEF USE_VORBIS} cdouble {$ELSE} ogg_int64_t {$ENDIF};
+    bittrack        : cdouble;
+    samptrack       : cdouble;
     os              : ogg_stream_state;
     vd              : vorbis_dsp_state;
     vb              : vorbis_block;
@@ -301,10 +265,10 @@ type
   function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
   function ov_open_callbacks(datasource: pointer; out vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
   function ov_info(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl; external;
-  function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; {$IFDEF USE_VORBIS} bigendianp: cbool; word: cint; sgned: cbool; {$ENDIF} bitstream: pcint): clong; cdecl; external;
+  function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl; external;
   function ov_pcm_seek(var vf: OggVorbis_File; pos: cint64): cint; cdecl; external;
   function ov_pcm_total(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl; external;
-  function ov_time_seek(var vf: OggVorbis_File; {$IFDEF USE_VORBIS} time: double {$ELSE} ms: ogg_int64_t {$ENDIF}): cint; cdecl; external;
+  function ov_time_seek(var vf: OggVorbis_File; time: double): cint; cdecl; external;
 {$ELSE}
   var
     ogg_sync_init         : function(oy: pogg_sync_state): cint; cdecl;
@@ -324,10 +288,10 @@ type
     ov_clear          : function(var vf: OggVorbis_File): cint; cdecl;
     ov_open_callbacks : function(datasource: pointer; out vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl;
     ov_info           : function(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl;
-    ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; {$IFDEF USE_VORBIS} bigendianp: cbool; word: cint; sgned: cbool; {$ENDIF} bitstream: pcint): clong; cdecl;
+    ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl;
     ov_pcm_seek       : function(var vf: OggVorbis_File; pos: cint64): cint; cdecl;
     ov_pcm_total      : function(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl;
-    ov_time_seek      : function(var vf: OggVorbis_File; {$IFDEF USE_VORBIS} time: double {$ELSE} ms: ogg_int64_t {$ENDIF}): cint; cdecl;
+    ov_time_seek      : function(var vf: OggVorbis_File; time: double): cint; cdecl;
 {$ENDIF}
 
 function  InitOgg : Boolean;
@@ -343,17 +307,14 @@ var
 implementation
 {$IFNDEF USE_OGG_STATIC}
 uses
-  {$IFDEF MACOSX}
-  zgl_application,
-  {$ENDIF}
   zgl_utils;
 {$ENDIF}
 
 {$IFNDEF USE_OGG_STATIC}
 var
-  oggLibrary        : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisLibrary     : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  vorbisfileLibrary : {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
+  oggLibrary        : HMODULE;
+  vorbisLibrary     : HMODULE;
+  vorbisfileLibrary : HMODULE;
 {$ENDIF}
 
 function InitOgg : Boolean;
@@ -367,15 +328,7 @@ begin
 {$IFDEF USE_OGG_STATIC}
   Result := TRUE;
 {$ELSE}
-  {$IFDEF LINUX}
-  oggLibrary := dlopen( libogg, $001 );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   oggLibrary := dlopen( libogg );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  oggLibrary := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libogg ), $001 );
-  {$ENDIF}
 
   if oggLibrary <> LIB_ERROR Then
     begin
@@ -417,18 +370,8 @@ begin
 {$ELSE}
   if InitOgg() Then
     begin
-      {$IFDEF LINUX}
-      vorbisLibrary     := dlopen( libvorbis, $001 );
-      vorbisfileLibrary := dlopen( libvorbisfile, $001 );
-      {$ENDIF}
-      {$IFDEF WINDOWS}
       vorbisLibrary     := dlopen( libvorbis );
       vorbisfileLibrary := dlopen( libvorbisfile );
-      {$ENDIF}
-      {$IFDEF MACOSX}
-      vorbisLibrary     := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libvorbis ), $001 );
-      vorbisfileLibrary := dlopen( PAnsiChar( appWorkDir + 'Contents/Frameworks/' + libvorbisfile ), $001 );
-      {$ENDIF}
 
       if ( vorbisLibrary <> LIB_ERROR ) and ( vorbisfileLibrary <> LIB_ERROR ) Then
         begin

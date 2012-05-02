@@ -36,9 +36,6 @@ uses
 
   zgl_mouse,
   zgl_keyboard,
-  {$IFDEF ANDROID}
-  zgl_touch,
-  {$ENDIF}
   {$IFDEF USE_JOYSTICK}
   zgl_joystick,
   {$ENDIF}
@@ -110,12 +107,7 @@ uses
   ;
 
 const
-// I hate Apple! :)
-  {$IFDEF MACOSX}
-  prefix = '_';
-  {$ELSE}
   prefix = '';
-  {$ENDIF}
 
 exports
   // Main
@@ -194,17 +186,6 @@ exports
   _key_GetText             name prefix + 'key_GetText',
   key_EndReadText          name prefix + 'key_EndReadText',
   key_ClearState           name prefix + 'key_ClearState',
-
-  // Touch
-  {$IFDEF ANDROID}
-  touch_X                   name prefix + 'touch_X',
-  touch_Y                   name prefix + 'touch_Y',
-  touch_Down                name prefix + 'touch_Down',
-  touch_Up                  name prefix + 'touch_Up',
-  touch_Tap                 name prefix + 'touch_Tap',
-  touch_DblTap              name prefix + 'touch_DblTap',
-  touch_ClearState          name prefix + 'touch_ClearState',
-  {$ENDIF}
 
   // Joystick
   {$IFDEF USE_JOYSTICK}
@@ -465,9 +446,7 @@ exports
   {$ENDIF}
   ;
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
+{$R *.res}
 
 begin
 end.
