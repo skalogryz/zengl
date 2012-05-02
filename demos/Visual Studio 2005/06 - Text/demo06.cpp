@@ -9,7 +9,6 @@ char resource[256];
 
 char* GetResource( char* FileName )
 {
-	memset( &resource[ 0 ], 256, 0 );
 	sprintf_s( resource, "../data/%s", FileName );
 	return resource;
 }
