@@ -33,12 +33,12 @@ const
   SCREEN_HEIGHT = 600;
 
 var
-  dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fnt    : zglPFont;
-  icon   : array[ 0..1 ] of zglPTexture;
-  sound  : zglPSound;
-  audio  : Integer;
-  state  : Integer;
+  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  fntMain : zglPFont;
+  icon    : array[ 0..1 ] of zglPTexture;
+  sound   : zglPSound;
+  audio   : Integer;
+  state   : Integer;
 
 // RU: Т.к. звуковая подсистема нацелена на 3D, для позиционирования звуков в 2D нужны некоторые ухищрения.
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D.
@@ -69,7 +69,7 @@ begin
   icon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png' );
   icon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png' );
 
-  fnt := font_LoadFromFile( dirRes + 'font.zfi' );
+  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 end;
 
 procedure Draw;
@@ -77,7 +77,7 @@ procedure Draw;
     r : zglTRect;
 begin
   ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 128 ) / 2, ( SCREEN_HEIGHT - 128 ) / 2, 128, 128, 0 );
-  text_Draw( fnt, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
+  text_Draw( fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
 
   r.X := ( SCREEN_WIDTH - 128 ) / 2;
   r.Y := ( SCREEN_HEIGHT - 128 ) / 2;

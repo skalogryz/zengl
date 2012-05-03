@@ -886,7 +886,7 @@ begin
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
-          file_Write( f, Frame, 8 );
+          file_Write( f, Frame[ 0 ], 8 );
 
           // ZEF_CHUNK_COLOR
           chunk := ZEF_CHUNK_COLOR;
