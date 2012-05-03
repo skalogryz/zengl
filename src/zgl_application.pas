@@ -1257,7 +1257,8 @@ end;
 
 procedure zglCAppDelegate.applicationDidReceiveMemoryWarning;
 begin
-  app_PMemoryWarn();
+  if Assigned( app_PMemoryWarn ) Then
+    app_PMemoryWarn();
 end;
 
 function zglCAppDelegate.textFieldShouldBeginEditing( textField : UITextField ) : Boolean;
@@ -1590,7 +1591,8 @@ begin
   if appInitialized Then
     begin
       gl_ResetState();
-      app_PRestore();
+      if Assigned( app_PRestore ) Then
+        app_PRestore();
       timer_Reset();
     end;
 end;
