@@ -103,10 +103,6 @@ begin
   batch2d_Begin();
   if time > 255 Then
     begin
-      // RU: Для увеличения быстродействия можно отключить очистку буфера цвета, учитывая что экран полностью заполнен.
-      // EN: Rendering perfomance can be increased by disabling clearing the color buffer. This is a good idea because screen is full of objects.
-      zgl_Disable( COLOR_BUFFER_CLEAR );
-
       // RU: Рисуем задний фон с размерами 800х600 используя текстуру back.
       // EN: Render the background with size 800x600 and using texture "back".
       ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
