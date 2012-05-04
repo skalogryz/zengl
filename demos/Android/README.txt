@@ -1,4 +1,4 @@
-RU:
+﻿RU:
 Примеры рассчитаны на Android NDK r7c и FreePascal собранный по этой инструкции:
 http://zengl.org/wiki/doku.php?id=compilation:android
 
