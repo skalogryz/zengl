@@ -12,7 +12,8 @@
         <activity
             android:name=".Demo08Activity"
             android:label="@string/app_name"
-            android:configChanges="screenLayout|orientation|keyboardHidden|fontScale" >
+            android:configChanges="screenLayout|orientation|keyboardHidden|fontScale"
+            android:screenOrientation="landscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
