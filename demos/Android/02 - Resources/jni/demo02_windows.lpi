@@ -84,13 +84,13 @@
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-CpARMv5
--CfSOFT
+      <CustomOptions Value="-CpARMv6
+-CfVFPv2
 -Xd
 -XParm-linux-androideabi-
--FD$(LazarusDir)..\android-ndk-r7c\toolchains\arm-linux-androideabi-4.4.3\prebuilt\windows\bin
--Fu$(LazarusDir)..\android-ndk-r7c\platforms\android-3\arch-arm\usr\lib
--FL$(LazarusDir)..\android-ndk-r7c\platforms\android-3\arch-arm\usr\lib\libdl.so"/>
+-FD$(LazarusDir)..\android-ndk-r8\toolchains\arm-linux-androideabi-4.4.3\prebuilt\windows\bin
+-Fu$(LazarusDir)..\android-ndk-r8\platforms\android-3\arch-arm\usr\lib
+-FL$(LazarusDir)..\android-ndk-r8\platforms\android-3\arch-arm\usr\lib\libdl.so"/>
       <CompilerPath Value="$(CompPath)"/>
       <ExecuteBefore>
         <Command Value="windows_prebuild.bat"/>

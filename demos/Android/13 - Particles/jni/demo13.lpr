@@ -1,5 +1,3 @@
-// RU: ВНИМАНИЕ! Т.к. на данный момент используется soft float - производительность крайне мала.
-// EN: WARNING! Because of using soft float performance is not good.
 library demo13;
 
 {$I zglCustomConfig.cfg}

@@ -1,5 +1,5 @@
-// RU: ВНИМАНИЕ! Т.к. на данный момент используется soft float - производительность крайне мала.
-// EN: WARNING! Because of using soft float performance is not good.
+// RU: ВНИМАНИЕ! Т.к. на данный момент Chipmunk собран с soft float - производительность довольно низкая.
+// EN: WARNING! Chipmunk is built with soft float and because of this performance is not good.
 library demo16;
 
 {$I zglCustomConfig.cfg}

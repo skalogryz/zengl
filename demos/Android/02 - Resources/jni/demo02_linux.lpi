@@ -84,8 +84,8 @@
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-CpARMv5
--CfSOFT
+      <CustomOptions Value="-CpARMv6
+-CfVFPv2
 -Xd
 -XParm-linux-androideabi-
 -FD/opt/android-ndk/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
