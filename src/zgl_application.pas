@@ -1579,12 +1579,16 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject );
 begin
-  appWork := FALSE;
+  appEnv    := env;
+  appObject := thiz;
+  appWork   := FALSE;
   zgl_Destroy();
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring );
 begin
+  appEnv     := env;
+  appObject  := thiz;
   appWorkDir := appEnv^.GetStringUTFChars( appEnv, AppDirectory, nil );
   appHomeDir := appEnv^.GetStringUTFChars( appEnv, HomeDirectory, nil ) + '/';
 
@@ -1649,6 +1653,8 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeActivate( env : PJNIEnv; thiz : jobject; Activate : jboolean );
 begin
+  appEnv    := env;
+  appObject := thiz;
   if Activate > 0 Then
     begin
       appFocus := TRUE;
