@@ -1,5 +1,7 @@
 ﻿RU:
-Примеры рассчитаны на Android NDK r7c и FreePascal собранный по этой инструкции:
+ВНИМАНИЕ! Примеры не будут работать в эмуляторе, т.к. он не поддерживает архитектуру ARMv6
+
+Примеры рассчитаны на Android NDK r8 и FreePascal собранный по этой инструкции:
 http://zengl.org/wiki/doku.php?id=compilation:android
 
 Для других версий Android NDK понадобится менять путь для файлов проекта в Lazarus(Project->Project Options->Other).
@@ -10,6 +12,8 @@ http://zengl.org/wiki/doku.php?id=compilation:android
 - запустить дебаг :)
 
 EN:
+WARNING! Demos won't work in emulator because it doesn't support ARMv6 architecture
+
 Demos are written for Android NDK r7c and FreePascal built using this instruction:
 http://zengl.org/wiki/doku.php?id=compilation:android
 
