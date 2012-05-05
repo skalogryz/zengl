@@ -93,6 +93,7 @@ var
 implementation
 uses
   zgl_main,
+  zgl_log,
   zgl_utils;
 
 function video_Add : zglPVideoStream;
@@ -140,6 +141,12 @@ function video_OpenFile( const FileName : UTF8String ) : zglPVideoStream;
     ext : UTF8String;
 begin
   Result := video_Add();
+
+  if not file_Exists( FileName ) Then
+    begin
+      log_Add( 'Cannot read "' + FileName + '"' );
+      exit;
+    end;
 
   ext := u_StrUp( file_GetExtension( FileName ) );
   for i := managerVideo.Count.Decoders - 1 downto 0 do
