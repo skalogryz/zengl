@@ -686,11 +686,20 @@ begin
             end;
           ZEF_CHUNK_TEXTURE:
             begin
+              mem_Read( emitter2dMem, size, 4 );
               SetLength( texFile, size );
               mem_Read( emitter2dMem, texFile[ 1 ], size );
               texHash := u_Hash( texFile );
               if FileName <> '' Then
                 ParParams.Texture := pengine2d_LoadTexture( file_GetDirectory( FileName ) + texFile );
+
+              mem_Read( emitter2dMem, size, 4 );
+              if Assigned( ParParams.Texture ) Then
+                begin
+                  SetLength( ParParams.Texture.FramesCoord, size div SizeOf( zglTTextureCoord ) );
+                  mem_Read( emitter2dMem, ParParams.Texture.FramesCoord[ 0 ], size );
+                end else
+                  INC( emitter2dMem.Position, size );
             end;
           ZEF_CHUNK_BLENDMODE:
             begin
@@ -846,13 +855,19 @@ begin
         begin
           // ZEF_CHUNK_TEXTURE
           chunk := ZEF_CHUNK_TEXTURE;
-          size  := length( texFile );
+          size  := length( texFile ) + length( Texture.FramesCoord ) * SizeOf( zglTTextureCoord );
           if size > 0 Then
             begin
               file_Write( f, chunk, 2 );
               file_Write( f, size, 4 );
 
+              size := length( texFile );
+              file_Write( f, size, 4 );
               file_Write( f, texFile[ 1 ], size );
+
+              size := length( Texture.FramesCoord ) * SizeOf( zglTTextureCoord );
+              file_Write( f, size, 4 );
+              file_Write( f, Texture.FramesCoord[ 0 ], size );
             end;
 
           // ZEF_CHUNK_BLENDMODE
