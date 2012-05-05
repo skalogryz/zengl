@@ -1274,10 +1274,13 @@ begin
           p := list[ Particles ];
           with p._private do
             begin
-              lColorID := 1;
-              lAlphaID := 1;
-              lSizeXID := 1;
-              lSizeYID := 1;
+              lColorID     := 1;
+              lAlphaID     := 1;
+              lSizeXID     := 1;
+              lSizeYID     := 1;
+              lVelocityID  := 1;
+              laVelocityID := 1;
+              lSpinID      := 1;
             end;
 
           p.Life       := 1;
