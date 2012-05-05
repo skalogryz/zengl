@@ -53,6 +53,7 @@ type
       Height    : Word;
       FrameRate : Single;
       Duration  : Double;
+      Frames    : Integer;
                 end;
 
     Loop       : Boolean;
@@ -84,7 +85,7 @@ procedure video_Del( var Stream : zglPVideoStream );
 
 function  video_OpenFile( const FileName : UTF8String ) : zglPVideoStream;
 function  video_OpenMemory( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
-procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double );
+procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double; Loop : Boolean = FALSE );
 procedure video_Seek( var Stream : zglPVideoStream; Milliseconds : Double );
 
 var
@@ -197,11 +198,22 @@ begin
       video_Del( Result );
 end;
 
-procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double );
+procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double; Loop : Boolean = FALSE );
   var
     frame : Integer;
 begin
   if not Assigned( Stream ) Then exit;
+
+  if Stream.Time + Milliseconds / 1000 > Stream.Info.Duration Then
+    begin
+      Stream._private.Decoder.Loop( Stream^ );
+      Milliseconds := ( Stream.Time + Milliseconds / 1000 - Stream.Info.Duration ) * 1000;
+      Stream.Time  := 0;
+      Stream.Frame := 0;
+      Stream._private.Decoder.Update( Stream^, Milliseconds, Stream.Data );
+      tex_SetData( Stream.Texture, Stream.Data, 0, 0, Stream.Info.Width, Stream.Info.Height );
+      exit;
+    end;
 
   frame := Stream.Frame;
   Stream._private.Decoder.Update( Stream^, Milliseconds, Stream.Data );

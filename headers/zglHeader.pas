@@ -2,8 +2,8 @@
 {-----------= ZenGL =------------}
 {--------------------------------}
 {                                }
-{ version:  0.3 beta 1           }
-{ date:     2012.05.01           }
+{ version:  0.3 beta 2           }
+{ date:     2012.05.06           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1243,7 +1243,7 @@ var
   video_Del        : procedure( var Stream : zglPVideoStream );
   video_OpenFile   : function( const FileName : UTF8String ) : zglPVideoStream;
   video_OpenMemory : function( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
-  video_Update     : procedure( var Stream : zglPVideoStream; Milliseconds : Double );
+  video_Update     : procedure( var Stream : zglPVideoStream; Milliseconds : Double; Loop : Boolean = FALSE );
   video_Seek       : procedure( var Stream : zglPVideoStream; Milliseconds : Double );
 
 

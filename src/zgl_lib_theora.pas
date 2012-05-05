@@ -108,15 +108,20 @@ type
   th_dec_ctx  = record
   end;
 
+const
+  TH_DECCTL_SET_GRANPOS = 5;
+
 {$IFDEF USE_THEORA_STATIC}
   procedure th_info_init( _info : pth_info ); cdecl; external;
   procedure th_info_clear( _info : pth_info ); cdecl; external;
   procedure th_comment_init( _tc : pth_comment ); cdecl; external;
   procedure th_comment_clear( _tc : pth_comment ); cdecl; external;
   procedure th_setup_free( _setup : pth_setup_info ); cdecl; external;
+  function th_granule_frame( _encdec : Pointer; _granpos : ogg_int64_t ) : ogg_int64_t; cdecl; external;
   function th_granule_time( _encdec : Pointer; _granpos : ogg_int64_t ) : cdouble; cdecl; external;
   function th_decode_headerin( _info : pth_info; _tc : pth_comment; _setup : ppth_setup_info; _op : pogg_packet ) : cint; cdecl; external;
   function th_decode_alloc( const _info : pth_info; const _setup : pth_setup_info ) : pth_dec_ctx; cdecl; external;
+  function th_decode_ctl( _dec : pth_dec_ctx; _req : cint; _buf : Pointer; _buf_sz : csize_t ) : cint; cdecl; external;
   procedure th_decode_free( _dec : pth_dec_ctx ); cdecl; external;
   function th_decode_packetin( _dec : pth_dec_ctx; const _op : pogg_packet; _granpos : pogg_int64_t ) : cint; cdecl; external;
   function th_decode_ycbcr_out( _dec : pth_dec_ctx; _ycbcr : pth_ycbcr_buffer ) : cint; cdecl; external;
@@ -127,9 +132,11 @@ type
     th_comment_init     : procedure( _tc : pth_comment ); cdecl;
     th_comment_clear    : procedure( _tc : pth_comment ); cdecl;
     th_setup_free       : procedure( _setup : pth_setup_info ); cdecl;
+    th_granule_frame    : function( _encdec : Pointer; _granpos : ogg_int64_t ) : ogg_int64_t; cdecl;
     th_granule_time     : function( _encdec : Pointer; _granpos : ogg_int64_t ) : cdouble; cdecl;
     th_decode_headerin  : function( _info : pth_info; _tc : pth_comment; _setup : ppth_setup_info; _op : pogg_packet ) : cint; cdecl;
     th_decode_alloc     : function( const _info : pth_info; const _setup : pth_setup_info ) : pth_dec_ctx; cdecl;
+    th_decode_ctl       : function( _dec : pth_dec_ctx; _req : cint; _buf : Pointer; _buf_sz : csize_t ) : cint; cdecl;
     th_decode_free      : procedure( _dec : pth_dec_ctx ); cdecl;
     th_decode_packetin  : function( _dec : pth_dec_ctx; const _op : pogg_packet; _granpos : pogg_int64_t ) : cint; cdecl;
     th_decode_ycbcr_out : function( _dec : pth_dec_ctx; _ycbcr : pth_ycbcr_buffer ) : cint; cdecl;
@@ -189,9 +196,11 @@ begin
       th_comment_init     := dlsym( theoraLibrary, 'th_comment_init' );
       th_comment_clear    := dlsym( theoraLibrary, 'th_comment_clear' );
       th_setup_free       := dlsym( theoraLibrary, 'th_setup_free' );
+      th_granule_frame    := dlsym( theoraLibrary, 'th_granule_frame' );
       th_granule_time     := dlsym( theoraLibrary, 'th_granule_time' );
       th_decode_headerin  := dlsym( theoraLibrary, 'th_decode_headerin' );
       th_decode_alloc     := dlsym( theoraLibrary, 'th_decode_alloc' );
+      th_decode_ctl       := dlsym( theoraLibrary, 'th_decode_ctl' );
       th_decode_free      := dlsym( theoraLibrary, 'th_decode_free' );
       th_decode_packetin  := dlsym( theoraLibrary, 'th_decode_packetin' );
       th_decode_ycbcr_out := dlsym( theoraLibrary, 'th_decode_ycbcr_out' );

@@ -285,6 +285,7 @@ type
 
 {$IFDEF USE_OGG_STATIC}
   function ogg_sync_init(oy: pogg_sync_state): cint; cdecl; external;
+  function ogg_sync_reset(oy: pogg_sync_state): cint; cdecl; external;
   function ogg_sync_clear(oy: pogg_sync_state): cint; cdecl; external;
   function ogg_sync_buffer(oy: pogg_sync_state; size: clong): pointer; cdecl; external;
   function ogg_sync_wrote(oy: pogg_sync_state; bytes: clong): cint; cdecl; external;
@@ -294,9 +295,11 @@ type
   function ogg_stream_packetout(os: pogg_stream_state; op: pogg_packet): cint; cdecl; external;
   function ogg_stream_packetpeek(os: pogg_stream_state; op: pogg_packet): cint; cdecl; external;
   function ogg_stream_init(os: pogg_stream_state; serialno: cint): cint; cdecl; external;
+  function ogg_stream_reset(os: pogg_stream_state): cint; cdecl; external;
   function ogg_stream_clear(os: pogg_stream_state): cint; cdecl; external;
   function ogg_page_bos(og: pogg_page): cint; cdecl; external;
   function ogg_page_serialno(og: pogg_page): cint; cdecl; external;
+  function ogg_page_granulepos(og: pogg_page): ogg_int64_t; cdecl; external;
 
   function ov_clear(var vf: OggVorbis_File): cint; cdecl; external;
   function ov_open_callbacks(datasource: pointer; out vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl; external;
@@ -308,6 +311,7 @@ type
 {$ELSE}
   var
     ogg_sync_init         : function(oy: pogg_sync_state): cint; cdecl;
+    ogg_sync_reset        : function(oy: pogg_sync_state): cint; cdecl;
     ogg_sync_clear        : function(oy: pogg_sync_state): cint; cdecl;
     ogg_sync_buffer       : function(oy: pogg_sync_state; size: clong): pointer; cdecl;
     ogg_sync_wrote        : function(oy: pogg_sync_state; bytes: clong): cint; cdecl;
@@ -317,9 +321,11 @@ type
     ogg_stream_packetout  : function(os: pogg_stream_state; op: pogg_packet): cint; cdecl;
     ogg_stream_packetpeek : function(os: pogg_stream_state; op: pogg_packet): cint; cdecl;
     ogg_stream_init       : function(os: pogg_stream_state; serialno: cint): cint; cdecl;
+    ogg_stream_reset      : function(os: pogg_stream_state): cint; cdecl;
     ogg_stream_clear      : function(os: pogg_stream_state): cint; cdecl;
     ogg_page_bos          : function(og: pogg_page): cint; cdecl;
     ogg_page_serialno     : function(og: pogg_page): cint; cdecl;
+    ogg_page_granulepos   : function(og: pogg_page): ogg_int64_t; cdecl;
 
     ov_clear          : function(var vf: OggVorbis_File): cint; cdecl;
     ov_open_callbacks : function(datasource: pointer; out vf: OggVorbis_File; initial: pointer; ibytes: clong; callbacks: ov_callbacks): cint; cdecl;
@@ -380,6 +386,7 @@ begin
   if oggLibrary <> LIB_ERROR Then
     begin
       ogg_sync_init         := dlsym( oggLibrary, 'ogg_sync_init' );
+      ogg_sync_reset        := dlsym( oggLibrary, 'ogg_sync_reset' );
       ogg_sync_clear        := dlsym( oggLibrary, 'ogg_sync_clear' );
       ogg_sync_buffer       := dlsym( oggLibrary, 'ogg_sync_buffer' );
       ogg_sync_wrote        := dlsym( oggLibrary, 'ogg_sync_wrote' );
@@ -389,9 +396,11 @@ begin
       ogg_stream_packetout  := dlsym( oggLibrary, 'ogg_stream_packetout' );
       ogg_stream_packetpeek := dlsym( oggLibrary, 'ogg_stream_packetpeek' );
       ogg_stream_init       := dlsym( oggLibrary, 'ogg_stream_init' );
+      ogg_stream_reset      := dlsym( oggLibrary, 'ogg_stream_reset' );
       ogg_stream_clear      := dlsym( oggLibrary, 'ogg_stream_clear' );
       ogg_page_bos          := dlsym( oggLibrary, 'ogg_page_bos' );
       ogg_page_serialno     := dlsym( oggLibrary, 'ogg_page_serialno' );
+      ogg_page_granulepos   := dlsym( oggLibrary, 'ogg_page_granulepos' );
       Result                := TRUE;
     end else
       Result := FALSE;
