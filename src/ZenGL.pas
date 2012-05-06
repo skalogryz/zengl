@@ -463,6 +463,7 @@ exports
   _snd_PlayMemory          name prefix + '_snd_PlayMemory'
   {$ENDIF}
   {$IFDEF USE_VIDEO}
+  ,
   _video_OpenFile          name prefix + '_video_OpenFile',
   _video_OpenMemory        name prefix + '_video_OpenMemory'
   {$ENDIF}
