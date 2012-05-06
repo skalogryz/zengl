@@ -950,6 +950,215 @@ ZGLEXTERN void ( *agrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGri
 ZGLEXTERN void ( *cgrid2d_Draw )( zglPTexture Texture, float X, float Y, zglPGrid2D Grid, zglTRect CutRect, byte Alpha, uint FX );
 #endif
 
+// Particles
+#define EMITTER_MAX_PARTICLES 1024
+
+#define EMITTER_NONE      0
+#define EMITTER_POINT     1
+#define EMITTER_LINE      2
+#define EMITTER_RECTANGLE 3
+#define EMITTER_CIRCLE    4
+#define EMITTER_RING      5
+
+typedef struct
+{
+  float Life;
+  byte  Value;
+} TDiagramByte;
+
+typedef struct
+{
+  float Life;
+  uint  Value;
+} TDiagramLW;
+
+typedef struct
+{
+  float Life;
+  float Value;
+} TDiagramSingle;
+
+typedef struct
+{
+  struct
+  {
+    int lColorID;
+    int lAlphaID;
+    int lSizeXID;
+    int lSizeYID;
+    int lVelocityID;
+    int laVelocityID;
+    int lSpinID;
+  } _private;
+
+  int         ID;
+
+  float       Life;
+  int         LifeTime;
+  double      Time;
+
+  ushort      Frame;
+  uint        Color;
+  byte        Alpha;
+
+  zglTPoint2D Position;
+  zglTPoint2D Size;
+  zglTPoint2D SizeS;
+  float       Angle;
+  float       Direction;
+
+  float       Velocity;
+  float       VelocityS;
+  float       aVelocity;
+  float       aVelocityS;
+  float       Spin;
+} zglTParticle2D, *zglPParticle2D;
+
+typedef struct
+{
+  float Direction;
+  float Spread;
+} zglTEmitterPoint;
+
+typedef struct
+{
+  float Direction;
+  float Spread;
+  float Size;
+  bool  TwoSide;
+} zglTEmitterLine;
+
+typedef struct
+{
+  float    Direction;
+  float    Spread;
+  zglTRect Rect;
+} zglTEmitterRect;
+
+typedef struct
+{
+  float Direction;
+  float Spread;
+  float cX;
+  float cY;
+  float Radius;
+} zglTEmitterCircle;
+
+typedef struct
+{
+  float Direction;
+  float Spread;
+  float cX;
+  float cY;
+  float Radius0;
+  float Radius1;
+} zglTEmitterRing;
+
+typedef struct
+{
+  zglPTexture    Texture;
+  byte           BlendMode;
+  byte           ColorMode;
+
+  int            LifeTimeS;
+  int            LifeTimeV;
+  int            Frame[2];
+  TDiagramLW     *Color;
+  TDiagramByte   *Alpha;
+  bool           SizeXYBind;
+  float          SizeXS;
+  float          SizeYS;
+  float          SizeXV;
+  float          SizeYV;
+  TDiagramSingle *SizeXD;
+  TDiagramSingle *SizeYD;
+  float          AngleS;
+  float          AngleV;
+  float          VelocityS;
+  float          VelocityV;
+  TDiagramSingle *VelocityD;
+  float          aVelocityS;
+  float          aVelocityV;
+  TDiagramSingle *aVelocityD;
+  float          SpinS;
+  float          SpinV;
+  TDiagramSingle *SpinD;
+} zglTParticleParams;
+
+typedef struct
+{
+  struct
+  {
+    struct zglTPEngine2D  *pengine;
+    zglTParticle2D particle[EMITTER_MAX_PARTICLES];
+    zglPParticle2D list[EMITTER_MAX_PARTICLES];
+    int            parCreated;
+    size_t         reserved; // texFile    : UTF8String;
+    uint           texHash;
+  } _private;
+
+  int  ID;
+  byte Type_;
+  struct
+  {
+    int         Layer;
+    int         LifeTime;
+    bool        Loop;
+    int         Emission;
+    zglTPoint2D Position;
+  } Params;
+
+  zglTParticleParams ParParams;
+
+  float  Life;
+  double Time;
+  double LastSecond;
+  int    Particles;
+  struct
+  {
+    float MinX;
+    float MaxX;
+    float MinY;
+    float MaxY;
+  } BBox;
+
+  union
+  {
+    zglTEmitterPoint  AsPoint;
+    zglTEmitterLine   AsLine;
+    zglTEmitterRect   AsRect;
+    zglTEmitterCircle AsCircle;
+    zglTEmitterRing   AsRing;
+  };
+} zglTEmitter2D, *zglPEmitter2D;
+
+typedef struct
+{
+  struct
+  {
+    int Emitters;
+    int Particles;
+  } Count;
+
+  zglPEmitter2D *List;
+} zglTPEngine2D, *zglPPEngine2D;
+
+ZGLEXTERN void ( *pengine2d_Set )( zglPPEngine2D PEngine );
+ZGLEXTERN zglPPEngine2D ( *pengine2d_Get )();
+ZGLEXTERN void ( *pengine2d_Draw )();
+ZGLEXTERN void ( *pengine2d_Proc )( double dt );
+ZGLEXTERN zglPEmitter2D ( *pengine2d_AddEmitter )( zglPEmitter2D Emitter, float X, float Y );
+ZGLEXTERN void ( *pengine2d_DelEmitter )( int ID );
+ZGLEXTERN void ( *pengine2d_ClearAll )();
+ZGLEXTERN zglPEmitter2D ( *emitter2d_Add )();
+ZGLEXTERN void ( *emitter2d_Del )( zglPEmitter2D *Emitter );
+ZGLEXTERN zglPEmitter2D ( *emitter2d_LoadFromFile )( const char *FileName );
+ZGLEXTERN zglPEmitter2D ( *emitter2d_LoadFromMemory )( zglTMemory Memory );
+ZGLEXTERN void ( *emitter2d_Init )( zglPEmitter2D Emitter );
+ZGLEXTERN void ( *emitter2d_Free )( zglPEmitter2D *Emitter );
+ZGLEXTERN void ( *emitter2d_Draw )( zglPEmitter2D Emitter );
+ZGLEXTERN void ( *emitter2d_Proc )( zglPEmitter2D Emitter, double dt );
+
 // Text
 typedef struct
 {
@@ -1188,6 +1397,44 @@ ZGLEXTERN void ( *snd_PauseStream )( int ID );
 ZGLEXTERN void ( *snd_StopStream )( int ID );
 ZGLEXTERN void ( *snd_ResumeStream )( int ID );
 ZGLEXTERN void ( *snd_SeekStream )( int ID, double Milliseconds );
+
+// Video
+typedef struct
+{
+  struct
+  {
+    void       *Data;
+    zglTFile   File_;
+    zglTMemory Memory;
+    void       *Decoder; // zglPVideoDecoder;
+  } _private;
+
+  void        *Data;
+  zglPTexture Texture;
+  int         Frame;
+  double      Time;
+
+  struct
+  {
+    ushort  Width;
+    ushort  Height;
+    float   FrameRate;
+    double  Duration;
+    int     Frames;
+  } Info;
+
+  bool Loop;
+
+  void *prev;
+  void *next;
+} zglTVideoStream, *zglPVideoStream;
+
+ZGLEXTERN zglPVideoStream ( *video_Add )();
+ZGLEXTERN void ( *video_Del )( zglPVideoStream *Stream );
+ZGLEXTERN zglPVideoStream ( *video_OpenFile )( const char *FileName );
+ZGLEXTERN zglPVideoStream ( *video_OpenMemory )( zglTMemory Memory, const char *Extension );
+ZGLEXTERN void ( *video_Update )( zglPVideoStream *Stream, double Milliseconds, bool Loop );
+ZGLEXTERN void ( *video_Seek )( zglPVideoStream *Stream, double Milliseconds );
 
 // MATH
 #define pi      3.141592654
@@ -1538,7 +1785,7 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( agrid2d_Draw, zglLib, "agrid2d_Draw" );
     zglGetAddress( cgrid2d_Draw, zglLib, "cgrid2d_Draw" );
 #endif
-/*
+
     zglGetAddress( pengine2d_Set, zglLib, "pengine2d_Set" );
     zglGetAddress( pengine2d_Get, zglLib, "pengine2d_Get" );
     zglGetAddress( pengine2d_Draw, zglLib, "pengine2d_Draw" );
@@ -1548,13 +1795,13 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( pengine2d_ClearAll, zglLib, "pengine2d_ClearAll" );
     zglGetAddress( emitter2d_Add, zglLib, "emitter2d_Add" );
     zglGetAddress( emitter2d_Del, zglLib, "emitter2d_Del" );
-    zglGetAddress( emitter2d_LoadFromFile, zglLib, "emitter2d_LoadFromFile" );
+    zglGetAddress( emitter2d_LoadFromFile, zglLib, "_emitter2d_LoadFromFile" );
     zglGetAddress( emitter2d_LoadFromMemory, zglLib, "emitter2d_LoadFromMemory" );
     zglGetAddress( emitter2d_Init, zglLib, "emitter2d_Init" );
     zglGetAddress( emitter2d_Free, zglLib, "emitter2d_Free" );
     zglGetAddress( emitter2d_Draw, zglLib, "emitter2d_Draw" );
     zglGetAddress( emitter2d_Proc, zglLib, "emitter2d_Proc" );
-*/
+
     zglGetAddress( font_Add, zglLib, "font_Add" );
     zglGetAddress( font_Del, zglLib, "font_Del" );
     zglGetAddress( font_LoadFromFile, zglLib, "_font_LoadFromFile" );
@@ -1605,6 +1852,13 @@ bool zglLoad( const char* LibraryName )
     zglGetAddress( snd_StopStream, zglLib, "snd_StopStream" );
     zglGetAddress( snd_ResumeStream, zglLib, "snd_ResumeStream" );
     zglGetAddress( snd_SeekStream, zglLib, "snd_SeekStream" );
+
+    zglGetAddress( video_Add, zglLib, "video_Add" );
+    zglGetAddress( video_Del, zglLib, "video_Del" );
+    zglGetAddress( video_OpenFile, zglLib, "_video_OpenFile" );
+    zglGetAddress( video_OpenMemory, zglLib, "_video_OpenMemory" );
+    zglGetAddress( video_Update, zglLib, "video_Update" );
+    zglGetAddress( video_Seek, zglLib, "video_Seek" );
 
     zglGetAddress( m_Cos, zglLib, "m_Cos" );
     zglGetAddress( m_Sin, zglLib, "m_Sin" );
