@@ -452,11 +452,11 @@ end;
 
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
   var
-    i, j   : Integer;
-    tData  : PByteArray;
-    mData  : PByteArray;
-    rW, mW : Integer;
-    res    : zglTTextureMaskResource;
+    i, j  : Integer;
+    tData : PByteArray;
+    mData : PByteArray;
+    rW    : Integer;
+    res   : zglTTextureMaskResource;
 begin
   if ( not Assigned( Texture ) ) or ( not Assigned( Mask ) ) Then exit;
 
@@ -472,7 +472,6 @@ begin
         if ( Texture.Width <> Mask.Width ) or ( Texture.Height <> Mask.Height ) or ( Texture.Format <> TEX_FORMAT_RGBA ) or ( Mask.Format <> TEX_FORMAT_RGBA ) Then exit;
 
         rW := Round( Texture.Width / Texture.U );
-        mW := Round( Mask.Width / Mask.U );
 
         tex_GetData( Texture, tData );
         tex_GetData( Mask, mData );
@@ -482,11 +481,11 @@ begin
             for i := 0 to Texture.Width - 1 do
               tData[ i * 4 + 3 ] := mData[ i * 4 ];
             INC( PByte( tData ), rW * 4 );
-            INC( PByte( mData ), mW * 4 );
+            INC( PByte( mData ), rW * 4 );
           end;
         DEC( PByte( tData ), rW * Texture.Height * 4 );
-        DEC( PByte( mData ), mW * Mask.Height * 4 );
-        tex_SetData( Texture, tData, 0, 0, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ), Round( Texture.Width / Texture.U ) );
+        DEC( PByte( mData ), rW * Mask.Height * 4 );
+        tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height, rW );
 
         FreeMem( tData );
         FreeMem( mData );

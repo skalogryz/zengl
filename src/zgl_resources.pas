@@ -217,7 +217,7 @@ begin
                 RES_TEXTURE_MASK:
                   with zglPTextureMaskResource( item.Resource )^ do
                     begin
-                      tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
+                      tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height, Round( Texture.Width / Texture.U ) );
                       FreeMem( tData );
                       FreeMem( mData );
 
@@ -427,7 +427,7 @@ function res_ProcQueue( data : Pointer ) : LongInt;
     item : zglPResourceItem;
     idel : zglPResourceItem;
     // mask
-    i, j, mW, rW : Integer;
+    i, j, rW : Integer;
     // font
     mem  : zglTMemory;
     dir  : UTF8String;
@@ -521,17 +521,16 @@ begin
                         end;
 
                       rW := Round( Texture.Width / Texture.U );
-                      mW := Round( Mask.Width / Mask.U );
 
                       for j := 0 to Texture.Height - 1 do
                         begin
                           for i := 0 to Texture.Width - 1 do
                             tData[ i * 4 + 3 ] := mData[ i * 4 ];
                           INC( PByte( tData ), rW * 4 );
-                          INC( PByte( mData ), mW * 4 );
+                          INC( PByte( mData ), rW * 4 );
                         end;
                       DEC( PByte( tData ), rW * Texture.Height * 4 );
-                      DEC( PByte( mData ), mW * Mask.Height * 4 );
+                      DEC( PByte( mData ), rW * Mask.Height * 4 );
 
                       Ready := TRUE;
                     end;
