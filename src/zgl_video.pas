@@ -204,7 +204,7 @@ procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double; Loo
 begin
   if not Assigned( Stream ) Then exit;
 
-  if Stream.Time + Milliseconds / 1000 > Stream.Info.Duration Then
+  if Loop and ( Stream.Time + Milliseconds / 1000 > Stream.Info.Duration ) Then
     begin
       Stream._private.Decoder.Loop( Stream^ );
       Milliseconds := ( Stream.Time + Milliseconds / 1000 - Stream.Info.Duration ) * 1000;
