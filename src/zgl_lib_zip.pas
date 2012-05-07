@@ -127,7 +127,7 @@ function zip_fread( file_ : Pzip_file; out buf; nbytes : cuint64 ) : cint; cdecl
 function zip_fclose( file_ : Pzip_file ) : cint; cdecl; external;
 
 function zip_get_num_entries( archive : Pzip; flags : cint ) : cuint64; cdecl; external;
-function zip_get_name( archive : Pzip; index : cint; flags : cint ) : PAnsiChar; cdecl; external;
+function zip_get_name( archive : Pzip; index : cuint64; flags : cint ) : PAnsiChar; cdecl; external;
 
 // hack for compression functions which will be never used, but which are needed on linking stage
 {$IFDEF FPC}
