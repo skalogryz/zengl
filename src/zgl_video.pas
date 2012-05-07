@@ -204,10 +204,11 @@ procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double; Loo
 begin
   if not Assigned( Stream ) Then exit;
 
-  if Loop and ( Stream.Time + Milliseconds / 1000 > Stream.Info.Duration ) Then
+  if Loop and ( Stream.Time + Milliseconds > Stream.Info.Duration ) Then
     begin
       Stream._private.Decoder.Loop( Stream^ );
-      Milliseconds := ( Stream.Time + Milliseconds / 1000 - Stream.Info.Duration ) * 1000;
+      Milliseconds := Stream.Time + Milliseconds;
+      Milliseconds := Milliseconds - Trunc( Milliseconds / Stream.Info.Duration ) * Stream.Info.Duration;
       Stream.Time  := 0;
       Stream.Frame := 0;
       Stream._private.Decoder.Update( Stream^, Milliseconds, Stream.Data );
@@ -225,6 +226,12 @@ end;
 procedure video_Seek( var Stream : zglPVideoStream; Milliseconds : Double );
 begin
   if not Assigned( Stream ) Then exit;
+
+  if Milliseconds > Stream.Info.Duration Then
+    begin
+      Stream._private.Decoder.Loop( Stream^ );
+      Milliseconds := Milliseconds - Trunc( Milliseconds / Stream.Info.Duration ) * Stream.Info.Duration;
+    end;
 
   Stream._private.Decoder.Seek( Stream^, Milliseconds );
   video_Update( Stream, 0 );
