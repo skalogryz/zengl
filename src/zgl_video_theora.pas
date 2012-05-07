@@ -183,7 +183,6 @@ begin
               if ogg_page_serialno( @page ) <> TheoraData.StreamState.serialno Then continue;
 
               granulePos := ogg_page_granulepos( @page );
-              writeln( granulePos );
               if granulePos >= 0 Then
                 Frames := th_granule_frame( TheoraData.DecoderCtx, granulePos )
               else
