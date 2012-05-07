@@ -486,7 +486,7 @@ begin
           end;
         DEC( PByte( tData ), rW * Texture.Height * 4 );
         DEC( PByte( mData ), mW * Mask.Height * 4 );
-        tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height );
+        tex_SetData( Texture, tData, 0, 0, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ), Round( Texture.Width / Texture.U ) );
 
         FreeMem( tData );
         FreeMem( mData );
