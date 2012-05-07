@@ -551,7 +551,7 @@ begin
           if ( file_GetDirectory( name ) = Directory ) and ( ( FindDir and ( name[ len - 1 ] = '/' ) ) or ( ( not FindDir ) and ( name[ len - 1 ] <> '/' ) ) ) Then
             begin
               SetLength( List.Items, List.Count + 1 );
-              List.Items[ List.Count ] := u_CopyUTF8Str( name );
+              List.Items[ List.Count ] := u_CopyUTF8Str( file_GetName( name ) + '.' + file_GetExtension( name ) );
               INC( List.Count );
             end;
         end;
