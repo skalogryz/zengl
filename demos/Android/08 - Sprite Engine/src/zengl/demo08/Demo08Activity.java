@@ -55,6 +55,13 @@ public class Demo08Activity extends Activity
 	}
 
 	@Override
+	public void onBackPressed()
+	{
+		if ( zengl.onBackPressed() )
+			super.onBackPressed();
+	}	
+	
+	@Override
 	public void onConfigurationChanged( Configuration newConfig )
 	{
 		super.onConfigurationChanged( newConfig );

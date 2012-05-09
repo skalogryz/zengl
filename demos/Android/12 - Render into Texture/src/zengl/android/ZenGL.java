@@ -199,14 +199,19 @@ public class ZenGL extends GLSurfaceView
 			HideKeyboard();
 		else if ( keyCode == KeyEvent.KEYCODE_DEL )
 			zglNativeBackspace();
-		else if ( keyCode == KeyEvent.KEYCODE_BACK )
-			if ( zglNativeCloseQuery() )
-			{
-				IsDestroy = true;
-				return true;
-			}
 
 		return super.onKeyDown( keyCode, event );
+	}
+	
+	public boolean onBackPressed()
+	{
+		if ( zglNativeCloseQuery() )
+		{
+			IsDestroy = true;
+			return true;
+		}
+
+		return false;
 	}
 
 	class zglCRenderer implements Renderer
