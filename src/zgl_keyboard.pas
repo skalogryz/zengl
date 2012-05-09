@@ -455,14 +455,20 @@ procedure key_InputText( const Text : UTF8String );
 begin
   if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
     begin
-      {$IFNDEF iOS}
+      {$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
       if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
         begin
           c := AnsiChar( scancode_to_utf8( keysLast[ 0 ] ) );
           if c <> #0 Then
             keysText := keysText + UTF8String( c );
         end else
-      {$ENDIF}
+      {$ELSE}
+      if appFlags and APP_USE_ENGLISH_INPUT > 0  Then
+        begin
+          if ( length( Text ) = 1 ) and ( Byte( Text[ 1 ] ) < 128 ) Then
+            keysText := keysText + Text;
+        end else
+      {$IFEND}
           keysText := keysText + Text;
     end;
 
