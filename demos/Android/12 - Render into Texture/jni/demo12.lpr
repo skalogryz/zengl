@@ -36,7 +36,7 @@ begin
   file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
 
   texTux := tex_LoadFromFile( dirRes + 'tux_stand.png' );
-  tex_SetFrameSize( textux, 64, 64 );
+  tex_SetFrameSize( texTux, 64, 64 );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
@@ -54,8 +54,6 @@ begin
 end;
 
 procedure Draw;
-  var
-    i : Integer;
 begin
   // RU: Устанавливаем текущий RenderTarget.
   // EN: Set current RenderTarget.

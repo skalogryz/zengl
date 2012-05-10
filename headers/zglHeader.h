@@ -1132,7 +1132,7 @@ typedef struct
   };
 } zglTEmitter2D, *zglPEmitter2D;
 
-typedef struct
+typedef struct zglTPEngine2D
 {
   struct
   {
@@ -1141,7 +1141,7 @@ typedef struct
   } Count;
 
   zglPEmitter2D *List;
-} zglTPEngine2D, *zglPPEngine2D;
+} *zglPPEngine2D;
 
 ZGLEXTERN void ( *pengine2d_Set )( zglPPEngine2D PEngine );
 ZGLEXTERN zglPPEngine2D ( *pengine2d_Get )();
