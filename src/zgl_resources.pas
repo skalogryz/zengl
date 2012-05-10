@@ -134,7 +134,6 @@ procedure res_Init;
 procedure res_Free;
 procedure res_Proc;
 procedure res_AddToQueue( Type_ : Integer; FromFile : Boolean; Resource : Pointer );
-function  res_ProcQueue( data : Pointer ) : LongInt;
 
 procedure res_BeginQueue( QueueID : Byte );
 procedure res_EndQueue;
@@ -421,7 +420,7 @@ begin
   thread_EventSet( resQueueState[ resQueueCurrentID ] );
 end;
 
-function res_ProcQueue( data : Pointer ) : LongInt;
+function res_ProcQueue( data : Pointer ) : LongInt; register;
   var
     id   : Byte;
     item : zglPResourceItem;

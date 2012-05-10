@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by 12 - Render into Texture.rc
+// Used by 14 - Sound.rc
 //
 #define MAINICON                        101
 

@@ -71,8 +71,8 @@ function _emitter2d_LoadFromFile( FileName : PAnsiChar ) : zglPEmitter2D;
 {$IFDEF USE_SOUND}
 function _snd_LoadFromFile( FileName : PAnsiChar; SourceCount : Integer = 8 ) : zglPSound;
 function _snd_LoadFromMemory( Memory : zglTMemory; Extension : PAnsiChar; SourceCount : Integer = 8 ) : zglPSound;
-function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
-function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
+function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
 {$ENDIF}
 
 {$IFDEF USE_VIDEO}
@@ -169,14 +169,14 @@ begin
   Result := snd_LoadFromMemory( Memory, Extension, SourceCount );
 end;
 
-function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_PlayFile( FileName : PAnsiChar; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
 begin
-  Result := snd_PlayFile( FileName, Loop );
+  Result := snd_PlayFile( FileName, Loop, Volume );
 end;
 
-function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE ) : Integer;
+function _snd_PlayMemory( Memory : zglTMemory; Extension : PAnsiChar; Loop : Boolean = FALSE; Volume : Single = SND_VOLUME_DEFAULT ) : Integer;
 begin
-  Result := snd_PlayMemory( Memory, Extension, Loop );
+  Result := snd_PlayMemory( Memory, Extension, Loop, Volume );
 end;
 {$ENDIF}
 

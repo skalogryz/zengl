@@ -53,8 +53,6 @@ begin
 end;
 
 procedure Init;
-  var
-    i : Integer;
 begin
   zgl_Enable( CORRECT_RESOLUTION );
   scr_CorrectResolution( 800, 600 );
@@ -102,7 +100,7 @@ begin
     end;
 end;
 
-procedure Proc;
+procedure Timer;
   var
     r : zglTRect;
     p : Integer;
@@ -150,7 +148,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Proc, 16 );
+  timer_Add( @Timer, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

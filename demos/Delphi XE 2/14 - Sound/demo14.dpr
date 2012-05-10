@@ -55,8 +55,6 @@ begin
 end;
 
 procedure Init;
-  var
-    i : Integer;
 begin
   // RU: Инициализируем звуковую подсистему. Для Windows можно сделать выбор между DirectSound и OpenAL отредактировав файл zgl_config.cfg.
   // EN: Initializing sound subsystem. For Windows can be used DirectSound or OpenAL, see zgl_config.cfg.
@@ -93,7 +91,7 @@ begin
     end;
 end;
 
-procedure Proc;
+procedure Timer;
   var
     r : zglTRect;
     p : Integer;
@@ -147,7 +145,7 @@ Begin
 
   randomize();
 
-  timer_Add( @Proc, 16 );
+  timer_Add( @Timer, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
