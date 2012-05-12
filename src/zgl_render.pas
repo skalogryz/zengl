@@ -40,13 +40,8 @@ uses
   zgl_main,
   zgl_window,
   zgl_screen,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_camera_2d;
 
@@ -71,7 +66,7 @@ begin
       else
         glOrtho( 0, wndWidth, wndHeight, 0, -1, 1 );
     end else
-      glOrtho( 0, oglWidth, oglHeight, 0, -1, 1 );
+      glOrtho( 0, oglWidth, 0, oglHeight, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   scr_SetViewPort();

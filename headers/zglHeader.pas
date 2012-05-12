@@ -820,8 +820,6 @@ type
   zglPEmitterPoint     = ^zglTEmitterPoint;
   zglPEmitterLine      = ^zglTEmitterLine;
   zglPEmitterRect      = ^zglTEmitterRect;
-  zglPEmitterCircle    = ^zglTEmitterCircle;
-  zglPEmitterRing      = ^zglTEmitterRing;
   zglPParticleParams   = ^zglTParticleParams;
   zglPEmitter2D        = ^zglTEmitter2D;
   zglPPEngine2D        = ^zglTPEngine2D;
@@ -894,6 +892,7 @@ type
     Rect      : zglTRect;
   end;
 
+  zglPEmitterCircle = ^zglTEmitterCircle;
   zglTEmitterCircle = record
     Direction : Single;
     Spread    : Single;
@@ -901,6 +900,7 @@ type
     Radius    : Single;
   end;
 
+  zglPEmitterRing = ^zglTEmitterRing;
   zglTEmitterRing = record
     Direction : Single;
     Spread    : Single;

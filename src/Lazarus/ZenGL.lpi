@@ -13,6 +13,12 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <MinorVersionNr Value="3"/>
+      <CharSet Value="04B0"/>
+      <StringTable CompanyName="Kemka Andrey aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Kemka Andrey aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.3.0"/>
+    </VersionInfo>
     <BuildModes Count="4">
       <Item1 Name="Release" Default="True"/>
       <Item2 Name="Debug">
@@ -23,17 +29,9 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
             <UnitOutputDirectory Value="../tmp"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
-          <BuildMacros>
-            <Count Value="1"/>
-            <Item1>
-              <Identifier Value="MacOSX"/>
-            </Item1>
-          </BuildMacros>
           <Parsing>
             <SyntaxOptions>
               <SyntaxMode Value="Delphi"/>
@@ -71,17 +69,9 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
             <UnitOutputDirectory Value="../tmp"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
-          <BuildMacros>
-            <Count Value="1"/>
-            <Item1>
-              <Identifier Value="MacOSX"/>
-            </Item1>
-          </BuildMacros>
           <Parsing>
             <SyntaxOptions>
               <SyntaxMode Value="Delphi"/>
@@ -129,17 +119,9 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
             <UnitOutputDirectory Value="../tmp"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
-          <BuildMacros>
-            <Count Value="1"/>
-            <Item1>
-              <Identifier Value="MacOSX"/>
-            </Item1>
-          </BuildMacros>
           <Parsing>
             <SyntaxOptions>
               <SyntaxMode Value="Delphi"/>
@@ -183,7 +165,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="56">
+    <Units Count="52">
       <Unit0>
         <Filename Value="../ZenGL.pas"/>
         <IsPartOfProject Value="True"/>
@@ -255,14 +237,14 @@
         <UnitName Value="zgl_mouse"/>
       </Unit13>
       <Unit14>
-        <Filename Value="../zgl_opengl.pas"/>
+        <Filename Value="../zgl_direct3d.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengl"/>
+        <UnitName Value="zgl_direct3d"/>
       </Unit14>
       <Unit15>
-        <Filename Value="../zgl_opengl_all.pas"/>
+        <Filename Value="../zgl_direct3d_all.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengl_all"/>
+        <UnitName Value="zgl_direct3d_all"/>
       </Unit15>
       <Unit16>
         <Filename Value="../zgl_render.pas"/>
@@ -375,113 +357,85 @@
         <UnitName Value="zgl_particles_2d"/>
       </Unit37>
       <Unit38>
-        <Filename Value="../zgl_touch.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_touch"/>
-      </Unit38>
-      <Unit39>
         <Filename Value="../zgl_joystick.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_joystick"/>
-      </Unit39>
-      <Unit40>
-        <Filename Value="../zgl_opengles.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengles"/>
-      </Unit40>
-      <Unit41>
-        <Filename Value="../zgl_opengles_all.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_opengles_all"/>
-      </Unit41>
-      <Unit42>
+      </Unit38>
+      <Unit39>
         <Filename Value="../zgl_resources.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_resources"/>
-      </Unit42>
-      <Unit43>
+      </Unit39>
+      <Unit40>
         <Filename Value="../zgl_lib_msvcrt.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_lib_msvcrt"/>
-      </Unit43>
-      <Unit44>
+      </Unit40>
+      <Unit41>
         <Filename Value="../zgl_lib_zip.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_lib_zip"/>
-      </Unit44>
-      <Unit45>
+      </Unit41>
+      <Unit42>
         <Filename Value="../zgl_config.cfg"/>
         <IsPartOfProject Value="True"/>
-      </Unit45>
-      <Unit46>
+      </Unit42>
+      <Unit43>
         <Filename Value="../zgl_export_c.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_export_c"/>
-      </Unit46>
-      <Unit47>
+      </Unit43>
+      <Unit44>
         <Filename Value="../zgl_fpc.cfg"/>
         <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
+      </Unit44>
+      <Unit45>
         <Filename Value="../zgl_render_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_render_2d"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="../zgl_textures_pvr.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zgl_textures_pvr"/>
-      </Unit49>
-      <Unit50>
+      </Unit45>
+      <Unit46>
         <Filename Value="../zgl_video.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_video"/>
-      </Unit50>
-      <Unit51>
+      </Unit46>
+      <Unit47>
         <Filename Value="../zgl_video_theora.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_video_theora"/>
-      </Unit51>
-      <Unit52>
+      </Unit47>
+      <Unit48>
         <Filename Value="../zgl_lib_ogg.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_lib_ogg"/>
-      </Unit52>
-      <Unit53>
+      </Unit48>
+      <Unit49>
         <Filename Value="../zgl_lib_theora.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_lib_theora"/>
-      </Unit53>
-      <Unit54>
+      </Unit49>
+      <Unit50>
         <Filename Value="../zgl_threads.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_threads"/>
-      </Unit54>
-      <Unit55>
+      </Unit50>
+      <Unit51>
         <Filename Value="../zgl_tiles_2d.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="zgl_tiles_2d"/>
-      </Unit55>
+      </Unit51>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="11"/>
+    <Version Value="9"/>
     <Target>
-      <Filename Value="./libZenGL"/>
+      <Filename Value="./ZenGL.dll"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../Direct3D;../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp"/>
     </SearchPaths>
-    <Conditionals Value="if TargetOS = 'darwin' Then
-  CustomOptions += ' -k&quot;-no_order_inits&quot; -k&quot;-no_order_data&quot; -k&quot;-macosx_version_min&quot; -k&quot;10.4&quot;';"/>
-    <BuildMacros>
-      <Count Value="1"/>
-      <Item1>
-        <Identifier Value="MacOSX"/>
-      </Item1>
-    </BuildMacros>
     <Parsing>
       <SyntaxOptions>
         <SyntaxMode Value="Delphi"/>
@@ -512,9 +466,7 @@
     </Linking>
     <Other>
       <Verbosity>
-        <ShowNotes Value="False"/>
-        <ShowHints Value="False"/>
-        <ShowGenInfo Value="False"/>
+        <ShowSummary Value="True"/>
       </Verbosity>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

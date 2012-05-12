@@ -24,9 +24,7 @@ unit zgl_resources;
 
 interface
 uses
-  {$IFDEF WINDOWS}
   Windows,
-  {$ENDIF}
   zgl_memory,
   zgl_textures,
   zgl_font,
@@ -433,10 +431,6 @@ function res_ProcQueue( data : Pointer ) : LongInt; register;
     name : UTF8String;
     tmp  : UTF8String;
 begin
-  {$IFDEF iOS}
-  app_InitPool();
-  {$ENDIF}
-
   Result := 0;
   id     := PByte( data )^;
   item   := nil;
@@ -642,11 +636,7 @@ begin
               RES_ZIP_OPEN:
                 with item^, zglPZIPResource( Resource )^ do
                   begin
-                    {$IF DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(WINCE)}
-                    zipCurrent := zip_open( PAnsiChar( platform_GetRes( FileName ) ), 0, i );
-                    {$ELSE}
                     zipCurrent := zip_open( PAnsiChar( FileName ), 0, i );
-                    {$IFEND}
 
                     if zipCurrent = nil Then
                       begin
@@ -701,10 +691,6 @@ begin
       thread_EventWait( resQueueState[ id ] );
       thread_EventReset( resQueueState[ id ] );
     end;
-
-  {$IFDEF iOS}
-  app_FreePool();
-  {$ENDIF}
 
   thread_EventDestroy( resQueueState[ id ] );
   EndThread( 0 );
