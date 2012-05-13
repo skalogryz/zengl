@@ -105,8 +105,9 @@ type
 {$IFDEF ANDROID}
 function  JNI_OnLoad( vm : PJavaVM; reserved : Pointer ) : jint; cdecl;
 function  JNI_OnUnload( vm : PJavaVM; reserved : Pointer) : jint; cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeInit( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject ); cdecl;
-procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring ); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( env : PJNIEnv; thiz : jobject; Width, Height : jint ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( env : PJNIEnv; thiz : jobject ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeActivate( env : PJNIEnv; thiz : jobject; Activate : jboolean ); cdecl;
@@ -1577,6 +1578,15 @@ begin
   Result := 0;
 end;
 
+procedure Java_zengl_android_ZenGL_zglNativeInit( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring );
+begin
+  appEnv        := env;
+  appObject     := thiz;
+  appWorkDir    := appEnv^.GetStringUTFChars( appEnv, AppDirectory, nil );
+  appHomeDir    := appEnv^.GetStringUTFChars( appEnv, HomeDirectory, nil ) + '/';
+  appGotSysDirs := TRUE;
+end;
+
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject );
 begin
   appEnv    := env;
@@ -1585,13 +1595,10 @@ begin
   zgl_Destroy();
 end;
 
-procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring );
+procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject );
 begin
   appEnv        := env;
   appObject     := thiz;
-  appWorkDir    := appEnv^.GetStringUTFChars( appEnv, AppDirectory, nil );
-  appHomeDir    := appEnv^.GetStringUTFChars( appEnv, HomeDirectory, nil ) + '/';
-  appGotSysDirs := TRUE;
 
   if appInitialized Then
     begin

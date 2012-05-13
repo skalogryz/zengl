@@ -1215,7 +1215,7 @@ begin
   Result := -1;
 end;
 
-function snd_ProcStream( data : Pointer ) : LongInt; register;
+function snd_ProcStream( data : Pointer ) : LongInt; {$IFDEF USE_EXPORT_C} register; {$ENDIF}
   var
     id        : Integer;
     _end      : Boolean;

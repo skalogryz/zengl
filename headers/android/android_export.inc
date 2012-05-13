@@ -1,5 +1,6 @@
 JNI_OnLoad,
 JNI_OnUnload,
+Java_zengl_android_ZenGL_zglNativeInit,
 Java_zengl_android_ZenGL_zglNativeDestroy,
 Java_zengl_android_ZenGL_zglNativeSurfaceCreated,
 Java_zengl_android_ZenGL_zglNativeSurfaceChanged,

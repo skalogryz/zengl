@@ -36,8 +36,9 @@ import android.view.inputmethod.InputMethodManager;
 public class ZenGL extends GLSurfaceView
 {
 	private native void Main();
+	private native void zglNativeInit( String AppDirectory, String HomeDirectory );
 	private native void zglNativeDestroy();
-	private native void zglNativeSurfaceCreated( String AppDirectory, String HomeDirectory );
+	private native void zglNativeSurfaceCreated();
 	private native void zglNativeSurfaceChanged( int width, int height );
 	private native void zglNativeDrawFrame();
 	private native void zglNativeActivate( boolean Activate );
@@ -69,6 +70,7 @@ public class ZenGL extends GLSurfaceView
 		InputManager = (InputMethodManager)context.getSystemService( Context.INPUT_METHOD_SERVICE );
 		setFocusableInTouchMode( true );
 
+		zglNativeInit( SourceDir, DataDir );
 		Main();
 	}
 
@@ -218,7 +220,7 @@ public class ZenGL extends GLSurfaceView
 	{
 		public void onSurfaceCreated( GL10 gl, EGLConfig config )
 		{
-			zglNativeSurfaceCreated( SourceDir, DataDir );
+			zglNativeSurfaceCreated();
 		}
 
 		public void onSurfaceChanged( GL10 gl, int width, int height )

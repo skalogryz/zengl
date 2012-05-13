@@ -420,7 +420,7 @@ begin
   thread_EventSet( resQueueState[ resQueueCurrentID ] );
 end;
 
-function res_ProcQueue( data : Pointer ) : LongInt; register;
+function res_ProcQueue( data : Pointer ) : LongInt; {$IFDEF USE_EXPORT_C} register; {$ENDIF}
   var
     id   : Byte;
     item : zglPResourceItem;
