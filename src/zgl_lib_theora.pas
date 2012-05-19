@@ -214,7 +214,7 @@ end;
 
 procedure FreeTheora;
 begin
-{$IFNDEF USE_OGG_STATIC}
+{$IFNDEF USE_THEORA_STATIC}
   if not theoraInit Then exit;
 
   dlclose( theoraLibrary );

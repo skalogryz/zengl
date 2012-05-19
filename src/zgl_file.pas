@@ -423,7 +423,7 @@ end;
 function file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
 begin
   {$IFDEF USE_ZIP}
-  if Assigned( zipCurrent ) Then
+  if Assigned( zipCurrent ) and ( FileHandle <> log {FIXME} ) Then
     begin
       Result := 0;
       exit;
@@ -454,7 +454,7 @@ function file_GetSize( FileHandle : zglTFile ) : LongWord;
   {$ENDIF}
 begin
   {$IFDEF USE_ZIP}
-  if Assigned( zipCurrent ) Then
+  if Assigned( zipCurrent ) and ( FileHandle <> log {FIXME} ) Then
     begin
       if zip_stat( zipCurrent, zglPZipFile( FileHandle ).name, 0, zipStat ) = 0 Then
         Result := zipStat.size
@@ -478,7 +478,7 @@ end;
 procedure file_Flush( FileHandle : zglTFile );
 begin
   {$IFDEF USE_ZIP}
-  if Assigned( zipCurrent ) Then exit;
+  if Assigned( zipCurrent ) and ( FileHandle <> log {FIXME} ) Then exit;
   {$ENDIF}
 
 {$IFDEF UNIX}
@@ -492,7 +492,7 @@ end;
 procedure file_Close( var FileHandle : zglTFile );
 begin
   {$IFDEF USE_ZIP}
-  if Assigned( zipCurrent ) Then
+  if Assigned( zipCurrent ) and ( FileHandle <> log {FIXME} ) Then
     begin
       zip_fclose( zglPZipFile( FileHandle ).file_ );
       zgl_FreeMem( Pointer( zglPZipFile( FileHandle ).name ) );
@@ -536,6 +536,7 @@ procedure file_Find( const Directory : UTF8String; out List : zglTFileList; Find
   {$IFDEF USE_ZIP}
     count : Integer;
     name  : PAnsiChar;
+    name2 : UTF8String;
     len   : Integer;
   {$ENDIF}
 begin
@@ -544,16 +545,32 @@ begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
     begin
-      for count := 0 to zip_get_num_entries( zipCurrent, ZIP_FL_UNCHANGED ) do
+      for count := 0 to zip_get_num_entries( zipCurrent, ZIP_FL_UNCHANGED ) - 1 do
         begin
           name := zip_get_name( zipCurrent, count, ZIP_FL_UNCHANGED );
           len  := Length( name );
-          if ( file_GetDirectory( name ) = Directory ) and ( ( FindDir and ( name[ len - 1 ] = '/' ) ) or ( ( not FindDir ) and ( name[ len - 1 ] <> '/' ) ) ) Then
+          if FindDir Then
             begin
-              SetLength( List.Items, List.Count + 1 );
-              List.Items[ List.Count ] := u_CopyUTF8Str( file_GetName( name ) + '.' + file_GetExtension( name ) );
-              INC( List.Count );
-            end;
+              if name[ len - 1 ] = '/' Then
+                begin
+                  name2 := name;
+                  SetLength( name2, len - 1 );
+                end else
+                  continue;
+
+              if file_GetDirectory( name2 ) = Directory Then
+                begin
+                  SetLength( List.Items, List.Count + 1 );
+                  List.Items[ List.Count ] := copy( name2, length( Directory ) + 1, len - 1 );
+                  INC( List.Count );
+                end;
+            end else
+              if ( name[ len - 1 ] <> '/' ) and ( file_GetDirectory( name ) = Directory ) Then
+                begin
+                  SetLength( List.Items, List.Count + 1 );
+                  List.Items[ List.Count ] := u_CopyUTF8Str( file_GetName( name ) + '.' + file_GetExtension( name ) );
+                  INC( List.Count );
+                end;
         end;
 
       if List.Count > 2 Then
