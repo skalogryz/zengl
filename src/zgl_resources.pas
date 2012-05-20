@@ -166,9 +166,48 @@ procedure res_Init;
 begin
 end;
 
+procedure res_DelItem( var Item : zglPResourceItem );
+begin
+  if not Assigned( Item ) Then exit;
+
+  if Assigned( Item.prev ) Then
+    Item.prev.next := Item.next;
+  if Assigned( Item.next ) Then
+    Item.next.prev := Item.prev;
+
+  case Item.Type_ of
+    RES_TEXTURE:
+      if Assigned( Item.Resource ) Then
+        zglPTextureResource( Item.Resource ).FileName := '';
+    RES_FONT:
+      if Assigned( Item.Resource ) Then
+        zglPFontResource( Item.Resource ).FileName := '';
+    {$IFDEF USE_SOUND}
+    RES_SOUND:
+      if Assigned( Item.Resource ) Then
+        zglPSoundResource( Item.Resource ).FileName := '';
+    {$ENDIF}
+    {$IFDEF USE_ZIP}
+    RES_ZIP_OPEN,
+    RES_ZIP_CLOSE:
+      if Assigned( Item.Resource ) Then
+        with zglPZIPResource( Item.Resource )^ do
+          begin
+            FileName := '';
+            Password := '';
+          end;
+    {$ENDIF}
+  end;
+
+  FreeMem( Item.Resource );
+  FreeMem( Item );
+  Item := nil;
+end;
+
 procedure res_Free;
   var
     i : Integer;
+    r : zglPResourceItem;
 begin
   for i := 0 to 255 do
     if resQueueState[ i ] <> nil Then
@@ -176,6 +215,14 @@ begin
         thread_EventSet( resQueueState[ i ] );
         resQueueSize[ i ] := 0;
         while resQueueState[ i ] <> nil do;
+
+        while Assigned( resQueueItems[ i ].next ) do
+          begin
+            r := resQueueItems[ i ].next;
+            res_DelItem( r );
+          end;
+        resQueueItems[ i ].prev := nil;
+        resQueueItems[ i ].next := nil;
       end;
 end;
 
@@ -190,7 +237,7 @@ begin
   size := 0;
   max  := 0;
   for id := 0 to 255 do
-    if resQueueState[ id ] <> nil Then
+    if appWork and ( resQueueState[ id ] <> nil ) Then
       begin
         if resQueueSize[ id ] <= 0 Then continue;
 
@@ -444,7 +491,7 @@ begin
     begin
       item := resQueueItems[ id ].next;
       idel := nil;
-      while Assigned( item ) do
+      while appWork and Assigned( item ) do
         begin
           if ( not item.Ready ) and Assigned( item.Resource ) Then
             case item.Type_ of
