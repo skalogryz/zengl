@@ -33,6 +33,7 @@ type
 
     function  AddSprite : Integer; overload; virtual;
     function  AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D; overload; virtual;
+    procedure AddSprite( Sprite : zglCSprite2D; Layer : Integer ); overload; virtual;
     procedure DelSprite( ID : Integer ); virtual;
     procedure ClearAll; virtual;
 
@@ -58,7 +59,7 @@ type
     Alpha   : Integer;
     FxFlags : LongWord;
 
-    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
+    constructor Create( _Manager : zglCSEngine2D; _ID : Integer ); virtual;
     destructor  Destroy; override;
 
     procedure OnInit( _Texture : zglPTexture; _Layer : Integer ); virtual;
@@ -153,6 +154,17 @@ begin
   FList[ id ] := zglCSprite2D.Create( Self, id );
   Result := FList[ id ];
   Result.OnInit( Texture, Layer );
+end;
+
+procedure zglCSEngine2D.AddSprite( Sprite : zglCSprite2D; Layer : Integer );
+  var
+    id : Integer;
+begin
+  if not Assigned( Sprite ) Then exit;
+  id := AddSprite();
+
+  FList[ id ] := Sprite;
+  FList[ id ].OnInit( Sprite.Texture, Layer );
 end;
 
 procedure zglCSEngine2D.DelSprite( ID : Integer );
