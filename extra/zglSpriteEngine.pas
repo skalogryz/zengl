@@ -163,7 +163,9 @@ begin
   if not Assigned( Sprite ) Then exit;
   id := AddSprite();
 
-  FList[ id ] := Sprite;
+  FList[ id ]         := Sprite;
+  FList[ id ].Manager := Self;
+  FList[ id ].ID      := id;
   FList[ id ].OnInit( Sprite.Texture, Layer );
 end;
 
