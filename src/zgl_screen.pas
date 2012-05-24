@@ -233,7 +233,7 @@ begin
   FillChar( scrMonInfo, SizeOf( MONITORINFOEX ), 0 );
   scrMonInfo.cbSize := SizeOf( MONITORINFOEX );
   GetMonitorInfoW( scrMonitor, scrMonInfo );
-
+log_Add('FUCK!');
   FillChar( scrDesktop, SizeOf( DEVMODEW ), 0 );
   with scrDesktop do
     begin
@@ -555,7 +555,6 @@ begin
   VSync      := TRUE;
 {$IFEND}
 
-  scrChanging   := TRUE;
   wndWidth      := Width;
   wndHeight     := Height;
   scrRefresh    := Refresh;
@@ -582,6 +581,7 @@ begin
       oglTargetH := Height;
       exit;
     end;
+  scrChanging := TRUE;
   scr_SetVSync( scrVSync );
 {$IFDEF USE_X11}
   if wndFullScreen Then
