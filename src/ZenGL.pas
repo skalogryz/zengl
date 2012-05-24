@@ -474,9 +474,5 @@ exports
   {$ENDIF}
   ;
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
-
 begin
 end.

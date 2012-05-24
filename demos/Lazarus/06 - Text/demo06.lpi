@@ -44,7 +44,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo04"/>
+      <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo06"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
