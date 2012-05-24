@@ -94,7 +94,6 @@ var
   scrVSync       : Boolean;
   scrResList     : zglTResolutionList;
   scrInitialized : Boolean;
-  scrChanging    : Boolean;
 
   // Resolution Correct
   scrResW  : Integer;
@@ -144,25 +143,6 @@ uses
   zgl_log,
   zgl_utils;
 
-{$IFDEF WINDOWS}
-function GetDisplayColors : Integer;
-  var
-    tHDC: hdc;
-begin
-  tHDC := GetDC( 0 );
-  Result := GetDeviceCaps( tHDC, BITSPIXEL ) * GetDeviceCaps( tHDC, PLANES );
-  ReleaseDC( 0, tHDC );
-end;
-
-function GetDisplayRefresh : Integer;
-  var
-    tHDC: hdc;
-begin
-  tHDC := GetDC( 0 );
-  Result := GetDeviceCaps( tHDC, VREFRESH );
-  ReleaseDC( 0, tHDC );
-end;
-{$ENDIF}
 
 procedure scr_Init;
   {$IFDEF LINUX}
@@ -197,16 +177,15 @@ begin
   scrMonInfo.cbSize := SizeOf( MONITORINFOEX );
   GetMonitorInfoW( scrMonitor, scrMonInfo );
 
-  FillChar( scrDesktop, SizeOf( DEVMODEW ), 0 );
-  with scrDesktop do
+  if appInitialized and ( not wndFullScreen ) Then
     begin
-      dmSize             := SizeOf( DEVMODEW );
-      dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
-      dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
-      dmBitsPerPel       := GetDisplayColors();
-      dmDisplayFrequency := GetDisplayRefresh();
-      dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
+      scrWidth  := scrMonInfo.rcMonitor.Right - scrMonInfo.rcMonitor.Left;
+      scrHeight := scrMonInfo.rcMonitor.Bottom - scrMonInfo.rcMonitor.Top;
     end;
+
+  FillChar( scrDesktop, SizeOf( DEVMODEW ), 0 );
+  scrDesktop.dmSize := SizeOf( DEVMODEW );
+  EnumDisplaySettingsW( scrMonInfo.szDevice, ENUM_REGISTRY_SETTINGS, scrDesktop );
 {$ENDIF}
 {$IFDEF DARWIN}
   scrDisplay  := CGMainDisplayID();
@@ -356,7 +335,6 @@ end;
 
 procedure scr_Reset;
 begin
-  scrChanging := TRUE;
 {$IFDEF LINUX}
   XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, 1, 0 );
 {$ENDIF}
@@ -413,7 +391,7 @@ begin
         end else
           ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
 
-      scrRefresh := GetDisplayRefresh();
+      scrRefresh := scrDesktop.dmDisplayFrequency;
     end else
       scr_Reset();
   {$ENDIF}
@@ -460,7 +438,6 @@ begin
       end;
 
   if not appInitialized Then exit;
-  scrChanging := TRUE;
   scr_SetVSync( scrVSync );
 {$IFDEF LINUX}
   if wndFullScreen Then
@@ -527,7 +504,7 @@ begin
         end else
           ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_FULLSCREEN, nil );
 
-      scrRefresh := GetDisplayRefresh();
+      scrRefresh := scrDesktop.dmDisplayFrequency;
     end else
       scr_SetWindowedMode();
 {$ENDIF}

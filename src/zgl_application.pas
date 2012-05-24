@@ -439,14 +439,7 @@ begin
       end;
     WM_DISPLAYCHANGE:
       begin
-        if scrChanging Then
-          begin
-            scrChanging := FALSE;
-            exit;
-          end;
         scr_Init();
-        scrWidth  := scrDesktop.dmPelsWidth;
-        scrHeight := scrDesktop.dmPelsHeight;
         if not wndFullScreen Then
           wnd_Update();
       end;

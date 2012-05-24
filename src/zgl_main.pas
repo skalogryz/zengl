@@ -36,11 +36,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.2.8';
-  cs_Date     = '2012.04.30';
+  cs_ZenGL    = 'ZenGL 0.2.9';
+  cs_Date     = '2012.05.24';
   cv_major    = 0;
   cv_minor    = 2;
-  cv_revision = 7;
+  cv_revision = 9;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
