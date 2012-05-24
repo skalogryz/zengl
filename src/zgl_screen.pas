@@ -198,7 +198,6 @@ end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
 begin
-  scrChanging   := TRUE;
   oglWidth      := Width;
   oglHeight     := Height;
   oglTargetW    := Width;
@@ -222,6 +221,7 @@ begin
       end;
 
   if not appInitialized Then exit;
+  scrChanging := TRUE;
   scr_SetVSync( scrVSync );
 
   if Assigned( d3dDevice ) Then
