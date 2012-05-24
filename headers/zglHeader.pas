@@ -2,8 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 {                               }
-{ version:  0.2.8               }
-{ date:     2012.04.30          }
+{ version:  0.2.9               }
+{ date:     2012.05.24          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }

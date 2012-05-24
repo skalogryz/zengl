@@ -46,6 +46,21 @@ procedure scr_SetViewPort;
 procedure scr_SetVSync( VSync : Boolean );
 procedure scr_SetFSAA( FSAA : Byte );
 procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
+const
+  MONITOR_DEFAULTTOPRIMARY = $00000001;
+
+type
+  HMONITOR = THANDLE;
+  MONITORINFOEX = record
+    cbSize    : LongWord;
+    rcMonitor : TRect;
+    rcWork    : TRect;
+    dwFlags   : LongWord;
+    szDevice  : array[ 0..CCHDEVICENAME - 1 ] of WideChar;
+  end;
+
+function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
+function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
 
 type
   zglPResolutionList = ^zglTResolutionList;
@@ -56,13 +71,12 @@ type
 end;
 
 var
-  scrWidth   : Integer = 800;
-  scrHeight  : Integer = 600;
-  scrRefresh : Integer;
-  scrVSync   : Boolean;
-  scrResList : zglTResolutionList;
+  scrWidth       : Integer = 800;
+  scrHeight      : Integer = 600;
+  scrRefresh     : Integer;
+  scrVSync       : Boolean;
+  scrResList     : zglTResolutionList;
   scrInitialized : Boolean;
-  scrChanging : Boolean;
 
   // Resolution Correct
   scrResW  : Integer;
@@ -74,8 +88,10 @@ var
   scrSubCX : Integer = 0;
   scrSubCY : Integer = 0;
 
-  scrSettings : DEVMODE;
-  scrDesktop  : DEVMODE;
+  scrSettings : DEVMODEW;
+  scrDesktop  : DEVMODEW;
+  scrMonitor  : HMONITOR;
+  scrMonInfo  : MONITORINFOEX;
 
 implementation
 uses
@@ -109,20 +125,25 @@ end;
 procedure scr_Init;
 begin
   scrInitialized := TRUE;
-  with scrDesktop do
+  scrMonitor := MonitorFromWindow( wndHandle, MONITOR_DEFAULTTOPRIMARY );
+  FillChar( scrMonInfo, SizeOf( MONITORINFOEX ), 0 );
+  scrMonInfo.cbSize := SizeOf( MONITORINFOEX );
+  GetMonitorInfoW( scrMonitor, scrMonInfo );
+
+  if appInitialized and ( not wndFullScreen ) Then
     begin
-      dmSize             := SizeOf( DEVMODE );
-      dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
-      dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
-      dmBitsPerPel       := GetDisplayColors();
-      dmDisplayFrequency := GetDisplayRefresh();
-      dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
+      scrWidth  := scrMonInfo.rcMonitor.Right - scrMonInfo.rcMonitor.Left;
+      scrHeight := scrMonInfo.rcMonitor.Bottom - scrMonInfo.rcMonitor.Top;
     end;
+
+  FillChar( scrDesktop, SizeOf( DEVMODEW ), 0 );
+  scrDesktop.dmSize := SizeOf( DEVMODEW );
+  EnumDisplaySettingsW( scrMonInfo.szDevice, ENUM_REGISTRY_SETTINGS, scrDesktop );
 end;
 
 function scr_Create : Boolean;
   var
-    settings : DEVMODE;
+    settings : DEVMODEW;
 begin
   Result := FALSE;
   scr_Init();
@@ -131,12 +152,12 @@ begin
       settings              := scrDesktop;
       settings.dmBitsPerPel := 32;
 
-      if ChangeDisplaySettings( settings, CDS_TEST or CDS_FULLSCREEN ) <> DISP_CHANGE_SUCCESSFUL Then
+      if ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
           u_Error( 'Desktop doesn''t support 32-bit color mode.' );
           zgl_Exit;
         end else
-          ChangeDisplaySettings( settings, CDS_FULLSCREEN );
+          ChangeDisplaySettingsExW( scrMonInfo.szDevice, settings, 0, CDS_FULLSCREEN, nil );
     end;
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
   scr_GetResList();
@@ -146,7 +167,7 @@ end;
 procedure scr_GetResList;
   var
     i : Integer;
-    tmpSettings : DEVMODE;
+    tmpSettings : DEVMODEW;
   function Already( Width, Height : Integer ) : Boolean;
     var
       j : Integer;
@@ -157,7 +178,9 @@ procedure scr_GetResList;
   end;
 begin
   i := 0;
-  while EnumDisplaySettings( nil, i, tmpSettings ) <> FALSE do
+  FillChar( tmpSettings, SizeOf( DEVMODEW ), 0 );
+  tmpSettings.dmSize := SizeOf( DEVMODEW );
+  while EnumDisplaySettingsW( scrMonInfo.szDevice, i, tmpSettings ) <> FALSE do
     begin
       if not Already( tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight ) Then
         begin
@@ -221,7 +244,6 @@ begin
       end;
 
   if not appInitialized Then exit;
-  scrChanging := TRUE;
   scr_SetVSync( scrVSync );
 
   if Assigned( d3dDevice ) Then
@@ -234,7 +256,7 @@ begin
   if appWork Then
     begin
       wnd_Update();
-      scrRefresh := GetDisplayRefresh();
+      scrRefresh := scrDesktop.dmDisplayFrequency;
     end;
 end;
 

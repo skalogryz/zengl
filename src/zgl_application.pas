@@ -222,14 +222,7 @@ begin
       end;
     WM_DISPLAYCHANGE:
       begin
-        if scrChanging or d3dwrc Then
-          begin
-            scrChanging := FALSE;
-            exit;
-          end;
         scr_Init();
-        scrWidth  := scrDesktop.dmPelsWidth;
-        scrHeight := scrDesktop.dmPelsHeight;
         if ( not wndFullScreen ) and ( scr_Create() ) Then
           wnd_Update();
       end;
