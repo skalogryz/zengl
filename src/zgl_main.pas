@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 beta 4';
-  cs_Date     = '2012.05.19';
+  cs_Date     = '2012.05.25';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -608,7 +608,7 @@ begin
 
     DESKTOP_WIDTH:
     {$IFDEF USE_X11}
-      Result := PXRRScreenSize( scrModeList + scrDesktop * SizeOf( PXRRScreenSize ) ).width;
+      Result := PXRRScreenSize( scrModeList + scrDesktop ).width;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsWidth;
@@ -618,7 +618,7 @@ begin
     {$IFEND}
     DESKTOP_HEIGHT:
     {$IFDEF USE_X11}
-      Result := PXRRScreenSize( scrModeList + scrDesktop * SizeOf( PXRRScreenSize ) ).height;
+      Result := PXRRScreenSize( scrModeList + scrDesktop ).height;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsHeight;

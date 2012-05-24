@@ -109,6 +109,8 @@ var
   scrCurrent   : LongInt;
   scrModeCount : LongInt;
   scrModeList  : PXRRScreenSize;
+  scrEventBase : cint;
+  scrErrorBase : cint;
   scrRotation  : Word;
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -179,6 +181,86 @@ function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BO
 function ChangeDisplaySettingsExW( lpszDeviceName : PWideChar; lpDevMode : DEVMODEW; handle : HWND; dwflags : DWORD; lParam : Pointer ) : LongInt; stdcall; external 'coredll.dll' name 'ChangeDisplaySettingsEx';
 {$ENDIF}
 
+procedure scr_GetResList;
+  var
+    i : Integer;
+  {$IFDEF USE_X11}
+    tmpSettings : PXRRScreenSize;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+    tmpSettings : DEVMODEW;
+  {$ENDIF}
+  {$IFDEF MACOSX}
+    tmpSettings   : UnivPtr;
+    width, height : Integer;
+  {$ENDIF}
+  function Already( Width, Height : Integer ) : Boolean;
+    var
+      j : Integer;
+  begin
+    Result := FALSE;
+    for j := 0 to scrResList.Count - 1 do
+      if ( scrResList.Width[ j ] = Width ) and ( scrResList.Height[ j ] = Height ) Then Result := TRUE;
+  end;
+begin
+{$IFDEF USE_X11}
+  tmpSettings := scrModeList;
+  for i := 0 to scrModeCount - 1 do
+    begin
+      if not Already( tmpSettings.Width, tmpSettings.Height ) Then
+        begin
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.Width;
+          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.Height;
+        end;
+      INC( tmpSettings );
+    end;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  i := 0;
+  FillChar( tmpSettings, SizeOf( DEVMODEW ), 0 );
+  tmpSettings.dmSize := SizeOf( DEVMODEW );
+  while EnumDisplaySettingsW( scrMonInfo.szDevice, i, tmpSettings ) <> FALSE do
+    begin
+      if not Already( tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight ) Then
+        begin
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.dmPelsWidth;
+          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.dmPelsHeight;
+        end;
+      INC( i );
+    end;
+{$ENDIF}
+{$IFDEF MACOSX}
+  tmpSettings := scrModeList;
+  for i := 0 to scrModeCount - 1 do
+    begin
+      tmpSettings := CFArrayGetValueAtIndex( scrModeList, i );
+      CFNumberGetValue( CFDictionaryGetValue( tmpSettings, CFSTRP('Width') ), kCFNumberIntType, @width );
+      CFNumberGetValue( CFDictionaryGetValue( tmpSettings, CFSTRP('Height') ), kCFNumberIntType, @height );
+      if not Already( width, height ) Then
+        begin
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := width;
+          scrResList.Height[ scrResList.Count - 1 ] := height;
+        end;
+    end;
+{$ENDIF}
+{$IFDEF iOS}
+  scrResList.Count := 1;
+  SetLength( scrResList.Width, 1 );
+  SetLength( scrResList.Height, 1 );
+  scrResList.Width[ 0 ] := scrDesktopW;
+  scrResList.Height[ 0 ] := scrDesktopH;
+{$ENDIF}
+end;
+
 procedure scr_Init;
   {$IFDEF iOS}
   var
@@ -188,24 +270,32 @@ procedure scr_Init;
   {$ENDIF}
 begin
 {$IFDEF USE_X11}
-  log_Init();
-
-  if Assigned( scrDisplay ) Then
-    XCloseDisplay( scrDisplay );
-
-  scrDisplay := XOpenDisplay( nil );
-  if not Assigned( scrDisplay ) Then
+  if not appInitialized Then
     begin
-      u_Error( 'Cannot connect to X server.' );
-      exit;
-    end;
+      log_Init();
 
-  scrDefault := DefaultScreen( scrDisplay );
-  wndRoot    := DefaultRootWindow( scrDisplay );
+      if Assigned( scrDisplay ) Then
+        XCloseDisplay( scrDisplay );
+
+      scrDisplay := XOpenDisplay( nil );
+      if not Assigned( scrDisplay ) Then
+        begin
+          u_Error( 'Cannot connect to X server.' );
+          exit;
+        end;
+
+      scrDefault := DefaultScreen( scrDisplay );
+      wndRoot    := DefaultRootWindow( scrDisplay );
+
+      XRRSelectInput( scrDisplay, wndRoot, RRScreenChangeNotifyMask );
+      XRRQueryExtension( scrDisplay, @scrEventBase, @scrErrorBase ) ;
+    end;
 
   scrModeList := XRRSizes( scrDisplay, XRRRootToScreen( scrDisplay, wndRoot ), @scrModeCount );
   scrSettings := XRRGetScreenInfo( scrDisplay, wndRoot );
   scrDesktop  := XRRConfigCurrentConfiguration( scrSettings, @scrRotation );
+  if appInitialized Then
+    scr_GetResList();
 {$ENDIF}
 {$IFDEF WINDOWS}
   scrMonitor := MonitorFromWindow( wndHandle, MONITOR_DEFAULTTOPRIMARY );
@@ -289,86 +379,6 @@ begin
   oglTargetH  := scrDesktopH;
 {$ENDIF}
   scrInitialized := TRUE;
-end;
-
-procedure scr_GetResList;
-  var
-    i : Integer;
-  {$IFDEF USE_X11}
-    tmpSettings : PXRRScreenSize;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-    tmpSettings : DEVMODEW;
-  {$ENDIF}
-  {$IFDEF MACOSX}
-    tmpSettings   : UnivPtr;
-    width, height : Integer;
-  {$ENDIF}
-  function Already( Width, Height : Integer ) : Boolean;
-    var
-      j : Integer;
-  begin
-    Result := FALSE;
-    for j := 0 to scrResList.Count - 1 do
-      if ( scrResList.Width[ j ] = Width ) and ( scrResList.Height[ j ] = Height ) Then Result := TRUE;
-  end;
-begin
-{$IFDEF USE_X11}
-  tmpSettings := scrModeList;
-  for i := 0 to scrModeCount - 1 do
-    begin
-      if not Already( tmpSettings.Width, tmpSettings.Height ) Then
-        begin
-          INC( scrResList.Count );
-          SetLength( scrResList.Width, scrResList.Count );
-          SetLength( scrResList.Height, scrResList.Count );
-          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.Width;
-          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.Height;
-        end;
-      INC( tmpSettings );
-    end;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  i := 0;
-  FillChar( tmpSettings, SizeOf( DEVMODEW ), 0 );
-  tmpSettings.dmSize := SizeOf( DEVMODEW );
-  while EnumDisplaySettingsW( scrMonInfo.szDevice, i, tmpSettings ) <> FALSE do
-    begin
-      if not Already( tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight ) Then
-        begin
-          INC( scrResList.Count );
-          SetLength( scrResList.Width, scrResList.Count );
-          SetLength( scrResList.Height, scrResList.Count );
-          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.dmPelsWidth;
-          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.dmPelsHeight;
-        end;
-      INC( i );
-    end;
-{$ENDIF}
-{$IFDEF MACOSX}
-  tmpSettings := scrModeList;
-  for i := 0 to scrModeCount - 1 do
-    begin
-      tmpSettings := CFArrayGetValueAtIndex( scrModeList, i );
-      CFNumberGetValue( CFDictionaryGetValue( tmpSettings, CFSTRP('Width') ), kCFNumberIntType, @width );
-      CFNumberGetValue( CFDictionaryGetValue( tmpSettings, CFSTRP('Height') ), kCFNumberIntType, @height );
-      if not Already( width, height ) Then
-        begin
-          INC( scrResList.Count );
-          SetLength( scrResList.Width, scrResList.Count );
-          SetLength( scrResList.Height, scrResList.Count );
-          scrResList.Width[ scrResList.Count - 1 ]  := width;
-          scrResList.Height[ scrResList.Count - 1 ] := height;
-        end;
-    end;
-{$ENDIF}
-{$IFDEF iOS}
-  scrResList.Count := 1;
-  SetLength( scrResList.Width, 1 );
-  SetLength( scrResList.Height, 1 );
-  scrResList.Width[ 0 ] := scrDesktopW;
-  scrResList.Height[ 0 ] := scrDesktopH;
-{$ENDIF}
 end;
 
 procedure scr_Reset;

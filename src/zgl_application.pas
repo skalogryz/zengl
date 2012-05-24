@@ -28,7 +28,7 @@ unit zgl_application;
 interface
 uses
   {$IFDEF USE_X11}
-  X, XLib
+  X, XLib, XRandr
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows, Messages
@@ -415,6 +415,12 @@ begin
   while XPending( scrDisplay ) <> 0 do
     begin
       XNextEvent( scrDisplay, @event );
+
+      if ( XRRUpdateConfiguration( @event ) = 1 ) and ( event._type - scrEventBase = RRScreenChangeNotify ) Then
+        begin
+          scr_Init();
+          continue;
+        end;
 
       if appWork Then
       case event._type of
