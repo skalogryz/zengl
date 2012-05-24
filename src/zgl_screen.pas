@@ -437,7 +437,6 @@ procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boo
     b : Integer;
   {$ENDIF}
 begin
-  scrChanging   := TRUE;
   oglWidth      := Width;
   oglHeight     := Height;
   oglTargetW    := Width;
@@ -461,6 +460,7 @@ begin
       end;
 
   if not appInitialized Then exit;
+  scrChanging := TRUE;
   scr_SetVSync( scrVSync );
 {$IFDEF LINUX}
   if wndFullScreen Then
