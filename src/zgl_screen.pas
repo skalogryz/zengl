@@ -233,7 +233,7 @@ begin
   FillChar( scrMonInfo, SizeOf( MONITORINFOEX ), 0 );
   scrMonInfo.cbSize := SizeOf( MONITORINFOEX );
   GetMonitorInfoW( scrMonitor, scrMonInfo );
-log_Add('FUCK!');
+
   FillChar( scrDesktop, SizeOf( DEVMODEW ), 0 );
   with scrDesktop do
     begin
