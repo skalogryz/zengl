@@ -311,6 +311,8 @@ procedure wnd_Update;
     FullScreen : Boolean;
   {$ENDIF}
 begin
+  if appInitedToHandle Then exit;
+
 {$IFDEF LINUX}
   XSync( scrDisplay, X_TRUE );
   wnd_SetHints();
@@ -378,6 +380,8 @@ procedure wnd_SetCaption( const NewCaption : String );
     str : CFStringRef;
   {$ENDIF}
 begin
+  if appInitedToHandle Then exit;
+
   wndCaption := u_CopyStr( NewCaption );
 {$IFDEF LINUX}
   if wndHandle <> 0 Then
@@ -476,6 +480,8 @@ procedure wnd_SetPos( X, Y : Integer );
     mode : LongWord;
   {$ENDIF}
 begin
+  if appInitedToHandle Then exit;
+
   wndX := X;
   wndY := Y;
 {$IFDEF LINUX}
@@ -512,6 +518,8 @@ procedure wnd_ShowCursor( Show : Boolean );
     mask   : TPixmap;
     xcolor : TXColor;
 begin
+  if appInitedToHandle Then exit;
+
   appShowCursor := Show;
 
   if wndHandle = 0 Then exit;
