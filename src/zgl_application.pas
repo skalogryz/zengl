@@ -223,8 +223,6 @@ begin
     WM_DISPLAYCHANGE:
       begin
         scr_Init();
-        if ( not wndFullScreen ) and ( scr_Create() ) Then
-          wnd_Update();
       end;
     WM_ACTIVATEAPP:
       begin
