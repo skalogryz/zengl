@@ -109,10 +109,7 @@ begin
       exit;
     end;
 
-  if wndFullScreen Then
-    wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
-  else
-    wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+  wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
                                 wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
                                 wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );
@@ -160,6 +157,8 @@ procedure wnd_Update;
   var
     FullScreen : Boolean;
 begin
+  if appInitedToHandle Then exit;
+
   if appFocus Then
     FullScreen := wndFullScreen
   else
@@ -170,21 +169,23 @@ begin
   else
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  appWork := TRUE;
-  wnd_SetCaption( wndCaption );
-  wnd_SetSize( wndWidth, wndHeight );
-
   SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
   SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 
+  appWork := TRUE;
+  wnd_SetCaption( wndCaption );
+
   if ( not wndFullScreen ) and ( appFlags and WND_USE_AUTOCENTER > 0 ) Then
     wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2 );
+  wnd_SetSize( wndWidth, wndHeight );
 end;
 
 procedure wnd_SetCaption( const NewCaption : String );
   var
     len : Integer;
 begin
+  if appInitedToHandle Then exit;
+
   wndCaption := u_CopyStr( NewCaption );
 
   {$IFNDEF FPC}
@@ -235,6 +236,8 @@ end;
 
 procedure wnd_SetPos( X, Y : Integer );
 begin
+  if appInitedToHandle Then exit;
+
   wndX := X;
   wndY := Y;
 

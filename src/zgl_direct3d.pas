@@ -310,6 +310,7 @@ begin
     end else log_Add( 'D3DCREATE_HARDWARE_VERTEXPROCESSING' );
 
   d3d_ResetState();
+  wnd_Update();
 
   Result := TRUE;
 end;
