@@ -1328,7 +1328,7 @@ var
   function file_GetDirectory( const FileName : UTF8String ) : UTF8String;
 
 var
-  mem_LoadFromFile : function( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
+  mem_LoadFromFile : function( out Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
   mem_SaveToFile   : function( var Memory : zglTMemory; const FileName : UTF8String ) : Boolean;
   mem_Seek         : function( var Memory : zglTMemory; Offset, Mode : Integer ) : LongWord;
   mem_Read         : function( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
