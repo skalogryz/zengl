@@ -903,6 +903,7 @@ begin
     end;
   glBindFramebuffer( GL_FRAMEBUFFER, oglReadPixelsFBO );
   glBindRenderbuffer( GL_RENDERBUFFER, oglReadPixelsRB );
+  glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ) );
 
   glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture.ID, 0 );
 
