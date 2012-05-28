@@ -856,7 +856,8 @@ begin
       for i := 0 to Height - 1 do
         Move( pData[ i * Stride * 4 ], pDataGLES[ i * Width * 4 ], Width * 4 );
       pData := pDataGLES;
-    end;
+    end else
+      pDataGLES := nil;
   {$ENDIF}
 
   glEnable( GL_TEXTURE_2D );
@@ -898,8 +899,10 @@ begin
   if oglReadPixelsFBO = 0 Then
     begin
       glGenFramebuffers( 1, @oglReadPixelsFBO );
-      glBindFramebuffer( GL_FRAMEBUFFER, oglReadPixelsFBO );
+      glGenRenderbuffers( 1, @oglReadPixelsRB );
     end;
+  glBindFramebuffer( GL_FRAMEBUFFER, oglReadPixelsFBO );
+  glBindRenderbuffer( GL_RENDERBUFFER, oglReadPixelsRB );
 
   glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture.ID, 0 );
 

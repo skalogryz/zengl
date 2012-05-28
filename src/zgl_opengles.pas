@@ -90,6 +90,7 @@ var
   oglSeparate      : Boolean;
 
   oglReadPixelsFBO : LongWord;
+  oglReadPixelsRB  : LongWord;
 
   {$IFNDEF NO_EGL}
   oglDisplay : EGLDisplay;
