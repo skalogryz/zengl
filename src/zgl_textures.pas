@@ -912,6 +912,7 @@ begin
     begin
       {$IFNDEF iOS}
       glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+      glBindRenderbuffer( GL_RENDERBUFFER, 0 );
       {$ELSE}
       glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
       glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
