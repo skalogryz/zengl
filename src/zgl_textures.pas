@@ -478,14 +478,14 @@ begin
 
         for j := 0 to Texture.Height - 1 do
           begin
-            for i := 0 to Texture.Width - 1 do
+            for i := 0 to rW - 1 do
               tData[ i * 4 + 3 ] := mData[ i * 4 ];
             INC( PByte( tData ), rW * 4 );
             INC( PByte( mData ), rW * 4 );
           end;
         DEC( PByte( tData ), rW * Texture.Height * 4 );
         DEC( PByte( mData ), rW * Mask.Height * 4 );
-        tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height, rW );
+        tex_SetData( Texture, tData, 0, 0, rW, Texture.Height );
 
         FreeMem( tData );
         FreeMem( mData );
@@ -839,10 +839,25 @@ begin
 end;
 
 procedure tex_SetData( Texture : zglPTexture; pData : PByteArray; X, Y, Width, Height : Word; Stride : Integer = 0 );
+  {$IFDEF USE_GLES}
+  var
+    pDataGLES : PByteArray;
+    i         : Integer;
+  {$ENDIF}
 begin
   batch2d_Flush();
 
   if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then exit;
+
+  {$IFDEF USE_GLES}
+  if Stride > Width Then
+    begin
+      GetMem( pDataGLES, Width * Height * 4 );
+      for i := 0 to Height - 1 do
+        Move( pData[ i * Stride * 4 ], pDataGLES[ i * Width * 4 ], Width * 4 );
+      pData := pDataGLES;
+    end;
+  {$ENDIF}
 
   glEnable( GL_TEXTURE_2D );
   {$IFNDEF USE_GLES}
@@ -854,6 +869,10 @@ begin
   glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
   {$ENDIF}
   glDisable( GL_TEXTURE_2D );
+
+  {$IFDEF USE_GLES}
+  FreeMem( pDataGLES );
+  {$ENDIF}
 end;
 
 procedure tex_GetData( Texture : zglPTexture; out pData : PByteArray );

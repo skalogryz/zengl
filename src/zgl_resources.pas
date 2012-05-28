@@ -263,7 +263,7 @@ begin
                 RES_TEXTURE_MASK:
                   with zglPTextureMaskResource( item.Resource )^ do
                     begin
-                      tex_SetData( Texture, tData, 0, 0, Texture.Width, Texture.Height, Round( Texture.Width / Texture.U ) );
+                      tex_SetData( Texture, tData, 0, 0, Round( Texture.Width / Texture.U ), Texture.Height );
                       FreeMem( tData );
                       FreeMem( mData );
 
@@ -570,7 +570,7 @@ begin
 
                       for j := 0 to Texture.Height - 1 do
                         begin
-                          for i := 0 to Texture.Width - 1 do
+                          for i := 0 to rW - 1 do
                             tData[ i * 4 + 3 ] := mData[ i * 4 ];
                           INC( PByte( tData ), rW * 4 );
                           INC( PByte( mData ), rW * 4 );
