@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -24,8 +24,7 @@ unit zgl_sound_dsound;
 
 interface
 uses
-  Windows,
-  zgl_types;
+  Windows;
 
 const
   _FACDS                      = $878; { DirectSound's facility code }
@@ -48,7 +47,6 @@ const
 
   DSBSTATUS_PLAYING           = $00000001;
   DSBSTATUS_BUFFERLOST        = $00000002;
-  DSBSTATUS_LOOPING           = $00000004;
 
   DSBPLAY_LOOPING             = $00000001;
 
@@ -94,7 +92,7 @@ type
         out lpDsbDuplicate: IDirectSoundBuffer) : HResult; stdcall;
     function SetCooperativeLevel(hwnd: HWND; dwLevel: LongWord) : HResult; stdcall;
     function Compact: HResult; stdcall;
-    function GetSpeakerConfig(out lpdwSpeakerConfig: LongWord) : HResult; stdcall;
+    function GetSpeakerConfig(var lpdwSpeakerConfig: LongWord) : HResult; stdcall;
     function SetSpeakerConfig(dwSpeakerConfig: LongWord) : HResult; stdcall;
     function Initialize(lpGuid: PGUID) : HResult; stdcall;
   end;
@@ -106,15 +104,15 @@ type
         (lpdwPlayPosition, lpdwReadPosition : PLongWord) : HResult; stdcall;
     function GetFormat(lpwfxFormat: Pointer; dwSizeAllocated: LongWord;
         lpdwSizeWritten: PLongWord) : HResult; stdcall;
-    function GetVolume(out lplVolume: integer) : HResult; stdcall;
-    function GetPan(out lplPan: integer) : HResult; stdcall;
-    function GetFrequency(out lpdwFrequency: LongWord) : HResult; stdcall;
-    function GetStatus(out lpdwStatus: LongWord) : HResult; stdcall;
+    function GetVolume(var lplVolume: integer) : HResult; stdcall;
+    function GetPan(var lplPan: integer) : HResult; stdcall;
+    function GetFrequency(var lpdwFrequency: LongWord) : HResult; stdcall;
+    function GetStatus(var lpdwStatus: LongWord) : HResult; stdcall;
     function Initialize(lpDirectSound: IDirectSound;
         const lpcDSBufferDesc: TDSBufferDesc) : HResult; stdcall;
     function Lock(dwWriteCursor, dwWriteBytes: LongWord;
-        out lplpvAudioPtr1: Pointer; out lpdwAudioBytes1: LongWord;
-        out lplpvAudioPtr2: Pointer; out lpdwAudioBytes2: LongWord;
+        var lplpvAudioPtr1: Pointer; var lpdwAudioBytes1: LongWord;
+        var lplpvAudioPtr2: Pointer; var lpdwAudioBytes2: LongWord;
         dwFlags: LongWord) : HResult; stdcall;
     function Play(dwReserved1,dwReserved2,dwFlags: LongWord) : HResult; stdcall;
     function SetCurrentPosition(dwPosition: LongWord) : HResult; stdcall;
@@ -137,8 +135,8 @@ function  InitDSound : Boolean;
 procedure FreeDSound;
 
 procedure dsu_CreateBuffer( var Buffer : IDirectSoundBuffer; BufferSize : LongWord; Format : Pointer );
-procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : PByteArray; DataSize : LongWord; Pos : LongWord = 0 );
-function  dsu_CalcPos( X, Y, Z : Single; out Volume : Single ) : Integer;
+procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; DataSize : LongWord; Pos : LongWord = 0 );
+function  dsu_CalcPos( X, Y, Z : Single; var Volume : Single ) : Integer;
 function  dsu_CalcVolume( Volume : Single ) : Integer;
 
 var
@@ -152,7 +150,9 @@ var
 
 implementation
 uses
+  zgl_types,
   zgl_sound,
+  zgl_log,
   zgl_utils;
 
 function CoInitialize(pvReserved: Pointer): HResult; stdcall; external 'ole32.dll' name 'CoInitialize';
@@ -189,18 +189,18 @@ begin
   dsDevice.CreateSoundBuffer( bufferDesc, Buffer, nil );
 end;
 
-procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : PByteArray; DataSize : LongWord; Pos : LongWord = 0 );
+procedure dsu_FillData( var Buffer : IDirectSoundBuffer; Data : Pointer; DataSize : LongWord; Pos : LongWord = 0 );
   var
     block1, block2 : Pointer;
     b1Size, b2Size : LongWord;
 begin
   Buffer.Lock( Pos, DataSize, block1, b1Size, block2, b2Size, 0 );
   Move( Data^, block1^, b1Size );
-  if b2Size <> 0 Then Move( Data[ b1Size ], block2^, b2Size );
+  if b2Size <> 0 Then Move( Pointer( Ptr( Data ) + b1Size )^, block2^, b2Size );
   Buffer.Unlock( block1, b1Size, block2, b2Size );
 end;
 
-function dsu_CalcPos( X, Y, Z : Single; out Volume : Single ) : Integer;
+function dsu_CalcPos( X, Y, Z : Single; var Volume : Single ) : Integer;
   var
     dist, angle : Single;
 begin
