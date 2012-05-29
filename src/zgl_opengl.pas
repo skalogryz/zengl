@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -30,7 +30,7 @@ uses
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   MacOSAll,
   {$ENDIF}
   zgl_opengl_all;
@@ -53,25 +53,36 @@ var
   oglFOVY       : Single = 45;
   oglzNear      : Single = 0.1;
   oglzFar       : Single = 100;
+  oglMTexActive : array[ 0..8 ] of Boolean;
+  oglMTexture   : array[ 0..8 ] of LongWord;
 
   oglMode    : Integer = 2; // 2D/3D Modes
   oglTarget  : Integer = TARGET_SCREEN;
   oglTargetW : Integer;
   oglTargetH : Integer;
-  oglWidth   : Integer;
-  oglHeight  : Integer;
 
-  oglVRAMUsed : LongWord;
+  oglWidth  : Integer;
+  oglHeight : Integer;
+  oglClipX  : Integer;
+  oglClipY  : Integer;
+  oglClipW  : Integer;
+  oglClipH  : Integer;
+  oglClipR  : Integer;
 
-  oglRenderer      : UTF8String;
-  oglExtensions    : UTF8String;
+  oglRenderer      : AnsiString;
+  oglExtensions    : AnsiString;
   ogl3DAccelerator : Boolean;
   oglCanVSync      : Boolean;
   oglCanAnisotropy : Boolean;
-  oglCanS3TC       : Boolean;
+  oglCanCompressA  : Boolean;
+  oglCanCompressE  : Boolean;
   oglCanAutoMipMap : Boolean;
+  oglCanARB        : Boolean; // ARBvp/ARBfp шейдеры
+  oglCanGLSL       : Boolean; // GLSL шейдеры
+  oglCanVBO        : Boolean;
   oglCanFBO        : Boolean;
   oglCanPBuffer    : Boolean;
+  oglMaxLights     : Integer;
   oglMaxTexSize    : Integer;
   oglMaxFBOSize    : Integer;
   oglMaxAnisotropy : Integer;
@@ -79,7 +90,7 @@ var
   oglSeparate      : Boolean;
 
   {$IFDEF LINUX}
-  oglXExtensions : UTF8String;
+  oglXExtensions : AnsiString;
   oglPBufferMode : Integer;
   oglContext     : GLXContext;
   oglVisualInfo  : PXVisualInfo;
@@ -93,7 +104,7 @@ var
   oglFormats    : LongWord;
   oglFormatDesc : TPixelFormatDescriptor;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   oglDevice   : GDHandle;
   oglContext  : TAGLContext;
   oglFormat   : TAGLPixelFormat;
@@ -102,6 +113,7 @@ var
 
 implementation
 uses
+  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_log,
@@ -116,7 +128,7 @@ function gl_Create : Boolean;
     i           : Integer;
     pixelFormat : Integer;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
     i : Integer;
   {$ENDIF}
 begin
@@ -298,12 +310,12 @@ begin
       log_Add( 'ChoosePixelFormat: zDepth = ' + u_IntToStr( oglzDepth ) + '; ' + 'stencil = ' + u_IntToStr( oglStencil )  );
     end;
 
+  wndFirst := FALSE;
   wglMakeCurrent( wndDC, 0 );
   wglDeleteContext( oglContext );
   wnd_Destroy();
-  wndFirst := FALSE;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if not InitAGL() Then
     begin
       log_Add( 'Cannot load AGL library' );
@@ -382,7 +394,7 @@ begin
 
   wglDeleteContext( oglContext );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   aglDestroyPixelFormat( oglFormat );
   if aglSetCurrentContext( nil ) = GL_FALSE Then
     u_Error( 'Cannot release current OpenGL context' );
@@ -396,12 +408,11 @@ end;
 
 function gl_Initialize : Boolean;
 begin
-  Result := FALSE;
 {$IFDEF LINUX}
-  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, nil, TRUE );
+  oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, TRUE );
   if not Assigned( oglContext ) Then
     begin
-      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, nil, FALSE );
+      oglContext := glXCreateContext( scrDisplay, oglVisualInfo, 0, FALSE );
       if not Assigned( oglContext ) Then
         begin
           u_Error( 'Cannot create OpenGL context' );
@@ -433,7 +444,7 @@ begin
       exit;
     end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   oglContext := aglCreateContext( oglFormat, nil );
   if not Assigned( oglContext ) Then
     begin
@@ -462,7 +473,7 @@ begin
 {$IFDEF WINDOWS}
   ogl3DAccelerator := oglRenderer <> 'GDI Generic';
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   ogl3DAccelerator := oglRenderer <> 'Apple Software Renderer';
 {$ENDIF}
   if not ogl3DAccelerator Then
@@ -515,9 +526,10 @@ begin
   glGetIntegerv( GL_MAX_TEXTURE_SIZE, @oglMaxTexSize );
   log_Add( 'GL_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
 
-  glCompressedTexImage2D := gl_GetProc( 'glCompressedTexImage2D' );
-  oglCanS3TC := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
-  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanS3TC ) );
+  oglCanCompressA := gl_IsSupported( 'GL_ARB_texture_compression', oglExtensions );
+  log_Add( 'GL_ARB_TEXTURE_COMPRESSION: ' + u_BoolToStr( oglCanCompressA ) );
+  oglCanCompressE := gl_IsSupported( 'GL_EXT_texture_compression_s3tc', oglExtensions );
+  log_Add( 'GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr( oglCanCompressE ) );
 
   oglCanAutoMipMap := gl_IsSupported( 'GL_SGIS_generate_mipmap', oglExtensions );
   log_Add( 'GL_SGIS_GENERATE_MIPMAP: ' + u_BoolToStr( oglCanAutoMipMap ) );
@@ -611,7 +623,7 @@ begin
       oglCanPBuffer := FALSE;
   log_Add( 'WGL_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   oglCanPBuffer := Assigned( aglCreatePBuffer );
   log_Add( 'AGL_PBUFFER: ' + u_BoolToStr( oglCanPBuffer ) );
 {$ENDIF}
@@ -625,7 +637,7 @@ begin
   wglSwapInterval := gl_GetProc( 'wglSwapInterval' );
   oglCanVSync     := Assigned( wglSwapInterval );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if aglSetInt( oglContext, AGL_SWAP_INTERVAL, 1 ) = GL_TRUE Then
     oglCanVSync := TRUE
   else

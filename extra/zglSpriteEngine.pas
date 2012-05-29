@@ -1,16 +1,16 @@
 unit zglSpriteEngine;
 
-{$I zglCustomConfig.cfg}
+// RU: Если проект не собирается с ZenGL статически, то стоит закоментировать этот define
+// EN: If project doesn't compile statically with ZenGL then comment define below
+{$DEFINE STATIC}
 
 interface
+
 uses
-  {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
-  zgl_fx,
-  zgl_sprite_2d,
-  zgl_textures
-  {$ELSE}
+  {$IFNDEF STATIC}
   zglHeader
+  {$ELSE}
+  zgl_textures
   {$ENDIF}
   ;
 
@@ -33,7 +33,6 @@ type
 
     function  AddSprite : Integer; overload; virtual;
     function  AddSprite( Texture : zglPTexture; Layer : Integer ) : zglCSprite2D; overload; virtual;
-    procedure AddSprite( Sprite : zglCSprite2D; Layer : Integer ); overload; virtual;
     procedure DelSprite( ID : Integer ); virtual;
     procedure ClearAll; virtual;
 
@@ -51,7 +50,7 @@ type
     Manager : zglCSEngine2D;
     Texture : zglPTexture;
     Kill    : Boolean;
-    Layer   : Integer;
+    Layer   : LongWord;
     X, Y    : Single;
     W, H    : Single;
     Angle   : Single;
@@ -59,7 +58,7 @@ type
     Alpha   : Integer;
     FxFlags : LongWord;
 
-    constructor Create( _Manager : zglCSEngine2D; _ID : Integer ); virtual;
+    constructor Create( _Manager : zglCSEngine2D; _ID : Integer );
     destructor  Destroy; override;
 
     procedure OnInit( _Texture : zglPTexture; _Layer : Integer ); virtual;
@@ -69,6 +68,12 @@ type
   end;
 
 implementation
+{$IFDEF STATIC}
+uses
+  zgl_main,
+  zgl_fx,
+  zgl_sprite_2d;
+{$ENDIF}
 
 destructor zglCSEngine2D.Destroy;
 begin
@@ -156,19 +161,6 @@ begin
   Result.OnInit( Texture, Layer );
 end;
 
-procedure zglCSEngine2D.AddSprite( Sprite : zglCSprite2D; Layer : Integer );
-  var
-    id : Integer;
-begin
-  if not Assigned( Sprite ) Then exit;
-  id := AddSprite();
-
-  FList[ id ]         := Sprite;
-  FList[ id ].Manager := Self;
-  FList[ id ].ID      := id;
-  FList[ id ].OnInit( Sprite.Texture, Layer );
-end;
-
 procedure zglCSEngine2D.DelSprite( ID : Integer );
   var
     i : Integer;
@@ -241,7 +233,7 @@ begin
           if s.Layer < l Then
             begin
               SortByLayer( 0, FCount - 1 );
-              // TODO: provide parameter for enabling/disabling stable sorting
+              // TODO: наверное сделать выбор вкл./выкл. устойчивой сортировки
               l := FList[ 0 ].Layer;
               a := 0;
               for b := 0 to FCount - 1 do
@@ -285,8 +277,8 @@ begin
   Y       := 0;
   if Assigned( Texture ) Then
     begin
-      W   := Round( ( Texture.FramesCoord[ 1, 1 ].X - Texture.FramesCoord[ 1, 0 ].X ) * Texture.Width );
-      H   := Round( ( Texture.FramesCoord[ 1, 0 ].Y - Texture.FramesCoord[ 1, 2 ].Y ) * Texture.Height );
+      W   := Texture.Width div Texture.FramesX;
+      H   := Texture.Height div Texture.FramesY;
     end else
       begin
         W := 0;

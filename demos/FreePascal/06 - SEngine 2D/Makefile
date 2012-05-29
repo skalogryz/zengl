@@ -1,0 +1,80 @@
+# Get current platform
+ifeq ($(shell uname -m), x86_64)
+  ARCH  = x86_64
+else
+  ARCH  = i386
+endif
+
+# Get current OS
+ifeq ($(shell uname), Linux)
+  OS    = linux
+else ifeq ($(shell uname), Darwin)
+  OS    = darwin
+endif
+
+# Variables
+FPC     = fpc
+FLAGS   = -O3 -XsX -CX -Sd
+INCLUDE = -Fu../../../headers -Fu../../../extra -Fu../../../src
+LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS)
+LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS)
+OUTPUT  = ../../../bin/
+TMP     = ../tmp/
+UNIT    = demo06.pas
+TARGET  = demo06
+TARGETW = demo06.exe
+TARGETM = demo06
+BUNDLE  = $(OUTPUT)$(TARGETM).app
+
+# Targets
+all: clean
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT)$(ARCH)/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX
+	strip $(OUTPUT)$(ARCH)/$(TARGET) --strip-unneeded -R .comment -R .note
+
+linux32: clean
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/i386-linux \
+	-Fu../../../lib/ogg/i386-linux \
+	-Fu../../../lib/zlib/i386-linux \
+	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
+	strip $(OUTPUT)i386/$(TARGET) --strip-unneeded -R .comment -R .note
+
+win32: clean
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/i386-win32 \
+	-Fu../../../lib/msvcrt/i386 \
+	-Fu../../../lib/ogg/i386-win32 \
+	-Fu../../../lib/zlib/i386-win32 \
+	-FE$(OUTPUT)i386/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN32 -Pi386 -WG
+
+win64: clean
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/x86_64-win64 \
+	-Fu../../../lib/msvcrt/x86_64 \
+	-Fu../../../lib/ogg/x86_64-win64 \
+	-Fu../../../lib/zlib/x86_64-win64 \
+	-FE$(OUTPUT)x86_64/ -FU$(TMP) $(FLAGS) -o$(TARGETW) -TWIN64 -Px86_64 -WG
+
+macos: clean
+	rm -Rf $(BUNDLE)
+	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM) -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
+	mv $(OUTPUT)$(TARGETM) $(BUNDLE)/Contents/MacOS/
+	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/zengl.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/miku.png $(BUNDLE)/Contents/Resources/
+
+macos_uni: clean
+	rm -Rf $(BUNDLE)
+	mkdir {$(BUNDLE),$(BUNDLE)/{Contents,Contents/{MacOS,Resources,Frameworks}}}
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBS) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-386 -TDARWIN -Pi386 -k"-macosx_version_min 10.4"
+	$(FPC) $(UNIT) $(INCLUDE) $(LIBSPPC) -FE$(OUTPUT) -FU$(TMP) $(FLAGS) -o$(TARGETM)-ppc -TDARWIN -Ppowerpc -k"-macosx_version_min 10.4"
+	lipo -create $(OUTPUT)$(TARGETM)-ppc $(OUTPUT)$(TARGETM)-386 -output $(BUNDLE)/Contents/MacOS/$(TARGETM)
+	cp $(OUTPUT)data/font* $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/zengl.png $(BUNDLE)/Contents/Resources/
+	cp $(OUTPUT)data/miku.png $(BUNDLE)/Contents/Resources/
+	rm $(OUTPUT)$(TARGETM)-386 $(OUTPUT)$(TARGETM)-ppc
+
+clean:
+	rm -f *.*~
+	rm -f $(TMP)*.*

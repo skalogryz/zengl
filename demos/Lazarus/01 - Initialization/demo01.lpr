@@ -1,32 +1,41 @@
 program demo01;
 
-// RU: Этот файл содержит некоторые настройки(например использовать ли статическую компиляцию) и определения ОС под которую происходит компиляция.
-// EN: This file contains some options(e.g. whether to use static compilation) and defines of OS for which is compilation going.
-{$I zglCustomConfig.cfg}
-
 {$IFDEF WINDOWS}
   {$R *.res}
 {$ENDIF}
 
+// RU: Приложение можно собрать с ZenGL либо статично, либо используя so/dll/dylib.
+// Для этого закомментируйте объявление ниже. Преимущество статичной компиляции
+// заключается в меньшем размере, но требует подключение каждого модуля вручную.
+// Также статическая компиляция обязывает исполнять условия LGPL-лицензии,
+// в частности требуется открытие исходных кодов приложения, которое использует
+// исходные коды ZenGL. Использование же только so/dll/dylib этого не требует.
+//
+// EN: Application can be compiled with ZenGL statically or with using so/dll/dylib.
+// For this comment the define below. Advantage of static compilation is smaller
+// size of application, but it requires including all units.
+// Also static compilation requires to follow the terms of LGPL-license,
+// particularly you must open source code of application that use
+// source code of ZenGL. Using so/dll/dylib doesn't requires this.
+{$DEFINE STATIC}
+
 uses
-  {$IFDEF USE_ZENGL_STATIC}
-  // RU: При использовании статической компиляции необходимо подключать модули ZenGL содержащие необходимый функционал.
-  // EN: Using static compilation needs to use ZenGL units with needed functionality.
+  {$IFNDEF STATIC}
+  zglHeader
+  {$ELSE}
+  // RU: Перед использованием модулей, не забудьте указать путь к исходным кодам ZenGL :)
+  // EN: Before using the modules don't forget to set path to source code of ZenGL :)
   zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
   zgl_utils
-  {$ELSE}
-  // RU: Используя ZenGL в качестве библиотеки(so, dll или dylib) нужен всего один заголовочный файл.
-  // EN: Using ZenGL as a shared library(so, dll or dylib) needs only one header.
-  zglHeader
   {$ENDIF}
   ;
 
 var
-  DirApp  : UTF8String;
-  DirHome : UTF8String;
+  DirApp  : String;
+  DirHome : String;
 
 procedure Init;
 begin
@@ -42,8 +51,8 @@ end;
 
 procedure Update( dt : Double );
 begin
-  // RU: Эта функция наземенима для реализация плавного движения чего-либо, т.к. точность таймеров ограничена FPS.
-  // EN: This function is the best way to implement smooth moving of something, because accuracy of timers are restricted by FPS.
+  // RU: Эта функция наземенима для реализация плавного движения чего-либо, т.к. таймеры зачастую ограничены FPS.
+  // EN: This function is the best way to implement smooth moving of something, because timers are restricted by FPS.
 end;
 
 procedure Timer;
@@ -59,34 +68,42 @@ begin
 end;
 
 Begin
-  // RU: Код ниже загружает библиотеку если статическая компиляция не используется.
-  // EN: Code below loads a library if static compilation is not used.
-  {$IFNDEF USE_ZENGL_STATIC}
+  {$IFNDEF STATIC}
     {$IFDEF LINUX}
-    // RU: В GNU/Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна быть предварительно установлена.
-    // Но zglLoad сначала проверить есть ли libZenGL.so рядом с исполняемым файлом.
+    // RU: В Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна
+    // быть предварительно установлена. Но zglLoad сначала проверить есть ли libZenGL.so
+    // рядом с исполняемым файлом.
     //
-    // EN: In GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be installed before it will be used.
-    // But zglLoad will check first if there is libZenGL.so near executable file.
-    if not zglLoad( libZenGL ) Then exit;
+    // EN: Under GNU/Linux all libraries placed in /usr/lib, so libZenGL.so must be
+    // installed before it will be used. But zglLoad will check first if there is
+    // libZenGL.so near executable file.
+    zglLoad( libZenGL );
     {$ENDIF}
-    {$IFDEF WINDOWS}
-    if not zglLoad( libZenGL ) Then exit;
+    {$IFDEF WIN32}
+    zglLoad( libZenGL );
     {$ENDIF}
     {$IFDEF DARWIN}
-    // RU: libZenGL.dylib следует предварительно поместить в каталог MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложения.
-    // Также следует упомянуть, что лог-файл будет создаваться в корневом каталоге поэтому либо отключайте его, либо указывайте свой путь и имя, как описано в справке.
+    // RU: libZenGL.dylib следует предварительно поместить в каталог
+    // MyApp.app/Contents/Frameworks/, где MyApp.app - Bundle вашего приложения.
+    // Также следует упомянуть, что лог-файл будет создаваться в корневом каталоге,
+    // поэтому либо отключайте его, либо указывайте свой путь и имя, как описано в справке.
     //
-    // EN: libZenGL.dylib must be placed into this directory MyApp.app/Contents/Frameworks/, where MyApp.app - Bundle of your application.
-    // Also you must know, that log-file will be created in root directory, so you must disable a log, or choose your own path and name for it. How to do this you can find in documentation.
-    if not zglLoad( libZenGL ) Then exit;
+    // EN: libZenGL.dylib must be placed into this directory
+    // MyApp.app/Contents/Frameworks/, where MyApp.app - Bundle of your application.
+    // Also you must know, that log-file will be created in root directory, so you must
+    // disable a log, or choose your own path and name for it. How to do this you can find
+    // in help.
+    zglLoad( libZenGL );
     {$ENDIF}
   {$ENDIF}
 
-  // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
-  // EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
-  DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-  DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
+  // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к
+  // домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
+  //
+  // EN: For loading/creating your own options/profiles/etc. you can get path to user home
+  // directory, or to executable file(not works for GNU/Linux).
+  DirApp  := u_CopyStr( PChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+  DirHome := u_CopyStr( PChar( zgl_Get( DIRECTORY_HOME ) ) );
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
@@ -104,6 +121,12 @@ Begin
   // RU: Регистрируем процедуру, которая выполнится после завершения работы ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL shutdown.
   zgl_Reg( SYS_EXIT, @Quit );
+
+  // RU: Т.к. модуль сохранен в кодировке UTF-8 и в нем используются строковые переменные
+  // следует указать использование этой кодировки.
+  // EN: Enable using of UTF-8, because this unit saved in UTF-8 encoding and here used
+  // string variables.
+  zgl_Enable( APP_USE_UTF8 );
 
   // RU: Устанавливаем заголовок окна.
   // EN: Set the caption of the window.

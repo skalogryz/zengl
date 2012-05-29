@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -35,37 +35,33 @@ const
   TEXT_VALIGN_TOP     = $000010;
   TEXT_VALIGN_CENTER  = $000020;
   TEXT_VALIGN_BOTTOM  = $000040;
-  TEXT_CLIP_RECT      = $000080;
-  TEXT_FX_VCA         = $000100;
-  TEXT_FX_LENGTH      = $000200;
-
-procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : UTF8String; Flags : LongWord = 0 );
-procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
-procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
-function  text_GetWidth( Font : zglPFont; const Text : UTF8String; Step : Single = 0.0 ) : Single;
-function  text_GetHeight( Font : zglPFont; Width : Single; const Text : UTF8String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
-procedure textFx_SetLength( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
-
-implementation
-uses
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
-  zgl_render,
-  zgl_render_2d,
-  zgl_fx,
-  zgl_utils;
+  TEXT_FX_VCA         = $000080;
+  TEXT_FX_LENGTH      = $000100;
 
 type
   zglTTextWord = record
     X, Y, W : Integer;
-    Str     : UTF8String;
+    Str     : String;
 end;
+
+procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : String; Flags : LongWord = 0 );
+procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+function  text_GetWidth( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
+function  text_GetHeight( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+procedure textFx_SetLength( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
+
+procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+
+implementation
+uses
+  zgl_opengl,
+  zgl_opengl_all,
+  zgl_opengl_simple,
+  zgl_render_2d,
+  zgl_fx,
+  zgl_utils;
 
 var
   textRGBA       : array[ 0..3 ] of Byte = ( 255, 255, 255, 255 );
@@ -78,149 +74,7 @@ var
   textWordsCount : Integer;
   textLinesCount : Integer;
 
-procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
-  var
-    x, y, sX   : Integer;
-    b, i, imax : Integer;
-    c, lc      : LongWord;
-    curWord, j : Integer;
-    newLine    : Integer;
-    lineWidth  : Integer;
-    startWord  : Boolean;
-    newWord    : Boolean;
-    lineEnd    : Boolean;
-    lineFeed   : Boolean;
-begin
-  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
-
-  i              := 1;
-  b              := 1;
-  c              := 32;
-  curWord        := 0;
-  newLine        := 0;
-  lineWidth      := 0;
-  textWordsCount := 0;
-  textLinesCount := 0;
-  startWord      := FALSE;
-  newWord        := FALSE;
-  lineEnd        := FALSE;
-  lineFeed       := FALSE;
-  x              := Round( Rect.X ) + 1;
-  y              := Round( Rect.Y ) + 1 - Round( Font.MaxHeight * textScale );
-  while i <= length( Text ) do
-    begin
-      lc   := c;
-      j    := i;
-      c    := u_GetUTF8ID( Text, i, @i );
-      imax := Integer( i > length( Text ) );
-
-      if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then
-        begin
-          b := j - 1 * Integer( curWord > 0 ) + Integer( lc = 10 );
-          while lineEnd and ( Text[ b ] = ' ' ) do INC( b );
-          startWord := TRUE;
-          lineEnd   := FALSE;
-          if imax = 0 Then
-            continue;
-        end;
-
-      if ( c = 32 ) and ( startWord ) and ( lc <> 10 ) and ( lc <> 32 ) Then
-        begin
-          newWord   := TRUE;
-          startWord := FALSE;
-        end;
-
-      if ( ( c = 10 ) and ( lc <> 10 ) and ( lc <> 32 ) ) or ( imax > 0 ) Then
-        begin
-          newWord   := TRUE;
-          startWord := FALSE;
-          lineFeed  := TRUE;
-        end else
-          if c = 10 Then
-            begin
-              startWord := FALSE;
-              lineFeed  := TRUE;
-            end;
-
-      if newWord Then
-        begin
-          textWords[ curWord ].Str := Copy( Text, b, i - b - ( 1 - imax ) );
-          textWords[ curWord ].W   := Round( text_GetWidth( Font, textWords[ curWord ].Str, textStep ) * textScale );
-          lineWidth                := lineWidth + textWords[ curWord ].W;
-
-          newWord := FALSE;
-          INC( curWord );
-          INC( textWordsCount );
-          if ( lineWidth > Rect.W - 2 ) and ( curWord - newLine > 1 ) Then
-            begin
-              lineEnd := TRUE;
-              i := b;
-              while Text[ i ] = ' ' do INC( i );
-              DEC( curWord );
-              DEC( textWordsCount );
-            end;
-          if textWordsCount > High( textWords ) Then
-            SetLength( textWords, length( textWords ) + 1024 );
-        end;
-
-      if lineFeed or lineEnd Then
-        begin
-          y := y + Round( Font.MaxHeight * textScale );
-          textWords[ newLine ].X := x;
-          textWords[ newLine ].Y := y;
-          for j := newLine + 1 to curWord - 1 do
-            begin
-              textWords[ j ].X := textWords[ j - 1 ].X + textWords[ j - 1 ].W;
-              textWords[ j ].Y := textWords[ newLine ].Y;
-            end;
-
-          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( curWord - newLine > 1 ) and ( c <> 10 ) and ( imax = 0 ) Then
-            begin
-              sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
-              while sX > ( curWord - 1 ) - newLine do
-                begin
-                  for j := newLine + 1 to curWord - 1 do
-                    INC( textWords[ j ].X, 1 + ( j - ( newLine + 1 ) ) );
-                  sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
-                end;
-              textWords[ curWord - 1 ].X := textWords[ curWord - 1 ].X + sX;
-            end else
-              if Flags and TEXT_HALIGN_CENTER > 0 Then
-                begin
-                  sX := ( Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W ) ) div 2;
-                  for j := newLine to curWord do
-                    textWords[ j ].X := textWords[ j ].X + sX;
-                end else
-                  if Flags and TEXT_HALIGN_RIGHT > 0 Then
-                    begin
-                      sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
-                      for j := newLine to curWord do
-                        textWords[ j ].X := textWords[ j ].X + sX;
-                    end;
-
-          newLine   := curWord;
-          lineWidth := 0;
-          lineFeed  := FALSE;
-          INC( textLinesCount );
-          if ( Flags and TEXT_CLIP_RECT > 0 ) and ( ( textLinesCount + 1 ) * Font.MaxHeight > Rect.H ) Then break;
-        end;
-    end;
-
-  if Flags and TEXT_VALIGN_CENTER > 0 Then
-    begin
-      y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ textWordsCount - 1 ].Y + Font.MaxHeight * textScale ) ) div 2;
-      for i := 0 to textWordsCount - 1 do
-        textWords[ i ].Y := textWords[ i ].Y + y;
-    end else
-      if Flags and TEXT_VALIGN_BOTTOM > 0 Then
-        begin
-          y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ textWordsCount - 1 ].Y + Font.MaxHeight * textScale ) );
-          for i := 0 to textWordsCount - 1 do
-            textWords[ i ].Y := textWords[ i ].Y + y;
-        end;
-end;
-
-procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : UTF8String; Flags : LongWord = 0 );
+procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : String; Flags : LongWord = 0 );
   var
     i, c, s  : Integer;
     charDesc : zglPCharDesc;
@@ -252,7 +106,7 @@ begin
   FillChar( quad[ 0 ], SizeOf( zglTPoint2D ) * 4, 0 );
   charDesc := nil;
   lastPage := -1;
-  c := u_GetUTF8ID( Text, 1, @i );
+  c := font_GetCID( Text, 1, @i );
   s := 1;
   i := 1;
   if Flags and TEXT_FX_VCA > 0 Then
@@ -284,7 +138,7 @@ begin
           X := sx;
           Y := Y + Font.MaxHeight * textScale;
         end;
-      c := u_GetUTF8ID( Text, i, @i );
+      c := font_GetCID( Text, i, @i );
 
       if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then
         begin
@@ -387,7 +241,7 @@ begin
     end;
 end;
 
-procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure text_DrawEx( Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; Alpha : Byte = 255; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 begin
   textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
@@ -404,10 +258,10 @@ begin
   textStep      := 0;
 end;
 
-procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : UTF8String; Flags : LongWord = 0 );
+procedure text_DrawInRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
   var
-    i, j, b  : Integer;
-    NewFlags : Integer;
+    i, j, b    : Integer;
+    NewFlags   : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
 
@@ -433,7 +287,7 @@ begin
     end;
 end;
 
-procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : UTF8String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
+procedure text_DrawInRectEx( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
 begin
   textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
@@ -450,7 +304,7 @@ begin
   textStep      := 0;
 end;
 
-function text_GetWidth( Font : zglPFont; const Text : UTF8String; Step : Single = 0.0 ) : Single;
+function text_GetWidth( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
   var
     i : Integer;
     c : LongWord;
@@ -462,7 +316,7 @@ begin
   i  := 1;
   while i <= length( Text ) do
     begin
-      c := u_GetUTF8ID( Text, i, @i );
+      c := font_GetCID( Text, i, @i );
       if c = 10 Then
         begin
           lResult := Result;
@@ -475,15 +329,11 @@ begin
     Result := lResult;
 end;
 
-function text_GetHeight( Font : zglPFont; Width : Single; const Text : UTF8String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+function text_GetHeight( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
   var
     Rect : zglTRect;
 begin
-  if ( Text = '' ) or ( not Assigned( Font ) ) Then
-    begin
-      Result := 0;
-      exit;
-    end;
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
 
   Rect.X    := 0;
   Rect.Y    := 0;
@@ -502,6 +352,148 @@ begin
   textLength    := Length;
   textLCoord    := LastCoord;
   textLCharDesc := LastCharDesc;
+end;
+
+procedure text_CalcRect( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
+  var
+    x, y, sX   : Integer;
+    b, i, imax : Integer;
+    c, lc      : LongWord;
+    curWord, j : Integer;
+    newLine    : Integer;
+    lineWidth  : Integer;
+    startWord  : Boolean;
+    newWord    : Boolean;
+    lineEnd    : Boolean;
+    lineFeed   : Boolean;
+begin
+  if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
+
+  i              := 1;
+  b              := 1;
+  c              := 32;
+  curWord        := 0;
+  newLine        := 0;
+  lineWidth      := 0;
+  textWordsCount := 0;
+  textLinesCount := 0;
+  startWord      := FALSE;
+  newWord        := FALSE;
+  lineEnd        := FALSE;
+  lineFeed       := FALSE;
+  x              := Round( Rect.X ) + 1;
+  y              := Round( Rect.Y ) + 1 - Round( Font.MaxHeight * textScale );
+  while i <= length( Text ) do
+    begin
+      lc   := c;
+      j    := i;
+      c    := font_GetCID( Text, i, @i );
+      imax := Integer( i > length( Text ) );
+
+      if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then
+        begin
+          b := j - 1 * Integer( curWord > 0 ) + Integer( lc = 10 );
+          while lineEnd and ( Text[ b ] = ' ' ) do INC( b );
+          startWord := TRUE;
+          lineEnd   := FALSE;
+          if imax = 0 Then
+            continue;
+        end;
+
+      if ( c = 32 ) and ( startWord ) and ( lc <> 10 ) and ( lc <> 32 ) Then
+        begin
+          newWord   := TRUE;
+          startWord := FALSE;
+        end;
+
+      if ( ( c = 10 ) and ( lc <> 10 ) and ( lc <> 32 ) ) or ( imax > 0 ) Then
+        begin
+          newWord   := TRUE;
+          startWord := FALSE;
+          lineFeed  := TRUE;
+        end else
+          if c = 10 Then
+            begin
+              startWord := FALSE;
+              lineFeed  := TRUE;
+            end;
+
+      if newWord Then
+        begin
+          textWords[ curWord ].Str := Copy( Text, b, i - b - ( 1 - imax ) );
+          textWords[ curWord ].W   := Round( text_GetWidth( Font, textWords[ curWord ].Str, textStep ) * textScale );
+          lineWidth                := lineWidth + textWords[ curWord ].W;
+
+          newWord := FALSE;
+          INC( curWord );
+          INC( textWordsCount );
+          if ( lineWidth > Rect.W - 2 ) and ( curWord - newLine > 1 ) Then
+            begin
+              lineEnd := TRUE;
+              i := b;
+              while Text[ i ] = ' ' do INC( i );
+              DEC( curWord );
+              DEC( textWordsCount );
+            end;
+          if textWordsCount > High( textWords ) Then
+            SetLength( textWords, length( textWords ) + 1024 );
+        end;
+
+      if lineFeed or lineEnd Then
+        begin
+          y := y + Round( Font.MaxHeight * textScale );
+          textWords[ newLine ].X := x;
+          textWords[ newLine ].Y := y;
+          for j := newLine + 1 to curWord - 1 do
+            begin
+              textWords[ j ].X := textWords[ j - 1 ].X + textWords[ j - 1 ].W;
+              textWords[ j ].Y := textWords[ newLine ].Y;
+            end;
+
+          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( curWord - newLine > 1 ) and ( c <> 10 ) and ( imax = 0 ) Then
+            begin
+              sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+              while sX > ( curWord - 1 ) - newLine do
+                begin
+                  for j := newLine + 1 to curWord - 1 do
+                    INC( textWords[ j ].X, 1 + ( j - ( newLine + 1 ) ) );
+                  sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+                end;
+              textWords[ curWord - 1 ].X := textWords[ curWord - 1 ].X + sX;
+            end else
+              if Flags and TEXT_HALIGN_CENTER > 0 Then
+                begin
+                  sX := ( Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W ) ) div 2;
+                  for j := newLine to curWord do
+                    textWords[ j ].X := textWords[ j ].X + sX;
+                end else
+                  if Flags and TEXT_HALIGN_RIGHT > 0 Then
+                    begin
+                      sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+                      for j := newLine to curWord do
+                        textWords[ j ].X := textWords[ j ].X + sX;
+                    end;
+
+          newLine   := curWord;
+          lineWidth := 0;
+          lineFeed  := FALSE;
+          INC( textLinesCount );
+//          if ( textLinesCount + 1 ) * Font.MaxHeight > Rect.H Then break;
+        end;
+    end;
+
+  if Flags and TEXT_VALIGN_CENTER > 0 Then
+    begin
+      y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ textWordsCount - 1 ].Y + Font.MaxHeight * textScale ) ) div 2;
+      for i := 0 to textWordsCount - 1 do
+        textWords[ i ].Y := textWords[ i ].Y + y;
+    end else
+      if Flags and TEXT_VALIGN_BOTTOM > 0 Then
+        begin
+          y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ textWordsCount - 1 ].Y + Font.MaxHeight * textScale ) );
+          for i := 0 to textWordsCount - 1 do
+            textWords[ i ].Y := textWords[ i ].Y + y;
+        end;
 end;
 
 initialization

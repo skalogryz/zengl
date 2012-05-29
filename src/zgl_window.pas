@@ -1,5 +1,5 @@
 {
- *  Copyright © Andrey Kemka aka Andru
+ *  Copyright © Kemka Andrey aka Andru
  *  mail: dr.andru@gmail.com
  *  site: http://zengl.org
  *
@@ -21,36 +21,29 @@
 unit zgl_window;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
-  {$modeswitch objectivec1}
-{$ENDIF}
-
-{$IFDEF WINCE}
-  {$R zgl_wince.rc}
-{$ENDIF}
 
 interface
-{$IFDEF USE_X11}
-  uses X, XLib, XUtil;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
-{$IFDEF iOS}
-  uses iPhoneAll, CGGeometry;
-{$ENDIF}
+uses
+  {$IFDEF LINUX}
+  X, XLib, XUtil
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Windows
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  MacOSAll
+  {$ENDIF}
+  ;
 
 function  wnd_Create( Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
-procedure wnd_SetCaption( const NewCaption : UTF8String );
+procedure wnd_SetCaption( const NewCaption : String );
 procedure wnd_SetSize( Width, Height : Integer );
 procedure wnd_SetPos( X, Y : Integer );
 procedure wnd_ShowCursor( Show : Boolean );
+procedure wnd_Select;
 
 var
   wndX          : Integer;
@@ -58,9 +51,9 @@ var
   wndWidth      : Integer = 800;
   wndHeight     : Integer = 600;
   wndFullScreen : Boolean;
-  wndCaption    : UTF8String;
+  wndCaption    : String;
 
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   wndHandle      : TWindow;
   wndRoot        : TWindow;
   wndClass       : TXClassHint;
@@ -75,7 +68,7 @@ var
   wndHandle    : HWND;
   wndDC        : HDC;
   wndINST      : HINST;
-  wndClass     : {$IFNDEF WINCE}TWndClassExW{$ELSE}TWndClassW{$ENDIF};
+  wndClass     : TWndClassExW;
   wndClassName : PWideChar = 'ZenGL';
   wndStyle     : LongWord;
   wndCpnSize   : Integer;
@@ -83,19 +76,11 @@ var
   wndBrdSizeY  : Integer;
   wndCaptionW  : PWideChar;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   wndHandle  : WindowRef;
   wndAttr    : WindowAttributes;
   wndEvents  : array[ 0..14 ] of EventTypeSpec;
   wndMouseIn : Boolean;
-  {$ENDIF}
-  {$IFDEF iOS}
-  wndHandle   : UIWindow;
-  wndViewCtrl : UIViewController;
-  wndPortrait : Boolean;
-  {$ENDIF}
-  {$IFDEF ANDROID}
-  wndHandle : Integer; // dummy
   {$ENDIF}
 
 implementation
@@ -103,14 +88,9 @@ uses
   zgl_main,
   zgl_application,
   zgl_screen,
-  {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
-  zgl_render,
+  zgl_opengl_simple,
   zgl_utils;
 
 {$IFNDEF FPC}
@@ -118,7 +98,7 @@ uses
 function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcall; external user32 name 'LoadCursorW';
 {$ENDIF}
 
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
 procedure wnd_SetHints( Initialized : Boolean = TRUE );
   var
     sizehints : TXSizeHints;
@@ -140,37 +120,13 @@ begin
 end;
 {$ENDIF}
 
-procedure wnd_Select;
-begin
-  if appInitedToHandle Then exit;
-
-{$IFDEF USE_X11}
-  XMapWindow( scrDisplay, wndHandle );
-{$ENDIF}
-{$IFDEF WINDOWS}
-  BringWindowToTop( wndHandle );
-{$ENDIF}
-{$IFDEF MACOSX}
-  SelectWindow( wndHandle );
-  ShowWindow( wndHandle );
-  if wndFullScreen Then
-    wnd_SetPos( 0, 0 );
-{$ENDIF}
-{$IFDEF iOS}
-  wndHandle.makeKeyAndVisible();
-{$ENDIF}
-end;
-
 function wnd_Create( Width, Height : Integer ) : Boolean;
-  {$IFDEF MACOSX}
+  {$IFDEF DARWIN}
   var
     size   : MacOSAll.Rect;
     status : OSStatus;
   {$ENDIF}
 begin
-  Result := TRUE;
-  if wndHandle <> {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF} Then exit;
-
   Result    := FALSE;
   wndX      := 0;
   wndY      := 0;
@@ -182,7 +138,7 @@ begin
       wndX := ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2;
       wndY := ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2;
     end;
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   FillChar( wndAttr, SizeOf( wndAttr ), 0 );
   wndAttr.colormap   := XCreateColormap( scrDisplay, wndRoot, oglVisualInfo.visual, AllocNone );
   wndAttr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or KeyPressMask or KeyReleaseMask or StructureNotifyMask;
@@ -209,35 +165,25 @@ begin
 {$IFDEF WINDOWS}
   wndCpnSize  := GetSystemMetrics( SM_CYCAPTION  );
   wndBrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
-  {$IFDEF WINDESKTOP}
   wndBrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
-  {$ENDIF}
 
   with wndClass do
     begin
-      {$IFDEF WINDESKTOP}
       cbSize        := SizeOf( TWndClassExW );
-      {$ENDIF}
-      style         := CS_DBLCLKS {$IFDEF WINDESKTOP}or CS_OWNDC{$ENDIF};
+      style         := CS_DBLCLKS or CS_OWNDC;
       lpfnWndProc   := @app_ProcessMessages;
       cbClsExtra    := 0;
       cbWndExtra    := 0;
       hInstance     := wndINST;
       hIcon         := LoadIconW  ( wndINST, 'MAINICON' );
-      {$IFDEF WINDESKTOP}
       hIconSm       := LoadIconW  ( wndINST, 'MAINICON' );
-      {$ENDIF}
       hCursor       := LoadCursorW( wndINST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
       lpszClassName := wndClassName;
     end;
 
-  {$IFDEF WINDESKTOP}
   if RegisterClassExW( wndClass ) = 0 Then
-  {$ELSE}
-  if RegisterClass( wndClass ) = 0 Then
-  {$ENDIF}
     begin
       u_Error( 'Cannot register window class' );
       exit;
@@ -247,12 +193,10 @@ begin
     wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
   else
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  {$IFNDEF USE_GLES}
   if oglFormat = 0 Then
     wndHandle := CreateWindowExW( WS_EX_TOOLWINDOW, wndClassName, wndCaptionW, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
-  {$ENDIF}
-    wndHandle := CreateWindowExW( {$IFDEF WINDESKTOP}WS_EX_APPWINDOW or{$ENDIF} WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
+    wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
                                   wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
                                   wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );
 
@@ -270,7 +214,7 @@ begin
     end;
   wnd_Select();
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   size.Left   := wndX;
   size.Top    := wndY;
   size.Right  := wndX + wndWidth;
@@ -323,24 +267,13 @@ begin
   InstallEventHandler( GetApplicationEventTarget, NewEventHandlerUPP( @app_ProcessMessages ), 15, @wndEvents[ 0 ], nil, nil );
   wnd_Select();
 {$ENDIF}
-{$IFDEF iOS}
-  // always fullscreen
-  wndFullScreen := TRUE;
-
-  UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
-  wndHandle := UIWindow.alloc().initWithFrame( UIScreen.mainScreen.bounds );
-  wndViewCtrl := zglCiOSViewController.alloc().init();
-
-  wnd_Select();
-{$ENDIF}
   Result := TRUE;
 end;
 
 procedure wnd_Destroy;
 begin
-{$IFDEF USE_X11}
-  if not appInitedToHandle Then
-    XDestroyWindow( scrDisplay, wndHandle );
+{$IFDEF LINUX}
+  XDestroyWindow( scrDisplay, wndHandle );
   XSync( scrDisplay, X_FALSE );
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -350,30 +283,26 @@ begin
       wndDC := 0;
     end;
 
-  if wndFirst or ( not appInitedToHandle ) Then
+  if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
     begin
-      if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
-        begin
-          u_Error( 'Cannot destroy window' );
-          wndHandle := 0;
-        end;
+      u_Error( 'Cannot destroy window' );
+      wndHandle := 0;
+    end;
 
-      if not UnRegisterClassW( wndClassName, wndINST ) Then
-        begin
-          u_Error( 'Cannot unregister window class' );
-          wndINST := 0;
-        end;
+  if not UnRegisterClassW( wndClassName, wndINST ) Then
+    begin
+      u_Error( 'Cannot unregister window class' );
+      wndINST := 0;
     end;
 {$ENDIF}
-{$IFDEF MACOSX}
-  if not appInitedToHandle Then
-    ReleaseWindow( wndHandle );
+{$IFDEF DARWIN}
+  ReleaseWindow( wndHandle );
 {$ENDIF}
-  wndHandle := {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF};
+  wndHandle := 0;
 end;
 
 procedure wnd_Update;
-  {$IFDEF USE_X11}
+  {$IFDEF LINUX}
   var
     event : TXEvent;
   {$ENDIF}
@@ -384,7 +313,7 @@ procedure wnd_Update;
 begin
   if appInitedToHandle Then exit;
 
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   XSync( scrDisplay, X_TRUE );
   wnd_SetHints();
 
@@ -418,20 +347,17 @@ begin
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
   SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
-  SetWindowLongW( wndHandle, GWL_EXSTYLE, {$IFDEF WINDESKTOP}WS_EX_APPWINDOW or{$ENDIF} WS_EX_TOPMOST * Byte( FullScreen ) );
+  SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if wndFullScreen Then
     ChangeWindowAttributes( wndHandle, kWindowNoTitleBarAttribute, kWindowResizableAttribute )
   else
     ChangeWindowAttributes( wndHandle, kWindowResizableAttribute, kWindowNoTitleBarAttribute );
-  // Apple and their magic driving me crazy...
+  // Какой индус из Apple придумал, что необходимо менять kWindowResizableAttribute вместе с kWindowNoTitleBarAttribute...
   ChangeWindowAttributes( wndHandle, 0, kWindowResizableAttribute );
 
   aglSetCurrentContext( oglContext );
-{$ENDIF}
-{$IFDEF iOS}
-  UIApplication.sharedApplication.setStatusBarHidden( wndFullScreen );
 {$ENDIF}
   appWork := TRUE;
   wnd_SetCaption( wndCaption );
@@ -441,29 +367,30 @@ begin
   wnd_SetSize( wndWidth, wndHeight );
 end;
 
-procedure wnd_SetCaption( const NewCaption : UTF8String );
-  {$IFDEF USE_X11}
+procedure wnd_SetCaption( const NewCaption : String );
   var
+  {$IFDEF LINUX}
     err : Integer;
-    str : PAnsiChar;
+    str : PChar;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  var
     len : Integer;
   {$ENDIF}
-  {$IFDEF MACOSX}
-  var
+  {$IFDEF DARWIN}
     str : CFStringRef;
   {$ENDIF}
 begin
   if appInitedToHandle Then exit;
 
-  wndCaption := u_CopyUTF8Str( NewCaption );
-{$IFDEF USE_X11}
+  wndCaption := u_CopyStr( NewCaption );
+{$IFDEF LINUX}
   if wndHandle <> 0 Then
     begin
-      str := u_GetPAnsiChar( wndCaption );
-      err := Xutf8TextListToTextProperty( scrDisplay, @str, 1, XUTF8StringStyle, @wndTitle );
+      str := u_GetPChar( wndCaption );
+      if appFlags and APP_USE_UTF8 > 0 Then
+        err := Xutf8TextListToTextProperty( scrDisplay, @str, 1, XUTF8StringStyle, @wndTitle )
+      else
+        err := XStringListToTextProperty( @str, 1, @wndTitle );
 
       if err = 0 Then
         begin
@@ -475,22 +402,40 @@ begin
     end;
 {$ENDIF}
 {$IFDEF WINDOWS}
+  {$IFNDEF FPC}
+  if SizeOf( Char ) = 2 Then
+    len := 2
+  else
+  {$ENDIF}
+  len := 1;
   if wndHandle <> 0 Then
     begin
-      len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
-      if Assigned( wndCaptionW ) Then
-        FreeMem( wndCaptionW );
-      GetMem( wndCaptionW, len * 2 + 2 );
-      wndCaptionW[ len ] := #0;
-      MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
+      if len = 1 Then
+        begin
+          if appFlags and APP_USE_UTF8 = 0 Then
+            wndCaption := AnsiToUtf8( wndCaption );
+          len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
+          if Assigned( wndCaptionW ) Then
+            FreeMem( wndCaptionW );
+          GetMem( wndCaptionW, len * 2 + 2 );
+          wndCaptionW[ len ] := #0;
+          MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
 
-      SetWindowTextW( wndHandle, wndCaptionW );
+          SetWindowTextW( wndHandle, wndCaptionW );
+        end else
+          begin
+            wndCaptionW := PWideChar( u_GetPChar( wndCaption ) );
+            SetWindowTextW( wndHandle, wndCaptionW );
+          end;
     end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if Assigned( wndHandle ) Then
     begin
-      str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingUTF8 );
+      if appFlags and APP_USE_UTF8 = 0 Then
+        str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingASCII )
+      else
+        str := CFStringCreateWithPascalString( nil, wndCaption, kCFStringEncodingUTF8 );
       SetWindowTitleWithCFString( wndHandle, str );
       CFRelease( str );
       wnd_Select();
@@ -502,7 +447,7 @@ procedure wnd_SetSize( Width, Height : Integer );
 begin
   wndWidth  := Width;
   wndHeight := Height;
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   if ( not appInitedToHandle ) and ( wndHandle <> 0 ) Then
     begin
       wnd_SetHints();
@@ -513,16 +458,13 @@ begin
   if not appInitedToHandle Then
     wnd_SetPos( wndX, wndY );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if ( not appInitedToHandle ) and Assigned( wndHandle ) Then
     begin
       SizeWindow( wndHandle, wndWidth, wndHeight, TRUE );
       aglUpdateContext( oglContext );
       wnd_Select();
     end;
-{$ENDIF}
-{$IFDEF iOS}
-  eglContext.renderbufferStorage_fromDrawable( GL_RENDERBUFFER, eglSurface );
 {$ENDIF}
   oglWidth  := Width;
   oglHeight := Height;
@@ -542,7 +484,7 @@ begin
 
   wndX := X;
   wndY := Y;
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   if wndHandle <> 0 Then
     if not wndFullScreen Then
       XMoveWindow( scrDisplay, wndHandle, X, Y )
@@ -561,21 +503,17 @@ begin
     else
       SetWindowPos( wndHandle, mode, 0, 0, wndWidth, wndHeight, SWP_NOACTIVATE );
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF DARWIN}
   if Assigned( wndHandle ) Then
     if not wndFullScreen Then
       MoveWindow( wndHandle, wndX, wndY, TRUE )
     else
       MoveWindow( wndHandle, 0, 0, TRUE );
 {$ENDIF}
-{$IFDEF iOS}
-  wndX := 0;
-  wndY := 0;
-{$ENDIF}
 end;
 
 procedure wnd_ShowCursor( Show : Boolean );
-{$IFDEF USE_X11}
+{$IFDEF LINUX}
   var
     mask   : TPixmap;
     xcolor : TXColor;
@@ -601,12 +539,30 @@ begin
         XDefineCursor( scrDisplay, wndHandle, appCursor );
       end;
 {$ENDIF}
-{$IF DEFINED(WINDOWS) or DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(ANDROID)}
+{$IFDEF WINDOWS}
 begin
-  if appInitedToHandle Then exit;
-
   appShowCursor := Show;
-{$IFEND}
+{$ENDIF}
+{$IFDEF DARWIN}
+begin
+  appShowCursor := Show;
+{$ENDIF}
+end;
+
+procedure wnd_Select;
+begin
+{$IFDEF LINUX}
+  XMapWindow( scrDisplay, wndHandle );
+{$ENDIF}
+{$IFDEF WINDOWS}
+  BringWindowToTop( wndHandle );
+{$ENDIF}
+{$IFDEF DARWIN}
+  SelectWindow( wndHandle );
+  ShowWindow( wndHandle );
+  if wndFullScreen Then
+    wnd_SetPos( 0, 0 );
+{$ENDIF}
 end;
 
 initialization
