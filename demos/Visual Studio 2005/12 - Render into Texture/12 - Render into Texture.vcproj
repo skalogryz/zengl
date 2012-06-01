@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8,00"
 	Name="12 - Render into Texture"
-	ProjectGUID="{517392CA-D6EB-474F-B6C5-B9E00251006F}"
+	ProjectGUID="{517392CA-D6EB-474f-B6C5-B9E00251006F}"
 	RootNamespace="My12RenderIntoTexture"
 	Keyword="Win32Proj"
 	>

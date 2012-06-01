@@ -27,31 +27,17 @@ unit zgl_lib_zip;
 {$ENDIF}
 
 {$L zlib_helper}
-{$IFDEF USE_ZLIB_STATIC}
-  {$L infback}
-  {$L inffast}
-  {$L inflate}
-  {$L inftrees}
-  {$L zutil}
-  {$L adler32}
-  {$L crc32}
-{$ELSE}
-  {$IF DEFINED(LINUX) and ( not DEFINED(ANDROID) )}
-    {$LINKLIB libz.so.1}
-  {$IFEND}
-  {$IFDEF ANDROID}
-    {$LINKLIB libz.so}
-  {$ENDIF}
-  {$IFDEF DARWIN}
-    {$LINKLIB libz.dylib}
-  {$ENDIF}
-{$ENDIF}
+{$L infback}
+{$L inffast}
+{$L inflate}
+{$L inftrees}
+{$L zutil}
+{$L adler32}
+{$L crc32}
 
 interface
 uses
-  {$IFDEF WINDESKTOP}
   zgl_lib_msvcrt,
-  {$ENDIF}
   zgl_memory,
   zgl_types;
 

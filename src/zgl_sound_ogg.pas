@@ -163,7 +163,7 @@ begin
 
   bytesRead := 0;
   repeat
-    Result := ov_read( zglTOggStream( Stream._data^ ).vf, Pointer( @Buffer[ bytesRead ] ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
+    Result := ov_read( zglTOggStream( Stream._data^ ).vf, Pointer( @Buffer[ bytesRead ] ), Bytes - bytesRead, FALSE, 2, TRUE, nil );
     bytesRead := bytesRead + Result;
   until ( Result = 0 ) or ( bytesRead = Bytes );
 
@@ -175,7 +175,7 @@ procedure ogg_DecoderSeek( var Stream : zglTSoundStream; Milliseconds : Double )
 begin
   if not vorbisInit Then exit;
 
-  ov_time_seek( zglTOggStream( Stream._data^ ).vf, {$IFDEF USE_VORBIS} Milliseconds / 1000 {$ELSE} Round( Milliseconds ) {$ENDIF} );
+  ov_time_seek( zglTOggStream( Stream._data^ ).vf, Milliseconds / 1000 );
 end;
 
 procedure ogg_DecoderLoop( var Stream : zglTSoundStream );
@@ -199,7 +199,7 @@ function decoderRead( var VorbisFile : OggVorbis_File; Buffer : PByteArray; Byte
 begin
   bytesRead := 0;
   repeat
-    Result := ov_read( VorbisFile, Pointer( @Buffer[ bytesRead ] ), Bytes - bytesRead, {$IFDEF USE_VORBIS} BIG_ENDIAN, 2, TRUE, {$ENDIF} nil );
+    Result := ov_read( VorbisFile, Pointer( @Buffer[ bytesRead ] ), Bytes - bytesRead, FALSE, 2, TRUE, nil );
     bytesRead := bytesRead + Result;
   until ( Result = 0 ) or ( bytesRead = Bytes );
 
