@@ -214,9 +214,15 @@ begin
       Stream._private.Decoder.Update( Stream^, Milliseconds, Stream.Data );
       tex_SetData( Stream.Texture, Stream.Data, 0, 0, Stream.Info.Width, Stream.Info.Height );
       exit;
-    end;
+    end else
+      if Stream.Time + Milliseconds > Stream.Info.Duration Then
+        begin
+          Milliseconds := Stream.Info.Duration - Stream.Time;
+          Stream.Time  := Stream.Info.Duration;
+        end;
 
-  frame := Stream.Frame;
+  frame       := Stream.Frame;
+  Stream.Time := Stream.Time + Milliseconds;
   Stream._private.Decoder.Update( Stream^, Milliseconds, Stream.Data );
 
   if Stream.Frame <> frame Then
@@ -233,6 +239,8 @@ begin
       Milliseconds := Milliseconds - Trunc( Milliseconds / Stream.Info.Duration ) * Stream.Info.Duration;
     end;
 
+  Stream.Time  := Milliseconds;
+  Stream.Frame := Trunc( Stream.Time / 1000  * Stream.Info.FrameRate );
   Stream._private.Decoder.Seek( Stream^, Milliseconds );
   video_Update( Stream, 0 );
 end;

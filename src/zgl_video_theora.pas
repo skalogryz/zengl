@@ -441,14 +441,11 @@ end;
 
 procedure theora_DecoderUpdate( var Stream : zglTVideoStream; Milliseconds : Double; Data : PByteArray );
 begin
-  Stream.Time := Stream.Time + Milliseconds;
   INC( Stream.Frame, theora_Update( zglTTheoraData( Stream._private.Data^ ), Stream.Time, Data ) );
 end;
 
 procedure theora_DecoderSeek( var Stream : zglTVideoStream; Milliseconds : Double );
 begin
-  Stream.Time  := Milliseconds;
-  Stream.Frame := Trunc( Stream.Time / 1000  * Stream.Info.FrameRate );
   zglTTheoraData( Stream._private.Data^ ).Time := Milliseconds;
   theora_Seek( zglTTheoraData( Stream._private.Data^ ), Stream.Frame );
 end;
