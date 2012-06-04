@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 RC               }
-{ date:     2012.06.03           }
+{ date:     2012.06.04           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -243,7 +243,7 @@ var
   // RU: ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
   // EN: WARNING: Function will destroy OpenGL context, so all resources must be reloaded
   scr_SetFSAA           : procedure( FSAA : Byte );
-  scr_SetOptions        : procedure( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
+  scr_SetOptions        : function( Width, Height, Refresh : Word; FullScreen, VSync : Boolean ) : Boolean;
   scr_CorrectResolution : procedure( Width, Height : Word );
   scr_ReadPixels        : procedure( var pData : Pointer; X, Y, Width, Height : Word );
 

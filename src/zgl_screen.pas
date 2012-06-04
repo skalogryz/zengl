@@ -50,7 +50,7 @@ procedure scr_Destroy;
 procedure scr_Clear;
 procedure scr_Flush;
 
-procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
+function  scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean ) : Boolean;
 procedure scr_CorrectResolution( Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( VSync : Boolean );
@@ -519,7 +519,7 @@ begin
 {$ENDIF}
 end;
 
-procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
+function scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean ) : Boolean;
   {$IFDEF USE_X11}
   var
     modeToSet : Integer;
@@ -543,6 +543,7 @@ begin
   VSync      := TRUE;
 {$IFEND}
 
+  Result        := TRUE;
   wndWidth      := Width;
   wndHeight     := Height;
   scrRefresh    := Refresh;
@@ -584,13 +585,14 @@ begin
           end else
             INC( mode );
 
-      if scrCurrent = -1 Then
+      if ( scrCurrent = -1 ) or ( XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, scrRotation, CurrentTime ) <> 0 ) Then
         begin
-          u_Warning( 'Cannot set fullscreen mode.' );
+          u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
           scrCurrent    := scrDesktop;
           wndFullScreen := FALSE;
+          Result        := FALSE;
+          exit;
         end;
-      XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, scrRotation, CurrentTime );
     end else
       scr_SetWindowedMode();
 {$ENDIF}
@@ -630,8 +632,10 @@ begin
 
       if ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
-          u_Warning( 'Cannot set fullscreen mode.' );
+          u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
           wndFullScreen := FALSE;
+          Result        := FALSE;
+          exit;
         end else
           ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_FULLSCREEN, nil );
 
@@ -642,7 +646,6 @@ begin
 {$IFDEF MACOSX}
   if wndFullScreen Then
     begin
-      //CGDisplayCapture( scrDisplay );
       if ( scrRefresh <> 0 ) and ( scrRefresh <> 1 ) Then
         begin
           scrSettings := CGDisplayBestModeForParametersAndRefreshRate( scrDisplay, 32, scrWidth, scrHeight, scrRefresh, b );
@@ -651,12 +654,12 @@ begin
       if ( scrRefresh = 0 ) or ( scrRefresh = 1 ) Then
         scrSettings := CGDisplayBestModeForParameters( scrDisplay, 32, scrWidth, scrHeight, b );
 
-      if b = 1 Then
-        CGDisplaySwitchToMode( scrDisplay, scrSettings )
-      else
+      if ( b <> 1 ) or ( CGDisplaySwitchToMode( scrDisplay, scrSettings ) <> kCGErrorSuccess ) Then
         begin
-          u_Warning( 'Cannot set fullscreen mode.' );
+          u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
           wndFullScreen := FALSE;
+          Result        := FALSE;
+          exit;
         end;
 
       HideMenuBar();

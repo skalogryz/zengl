@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 RC               */
-/* date:     2012.06.03           */
+/* date:     2012.06.04           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -223,7 +223,7 @@ ZGLEXTERN void ( *scr_SetVSync )( bool VSync );
 // RU: ВНИМАНИЕ: Функция уничтожает контекст OpenGL, что потребует перезагрузку ресурсов
 // EN: WARNING: Function will destroy OpenGL context, so all resources must be reloaded
 ZGLEXTERN void ( *scr_SetFSAA )( byte FSAA );
-ZGLEXTERN void ( *scr_SetOptions )( ushort Width, ushort Height, ushort Refresh, bool FullScreen, bool VSync );
+ZGLEXTERN bool ( *scr_SetOptions )( ushort Width, ushort Height, ushort Refresh, bool FullScreen, bool VSync );
 ZGLEXTERN void ( *scr_CorrectResolution )( ushort Width, ushort Height );
 ZGLEXTERN void ( *scr_ReadPixels )( void **pData, ushort X, ushort Y, ushort Width, ushort Height );
 
