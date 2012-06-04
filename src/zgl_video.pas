@@ -145,6 +145,7 @@ begin
 
   if not file_Exists( FileName ) Then
     begin
+      video_Del( Result );
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
     end;

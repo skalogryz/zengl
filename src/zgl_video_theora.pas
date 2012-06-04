@@ -25,7 +25,7 @@ unit zgl_video_theora;
 interface
 
 const
-  THEORA_EXTENSIONS : array[ 0..0 ] of UTF8String = ( 'OGV' );
+  THEORA_EXTENSIONS : array[ 0..1 ] of UTF8String = ( 'OGV', 'OGG' );
 
 implementation
 uses
@@ -51,7 +51,8 @@ type
   end;
 
 var
-  theoraDecoder : zglTVideoDecoder;
+  theoraDecoderOGV : zglTVideoDecoder;
+  theoraDecoderOGG : zglTVideoDecoder;
 
 function buffer_ReadData( var TheoraData : zglTTheoraData; Size : LongWord = 4096 ) : LongWord;
   var
@@ -489,14 +490,17 @@ end;
 
 initialization
 {$IFDEF USE_THEORA}
-  theoraDecoder.Extension := THEORA_EXTENSIONS[ 0 ];
-  theoraDecoder.Open      := theora_DecoderOpen;
-  theoraDecoder.OpenMem   := theora_DecoderOpenMem;
-  theoraDecoder.Update    := theora_DecoderUpdate;
-  theoraDecoder.Seek      := theora_DecoderSeek;
-  theoraDecoder.Loop      := theora_DecoderLoop;
-  theoraDecoder.Close     := theora_DecoderClose;
-  zgl_Reg( VIDEO_FORMAT_DECODER, @theoraDecoder );
+  theoraDecoderOGV.Extension := THEORA_EXTENSIONS[ 0 ];
+  theoraDecoderOGV.Open      := theora_DecoderOpen;
+  theoraDecoderOGV.OpenMem   := theora_DecoderOpenMem;
+  theoraDecoderOGV.Update    := theora_DecoderUpdate;
+  theoraDecoderOGV.Seek      := theora_DecoderSeek;
+  theoraDecoderOGV.Loop      := theora_DecoderLoop;
+  theoraDecoderOGV.Close     := theora_DecoderClose;
+  zgl_Reg( VIDEO_FORMAT_DECODER, @theoraDecoderOGV );
+  theoraDecoderOGG           := theoraDecoderOGV;
+  theoraDecoderOGG.Extension := THEORA_EXTENSIONS[ 1 ];
+  zgl_Reg( VIDEO_FORMAT_DECODER, @theoraDecoderOGG );
 {$ENDIF}
 
 end.
