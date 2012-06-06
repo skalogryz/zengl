@@ -147,7 +147,8 @@ begin
     oglAttr[ 6  ] := GLX_BLUE_SIZE;
     oglAttr[ 7  ] := 8;
     oglAttr[ 8  ] := GLX_ALPHA_SIZE;
-    oglAttr[ 9  ] := 8;
+    // NVIDIA sucks!
+    oglAttr[ 9  ] := 8 * Byte( not appInitedToHandle );
     oglAttr[ 10 ] := GLX_DOUBLEBUFFER;
     oglAttr[ 11 ] := GL_TRUE;
     oglAttr[ 12 ] := GLX_DEPTH_SIZE;
