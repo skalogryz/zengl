@@ -1351,9 +1351,10 @@ function u_StrDown( const str : UTF8String ) : UTF8String;
 function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
 
 var
-  u_SortList : procedure( var List : zglTStringList; iLo, iHi : Integer );
-  u_Sleep    : procedure( Milliseconds : LongWord );
-  u_Hash     : function( const Str : UTF8String ) : LongWord;
+  u_GetUTF8ID : function( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
+  u_SortList  : procedure( var List : zglTStringList; iLo, iHi : Integer );
+  u_Sleep     : procedure( Milliseconds : LongWord );
+  u_Hash      : function( const Str : UTF8String ) : LongWord;
 
 {$IFDEF UNIX}
 function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -1820,6 +1821,7 @@ begin
       mem_SetSize := dlsym( zglLib, 'mem_SetSize' );
       mem_Free := dlsym( zglLib, 'mem_Free' );
 
+      u_GetUTF8ID := dlsym( zglLib, 'u_GetUTF8ID' );
       u_SortList := dlsym( zglLib, 'u_SortList' );
       u_Hash := dlsym( zglLib, 'u_Hash' );
       u_Sleep := dlsym( zglLib, 'u_Sleep' );
