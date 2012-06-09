@@ -102,6 +102,7 @@ var
 
 implementation
 uses
+  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_log,
