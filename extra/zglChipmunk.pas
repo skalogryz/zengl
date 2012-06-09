@@ -32,7 +32,9 @@ unit zglChipmunk;
 {$I zglCustomConfig.cfg}
 
 {$IFDEF FPC}
+  {$MODE DELPHI}
   {$PACKRECORDS C}
+  {$MINENUMSIZE 4}
   {$IFDEF USE_CHIPMUNK_STATIC}
     {$L chipmunk}
     {$L cpArbiter}

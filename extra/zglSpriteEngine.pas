@@ -2,6 +2,10 @@ unit zglSpriteEngine;
 
 {$I zglCustomConfig.cfg}
 
+{$IFDEF FPC}
+  {$MODE DELPHI}
+{$ENDIF}
+
 interface
 uses
   {$IFDEF USE_ZENGL_STATIC}

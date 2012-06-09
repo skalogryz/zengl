@@ -2,6 +2,12 @@ unit zglModPlug;
 
 {$I zglCustomConfig.cfg}
 
+{$IFDEF FPC}
+  {$MODE DELPHI}
+  {$PACKRECORDS C}
+  {$MINENUMSIZE 4}
+{$ENDIF}
+
 interface
 uses
   {$IFDEF USE_ZENGL_STATIC}
