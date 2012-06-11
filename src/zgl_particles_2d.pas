@@ -67,6 +67,7 @@ type
   zglPEmitterRing      = ^zglTEmitterRing;
   zglPParticleParams   = ^zglTParticleParams;
   zglPEmitter2D        = ^zglTEmitter2D;
+  zglPPEmitter2D       = ^zglPEmitter2D;
   zglPPEngine2D        = ^zglTPEngine2D;
   zglPEmitter2DManager = ^zglTEmitter2DManager;
 
@@ -226,6 +227,7 @@ type
       Particles : Integer;
             end;
     List  : array of zglPEmitter2D;
+    ListU : array of zglPPEmitter2D;
   end;
 
   zglTEmitter2DManager = record
@@ -237,7 +239,7 @@ procedure pengine2d_Set( PEngine : zglPPEngine2D );
 function  pengine2d_Get : zglPPEngine2D;
 procedure pengine2d_Draw;
 procedure pengine2d_Proc( dt : Double );
-function  pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
+procedure pengine2d_AddEmitter( Emitter : zglPEmitter2D; Result : zglPPEmitter2D = nil; X : Single = 0; Y : Single = 0 );
 procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
 
@@ -292,7 +294,8 @@ end;
 procedure pengine2d_Sort( iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
-    t : zglPEmitter2D;
+    t  : zglPEmitter2D;
+    tU : zglPPEmitter2D;
 begin
   lo   := iLo;
   hi   := iHi;
@@ -304,9 +307,12 @@ begin
     while List[ hi ].Params.Layer > mid do DEC( hi );
     if lo <= hi then
       begin
-        t          := List[ lo ];
-        List[ lo ] := List[ hi ];
-        List[ hi ] := t;
+        t           := List[ lo ];
+        List[ lo ]  := List[ hi ];
+        List[ hi ]  := t;
+        tU          := ListU[ lo ];
+        ListU[ lo ] := ListU[ hi ];
+        ListU[ hi ] := tU;
         INC( lo );
         DEC( hi );
       end;
@@ -319,7 +325,8 @@ end;
 procedure pengine2d_SortID( iLo, iHi : Integer );
   var
     lo, hi, mid : Integer;
-    t : zglPEmitter2D;
+    t  : zglPEmitter2D;
+    tU : zglPPEmitter2D;
 begin
   lo   := iLo;
   hi   := iHi;
@@ -331,9 +338,12 @@ begin
     while List[ hi ].ID > mid do DEC( hi );
     if lo <= hi then
       begin
-        t          := List[ lo ];
-        List[ lo ] := List[ hi ];
-        List[ hi ] := t;
+        t           := List[ lo ];
+        List[ lo ]  := List[ hi ];
+        List[ hi ]  := t;
+        tU          := ListU[ lo ];
+        ListU[ lo ] := ListU[ hi ];
+        ListU[ hi ] := tU;
         INC( lo );
         DEC( hi );
       end;
@@ -414,20 +424,23 @@ begin
     end;
 end;
 
-function pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
+procedure pengine2d_AddEmitter( Emitter : zglPEmitter2D; Result : zglPPEmitter2D = nil; X : Single = 0; Y : Single = 0 );
   var
     new : zglPEmitter2D;
     len : Integer;
 begin
   if pengine2d.Count.Emitters + 1 > length( pengine2d.List ) Then
-    SetLength( pengine2d.List, length( pengine2d.List ) + 16384 );
+    begin
+      SetLength( pengine2d.List, length( pengine2d.List ) + 1024 );
+      SetLength( pengine2d.ListU, length( pengine2d.ListU ) + 1024 );
+    end;
 
   zgl_GetMem( Pointer( new ), SizeOf( zglTEmitter2D ) );
-  pengine2d.List[ pengine2d.Count.Emitters ] := new;
+  pengine2d.List[ pengine2d.Count.Emitters ]  := new;
+  pengine2d.ListU[ pengine2d.Count.Emitters ] := Result;
   INC( pengine2d.Count.Emitters );
 
-  Result := new;
-  with Result^, Result._private do
+  with new^, new._private do
     begin
       pengine     := pengine2d;
       parCreated  := Emitter._private.parCreated;
@@ -509,13 +522,18 @@ begin
       Move( Emitter._private.particle[ 0 ], particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
     end;
 
-  emitter2d_Init( Result );
+  emitter2d_Init( new );
+
+  if Assigned( Result ) Then
+    Result^ := new;
 end;
 
 procedure pengine2d_DelEmitter( ID : Integer );
 begin
   if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) Then exit;
 
+  if Assigned( pengine2d.ListU[ ID ] ) Then
+    pengine2d.ListU[ ID ]^ := nil;
   emitter2d_Free( pengine2d.List[ ID ] );
   pengine2d.List[ ID ] := pengine2d.List[ pengine2d.Count.Emitters - 1 ];
   DEC( pengine2d.Count.Emitters );

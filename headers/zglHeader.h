@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 RC               */
-/* date:     2012.06.04           */
+/* date:     2012.06.11           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1130,7 +1130,7 @@ typedef struct
     zglTEmitterCircle AsCircle;
     zglTEmitterRing   AsRing;
   };
-} zglTEmitter2D, *zglPEmitter2D;
+} zglTEmitter2D, *zglPEmitter2D, **zglPPEmitter2D;
 
 typedef struct zglTPEngine2D
 {
@@ -1141,13 +1141,14 @@ typedef struct zglTPEngine2D
   } Count;
 
   zglPEmitter2D *List;
+  zglPPEmitter2D *ListU;
 } *zglPPEngine2D;
 
 ZGLEXTERN void ( *pengine2d_Set )( zglPPEngine2D PEngine );
 ZGLEXTERN zglPPEngine2D ( *pengine2d_Get )();
 ZGLEXTERN void ( *pengine2d_Draw )();
 ZGLEXTERN void ( *pengine2d_Proc )( double dt );
-ZGLEXTERN zglPEmitter2D ( *pengine2d_AddEmitter )( zglPEmitter2D Emitter, float X, float Y );
+ZGLEXTERN void ( *pengine2d_AddEmitter )( zglPEmitter2D Emitter, zglPPEmitter2D Result, float X, float Y );
 ZGLEXTERN void ( *pengine2d_DelEmitter )( int ID );
 ZGLEXTERN void ( *pengine2d_ClearAll )();
 ZGLEXTERN zglPEmitter2D ( *emitter2d_Add )();

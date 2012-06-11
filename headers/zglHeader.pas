@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 RC               }
-{ date:     2012.06.04           }
+{ date:     2012.06.11           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -824,6 +824,7 @@ type
   zglPEmitterRing      = ^zglTEmitterRing;
   zglPParticleParams   = ^zglTParticleParams;
   zglPEmitter2D        = ^zglTEmitter2D;
+  zglPPEmitter2D       = ^zglPEmitter2D;
   zglPPEngine2D        = ^zglTPEngine2D;
   zglPEmitter2DManager = ^zglTEmitter2DManager;
 
@@ -995,7 +996,7 @@ var
   pengine2d_Get            : function : zglPPEngine2D;
   pengine2d_Draw           : procedure;
   pengine2d_Proc           : procedure( dt : Double );
-  pengine2d_AddEmitter     : function( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
+  pengine2d_AddEmitter     : procedure( Emitter : zglPEmitter2D; Result : zglPPEmitter2D = nil; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
   pengine2d_DelEmitter     : procedure( ID : Integer );
   pengine2d_ClearAll       : procedure;
   emitter2d_Add            : function : zglPEmitter2D;
