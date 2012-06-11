@@ -25,8 +25,8 @@
 		BAA288A715868A9F0044432B /* demo11-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "demo11-Prefix.pch"; sourceTree = "<group>"; };
 		BAA288A815868A9F0044432B /* ReadMe.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
 		BAA288AC15868A9F0044432B /* demo11.pas */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = demo11.pas; sourceTree = "<group>"; };
-		BAA288C715868B2D0044432B /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = ../../../../../bin/data; sourceTree = "<group>"; };
-		BAA288C915868B430044432B /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../../icons; sourceTree = "<group>"; };
+		BAA288C715868B2D0044432B /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = ../../../../bin/data; sourceTree = "<group>"; };
+		BAA288C915868B430044432B /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../icons; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
