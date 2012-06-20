@@ -42,6 +42,7 @@ type
   zglTEvent           = Pointer;
 
 procedure thread_Create( var Thread : zglTThread; Callback : zglTThreadCallback; Data : Pointer = nil );
+procedure thread_Close( var Thread : zglTThread );
 procedure thread_CSInit( var CS : TRTLCriticalSection );
 procedure thread_CSDone( var CS : TRTLCriticalSection );
 procedure thread_CSEnter( var CS : TRTLCriticalSection );
@@ -60,6 +61,15 @@ begin
   Thread.Handle := BeginThread( Callback, Data, Thread.ID );
   {$ELSE}
   Thread.Handle := BeginThread( nil, 0, Callback, Data, 0, Thread.ID );
+  {$ENDIF}
+end;
+
+procedure thread_Close( var Thread : zglTThread );
+begin
+  {$IFDEF FPC}
+  CloseThread( Thread.Handle );
+  {$ELSE}
+  CloseHandle( Thread.Handle );
   {$ENDIF}
 end;
 

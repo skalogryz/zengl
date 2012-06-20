@@ -215,6 +215,7 @@ begin
         thread_EventSet( resQueueState[ i ] );
         resQueueSize[ i ] := 0;
         while resQueueState[ i ] <> nil do;
+        thread_Close( resThread[ i ] );
 
         while Assigned( resQueueItems[ i ].next ) do
           begin
