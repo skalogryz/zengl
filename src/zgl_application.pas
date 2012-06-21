@@ -1032,7 +1032,7 @@ begin
       case eKind of
         kEventMouseMoved, kEventMouseDragged:
           begin
-            wndMouseIn := ( mouseX > 0 ) and ( mouseX < wndWidth ) and ( mouseY > 0 ) and ( mouseY < wndHeight );
+            wndMouseIn := ( mouseX >= 0 ) and ( mouseX <= wndWidth ) and ( mouseY >= 0 ) and ( mouseY <= wndHeight );
             if wndMouseIn Then
               begin
                 if ( not appShowCursor ) and ( CGCursorIsVisible = 1 ) Then
