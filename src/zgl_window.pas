@@ -514,11 +514,15 @@ begin
     wnd_SetPos( wndX, wndY );
 {$ENDIF}
 {$IFDEF MACOSX}
-  if ( not appInitedToHandle ) and Assigned( wndHandle ) Then
+  if Assigned( wndHandle ) Then
     begin
-      SizeWindow( wndHandle, wndWidth, wndHeight, TRUE );
-      aglUpdateContext( oglContext );
-      wnd_Select();
+      if not appInitedToHandle Then
+        begin
+          SizeWindow( wndHandle, wndWidth, wndHeight, TRUE );
+          aglUpdateContext( oglContext );
+          wnd_Select();
+        end else
+          wnd_SetPos( wndX, wndY );
     end;
 {$ENDIF}
 {$IFDEF iOS}
@@ -537,11 +541,26 @@ procedure wnd_SetPos( X, Y : Integer );
   var
     mode : LongWord;
   {$ENDIF}
+  {$IFDEF MACOSX}
+  var
+    clipRgn : RgnHandle;
+  {$ENDIF}
 begin
-  if appInitedToHandle Then exit;
-
   wndX := X;
   wndY := Y;
+
+  if appInitedToHandle Then
+  {$IFDEF MACOSX}
+    begin
+      clipRgn := NewRgn();
+      SetRectRgn( clipRgn, X, Y, X + wndWidth, Y + wndHeight );
+      aglSetInteger( oglContext, AGL_CLIP_REGION, clipRgn );
+      aglEnable( oglContext, AGL_CLIP_REGION );
+      DisposeRgn( clipRgn );
+    end;
+  {$ENDIF}
+  exit;
+
 {$IFDEF USE_X11}
   if wndHandle <> 0 Then
     if not wndFullScreen Then

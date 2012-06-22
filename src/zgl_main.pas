@@ -46,7 +46,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3 RC';
-  cs_Date     = '2012.06.11';
+  cs_Date     = '2012.06.23';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 0;
@@ -315,12 +315,12 @@ begin
   {$IFDEF USE_X11}
   wndHandle := TWindow( Handle );
   {$ENDIF}
-  {$IFDEF MACOSX}
-  wndHandle := WindowRef( Handle );
-  {$ENDIF}
   {$IFDEF WINDOWS}
   wndHandle := HWND( Handle );
   wndDC     := GetDC( wndHandle );
+  {$ENDIF}
+  {$IFDEF MACOSX}
+  wndHandle := WindowRef( Handle );
   {$ENDIF}
   if not gl_Initialize() Then exit;
 

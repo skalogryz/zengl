@@ -22,6 +22,10 @@ uses
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF MACOSX}
+  CarbonPrivate,
+{$ENDIF}
+
   {$IFDEF USE_ZENGL_STATIC}
   zgl_main,
   zgl_window,
@@ -52,7 +56,8 @@ type
 var
   Form1: TForm1;
 
-  zglInited : Boolean;
+  zglInited  : Boolean;
+  zglResized : Boolean;
 
 implementation
 
@@ -66,13 +71,23 @@ begin
 
   // RU: Перед стартом необходимо настроить viewport.
   // EN: Before the start need to configure a viewport.
-  wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight );
+  wnd_SetPos( Form1.Panel1.Left, Form1.Panel1.Top );
+  wnd_SetSize( Form1.Panel1.Width, Form1.Panel1.ClientHeight );
 
   Form1.BringToFront();
 end;
 
 procedure Draw;
 begin
+  // RU: Необходимо обновлять viewport как только изменились размеры контрола, куда был инициализирован ZenGL.
+  // EN: Viewport should be updated as soon as size of control was changed.
+  if zglResized Then
+    begin
+      zglResized := FALSE;
+      wnd_SetPos( Form1.Panel1.Left, Form1.Panel1.Top );
+      wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight );
+    end;
+
   pr2d_Rect( 10, 10, 800 - 30, 600 - 30, $FF0000, 255 );
 
   // RU: Т.к. ZenGL перехватывает "управление" нужно выполнять обработку интерфейса вручную.
@@ -136,6 +151,12 @@ begin
       zgl_InitToHandle( Panel1.Handle );
     {$ENDIF}
 
+    {$IFDEF MACOSX}
+      // RU: В MacOS X инициализироваться нужно в форму, даже если рисовать надо в другом контроле.
+      // EN: For MacOS X initialization should be done into form, even if rendering will be into another control.
+      zgl_InitToHandle( LongWord( TCarbonWindow( Form1.Handle ).Window ) );
+    {$ENDIF}
+
       Application.Terminate();
     end;
 end;
@@ -151,10 +172,9 @@ end;
 
 procedure TForm1.Panel1Resize(Sender: TObject);
 begin
-  // RU: Необходимо обновлять viewport как только изменились размеры контрола, куда был инициализирован ZenGL.
-  // EN: Viewport should be updated as soon as size of control was changed.
-  if zglInited Then
-    wnd_SetSize( Panel1.ClientWidth, Panel1.ClientHeight );
+  // RU: Установим флаг, что размер контрола изменился.
+  // EN: Set a flag that size of control has been changed.
+  zglResized := TRUE;
 end;
 
 end.
