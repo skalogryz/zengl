@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3 RC               */
-/* date:     2012.06.11           */
+/* date:     2012.06.23           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -1203,7 +1203,9 @@ typedef struct
 #define TEXT_VALIGN_TOP     0x000010
 #define TEXT_VALIGN_CENTER  0x000020
 #define TEXT_VALIGN_BOTTOM  0x000040
-#define TEXT_FX_VCA         0x000080
+#define TEXT_CLIP_RECT      0x000080
+#define TEXT_FX_VCA         0x000100
+#define TEXT_FX_LENGTH      0x000200
 
 ZGLEXTERN zglPFont ( *font_Add )();
 ZGLEXTERN void ( *font_Del )( zglPFont *Font );

@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 RC               }
-{ date:     2012.06.11           }
+{ date:     2012.06.23           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1053,7 +1053,9 @@ const
   TEXT_VALIGN_TOP     = $000010;
   TEXT_VALIGN_CENTER  = $000020;
   TEXT_VALIGN_BOTTOM  = $000040;
-  TEXT_FX_VCA         = $000080;
+  TEXT_CLIP_RECT      = $000080;
+  TEXT_FX_VCA         = $000100;
+  TEXT_FX_LENGTH      = $000200;
 
 var
   font_Add            : function : zglPFont;
