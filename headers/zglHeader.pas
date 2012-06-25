@@ -1499,7 +1499,7 @@ begin
     System.Move( Str[ 1 ], Result[ 1 ], len );
 end;
 
-function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
+function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
