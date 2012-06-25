@@ -51,7 +51,8 @@ function u_StrToFloat( const Value : UTF8String ) : Single;
 function u_BoolToStr( Value : Boolean ) : UTF8String;
 function u_StrToBool( const Value : UTF8String ) : Boolean;
 
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
+function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String; overload;
+function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String; overload;
 function u_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
 {$IFDEF WINDOWS}
 function u_GetUTF8String( const Str : PWideChar ) : UTF8String;
@@ -67,6 +68,8 @@ function  u_Length( const Str : UTF8String ) : Integer;
 // Returns count of words, which a divided by delimiter d
 function  u_Words( const Str : UTF8String; D : AnsiChar = ' ' ) : Integer;
 function  u_GetWord( const Str : UTF8String; N : Integer; D : AnsiChar = ' ' ) : UTF8String;
+// Resturns new position after current char
+procedure u_GetUTF8Shift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
 // Returns char ID for different encodings
 function u_GetUTF8ID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
 function u_GetUTF16ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
@@ -171,6 +174,23 @@ begin
   SetLength( Result, len );
   if len > 0 Then
     System.Move( Str[ 1 ], Result[ 1 ], len );
+end;
+
+function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
+  var
+    i, j, len : Integer;
+begin
+  len := u_Length( Str );
+  if FromPosition < 1 Then FromPosition := 1;
+  if FromPosition > len Then exit;
+  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+
+  i := 1;
+  u_GetUTF8Shift( Str, i, i, FromPosition - 1 );
+  j := i;
+  u_GetUTF8Shift( Str, j, j, Count );
+  SetLength( Result, j - i );
+  System.Move( Str[ i ], Result[ 1 ], j - i );
 end;
 
 function u_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
@@ -306,6 +326,25 @@ b:
     end;
 
   Delete( Result, p, length( Result ) - p + 1 );
+end;
+
+procedure u_GetUTF8Shift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
+  var
+    i : Integer;
+begin
+  NewPos := Pos;
+  for i := 1 to Chars do
+    case Byte( Text[ NewPos ] ) of
+      0..127: INC( NewPos );
+      192..223: INC( NewPos, 2 );
+      224..239: INC( NewPos, 3 );
+      240..247: INC( NewPos, 4 );
+      248..251: INC( NewPos, 5 );
+      252..253: INC( NewPos, 6 );
+      254..255: INC( NewPos );
+    else
+      INC( NewPos );
+    end;
 end;
 
 function u_GetUTF8ID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;

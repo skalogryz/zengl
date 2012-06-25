@@ -1351,14 +1351,16 @@ function u_StrToBool( const Value : UTF8String ) : Boolean;
 function u_StrUp( const str : UTF8String ) : UTF8String;
 function u_StrDown( const str : UTF8String ) : UTF8String;
 
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
+function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String; overload;
+function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String; overload;
 
 var
-  u_Length    : function( const Str : UTF8String ) : Integer;
-  u_GetUTF8ID : function( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
-  u_SortList  : procedure( var List : zglTStringList; iLo, iHi : Integer );
-  u_Sleep     : procedure( Milliseconds : LongWord );
-  u_Hash      : function( const Str : UTF8String ) : LongWord;
+  u_Length       : function( const Str : UTF8String ) : Integer;
+  u_GetUTF8Shift : procedure( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
+  u_GetUTF8ID    : function( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
+  u_SortList     : procedure( var List : zglTStringList; iLo, iHi : Integer );
+  u_Sleep        : procedure( Milliseconds : LongWord );
+  u_Hash         : function( const Str : UTF8String ) : LongWord;
 
 {$IFDEF UNIX}
 function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
@@ -1495,6 +1497,33 @@ begin
   SetLength( Result, len );
   if len > 0 Then
     System.Move( Str[ 1 ], Result[ 1 ], len );
+end;
+
+function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  SetLength( Result, len );
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result[ 1 ], len );
+end;
+
+function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
+  var
+    i, j, len : Integer;
+begin
+  len := u_Length( Str );
+  if FromPosition < 1 Then FromPosition := 1;
+  if FromPosition > len Then exit;
+  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+
+  i := 1;
+  u_GetUTF8Shift( Str, i, i, FromPosition - 1 );
+  j := i;
+  u_GetUTF8Shift( Str, j, j, Count );
+  SetLength( Result, j - i );
+  System.Move( Str[ i ], Result[ 1 ], j - i );
 end;
 
 {$IFDEF WINCE}
@@ -1826,6 +1855,7 @@ begin
       mem_Free := dlsym( zglLib, 'mem_Free' );
 
       u_Length := dlsym( zglLib, 'u_Length' );
+      u_GetUTF8Shift := dlsym( zglLib, 'u_GetUTF8Shift' );
       u_GetUTF8ID := dlsym( zglLib, 'u_GetUTF8ID' );
       u_SortList := dlsym( zglLib, 'u_SortList' );
       u_Hash := dlsym( zglLib, 'u_Hash' );
