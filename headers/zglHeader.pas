@@ -1499,16 +1499,6 @@ begin
     System.Move( Str[ 1 ], Result[ 1 ], len );
 end;
 
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
-  var
-    len : Integer;
-begin
-  len := length( Str );
-  SetLength( Result, len );
-  if len > 0 Then
-    System.Move( Str[ 1 ], Result[ 1 ], len );
-end;
-
 function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
   var
     i, j, len : Integer;
