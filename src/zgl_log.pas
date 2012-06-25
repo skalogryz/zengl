@@ -56,26 +56,26 @@ begin
 
   {$IFDEF LINUX}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( 'log.txt' )
+    logFile := utf8_GetPAnsiChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF WINDESKTOP}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( 'log.txt' )
+    logFile := utf8_GetPAnsiChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF MACOSX}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( appWorkDir + '../log.txt' )
+    logFile := utf8_GetPAnsiChar( appWorkDir + '../log.txt' )
   {$ENDIF}
   {$IFDEF WINCE}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( 'log.txt' )
+    logFile := utf8_GetPAnsiChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF iOS}
   if not Assigned( logFile ) Then
-    logFile := u_GetPAnsiChar( appHomeDir + 'log.txt' )
+    logFile := utf8_GetPAnsiChar( appHomeDir + 'log.txt' )
   {$ENDIF}
   else
-    logFile := u_GetPAnsiChar( logFile );
+    logFile := utf8_GetPAnsiChar( logFile );
 
   {$IFNDEF ANDROID}
   file_Open( log, logFile, FOM_CREATE );

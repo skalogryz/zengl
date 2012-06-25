@@ -458,11 +458,11 @@ procedure wnd_SetCaption( const NewCaption : UTF8String );
 begin
   if appInitedToHandle Then exit;
 
-  wndCaption := u_CopyUTF8Str( NewCaption );
+  wndCaption := utf8_Copy( NewCaption );
 {$IFDEF USE_X11}
   if wndHandle <> 0 Then
     begin
-      str := u_GetPAnsiChar( wndCaption );
+      str := utf8_GetPAnsiChar( wndCaption );
       err := Xutf8TextListToTextProperty( scrDisplay, @str, 1, XUTF8StringStyle, @wndTitle );
 
       if err = 0 Then

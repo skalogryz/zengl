@@ -65,8 +65,8 @@ Begin
 
   // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
-  DirApp  := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-  DirHome := u_CopyUTF8Str( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
+  DirApp  := utf8_Copy( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+  DirHome := utf8_Copy( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.

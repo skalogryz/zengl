@@ -126,7 +126,7 @@ begin
   if ( len > 0 ) and ( Path[ len ] <> '/' ) {$IFDEF WINDOWS} and ( Path[ len ] <> '\' ) {$ENDIF} Then
     Result := Path + '/'
   else
-    Result := u_CopyUTF8Str( Path );
+    Result := utf8_Copy( Path );
 end;
 
 function file_Open( out FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
@@ -146,7 +146,7 @@ begin
       if not Assigned( zglPZipFile( FileHandle ).file_ ) Then
         zgl_FreeMem( Pointer( FileHandle ) )
       else
-        zglPZipFile( FileHandle ).name := u_GetPAnsiChar( filePath + FileName );
+        zglPZipFile( FileHandle ).name := utf8_GetPAnsiChar( filePath + FileName );
 
       Result := FileHandle <> 0;
       exit;
@@ -162,9 +162,9 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   {$IFDEF WINDESKTOP}
-  wideStr := u_GetPWideChar( filePath + FileName );
+  wideStr := utf8_GetPWideChar( filePath + FileName );
   {$ELSE}
-  wideStr := u_GetPWideChar( platform_GetRes( filePath + FileName ) );
+  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + FileName ) );
   {$ENDIF}
   case Mode of
     FOM_CREATE: FileHandle := CreateFileW( wideStr, GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
@@ -198,9 +198,9 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   {$IFDEF WINDESKTOP}
-  wideStr := u_GetPWideChar( filePath + Directory );
+  wideStr := utf8_GetPWideChar( filePath + Directory );
   {$ELSE}
-  wideStr := u_GetPWideChar( platform_GetRes( filePath + Directory ) );
+  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Directory ) );
   {$ENDIF}
   Result := CreateDirectoryW( wideStr, nil );
   FreeMem( wideStr );
@@ -243,9 +243,9 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   {$IFDEF WINDESKTOP}
-  wideStr := u_GetPWideChar( filePath + Name );
+  wideStr := utf8_GetPWideChar( filePath + Name );
   {$ELSE}
-  wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
   {$ENDIF}
   dir := GetFileAttributesW( wideStr ) and FILE_ATTRIBUTE_DIRECTORY > 0;
   FreeMem( wideStr );
@@ -275,9 +275,9 @@ begin
       {$ENDIF}
       {$IFDEF WINDOWS}
       {$IFDEF WINDESKTOP}
-      wideStr := u_GetPWideChar( filePath + Name );
+      wideStr := utf8_GetPWideChar( filePath + Name );
       {$ELSE}
-      wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+      wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
       {$ENDIF}
       Result := RemoveDirectoryW( wideStr );
       FreeMem( wideStr );
@@ -295,9 +295,9 @@ begin
       {$IFDEF WINDOWS}
       begin
         {$IFDEF WINDESKTOP}
-        wideStr := u_GetPWideChar( filePath + Name );
+        wideStr := utf8_GetPWideChar( filePath + Name );
         {$ELSE}
-        wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+        wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
         {$ENDIF}
         Result := DeleteFileW( wideStr );
         FreeMem( wideStr );
@@ -334,9 +334,9 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   {$IFDEF WINDESKTOP}
-  wideStr := u_GetPWideChar( filePath + Name );
+  wideStr := utf8_GetPWideChar( filePath + Name );
   {$ELSE}
-  wideStr := u_GetPWideChar( platform_GetRes( filePath + Name ) );
+  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
   {$ENDIF}
   Result  := GetFileAttributesW( wideStr ) <> $FFFFFFFF;
   FreeMem( wideStr );
@@ -568,7 +568,7 @@ begin
               if ( name[ len - 1 ] <> '/' ) and ( file_GetDirectory( name ) = Directory ) Then
                 begin
                   SetLength( List.Items, List.Count + 1 );
-                  List.Items[ List.Count ] := u_CopyUTF8Str( file_GetName( name ) + '.' + file_GetExtension( name ) );
+                  List.Items[ List.Count ] := utf8_Copy( file_GetName( name ) + '.' + file_GetExtension( name ) );
                   INC( List.Count );
                 end;
         end;
@@ -603,9 +603,9 @@ begin
 {$IFEND}
 {$IFDEF WINDOWS}
   {$IFDEF WINDESKTOP}
-  wideStr := u_GetPWideChar( filePath + Directory + '*' );
+  wideStr := utf8_GetPWideChar( filePath + Directory + '*' );
   {$ELSE}
-  wideStr := u_GetPWideChar( platform_GetRes( filePath + Directory ) + '*' );
+  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Directory ) + '*' );
   {$ENDIF}
   First   := FindFirstFileW( wideStr, FList );
   FreeMem( wideStr );
@@ -616,7 +616,7 @@ begin
       end else
         if FList.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY > 0 Then continue;
     SetLength( List.Items, List.Count + 1 );
-    List.Items[ List.Count ] := u_GetUTF8String( FList.cFileName );
+    List.Items[ List.Count ] := utf16_GetUTF8String( FList.cFileName );
     INC( List.Count );
   until not FindNextFileW( First, FList );
   FindClose( First );
@@ -786,17 +786,17 @@ end;
 
 function _file_GetName( const FileName : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPAnsiChar( file_GetName( FileName ) );
+  Result := utf8_GetPAnsiChar( file_GetName( FileName ) );
 end;
 
 function _file_GetExtension( const FileName : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPAnsiChar( file_GetExtension( FileName ) );
+  Result := utf8_GetPAnsiChar( file_GetExtension( FileName ) );
 end;
 
 function _file_GetDirectory( const FileName : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPAnsiChar( file_GetDirectory( FileName ) );
+  Result := utf8_GetPAnsiChar( file_GetDirectory( FileName ) );
 end;
 
 {$IFDEF iOS}

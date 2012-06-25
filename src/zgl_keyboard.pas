@@ -266,7 +266,7 @@ begin
     keysTextField.setText( u_GetNSString( Text ) );
 {$ENDIF}
 
-  keysText    := u_CopyUTF8Str( Text );
+  keysText    := utf8_Copy( Text );
   keysMax     := MaxSymbols;
   keysCanText := TRUE;
 
@@ -312,7 +312,7 @@ begin
         keysTextField.setText( u_GetNSString( Text ) );
       {$ENDIF}
 
-      keysText := u_CopyUTF8Str( Text );
+      keysText := utf8_Copy( Text );
       keysMax  := MaxSymbols;
     end;
 end;
@@ -453,7 +453,7 @@ procedure key_InputText( const Text : UTF8String );
   var
     c : AnsiChar;
 begin
-  if ( u_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
+  if ( utf8_Length( keysText ) < keysMax ) or ( keysMax = -1 ) Then
     begin
       {$IF ( not DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
       if ( appFlags and APP_USE_ENGLISH_INPUT > 0 ) and ( Text[ 1 ] <> ' ' )  Then
@@ -750,7 +750,7 @@ end;
 
 function _key_GetText : PAnsiChar;
 begin
-  Result := u_GetPAnsiChar( key_GetText() );
+  Result := utf8_GetPAnsiChar( key_GetText() );
 end;
 
 end.

@@ -51,28 +51,26 @@ function u_StrToFloat( const Value : UTF8String ) : Single;
 function u_BoolToStr( Value : Boolean ) : UTF8String;
 function u_StrToBool( const Value : UTF8String ) : Boolean;
 
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String; overload;
-function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String; overload;
-function u_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
-{$IFDEF WINDOWS}
-function u_GetUTF8String( const Str : PWideChar ) : UTF8String;
-function u_GetPWideChar( const Str : UTF8String ) : PWideChar;
-{$ENDIF}
 // Only for latin symbols in range 0..127
 function u_StrUp( const Str : UTF8String ) : UTF8String;
 function u_StrDown( const Str : UTF8String ) : UTF8String;
-// Removes one symbol from utf8-string
-procedure u_Backspace( var Str : UTF8String );
-// Returns count of symbols in utf8-string
-function  u_Length( const Str : UTF8String ) : Integer;
-// Returns count of words, which a divided by delimiter d
-function  u_Words( const Str : UTF8String; D : AnsiChar = ' ' ) : Integer;
-function  u_GetWord( const Str : UTF8String; N : Integer; D : AnsiChar = ' ' ) : UTF8String;
-// Resturns new position after current char
-procedure u_GetUTF8Shift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
-// Returns char ID for different encodings
-function u_GetUTF8ID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
-function u_GetUTF16ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
+
+function utf8_Copy( const Str : UTF8String ) : UTF8String; overload;
+function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String; overload;
+function utf8_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
+{$IFDEF WINDOWS}
+function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
+function utf16_GetUTF8String( const Str : PWideChar ) : UTF8String;
+{$ENDIF}
+{$IFDEF iOS}
+function utf8_GetNSString( const Str : UTF8String ) : NSString;
+{$ENDIF}
+procedure utf8_Backspace( var Str : UTF8String );
+function  utf8_Length( const Str : UTF8String ) : Integer;
+function utf8_Words( const Str : UTF8String; D : AnsiChar = ' ' ) : Integer;
+function utf8_GetWord( const Str : UTF8String; N : Integer; D : AnsiChar = ' ' ) : UTF8String;
+procedure utf8_GetShift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
+function utf8_GetID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
 //
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 //
@@ -106,9 +104,6 @@ function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall;
 function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
-{$ENDIF}
-{$IFDEF iOS}
-function u_GetNSString( const Str : UTF8String ) : NSString;
 {$ENDIF}
 
 implementation
@@ -166,72 +161,6 @@ begin
       Result := FALSE;
 end;
 
-function u_CopyUTF8Str( const Str : UTF8String ) : UTF8String;
-  var
-    len : Integer;
-begin
-  len := length( Str );
-  SetLength( Result, len );
-  if len > 0 Then
-    System.Move( Str[ 1 ], Result[ 1 ], len );
-end;
-
-function u_CopyUTF8Str( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
-  var
-    i, j, len : Integer;
-begin
-  len := u_Length( Str );
-  if FromPosition < 1 Then FromPosition := 1;
-  if FromPosition > len Then exit;
-  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
-
-  i := 1;
-  u_GetUTF8Shift( Str, i, i, FromPosition - 1 );
-  j := i;
-  u_GetUTF8Shift( Str, j, j, Count );
-  SetLength( Result, j - i );
-  System.Move( Str[ i ], Result[ 1 ], j - i );
-end;
-
-function u_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
-  var
-    len : Integer;
-begin
-  len := length( Str );
-  GetMem( Result, len + 1 );
-  Result[ len ] := #0;
-  if len > 0 Then
-    System.Move( Str[ 1 ], Result^, len );
-end;
-
-{$IFDEF WINDOWS}
-function u_GetUTF8String( const Str : PWideChar ) : UTF8String;
-  var
-    len : Integer;
-begin
-  len := WideCharToMultiByte( CP_UTF8, 0, Str, length( Str ), nil, 0, nil, nil );
-  SetLength( Result, len );
-  if len > 0 Then
-    WideCharToMultiByte( CP_UTF8, 0, Str, length( Str ), @Result[ 1 ], len, nil, nil );
-end;
-
-function u_GetPWideChar( const Str : UTF8String ) : PWideChar;
-  var
-    len : Integer;
-begin
-  len := MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), nil, 0 );
-  GetMem( Result, len * 2 + 2 );
-  Result[ len ] := #0;
-  MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), Result, len );
-end;
-{$ENDIF}
-
-{$IFDEF iOS}
-function u_GetNSString( const Str : UTF8String ) : NSString;
-begin
-  Result := NSString.stringWithUTF8String( PAnsiChar( Str ) );
-end;
-{$ENDIF}
 
 function u_StrUp( const Str : UTF8String ) : UTF8String;
   var
@@ -259,23 +188,89 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-procedure u_Backspace( var Str : UTF8String );
+function utf8_Copy( const Str : UTF8String ) : UTF8String;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  SetLength( Result, len );
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result[ 1 ], len );
+end;
+
+function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String;
+  var
+    i, j, len : Integer;
+begin
+  len := utf8_Length( Str );
+  if FromPosition < 1 Then FromPosition := 1;
+  if FromPosition > len Then exit;
+  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+
+  i := 1;
+  utf8_GetShift( Str, i, i, FromPosition - 1 );
+  j := i;
+  utf8_GetShift( Str, j, j, Count );
+  SetLength( Result, j - i );
+  System.Move( Str[ i ], Result[ 1 ], j - i );
+end;
+
+function utf8_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
+  var
+    len : Integer;
+begin
+  len := length( Str );
+  GetMem( Result, len + 1 );
+  Result[ len ] := #0;
+  if len > 0 Then
+    System.Move( Str[ 1 ], Result^, len );
+end;
+
+{$IFDEF WINDOWS}
+function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
+  var
+    len : Integer;
+begin
+  len := MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), nil, 0 );
+  GetMem( Result, len * 2 + 2 );
+  Result[ len ] := #0;
+  MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), Result, len );
+end;
+
+function utf16_GetUTF8String( const Str : PWideChar ) : UTF8String;
+  var
+    len : Integer;
+begin
+  len := WideCharToMultiByte( CP_UTF8, 0, Str, length( Str ), nil, 0, nil, nil );
+  SetLength( Result, len );
+  if len > 0 Then
+    WideCharToMultiByte( CP_UTF8, 0, Str, length( Str ), @Result[ 1 ], len, nil, nil );
+end;
+{$ENDIF}
+
+{$IFDEF iOS}
+function utf8_GetNSString( const Str : UTF8String ) : NSString;
+begin
+  Result := NSString.stringWithUTF8String( PAnsiChar( Str ) );
+end;
+{$ENDIF}
+
+procedure utf8_Backspace( var Str : UTF8String );
   var
     i, last : Integer;
 begin
-  if str = '' Then exit;
   i := 1;
-  last := 0;
+  last := 1;
   while i <= length( Str ) do
     begin
       last := i;
-      u_GetUTF8ID( Str, last, @i );
+      utf8_GetShift( Str, last, i );
     end;
 
   SetLength( Str, last - 1 )
 end;
 
-function u_Length( const Str : UTF8String ) : Integer;
+function utf8_Length( const Str : UTF8String ) : Integer;
   var
     i : Integer;
 begin
@@ -284,11 +279,11 @@ begin
   while i <= length( Str ) do
     begin
       INC( Result );
-      u_GetUTF8ID( Str, i, @i );
+      utf8_GetShift( Str, i, i );
     end;
 end;
 
-function u_Words( const Str : UTF8String; D : AnsiChar = ' ' ) : Integer;
+function utf8_Words( const Str : UTF8String; D : AnsiChar = ' ' ) : Integer;
   var
     i, m : Integer;
 begin
@@ -305,7 +300,7 @@ begin
     end;
 end;
 
-function u_GetWord( const Str : UTF8String; N : Integer; D : AnsiChar = ' ' ) : UTF8String;
+function utf8_GetWord( const Str : UTF8String; N : Integer; D : AnsiChar = ' ' ) : UTF8String;
   label b;
   var
     i, p : Integer;
@@ -328,7 +323,7 @@ b:
   Delete( Result, p, length( Result ) - p + 1 );
 end;
 
-procedure u_GetUTF8Shift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
+procedure utf8_GetShift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
   var
     i : Integer;
 begin
@@ -347,7 +342,7 @@ begin
     end;
 end;
 
-function u_GetUTF8ID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
+function utf8_GetID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
 begin
   case Byte( Text[ Pos ] ) of
     0..127:
@@ -406,13 +401,6 @@ begin
     if Assigned( Shift ) Then
       Shift^ := Pos + 1;
   end;
-end;
-
-function u_GetUTF16ID( const Text : String; Pos : Integer; Shift : PInteger ) : LongWord;
-begin
-  if Assigned( Shift ) Then
-    Shift^ := Pos + 1;
-  Result := Word( Text[ Pos ] );
 end;
 
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
@@ -513,7 +501,7 @@ begin
   printf( PAnsiChar( 'ERROR: ' + ErrStr ), [ nil ] );
 {$IFEND}
 {$IFDEF WINDOWS}
-  wideStr := u_GetPWideChar( ErrStr );
+  wideStr := utf8_GetPWideChar( ErrStr );
   MessageBoxW( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
   FreeMem( wideStr );
 {$ENDIF}
@@ -541,7 +529,7 @@ begin
   printf( PAnsiChar( 'WARNING: ' + ErrStr ), [ nil ] );
 {$IFEND}
 {$IFDEF WINDOWS}
-  wideStr := u_GetPWideChar( ErrStr );
+  wideStr := utf8_GetPWideChar( ErrStr );
   MessageBoxW( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
   FreeMem( wideStr );
 {$ENDIF}

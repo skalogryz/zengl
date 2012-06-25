@@ -247,7 +247,7 @@ begin
   Result := FALSE;
   ini_Free();
   if not file_Exists( FileName ) Then exit;
-  iniRec.FileName := u_CopyUTF8Str( FileName );
+  iniRec.FileName := utf8_Copy( FileName );
 
   mem_LoadFromFile( iniMem, FileName );
   ini_Process();
@@ -293,8 +293,8 @@ procedure ini_Add( const Section, Key : UTF8String );
     s, k   : UTF8String;
     ns, nk : Integer;
 begin
-  s := u_CopyUTF8Str( Section );
-  k := u_CopyUTF8Str( Key );
+  s := utf8_Copy( Section );
+  k := utf8_Copy( Key );
 
   ini_GetID( s, k, ns, nk );
 
@@ -468,7 +468,7 @@ begin
 
   if ini_GetID( s, k, i, j ) Then
     begin
-      iniRec.Section[ i ].Key[ j ].Value := u_CopyUTF8Str( Value );
+      iniRec.Section[ i ].Key[ j ].Value := utf8_Copy( Value );
       Result := TRUE;
     end else
       begin
@@ -540,7 +540,7 @@ end;
 
 function _ini_ReadKeyStr( const Section, Key : UTF8String ) : PAnsiChar;
 begin
-  Result := u_GetPAnsiChar( ini_ReadKeyStr( Section, Key ) );
+  Result := utf8_GetPAnsiChar( ini_ReadKeyStr( Section, Key ) );
 end;
 
 end.

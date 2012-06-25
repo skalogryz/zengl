@@ -268,7 +268,7 @@ begin
   for i := 0 to j - 1 do
     if joyGetDevCapsW( i, @joyArray[ i ].caps, SizeOf( TJOYCAPSW ) ) = 0 Then
       begin
-        joyArray[ i ].Info.Name          := u_GetUTF8String( joyArray[ i ].caps.szPname );
+        joyArray[ i ].Info.Name          := utf16_GetUTF8String( joyArray[ i ].caps.szPname );
         joyArray[ i ].Info.Count.Axes    := joyArray[ i ].caps.wNumAxes;
         joyArray[ i ].Info.Count.Buttons := joyArray[ i ].caps.wNumButtons;
 

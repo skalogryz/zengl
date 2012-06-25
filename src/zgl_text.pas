@@ -111,7 +111,7 @@ begin
     begin
       lc   := c;
       j    := i;
-      c    := u_GetUTF8ID( Text, i, @i );
+      c    := utf8_GetID( Text, i, @i );
       imax := Integer( i > length( Text ) );
 
       if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then
@@ -252,7 +252,7 @@ begin
   FillChar( quad[ 0 ], SizeOf( zglTPoint2D ) * 4, 0 );
   charDesc := nil;
   lastPage := -1;
-  c := u_GetUTF8ID( Text, 1, @i );
+  c := utf8_GetID( Text, 1, @i );
   s := 1;
   i := 1;
   if Flags and TEXT_FX_VCA > 0 Then
@@ -284,7 +284,7 @@ begin
           X := sx;
           Y := Y + Font.MaxHeight * textScale;
         end;
-      c := u_GetUTF8ID( Text, i, @i );
+      c := utf8_GetID( Text, i, @i );
 
       if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then
         begin
@@ -427,7 +427,7 @@ begin
         begin
           textFx_SetLength( b - j, textLCoord, textLCharDesc );
           if j > b Then continue;
-          j := j + u_Length( textWords[ i ].Str );
+          j := j + utf8_Length( textWords[ i ].Str );
         end;
       text_Draw( Font, textWords[ i ].X, textWords[ i ].Y, textWords[ i ].Str, NewFlags );
     end;
@@ -462,7 +462,7 @@ begin
   i  := 1;
   while i <= length( Text ) do
     begin
-      c := u_GetUTF8ID( Text, i, @i );
+      c := utf8_GetID( Text, i, @i );
       if c = 10 Then
         begin
           lResult := Result;

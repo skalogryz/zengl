@@ -584,7 +584,7 @@ begin
               K_SUPER_L, K_SUPER_R,
               K_APP_MENU,
               K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
-              K_BACKSPACE: u_Backspace( keysText );
+              K_BACKSPACE: utf8_Backspace( keysText );
               K_TAB:       key_InputText( '  ' );
             else
               len := Xutf8LookupString( appXIC, @event, @c[ 0 ], 6, @keysym, @status );
@@ -845,7 +845,7 @@ begin
         if keysCanText Then
         case winkey_to_scancode( wParam ) of
           K_ENTER:;
-          K_BACKSPACE: u_Backspace( keysText );
+          K_BACKSPACE: utf8_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
           len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
@@ -999,7 +999,7 @@ begin
                 K_SUPER_L, K_SUPER_R,
                 K_APP_MENU,
                 K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
-                K_BACKSPACE: u_Backspace( keysText );
+                K_BACKSPACE: utf8_Backspace( keysText );
                 K_TAB:       key_InputText( '  ' );
               else
                 GetEventParameter( inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[ 0 ] );
@@ -1277,7 +1277,7 @@ begin
   CFStringGetCString( CFStringRef( string_ ), @buffer[ 0 ], 4, kCFStringEncodingUTF8 );
 
   if buffer[ 0 ] = #0 Then
-    u_Backspace( keysText )
+    utf8_Backspace( keysText )
   else
     key_InputText( buffer );
 end;
@@ -1775,7 +1775,7 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeBackspace( env : PJNIEnv; thiz : jobject );
 begin
-  u_Backspace( keysText );
+  utf8_Backspace( keysText );
 end;
 {$ENDIF}
 

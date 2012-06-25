@@ -736,13 +736,13 @@ begin
   {$ELSE}
   if Result = nil Then
     begin
-      wideStr := u_GetPWideChar( Proc );
+      wideStr := utf8_GetPWideChar( Proc );
       Result  := dlsym( glesLibrary, wideStr );
       FreeMem( wideStr );
     end;
   if Result = nil Then
     begin
-      wideStr := u_GetPWideChar( Proc + 'OES' );
+      wideStr := utf8_GetPWideChar( Proc + 'OES' );
       Result  := dlsym( glesLibrary, wideStr );
       FreeMem( wideStr );
     end;
