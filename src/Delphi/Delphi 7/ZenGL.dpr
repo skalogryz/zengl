@@ -414,9 +414,9 @@ exports
   mem_SetSize              name prefix + 'mem_SetSize',
   mem_Free                 name prefix + 'mem_Free',
 
-  u_Length                 name prefix + 'u_Length',
-  u_GetUTF8Shift           name prefix + 'u_GetUTF8Shift',
-  u_GetUTF8ID              name prefix + 'u_GetUTF8ID',
+  utf8_Length              name prefix + 'utf8_Length',
+  utf8_GetShift            name prefix + 'utf8_GetShift',
+  utf8_GetID               name prefix + 'utf8_GetID',
   u_SortList               name prefix + 'u_SortList',
   u_Hash                   name prefix + 'u_Hash',
   u_Sleep                  name prefix + 'u_Sleep'

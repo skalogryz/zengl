@@ -1491,6 +1491,32 @@ begin
       Result := FALSE;
 end;
 
+function u_StrUp( const Str : UTF8String ) : UTF8String;
+  var
+    i, l : Integer;
+begin
+  l := length( Str );
+  SetLength( Result, l );
+  for i := 1 to l do
+    if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
+      Result[ i ] := AnsiChar( Byte( Str[ i ] ) - 32 )
+    else
+      Result[ i ] := Str[ i ];
+end;
+
+function u_StrDown( const Str : UTF8String ) : UTF8String;
+  var
+    i, l : Integer;
+begin
+  l := length( Str );
+  SetLength( Result, l );
+  for i := 1 to l do
+    if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
+      Result[ i ] := AnsiChar( Byte( Str[ i ] ) + 32 )
+    else
+      Result[ i ] := Str[ i ];
+end;
+
 function utf8_Copy( const Str : UTF8String ) : UTF8String;
   var
     len : Integer;
@@ -1529,32 +1555,6 @@ begin
   MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), Result, len );
 end;
 {$ENDIF}
-
-function u_StrUp( const Str : UTF8String ) : UTF8String;
-  var
-    i, l : Integer;
-begin
-  l := length( Str );
-  SetLength( Result, l );
-  for i := 1 to l do
-    if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
-      Result[ i ] := AnsiChar( Byte( Str[ i ] ) - 32 )
-    else
-      Result[ i ] := Str[ i ];
-end;
-
-function u_StrDown( const Str : UTF8String ) : UTF8String;
-  var
-    i, l : Integer;
-begin
-  l := length( Str );
-  SetLength( Result, l );
-  for i := 1 to l do
-    if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
-      Result[ i ] := AnsiChar( Byte( Str[ i ] ) + 32 )
-    else
-      Result[ i ] := Str[ i ];
-end;
 
 function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
   {$IFDEF WINCE}
