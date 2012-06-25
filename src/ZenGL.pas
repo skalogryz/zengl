@@ -432,6 +432,7 @@ exports
   mem_SetSize              name prefix + 'mem_SetSize',
   mem_Free                 name prefix + 'mem_Free',
 
+  u_Length                 name prefix + 'u_Length',
   u_GetUTF8ID              name prefix + 'u_GetUTF8ID',
   u_SortList               name prefix + 'u_SortList',
   u_Hash                   name prefix + 'u_Hash',
