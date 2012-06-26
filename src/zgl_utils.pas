@@ -57,6 +57,8 @@ function u_StrDown( const Str : UTF8String ) : UTF8String;
 
 function utf8_Copy( const Str : UTF8String ) : UTF8String; overload;
 function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String; overload;
+procedure utf8_Delete( var Str : UTF8String; FromPosition, Count : Integer );
+function utf8_Pos( const SubStr, Source : UTF8String ) : Integer;
 function utf8_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
 {$IFDEF WINDOWS}
 function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
@@ -166,7 +168,7 @@ function u_StrUp( const Str : UTF8String ) : UTF8String;
   var
     i, l : Integer;
 begin
-  l := length( Str );
+  l := Length( Str );
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 97 ) and ( Byte( Str[ i ] ) <= 122 ) Then
@@ -179,7 +181,7 @@ function u_StrDown( const Str : UTF8String ) : UTF8String;
   var
     i, l : Integer;
 begin
-  l := length( Str );
+  l := Length( Str );
   SetLength( Result, l );
   for i := 1 to l do
     if ( Byte( Str[ i ] ) >= 65 ) and ( Byte( Str[ i ] ) <= 90 ) Then
@@ -192,7 +194,7 @@ function utf8_Copy( const Str : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
-  len := length( Str );
+  len := Length( Str );
   SetLength( Result, len );
   if len > 0 Then
     System.Move( Str[ 1 ], Result[ 1 ], len );
@@ -204,22 +206,51 @@ function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UT
 begin
   len := utf8_Length( Str );
   if FromPosition < 1 Then FromPosition := 1;
-  if FromPosition > len Then exit;
+  if ( FromPosition > len ) or ( Count < 1 ) Then exit;
   if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
 
   i := 1;
   utf8_GetShift( Str, i, i, FromPosition - 1 );
-  j := i;
-  utf8_GetShift( Str, j, j, Count );
+  utf8_GetShift( Str, i, j, Count );
   SetLength( Result, j - i );
   System.Move( Str[ i ], Result[ 1 ], j - i );
+end;
+
+procedure utf8_Delete( var Str : UTF8String; FromPosition, Count : Integer );
+  var
+    i, j, len : Integer;
+    Result    : UTF8String;
+begin
+  len := utf8_Length( Str );
+  if FromPosition < 1 Then FromPosition := 1;
+  if ( FromPosition > len ) or ( Count < 1 ) Then exit;
+  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+  if ( FromPosition = 1 ) and ( Count = len ) Then
+    begin
+      Str := '';
+      exit;
+    end;
+
+  len := Length( Str );
+  i := 1;
+  utf8_GetShift( Str, i, i, FromPosition - 1 );
+  utf8_GetShift( Str, i, j, Count );
+  SetLength( Result, len - j + i );
+  System.Move( Str[ 1 ], Result[ 1 ], i - 1 );
+  if j < len Then
+    System.Move( Str[ j ], Result[ i ], len - ( j - 1 ) );
+  Str := Result;
+end;
+
+function utf8_Pos( const SubStr, Source : UTF8String ) : Integer;
+begin
 end;
 
 function utf8_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
   var
     len : Integer;
 begin
-  len := length( Str );
+  len := Length( Str );
   GetMem( Result, len + 1 );
   Result[ len ] := #0;
   if len > 0 Then
@@ -231,20 +262,20 @@ function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
   var
     len : Integer;
 begin
-  len := MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), nil, 0 );
+  len := MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], Length( Str ), nil, 0 );
   GetMem( Result, len * 2 + 2 );
   Result[ len ] := #0;
-  MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), Result, len );
+  MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], Length( Str ), Result, len );
 end;
 
 function utf16_GetUTF8String( const Str : PWideChar ) : UTF8String;
   var
     len : Integer;
 begin
-  len := WideCharToMultiByte( CP_UTF8, 0, Str, length( Str ), nil, 0, nil, nil );
+  len := WideCharToMultiByte( CP_UTF8, 0, Str, Length( Str ), nil, 0, nil, nil );
   SetLength( Result, len );
   if len > 0 Then
-    WideCharToMultiByte( CP_UTF8, 0, Str, length( Str ), @Result[ 1 ], len, nil, nil );
+    WideCharToMultiByte( CP_UTF8, 0, Str, Length( Str ), @Result[ 1 ], len, nil, nil );
 end;
 {$ENDIF}
 
@@ -261,7 +292,7 @@ procedure utf8_Backspace( var Str : UTF8String );
 begin
   i := 1;
   last := 1;
-  while i <= length( Str ) do
+  while i <= Length( Str ) do
     begin
       last := i;
       utf8_GetShift( Str, last, i );
@@ -276,7 +307,7 @@ function utf8_Length( const Str : UTF8String ) : Integer;
 begin
   Result := 0;
   i := 1;
-  while i <= length( Str ) do
+  while i <= Length( Str ) do
     begin
       INC( Result );
       utf8_GetShift( Str, i, i );
@@ -289,7 +320,7 @@ function utf8_Words( const Str : UTF8String; D : AnsiChar = ' ' ) : Integer;
 begin
   Result := 0;
   m := 0;
-  for i := 1 to length( Str ) do
+  for i := 1 to Length( Str ) do
     begin
       if ( Str[ i ] <> D ) and ( m = 0 ) Then
         begin
@@ -311,16 +342,16 @@ begin
 b:
   INC( i );
   p := Pos( D, Result );
-  while Result[ p ] = d do Delete( Result, p, 1 );
+  while Result[ p ] = d do utf8_Delete( Result, p, 1 );
 
   p := Pos( D, Result );
   if N > i Then
     begin
-      Delete( Result, 1, p - 1 );
+      utf8_Delete( Result, 1, p - 1 );
       goto b;
     end;
 
-  Delete( Result, p, length( Result ) - p + 1 );
+  utf8_Delete( Result, p, Length( Result ) - p + 1 );
 end;
 
 procedure utf8_GetShift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
@@ -437,7 +468,7 @@ function u_Hash( const Str : UTF8String ) : LongWord;
 begin
   Result := 0;
   if Str = '' Then exit;
-  len  := length( Str );
+  len  := Length( Str );
   hash := len;
   data := @Str[ 1 ];
 

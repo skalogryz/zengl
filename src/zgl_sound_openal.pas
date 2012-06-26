@@ -224,7 +224,7 @@ function oal_GetSource( Source : Pointer ) : LongWord;
     i, state : Integer;
 begin
   Result := 0;
-  for i := 0 to length( oalSources ) - 1 do
+  for i := 0 to Length( oalSources ) - 1 do
     begin
       alGetSourcei( oalSources[ i ], AL_SOURCE_STATE, state );
       if state <> AL_PLAYING Then

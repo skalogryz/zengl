@@ -465,7 +465,7 @@ begin
       {$ELSE}
       if appFlags and APP_USE_ENGLISH_INPUT > 0  Then
         begin
-          if ( length( Text ) = 1 ) and ( Byte( Text[ 1 ] ) < 128 ) Then
+          if ( Length( Text ) = 1 ) and ( Byte( Text[ 1 ] ) < 128 ) Then
             keysText := keysText + Text;
         end else
       {$IFEND}

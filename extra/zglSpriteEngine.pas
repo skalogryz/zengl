@@ -143,7 +143,7 @@ end;
 
 function zglCSEngine2D.AddSprite : Integer;
 begin
-  if FCount + 1 > length( FList ) Then
+  if FCount + 1 > Length( FList ) Then
     SetLength( FList, FCount + 16384 );
   Result := FCount;
   INC( FCount );

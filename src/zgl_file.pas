@@ -122,7 +122,7 @@ function GetDir( const Path : UTF8String ) : UTF8String;
   var
     len : Integer;
 begin
-  len := length( Path );
+  len := Length( Path );
   if ( len > 0 ) and ( Path[ len ] <> '/' ) {$IFDEF WINDOWS} and ( Path[ len ] <> '\' ) {$ENDIF} Then
     Result := Path + '/'
   else
@@ -561,7 +561,7 @@ begin
               if file_GetDirectory( name2 ) = Directory Then
                 begin
                   SetLength( List.Items, List.Count + 1 );
-                  List.Items[ List.Count ] := copy( name2, length( Directory ) + 1, len - 1 );
+                  List.Items[ List.Count ] := copy( name2, Length( Directory ) + 1, len - 1 );
                   INC( List.Count );
                 end;
             end else
@@ -650,7 +650,7 @@ function GetStr( const Str : UTF8String; const d : AnsiChar; const b : Boolean )
     i, pos, l : Integer;
 begin
   pos := 0;
-  l := length( Str );
+  l := Length( Str );
   for i := l downto 1 do
     if Str[ i ] = d Then
       begin
@@ -674,7 +674,7 @@ begin
   {$ENDIF}
   tmp := GetStr( Result, '.', FALSE );
   if Result <> tmp Then
-    Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
+    Result := copy( Result, 1, Length( Result ) - Length( tmp ) - 1 );
 end;
 
 function file_GetExtension( const FileName : UTF8String ) : UTF8String;
@@ -708,7 +708,7 @@ end;
 {$IFDEF MACOSX}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
 begin
-  if ( length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) Then
+  if ( Length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := appWorkDir + 'Contents/Resources/' + FileName
   else
     Result := FileName;
@@ -717,7 +717,7 @@ end;
 {$IFDEF WINCE}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
 begin
-  if ( length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) and ( FileName[ 1 ] <> '\' ) Then
+  if ( Length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) and ( FileName[ 1 ] <> '\' ) Then
     Result := appWorkDir + FileName
   else
     Result := FileName;
@@ -726,7 +726,7 @@ end;
 {$IFDEF iOS}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
 begin
-  if ( length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) Then
+  if ( Length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) Then
     Result := appWorkDir + FileName
   else
     Result := FileName;

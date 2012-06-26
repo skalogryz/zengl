@@ -97,7 +97,7 @@ type
     ch_comment_len   : cint;       // length of changed zip archive * comment, -1 if unchanged
     nentry           : cuint64;    // number of entries
     nentry_alloc     : cuint64;    // number of entries allocated
-    entry            : Pointer;    //zip_entry // entries
+    entry            : Pointer;    // zip_entry // entries
     nfile            : cint;       // number of opened files within archive
     nfile_alloc      : cint;       // number of files allocated
     file_            : array of Pzip_file; // opened files within archive

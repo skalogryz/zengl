@@ -477,12 +477,12 @@ begin
 {$IFDEF WINDOWS}
   if wndHandle <> 0 Then
     begin
-      len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
+      len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], Length( wndCaption ), nil, 0 );
       if Assigned( wndCaptionW ) Then
         FreeMem( wndCaptionW );
       GetMem( wndCaptionW, len * 2 + 2 );
       wndCaptionW[ len ] := #0;
-      MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
+      MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], Length( wndCaption ), wndCaptionW, len );
 
       SetWindowTextW( wndHandle, wndCaptionW );
     end;

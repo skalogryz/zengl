@@ -429,10 +429,10 @@ procedure pengine2d_AddEmitter( Emitter : zglPEmitter2D; Result : zglPPEmitter2D
     new : zglPEmitter2D;
     len : Integer;
 begin
-  if pengine2d.Count.Emitters + 1 > length( pengine2d.List ) Then
+  if pengine2d.Count.Emitters + 1 > Length( pengine2d.List ) Then
     begin
-      SetLength( pengine2d.List, length( pengine2d.List ) + 1024 );
-      SetLength( pengine2d.ListU, length( pengine2d.ListU ) + 1024 );
+      SetLength( pengine2d.List, Length( pengine2d.List ) + 1024 );
+      SetLength( pengine2d.ListU, Length( pengine2d.ListU ) + 1024 );
     end;
 
   zgl_GetMem( Pointer( new ), SizeOf( zglTEmitter2D ) );
@@ -471,11 +471,11 @@ begin
           LifeTimeV := Emitter.ParParams.LifeTimeV;
           Frame     := Emitter.ParParams.Frame;
 
-          len := length( Emitter.ParParams.Color );
+          len := Length( Emitter.ParParams.Color );
           SetLength( Color, len );
           Move( Emitter.ParParams.Color[ 0 ], Color[ 0 ], len * SizeOf( Color[ 0 ] ) );
 
-          len := length( Emitter.ParParams.Alpha );
+          len := Length( Emitter.ParParams.Alpha );
           SetLength( Alpha, len );
           Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
 
@@ -485,11 +485,11 @@ begin
           SizeXV := Emitter.ParParams.SizeXV;
           SizeYV := Emitter.ParParams.SizeYV;
 
-          len := length( Emitter.ParParams.SizeXD );
+          len := Length( Emitter.ParParams.SizeXD );
           SetLength( SizeXD, len );
           Move( Emitter.ParParams.SizeXD[ 0 ], SizeXD[ 0 ], len * SizeOf( SizeXD[ 0 ] ) );
 
-          len := length( Emitter.ParParams.SizeYD );
+          len := Length( Emitter.ParParams.SizeYD );
           SetLength( SizeYD, len );
           Move( Emitter.ParParams.SizeYD[ 0 ], SizeYD[ 0 ], len * SizeOf( SizeYD[ 0 ] ) );
 
@@ -498,21 +498,21 @@ begin
           VelocityS := Emitter.ParParams.VelocityS;
           VelocityV := Emitter.ParParams.VelocityV;
 
-          len := length( Emitter.ParParams.VelocityD );
+          len := Length( Emitter.ParParams.VelocityD );
           SetLength( VelocityD, len );
           Move( Emitter.ParParams.VelocityD[ 0 ], VelocityD[ 0 ], len * SizeOf( VelocityD[ 0 ] ) );
 
           aVelocityS := Emitter.ParParams.aVelocityS;
           aVelocityV := Emitter.ParParams.aVelocityV;
 
-          len := length( Emitter.ParParams.aVelocityD );
+          len := Length( Emitter.ParParams.aVelocityD );
           SetLength( aVelocityD, len );
           Move( Emitter.ParParams.aVelocityD[ 0 ], aVelocityD[ 0 ], len * SizeOf( aVelocityD[ 0 ] ) );
 
           SpinS := Emitter.ParParams.SpinS;
           SpinV := Emitter.ParParams.SpinV;
 
-          len := length( Emitter.ParParams.SpinD );
+          len := Length( Emitter.ParParams.SpinD );
           SetLength( SpinD, len );
           Move( Emitter.ParParams.SpinD[ 0 ], SpinD[ 0 ], len * SizeOf( SpinD[ 0 ] ) );
         end;
@@ -590,7 +590,7 @@ begin
           Frame := Params.Frame[ 0 ] + Round( ( Params.Frame[ 1 ] - Params.Frame[ 0 ] ) * iLife );
 
           // Color
-          if length( Params.Color ) > 0 Then
+          if Length( Params.Color ) > 0 Then
             begin
               while iLife > Params.Color[ lColorID ].Life do INC( lColorID );
               prevL := @Params.Color[ lColorID - 1 ];
@@ -654,8 +654,8 @@ end;
 
 function emitter2d_Add : zglPEmitter2D;
 begin
-  if managerEmitter2D.Count + 1 > length( managerEmitter2D.List ) Then
-    SetLength( managerEmitter2D.List, length( managerEmitter2D.List ) + 128 );
+  if managerEmitter2D.Count + 1 > Length( managerEmitter2D.List ) Then
+    SetLength( managerEmitter2D.List, Length( managerEmitter2D.List ) + 128 );
 
   zgl_GetMem( Pointer( Result ), SizeOf( zglTEmitter2D ) );
   managerEmitter2D.List[ managerEmitter2D.Count ] := Result;
@@ -873,17 +873,17 @@ begin
         begin
           // ZEF_CHUNK_TEXTURE
           chunk := ZEF_CHUNK_TEXTURE;
-          size  := length( texFile ) + length( Texture.FramesCoord ) * SizeOf( zglTTextureCoord );
+          size  := Length( texFile ) + Length( Texture.FramesCoord ) * SizeOf( zglTTextureCoord );
           if size > 0 Then
             begin
               file_Write( f, chunk, 2 );
               file_Write( f, size, 4 );
 
-              size := length( texFile );
+              size := Length( texFile );
               file_Write( f, size, 4 );
               file_Write( f, texFile[ 1 ], size );
 
-              size := length( Texture.FramesCoord ) * SizeOf( zglTTextureCoord );
+              size := Length( Texture.FramesCoord ) * SizeOf( zglTTextureCoord );
               file_Write( f, size, 4 );
               file_Write( f, Texture.FramesCoord[ 0 ], size );
             end;
@@ -923,21 +923,21 @@ begin
 
           // ZEF_CHUNK_COLOR
           chunk := ZEF_CHUNK_COLOR;
-          size  := 4 + length( Color ) * SizeOf( TDiagramLW ) + 4 + length( Alpha ) * SizeOf( TDiagramByte );
+          size  := 4 + Length( Color ) * SizeOf( TDiagramLW ) + 4 + Length( Alpha ) * SizeOf( TDiagramByte );
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
-          c := length( Color );
+          c := Length( Color );
           file_Write( f, c, 4 );
           file_Write( f, Color[ 0 ], SizeOf( TDiagramLW ) * c );
 
-          c := length( Alpha );
+          c := Length( Alpha );
           file_Write( f, c, 4 );
           file_Write( f, Alpha[ 0 ], SizeOf( TDiagramByte ) * c );
 
           // ZEF_CHUNK_SIZEXY
           chunk := ZEF_CHUNK_SIZEXY;
-          size  := 1 + 4 + 4 + 4 + 4 + ( 4 + length( SizeXD ) * SizeOf( TDiagramSingle ) + 4 + length( SizeYD ) * SizeOf( TDiagramSingle ) );
+          size  := 1 + 4 + 4 + 4 + 4 + ( 4 + Length( SizeXD ) * SizeOf( TDiagramSingle ) + 4 + Length( SizeYD ) * SizeOf( TDiagramSingle ) );
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
@@ -947,11 +947,11 @@ begin
           file_Write( f, SizeXV, 4 );
           file_Write( f, SizeYV, 4 );
 
-          c := length( SizeXD );
+          c := Length( SizeXD );
           file_Write( f, c, 4 );
           file_Write( f, SizeXD[ 0 ], SizeOf( TDiagramSingle ) * c );
 
-          c := length( SizeYD );
+          c := Length( SizeYD );
           file_Write( f, c, 4 );
           file_Write( f, SizeYD[ 0 ], SizeOf( TDiagramSingle ) * c );
 
@@ -966,40 +966,40 @@ begin
 
           // ZEF_CHUNK_VELOCITY
           chunk := ZEF_CHUNK_VELOCITY;
-          size  := 4 + 4 + ( 4 + length( VelocityD ) * SizeOf( TDiagramSingle ) );
+          size  := 4 + 4 + ( 4 + Length( VelocityD ) * SizeOf( TDiagramSingle ) );
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
           file_Write( f, VelocityS, 4 );
           file_Write( f, VelocityV, 4 );
 
-          c := length( VelocityD );
+          c := Length( VelocityD );
           file_Write( f, c, 4 );
           file_Write( f, VelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
 
           // ZEF_CHUNK_AVELOCITY
           chunk := ZEF_CHUNK_AVELOCITY;
-          size  := 4 + 4 + ( 4 + length( aVelocityD ) * SizeOf( TDiagramSingle ) );
+          size  := 4 + 4 + ( 4 + Length( aVelocityD ) * SizeOf( TDiagramSingle ) );
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
           file_Write( f, aVelocityS, 4 );
           file_Write( f, aVelocityV, 4 );
 
-          c := length( aVelocityD );
+          c := Length( aVelocityD );
           file_Write( f, c, 4 );
           file_Write( f, aVelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
 
           // ZEF_CHUNK_SPIN
           chunk := ZEF_CHUNK_SPIN;
-          size  := 4 + 4 + ( 4 + length( SpinD ) * SizeOf( TDiagramSingle ) );
+          size  := 4 + 4 + ( 4 + Length( SpinD ) * SizeOf( TDiagramSingle ) );
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
           file_Write( f, SpinS, 4 );
           file_Write( f, SpinV, 4 );
 
-          c := length( SpinD );
+          c := Length( SpinD );
           file_Write( f, c, 4 );
           file_Write( f, SpinD[ 0 ], SizeOf( TDiagramSingle ) * c );
         end;
@@ -1072,7 +1072,7 @@ begin
           glBegin( GL_QUADS );
         end;
 
-      if length( ParParams.Color ) = 0 Then
+      if Length( ParParams.Color ) = 0 Then
         begin
           fx2d_SetColor( $FFFFFF );
           for i := 0 to Particles - 1 do
@@ -1305,7 +1305,7 @@ begin
           p.LifeTime   := ParParams.LifeTimeS + Random( ParParams.LifeTimeV ) - Round( ParParams.LifeTimeV / 2 );
           p.Time       := 0;
           p.Frame      := ParParams.Frame[ 0 ];
-          if length( ParParams.Color ) > 0 Then
+          if Length( ParParams.Color ) > 0 Then
             p.Color    := ParParams.Color[ 0 ].Value
           else
             p.Color    := $FFFFFF;

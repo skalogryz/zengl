@@ -251,8 +251,8 @@ procedure tessVertex2f( Vertex : zglPPoint2D ); stdcall;
 begin
   if not Assigned( Vertex ) Then exit;
 
-  if tessVCount + 3 > length( tessVerts ) Then
-    SetLength( tessVerts, length( tessVerts ) + 65536 );
+  if tessVCount + 3 > Length( tessVerts ) Then
+    SetLength( tessVerts, Length( tessVerts ) + 65536 );
 
   tessVertex[ tessCurrent ] := Vertex^;
   INC( tessCurrent );

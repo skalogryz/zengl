@@ -107,12 +107,12 @@ begin
   lineFeed       := FALSE;
   x              := Round( Rect.X ) + 1;
   y              := Round( Rect.Y ) + 1 - Round( Font.MaxHeight * textScale );
-  while i <= length( Text ) do
+  while i <= Length( Text ) do
     begin
       lc   := c;
       j    := i;
       c    := utf8_GetID( Text, i, @i );
-      imax := Integer( i > length( Text ) );
+      imax := Integer( i > Length( Text ) );
 
       if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then
         begin
@@ -160,7 +160,7 @@ begin
               DEC( textWordsCount );
             end;
           if textWordsCount > High( textWords ) Then
-            SetLength( textWords, length( textWords ) + 1024 );
+            SetLength( textWords, Length( textWords ) + 1024 );
         end;
 
       if lineFeed or lineEnd Then
@@ -277,7 +277,7 @@ begin
             glBegin( mode );
           end;
     end;
-  while i <= length( Text ) do
+  while i <= Length( Text ) do
     begin
       if Text[ i ] = #10 Then
         begin
@@ -460,7 +460,7 @@ begin
   Result  := 0;
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   i  := 1;
-  while i <= length( Text ) do
+  while i <= Length( Text ) do
     begin
       c := utf8_GetID( Text, i, @i );
       if c = 10 Then

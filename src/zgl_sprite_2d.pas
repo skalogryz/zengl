@@ -487,7 +487,7 @@ begin
           if not sprite2d_InScreen( mX, mY, mW + abs( X - mX ) + abs( mW - W ), mH + abs( Y - mY ) + abs( mH - H ), Angle ) Then Exit;
         end;
 
-  fc := length( Texture.FramesCoord ) - 1;
+  fc := Length( Texture.FramesCoord ) - 1;
   if Frame > fc Then
     DEC( Frame, ( ( Frame - 1 ) div fc ) * fc )
   else

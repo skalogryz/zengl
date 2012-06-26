@@ -82,7 +82,7 @@ begin
   {$ENDIF}
   // crazy code :)
   es := '';
-  for i := 0 to length( cs_ZenGL + ' (' + cs_Date + ')' ) + 7 do
+  for i := 0 to Length( cs_ZenGL + ' (' + cs_Date + ')' ) + 7 do
     es := es + '=';
   log_Add( es, FALSE );
   log_Add( '=== ' + cs_ZenGL + ' (' + cs_Date + ') ===', FALSE );
@@ -115,7 +115,7 @@ begin
     str := Message + #13#10;
 
   {$IFNDEF ANDROID}
-  file_Write( log, str[ 1 ], length( str ) );
+  file_Write( log, str[ 1 ], Length( str ) );
   {$ELSE}
   __android_log_write( 3, 'ZenGL', PAnsiChar( log_Timing + Message ) );
   {$ENDIF}

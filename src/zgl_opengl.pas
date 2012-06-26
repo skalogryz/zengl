@@ -138,7 +138,7 @@ begin
 
   oglzDepth := 24;
   repeat
-    FillChar( oglAttr[ 0 ], length( oglAttr ) * 4, None );
+    FillChar( oglAttr[ 0 ], Length( oglAttr ) * 4, None );
     oglAttr[ 0  ] := GLX_RGBA;
     oglAttr[ 1  ] := GL_TRUE;
     oglAttr[ 2  ] := GLX_RED_SIZE;
@@ -238,7 +238,7 @@ begin
       oglzDepth := 24;
 
       repeat
-        FillChar( ogliAttr[ 0 ], length( ogliAttr ) * 4, 0 );
+        FillChar( ogliAttr[ 0 ], Length( ogliAttr ) * 4, 0 );
         ogliAttr[ 0  ] := WGL_ACCELERATION_ARB;
         ogliAttr[ 1  ] := WGL_FULL_ACCELERATION_ARB;
         ogliAttr[ 2  ] := WGL_DRAW_TO_WINDOW_ARB;
@@ -314,7 +314,7 @@ begin
 
   oglzDepth := 24;
   repeat
-    FillChar( oglAttr[ 0 ], length( oglAttr ) * 4, AGL_NONE );
+    FillChar( oglAttr[ 0 ], Length( oglAttr ) * 4, AGL_NONE );
     oglAttr[ 0  ] := AGL_RGBA;
     oglAttr[ 1  ] := AGL_RED_SIZE;
     oglAttr[ 2  ] := 8;

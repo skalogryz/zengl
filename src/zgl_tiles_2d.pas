@@ -187,7 +187,7 @@ begin
   for i := aI to bI do
     for j := aJ to bJ do
       begin
-        if ( Tiles.Tiles[ i, j ] < 1 ) or ( Tiles.Tiles[ i, j ] >= length( Texture.FramesCoord ) ) Then continue;
+        if ( Tiles.Tiles[ i, j ] < 1 ) or ( Tiles.Tiles[ i, j ] >= Length( Texture.FramesCoord ) ) Then continue;
         tc := @Texture.FramesCoord[ Tiles.Tiles[ i, j ] ];
 
         glTexCoord2fv( @tc[ tci[ 0 ] ] );

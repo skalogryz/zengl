@@ -305,7 +305,7 @@ begin
         begin
           sndAutoPaused := FALSE;
           {$IFDEF USE_OPENAL}
-          for i := 0 to length( oalSources ) - 1 do
+          for i := 0 to Length( oalSources ) - 1 do
             if oalSrcState[ i ] = AL_PLAYING Then
               alSourcePlay( oalSources[ i ] );
           {$ELSE}
@@ -323,7 +323,7 @@ begin
           begin
             sndAutoPaused := TRUE;
             {$IFDEF USE_OPENAL}
-            for i := 0 to length( oalSources ) - 1 do
+            for i := 0 to Length( oalSources ) - 1 do
               begin
                 alGetSourcei( oalSources[ i ], AL_SOURCE_STATE, z );
                 if z = AL_PLAYING Then
@@ -447,7 +447,7 @@ begin
   SetLength( oalSrcPtrs, i );
   SetLength( oalSrcState, i );
 
-  log_Add( 'OpenAL: generated ' + u_IntToStr( length( oalSources ) ) + ' source' );
+  log_Add( 'OpenAL: generated ' + u_IntToStr( Length( oalSources ) ) + ' source' );
 {$ELSE}
   log_Add( 'DirectSound: loading DSound.dll' );
   if not InitDSound() Then
@@ -511,7 +511,7 @@ begin
       alDeleteSources( 1, @sfSource[ i ] );
       alDeleteBuffers( 2, @sfBuffers[ i ] );
     end;
-  alDeleteSources( length( oalSources ), @oalSources[ 0 ] );
+  alDeleteSources( Length( oalSources ), @oalSources[ 0 ] );
   SetLength( oalSources, 0 );
   SetLength( oalSrcPtrs, 0 );
   SetLength( oalSrcState, 0 );

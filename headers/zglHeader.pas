@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3 RC               }
-{ date:     2012.06.25           }
+{ date:     2012.06.26           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -1353,6 +1353,7 @@ function u_StrDown( const Str : UTF8String ) : UTF8String;
 
 function utf8_Copy( const Str : UTF8String ) : UTF8String; overload;
 function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UTF8String; overload;
+procedure utf8_Delete( var Str : UTF8String; FromPosition, Count : Integer );
 var
   utf8_Length    : function( const Str : UTF8String ) : Integer;
   utf8_GetShift  : procedure( const Str : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
@@ -1533,15 +1534,40 @@ function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UT
 begin
   len := utf8_Length( Str );
   if FromPosition < 1 Then FromPosition := 1;
-  if FromPosition > len Then exit;
+  if ( FromPosition > len ) or ( Count < 1 ) Then exit;
   if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
 
   i := 1;
   utf8_GetShift( Str, i, i, FromPosition - 1 );
-  j := i;
-  utf8_GetShift( Str, j, j, Count );
+  utf8_GetShift( Str, i, j, Count );
   SetLength( Result, j - i );
   System.Move( Str[ i ], Result[ 1 ], j - i );
+end;
+
+procedure utf8_Delete( var Str : UTF8String; FromPosition, Count : Integer );
+  var
+    i, j, len : Integer;
+    Result    : UTF8String;
+begin
+  len := utf8_Length( Str );
+  if FromPosition < 1 Then FromPosition := 1;
+  if ( FromPosition > len ) or ( Count < 1 ) Then exit;
+  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+  if ( FromPosition = 1 ) and ( Count = len ) Then
+    begin
+      Str := '';
+      exit;
+    end;
+
+  len := Length( Str );
+  i := 1;
+  utf8_GetShift( Str, i, i, FromPosition - 1 );
+  utf8_GetShift( Str, i, j, Count );
+  SetLength( Result, len - j + i );
+  System.Move( Str[ 1 ], Result[ 1 ], i - 1 );
+  if j < len Then
+    System.Move( Str[ j ], Result[ i ], len - ( j - 1 ) );
+  Str := Result;
 end;
 
 {$IFDEF WINCE}

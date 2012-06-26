@@ -865,7 +865,7 @@ procedure glVertex2f(x, y: GLfloat);
   var
     vertex : zglGLESPVertex;
 begin
-  if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
+  if ( not RenderTextured ) and ( bSize = Length( bVertices ) ) Then
     SetLength( bVertices, bSize + 1024 );
 
   vertex       := @bVertices[ bSize ];
@@ -879,7 +879,7 @@ begin
       INC( newTriangle );
       if newTriangle = 3 Then
         begin
-          if bSize = length( bVertices ) Then
+          if bSize = Length( bVertices ) Then
             SetLength( bVertices, bSize + 1024 );
           bVertices[ bSize ] := bVertices[ bSize - 1 ];
 
@@ -887,7 +887,7 @@ begin
         end else
           if newTriangle = 4 Then
             begin
-              if bSize = length( bVertices ) Then
+              if bSize = Length( bVertices ) Then
                 SetLength( bVertices, bSize + 1024 );
               bVertices[ bSize ] := bVertices[ bSize - 5 ];
 
@@ -901,7 +901,7 @@ procedure glVertex2fv(v: PGLfloat);
   var
     vertex : zglGLESPVertex;
 begin
-  if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
+  if ( not RenderTextured ) and ( bSize = Length( bVertices ) ) Then
     SetLength( bVertices, bSize + 1024 );
 
   vertex       := @bVertices[ bSize ];
@@ -915,7 +915,7 @@ begin
       INC( newTriangle );
       if newTriangle = 3 Then
         begin
-          if bSize = length( bVertices ) Then
+          if bSize = Length( bVertices ) Then
             SetLength( bVertices, bSize + 1024 );
           bVertices[ bSize ] := bVertices[ bSize - 1 ];
 
@@ -923,7 +923,7 @@ begin
         end else
           if newTriangle = 4 Then
             begin
-              if bSize = length( bVertices ) Then
+              if bSize = Length( bVertices ) Then
                 SetLength( bVertices, bSize + 1024 );
               bVertices[ bSize ] := bVertices[ bSize - 5 ];
 
@@ -937,7 +937,7 @@ procedure glVertex3f(x, y, z: GLfloat);
   var
     vertex : zglGLESPVertex;
 begin
-  if ( not RenderTextured ) and ( bSize = length( bVertices ) ) Then
+  if ( not RenderTextured ) and ( bSize = Length( bVertices ) ) Then
     SetLength( bVertices, bSize + 1024 );
 
   vertex       := @bVertices[ bSize ];
@@ -951,7 +951,7 @@ begin
       INC( newTriangle );
       if newTriangle = 3 Then
         begin
-          if bSize = length( bVertices ) Then
+          if bSize = Length( bVertices ) Then
             SetLength( bVertices, bSize + 1024 );
           bVertices[ bSize ] := bVertices[ bSize - 1 ];
 
@@ -959,7 +959,7 @@ begin
         end else
           if newTriangle = 4 Then
             begin
-              if bSize = length( bVertices ) Then
+              if bSize = Length( bVertices ) Then
                 SetLength( bVertices, bSize + 1024 );
               bVertices[ bSize ] := bVertices[ bSize - 5 ];
 
@@ -977,7 +977,7 @@ procedure glTexCoord2f(s, t: GLfloat);
 begin
   RenderTextured := TRUE;
 
-  if bSize = length( bVertices ) Then
+  if bSize = Length( bVertices ) Then
     SetLength( bVertices, bSize + 1024 );
   bVertices[ bSize ].U := s;
   bVertices[ bSize ].V := t;
@@ -987,7 +987,7 @@ procedure glTexCoord2fv(v: PGLfloat);
 begin
   RenderTextured := TRUE;
 
-  if bSize = length( bVertices ) Then
+  if bSize = Length( bVertices ) Then
     SetLength( bVertices, bSize + 1024 );
   bVertices[ bSize ].U := zglPPoint2D( v ).X;
   bVertices[ bSize ].V := zglPPoint2D( v ).Y;

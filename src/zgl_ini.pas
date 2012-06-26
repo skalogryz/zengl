@@ -85,14 +85,14 @@ function delSpaces( const str : UTF8String ) : UTF8String;
     i, b, e : Integer;
 begin
   b := 1;
-  e := length( str );
-  for i := 1 to length( str ) do
+  e := Length( str );
+  for i := 1 to Length( str ) do
     if str[ i ] = ' ' Then
       INC( b )
     else
       break;
 
-  for i := length( str ) downto 1 do
+  for i := Length( str ) downto 1 do
     if str[ i ] = ' ' Then
       DEC( e )
     else
@@ -107,7 +107,7 @@ procedure addData( const str : UTF8String );
 begin
   if str = '' Then exit;
   if str[ 1 ] = ';' Then exit;
-  len := length( str );
+  len := Length( str );
 
   if ( str[ 1 ] = '[' ) and ( str[ len ] = ']' ) Then
     begin
@@ -265,13 +265,13 @@ begin
   for i := 0 to iniRec.Sections - 1 do
     begin
       s := '[ ' + iniRec.Section[ i ].Name + ' ]' + #13#10;
-      file_Write( f, s[ 1 ], length( s ) );
+      file_Write( f, s[ 1 ], Length( s ) );
       for j := 0 to iniRec.Section[ i ].Keys - 1 do
         begin
           s := iniRec.Section[ i ].Key[ j ].Name + ' = ';
-          file_Write( f, s[ 1 ], length( s ) );
+          file_Write( f, s[ 1 ], Length( s ) );
           s := iniRec.Section[ i ].Key[ j ].Value + #13#10;
-          file_Write( f, s[ 1 ], length( s ) );
+          file_Write( f, s[ 1 ], Length( s ) );
         end;
       if i = iniRec.Sections - 1 Then break;
         begin

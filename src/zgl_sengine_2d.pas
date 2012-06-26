@@ -84,8 +84,8 @@ function sengine2d_AddCustom( Texture : zglPTexture; Size : LongWord; Layer : In
   var
     new : zglPSprite2D;
 begin
-  if sengine2d.Count + 1 > length( sengine2d.List ) Then
-    SetLength( sengine2d.List, length( sengine2d.List ) + 1024 );
+  if sengine2d.Count + 1 > Length( sengine2d.List ) Then
+    SetLength( sengine2d.List, Length( sengine2d.List ) + 1024 );
 
   zgl_GetMem( Pointer( new ), Size );
   sengine2d.List[ sengine2d.Count ] := new;
