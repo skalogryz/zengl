@@ -996,7 +996,7 @@ var
   pengine2d_Get            : function : zglPPEngine2D;
   pengine2d_Draw           : procedure;
   pengine2d_Proc           : procedure( dt : Double );
-  pengine2d_AddEmitter     : function( Emitter : zglPEmitter2D; Result : zglPPEmitter2D = nil; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
+  pengine2d_AddEmitter     : procedure( Emitter : zglPEmitter2D; Result : zglPPEmitter2D = nil; X : Single = 0; Y : Single = 0 );
   pengine2d_DelEmitter     : procedure( ID : Integer );
   pengine2d_ClearAll       : procedure;
   emitter2d_Add            : function : zglPEmitter2D;

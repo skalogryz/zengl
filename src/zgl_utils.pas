@@ -342,16 +342,16 @@ begin
 b:
   INC( i );
   p := Pos( D, Result );
-  while Result[ p ] = d do utf8_Delete( Result, p, 1 );
+  while Result[ p ] = d do Delete( Result, p, 1 );
 
   p := Pos( D, Result );
   if N > i Then
     begin
-      utf8_Delete( Result, 1, p - 1 );
+      Delete( Result, 1, p - 1 );
       goto b;
     end;
 
-  utf8_Delete( Result, p, Length( Result ) - p + 1 );
+  Delete( Result, p, length( Result ) - p + 1 );
 end;
 
 procedure utf8_GetShift( const Text : UTF8String; Pos : Integer; out NewPos : Integer; Chars : Integer = 1 );
