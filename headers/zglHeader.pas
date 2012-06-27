@@ -1534,7 +1534,11 @@ function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UT
 begin
   len := utf8_Length( Str );
   if FromPosition < 1 Then FromPosition := 1;
-  if ( FromPosition > len ) or ( Count < 1 ) Then exit;
+  if ( FromPosition > len ) or ( Count < 1 ) Then
+    begin
+      Result := '';
+      exit;
+    end;
   if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
 
   i := 1;
