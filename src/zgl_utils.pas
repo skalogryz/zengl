@@ -237,7 +237,7 @@ begin
   utf8_GetShift( Str, i, j, Count );
   SetLength( Result, len - j + i );
   System.Move( Str[ 1 ], Result[ 1 ], i - 1 );
-  if j < len Then
+  if j <= len Then
     System.Move( Str[ j ], Result[ i ], len - ( j - 1 ) );
   Str := Result;
 end;
