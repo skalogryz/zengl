@@ -174,7 +174,7 @@ begin
       Form2.ProgressBar1.Position := i;
       Form2.ProgressBar1.Update();
 
-      c := u_GetUTF8ID( EditChars.Text, i, @j );
+      c := utf8_GetID( EditChars.Text, i, @j );
       if not fg_CharsUse[ c ] Then
         begin
           fg_CharsUse[ c ] := TRUE;
