@@ -313,6 +313,7 @@ begin
     end else
       i := 0;
 
+  granulePos := 0;
   while i < 100 do
     begin
 		  ogg_sync_reset( @TheoraData.SyncState );

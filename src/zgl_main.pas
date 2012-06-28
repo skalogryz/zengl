@@ -588,6 +588,8 @@ end;
 
 function zgl_Get( What : LongWord ) : Ptr;
 begin
+  Result := 0;
+
   if ( not appGotSysDirs ) and ( ( What = DIRECTORY_APPLICATION ) or ( What = DIRECTORY_HOME ) ) Then
     zgl_GetSysDir();
 
@@ -667,8 +669,6 @@ begin
     {$IFDEF USE_PARTICLES}
     MANAGER_EMITTER2D: Result := Ptr( @managerEmitter2D );
     {$ENDIF}
-  else
-    Result := 0;
   end;
 end;
 

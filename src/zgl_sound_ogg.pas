@@ -245,14 +245,12 @@ begin
         INC( Size, bytesRead );
       until _End;
       FreeMem( Buffer );
-      _vi := nil;
       ov_clear( _vf );
 
       if ov_open_callbacks( nil, _vf, Pointer( @PByteArray( Memory.Memory )[ Memory.Position ] ), Memory.Size - Memory.Position, _vc ) >= 0 Then
         begin
           GetMem( Data, Size );
           decoderRead( _vf, Data, Size, _end );
-          _vi := nil;
           ov_clear( _vf );
         end;
     end;

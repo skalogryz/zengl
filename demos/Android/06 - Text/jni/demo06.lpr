@@ -25,8 +25,8 @@ var
   fntMain : zglPFont;
 
 procedure Init;
-  var
-    i : Integer;
+  //var
+  //  i : Integer;
 begin
   zgl_Enable( CORRECT_RESOLUTION );
   scr_CorrectResolution( 800, 600 );
@@ -46,7 +46,6 @@ end;
 
 procedure Draw;
   var
-    i : Integer;
     r : zglTRect;
     s : UTF8String;
 begin

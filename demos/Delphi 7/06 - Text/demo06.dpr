@@ -30,8 +30,8 @@ var
   fntMain : zglPFont;
 
 procedure Init;
-  var
-    i : Integer;
+  //var
+  //  i : Integer;
 begin
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
@@ -44,7 +44,6 @@ end;
 
 procedure Draw;
   var
-    i : Integer;
     r : zglTRect;
     s : UTF8String;
 begin
