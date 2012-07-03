@@ -263,7 +263,7 @@ procedure key_BeginReadText( const Text : UTF8String; MaxSymbols : Integer = -1 
 begin
 {$IFDEF iOS}
   if Assigned( keysTextField ) and ( keysText <> Text ) Then
-    keysTextField.setText( u_GetNSString( Text ) );
+    keysTextField.setText( utf8_GetNSString( Text ) );
 {$ENDIF}
 
   keysText    := utf8_Copy( Text );
@@ -286,7 +286,7 @@ begin
           setSecureTextEntry( FALSE );
           addTarget_action_forControlEvents( appDelegate, objcselector( 'textFieldEditingChanged' ), UIControlEventEditingChanged );
         end;
-      keysTextField.setText( u_GetNSString( Text ) );
+      keysTextField.setText( utf8_GetNSString( Text ) );
       wndHandle.addSubview( keysTextField );
     end;
 
@@ -309,7 +309,7 @@ begin
     begin
       {$IFDEF iOS}
       if Assigned( keysTextField ) and ( keysText <> Text ) Then
-        keysTextField.setText( u_GetNSString( Text ) );
+        keysTextField.setText( utf8_GetNSString( Text ) );
       {$ENDIF}
 
       keysText := utf8_Copy( Text );

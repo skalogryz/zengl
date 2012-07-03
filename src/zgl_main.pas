@@ -252,7 +252,7 @@ begin
     begin
       appPoolInitialized := TRUE;
       app_InitPool();
-      ExitCode := UIApplicationMain( argc, argv, nil, u_GetNSString( 'zglCAppDelegate' ) );
+      ExitCode := UIApplicationMain( argc, argv, nil, utf8_GetNSString( 'zglCAppDelegate' ) );
       app_FreePool();
       exit;
     end;

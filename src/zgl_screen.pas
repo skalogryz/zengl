@@ -328,7 +328,7 @@ begin
 
   app_InitPool();
 
-  orientations := NSBundle.mainBundle.infoDictionary.objectForKey( u_GetNSString( 'UISupportedInterfaceOrientations' ) );
+  orientations := NSBundle.mainBundle.infoDictionary.objectForKey( utf8_GetNSString( 'UISupportedInterfaceOrientations' ) );
   for i := 0 to orientations.count() - 1 do
     begin
       CFStringGetCString( CFStringRef( orientations.objectAtIndex( i ) ), @tmp[ 0 ], 255, kCFStringEncodingUTF8 );

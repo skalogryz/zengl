@@ -323,9 +323,9 @@ begin
   eglSurface.setOpaque( TRUE );
   eglSurface.setDrawableProperties( NSDictionary.dictionaryWithObjectsAndKeys(
                                     NSNumber.numberWithBool( FALSE ),
-                                    u_GetNSString( 'kEAGLDrawablePropertyRetainedBacking' ),
-                                    u_GetNSString( 'kEAGLColorFormatRGBA8' ),
-                                    u_GetNSString( 'kEAGLDrawablePropertyColorFormat' ),
+                                    utf8_GetNSString( 'kEAGLDrawablePropertyRetainedBacking' ),
+                                    utf8_GetNSString( 'kEAGLColorFormatRGBA8' ),
+                                    utf8_GetNSString( 'kEAGLDrawablePropertyColorFormat' ),
                                     nil ) );
   wndViewCtrl.setView( eglView );
   wndHandle.addSubview( eglView );

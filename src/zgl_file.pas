@@ -255,7 +255,7 @@ begin
   dir := fpS_ISDIR( status.st_mode );
 {$ENDIF}
 {$IFDEF iOS}
-  iosFileManager.fileExistsAtPath_isDirectory( u_GetNSString( platform_GetRes( filePath + Name ) ), @dir );
+  iosFileManager.fileExistsAtPath_isDirectory( utf8_GetNSString( platform_GetRes( filePath + Name ) ), @dir );
 {$ENDIF}
 
   if dir Then
@@ -286,7 +286,7 @@ begin
       Result := FpRmdir( platform_GetRes( filePath + Name ) ) = 0;
       {$ENDIF}
       {$IFDEF iOS}
-      Result := iosFileManager.removeItemAtPath_error( u_GetNSString( platform_GetRes( filePath + Name ) ), error );
+      Result := iosFileManager.removeItemAtPath_error( utf8_GetNSString( platform_GetRes( filePath + Name ) ), error );
       {$ENDIF}
     end else
       {$IFDEF LINUX}
@@ -307,7 +307,7 @@ begin
       Result := FpUnlink( platform_GetRes( filePath + Name ) ) = 0;
       {$ENDIF}
       {$IFDEF iOS}
-      Result := iosFileManager.removeItemAtPath_error( u_GetNSString( platform_GetRes( filePath + Name ) ), error );
+      Result := iosFileManager.removeItemAtPath_error( utf8_GetNSString( platform_GetRes( filePath + Name ) ), error );
       {$ENDIF}
 end;
 
@@ -345,7 +345,7 @@ begin
   Result := FpStat( platform_GetRes( filePath + Name ), status ) = 0;
 {$ENDIF}
 {$IFDEF iOS}
-  Result := iosFileManager.fileExistsAtPath( u_GetNSString( platform_GetRes( filePath + Name ) ) );
+  Result := iosFileManager.fileExistsAtPath( utf8_GetNSString( platform_GetRes( filePath + Name ) ) );
 {$ENDIF}
 end;
 
@@ -622,7 +622,7 @@ begin
   FindClose( First );
 {$ENDIF}
 {$IFDEF iOS}
-  path       := u_GetNSString( platform_GetRes( filePath + Directory ) );
+  path       := utf8_GetNSString( platform_GetRes( filePath + Directory ) );
   dirContent := iosFileManager.contentsOfDirectoryAtPath_error( path, error );
   iosFileManager.changeCurrentDirectoryPath( path );
   for i := 0 to dirContent.count() - 1 do
