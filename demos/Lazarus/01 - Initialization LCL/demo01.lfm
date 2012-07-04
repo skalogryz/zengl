@@ -6,6 +6,7 @@ object Form1: TForm1
   Caption = '01 - Initialization LCL'
   ClientHeight = 600
   ClientWidth = 800
+  KeyPreview = True
   OnActivate = FormActivate
   OnClose = FormClose
   Position = poScreenCenter
