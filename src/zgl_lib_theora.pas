@@ -22,10 +22,6 @@ unit zgl_lib_theora;
 
 {$I zgl_config.cfg}
 
-{$IFDEF USE_THEORA_STATIC}
-  {$LINKLIB libtheoradec.a}
-{$ENDIF}
-
 interface
 uses
   {$IFDEF WINDOWS}
@@ -41,7 +37,11 @@ uses
 {$IFNDEF USE_THEORA_STATIC}
 const
 {$IFDEF LINUX}
+  {$IFNDEF ANDROID}
   libtheoradec  = 'libtheoradec.so.1';
+  {$ELSE}
+  libtheoradec  = 'libtheoradec.so';
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF WINDOWS}
   libtheoradec  = 'libtheoradec-1.dll';

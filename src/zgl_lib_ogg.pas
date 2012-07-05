@@ -75,9 +75,15 @@ uses
 
 const
 {$IFDEF LINUX}
+  {$IFNDEF ANDROID}
   libogg        = 'libogg.so.0';
   libvorbis     = 'libvorbis.so.0';
   libvorbisfile = 'libvorbisfile.so.3';
+  {$ELSE}
+  libogg        = 'libogg.so';
+  libvorbis     = 'libvorbis.so';
+  libvorbisfile = 'libvorbis.so';
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF WINDOWS}
   libogg        = 'libogg-0.dll';
