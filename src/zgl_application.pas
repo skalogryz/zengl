@@ -171,6 +171,7 @@ var
   appFinish       : JMethodID;
   appShowKeyboard : JMethodID;
   appHideKeyboard : JMethodID;
+  appIsLibrary    : Byte public name 'TC_SYSTEM_ISLIBRARY';
   {$ENDIF}
   appShowCursor : Boolean;
 
