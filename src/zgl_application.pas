@@ -171,7 +171,7 @@ var
   appFinish       : JMethodID;
   appShowKeyboard : JMethodID;
   appHideKeyboard : JMethodID;
-  appIsLibrary    : Byte public name 'TC_SYSTEM_ISLIBRARY';
+  //appIsLibrary    : Byte public name 'TC_SYSTEM_ISLIBRARY'; // workaround for the latest revisions of FreePascal 2.6.x
   {$ENDIF}
   appShowCursor : Boolean;
 
