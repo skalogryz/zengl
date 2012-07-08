@@ -1682,7 +1682,9 @@ begin
         appPause := TRUE;
         if appWork and Assigned( app_PActivate ) Then
           app_PActivate( FALSE );
+        {$IFDEF USE_SOUND}
         snd_MainLoop();
+        {$ENDIF}
       end;
 end;
 

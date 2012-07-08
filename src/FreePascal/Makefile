@@ -31,8 +31,8 @@ WINCE_FLAGS      = -CpARMv4 -CfSOFT
 BINUTILS_WINCE 	 = -XParm-wince-cegcc-
 LIBS_WINCE     	 = -Fu../../lib/jpeg/arm-wince -Fu../../lib/ogg/arm-wince -Fu../../lib/theora/arm-wince -Fu../../lib/zlib/arm-wince -Fu../../lib/zip/arm-wince
 # Android
-ANDROID_FLAGS    = -CpARMv5 -CfSOFT
-ANDROID_LIB    	 = -Fu$(ANDROID_NDK)/platforms/android-3/arch-arm/usr/lib
+ANDROID_FLAGS    = -CpARMv6 -CfVFPv2
+ANDROID_LIB      = -Fu$(ANDROID_NDK)/platforms/android-3/arch-arm/usr/lib
 ANDROID_STRIP    = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-strip
 BINUTILS_ANDROID = -XParm-linux-androideabi- -FD$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
 LIBS_ANDROID   	 = -Fu../../lib/jpeg/arm-linux -Fu../../lib/ogg/arm-linux -Fu../../lib/theora/arm-linux -Fu../../lib/zlib/arm-linux -Fu../../lib/zip/arm-linux -Fu../../lib/chipmunk/arm-linux
