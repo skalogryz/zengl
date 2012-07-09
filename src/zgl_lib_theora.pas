@@ -23,9 +23,7 @@ unit zgl_lib_theora;
 {$I zgl_config.cfg}
 
 {$IFDEF USE_THEORA_STATIC}
-  {$IFDEF iOS}
-    {$LINKLIB libtheoradec.a}
-  {$ENDIF}
+  {$LINKLIB libtheoradec.a}
 {$ENDIF}
 
 interface
