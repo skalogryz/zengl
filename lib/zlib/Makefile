@@ -7,7 +7,7 @@ linux:
 	gcc zlib_helper.c -c -ox86_64-linux/zlib_helper.o -O2 -s -ffast-math -std=c99 -m64 -fPIC
 
 android:
-	$(ANDROID_GCC) zlib_helper.c -c -oarm-linux/zlib_helper.o -O2 -s -Xassembler "-meabi=5" -ffast-math -std=c99 -I$(ANDROID_NDK)/platforms/android-3/arch-arm/usr/include
+	$(ANDROID_GCC) zlib_helper.c -c -oarm-linux/zlib_helper.o -O2 -s -marm -march=armv5 -Xassembler "-meabi=5" -ffast-math -std=c99 -I$(ANDROID_NDK)/platforms/android-3/arch-arm/usr/include
 
 win32:
 	i486-mingw32-gcc zlib_helper.c -c -oi386-win32/zlib_helper.o -O2 -s -ffast-math -std=c99 -march=i686
