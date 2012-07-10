@@ -497,9 +497,6 @@ begin
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
 {$ENDIF}
-{$IFDEF ANDROID}
-  __android_log_write( 3, 'ZenGL', PAnsiChar( 'ERROR: ' + ErrStr ) );
-{$ENDIF}
 
   log_Add( 'ERROR: ' + ErrStr );
 end;
@@ -524,9 +521,6 @@ begin
 {$ENDIF}
 {$IFDEF MACOSX}
   StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
-{$ENDIF}
-{$IFDEF ANDROID}
-  __android_log_write( 3, 'ZenGL', PAnsiChar( 'WARNING: ' + ErrStr ) );
 {$ENDIF}
 
   log_Add( 'WARNING: ' + ErrStr );
