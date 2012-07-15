@@ -8,4 +8,5 @@ cp ../../../../bin/Android/armv6/libchipmunk.so ../libs/armeabi/
 # copy resources
 cp ../../../../bin/data/back02.png ../assets
 cp ../../../../bin/data/font* ../assets
+cp ../../../../bin/data/emitter_* ../assets
 cp ../../../../bin/data/particle.png ../assets

@@ -7,4 +7,5 @@ copy ..\..\..\..\bin\Android\armv6\libchipmunk.so ..\libs\armeabi\
 
 copy ..\..\..\..\bin\data\back02.png ..\assets
 copy ..\..\..\..\bin\data\font* ..\assets
+copy ..\..\..\..\bin\data\emitter_* ..\assets
 copy ..\..\..\..\bin\data\particle.png ..\assets

@@ -1,6 +1,7 @@
 # copy resources
 cp ../../../bin/data/back02.png ../../../bin/demo13.app/Contents/Resources/
 cp ../../../bin/data/font* ../../../bin/demo13.app/Contents/Resources/
+cp ../../../bin/data/emitter_* ../../../bin/demo13.app/Contents/Resources/
 cp ../../../bin/data/particle.png ../../../bin/demo13.app/Contents/Resources/
 # copy binary into bundle
 rm ../../../bin/demo13.app/Contents/MacOS/demo13
