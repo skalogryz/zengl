@@ -549,24 +549,6 @@ begin
   pengine2d.Count.Emitters := 0;
 end;
 
-function pengine2d_LoadTexture( const FileName : UTF8String ) : zglPTexture;
-  var
-    i    : Integer;
-    hash : LongWord;
-begin
-  Result := nil;
-  hash   := u_Hash( FileName );
-  for i := 0 to pengine2d.Count.Emitters - 1 do
-    if pengine2d.List[ i ]._private.texHash = hash Then
-      begin
-        Result := pengine2d.List[ i ].ParParams.Texture;
-        break;
-      end;
-
-  if not Assigned( Result ) Then
-    Result := tex_LoadFromFile( FileName );
-end;
-
 procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
   var
     coeff        : Single;
@@ -652,6 +634,24 @@ begin
     end;
 end;
 
+function emitter2d_LoadTexture( const FileName : UTF8String ) : zglPTexture;
+  var
+    i    : Integer;
+    hash : LongWord;
+begin
+  Result := nil;
+  hash   := u_Hash( FileName );
+  for i := 0 to managerEmitter2D.Count - 1 do
+    if managerEmitter2D.List[ i ]._private.texHash = hash Then
+      begin
+        Result := managerEmitter2D.List[ i ].ParParams.Texture;
+        break;
+      end;
+
+  if not Assigned( Result ) Then
+    Result := tex_LoadFromFile( FileName );
+end;
+
 function emitter2d_Add : zglPEmitter2D;
 begin
   if managerEmitter2D.Count + 1 > Length( managerEmitter2D.List ) Then
@@ -666,13 +666,24 @@ end;
 
 procedure emitter2d_Del( var Emitter : zglPEmitter2D );
   var
-    i : Integer;
+    i, j       : Integer;
+    delTexture : Boolean;
 begin
   if not Assigned( Emitter ) Then exit;
 
   for i := 0 to managerEmitter2D.Count - 1 do
     if managerEmitter2D.List[ i ] = Emitter Then
       begin
+        delTexture := TRUE;
+        for j := 0 to managerEmitter2D.Count - 1 do
+          if managerEmitter2D.List[ i ]._private.texHash = Emitter._private.texHash Then
+            begin
+              delTexture := FALSE;
+              break;
+            end;
+        if delTexture Then
+          tex_Del( Emitter.ParParams.Texture );
+
         DEC( managerEmitter2D.Count );
         emitter2d_Free( Emitter );
         managerEmitter2D.List[ i ] := managerEmitter2D.List[ managerEmitter2D.Count ];
@@ -707,9 +718,10 @@ begin
               mem_Read( emitter2dMem, size, 4 );
               SetLength( texFile, size );
               mem_Read( emitter2dMem, texFile[ 1 ], size );
+              texFile := file_GetDirectory( FileName ) + texFile;
               texHash := u_Hash( texFile );
               if FileName <> '' Then
-                ParParams.Texture := pengine2d_LoadTexture( file_GetDirectory( FileName ) + texFile );
+                ParParams.Texture := emitter2d_LoadTexture( texFile );
 
               mem_Read( emitter2dMem, size, 4 );
               if Assigned( ParParams.Texture ) Then
