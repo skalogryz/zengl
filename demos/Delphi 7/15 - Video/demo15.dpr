@@ -12,8 +12,6 @@ uses
   zgl_timers,
   zgl_keyboard,
   zgl_mouse,
-  zgl_render_2d,
-  zgl_fx,
   zgl_textures,
   zgl_textures_png,
   zgl_font,
@@ -22,8 +20,6 @@ uses
   zgl_sprite_2d,
   zgl_video,
   zgl_video_theora,
-  zgl_math_2d,
-  zgl_collision_2d,
   zgl_utils
   {$ELSE}
   zglHeader
