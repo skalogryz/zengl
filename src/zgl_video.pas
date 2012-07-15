@@ -245,7 +245,7 @@ begin
   frame        := Stream.Frame;
   Stream.Time  := Milliseconds;
   Stream.Frame := Trunc( Stream.Time / 1000  * Stream.Info.FrameRate );
-  if ( Stream.Frame <> frame ) Then
+  if Stream.Frame <> frame Then
     begin
       Stream._private.Decoder.Seek( Stream^, Milliseconds );
       video_Update( Stream, 0 );

@@ -1,15 +1,17 @@
-program demo15;
+library demo15;
 
 {$I zglCustomConfig.cfg}
 
 uses
-  {$IFDEF USE_ZENGL_STATIC}
+  zgl_application,
   zgl_main,
+  zgl_file,
+  zgl_memory,
   zgl_screen,
   zgl_window,
   zgl_timers,
   zgl_keyboard,
-  zgl_mouse,
+  zgl_touch,
   zgl_textures,
   zgl_textures_png,
   zgl_font,
@@ -19,24 +21,31 @@ uses
   zgl_video,
   zgl_video_theora,
   zgl_utils
-  {$ELSE}
-  zglHeader
-  {$ENDIF}
   ;
 
 var
-  dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  dirRes    : UTF8String = 'assets/';
   fntMain   : zglPFont;
   video     : zglPVideoStream;
+  videoFile : zglTMemory;
   videoSeek : Boolean;
 
 procedure Init;
 begin
+  zgl_Enable( CORRECT_RESOLUTION );
+  scr_CorrectResolution( 800, 600 );
+
+  file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+
+  mem_LoadFromFile( videoFile, dirRes + 'video.ogv' );
+
+  file_CloseArchive();
 
   // EN: Open the video file.
   // RU: Открыть видео файл.
-  video := video_OpenFile( dirRes + 'video.ogv' );
+  video := video_OpenMemory( videoFile, 'OGV' );
 end;
 
 procedure Draw;
@@ -49,8 +58,8 @@ begin
 
       // EN: Rendering of progress bar.
       // RU: Рендеринг полосы прогресса.
-      pr2d_Rect( 0, 600 - 100, 800, 20, $00FF00, 255 );
-      pr2d_Rect( 0, 600 - 100, ( 800 / video.Info.Duration ) * video.Time, 20, $00FF00, 155, PR2D_FILL );
+      pr2d_Rect( 4, 600 - 100, 792, 20, $00FF00, 255 );
+      pr2d_Rect( 4, 600 - 100, ( 792 / video.Info.Duration ) * video.Time, 20, $00FF00, 155, PR2D_FILL );
 
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Frame: ' + u_IntToStr( video.Frame ) );
@@ -64,17 +73,17 @@ procedure Timer;
 begin
   if key_Press( K_ESCAPE ) Then zgl_Exit();
 
-  // EN: If left mouse button is down on progress bar, then seek the video.
-  // RU: Если зажата левая кнопка мыши над полосой прогресса - перемещаться по видео.
-  if mouse_Down( M_BLEFT ) and ( mouse_Y() > 500 ) and ( mouse_Y() < 520 ) Then
+  // EN: Seek the video if finger is on the screen.
+  // RU: Перемещаться по видео если пальцем водят по экрану.
+  if touch_Tap( 0 ) Then
     begin
       videoSeek := TRUE;
-      video_Seek( video, ( mouse_X() / 800 ) * video.Info.Duration );
+      video_Seek( video, ( touch_X( 0 ) / 800 ) * video.Info.Duration );
     end else
       videoSeek := FALSE;
 
   key_ClearState();
-  mouse_ClearState();
+  touch_ClearState();
 end;
 
 procedure Update( dt : Double );
@@ -83,11 +92,8 @@ begin
     video_Update( video, dt, TRUE );
 end;
 
-Begin
-  {$IFNDEF USE_ZENGL_STATIC}
-  if not zglLoad( libZenGL ) Then exit;
-  {$ENDIF}
-
+procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
+begin
   randomize();
 
   timer_Add( @Timer, 16 );
@@ -96,11 +102,12 @@ Begin
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
 
-  wnd_SetCaption( '15 - Video' );
+  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, TRUE, TRUE );
+end;
 
-  wnd_ShowCursor( TRUE );
+exports
+  Java_zengl_android_ZenGL_Main,
+  {$I android_export.inc}
 
-  scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
-
-  zgl_Init();
+Begin
 End.

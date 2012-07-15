@@ -28,10 +28,6 @@ uses
   {$ENDIF}
   ;
 
-const
-  SCREEN_WIDTH  = 800;
-  SCREEN_HEIGHT = 600;
-
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
   fntMain   : zglPFont;
