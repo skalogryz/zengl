@@ -86,11 +86,11 @@
       </CompilerMessages>
       <CustomOptions Value="-CpARMv6
 -CfVFPv2
--Xd
 -XParm-linux-androideabi-
 -FD/opt/android-ndk/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
 -Fu/opt/android-ndk/platforms/android-3/arch-arm/usr/lib
--FL/opt/android-ndk/platforms/android-3/arch-arm/usr/lib/libdl.so"/>
+-FL/opt/android-ndk/platforms/android-3/arch-arm/usr/lib/libdl.so
+-Xd"/>
       <CompilerPath Value="$(CompPath)"/>
       <ExecuteBefore>
         <Command Value="sh linux_prebuild.sh"/>

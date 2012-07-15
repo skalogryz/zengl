@@ -63,8 +63,8 @@ procedure Timer;
 begin
   if key_Press( K_ESCAPE ) Then zgl_Exit();
 
-  // EN: If left mouse button is down on progress bar, then seek the video.
-  // RU: Если зажата левая кнопка мыши над полосой прогресса - перемещаться по видео.
+  // EN: Seek the video if finger is on the screen.
+  // RU: Перемещаться по видео если пальцем водят по экрану.
   if touch_Down( 0 ) Then
     begin
       videoSeek := TRUE;

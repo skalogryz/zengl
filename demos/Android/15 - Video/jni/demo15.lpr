@@ -10,7 +10,6 @@ uses
   zgl_screen,
   zgl_window,
   zgl_timers,
-  zgl_keyboard,
   zgl_touch,
   zgl_textures,
   zgl_textures_png,
@@ -71,18 +70,15 @@ end;
 
 procedure Timer;
 begin
-  if key_Press( K_ESCAPE ) Then zgl_Exit();
-
   // EN: Seek the video if finger is on the screen.
   // RU: Перемещаться по видео если пальцем водят по экрану.
-  if touch_Tap( 0 ) Then
+  if touch_Down( 0 ) Then
     begin
       videoSeek := TRUE;
       video_Seek( video, ( touch_X( 0 ) / 800 ) * video.Info.Duration );
     end else
       videoSeek := FALSE;
 
-  key_ClearState();
   touch_ClearState();
 end;
 
