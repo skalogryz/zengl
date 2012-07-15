@@ -65,10 +65,10 @@ begin
 
   // EN: If left mouse button is down on progress bar, then seek the video.
   // RU: Если зажата левая кнопка мыши над полосой прогресса - перемещаться по видео.
-  if touch_Down( M_BLEFT ) Then
+  if touch_Down( 0 ) Then
     begin
       videoSeek := TRUE;
-      video_Seek( video, ( touch_X() / 800 ) * video.Info.Duration );
+      video_Seek( video, ( touch_X( 0 ) / 800 ) * video.Info.Duration );
     end else
       videoSeek := FALSE;
 
