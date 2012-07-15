@@ -1691,6 +1691,7 @@ end;
 function Java_zengl_android_ZenGL_zglNativeCloseQuery( env : PJNIEnv; thiz : jobject ) : Boolean;
 begin
   Result := app_PCloseQuery();
+  if Result Then zgl_Exit();
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeTouch( env : PJNIEnv; thiz : jobject; ID : jint; X, Y, Pressure : jfloat );

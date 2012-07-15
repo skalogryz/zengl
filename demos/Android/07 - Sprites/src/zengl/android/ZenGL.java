@@ -47,7 +47,6 @@ public class ZenGL extends GLSurfaceView
 	private native void zglNativeInputText( String Text );
 	private native void zglNativeBackspace();
 
-	private boolean IsDestroy;
 	private zglCRenderer Renderer;
 	private String SourceDir;
 	private String DataDir;
@@ -207,16 +206,10 @@ public class ZenGL extends GLSurfaceView
 
 		return super.onKeyDown( keyCode, event );
 	}
-	
+
 	public boolean onBackPressed()
 	{
-		if ( zglNativeCloseQuery() )
-		{
-			IsDestroy = true;
-			return true;
-		}
-
-		return false;
+		return zglNativeCloseQuery();
 	}
 
 	class zglCRenderer implements Renderer
@@ -233,9 +226,6 @@ public class ZenGL extends GLSurfaceView
 
 		public void onDrawFrame( GL10 gl )
 		{
-			if ( IsDestroy )
-				Finish();
-
 			zglNativeDrawFrame();
 		}
 	}
