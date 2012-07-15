@@ -36,6 +36,9 @@ procedure Init;
   var
     i : Integer;
 begin
+  zgl_Enable( CORRECT_RESOLUTION );
+  scr_CorrectResolution( 800, 600 );
+
   texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
