@@ -23,15 +23,14 @@ uses
   ;
 
 var
-  dirRes      : UTF8String = 'data/';
-  fntMain     : zglPFont;
-  texBack     : zglPTexture;
-  texParticle : zglPTexture;
-  debug       : Boolean;
-  eFire       : array[ 0..6 ] of zglTEmitter2D;
-  eDiamond    : zglTEmitter2D;
-  eRain       : zglTEmitter2D;
-  count       : Integer;
+  dirRes         : UTF8String = 'data/';
+  fntMain        : zglPFont;
+  texBack        : zglPTexture;
+  debug          : Boolean;
+  particles      : zglTPEngine2D;
+  emitterFire    : array[ 0..2 ] of zglPEmitter2D;
+  emitterDiamond : zglPEmitter2D;
+  emitterRain    : zglPEmitter2D;
 
 procedure Init;
   var
