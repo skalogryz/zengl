@@ -11,7 +11,7 @@ BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = demo01.exe demo02.exe demo03.exe demo04.exe demo05.exe demo06.exe \
   demo07.exe demo08.exe demo09.exe demo11.exe demo12.exe demo13.exe demo14.exe \
-  demo16.exe
+  demo15.exe demo16.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -53,6 +53,9 @@ demo13.exe: 13 - Particles\demo13.dpr
   $(DCC)
 
 demo14.exe: 14 - Sound\demo14.dpr
+  $(DCC)
+
+demo15.exe: 14 - Sound\demo15.dpr
   $(DCC)
 
 demo16.exe: 16 - Physics\demo16.dpr

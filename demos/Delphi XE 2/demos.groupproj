@@ -42,6 +42,9 @@
 			<Projects Include="14 - Sound\demo14.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="15 - Video\demo15.dproj">
+				<Dependencies/>
+			</Projects>
 			<Projects Include="16 - Physics\demo16.dproj">
 				<Dependencies/>
 			</Projects>
@@ -170,6 +173,15 @@
 		<Target Name="demo14:Make">
 			<MSBuild Projects="14 - Sound\demo14.dproj" Targets="Make"/>
 		</Target>
+		<Target Name="demo15">
+			<MSBuild Projects="15 - Video\demo15.dproj"/>
+		</Target>
+		<Target Name="demo15:Clean">
+			<MSBuild Projects="15 - Video\demo15.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="demo15:Make">
+			<MSBuild Projects="15 - Video\demo15.dproj" Targets="Make"/>
+		</Target>
 		<Target Name="demo16">
 			<MSBuild Projects="16 - Physics\demo16.dproj"/>
 		</Target>
@@ -180,13 +192,13 @@
 			<MSBuild Projects="16 - Physics\demo16.dproj" Targets="Make"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="demo01;demo02;demo03;demo04;demo05;demo06;demo07;demo08;demo09;demo11;demo12;demo13;demo14;demo16"/>
+			<CallTarget Targets="demo01;demo02;demo03;demo04;demo05;demo06;demo07;demo08;demo09;demo11;demo12;demo13;demo14;demo15;demo16"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="demo01:Clean;demo02:Clean;demo03:Clean;demo04:Clean;demo05:Clean;demo06:Clean;demo07:Clean;demo08:Clean;demo09:Clean;demo11:Clean;demo12:Clean;demo13:Clean;demo14:Clean;demo16:Clean"/>
+			<CallTarget Targets="demo01:Clean;demo02:Clean;demo03:Clean;demo04:Clean;demo05:Clean;demo06:Clean;demo07:Clean;demo08:Clean;demo09:Clean;demo11:Clean;demo12:Clean;demo13:Clean;demo14:Clean;demo15:Clean;demo16:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="demo01:Make;demo02:Make;demo03:Make;demo04:Make;demo05:Make;demo06:Make;demo07:Make;demo08:Make;demo09:Make;demo11:Make;demo12:Make;demo13:Make;demo14:Make;demo16:Make"/>
+			<CallTarget Targets="demo01:Make;demo02:Make;demo03:Make;demo04:Make;demo05:Make;demo06:Make;demo07:Make;demo08:Make;demo09:Make;demo11:Make;demo12:Make;demo13:Make;demo14:Make;demo15:Make;demo16:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>
