@@ -231,6 +231,8 @@ begin
 end;
 
 procedure video_Seek( var Stream : zglPVideoStream; Milliseconds : Double );
+  var
+    frame : Integer;
 begin
   if not Assigned( Stream ) Then exit;
 
@@ -240,10 +242,14 @@ begin
       Milliseconds := Milliseconds - Trunc( Milliseconds / Stream.Info.Duration ) * Stream.Info.Duration;
     end;
 
+  frame        := Stream.Frame;
   Stream.Time  := Milliseconds;
   Stream.Frame := Trunc( Stream.Time / 1000  * Stream.Info.FrameRate );
-  Stream._private.Decoder.Seek( Stream^, Milliseconds );
-  video_Update( Stream, 0 );
+  if ( Stream.Frame <> frame ) Then
+    begin
+      Stream._private.Decoder.Seek( Stream^, Milliseconds );
+      video_Update( Stream, 0 );
+    end;
 end;
 
 end.
