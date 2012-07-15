@@ -43,6 +43,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BA84466B15B2998F00A47156 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				BAFFA5C015B2973800598270 /* demo15-Prefix.pch */,
+				BAFFA5BE15B2973800598270 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		BAFFA5A215B2973800598270 = {
 			isa = PBXGroup;
 			children = (
@@ -75,11 +84,10 @@
 			children = (
 				BAFFA5DE15B2979E00598270 /* icons */,
 				BAFFA5DC15B2979300598270 /* data */,
-				BAFFA5BA15B2973800598270 /* demo15-Info.plist */,
-				BAFFA5BE15B2973800598270 /* main.m */,
-				BAFFA5C015B2973800598270 /* demo15-Prefix.pch */,
-				BAFFA5C515B2973800598270 /* demo15.pas */,
 				BAFFA5C115B2973800598270 /* ReadMe.txt */,
+				BAFFA5BA15B2973800598270 /* demo15-Info.plist */,
+				BAFFA5C515B2973800598270 /* demo15.pas */,
+				BA84466B15B2998F00A47156 /* Supporting Files */,
 			);
 			path = demo15;
 			sourceTree = "<group>";
@@ -279,6 +287,7 @@
 				BAFFA5DB15B2973800598270 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
