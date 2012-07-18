@@ -3,7 +3,7 @@
 {--------------------------------}
 {                                }
 { version:  0.3                  }
-{ date:     2012.07.15           }
+{ date:     2012.07.18           }
 { license:  GNU LGPL version 3   }
 { homepage: http://zengl.org     }
 {                                }
@@ -14,7 +14,7 @@
 { mail:  dr.andru@gmail.com      }
 { JID:   dr.andru@googlemail.com }
 { ICQ:   496929849               }
-{ Skype: andru-kun               }
+{ Skype: kemka.andrey            }
 { www:   http://andru-kun.inf.ua }
 {                                }
 {--------------------------------}
@@ -617,7 +617,7 @@ const
 var
   tex_Add            : function : zglPTexture;
   tex_Del            : procedure( var Texture : zglPTexture );
-  tex_Create         : function( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
+  tex_Create         : function( var Data : PByteArray; Width, Height : Word; Format : Word = TEX_FORMAT_RGBA; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_CreateZero     : function( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromFile   : function( const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
   tex_LoadFromMemory : function( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;

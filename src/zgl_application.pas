@@ -204,6 +204,7 @@ uses
   {$ENDIF}
   zgl_timers,
   zgl_resources,
+  zgl_textures,
   zgl_font,
   {$IFDEF USE_SOUND}
   zgl_sound,
@@ -231,6 +232,8 @@ end;
 
 procedure app_Init;
 begin
+  managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+
   SetCurrentMode();
   scr_Clear();
   if Assigned( app_PLoad ) Then

@@ -102,7 +102,8 @@ end;
 function  tex_Add : zglPTexture;
 procedure tex_Del( var Texture : zglPTexture );
 
-function  tex_Create( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
+function  tex_CreateGL( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
+function  tex_Create( var Data : PByteArray; Width, Height : Word; Format : Word = TEX_FORMAT_RGBA; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
@@ -202,7 +203,7 @@ begin
   DEC( managerTexture.Count.Items );
 end;
 
-function tex_Create( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
+function tex_CreateGL( var Texture : zglTTexture; pData : PByteArray ) : Boolean;
   var
     width  : Integer;
     height : Integer;
@@ -275,6 +276,22 @@ begin
   Result := TRUE;
 end;
 
+function tex_Create( var Data : PByteArray; Width, Height : Word; Format : Word = TEX_FORMAT_RGBA; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+begin
+  Result        := tex_Add();
+  Result.Width  := Width;
+  Result.Height := Height;
+  Result.Format := Format;
+  Result.Flags  := Flags;
+  tex_CalcFlags( Result^, Data );
+  tex_CalcTexCoords( Result^ );
+  if not tex_CreateGL( Result^, Data ) Then
+    begin
+      tex_Del( Result );
+      Result := managerZeroTexture;
+    end;
+end;
+
 function tex_CreateZero( Width, Height : Word; Color, Flags : LongWord ) : zglPTexture;
   var
     i     : LongWord;
@@ -284,19 +301,7 @@ begin
   for i := 0 to Width * Height - 1 do
     pData[ i ] := Color;
 
-  Result        := tex_Add();
-  Result.Width  := Width;
-  Result.Height := Height;
-  Result.Format := TEX_FORMAT_RGBA;
-  Result.Flags  := Flags;
-  tex_CalcFlags( Result^, PByteArray( pData ) );
-  tex_CalcTexCoords( Result^ );
-  if not tex_Create( Result^, PByteArray( pData ) ) Then
-    begin
-      tex_Del( Result );
-      Result := managerZeroTexture;
-    end;
-
+  Result := tex_Create( PByteArray( pData ), Width, Height, TEX_FORMAT_RGBA, Flags );
   FreeMem( pData );
 end;
 
@@ -309,12 +314,8 @@ function tex_LoadFromFile( const FileName : UTF8String; TransparentColor, Flags 
     format : Word;
     res    : zglTTextureResource;
 begin
-  Result := nil;
-  pData  := nil;
-
-  if not Assigned( managerZeroTexture ) Then
-    managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
   Result := managerZeroTexture;
+  pData  := nil;
 
   if ( not resUseThreaded ) and ( not file_Exists( FileName ) ) Then
     begin
@@ -344,27 +345,16 @@ begin
       exit;
     end;
 
-  Result        := tex_Add();
-  Result.Width  := w;
-  Result.Height := h;
-  Result.Format := format;
-  Result.Flags  := Flags;
-  if Result.Format = TEX_FORMAT_RGBA Then
+  if Format = TEX_FORMAT_RGBA Then
     begin
-      if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+      if Flags and TEX_CALCULATE_ALPHA > 0 Then
         begin
           tex_CalcTransparent( pData, TransparentColor, w, h );
           tex_CalcAlpha( pData, w, h );
         end else
           tex_CalcTransparent( pData, TransparentColor, w, h );
     end;
-  tex_CalcFlags( Result^, pData );
-  tex_CalcTexCoords( Result^ );
-  if not tex_Create( Result^, pData ) Then
-    begin
-      tex_Del( Result );
-      Result := managerZeroTexture;
-    end;
+  Result := tex_Create( pData, w, h, format, Flags );
 
   log_Add( 'Texture loaded: "' + FileName + '"' );
 
@@ -380,12 +370,8 @@ function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8St
     format : Word;
     res    : zglTTextureResource;
 begin
-  Result := nil;
-  pData  := nil;
-
-  if not Assigned( managerZeroTexture ) Then
-    managerZeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
   Result := managerZeroTexture;
+  pData  := nil;
 
   ext := u_StrUp( Extension );
   for i := managerTexture.Count.Formats - 1 downto 0 do
@@ -409,27 +395,16 @@ begin
       exit;
     end;
 
-  Result        := tex_Add();
-  Result.Width  := w;
-  Result.Height := h;
-  Result.Format := format;
-  Result.Flags  := Flags;
-  if Result.Format = TEX_FORMAT_RGBA Then
+  if Format = TEX_FORMAT_RGBA Then
     begin
-      if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+      if Flags and TEX_CALCULATE_ALPHA > 0 Then
         begin
           tex_CalcTransparent( pData, TransparentColor, w, h );
           tex_CalcAlpha( pData, w, h );
         end else
           tex_CalcTransparent( pData, TransparentColor, w, h );
     end;
-  tex_CalcFlags( Result^, pData );
-  tex_CalcTexCoords( Result^ );
-  if not tex_Create( Result^, pData ) Then
-    begin
-      tex_Del( Result );
-      Result := managerZeroTexture;
-    end;
+  Result := tex_Create( pData, w, h, format, Flags );
 
   FreeMem( pData );
 end;

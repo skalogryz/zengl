@@ -3,7 +3,7 @@
 /*--------------------------------*/
 /*                                */
 /* version:  0.3                  */
-/* date:     2012.07.15           */
+/* date:     2012.07.18           */
 /* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
@@ -14,7 +14,7 @@
 /* mail:  dr.andru@gmail.com      */
 /* JID:   dr.andru@googlemail.com */
 /* ICQ:   496929849               */
-/* Skype: andru-kun               */
+/* Skype: kemka.andrey            */
 /* www:   http://andru-kun.inf.ua */
 /*                                */
 /*--------------------------------*/
@@ -638,7 +638,7 @@ end;
 
 ZGLEXTERN zglPTexture ( *tex_Add )();
 ZGLEXTERN void ( *tex_Del )( zglPTexture *Texture );
-ZGLEXTERN bool ( *tex_Create )( zglTTexture *Texture, void *pData );
+ZGLEXTERN zglPTexture ( *tex_Create )( void *Data, ushort Width, ushort Height, ushort Format, uint Flags );
 #ifdef __CPP__
 ZGLEXTERN zglPTexture ( *__tex_CreateZero )( ushort Width, ushort Height, uint Color, uint Flags );
 static inline zglPTexture tex_CreateZero( ushort Width, ushort Height, uint Color = 0x000000, uint Flags = TEX_DEFAULT_2D )

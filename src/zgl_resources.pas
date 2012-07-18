@@ -250,7 +250,7 @@ begin
                 RES_TEXTURE:
                   with zglPTextureResource( item.Resource )^ do
                     begin
-                      tex_Create( Texture^, pData );
+                      tex_CreateGL( Texture^, pData );
                       FreeMem( pData );
                       if item.IsFromFile Then
                         log_Add( 'Texture loaded: "' + FileName + '"' );
@@ -279,7 +279,7 @@ begin
                       begin
                         for i := 0 to Font.Count.Pages - 1 do
                           begin
-                            tex_Create( Font.Pages[ i ]^, pData[ i ] );
+                            tex_CreateGL( Font.Pages[ i ]^, pData[ i ] );
                             FreeMem( pData[ i ] );
                           end;
                         SetLength( pData, 0 );
