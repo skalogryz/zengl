@@ -674,10 +674,8 @@ begin
           if not Assigned( sn ) Then
             begin
               image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
-              tex_CalcAlpha( pData, fg_PageSize, fg_PageSize );
-              tex_CalcTexCoords( Font.Pages[ Font.Count.Pages - 1 ]^ );
-              tex_Create( Font.Pages[ Font.Count.Pages - 1 ]^, pData );
-              FreeMemory( pData );
+              Font.Pages[ Font.Count.Pages - 1 ] := tex_Create( pData, fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D );
+              zgl_FreeMem( pData );
 
               zgl_GetMem( pData, sqr( fg_PageSize ) * 4 );
               INC( Font.Count.Pages );
@@ -725,10 +723,8 @@ begin
               end;
         end;
       image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
-      tex_CalcAlpha( pData, fg_PageSize, fg_PageSize );
-      tex_CalcTexCoords( Font.Pages[ Font.Count.Pages - 1 ]^ );
-      tex_Create( Font.Pages[ Font.Count.Pages - 1 ]^, pData );
-      FreeMemory( pData );
+      Font.Pages[ Font.Count.Pages - 1 ] := tex_Create( pData, fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D );
+      zgl_FreeMem( pData );
     end else
       begin
         if MaxWidth = 0 Then MaxWidth := 1;
@@ -741,14 +737,6 @@ begin
         Font.MaxShiftY := 0;
         for i := 0 to Font.Count.Pages - 1 do
           begin
-            Font.Pages[ i ]        := tex_Add;
-            Font.Pages[ i ].Format := TEX_FORMAT_RGBA;
-            Font.Pages[ i ].Width  := fg_PageSize;
-            Font.Pages[ i ].Height := fg_PageSize;
-            Font.Pages[ i ].U      := 1;
-            Font.Pages[ i ].V      := 1;
-            Font.Pages[ i ].Flags  := TEX_CLAMP or TEX_FILTER_LINEAR;
-
             u := 1 / Font.Pages[ i ].Width;
             v := 1 / Font.Pages[ i ].Height;
 
@@ -787,10 +775,8 @@ begin
                 Font.MaxShiftY := Round( Max( Font.MaxShiftY, Font.CharDesc[ CharUID ].ShiftY ) );
             end;
           image_FlipVertically( pData, fg_PageSize, fg_PageSize, 4 );
-          tex_CalcAlpha( pData, fg_PageSize, fg_PageSize );
-          tex_CalcTexCoords( Font.Pages[ i ]^ );
-          tex_Create( Font.Pages[ i ]^, pData );
-          FreeMemory( pData );
+          Font.Pages[ i ] := tex_Create( pData, fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D );
+          zgl_FreeMem( pData );
         end;
     end;
   Font.Padding[ 0 ] := fg_FontPadding[ 0 ];
