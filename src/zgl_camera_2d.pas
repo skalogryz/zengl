@@ -92,7 +92,7 @@ begin
       cam2d.Apply  := TRUE;
       cam2d.OnlyXY := ( cam2d.Global.Angle = 0 ) and ( cam2d.Global.Zoom.X = 1 ) and ( cam2d.Global.Zoom.Y = 1 );
       if ( cam2d.ZoomX <> cam2d.Global.Zoom.X ) or ( cam2d.ZoomY <> cam2d.Global.Zoom.Y ) Then
-        render2dClipR := Round( sqrt( sqr( ( oglWidth - scrSubCX ) / cam2d.Global.Zoom.X ) + sqr( ( oglHeight - scrSubCY ) / cam2d.Global.Zoom.Y ) ) ) div 2;
+        render2dClipR := Round( sqrt( sqr( ( oglWidth - scrSubCX ) / cam2d.Global.Zoom.X ) + sqr( ( oglHeight - scrSubCY ) / cam2d.Global.Zoom.Y ) ) / 1.5 );
       cam2d.CX     := cam2d.Global.X + Camera.Center.X;
       cam2d.CY     := cam2d.Global.Y + Camera.Center.Y;
       cam2d.ZoomX  := cam2d.Global.Zoom.X;
