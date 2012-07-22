@@ -49,13 +49,8 @@ procedure textFx_SetLength( Length : Integer; LastCoord : zglPPoint2D = nil; Las
 
 implementation
 uses
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render,
   zgl_render_2d,
   zgl_fx,
@@ -227,7 +222,6 @@ procedure text_Draw( Font : zglPFont; X, Y : Single; const Text : UTF8String; Fl
     quad     : array[ 0..3 ] of zglTPoint2D;
     sx       : Single;
     lastPage : Integer;
-    mode     : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
   for i := 0 to Font.Count.Pages - 1 do
@@ -255,26 +249,22 @@ begin
   c := utf8_GetID( Text, 1, @i );
   s := 1;
   i := 1;
-  if Flags and TEXT_FX_VCA > 0 Then
-    mode := GL_TRIANGLES
-  else
-    mode := GL_QUADS;
   if not b2dStarted Then
     begin
       if Assigned( Font.CharDesc[ c ] ) Then
         begin
           lastPage := Font.CharDesc[ c ].Page;
-          batch2d_Check( mode, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
+          batch2d_Check( GL_QUADS, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
 
           glEnable( GL_BLEND );
           glEnable( GL_TEXTURE_2D );
           glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
-          glBegin( mode );
+          glBegin( GL_QUADS );
         end else
           begin
             glEnable( GL_BLEND );
             glEnable( GL_TEXTURE_2D );
-            glBegin( mode );
+            glBegin( GL_QUADS );
           end;
     end;
   while i <= Length( Text ) do
@@ -314,15 +304,15 @@ begin
               glEnd();
 
               glBindTexture( GL_TEXTURE_2D, Font.Pages[ charDesc.Page ].ID );
-              glBegin( mode );
+              glBegin( GL_QUADS );
             end else
-              if batch2d_Check( mode, FX_BLEND, Font.Pages[ charDesc.Page ] ) Then
+              if batch2d_Check( GL_QUADS, FX_BLEND, Font.Pages[ charDesc.Page ] ) Then
                 begin
                   glEnable( GL_BLEND );
 
                   glEnable( GL_TEXTURE_2D );
                   glBindTexture( GL_TEXTURE_2D, Font.Pages[ charDesc.Page ].ID );
-                  glBegin( mode );
+                  glBegin( GL_QUADS );
                 end;
         end;
 
@@ -349,17 +339,9 @@ begin
           glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
           glVertex2fv( @quad[ 2 ] );
 
-          glColor4ubv( @fx2dVCA3[ 0 ] );
-          glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-          glVertex2fv( @quad[ 2 ] );
-
           glColor4ubv( @fx2dVCA4[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
           glVertex2fv( @quad[ 3 ] );
-
-          glColor4ubv( @fx2dVCA1[ 0 ] );
-          glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-          glVertex2fv( @quad[ 0 ] );
         end else
           begin
             glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
