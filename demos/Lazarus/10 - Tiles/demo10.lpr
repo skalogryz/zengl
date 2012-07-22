@@ -33,7 +33,6 @@ var
   fntMain  : zglPFont;
   map      : zglTTiles2D;
   texTiles : zglPTexture;
-  currentTile : Integer = 19;
 
 procedure Init;
   var

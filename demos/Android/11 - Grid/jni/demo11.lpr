@@ -99,10 +99,6 @@ begin
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  wnd_SetCaption( '11 - Grid' );
-
-  wnd_ShowCursor( TRUE );
-
   scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
 end;
 

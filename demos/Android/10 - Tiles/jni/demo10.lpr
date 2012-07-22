@@ -1,9 +1,9 @@
-program demo10;
+library demo11;
 
 {$I zglCustomConfig.cfg}
 
 uses
-  {$IFDEF USE_ZENGL_STATIC}
+  zgl_application,
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -19,13 +19,10 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils
-  {$ELSE}
-  zglHeader
-  {$ENDIF}
   ;
 
 var
-  dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  dirRes   : UTF8String = 'assets/';
   fntMain  : zglPFont;
   map      : zglTTiles2D;
   texTiles : zglPTexture;
@@ -35,6 +32,11 @@ procedure Init;
     i, j : Integer;
     f    : zglTFile;
 begin
+  zgl_Enable( CORRECT_RESOLUTION );
+  scr_CorrectResolution( 800, 600 );
+
+  file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
   texTiles := tex_LoadFromFile( dirRes + 'tiles.png' );
@@ -59,6 +61,8 @@ begin
   for i := 0 to map.Count.X - 1 do
     file_Read( f, map.Tiles[ i, 0 ], map.Count.Y * SizeOf( Integer ) );
   file_Close( f );
+
+  file_CloseArchive();
 end;
 
 procedure Draw;
@@ -72,33 +76,19 @@ begin
   text_Draw( fntMain, 180, 30, 'This is a tarrible example of tile map, but main idea should be clear :)' );
 end;
 
-procedure Timer;
-  var
-    i : Integer;
-    f : zglTFile;
+procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
-  if key_Press( K_ESCAPE ) Then zgl_Exit();
-
-  key_ClearState();
-end;
-
-Begin
-  {$IFNDEF USE_ZENGL_STATIC}
-  if not zglLoad( libZenGL ) Then exit;
-  {$ENDIF}
-
   randomize();
-
-  timer_Add( @Timer, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 
-  wnd_SetCaption( '10 - Tiles' );
-
-  wnd_ShowCursor( TRUE );
-
   scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
+end;
 
-  zgl_Init();
+exports
+  Java_zengl_android_ZenGL_Main,
+  {$I android_export.inc}
+
+Begin
 End.
