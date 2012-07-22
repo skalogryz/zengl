@@ -21,28 +21,14 @@
 unit zgl_utils;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
-  {$modeswitch objectivec1}
-{$ENDIF}
 
 interface
 uses
-  {$IFDEF UNIX}
-  UnixType,
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   Windows,
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll,
-  {$ENDIF}
-  {$IFDEF iOS}
-  iPhoneAll, CFString,
-  {$ENDIF}
   zgl_types;
 
 const
-  LIB_ERROR  = {$IFDEF UNIX} nil {$ELSE} 0 {$ENDIF};
+  LIB_ERROR  = 0;
 
 function u_IntToStr( Value : Integer ) : UTF8String;
 function u_StrToInt( const Value : UTF8String ) : Integer;
@@ -64,13 +50,8 @@ procedure utf8_GetShift( const Text : UTF8String; Pos : Integer; out NewPos : In
 function utf8_GetID( const Text : UTF8String; Pos : Integer; Shift : PInteger ) : LongWord;
 
 function utf8_GetPAnsiChar( const Str : UTF8String ) : PAnsiChar;
-{$IFDEF WINDOWS}
 function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
 function utf16_GetUTF8String( const Str : PWideChar ) : UTF8String;
-{$ENDIF}
-{$IFDEF iOS}
-function utf8_GetNSString( const Str : UTF8String ) : NSString;
-{$ENDIF}
 //
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 //
@@ -83,35 +64,12 @@ function u_GetPOT( Value : Integer ) : Integer;
 
 procedure u_Sleep( Milliseconds : LongWord );
 
-{$IFDEF UNIX}
-function dlopen ( Name : PAnsiChar; Flags : longint) : Pointer; cdecl; external 'dl';
-function dlclose( Lib : Pointer) : Longint; cdecl; external 'dl';
-function dlsym  ( Lib : Pointer; Name : PAnsiChar) : Pointer; cdecl; external 'dl';
-
-function select( n : longint; readfds, writefds, exceptfds : Pointer; var timeout : timeVal ) : longint; cdecl; external 'libc';
-
-function printf( format : PAnsiChar; const args : array of const ) : Integer; cdecl; external 'libc';
-{$ENDIF}
-{$IFDEF ANDROID}
-function __android_log_write( prio : LongInt; tag, text : PAnsiChar ) : LongInt; cdecl; external 'liblog.so' name '__android_log_write';
-{$ENDIF}
-{$IFDEF WINDESKTOP}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
-{$ENDIF}
-{$IFDEF WINCE}
-function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
-function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
-function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
-{$ENDIF}
 
 implementation
 uses
-  {$IFDEF WINCE}
-  zgl_application,
-  zgl_main,
-  {$ENDIF}
   zgl_log;
 
 function u_IntToStr( Value : Integer ) : UTF8String;
@@ -204,11 +162,7 @@ function utf8_Copy( const Str : UTF8String; FromPosition, Count : Integer ) : UT
 begin
   len := utf8_Length( Str );
   if FromPosition < 1 Then FromPosition := 1;
-  if ( FromPosition > len ) or ( Count < 1 ) Then
-    begin
-      Result := '';
-      exit;
-    end;
+  if ( FromPosition > len ) or ( Count < 1 ) Then exit;
   if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
 
   i := 1;
@@ -363,7 +317,6 @@ begin
     System.Move( Str[ 1 ], Result^, len );
 end;
 
-{$IFDEF WINDOWS}
 function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
   var
     len : Integer;
@@ -383,14 +336,6 @@ begin
   if len > 0 Then
     WideCharToMultiByte( CP_UTF8, 0, Str, Length( Str ), @Result[ 1 ], len, nil, nil );
 end;
-{$ENDIF}
-
-{$IFDEF iOS}
-function utf8_GetNSString( const Str : UTF8String ) : NSString;
-begin
-  Result := NSString.stringWithUTF8String( PAnsiChar( Str ) );
-end;
-{$ENDIF}
 
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
   var
@@ -477,51 +422,23 @@ begin
 end;
 
 procedure u_Error( const ErrStr : UTF8String );
-  {$IFDEF MACOSX}
-  var
-    outItemHit: SInt16;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   var
     wideStr : PWideChar;
-  {$ENDIF}
 begin
-{$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
-  printf( PAnsiChar( 'ERROR: ' + ErrStr ), [ nil ] );
-{$IFEND}
-{$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar( ErrStr );
   MessageBoxW( 0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR );
   FreeMem( wideStr );
-{$ENDIF}
-{$IFDEF MACOSX}
-  StandardAlert( kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit );
-{$ENDIF}
 
   log_Add( 'ERROR: ' + ErrStr );
 end;
 
 procedure u_Warning( const ErrStr : UTF8String );
-  {$IFDEF MACOSX}
-  var
-    outItemHit: SInt16;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   var
     wideStr : PWideChar;
-  {$ENDIF}
 begin
-{$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
-  printf( PAnsiChar( 'WARNING: ' + ErrStr ), [ nil ] );
-{$IFEND}
-{$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar( ErrStr );
   MessageBoxW( 0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING );
   FreeMem( wideStr );
-{$ENDIF}
-{$IFDEF MACOSX}
-  StandardAlert( kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit );
-{$ENDIF}
 
   log_Add( 'WARNING: ' + ErrStr );
 end;
@@ -538,19 +455,8 @@ begin
 end;
 
 procedure u_Sleep( Milliseconds : LongWord );
-  {$IFDEF UNIX}
-  var
-    tv : TimeVal;
-  {$ENDIF}
 begin
-{$IFDEF UNIX}
-  tv.tv_sec  := Milliseconds div 1000;
-  tv.tv_usec := ( Milliseconds mod 1000 ) * 1000;
-  select( 0, nil, nil, nil, tv );
-{$ENDIF}
-{$IFDEF WINDOWS}
   Sleep( Milliseconds );
-{$ENDIF}
 end;
 
 end.

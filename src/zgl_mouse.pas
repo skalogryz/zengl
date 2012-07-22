@@ -23,15 +23,8 @@ unit zgl_mouse;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF USE_X11}
-  uses X, XLib;
-{$ENDIF}
-{$IFDEF WINDOWS}
-  uses Windows;
-{$ENDIF}
-{$IFDEF MACOSX}
-  uses MacOSAll;
-{$ENDIF}
+uses
+  Windows;
 
 const
   M_BLEFT   = 0;
@@ -78,11 +71,7 @@ var
 implementation
 uses
   zgl_window,
-  zgl_screen
-  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
-  , zgl_touch
-  {$IFEND}
-  ;
+  zgl_screen;
 
 function mouse_X : Integer;
 begin
@@ -106,10 +95,6 @@ end;
 
 function mouse_Down( Button : Byte ) : Boolean;
 begin
-  {$IFDEF UNIX}
-  Result := mouseDown[ Button ];
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   if GetSystemMetrics( SM_SWAPBUTTON ) = 0 Then
     begin
       case Button of
@@ -127,7 +112,6 @@ begin
       else
         Result := FALSE;
       end;
-  {$ENDIF}
 end;
 
 function mouse_Up( Button : Byte ) : Boolean;
@@ -157,27 +141,10 @@ begin
   FillChar( mouseDblClick[ 0 ], 3, 0 );
   FillChar( mouseCanClick[ 0 ], 3, 1 );
   FillChar( mouseWheel[ 0 ], 2, 0 );
-  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
-  touch_ClearState();
-  {$IFEND}
 end;
 
 procedure mouse_Lock( X : Integer = -1; Y : Integer = -1 );
-  {$IFDEF MACOSX}
-  var
-    Point : CGPoint;
-  {$ENDIF}
 begin
-{$IFDEF USE_X11}
-  if ( X = -1 ) and ( Y = -1 ) Then
-    begin
-      X := wndWidth div 2;
-      Y := wndHeight div 2;
-    end;
-
-  XWarpPointer( scrDisplay, None, wndHandle, 0, 0, 0, 0, X, Y );
-{$ENDIF}
-{$IFDEF WINDOWS}
   if ( X = -1 ) and ( Y = -1 ) Then
     begin
       if wndFullScreen Then
@@ -196,19 +163,6 @@ begin
       end;
 
   SetCursorPos( X, Y );
-{$ENDIF}
-{$IFDEF MACOSX}
-  if ( X = -1 ) and ( Y = -1 ) Then
-    begin
-      Point.X := wndX + wndWidth / 2;
-      Point.Y := wndY + wndHeight / 2;
-    end else
-      begin
-        Point.X := wndX + X;
-        Point.Y := wndY + Y;
-      end;
-  CGWarpMouseCursorPosition( Point );
-{$ENDIF}
 end;
 
 end.

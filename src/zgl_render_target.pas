@@ -24,53 +24,54 @@ unit zgl_render_target;
 
 interface
 uses
-  {$IFDEF USE_X11}
-  X, XLib, XUtil,
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   Windows,
+  {$IFDEF USE_DIRECT3D8}
+  DirectXGraphics,
   {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll,
+  {$IFDEF USE_DIRECT3D9}
+  Direct3D9,
   {$ENDIF}
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_textures;
 
 const
-  RT_TYPE_PBUFFER = 0;
-  RT_TYPE_FBO     = 1;
-
   RT_DEFAULT      = $00;
   RT_FULL_SCREEN  = $01;
   RT_USE_DEPTH    = $02;
   RT_CLEAR_COLOR  = $04;
   RT_CLEAR_DEPTH  = $08;
+  RT_SAVE_CONTENT = $10;
 
-  RT_FORCE_PBUFFER = $100000;
+type
+  zglPD3DTarget = ^zglTD3DTarget;
+  zglTD3DTarget = record
+    Old   : zglPTexture;
+    {$IFDEF USE_DIRECT3D8}
+    Depth : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    Depth : IDirect3DSurface9;
+    {$ENDIF}
+  end;
 
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
     Type_      : Byte;
-    Handle     : Pointer;
+    Handle     : zglPD3DTarget;
     Surface    : zglPTexture;
     Flags      : Byte;
 
     prev, next : zglPRenderTarget;
-end;
+  end;
 
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
     Count : Integer;
     First : zglTRenderTarget;
-end;
+  end;
 
 type
   zglTRenderCallback = procedure( Data : Pointer );
@@ -80,457 +81,143 @@ procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( Target : zglPRenderTarget );
 procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
 
+procedure rtarget_Save( Target : zglPTexture );
+procedure rtarget_Restore( Target : zglPTexture );
+
 var
   managerRTarget : zglTRenderTargetManager;
 
 implementation
 uses
-  zgl_application,
   zgl_main,
-  zgl_window,
+  zgl_application,
   zgl_screen,
   zgl_render,
   zgl_render_2d,
-  zgl_sprite_2d,
-  zgl_log,
-  zgl_utils;
-
-{$IFNDEF USE_GLES}
-{$IFDEF USE_X11}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Handle  : Integer;
-    Context : GLXContext;
-    PBuffer : GLXPBuffer;
-end;
-{$ENDIF}
-{$IFDEF WINDOWS}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Handle : THandle;
-    DC     : HDC;
-    RC     : HGLRC;
-end;
-{$ENDIF}
-{$IFDEF MACOSX}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Context : TAGLContext;
-    PBuffer : TAGLPbuffer;
-end;
-{$ENDIF}
-{$ENDIF}
-
-type
-  zglPFBO = ^zglTFBO;
-  zglTFBO = record
-    FrameBuffer  : LongWord;
-    RenderBuffer : LongWord;
-end;
+  zgl_camera_2d;
 
 var
+  lCanDraw : Boolean;
   lRTarget : zglPRenderTarget;
+  {$IFDEF USE_DIRECT3D8}
+  lSurface : IDirect3DSurface8;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  lSurface : IDirect3DSurface9;
+  {$ENDIF}
   lGLW     : Integer;
   lGLH     : Integer;
   lResCX   : Single;
   lResCY   : Single;
 
-function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
+procedure rtarget_Save( Target : zglPTexture );
   var
-    i, type_ : Integer;
-    pFBO     : zglPFBO;
-{$IFNDEF USE_GLES}
-    pPBuffer : zglPPBuffer;
-  {$IFDEF USE_X11}
-    n            : Integer;
-    fbconfig     : GLXFBConfig;
-    visualinfo   : PXVisualInfo;
-    pbufferiAttr : array[ 0..15 ] of Integer;
-    fbconfigAttr : array[ 0..31 ] of Integer;
+    s, d : TD3DSurface_Desc;
+    {$IFDEF USE_DIRECT3D8}
+    src, dst : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    src : IDirect3DSurface9;
+    {$ENDIF}
+begin
+  d3dResArray[ Target.ID ] := nil;
+  {$IFDEF USE_DIRECT3D8}
+  d3dTexArray[ Target.ID ].Texture.GetLevelDesc( 0, d );
+  if Assigned( d3dResArray[ Target.ID ] ) Then
+    begin
+      d3dResArray[ Target.ID ].GetLevelDesc( 0, s );
+      if ( s.Width < d.Width ) or ( s.Height < d.Height ) or ( s.Format <> d.Format ) Then
+        d3dResArray[ Target.ID ] := nil;
+    end;
+  if not Assigned( d3dResArray[ Target.ID ] ) Then
+    d3dDevice.CreateTexture( d.Width, d.Height, 1, 0, d.Format, D3DPOOL_MANAGED, d3dResArray[ Target.ID ] );
+
+  d3dTexArray[ Target.ID ].Texture.GetSurfaceLevel( 0, src );
+  d3dResArray[ Target.ID ].GetSurfaceLevel( 0, dst );
+  d3dDevice.CopyRects( src, nil, 0, dst, nil );
+
+  src := nil;
+  dst := nil;
   {$ENDIF}
-  {$IFDEF WINDOWS}
-    pbufferiAttr : array[ 0..31 ] of Integer;
-    pbufferfAttr : array[ 0..15 ] of Single;
-    pixelFormat  : array[ 0..63 ] of Integer;
-    nPixelFormat : LongWord;
+  {$IFDEF USE_DIRECT3D9}
+  d3dTexArray[ Target.ID ].Texture.GetLevelDesc( 0, d );
+  if Assigned( d3dResArray[ Target.ID ] ) Then
+    begin
+      d3dResArray[ Target.ID ].GetDesc( s );
+      if ( s.Width < d.Width ) or ( s.Height < d.Height ) or ( s.Format <> d.Format ) Then
+        d3dResArray[ Target.ID ] := nil;
+    end;
+  if not Assigned( d3dResArray[ Target.ID ] ) Then
+    d3dDevice.CreateOffscreenPlainSurface( d.Width, d.Height, d.Format, D3DPOOL_SYSTEMMEM, d3dResArray[ Target.ID ], nil );
+
+  d3dTexArray[ Target.ID ].Texture.GetSurfaceLevel( 0, src );
+  d3dDevice.GetRenderTargetData( src, d3dResArray[ Target.ID ] );
+
+  src := nil;
   {$ENDIF}
-  {$IFDEF MACOSX}
-    pbufferdAttr : array[ 0..31 ] of LongWord;
-    pixelFormat  : TAGLPixelFormat;
+end;
+
+procedure rtarget_Restore( Target : zglPTexture );
+  var
+    {$IFDEF USE_DIRECT3D8}
+    src, dst : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    dst : IDirect3DSurface9;
+    {$ENDIF}
+begin
+  if not Assigned( d3dResArray[ Target.ID ] ) Then exit;
+  {$IFDEF USE_DIRECT3D8}
+  d3dTexArray[ Target.ID ].Texture.GetSurfaceLevel( 0, dst );
+  d3dResArray[ Target.ID ].GetSurfaceLevel( 0, src );
+  d3dDevice.CopyRects( src, nil, 0, dst, nil );
+
+  src := nil;
+  dst := nil;
   {$ENDIF}
-  procedure FreePBuffer( var Target : zglPRenderTarget; Stage : Integer );
-  begin
-    oglCanPBuffer := FALSE;
-    FreeMem( Target.next.Handle );
-    FreeMem( Target.next );
-  {$IFDEF USE_X11}
-    if Stage = 4 Then
-      case oglPBufferMode of
-        1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
-        2: glXDestroyGLXPbufferSGIX( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
-      end;
+  {$IFDEF USE_DIRECT3D9}
+  d3dTexArray[ Target.ID ].Texture.GetSurfaceLevel( 0, dst );
+  d3dDevice.UpdateSurface( d3dResArray[ Target.ID ], nil, dst, nil );
+
+  dst := nil;
   {$ENDIF}
-  {$IFDEF WINDOWS}
-    if Stage = 2 Then
-      wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-    if Stage = 2 Then
-      aglDestroyPixelFormat( pixelFormat );
-    if Stage = 3 Then
-      aglDestroyContext( zglPPBuffer( Target.Handle ).Context );
-  {$ENDIF}
-    Target := nil;
-  end;
-{$ENDIF}
-  procedure FreeFBO( var Target : zglPRenderTarget; Stage : Integer );
-  begin
-    oglCanFBO := FALSE;
-    FreeMem( Target.next.Handle );
-    FreeMem( Target.next );
-    if Stage = 2 Then
-      glDeleteRenderbuffers( 1, @zglPFBO( Target.Handle ).RenderBuffer );
-    Target := nil;
-  end;
+end;
+
+function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
 begin
   Result := @managerRTarget.First;
-  while Assigned( Result.next ) do
-    Result := Result.next;
+  while Assigned( Result.Next ) do
+    Result := Result.Next;
 
-  zgl_GetMem( Pointer( Result.next ), SizeOf( zglTRenderTarget ) );
+  zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
+  zgl_GetMem( Pointer( Result.Next.Handle ), SizeOf( zglTD3DTarget ) );
 
-  type_ := RT_TYPE_FBO;
+  rtarget_Save( Surface );
+  d3dTexArray[ Surface.ID ].Texture := nil;
+  {$IFDEF USE_DIRECT3D8}
+  d3dDevice.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
+                           d3dTexArray[ Surface.ID ].Texture );
+  if Flags and RT_USE_DEPTH > 0 Then
+    d3dDevice.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3dParams.AutoDepthStencilFormat,
+                                         D3DMULTISAMPLE_NONE, Result.Next.Handle.Depth );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3dDevice.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
+                           d3dTexArray[ Surface.ID ].Texture, nil );
+  if Flags and RT_USE_DEPTH > 0 Then
+    d3dDevice.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3dParams.AutoDepthStencilFormat,
+                                         D3DMULTISAMPLE_NONE, 0, TRUE, Result.Next.Handle.Depth, nil );
+  {$ENDIF}
+  d3dTexArray[ Surface.ID ].Pool := D3DPOOL_DEFAULT;
+  rtarget_Restore( Surface );
 
-  // GeForce FX sucks: http://www.opengl.org/wiki/Common_Mistakes#Render_To_Texture
-  if gl_IsSupported( 'GeForce FX', oglRenderer ) and ( Flags and RT_USE_DEPTH > 0 ) Then
-    type_ := RT_TYPE_PBUFFER;
-
-  if Surface.Width > oglMaxFBOSize Then
-    type_ := RT_TYPE_PBUFFER;
-
-  if ( not oglCanFBO ) or ( Flags and RT_FORCE_PBUFFER > 0 ) Then
-    if not oglCanPBuffer Then
-      begin
-        u_Error( 'There is no possibility to create render target' );
-        Result := nil;
-        FreeMem( Result.next );
-        exit;
-      end else
-        type_ := RT_TYPE_PBUFFER;
-
-  case type_ of
-    {$IFNDEF USE_GLES}
-    {$IFDEF USE_X11}
-    RT_TYPE_PBUFFER:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
-        pPBuffer := Result.next.Handle;
-
-        FillChar( pbufferiAttr[ 0 ], 16 * 4, None );
-        FillChar( fbconfigAttr[ 0 ], 32 * 4, None );
-        fbconfigAttr[ 0  ] := GLX_DRAWABLE_TYPE;
-        fbconfigAttr[ 1  ] := GLX_PBUFFER_BIT;
-        fbconfigAttr[ 2  ] := GLX_DOUBLEBUFFER;
-        fbconfigAttr[ 3  ] := GL_TRUE;
-        fbconfigAttr[ 4  ] := GLX_RENDER_TYPE;
-        fbconfigAttr[ 5  ] := GLX_RGBA_BIT;
-        fbconfigAttr[ 6  ] := GLX_RED_SIZE;
-        fbconfigAttr[ 7  ] := 8;
-        fbconfigAttr[ 8  ] := GLX_GREEN_SIZE;
-        fbconfigAttr[ 9  ] := 8;
-        fbconfigAttr[ 10 ] := GLX_BLUE_SIZE;
-        fbconfigAttr[ 11 ] := 8;
-        fbconfigAttr[ 12 ] := GLX_ALPHA_SIZE;
-        fbconfigAttr[ 13 ] := 8;
-        fbconfigAttr[ 14 ] := GLX_DEPTH_SIZE;
-        fbconfigAttr[ 15 ] := oglzDepth;
-        i := 16;
-        if oglStencil > 0 Then
-          begin
-            fbconfigAttr[ i     ] := GLX_STENCIL_SIZE;
-            fbconfigAttr[ i + 1 ] := oglStencil;
-            INC( i, 2 );
-          end;
-        if oglFSAA > 0 Then
-          begin
-            fbconfigAttr[ i     ] := GLX_SAMPLES_SGIS;
-            fbconfigAttr[ i + 1 ] := oglFSAA;
-          end;
-
-        fbconfig := glXChooseFBConfig( scrDisplay, scrDefault, @fbconfigAttr[ 0 ], @n );
-        if not Assigned( fbconfig ) Then
-          begin
-            log_Add( 'PBuffer: failed to choose GLXFBConfig' );
-            FreePBuffer( Result, 1 );
-            Result := nil;
-            exit;
-          end else
-            pPBuffer.Handle := PInteger( fbconfig )^;
-
-        case oglPBufferMode of
-          1:
-            begin
-              pbufferiAttr[ 0 ] := GLX_PBUFFER_WIDTH;
-              pbufferiAttr[ 1 ] := Round( Surface.Width / Surface.U );
-              pbufferiAttr[ 2 ] := GLX_PBUFFER_HEIGHT;
-              pbufferiAttr[ 3 ] := Round( Surface.Height / Surface.V );
-              pbufferiAttr[ 4 ] := GLX_PRESERVED_CONTENTS;
-              pbufferiAttr[ 5 ] := GL_TRUE;
-              pbufferiAttr[ 6 ] := GLX_LARGEST_PBUFFER;
-              pbufferiAttr[ 7 ] := GL_TRUE;
-
-              pPBuffer.PBuffer := glXCreatePbuffer( scrDisplay, pPBuffer.Handle, @pbufferiAttr[ 0 ] );
-            end;
-          2:
-            begin
-              pbufferiAttr[ 0 ] := GLX_PRESERVED_CONTENTS;
-              pbufferiAttr[ 1 ] := GL_TRUE;
-              pbufferiAttr[ 2 ] := GLX_LARGEST_PBUFFER;
-              pbufferiAttr[ 3 ] := GL_TRUE;
-
-              pPBuffer.PBuffer := glXCreateGLXPbufferSGIX( scrDisplay, pPBuffer.Handle, Surface.Width, Surface.Height, @pbufferiAttr[ 0 ] );
-            end;
-        end;
-
-        if pPBuffer.PBuffer = 0 Then
-          begin
-            log_Add( 'PBuffer: failed to create GLXPBuffer' );
-            FreePBuffer( Result, 2 );
-            exit;
-          end;
-
-        visualinfo := glXGetVisualFromFBConfig( scrDisplay, pPBuffer.Handle );
-        if not Assigned( visualinfo ) Then
-          begin
-            log_Add( 'PBuffer: failed to choose Visual' );
-            FreePBuffer( Result, 3 );
-            Result := nil;
-            exit;
-          end;
-
-        pPBuffer.Context := glXCreateContext( scrDisplay, visualinfo, oglContext, TRUE );
-        XFree( fbconfig );
-        XFree( visualinfo );
-        if pPBuffer.Context = nil Then
-          begin
-            log_Add( 'PBuffer: failed to create GLXContext' );
-            FreePBuffer( Result, 4 );
-            Result := nil;
-            exit;
-          end;
-
-        glXMakeCurrent( scrDisplay, pPBuffer.PBuffer, pPBuffer.Context );
-        gl_ResetState();
-        Set2DMode();
-        glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
-        ssprite2d_Draw( Surface, 0, oglHeight - Surface.Height, oglWidth - ( oglWidth - Surface.Width ), oglHeight - ( oglHeight - Surface.Height ), 0, 255 );
-        glXMakeCurrent( scrDisplay, wndHandle, oglContext );
-      end;
-    {$ENDIF}
-    {$IFDEF WINDOWS}
-    RT_TYPE_PBUFFER:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
-        pPBuffer := Result.next.Handle;
-
-        FillChar( pbufferiAttr[ 0 ], 32 * 4, 0 );
-        FillChar( pbufferfAttr[ 0 ], 16 * 4, 0 );
-        pbufferiAttr[ 0  ] := WGL_DRAW_TO_PBUFFER_ARB;
-        pbufferiAttr[ 1  ] := GL_TRUE;
-        pbufferiAttr[ 2  ] := WGL_DOUBLE_BUFFER_ARB;
-        pbufferiAttr[ 3  ] := GL_TRUE;
-        pbufferiAttr[ 4  ] := WGL_COLOR_BITS_ARB;
-        pbufferiAttr[ 5  ] := 24;
-        pbufferiAttr[ 6  ] := WGL_RED_BITS_ARB;
-        pbufferiAttr[ 7  ] := 8;
-        pbufferiAttr[ 8  ] := WGL_GREEN_BITS_ARB;
-        pbufferiAttr[ 9  ] := 8;
-        pbufferiAttr[ 10 ] := WGL_BLUE_BITS_ARB;
-        pbufferiAttr[ 11 ] := 8;
-        pbufferiAttr[ 12 ] := WGL_ALPHA_BITS_ARB;
-        pbufferiAttr[ 13 ] := 8;
-        pbufferiAttr[ 14 ] := WGL_DEPTH_BITS_ARB;
-        pbufferiAttr[ 15 ] := oglzDepth;
-        i := 16;
-        if oglStencil > 0 Then
-          begin
-            pbufferiAttr[ i     ] := WGL_STENCIL_BITS_ARB;
-            pbufferiAttr[ i + 1 ] := oglStencil;
-            INC( i, 2 );
-          end;
-        if oglFSAA > 0 Then
-          begin
-            pbufferiAttr[ i     ] := WGL_SAMPLE_BUFFERS_ARB;
-            pbufferiAttr[ i + 1 ] := GL_TRUE;
-            pbufferiAttr[ i + 2 ] := WGL_SAMPLES_ARB;
-            pbufferiAttr[ i + 3 ] := oglFSAA;
-          end;
-
-        wglChoosePixelFormatARB( wndDC, @pbufferiAttr[ 0 ], @pbufferfAttr[ 0 ], 64, @pixelFormat, @nPixelFormat );
-
-        pPBuffer.Handle := wglCreatePbufferARB( wndDC, pixelFormat[ 0 ], Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), nil );
-        if pPBuffer.Handle <> 0 Then
-          begin
-            pPBuffer.DC := wglGetPbufferDCARB( pPBuffer.Handle );
-            pPBuffer.RC := wglCreateContext( pPBuffer.DC );
-            if pPBuffer.RC = 0 Then
-              begin
-                log_Add( 'PBuffer: RC create - Error' );
-                FreePBuffer( Result, 2 );
-                Result := nil;
-                exit;
-              end;
-            wglShareLists( oglContext, pPBuffer.RC );
-          end else
-            begin
-              log_Add( 'PBuffer: wglCreatePbufferARB - failed' );
-              FreePBuffer( Result, 1 );
-              Result := nil;
-              exit;
-            end;
-        wglMakeCurrent( pPBuffer.DC, pPBuffer.RC );
-        gl_ResetState();
-        Set2DMode();
-        glClear( GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT );
-        ssprite2d_Draw( Surface, 0, oglHeight - Surface.Height, oglWidth - ( oglWidth - Surface.Width ), oglHeight - ( oglHeight - Surface.Height ), 0, 255 );
-        wglMakeCurrent( wndDC, oglContext );
-      end;
-    {$ENDIF}
-    {$IFDEF MACOSX}
-    RT_TYPE_PBUFFER:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTPBuffer ) );
-        pPBuffer := Result.next.Handle;
-
-        FillChar( pbufferdAttr[ 0 ], 32 * 4, AGL_NONE );
-        pbufferdAttr[ 0  ] := AGL_DOUBLEBUFFER;
-        pbufferdAttr[ 1  ] := AGL_RGBA;
-        pbufferdAttr[ 2  ] := GL_TRUE;
-        pbufferdAttr[ 3  ] := AGL_RED_SIZE;
-        pbufferdAttr[ 4  ] := 8;
-        pbufferdAttr[ 5  ] := AGL_GREEN_SIZE;
-        pbufferdAttr[ 6  ] := 8;
-        pbufferdAttr[ 7  ] := AGL_BLUE_SIZE;
-        pbufferdAttr[ 8  ] := 8;
-        pbufferdAttr[ 9  ] := AGL_ALPHA_SIZE;
-        pbufferdAttr[ 10 ] := 8;
-        pbufferdAttr[ 11 ] := AGL_DEPTH_SIZE;
-        pbufferdAttr[ 12 ] := oglzDepth;
-        i := 13;
-        if oglStencil > 0 Then
-          begin
-            pbufferdAttr[ i     ] := AGL_STENCIL_SIZE;
-            pbufferdAttr[ i + 1 ] := oglStencil;
-            INC( i, 2 );
-          end;
-        if oglFSAA > 0 Then
-          begin
-            pbufferdAttr[ i     ] := AGL_SAMPLE_BUFFERS_ARB;
-            pbufferdAttr[ i + 1 ] := 1;
-            pbufferdAttr[ i + 2 ] := AGL_SAMPLES_ARB;
-            pbufferdAttr[ i + 3 ] := oglFSAA;
-          end;
-
-        DMGetGDeviceByDisplayID( DisplayIDType( scrDisplay ), oglDevice, FALSE );
-        pixelFormat := aglChoosePixelFormat( @oglDevice, 1, @pbufferdAttr[ 0 ] );
-        if not Assigned( pixelFormat ) Then
-          begin
-            log_Add( 'PBuffer: aglChoosePixelFormat - failed' );
-            FreePBuffer( Result, 1 );
-            Result := nil;
-            exit;
-          end;
-
-        pPBuffer.Context := aglCreateContext( pixelFormat, oglContext );
-        if not Assigned( pPBuffer.Context ) Then
-          begin
-            log_Add( 'PBuffer: aglCreateContext - failed' );
-            FreePBuffer( Result, 2 );
-            Result := nil;
-            exit;
-          end;
-        aglDestroyPixelFormat( pixelFormat );
-
-        if aglCreatePBuffer( Surface.Width, Surface.Height, GL_TEXTURE_2D, GL_RGBA, 0, @pPBuffer.PBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'PBuffer: aglCreatePBuffer - failed' );
-            FreePBuffer( Result, 3 );
-            Result := nil;
-            exit;
-          end;
-      end;
-    {$ENDIF}
-    {$ENDIF}
-    RT_TYPE_FBO:
-      begin
-        zgl_GetMem( Result.next.Handle, SizeOf( zglTFBO ) );
-        pFBO := Result.next.Handle;
-
-        glGenFramebuffers( 1, @pFBO.FrameBuffer );
-        glBindFramebuffer( GL_FRAMEBUFFER, pFBO.FrameBuffer );
-        if glIsFrameBuffer( pFBO.FrameBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'FBO: Gen FrameBuffer - Error' );
-            FreeFBO( Result, 1 );
-            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
-            exit;
-          end;
-
-        glGenRenderbuffers( 1, @pFBO.RenderBuffer );
-        glBindRenderbuffer( GL_RENDERBUFFER, pFBO.RenderBuffer );
-        if glIsRenderBuffer( pFBO.RenderBuffer ) = GL_FALSE Then
-          begin
-            log_Add( 'FBO: Gen RenderBuffer - Error' );
-            FreeFBO( Result, 2 );
-            Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
-            exit;
-          end;
-
-        glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-        if Flags and RT_USE_DEPTH > 0 Then
-          begin
-            {$IFNDEF USE_GLES}
-            case oglzDepth of
-              24: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-              32: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            else
-              glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            end;
-            {$ELSE}
-            if oglzDepth > 16 Then
-              begin
-                if ( oglzDepth = 32 ) and ( oglCanFBODepth32 ) Then
-                  glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) )
-                else
-                  if ( oglzDepth = 24 ) and ( oglCanFBODepth24 ) Then
-                    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) )
-                  else
-                    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-              end else
-                glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ) );
-            {$ENDIF}
-            glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, pFBO.RenderBuffer );
-          end;
-
-        glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
-        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-        {$IFDEF iOS}
-        glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-        glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-        glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-        {$ENDIF}
-      end;
-  end;
-  Result.next.Type_   := type_;
-  Result.next.Surface := Surface;
-  Result.next.Flags   := Flags;
-
-  Result.next.prev := Result;
-  Result.next.next := nil;
-  Result := Result.next;
+  Result.next.Type_      := 0;
+  Result.next.Handle.Old := Surface;
+  Result.next.Surface    := Surface;
+  Result.next.Flags      := Flags;
+  Result.next.prev       := Result;
+  Result.next.next       := nil;
+  Result                 := Result.next;
   INC( managerRTarget.Count );
 end;
 
@@ -540,46 +227,13 @@ begin
 
   tex_Del( Target.Surface );
 
-  case Target.Type_ of
-    {$IFNDEF USE_GLES}
-    RT_TYPE_PBUFFER:
-      begin
-        {$IFDEF USE_X11}
-        case oglPBufferMode of
-          1: glXDestroyPbuffer( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
-          2: glXDestroyGLXPbufferSGIX( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer );
-        end;
-        {$ENDIF}
-        {$IFDEF WINDOWS}
-        if zglPPBuffer( Target.Handle ).RC <> 0 Then
-          wglDeleteContext( zglPPBuffer( Target.Handle ).RC );
-        if zglPPBuffer( Target.Handle ).DC <> 0 Then
-          wglReleasePbufferDCARB( zglPPBuffer( Target.Handle ).Handle, zglPPBuffer( Target.Handle ).DC );
-        if zglPPBuffer( Target.Handle ).Handle <> 0 Then
-          wglDestroyPbufferARB( zglPPBuffer( Target.Handle ).Handle );
-        {$ENDIF}
-        {$IFDEF MACOSX}
-        aglDestroyContext( zglPPBuffer( Target.Handle ).Context );
-        aglDestroyPBuffer( zglPPBuffer( Target.Handle ).PBuffer );
-        {$ENDIF}
-      end;
-    {$ENDIF}
-    RT_TYPE_FBO:
-      begin
-        if glIsRenderBuffer( zglPFBO( Target.Handle ).RenderBuffer ) = GL_TRUE Then
-          glDeleteRenderbuffers( 1, @zglPFBO( Target.Handle ).RenderBuffer );
-        if glIsFramebuffer( zglPFBO( Target.Handle ).FrameBuffer ) = GL_TRUE Then
-          glDeleteFramebuffers( 1, @zglPFBO( Target.Handle ).FrameBuffer );
-      end;
-  end;
-
   if Assigned( Target.prev ) Then
     Target.prev.next := Target.next;
-  if Assigned( Target.next ) Then
+  if Assigned( Target.Next ) Then
     Target.next.prev := Target.prev;
 
-  if Assigned( Target.Handle ) Then
-    FreeMem( Target.Handle );
+  Target.Handle.Depth := nil;
+  FreeMem( Target.Handle );
   FreeMem( Target );
   Target := nil;
 
@@ -587,39 +241,64 @@ begin
 end;
 
 procedure rtarget_Set( Target : zglPRenderTarget );
+  var
+    d : TD3DSurface_Desc;
 begin
   batch2d_Flush();
 
   if Assigned( Target ) Then
     begin
-      lRTarget := Target;
-      lGLW     := oglWidth;
-      lGLH     := oglHeight;
-      lResCX   := scrResCX;
-      lResCY   := scrResCY;
+      lCanDraw := d3dCanDraw;
+      d3d_BeginScene();
+      lRTarget   := Target;
+      lGLW       := oglWidth;
+      lGLH       := oglHeight;
+      lResCX     := scrResCX;
+      lResCY     := scrResCY;
 
-      case Target.Type_ of
-        {$IFNDEF USE_GLES}
-        RT_TYPE_PBUFFER:
-          begin
-            {$IFDEF USE_X11}
-            glXMakeCurrent( scrDisplay, zglPPBuffer( Target.Handle ).PBuffer, zglPPBuffer( Target.Handle ).Context );
-            {$ENDIF}
-            {$IFDEF WINDOWS}
-            wglMakeCurrent( zglPPBuffer( Target.Handle ).DC, zglPPBuffer( Target.Handle ).RC );
-            {$ENDIF}
-            {$IFDEF MACOSX}
-            aglSetCurrentContext( zglPPBuffer( Target.Handle ).Context );
-            aglSetPBuffer( zglPPBuffer( Target.Handle ).Context, zglPPBuffer( Target.Handle ).PBuffer, 0, 0, aglGetVirtualScreen( oglContext ) );
-            {$ENDIF}
-          end;
-        {$ENDIF}
-        RT_TYPE_FBO:
-          begin
-            glBindFramebuffer( GL_FRAMEBUFFER, zglPFBO( Target.Handle ).FrameBuffer );
-            glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Target.Surface.ID, 0 );
-          end;
-      end;
+      if {$IFDEF USE_DIRECT3D9} ( not d3dCanD3DEx ) and {$ENDIF} ( Target.Surface <> Target.Handle.Old ) Then
+        begin
+          d3dTexArray[ Target.Surface.ID ].Texture.GetLevelDesc( 0, d );
+          if d.Pool <> D3DPOOL_DEFAULT Then
+            begin
+              Target.Handle.Old := Target.Surface;
+              rtarget_Save( Target.Surface );
+              d3dTexArray[ Target.Surface.ID ].Texture := nil;
+              Target.Handle.Depth := nil;
+              {$IFDEF USE_DIRECT3D8}
+              d3dDevice.CreateTexture( d.Width, d.Height, 1, D3DUSAGE_RENDERTARGET, d.Format, D3DPOOL_DEFAULT, d3dTexArray[ Target.Surface.ID ].Texture );
+              if Target.Flags and RT_USE_DEPTH > 0 Then
+                d3dDevice.CreateDepthStencilSurface( d.Width, d.Height, d3dParams.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, Target.Handle.Depth );
+              {$ENDIF}
+              {$IFDEF USE_DIRECT3D9}
+              d3dDevice.CreateTexture( d.Width, d.Height, 1, D3DUSAGE_RENDERTARGET, d.Format, D3DPOOL_DEFAULT, d3dTexArray[ Target.Surface.ID ].Texture, nil );
+              if Target.Flags and RT_USE_DEPTH > 0 Then
+                d3dDevice.CreateDepthStencilSurface( d.Width, d.Height, d3dParams.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, Target.Handle.Depth,
+                                                      nil );
+              {$ENDIF}
+              d3dTexArray[ Target.Surface.ID ].Pool := D3DPOOL_DEFAULT;
+              rtarget_Restore( Target.Surface );
+            end;
+        end;
+      {$IFDEF USE_DIRECT3D8}
+      d3dDevice.GetRenderTarget( d3dSurface );
+      d3dDevice.GetDepthStencilSurface( d3dStencil );
+      d3dTexArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
+      if Target.Flags and RT_USE_DEPTH > 0 Then
+        d3dDevice.SetRenderTarget( lSurface, Target.Handle.Depth )
+      else
+        d3dDevice.SetRenderTarget( lSurface, nil );
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      d3dDevice.GetDepthStencilSurface( d3dStencil );
+      d3dDevice.GetRenderTarget( 0, d3dSurface );
+      d3dTexArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
+      d3dDevice.SetRenderTarget( 0, lSurface );
+      if Target.Flags and RT_USE_DEPTH > 0 Then
+        d3dDevice.SetDepthStencilSurface( Target.Handle.Depth )
+      else
+        d3dDevice.SetDepthStencilSurface( nil );
+      {$ENDIF}
 
       oglTarget  := TARGET_TEXTURE;
       oglTargetW := Target.Surface.Width;
@@ -641,44 +320,25 @@ begin
       SetCurrentMode();
 
       if Target.Flags and RT_CLEAR_COLOR > 0 Then
-        glClear( GL_COLOR_BUFFER_BIT );
+        d3dDevice.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
       if Target.Flags and RT_CLEAR_DEPTH > 0 Then
-        glClear( GL_DEPTH_BUFFER_BIT );
+        d3dDevice.Clear( 0, nil, D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
     end else
       if Assigned( lRTarget ) Then
         begin
-          case lRTarget.Type_ of
-            {$IFNDEF USE_GLES}
-            RT_TYPE_PBUFFER:
-              begin
-                glEnable( GL_TEXTURE_2D );
-                glBindTexture( GL_TEXTURE_2D, lRTarget.Surface.ID );
-                glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
-                glDisable( GL_TEXTURE_2D );
+          {$IFDEF USE_DIRECT3D8}
+          d3dDevice.SetRenderTarget( d3dSurface, d3dStencil );
+          {$ENDIF}
+          {$IFDEF USE_DIRECT3D9}
+          d3dDevice.SetRenderTarget( 0, d3dSurface );
+          d3dDevice.SetDepthStencilSurface( d3dStencil );
+          {$ENDIF}
+          lSurface   := nil;
+          d3dSurface := nil;
+          d3dStencil := nil;
 
-                {$IFDEF USE_X11}
-                glXMakeCurrent( scrDisplay, wndHandle, oglContext );
-                {$ENDIF}
-                {$IFDEF WINDOWS}
-                wglMakeCurrent( wndDC, oglContext );
-                {$ENDIF}
-                {$IFDEF MACOSX}
-                aglSwapBuffers( zglPPBuffer( lRTarget.Handle ).Context );
-                aglSetCurrentContext( oglContext );
-                {$ENDIF}
-              end;
-            {$ENDIF}
-            RT_TYPE_FBO:
-              begin
-                glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0 );
-                glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-                {$IFDEF iOS}
-                glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-                glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-                glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-                {$ENDIF}
-              end;
-          end;
+          if {$IFDEF USE_DIRECT3D9} ( not d3dCanD3DEx ) and {$ENDIF} ( lRTarget.Flags and RT_SAVE_CONTENT > 0 ) Then
+            rtarget_Save( lRTarget.Surface );
 
           oglTarget  := TARGET_SCREEN;
           oglWidth   := lGLW;
@@ -693,6 +353,8 @@ begin
 
           lRTarget := nil;
           SetCurrentMode();
+          if not lCanDraw then
+            d3d_EndScene();
         end;
 end;
 
