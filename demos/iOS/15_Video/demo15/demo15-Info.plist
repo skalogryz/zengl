@@ -24,6 +24,20 @@
 	<string>1.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>CFBundleIconFiles</key>
+	<array>
+		<string>icons/icon_29.png</string>
+		<string>icons/icon_57.png</string>
+		<string>icons/icon_72.png</string>
+		<string>icons/icon_105.png</string>
+		<string>icons/icon_114.png</string>
+		<string>icons/icon_132.png</string>
+		<string>icons/icon_144.png</string>
+		<string>icons/icon_228.png</string>
+		<string>icons/icon_235.png</string>
+		<string>icons/icon_264.png</string>
+		<string>icons/icon_512.png</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -75,9 +75,6 @@ begin
 end;
 
 procedure Timer;
-  var
-    i : Integer;
-    f : zglTFile;
 begin
   if key_Press( K_ESCAPE ) Then zgl_Exit();
 

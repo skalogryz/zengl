@@ -2,12 +2,7 @@ program demo10;
 
 {$I zglCustomConfig.cfg}
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
-
 uses
-  {$IFDEF USE_ZENGL_STATIC}
   zgl_main,
   zgl_screen,
   zgl_window,
@@ -23,13 +18,10 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils
-  {$ELSE}
-  zglHeader
-  {$ENDIF}
   ;
 
 var
-  dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  dirRes   : UTF8String = 'data/';
   fntMain  : zglPFont;
   map      : zglTTiles2D;
   texTiles : zglPTexture;
@@ -76,28 +68,11 @@ begin
   text_Draw( fntMain, 180, 30, 'This is a tarrible example of tile map, but main idea should be clear :)' );
 end;
 
-procedure Timer;
-begin
-  if key_Press( K_ESCAPE ) Then zgl_Exit();
-
-  key_ClearState();
-end;
-
 Begin
-  {$IFNDEF USE_ZENGL_STATIC}
-  if not zglLoad( libZenGL ) Then exit;
-  {$ENDIF}
-
   randomize();
-
-  timer_Add( @Timer, 16 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
-
-  wnd_SetCaption( '10 - Tiles' );
-
-  wnd_ShowCursor( TRUE );
 
   scr_SetOptions( 800, 600, REFRESH_MAXIMUM, FALSE, FALSE );
 
