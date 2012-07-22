@@ -31,6 +31,9 @@ procedure Init;
     i, j : Integer;
     f    : zglTFile;
 begin
+  zgl_Enable( CORRECT_RESOLUTION );
+  scr_CorrectResolution( 800, 600 );
+
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
   texTiles := tex_LoadFromFile( dirRes + 'tiles.png' );
