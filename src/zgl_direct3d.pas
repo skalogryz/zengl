@@ -333,7 +333,7 @@ begin
       end;
 
   // D3D Device
-  {$IFDEF USE_DIRECT3D9}
+  {$IFDEF USE_DIRECT3D9Ex}
   if Assigned( Direct3DCreate9Ex ) Then
     begin
       // D3DCREATE_HARDWARE_VERTEXPROCESSING
@@ -351,7 +351,7 @@ begin
             end else log_Add( 'D3DCREATEEX_SOFTWARE_VERTEXPROCESSING' );
         end else log_Add( 'D3DCREATEEX_HARDWARE_VERTEXPROCESSING' );
     end else
-    {$ENDIF}
+  {$ENDIF}
       // D3DCREATE_HARDWARE_VERTEXPROCESSING
       if d3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wndHandle, $40 or D3DCREATE_FPU_PRESERVE, d3dParams, d3dDevice ) <> D3D_OK Then
         begin
