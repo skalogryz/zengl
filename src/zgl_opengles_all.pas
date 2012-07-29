@@ -25,6 +25,10 @@ unit zgl_opengles_all;
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
 
+{$IFDEF USE_TRIANGULATION}
+  {$LINKLIB libGLU.a}
+{$ENDIF}
+
 interface
 {$IFNDEF ANDROID}
 uses
@@ -428,15 +432,15 @@ var
 
 // Triangulation
   {$IFDEF USE_TRIANGULATION}
-  {procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
-  function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
-  function  gluNewTess: Integer; stdcall external libGLU;
-  procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
-  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
-  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external libGLU;
-  procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
-  procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
-  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;}
+  procedure gluDeleteTess(tess: Integer); stdcall external;
+  function  gluErrorString(error: Integer): PChar; stdcall external;
+  function  gluNewTess: Integer; stdcall external;
+  procedure gluTessBeginContour(tess: Integer); stdcall external;
+  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external;
+  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external;
+  procedure gluTessEndContour(tess: Integer); stdcall external;
+  procedure gluTessEndPolygon(tess: Integer); stdcall external;
+  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external;
   {$ENDIF}
 
 // EGL
