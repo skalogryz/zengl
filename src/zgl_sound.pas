@@ -1282,6 +1282,7 @@ begin
         end;
     end;
 
+  sfStream[ id ]._decoder.Close();
   thread_EventDestroy( sfEvent[ id ] );
   EndThread( 0 );
 end;
