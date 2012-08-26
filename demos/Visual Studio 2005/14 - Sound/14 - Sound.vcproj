@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8,00"
 	Name="14 - Sound"
-	ProjectGUID="{2AF57833-0AEE-45CE-8743-AEB1543E6E66}"
+	ProjectGUID="{2AF57833-0AEE-45ce-8743-AEB1543E6E66}"
 	RootNamespace="My14Sound"
 	Keyword="Win32Proj"
 	>
