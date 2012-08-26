@@ -68,7 +68,7 @@ end;
 
 procedure pr2d_Line( X1, Y1, X2, Y2 : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
-  if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_LINE_LOOP, FX_BLEND or FX, nil ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -79,7 +79,7 @@ begin
         end;
       glEnable( GL_BLEND );
 
-      glBegin( GL_LINES );
+      glBegin( GL_LINE_LOOP );
     end;
 
   if FX and FX2D_VCA > 0 Then
