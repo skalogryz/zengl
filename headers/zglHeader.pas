@@ -64,11 +64,11 @@ type
   {$ENDIF}
 
   PByteArray     = ^TByteArray;
-  TByteArray     = array[ 0..65535 ] of Byte;
+  TByteArray     = array[ 0..High(LongWord) shr 1 - 1 ] of Byte;
   PWordArray     = ^TWordArray;
-  TWordArray     = array[ 0..32767 ] of Word;
+  TWordArray     = array[ 0..High(LongWord) shr 2 - 1 ] of Word;
   PLongWordArray = ^TLongWordArray;
-  TLongWordArray = array[ 0..16383 ] of LongWord;
+  TLongWordArray = array[ 0..High(LongWord) shr 3 - 1 ] of LongWord;
 
 type
   zglTStringList = record
