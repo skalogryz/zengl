@@ -18,4 +18,4 @@ win32: clean
 
 clean:
 	rm -f *.*~
-	rm -f -R ./tmp/*
+	rm -f -R ../tmp/*
