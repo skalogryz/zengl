@@ -14,6 +14,6 @@ Version of Direct3D can be set by defines in zgl_config.cfg
 
 Difference with the original ZenGL:
 - no support of compressed textures
-- tex_SetData doesn't work with textures, that was used like Render Target(available only in Direct3D9 Ex mode)
+- tex_SetData doesn't work with textures, that were used like Render Target(available only in Direct3D9 Ex mode)
 - no support of Windows 64 bit
 - scr_SetOptions won't return FALSE even if it fails
