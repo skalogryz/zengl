@@ -1509,7 +1509,7 @@ begin
      ( not Assigned( d3dTexArray[ RenderTexID ].Texture ) ) Then exit;
 
   d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
-  if d.Pool = D3DPOOL_MANAGED Then
+  if ( d.Pool = D3DPOOL_MANAGED ) or ( d.Usage = D3DUSAGE_DYNAMIC ) Then
     begin
       d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY );
       d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
