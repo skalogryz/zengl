@@ -18,6 +18,7 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with ZenGL. If not, see http://www.gnu.org/licenses/
 }
+// TODO: glTexSubImage2D doesn't work properly with level parameter
 unit zgl_direct3d_all;
 
 {$I zgl_config.cfg}
@@ -1417,15 +1418,21 @@ end;
 
 procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer);
   var
-    r : TD3DLockedRect;
-    a : TRect;
-    d : TD3DSurface_Desc;
+    r    : TD3DLockedRect;
+    a    : TRect;
+    s, d : TD3DSurface_Desc;
+    {$IFDEF USE_DIRECT3D8}
+    src, dst : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    src, dst : IDirect3DSurface9;
+    {$ENDIF}
 begin
   if ( RenderTexID > d3dTexCount ) or
      ( not Assigned( d3dTexArray[ RenderTexID ].Texture ) ) Then exit;
 
   d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
-  if ( d.Pool = D3DPOOL_MANAGED ) {$IFDEF USE_DIRECT3D9} or d3dCanD3DEx {$ENDIF} Then
+  if d.Pool = D3DPOOL_MANAGED Then
     begin
       a.Left   := xoffset;
       a.Top    := yoffset;
@@ -1434,7 +1441,57 @@ begin
       d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, @a, 0 );
       d3d_FillTexture( pixels, r.pBits, width, height, d.Width * 4 );
       d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
-    end;
+    end else
+      if d.Pool = D3DPOOL_DEFAULT Then
+        begin
+          {$IFDEF USE_DIRECT3D8}
+          d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
+          if Assigned( d3dResArray[ RenderTexID ] ) Then
+            begin
+              d3dResArray[ RenderTexID ].GetLevelDesc( level, s );
+              if ( s.Width < d.Width ) or ( s.Height < d.Height ) or ( s.Format <> d.Format ) Then
+                d3dResArray[ RenderTexID ] := nil;
+            end;
+          if not Assigned( d3dResArray[ RenderTexID ] ) Then
+            d3dDevice.CreateTexture( d.Width, d.Height, 1, 0, d.Format, D3DPOOL_MANAGED, d3dResArray[ RenderTexID ] );
+
+          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, src );
+          d3dResArray[ RenderTexID ].GetSurfaceLevel( level, dst );
+          d3dDevice.CopyRects( src, nil, 0, dst, nil );
+
+          d3dResArray[ RenderTexID ].LockRect( level, r, nil, 0 );
+          d3d_FillTexture( pixels, r.pBits, d.Width, d.Height );
+          d3dResArray[ RenderTexID ].UnlockRect( level );
+
+          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, dst );
+          d3dResArray[ RenderTexID ].GetSurfaceLevel( level, src );
+          d3dDevice.CopyRects( src, nil, 0, dst, nil );
+          {$ENDIF}
+          {$IFDEF USE_DIRECT3D9}
+          d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
+          if Assigned( d3dResArray[ RenderTexID ] ) Then
+            begin
+              d3dResArray[ RenderTexID ].GetDesc( s );
+              if ( s.Width < d.Width ) or ( s.Height < d.Height ) or ( s.Format <> d.Format ) Then
+                d3dResArray[ RenderTexID ] := nil;
+            end;
+          if not Assigned( d3dResArray[ RenderTexID ] ) Then
+            d3dDevice.CreateOffscreenPlainSurface( d.Width, d.Height, d.Format, D3DPOOL_SYSTEMMEM, d3dResArray[ RenderTexID ], nil );
+
+          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, src );
+          d3dDevice.GetRenderTargetData( src, d3dResArray[ RenderTexID ] );
+
+          d3dResArray[ RenderTexID ].LockRect( r, nil, 0 );
+          d3d_FillTexture( pixels, r.pBits, d.Width, d.Height );
+          d3dResArray[ RenderTexID ].UnlockRect();
+
+          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, dst );
+          d3dDevice.UpdateSurface( d3dResArray[ RenderTexID ], nil, dst, nil );
+          {$ENDIF}
+
+          src := nil;
+          dst := nil;
+        end;
 end;
 
 procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
@@ -1452,7 +1509,7 @@ begin
      ( not Assigned( d3dTexArray[ RenderTexID ].Texture ) ) Then exit;
 
   d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
-  if ( d.Pool = D3DPOOL_MANAGED ) {$IFDEF USE_DIRECT3D9} or d3dCanD3DEx {$ENDIF} Then
+  if d.Pool = D3DPOOL_MANAGED Then
     begin
       d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY );
       d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );

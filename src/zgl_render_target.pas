@@ -120,7 +120,6 @@ procedure rtarget_Save( Target : zglPTexture );
     src : IDirect3DSurface9;
     {$ENDIF}
 begin
-  d3dResArray[ Target.ID ] := nil;
   {$IFDEF USE_DIRECT3D8}
   d3dTexArray[ Target.ID ].Texture.GetLevelDesc( 0, d );
   if Assigned( d3dResArray[ Target.ID ] ) Then
