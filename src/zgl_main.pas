@@ -28,11 +28,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.3.1';
-  cs_Date     = '2012.08.12';
+  cs_ZenGL    = 'ZenGL 0.3.2';
+  cs_Date     = '2012.08.30';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 1;
+  cv_revision = 2;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
