@@ -27,11 +27,12 @@ interface
 uses
   Windows,
   {$IFDEF USE_DIRECT3D8}
-  DirectXGraphics
+  DirectXGraphics,
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
-  Direct3D9
+  Direct3D9,
   {$ENDIF}
+  zgl_types
   ;
 
 const
@@ -317,7 +318,7 @@ procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
 procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
 {$ENDIF}
 
-procedure d3d_FillTexture( const Src, Dst : Pointer; const Width, Height : Integer; const DstStride : Integer = 0 );
+procedure d3d_FillTexture( Src, Dst : PByteArray; const Width, Height : Integer; const DstStride : Integer = 0 );
 
 var
   d3dTexCount   : Integer;
@@ -345,7 +346,6 @@ uses
   zgl_textures,
   zgl_log,
   zgl_math_2d,
-  zgl_types,
   math;
 
 var
@@ -1345,9 +1345,8 @@ begin
     d3dTexArray[ RenderTexID ].Wrap := lWrap;
 end;
 
-procedure d3d_FillTexture( const Src, Dst : Pointer; const Width, Height : Integer; const DstStride : Integer = 0 );
+procedure d3d_FillTexture( Src, Dst : PByteArray; const Width, Height : Integer; const DstStride : Integer = 0 );
   var
-    d, s : Ptr;
     i, j, w, stride : Integer;
 begin
   if psiUnpackRowLength > 0 Then
@@ -1359,21 +1358,30 @@ begin
   else
     stride := 0;
 
-  d := Ptr( Dst );
-  s := Ptr( Src );
-  for j := 0 to Height - 1 do
+  if stride = 0 Then
     begin
-      for i := 0 to w - 1 do
+      Move( Src^, Dst^, w * Height * 4 );
+      for i := 0 to w * Height - 1 do
         begin
-          PByte( d + 2 )^ := PByte( s + 0 )^;
-          PByte( d + 1 )^ := PByte( s + 1 )^;
-          PByte( d + 0 )^ := PByte( s + 2 )^;
-          PByte( d + 3 )^ := PByte( s + 3 )^;
-          INC( d, 4 );
-          INC( s, 4 );
+          Dst[ 2 ] := Src[ 0 ];
+          Dst[ 0 ] := Src[ 2 ];
+          INC( PByte( Dst ), 4 );
+          INC( PByte( Src ), 4 );
         end;
-      INC( d, stride );
-    end;
+    end else
+      for j := 0 to Height - 1 do
+        begin
+          for i := 0 to w - 1 do
+            begin
+              Dst[ 2 ] := Src[ 0 ];
+              Dst[ 1 ] := Src[ 1 ];
+              Dst[ 0 ] := Src[ 2 ];
+              Dst[ 3 ] := Src[ 3 ];
+              INC( PByte( Dst ), 4 );
+              INC( PByte( Src ), 4 );
+            end;
+          INC( PByte( Dst ), stride );
+        end;
 end;
 
 procedure glPixelStorei(pname: GLenum; param: GLint);
