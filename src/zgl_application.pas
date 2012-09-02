@@ -473,6 +473,6 @@ initialization
   app_PLoop       := @app_MainLoop;
   app_PCloseQuery := @app_CloseQuery;
 
-  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE or APP_USE_DT_CORRECTION;
+  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE or APP_USE_AUTOPAUSE or APP_USE_DT_CORRECTION;
 
 end.
