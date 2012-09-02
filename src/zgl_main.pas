@@ -49,7 +49,7 @@ const
   cs_Date     = '2012.09.02';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 2;
+  cv_revision = 1;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;

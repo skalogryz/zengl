@@ -130,7 +130,7 @@ begin
       wnd_ShowCursor( TRUE );
 
     {$IFDEF LINUX}
-      glist  := gtk_container_children( GTK_CONTAINER( PGtkWidget( Form1.Handle ) ) );
+      glist  := gtk_container_children( GTK_CONTAINER( PGtkWidget( Panel1.Handle ) ) );
       widget := PGtkWidget( glist.data );
       socket := gtk_socket_new();
       gtk_container_add( GTK_CONTAINER( widget ), socket );
