@@ -25,7 +25,7 @@ unit zgl_touch;
 interface
 
 const
-  MAX_TOUCH = 5;
+  MAX_TOUCH = {$IFDEF iOS} 5 {$ELSE} 32 {$ENDIF};
 
 function touch_X( Finger : Byte ) : Integer;
 function touch_Y( Finger : Byte ) : Integer;
