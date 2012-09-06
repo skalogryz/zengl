@@ -4,7 +4,7 @@ object Form1: TForm1
   Top = 184
   Width = 800
   ActiveControl = Panel1
-  Caption = 'ZenFont 0.2.5(LCL)'
+  Caption = 'ZenFont 0.2.6(LCL)'
   ClientHeight = 600
   ClientWidth = 800
   Constraints.MinHeight = 600
