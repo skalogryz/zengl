@@ -45,13 +45,8 @@ implementation
 uses
   zgl_application,
   zgl_screen,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_camera_2d;
 

@@ -91,12 +91,7 @@ var
 implementation
 uses
   zgl_main,
-  {$IFNDEF USE_GLES}
-  zgl_opengl_all
-  {$ELSE}
-  zgl_opengles_all
-  {$ENDIF}
-  ;
+  zgl_direct3d_all;
 
 {$IFDEF USE_TRIANGULATION}
 var
@@ -239,10 +234,6 @@ end;
 
 // GLU Triangulation
 {$IFDEF USE_TRIANGULATION}
-{$IFDEF UNIX}
-  {$DEFINE stdcall := cdecl}
-{$ENDIF}
-
 procedure tessBegin( Mode : Integer ); stdcall;
 begin
   tessMode    := Mode;

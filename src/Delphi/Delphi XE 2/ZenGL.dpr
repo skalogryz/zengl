@@ -103,12 +103,7 @@ uses
   ;
 
 const
-// I hate Apple! :)
-  {$IFDEF MACOSX}
-  prefix = '_';
-  {$ELSE}
   prefix = '';
-  {$ENDIF}
 
 exports
   // Main
