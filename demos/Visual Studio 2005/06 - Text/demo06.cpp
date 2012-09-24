@@ -35,8 +35,8 @@ void Draw()
 
 	batch2d_Begin();
 
-  // RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
-  // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
+	// RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
+	// EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
 
 	text_Draw( fntMain, 400, 25, "String with center alignment", TEXT_HALIGN_CENTER );
 
