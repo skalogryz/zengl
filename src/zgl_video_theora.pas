@@ -298,18 +298,7 @@ begin
                           ycbcr[ 0 ].stride, ycbcr[ 1 ].stride, -ycbcr[ 0 ].width * 4,
                           get_yuv2bgr565_table(), 0 );
 
-        {$IFDEF ANDROID}
-        INC( PByte( dataOrig ), 3 );
-        INC( PByte( Data ), 3 );
-        while ( Data <> dataOrig ) do
-          begin
-            PByte( Data )^ := 255;
-            DEC( PByte( Data ), 4 );
-          end;
-        DEC( PByte( Data ), 3 );
-        {$ELSE}
         Data := dataOrig;
-        {$ENDIF}
       {$ELSE}
         INC( PByte( Data ), ( ycbcr[ 0 ].height - 1 ) * ycbcr[ 0 ].width * 4 );
         for j := 0 to ycbcr[ 0 ].height - 1 do

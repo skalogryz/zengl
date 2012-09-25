@@ -14,13 +14,12 @@ uses
   ExtCtrls,
 
 {$IFDEF LINUX}
-  {$IFDEF LCLGTK2}
-  GTK2, GDK2x, GTK2Proc,
+  {$IFDEF LCLGTK}
+  GLib, GTK, GDK,
   {$ENDIF}
-{$ENDIF}
-
-{$IFDEF MACOSX}
-  CarbonPrivate,
+  {$IFDEF LCLGTK2}
+  GLib2, GTK2, GDK2, GDK2x,
+  {$ENDIF}
 {$ENDIF}
 
   {$IFDEF USE_ZENGL_STATIC}
@@ -53,8 +52,7 @@ type
 var
   Form1: TForm1;
 
-  zglInited  : Boolean;
-  zglResized : Boolean;
+  zglInited : Boolean;
 
 implementation
 
@@ -68,23 +66,13 @@ begin
 
   // RU: Перед стартом необходимо настроить viewport.
   // EN: Before the start need to configure a viewport.
-  wnd_SetPos( Form1.Panel1.Left, Form1.Panel1.Top );
-  wnd_SetSize( Form1.Panel1.Width, Form1.Panel1.ClientHeight );
+  wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight );
 
   Form1.BringToFront();
 end;
 
 procedure Draw;
 begin
-  // RU: Необходимо обновлять viewport как только изменились размеры контрола, куда был инициализирован ZenGL.
-  // EN: Viewport should be updated as soon as size of control was changed.
-  if zglResized Then
-    begin
-      zglResized := FALSE;
-      wnd_SetPos( Form1.Panel1.Left, Form1.Panel1.Top );
-      wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight );
-    end;
-
   pr2d_Rect( 10, 10, 800 - 30, 600 - 30, $FF0000, 255 );
 
   // RU: Т.к. ZenGL перехватывает "управление" нужно выполнять обработку интерфейса вручную.
@@ -107,6 +95,8 @@ procedure TForm1.FormActivate(Sender: TObject);
 {$IFDEF LINUX}
   var
     widget : PGtkWidget;
+    socket : PGtkWidget;
+    glist  : PGlist;
 {$ENDIF}
 begin
   if not zglInited Then
@@ -125,21 +115,25 @@ begin
       wnd_ShowCursor( TRUE );
 
     {$IFDEF LINUX}
+      glist  := gtk_container_children( GTK_CONTAINER( PGtkWidget( Panel1.Handle ) ) );
+      widget := PGtkWidget( glist.data );
+      socket := gtk_socket_new();
+      gtk_container_add( GTK_CONTAINER( widget ), socket );
+
+      gtk_widget_show( socket );
+      gtk_widget_show( widget );
+
+      gtk_widget_realize( socket );
+      {$IFDEF LCLGTK}
+      zgl_InitToHandle( ( PGdkWindowPrivate( widget.window ) ).xwindow );
+      {$ENDIF}
       {$IFDEF LCLGTK2}
-      widget := GetFixedWidget( PGtkWidget( Panel1.Handle ) );
-      gtk_widget_realize( widget );
       zgl_InitToHandle( GDK_WINDOW_XID( widget.window ) );
       {$ENDIF}
     {$ENDIF}
 
     {$IFDEF WINDOWS}
       zgl_InitToHandle( Panel1.Handle );
-    {$ENDIF}
-
-    {$IFDEF MACOSX}
-      // RU: В MacOS X инициализироваться нужно в форму, даже если рисовать надо в другом контроле.
-      // EN: For MacOS X initialization should be done into form, even if rendering will be into another control.
-      zgl_InitToHandle( LongWord( TCarbonWindow( Form1.Handle ).Window ) );
     {$ENDIF}
 
       Application.Terminate();
@@ -157,9 +151,10 @@ end;
 
 procedure TForm1.Panel1Resize(Sender: TObject);
 begin
-  // RU: Установим флаг, что размер контрола изменился.
-  // EN: Set a flag that size of control has been changed.
-  zglResized := TRUE;
+  // RU: Необходимо обновлять viewport как только изменились размеры контрола, куда был инициализирован ZenGL.
+  // EN: Viewport should be updated as soon as size of control was changed.
+  if zglInited Then
+    wnd_SetSize( Panel1.ClientWidth, Panel1.ClientHeight );
 end;
 
 end.

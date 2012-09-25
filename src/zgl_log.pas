@@ -54,32 +54,12 @@ begin
   appLog   := TRUE;
   logStart := Round( timer_GetTicks() );
 
-  {$IFDEF LINUX}
   if not Assigned( logFile ) Then
     logFile := utf8_GetPAnsiChar( 'log.txt' )
-  {$ENDIF}
-  {$IFDEF WINDESKTOP}
-  if not Assigned( logFile ) Then
-    logFile := utf8_GetPAnsiChar( 'log.txt' )
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  if not Assigned( logFile ) Then
-    logFile := utf8_GetPAnsiChar( appWorkDir + '../log.txt' )
-  {$ENDIF}
-  {$IFDEF WINCE}
-  if not Assigned( logFile ) Then
-    logFile := utf8_GetPAnsiChar( 'log.txt' )
-  {$ENDIF}
-  {$IFDEF iOS}
-  if not Assigned( logFile ) Then
-    logFile := utf8_GetPAnsiChar( appHomeDir + 'log.txt' )
-  {$ENDIF}
   else
     logFile := utf8_GetPAnsiChar( logFile );
 
-  {$IFNDEF ANDROID}
   file_Open( log, logFile, FOM_CREATE );
-  {$ENDIF}
   // crazy code :)
   es := '';
   for i := 0 to Length( cs_ZenGL + ' (' + cs_Date + ')' ) + 7 do
@@ -105,20 +85,12 @@ procedure log_Add( const Message : UTF8String; Timings : Boolean = TRUE );
     str : UTF8String;
 begin
   if not appLog Then exit;
-  {$IF ( DEFINED(LINUX) or DEFINED(iOS) ) and ( not DEFINED(ANDROID) )}
-  if ( appLog ) and ( Pos( 'ERROR: ', Message ) = 0 ) and ( Pos( 'WARNING: ', Message ) = 0 ) Then
-    printf( PAnsiChar( Message + #10 ), [ nil ] );
-  {$IFEND}
   if Timings Then
     str := log_Timing + Message + #13#10
   else
     str := Message + #13#10;
 
-  {$IFNDEF ANDROID}
   file_Write( log, str[ 1 ], Length( str ) );
-  {$ELSE}
-  __android_log_write( 3, 'ZenGL', PAnsiChar( log_Timing + Message ) );
-  {$ENDIF}
 
   {$IFDEF USE_LOG_FLUSH}
   log_Flush();

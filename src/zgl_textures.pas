@@ -107,10 +107,6 @@ function  tex_Create( var Data : PByteArray; Width, Height : Word; Format : Word
 function  tex_CreateZero( Width, Height : Word; Color : LongWord = $000000; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromFile( const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
 function  tex_LoadFromMemory( const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
-{$IFDEF ANDROID}
-procedure tex_RestoreFromFile( var Texture : zglPTexture; const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D );
-procedure tex_RestoreFromMemory( var Texture : zglPTexture; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D );
-{$ENDIF}
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 procedure tex_SetMask( var Texture : zglPTexture; Mask : zglPTexture );
 procedure tex_CalcTexCoords( var Texture : zglTTexture; FramesX : Integer = 1; FramesY : Integer = 1 );
@@ -136,13 +132,9 @@ var
 implementation
 uses
   zgl_main,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_screen,
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_resources,
   zgl_file,
@@ -214,9 +206,7 @@ function tex_CreateGL( var Texture : zglTTexture; pData : PByteArray ) : Boolean
     size   : LongWord;
 begin
   if Texture.Flags and TEX_COMPRESS >= 1 Then
-  {$IFNDEF USE_GLES}
     if not oglCanS3TC Then
-  {$ENDIF}
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
   width  := Round( Texture.Width / Texture.U );
@@ -230,11 +220,7 @@ begin
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-  {$IFDEF USE_GLES}
-  if ( ( not oglCanPVRTC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_DXT1 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT3 ) or ( Texture.Format = TEX_FORMAT_RGBA_DXT5 ) ) ) or
-  {$ELSE}
   if ( ( not oglCanS3TC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_PVR2 ) or ( Texture.Format = TEX_FORMAT_RGBA_PVR4 ) ) ) or
-  {$ENDIF}
     ( ( width > oglMaxTexSize ) or ( height > oglMaxTexSize ) ) Then
     begin
       glDisable( GL_TEXTURE_2D );
@@ -243,7 +229,6 @@ begin
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-  {$IFNDEF USE_GLES}
   if ( not oglCanAutoMipMap ) and ( Texture.Flags and TEX_MIPMAP > 0 ) Then
     begin
       if Texture.Flags and TEX_COMPRESS = 0 Then
@@ -251,28 +236,18 @@ begin
       else
         gluBuild2DMipmaps( GL_TEXTURE_2D, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
     end else
-  {$ENDIF}
       begin
         if Texture.Flags and TEX_COMPRESS = 0 Then
           begin
             case Texture.Format of
               TEX_FORMAT_RGBA: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
               TEX_FORMAT_RGBA_4444: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, pData );
-              {$IFDEF USE_GLES}
-              TEX_FORMAT_RGBA_PVR2: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, width, height, 0, size, pData );
-              TEX_FORMAT_RGBA_PVR4: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, width, height, 0, size, pData );
-              {$ELSE}
               TEX_FORMAT_RGBA_DXT1: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, width, height, 0, size, pData );
               TEX_FORMAT_RGBA_DXT3: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, width, height, 0, size, pData );
               TEX_FORMAT_RGBA_DXT5: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, size, pData );
-              {$ENDIF}
             end;
-          {$IFDEF USE_GLES}
-          end;
-          {$ELSE}
           end else
             glTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
-          {$ENDIF}
       end;
 
   oglVRAMUsed := oglVRAMUsed + size;
@@ -349,7 +324,7 @@ begin
       exit;
     end;
 
-  if format = TEX_FORMAT_RGBA Then
+  if Format = TEX_FORMAT_RGBA Then
     begin
       if Flags and TEX_CALCULATE_ALPHA > 0 Then
         begin
@@ -399,7 +374,7 @@ begin
       exit;
     end;
 
-  if format = TEX_FORMAT_RGBA Then
+  if Format = TEX_FORMAT_RGBA Then
     begin
       if Flags and TEX_CALCULATE_ALPHA > 0 Then
         begin
@@ -412,115 +387,6 @@ begin
 
   FreeMem( pData );
 end;
-
-{$IFDEF ANDROID}
-procedure tex_RestoreFromFile( var Texture : zglPTexture; const FileName : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D );
-  var
-    i      : Integer;
-    ext    : UTF8String;
-    pData  : PByteArray;
-    w, h   : Word;
-    format : Word;
-    res    : zglTTextureResource;
-begin
-  pData  := nil;
-
-  if ( not resUseThreaded ) and ( not file_Exists( FileName ) ) Then
-    begin
-      Texture.ID := managerZeroTexture.ID;
-      log_Add( 'Cannot read "' + FileName + '"' );
-      exit;
-    end;
-
-  ext := u_StrUp( file_GetExtension( FileName ) );
-  for i := managerTexture.Count.Formats - 1 downto 0 do
-    if ext = managerTexture.Formats[ i ].Extension Then
-      if resUseThreaded Then
-        begin
-          res.FileName         := FileName;
-          res.Texture          := Texture;
-          res.FileLoader       := managerTexture.Formats[ i ].FileLoader;
-          res.TransparentColor := TransparentColor;
-          res.Flags            := Flags;
-          res_AddToQueue( RES_TEXTURE_RESTORE, TRUE, @res );
-          exit;
-        end else
-          managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h, format );
-
-  if not Assigned( pData ) Then
-    begin
-      Texture.ID := managerZeroTexture.ID;
-      log_Add( 'Unable to restore texture: "' + FileName + '"' );
-      exit;
-    end;
-
-  if format = TEX_FORMAT_RGBA Then
-    begin
-      if Flags and TEX_CALCULATE_ALPHA > 0 Then
-        begin
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-          tex_CalcAlpha( pData, w, h );
-        end else
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-    end;
-  Texture.Flags := Flags;
-  tex_CalcFlags( Texture^, pData );
-  tex_CreateGL( Texture^, pData );
-
-  log_Add( 'Texture restored: "' + FileName + '"' );
-
-  FreeMem( pData );
-end;
-
-procedure tex_RestoreFromMemory( var Texture : zglPTexture; const Memory : zglTMemory; const Extension : UTF8String; TransparentColor : LongWord = TEX_NO_COLORKEY; Flags : LongWord = TEX_DEFAULT_2D );
-  var
-    i      : Integer;
-    ext    : UTF8String;
-    pData  : PByteArray;
-    w, h   : Word;
-    format : Word;
-    res    : zglTTextureResource;
-begin
-  pData  := nil;
-
-  ext := u_StrUp( Extension );
-  for i := managerTexture.Count.Formats - 1 downto 0 do
-    if ext = managerTexture.Formats[ i ].Extension Then
-      if resUseThreaded Then
-        begin
-          res.Memory           := Memory;
-          res.Texture          := Texture;
-          res.MemLoader        := managerTexture.Formats[ i ].MemLoader;
-          res.TransparentColor := TransparentColor;
-          res.Flags            := Flags;
-          res_AddToQueue( RES_TEXTURE_RESTORE, FALSE, @res );
-          exit;
-        end else
-          managerTexture.Formats[ i ].MemLoader( Memory, pData, w, h, format );
-
-  if not Assigned( pData ) Then
-    begin
-      Texture.ID := managerZeroTexture.ID;
-      log_Add( 'Unable to restore texture: From Memory' );
-      exit;
-    end;
-
-  if format = TEX_FORMAT_RGBA Then
-    begin
-      if Flags and TEX_CALCULATE_ALPHA > 0 Then
-        begin
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-          tex_CalcAlpha( pData, w, h );
-        end else
-          tex_CalcTransparent( pData, TransparentColor, w, h );
-    end;
-  Texture.Flags := Flags;
-  tex_CalcFlags( Texture^, pData );
-  tex_CreateGL( Texture^, pData );
-
-  FreeMem( pData );
-end;
-{$ENDIF}
 
 procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
   var
@@ -927,41 +793,17 @@ begin
 end;
 
 procedure tex_SetData( Texture : zglPTexture; pData : PByteArray; X, Y, Width, Height : Word; Stride : Integer = 0 );
-  {$IFDEF USE_GLES}
-  var
-    pDataGLES : PByteArray;
-    i         : Integer;
-  {$ENDIF}
 begin
   batch2d_Flush();
 
   if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then exit;
 
-  {$IFDEF USE_GLES}
-  if Stride > Width Then
-    begin
-      GetMem( pDataGLES, Width * Height * 4 );
-      for i := 0 to Height - 1 do
-        Move( pData[ i * Stride * 4 ], pDataGLES[ i * Width * 4 ], Width * 4 );
-      pData := pDataGLES;
-    end else
-      pDataGLES := nil;
-  {$ENDIF}
-
   glEnable( GL_TEXTURE_2D );
-  {$IFNDEF USE_GLES}
   glPixelStorei( GL_UNPACK_ROW_LENGTH, Stride );
-  {$ENDIF}
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glTexSubImage2D( GL_TEXTURE_2D, 0, X, Texture.Height - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
-  {$IFNDEF USE_GLES}
   glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
-  {$ENDIF}
   glDisable( GL_TEXTURE_2D );
-
-  {$IFDEF USE_GLES}
-  FreeMem( pDataGLES );
-  {$ENDIF}
 end;
 
 procedure tex_GetData( Texture : zglPTexture; out pData : PByteArray );
@@ -976,42 +818,10 @@ begin
 
   GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * 4 );
 
-  {$IFNDEF USE_GLES}
   glEnable( GL_TEXTURE_2D );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
   glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
   glDisable( GL_TEXTURE_2D );
-  {$ELSE}
-  if not oglCanFBO Then exit;
-
-  if oglReadPixelsFBO = 0 Then
-    begin
-      glGenFramebuffers( 1, @oglReadPixelsFBO );
-      glGenRenderbuffers( 1, @oglReadPixelsRB );
-    end;
-  glBindFramebuffer( GL_FRAMEBUFFER, oglReadPixelsFBO );
-  glBindRenderbuffer( GL_RENDERBUFFER, oglReadPixelsRB );
-  glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ) );
-
-  glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture.ID, 0 );
-
-  glReadPixels( 0, 0, Round( Texture.Width / Texture.U ), Round( Texture.Height / Texture.V ), GL_RGBA, GL_UNSIGNED_BYTE, pData );
-
-  if oglTarget = TARGET_SCREEN Then
-    begin
-      {$IFNDEF iOS}
-      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-      glBindRenderbuffer( GL_RENDERBUFFER, 0 );
-      {$ELSE}
-      glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-      glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-      glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-      {$ENDIF}
-    end else
-      begin
-        // TODO:
-      end;
-  {$ENDIF}
 end;
 
 end.

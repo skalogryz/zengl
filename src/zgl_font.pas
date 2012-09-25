@@ -73,9 +73,6 @@ procedure font_Del( var Font : zglPFont );
 
 function font_LoadFromFile( const FileName : UTF8String ) : zglPFont;
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
-{$IFDEF ANDROID}
-procedure font_RestoreFromFile( var Font : zglPFont; const FileName : UTF8String );
-{$ENDIF}
 
 procedure font_Load( var fnt : zglPFont; var fntMem : zglTMemory );
 
@@ -197,45 +194,6 @@ begin
     log_Add( 'Unable to load font: From Memory' );
 end;
 
-{$IFDEF ANDROID}
-procedure font_RestoreFromFile( var Font : zglPFont; const FileName : UTF8String );
-  var
-    fntMem : zglTMemory;
-    i, j   : Integer;
-    dir    : UTF8String;
-    name   : UTF8String;
-    tmp    : UTF8String;
-    res    : zglTFontResource;
-begin
-  if resUseThreaded Then
-    begin
-      res.FileName := FileName;
-      res.Font     := Font;
-      res_AddToQueue( RES_FONT_RESTORE, TRUE, @res );
-      exit;
-    end;
-
-  if not file_Exists( FileName ) Then
-    begin
-      log_Add( 'Cannot read "' + FileName + '"' );
-      exit;
-    end;
-
-  dir  := file_GetDirectory( FileName );
-  name := file_GetName( FileName );
-  for i := 0 to Font.Count.Pages - 1 do
-    for j := managerTexture.Count.Formats - 1 downto 0 do
-      begin
-        tmp := dir + name + '-page' + u_IntToStr( i ) + '.' + u_StrDown( managerTexture.Formats[ j ].Extension );
-        if file_Exists( tmp ) Then
-          begin
-            tex_RestoreFromFile( Font.Pages[ i ], tmp, TEX_NO_COLORKEY, TEX_DEFAULT_2D );
-            break;
-          end;
-      end;
-end;
-{$ENDIF}
-
 procedure font_Load( var fnt : zglPFont; var fntMem : zglTMemory );
   var
     i     : Integer;
@@ -266,30 +224,13 @@ begin
     begin
       mem_Read( fntMem, c, 4 );
       zgl_GetMem( Pointer( fnt.CharDesc[ c ] ), SizeOf( zglTCharDesc ) );
-      {$IFDEF ENDIAN_BIG}
-      forceNoSwap := TRUE;
-      {$ENDIF}
       mem_Read( fntMem, fnt.CharDesc[ c ].Page, 4 );
-      {$IFDEF ENDIAN_BIG}
-      forceNoSwap := FALSE;
-      {$ENDIF}
       mem_Read( fntMem, fnt.CharDesc[ c ].Width, 1 );
       mem_Read( fntMem, fnt.CharDesc[ c ].Height, 1 );
       mem_Read( fntMem, fnt.CharDesc[ c ].ShiftX, 4 );
       mem_Read( fntMem, fnt.CharDesc[ c ].ShiftY, 4 );
       mem_Read( fntMem, fnt.CharDesc[ c ].ShiftP, 4 );
-      {$IFDEF ENDIAN_BIG}
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ].X, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ].Y, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 1 ].X, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 1 ].Y, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 2 ].X, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 2 ].Y, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].X, 4 );
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
-      {$ELSE}
       mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
-      {$ENDIF}
     end;
 end;
 

@@ -87,9 +87,6 @@ function  video_OpenFile( const FileName : UTF8String ) : zglPVideoStream;
 function  video_OpenMemory( const Memory : zglTMemory; const Extension : UTF8String ) : zglPVideoStream;
 procedure video_Update( var Stream : zglPVideoStream; Milliseconds : Double; Loop : Boolean = FALSE );
 procedure video_Seek( var Stream : zglPVideoStream; Milliseconds : Double );
-{$IFDEF ANDROID}
-procedure video_Restore( var Stream : zglPVideoStream );
-{$ENDIF}
 
 var
   managerVideo : zglTVideoManager;
@@ -248,28 +245,11 @@ begin
   frame        := Stream.Frame;
   Stream.Time  := Milliseconds;
   Stream.Frame := Trunc( Stream.Time / 1000  * Stream.Info.FrameRate );
-  if Stream.Frame <> frame Then
+  if ( Stream.Frame <> frame ) Then
     begin
       Stream._private.Decoder.Seek( Stream^, Milliseconds );
       video_Update( Stream, 0 );
     end;
 end;
-
-{$IFDEF ANDROID}
-procedure video_Restore( var Stream : zglPVideoStream );
-  var
-    pData : PByteArray;
-    time  : Double;
-begin
-  GetMem( pData, Round( Stream.Texture.Width / Stream.Texture.U ) * Round( Stream.Texture.Height / Stream.Texture.V ) * 4 );
-  FillChar( pData, Round( Stream.Texture.Width / Stream.Texture.U ) * Round( Stream.Texture.Height / Stream.Texture.V ) * 4, 255 );
-  tex_CreateGL( Stream.Texture^, pData );
-  FreeMem( pData );
-
-  time := Stream.Time;
-  video_Seek( Stream, 0 );
-  video_Seek( Stream, time );
-end;
-{$ENDIF}
 
 end.
