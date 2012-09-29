@@ -33,28 +33,14 @@ unit zgl_textures_jpg;
 {$ENDIF}
 
 {$IFNDEF USE_LIBJPEG}
-  {$IFDEF WINDOWS}
-    {$DEFINE USE_OLEPICTURE}
-  {$ENDIF}
-  {$IFDEF iOS}
-    {$DEFINE USE_UIIMAGE}
-  {$ENDIF}
+  {$DEFINE USE_OLEPICTURE}
 {$ENDIF}
 
 interface
+
 uses
-  {$IFDEF WINDOWS}
   Windows,
   zgl_lib_msvcrt,
-  {$ENDIF}
-  {$IFDEF USE_UIIMAGE}
-  iPhoneAll,
-  CGContext,
-  CGGeometry,
-  CGImage,
-  CGBitmapContext,
-  CGColorSpace,
-  {$ENDIF}
   zgl_types,
   zgl_memory;
 
@@ -63,38 +49,33 @@ const
   JPEG_EXTENSION : UTF8String = 'JPEG';
 
 {$IFDEF USE_LIBJPEG}
-  {$IFNDEF ANDROID}
-    {$L jpeg_helper}
-    {$L jaricom}
-    {$L jcomapi}
-    {$L jdapimin}
-    {$L jdapistd}
-    {$L jdarith}
-    {$L jdatasrc}
-    {$L jdcoefct}
-    {$L jdcolor}
-    {$L jddctmgr}
-    {$L jdhuff}
-    {$L jdinput}
-    {$L jdmainct}
-    {$L jdmarker}
-    {$L jdmaster}
-    {$L jdmerge}
-    {$L jdpostct}
-    {$L jdsample}
-    {$L jerror}
-    {$L jidctflt}
-    {$L jidctfst}
-    {$L jidctint}
-    {$L jmemmgr}
-    {$L jmemnobs}
-    {$L jquant1}
-    {$L jquant2}
-    {$L jutils}
-  {$ENDIF}
-  {$IFDEF MACOSX}
-    {$LINKLIB libgcc.a}
-  {$ENDIF}
+  {$L jpeg_helper}
+  {$L jaricom}
+  {$L jcomapi}
+  {$L jdapimin}
+  {$L jdapistd}
+  {$L jdarith}
+  {$L jdatasrc}
+  {$L jdcoefct}
+  {$L jdcolor}
+  {$L jddctmgr}
+  {$L jdhuff}
+  {$L jdinput}
+  {$L jdmainct}
+  {$L jdmarker}
+  {$L jdmaster}
+  {$L jdmerge}
+  {$L jdpostct}
+  {$L jdsample}
+  {$L jerror}
+  {$L jidctflt}
+  {$L jidctfst}
+  {$L jidctint}
+  {$L jmemmgr}
+  {$L jmemnobs}
+  {$L jquant1}
+  {$L jquant2}
+  {$L jutils}
 {$ENDIF}
 
 procedure jpg_LoadFromFile( const FileName : UTF8String; out Data : PByteArray; out W, H, Format : Word );
@@ -215,19 +196,6 @@ type
   end;
 {$ENDIF}
 
-{$IFDEF USE_UIIMAGE}
-type
-  zglPJPGData = ^zglTJPGData;
-  zglTJPGData = record
-    Image   : UIImage;
-    Color   : CGColorSpaceRef;
-    Context : CGContextRef;
-    Data    : NSData;
-    Width   : Word;
-    Height  : Word;
-  end;
-{$ENDIF}
-
 {$IFDEF USE_LIBJPEG}
 function getmem_f( Size : Integer ) : PByte; cdecl;
 begin
@@ -318,21 +286,6 @@ begin
     jpg.Buffer := nil;
     jpg.Stream := nil;
   end;
-{$ENDIF}
-
-{$IFDEF USE_UIIMAGE}
-  jpg.Data    := NSData.alloc().init();
-  jpg.Data.initWithBytesNoCopy_length_freeWhenDone( Memory.Memory, Memory.Size, FALSE );
-  jpg.Image   := UIImage.imageWithData( jpg.Data );
-  jpg.Width   := Round( jpg.Image.size.width );
-  jpg.Height  := Round( jpg.Image.size.height );
-  jpg.Color   := CGImageGetColorSpace( jpg.Image.CGImage() );
-  GetMem( Data, jpg.Width * jpg.Height * 4 );
-  jpg.Context := CGBitmapContextCreate( Data, jpg.Width, jpg.Height, 8, jpg.Width * 4, jpg.Color, kCGImageAlphaPremultipliedLast );
-  CGContextTranslateCTM( jpg.Context, 0, jpg.Height );
-  CGContextScaleCTM( jpg.Context, 1, -1 );
-  CGContextDrawImage( jpg.Context, CGRectMake( 0, 0, jpg.Width, jpg.Height ), jpg.Image.CGImage() );
-  CGContextRelease( jpg.Context );
 {$ENDIF}
 
   W      := jpg.Width;

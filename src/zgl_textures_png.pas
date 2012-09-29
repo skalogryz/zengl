@@ -27,9 +27,7 @@ unit zgl_textures_png;
 
 interface
 uses
-  {$IFDEF WINDESKTOP}
   zgl_lib_msvcrt,
-  {$ENDIF}
   zgl_lib_zip,
   zgl_types,
   zgl_memory;
@@ -403,9 +401,6 @@ procedure png_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; 
     pngChunk        : zglTPNGChunk;
     pngHeaderOk     : Boolean;
 begin
-  {$IFDEF ENDIAN_BIG}
-  forceNoSwap := TRUE;
-  {$ENDIF}
   pngMem      := Memory;
   pngHasIDAT  := FALSE;
   pngHeaderOk := FALSE;
@@ -471,9 +466,6 @@ begin
 _exit:
   begin
     pngHastRNS  := FALSE;
-    {$IFDEF ENDIAN_BIG}
-    forceNoSwap := FALSE;
-    {$ENDIF}
   end;
 end;
 

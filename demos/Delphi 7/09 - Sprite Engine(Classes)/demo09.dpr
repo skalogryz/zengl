@@ -2,7 +2,9 @@ program demo09;
 
 {$I zglCustomConfig.cfg}
 
-{$R *.res}
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
 
 uses
   zglSpriteEngine,

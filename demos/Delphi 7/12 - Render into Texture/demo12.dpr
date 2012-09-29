@@ -2,7 +2,9 @@ program demo12;
 
 {$I zglCustomConfig.cfg}
 
-{$R *.res}
+{$IFDEF WINDOWS}
+  {$R *.res}
+{$ENDIF}
 
 uses
   {$IFDEF USE_ZENGL_STATIC}

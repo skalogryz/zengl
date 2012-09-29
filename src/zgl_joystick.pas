@@ -26,33 +26,7 @@ unit zgl_joystick;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF LINUX}
-uses
-  BaseUnix;
-{$ENDIF}
 
-{$IFDEF LINUX}
-type
-  js_event = record
-    time   : LongWord; // event timestamp in milliseconds
-    value  : SmallInt; // value
-    _type  : Byte;     // event type
-    number : Byte;     // axis/button number
-  end;
-
-const
-  ABS_MAX = $3F;
-
-  JS_EVENT_BUTTON = $01; // button pressed/released
-  JS_EVENT_AXIS   = $02; // joystick moved
-  JS_EVENT_INIT   = $80; // initial state of device
-
-  JSIOCGNAME    = -2142213613;
-  JSIOCGAXMAP   = -2143262158;
-  JSIOCGAXES    = -2147390959;
-  JSIOCGBUTTONS = -2147390958;
-{$ENDIF}
-{$IFDEF WINDESKTOP}
   type
     PJOYCAPSW = ^TJOYCAPSW;
     TJOYCAPSW = packed record
@@ -131,7 +105,6 @@ const
   function joyGetNumDevs : LongWord; stdcall; external 'winmm.dll' name 'joyGetNumDevs';
   function joyGetDevCapsW( uJoyID : LongWord; lpCaps : PJOYCAPSW; uSize : LongWord ) : LongWord; stdcall; external 'winmm.dll' name 'joyGetDevCapsW';
   function joyGetPosEx( uJoyID : LongWord; lpInfo : PJOYINFOEX ) : LongWord; stdcall; external 'winmm.dll' name 'joyGetPosEx';
-{$ENDIF}
 
 type
   zglPJoyInfo = ^zglTJoyInfo;
@@ -157,14 +130,8 @@ type
 type
   zglPJoy = ^zglTJoy;
   zglTJoy = record
-    {$IFDEF LINUX}
-    device  : LongInt;
-    axesMap : array[ 0..ABS_MAX - 1 ] of Byte;
-    {$ENDIF}
-    {$IFDEF WINDESKTOP}
     caps    : TJOYCAPSW;
     axesMap : array[ 0..5 ] of Byte;
-    {$ENDIF}
     Info    : zglTJoyInfo;
     State   : zglTJoyState;
   end;
@@ -185,15 +152,9 @@ const
   JOY_POVX   = 6;
   JOY_POVY   = 7;
 
-{$IFDEF LINUX}
-  JS_AXIS : array[ 0..17 ] of Byte = ( JOY_AXIS_X, JOY_AXIS_Y, JOY_AXIS_Z, JOY_AXIS_U, JOY_AXIS_V, JOY_AXIS_R, JOY_AXIS_Z, JOY_AXIS_R, 0, 0, 0, 0, 0, 0, 0, 0, JOY_POVX, JOY_POVY );
-{$ENDIF}
-{$IFDEF WINDESKTOP}
   JS_AXIS : array[ 0..5 ] of LongWord = ( 17 {X}, 19 {Y}, 21 {Z}, 26 {R}, 28 {U}, 30 {V} );
-{$ENDIF}
 
 function  joy_Init : Byte;
-procedure joy_Close;
 procedure joy_Proc;
 function  joy_GetInfo( JoyID : Byte ) : zglPJoyInfo;
 function  joy_AxisPos( JoyID, Axis : Byte ) : Single;
@@ -204,7 +165,6 @@ procedure joy_ClearState;
 
 implementation
 uses
-  zgl_file,
   zgl_log,
   zgl_math_2d,
   zgl_utils;
@@ -216,57 +176,9 @@ var
 function joy_Init : Byte;
   var
     i, j : Integer;
-  {$IFDEF WINDESKTOP}
     axis : Integer;
     caps : PLongWord;
-  {$ENDIF}
 begin
-{$IFDEF LINUX}
-  for i := 0 to 15 do
-    begin
-      joyArray[ joyCount ].device := FpOpen( '/dev/input/js' + u_IntToStr( i ), O_RDONLY or O_NONBLOCK );
-      if joyArray[ joyCount ].device = FILE_ERROR Then
-        joyArray[ joyCount ].device := FpOpen( '/dev/js' + u_IntToStr( i ), O_RDONLY or O_NONBLOCK );
-
-      if joyArray[ joyCount ].device <> FILE_ERROR Then
-        begin
-          SetLength( joyArray[ joyCount ].Info.Name, 256 );
-          FpIOCtl( joyArray[ joyCount ].device, JSIOCGNAME,    @joyArray[ joyCount ].Info.Name[ 1 ] );
-          FpIOCtl( joyArray[ joyCount ].device, JSIOCGAXMAP,   @joyArray[ joyCount ].axesMap[ 0 ] );
-          FpIOCtl( joyArray[ joyCount ].device, JSIOCGAXES,    @joyArray[ joyCount ].Info.Count.Axes );
-          FpIOCtl( joyArray[ joyCount ].device, JSIOCGBUTTONS, @joyArray[ joyCount ].Info.Count.Buttons );
-
-          for j := 0 to joyArray[ joyCount ].Info.Count.Axes - 1 do
-            with joyArray[ joyCount ].Info do
-              case joyArray[ joyCount ].axesMap[ j ] of
-                2, 6:   Caps := Caps or JOY_HAS_Z;
-                5, 7:   Caps := Caps or JOY_HAS_R;
-                3:      Caps := Caps or JOY_HAS_U;
-                4:      Caps := Caps or JOY_HAS_V;
-                16, 17: Caps := Caps or JOY_HAS_POV;
-              end;
-
-          for j := 1 to 255 do
-            if joyArray[ joyCount ].Info.Name[ j ] = #0 Then
-              begin
-                SetLength( joyArray[ joyCount ].Info.Name, j - 1 );
-                break;
-              end;
-
-          // Checking if joystick is a real one, because laptops with accelerometer can be detected as a joystick :)
-          if ( joyArray[ joyCount ].Info.Count.Axes >= 2 ) and ( joyArray[ joyCount ].Info.Count.Buttons > 0 ) Then
-            begin
-              log_Add( 'Joy: Find "' + joyArray[ joyCount ].Info.Name + '" (ID: ' + u_IntToStr( joyCount ) +
-                       '; Axes: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Axes ) +
-                       '; Buttons: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Buttons ) + ')' );
-
-              INC( joyCount );
-            end;
-        end else
-          break;
-    end;
-{$ENDIF}
-{$IFDEF WINDESKTOP}
   j := joyGetNumDevs();
   for i := 0 to j - 1 do
     if joyGetDevCapsW( i, @joyArray[ i ].caps, SizeOf( TJOYCAPSW ) ) = 0 Then
@@ -316,32 +228,15 @@ begin
         INC( joyCount );
       end else
         break;
-{$ENDIF}
 
   Result := joyCount;
   if Result = 0 Then
     log_Add( 'Joy: Couldn''t find joysticks' );
 end;
 
-procedure joy_Close;
-  {$IFDEF LINUX}
-  var
-    i : Integer;
-  {$ENDIF}
-begin
-  {$IFDEF LINUX}
-  for i := 0 to joyCount - 1 do
-    FpClose( joyArray[ i ].device );
-  {$ENDIF}
-end;
-
 procedure joy_Proc;
   var
     i : Integer;
-  {$IFDEF LINUX}
-    event : js_event;
-  {$ENDIF}
-  {$IFDEF WINDESKTOP}
     j, a  : Integer;
     btn   : Integer;
     state : TJOYINFOEX;
@@ -349,43 +244,9 @@ procedure joy_Proc;
     value : PLongWord;
     vMin  : LongWord;
     vMax  : LongWord;
-  {$ENDIF}
 begin
   if joyCount = 0 Then exit;
 
-{$IFDEF LINUX}
-  for i := 0 to joyCount - 1 do
-    begin
-      while FpRead( joyArray[ i ].device, event, 8 ) = 8 do
-        case event._type of
-          JS_EVENT_AXIS:
-            begin
-              joyArray[ i ].State.Axis[ JS_AXIS[ joyArray[ i ].axesMap[ event.number ] ] ] := Round( ( event.value / 32767 ) * 1000 ) / 1000;
-            end;
-          JS_EVENT_BUTTON:
-            case event.value of
-              0:
-                begin
-                  if joyArray[ i ].State.BtnDown[ event.number ] Then
-                    joyArray[ i ].State.BtnUp[ event.number ] := TRUE;
-
-                  joyArray[ i ].State.BtnDown[ event.number ] := FALSE;
-                end;
-              1:
-                begin
-                  joyArray[ i ].State.BtnDown[ event.number ] := TRUE;
-                  joyArray[ i ].State.BtnUp  [ event.number ] := FALSE;
-                  if joyArray[ i ].State.BtnCanPress[ event.number ] Then
-                    begin
-                      joyArray[ i ].State.BtnPress   [ event.number ] := TRUE;
-                      joyArray[ i ].State.BtnCanPress[ event.number ] := FALSE;
-                    end;
-                end;
-            end;
-        end;
-    end;
-{$ENDIF}
-{$IFDEF WINDESKTOP}
   state.dwSize := SizeOf( TJOYINFOEX );
   for i := 0 to joyCount - 1 do
     begin
@@ -432,7 +293,6 @@ begin
             end;
         end;
     end;
-{$ENDIF}
 end;
 
 function joy_GetInfo( JoyID : Byte ) : zglPJoyInfo;
@@ -489,10 +349,5 @@ begin
         state.BtnCanPress[ j ] := TRUE;
       end;
 end;
-
-initialization
-
-finalization
-  joy_Close();
 
 end.

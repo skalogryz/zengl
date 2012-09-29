@@ -30,31 +30,17 @@ unit zgl_lib_zip;
 {$ENDIF}
 
 {$L zlib_helper}
-{$IFDEF USE_ZLIB_STATIC}
-  {$L infback}
-  {$L inffast}
-  {$L inflate}
-  {$L inftrees}
-  {$L zutil}
-  {$L adler32}
-  {$L crc32}
-{$ELSE}
-  {$IF DEFINED(LINUX) and ( not DEFINED(ANDROID) )}
-    {$LINKLIB libz.so.1}
-  {$IFEND}
-  {$IFDEF ANDROID}
-    {$LINKLIB libz.so}
-  {$ENDIF}
-  {$IFDEF DARWIN}
-    {$LINKLIB libz.dylib}
-  {$ENDIF}
-{$ENDIF}
+{$L infback}
+{$L inffast}
+{$L inflate}
+{$L inftrees}
+{$L zutil}
+{$L adler32}
+{$L crc32}
 
 interface
 uses
-  {$IFDEF WINDESKTOP}
   zgl_lib_msvcrt,
-  {$ENDIF}
   zgl_memory,
   zgl_types;
 
@@ -100,7 +86,7 @@ type
     ch_comment_len   : cint;       // length of changed zip archive * comment, -1 if unchanged
     nentry           : cuint64;    // number of entries
     nentry_alloc     : cuint64;    // number of entries allocated
-    entry            : Pointer;    // zip_entry // entries
+    entry            : Pointer;    //zip_entry // entries
     nfile            : cint;       // number of opened files within archive
     nfile_alloc      : cint;       // number of files allocated
     file_            : array of Pzip_file; // opened files within archive

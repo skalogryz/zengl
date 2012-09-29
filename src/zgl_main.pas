@@ -24,27 +24,10 @@
 unit zgl_main;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
-  {$modeswitch objectivec1}
-{$ENDIF}
 
 interface
 uses
-  {$IFDEF UNIX}
-  BaseUnix,
-  {$ENDIF}
-  {$IFDEF USE_X11}
-  X, XRandr,
-  {$ENDIF}
-  {$IFDEF WINDOWS}
   Windows,
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll,
-  {$ENDIF}
-  {$IFDEF iOS}
-  iPhoneAll,
-  {$ENDIF}
   zgl_types;
 
 const
@@ -63,13 +46,6 @@ const
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
   SYS_CLOSE_QUERY        = $000008;
-  {$IFDEF iOS}
-  SYS_iOS_MEMORY_WARNING     = $000010;
-  SYS_iOS_CHANGE_ORIENTATION = $000011;
-  {$ENDIF}
-  {$IFDEF ANDROID}
-  SYS_ANDROID_RESTORE = $00000015;
-  {$ENDIF}
 
   INPUT_MOUSE_MOVE       = $000020;
   INPUT_MOUSE_PRESS      = $000021;
@@ -78,11 +54,6 @@ const
   INPUT_KEY_PRESS        = $000030;
   INPUT_KEY_RELEASE      = $000031;
   INPUT_KEY_CHAR         = $000032;
-  {$IFDEF iOS}
-  INPUT_TOUCH_MOVE       = $000040;
-  INPUT_TOUCH_PRESS      = $000041;
-  INPUT_TOUCH_RELEASE    = $000042;
-  {$ENDIF}
 
   TEX_FORMAT_EXTENSION   = $000100;
   TEX_FORMAT_FILE_LOADER = $000101;
@@ -116,7 +87,7 @@ const
   WINDOW_WIDTH            = 403;
   WINDOW_HEIGHT           = 404;
 
-  GAPI_CONTEXT            = 500;
+  GAPI_DEVICE             = 500;
   GAPI_MAX_TEXTURE_SIZE   = 501;
   GAPI_MAX_TEXTURE_UNITS  = 502;
   GAPI_MAX_ANISOTROPY     = 503;
@@ -158,11 +129,6 @@ const
   SND_CAN_PLAY          = $002000;
   SND_CAN_PLAY_FILE     = $004000;
   CLIP_INVISIBLE        = $008000;
-  {$IFDEF iOS}
-  SCR_ORIENTATION_PORTRAIT   = $100000;
-  SCR_ORIENTATION_LANDSCAPE  = $200000;
-  SND_ALLOW_BACKGROUND_MUSIC = $400000;
-  {$ENDIF}
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
 procedure zgl_InitToHandle( Handle : Ptr; FSAA : Byte = 0; StencilBits : Byte = 0 );
@@ -182,21 +148,11 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
-  {$IF DEFINED(LINUX) or DEFINED(WINDOWS) or DEFINED(iOS)}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_file,
-  {$IFEND}
   zgl_timers,
   zgl_log,
-  {$IFDEF iOS}
-  zgl_touch,
-  {$ENDIF}
   zgl_mouse,
   zgl_keyboard,
   zgl_render,
@@ -250,25 +206,16 @@ begin
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
 
-  {$IFDEF iOS}
-  if not appPoolInitialized Then
-    begin
-      appPoolInitialized := TRUE;
-      app_InitPool();
-      ExitCode := UIApplicationMain( argc, argv, nil, utf8_GetNSString( 'zglCAppDelegate' ) );
-      app_FreePool();
-      exit;
-    end;
-  {$ENDIF}
-
   zgl_GetSysDir();
   log_Init();
 
-  appInitialized := TRUE;
   if not scr_Create() Then exit;
-  if not gl_Create() Then exit;
+  appInitialized := TRUE;
+  if wndHeight >= zgl_Get( DESKTOP_HEIGHT ) Then
+    wndFullScreen := TRUE;
+
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
-  if not gl_Initialize() Then exit;
+  if not d3d_Create() Then exit;
 
   InitSoundVideo();
 
@@ -276,32 +223,10 @@ begin
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
 
-  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
-  if wndFullScreen Then
-    scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
-  {$IFEND}
-  {$IFDEF iOS}
-  key_BeginReadText( '' );
-  key_EndReadText();
-  scr_SetOptions( scrDesktopW, scrDesktopH, 0, TRUE, TRUE );
-  {$ENDIF}
-
+  d3d_BeginScene();
   app_PInit();
-  {$IFDEF iOS}
-  if ( UIDevice.currentDevice.systemVersion.floatValue() >= 3.1 ) Then
-    begin
-      scrDisplayLink := CADisplayLink.displayLinkWithTarget_selector( appDelegate, objcselector( 'MainLoop' ) );
-      scrDisplayLink.setFrameInterval( 1 );
-      scrDisplayLink.addToRunLoop_forMode( NSRunLoop.currentRunLoop(), NSDefaultRunLoopMode );
-    end else
-      NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats( 1 / 60, appDelegate, objcselector( 'MainLoop' ), nil, TRUE );
-  exit;
-  {$ENDIF}
-  {$IFDEF ANDROID}
-  exit;
-  {$ENDIF}
-
   app_PLoop();
+  d3d_EndScene();
   zgl_Destroy();
 end;
 
@@ -312,21 +237,11 @@ begin
 
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
-
-  appInitedToHandle := TRUE;
   if not scr_Create() Then exit;
-  if not gl_Create() Then exit;
-  {$IFDEF USE_X11}
-  wndHandle := TWindow( Handle );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  wndHandle := HWND( Handle );
-  wndDC     := GetDC( wndHandle );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  wndHandle := WindowRef( Handle );
-  {$ENDIF}
-  if not gl_Initialize() Then exit;
+  appInitedToHandle := TRUE;
+  wndHandle := Handle;
+  //wndDC := GetDC( wnd_Handle );
+  if not d3d_Create() Then exit;
 
   InitSoundVideo();
 
@@ -334,8 +249,10 @@ begin
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
 
+  d3d_BeginScene();
   app_PInit();
   app_PLoop();
+  d3d_EndScene();
   zgl_Destroy();
 end;
 
@@ -414,8 +331,8 @@ begin
   {$ENDIF}
 
   scr_Destroy();
-  gl_Destroy();
   wnd_Destroy();
+  d3d_Destroy();
 
   {$IFDEF USE_OGG}
   FreeVorbis();
@@ -476,22 +393,6 @@ begin
         app_PCloseQuery := UserData;
         if not Assigned( app_PCloseQuery ) Then app_PCloseQuery := @app_CloseQuery;
       end;
-    {$IFDEF iOS}
-    SYS_iOS_MEMORY_WARNING:
-      begin
-        app_PMemoryWarn := UserData;
-      end;
-    SYS_iOS_CHANGE_ORIENTATION:
-      begin
-        app_POrientation := UserData;
-      end;
-    {$ENDIF}
-    {$IFDEF ANDROID}
-    SYS_ANDROID_RESTORE:
-      begin
-        app_PRestore := UserData;
-      end;
-    {$ENDIF}
     // Input events
     INPUT_MOUSE_MOVE:
       begin
@@ -521,20 +422,6 @@ begin
       begin
         key_PInputChar := UserData;
       end;
-    {$IFDEF iOS}
-    INPUT_TOUCH_MOVE:
-      begin
-        touch_PMove := UserData;
-      end;
-    INPUT_TOUCH_PRESS:
-      begin
-        touch_PPress := UserData;
-      end;
-    INPUT_TOUCH_RELEASE:
-      begin
-        touch_PRelease := UserData;
-      end;
-    {$ENDIF}
     // Textures
     TEX_FORMAT_EXTENSION:
       begin
@@ -613,38 +500,18 @@ begin
         Result := Ptr( @logfile );
 
     DESKTOP_WIDTH:
-    {$IFDEF USE_X11}
-      Result := PXRRScreenSize( scrModeList + scrDesktop ).width;
-    {$ENDIF}
-    {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsWidth;
-    {$ENDIF}
-    {$IF DEFINED(DARWIN) or DEFINED(ANDROID)}
-      Result := scrDesktopW;
-    {$IFEND}
     DESKTOP_HEIGHT:
-    {$IFDEF USE_X11}
-      Result := PXRRScreenSize( scrModeList + scrDesktop ).height;
-    {$ENDIF}
-    {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsHeight;
-    {$ENDIF}
-    {$IF DEFINED(DARWIN) or DEFINED(ANDROID)}
-      Result := scrDesktopH;
-    {$IFEND}
     RESOLUTION_LIST: Result := Ptr( @scrResList );
 
-    {$IFNDEF iOS}
     WINDOW_HANDLE: Result := Ptr( wndHandle );
-    {$ENDIF}
     WINDOW_X: Result := Ptr( wndX );
     WINDOW_Y: Result := Ptr( wndY );
     WINDOW_WIDTH: Result := Ptr( wndWidth );
     WINDOW_HEIGHT: Result := Ptr( wndHeight );
 
-    {$IFNDEF NO_EGL}
-    GAPI_CONTEXT: Result := Ptr( oglContext );
-    {$ENDIF}
+    GAPI_DEVICE: Result := Ptr( d3dDevice );
     GAPI_MAX_TEXTURE_SIZE: Result := oglMaxTexSize;
     GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
     GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
@@ -677,21 +544,6 @@ begin
 end;
 
 procedure zgl_GetSysDir;
-{$IFDEF LINUX}
-begin
-  {$IFNDEF ANDROID}
-  appWorkDir := './';
-  appHomeDir := FpGetEnv( 'XDG_CONFIG_HOME' );
-  if appHomeDir = '' Then
-    appHomeDir := FpGetEnv( 'HOME' ) + '/.config/'
-  else
-    appHomeDir := appHomeDir + '/';
-  // for some old distros
-  if not file_Exists( appHomeDir ) Then
-    file_MakeDir( appHomeDir );
-  {$ENDIF}
-{$ENDIF}
-{$IFDEF WINDOWS}
   const
     APPDATA : PWideChar = 'APPDATA'; // workaround for Delphi 7
   var
@@ -714,29 +566,6 @@ begin
   WideCharToMultiByte( CP_UTF8, 0, fn, 32768, @appHomeDir[ 1 ], len, nil, nil );
   appHomeDir[ len + 1 ] := '\';
   FreeMem( fn );
-{$ENDIF}
-{$IFDEF MACOSX}
-  var
-    appBundle   : CFBundleRef;
-    appCFURLRef : CFURLRef;
-    appCFString : CFStringRef;
-    appPath     : array[ 0..8191 ] of AnsiChar;
-begin
-  appBundle   := CFBundleGetMainBundle();
-  appCFURLRef := CFBundleCopyBundleURL( appBundle );
-  appCFString := CFURLCopyFileSystemPath( appCFURLRef, kCFURLPOSIXPathStyle );
-  CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
-  appWorkDir  := appPath + '/';
-  appHomeDir  := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
-{$ENDIF}
-{$IFDEF iOS}
-begin
-  appWorkDir := file_GetDirectory( ParamStr( 0 ) );
-  appHomeDir := FpGetEnv( 'HOME' ) + '/Documents/';
-  if not file_Exists( appHomeDir ) Then
-    file_MakeDir( appHomeDir );
-{$ENDIF}
-  appGotSysDirs := TRUE;
 end;
 
 procedure zgl_GetMem( out Mem : Pointer; Size : LongWord );
@@ -794,21 +623,6 @@ begin
 
   if What and CLIP_INVISIBLE > 0 Then
     render2dClip := TRUE;
-
-{$IFDEF iOS}
-  if What and SCR_ORIENTATION_PORTRAIT > 0 Then
-    scrCanPortrait := TRUE;
-
-  if What and SCR_ORIENTATION_LANDSCAPE > 0 Then
-    scrCanLandscape := TRUE;
-
-  if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
-    begin
-      sndAllowBackgroundMusic := 1;
-      if sndInitialized Then
-        AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
-    end;
-{$ENDIF}
 end;
 
 procedure zgl_Disable( What : LongWord );
@@ -848,21 +662,6 @@ begin
 
   if What and CLIP_INVISIBLE > 0 Then
     render2dClip := FALSE;
-
-{$IFDEF iOS}
-  if What and SCR_ORIENTATION_PORTRAIT > 0 Then
-    scrCanPortrait := FALSE;
-
-  if What and SCR_ORIENTATION_LANDSCAPE > 0 Then
-    scrCanLandscape := FALSE;
-
-  if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
-    begin
-      sndAllowBackgroundMusic := 0;
-      if sndInitialized Then
-        AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
-    end;
-{$ENDIF}
 end;
 
 end.

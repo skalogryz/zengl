@@ -42,13 +42,8 @@ implementation
 uses
   zgl_application,
   zgl_screen,
-  {$IFNDEF USE_GLES}
-  zgl_opengl,
-  zgl_opengl_all,
-  {$ELSE}
-  zgl_opengles,
-  zgl_opengles_all,
-  {$ENDIF}
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_camera_2d;
 
@@ -60,7 +55,6 @@ procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTP
     quad : array[ 0..3 ] of zglTPoint2D;
     tci  : zglPTexCoordIndex;
     p    : zglPPoint2D;
-    mode : Integer;
 
     x1, x2 : Single;
     y1, y2 : Single;
@@ -176,11 +170,7 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if FX and FX2D_VCA > 0 Then
-    mode := GL_TRIANGLES
-  else
-    mode := GL_QUADS;
-  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -189,7 +179,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( mode );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -216,17 +206,9 @@ begin
       glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
       glVertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
-
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
       glVertex2fv( @quad[ 3 ] );
-
-      glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
@@ -258,7 +240,6 @@ procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alp
     p    : zglPPoint2D;
     tc   : zglPTextureCoord;
     tci  : zglPTexCoordIndex;
-    mode : Integer;
 
     x1, x2 : Single;
     y1, y2 : Single;
@@ -375,11 +356,7 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if FX and FX2D_VCA > 0 Then
-    mode := GL_TRIANGLES
-  else
-    mode := GL_QUADS;
-  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -388,7 +365,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( mode );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -415,17 +392,9 @@ begin
       glTexCoord2fv( @tc[ tci[ 2 ] ] );
       glVertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
-
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 3 ] ] );
       glVertex2fv( @quad[ 3 ] );
-
-      glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2fv( @tc[ tci[ 0 ] ] );
@@ -458,7 +427,6 @@ procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Fra
     tc   : zglPTextureCoord;
     tci  : zglPTexCoordIndex;
     fc   : Integer;
-    mode : Integer;
 
     x1, x2 : Single;
     y1, y2 : Single;
@@ -581,11 +549,7 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if FX and FX2D_VCA > 0 Then
-    mode := GL_TRIANGLES
-  else
-    mode := GL_QUADS;
-  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -594,7 +558,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( mode );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -621,17 +585,9 @@ begin
       glTexCoord2fv( @tc[ tci[ 2 ] ] );
       glVertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
-
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2fv( @tc[ tci[ 3 ] ] );
       glVertex2fv( @quad[ 3 ] );
-
-      glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2fv( @tc[ tci[ 0 ] ] );
@@ -661,7 +617,6 @@ procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; con
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
-    mode : Integer;
 
     tU, tV, tX, tY, tW, tH : Single;
 
@@ -787,11 +742,7 @@ begin
             p.Y := Y + H + fx2dVY4;
           end;
 
-  if FX and FX2D_VCA > 0 Then
-    mode := GL_TRIANGLES
-  else
-    mode := GL_QUADS;
-  if ( not b2dStarted ) or batch2d_Check( mode, FX, Texture ) Then
+  if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -800,7 +751,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( mode );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -827,17 +778,9 @@ begin
       glTexCoord2f( tW - tU, tH - tV );
       glVertex2fv( @quad[ 2 ] );
 
-      glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2f( tW - tU, tH - tV );
-      glVertex2fv( @quad[ 2 ] );
-
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2f( tX + tU, tH - tV );
       glVertex2fv( @quad[ 3 ] );
-
-      glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2f( tX + tU, tY + tV );
-      glVertex2fv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2f( tX + tU, tY + tV );

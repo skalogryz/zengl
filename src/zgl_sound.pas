@@ -24,20 +24,11 @@
 unit zgl_sound;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
-  {$LINKFRAMEWORK AudioToolbox}
-{$ENDIF}
 
 interface
 
 uses
-  {$IFDEF WINDOWS}
   Windows,
-  {$ENDIF}
-  {$IFDEF iOS}
-  CFBase,
-  CFRunLoop,
-  {$ENDIF}
   zgl_types,
   {$IFDEF USE_OPENAL}
   zgl_sound_openal,
@@ -177,20 +168,6 @@ procedure snd_StopStream( ID : Integer );
 procedure snd_ResumeStream( ID : Integer );
 procedure snd_SeekStream( ID : Integer; Milliseconds : Double );
 
-{$IFDEF iOS}
-const
-  kAudioSessionCategory_AmbientSound                  = 'ibma';
-  kAudioSessionProperty_AudioCategory                 = 'taca';
-  kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
-
-var
-  sndAllowBackgroundMusic : LongWord;
-
-function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : Pointer; inClientData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
-{$ENDIF}
-
 var
   managerSound : zglTSoundManager;
 
@@ -202,9 +179,7 @@ implementation
 uses
   zgl_application,
   zgl_main,
-  {$IFDEF WINDOWS}
   zgl_window,
-  {$ENDIF}
   zgl_timers,
   zgl_resources,
   zgl_threads,
@@ -356,56 +331,26 @@ end;
 function snd_Init : Boolean;
   var
     i : Integer;
-  {$IFDEF iOS}
-    sessionCategory : LongWord;
-  {$ENDIF}
-  {$IFDEF ANDROID}
-    attr : array[ 0..2 ] of Integer;
-  {$ENDIF}
 begin
   Result := FALSE;
 
   if sndInitialized Then exit;
 {$IFDEF USE_OPENAL}
-  {$IFNDEF ANDROID}
   log_Add( 'OpenAL: load ' + libopenal  );
   if not InitOpenAL Then
     begin
       log_Add( 'Error while loading ' + libopenal );
       exit;
     end;
-  {$ENDIF}
 
-  {$IFDEF LINUX}
-  log_Add( 'OpenAL: opening "ALSA Software"' );
-  oalDevice := alcOpenDevice( 'ALSA Software' );
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+
   log_Add( 'OpenAL: opening "Generic Software"' );
   oalDevice := alcOpenDevice( 'Generic Software' );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  log_Add( 'OpenAL: opening "CoreAudio Software"' );
-  oalDevice := alcOpenDevice( 'CoreAudio Software' );
-  {$ENDIF}
-  {$IFDEF iOS}
-  log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
-  oalDevice := alcOpenDevice( nil );
-  if AudioSessionInitialize( nil, nil, nil, nil ) = nil Then
-    begin
-      sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
-      AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
-      AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
-      AudioSessionSetActive( TRUE );
-    end else
-      log_Add( 'Unable to initialize Audio Session' );
-  {$ELSE}
   if not Assigned( oalDevice ) Then
     begin
       oalDevice := alcOpenDevice( nil );
       log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
     end;
-  {$ENDIF}
   if not Assigned( oalDevice ) Then
     begin
       log_Add( 'Cannot open sound device' );
@@ -413,14 +358,7 @@ begin
     end;
 
   log_Add( 'OpenAL: creating context' );
-  {$IFNDEF ANDROID}
   oalContext := alcCreateContext( oalDevice, nil );
-  {$ELSE}
-  attr[ 0 ] := $1007;
-  attr[ 1 ] := 22050;
-  attr[ 2 ] := 0;
-  oalContext := alcCreateContext( oalDevice, @attr[ 0 ] );
-  {$ENDIF}
   if not Assigned( oalContext ) Then
     begin
       log_Add( 'Cannot create sound context' );

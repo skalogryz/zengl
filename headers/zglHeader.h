@@ -4,7 +4,7 @@
 /*                                */
 /* version:  0.3.5                */
 /* date:     2012.09.30           */
-/* license:  zlib                 */
+/* license:  GNU LGPL version 3   */
 /* homepage: http://zengl.org     */
 /*                                */
 /*-------- developed by: ---------*/

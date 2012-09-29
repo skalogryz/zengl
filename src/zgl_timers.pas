@@ -26,12 +26,8 @@ unit zgl_timers;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF LINUX}
-uses UnixType;
-{$ENDIF}
-{$IFDEF WINDOWS}
-uses Windows;
-{$ENDIF}
+uses
+  Windows;
 
 type
   zglPTimer = ^zglTTimer;
@@ -70,35 +66,12 @@ uses
   zgl_application,
   zgl_main;
 
-{$IFDEF LINUX}
-function fpGetTimeOfDay( val : PTimeVal; tzp : Pointer ) : Integer; cdecl; external 'libc' name 'gettimeofday';
-{$ENDIF}
-{$IFDEF DARWIN}
-type
-  mach_timebase_info_t = record
-    numer : LongWord;
-    denom : LongWord;
-  end;
-
-  function mach_timebase_info( var info : mach_timebase_info_t ) : Integer; cdecl; external 'libc';
-  function mach_absolute_time : QWORD; cdecl; external 'libc';
-{$ENDIF}
-
 var
-  timersToKill  : Word = 0;
-  aTimersToKill : array[ 0..1023 ] of zglPTimer;
-
-  {$IFDEF LINUX}
-  timerTimeVal : TimeVal;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+  timersToKill   : Word = 0;
+  aTimersToKill  : array[ 0..1023 ] of zglPTimer;
   timerFrequency : Int64;
   timerFreq      : Single;
-  {$ENDIF}
-  {$IFDEF DARWIN}
-  timerTimebaseInfo : mach_timebase_info_t;
-  {$ENDIF}
-  timerStart : Double;
+  timerStart     : Double;
 
 function timer_Add( OnTimer : Pointer; Interval : LongWord; UseSenderForCallback : Boolean = FALSE; UserData : Pointer = nil ) : zglPTimer;
 begin
@@ -183,32 +156,14 @@ begin
 end;
 
 function timer_GetTicks : Double;
-  {$IFDEF WINDOWS}
   var
     t : int64;
     m : LongWord;
-  {$ENDIF}
 begin
-{$IFDEF LINUX}
-  fpGetTimeOfDay( @timerTimeVal, nil );
-  {$Q-}
-  // FIXME: почему-то overflow вылетает с флагом -Co
-  Result := timerTimeVal.tv_sec * 1000 + timerTimeVal.tv_usec / 1000 - timerStart;
-  {$Q+}
-{$ENDIF}
-{$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   m := SetThreadAffinityMask( GetCurrentThread(), 1 );
-  {$ENDIF}
   QueryPerformanceCounter( t );
   Result := 1000 * t * timerFreq - timerStart;
-  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), m );
-  {$ENDIF}
-{$ENDIF}
-{$IFDEF DARWIN}
-  Result := mach_absolute_time() * timerTimebaseInfo.numer / timerTimebaseInfo.denom / 1000000 - timerStart;
-{$ENDIF}
 end;
 
 procedure timer_Reset;
@@ -225,16 +180,9 @@ begin
 end;
 
 initialization
-{$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), 1 );
-  {$ENDIF}
   QueryPerformanceFrequency( timerFrequency );
   timerFreq := 1 / timerFrequency;
-{$ENDIF}
-{$IFDEF DARWIN}
-  mach_timebase_info( timerTimebaseInfo );
-{$ENDIF}
   timerStart := timer_GetTicks();
 
 end.
