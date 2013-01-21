@@ -185,7 +185,7 @@ begin
   else
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
+  SetWindowLongW( wndHandle, GWL_STYLE, LongInt(wndStyle) );
   SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 
   appWork := TRUE;
