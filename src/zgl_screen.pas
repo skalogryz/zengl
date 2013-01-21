@@ -292,7 +292,8 @@ begin
   oglHeight := Round( wndHeight / scrResCY );
   scrSubCX  := oglWidth - Width;
   scrSubCY  := oglHeight - Height;
-  SetCurrentMode();
+  if Assigned( d3dDevice ) Then
+    SetCurrentMode();
 end;
 
 procedure scr_SetViewPort;
