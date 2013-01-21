@@ -509,7 +509,7 @@ begin
 
   d3dDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
   d3dDevice.SetRenderState( D3DRS_LIGHTING, iFALSE );
-  d3dDevice.SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, DWORD( oglFSAA > 0 ) );
+  //d3dDevice.SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, DWORD( oglFSAA > 0 ) );
 end;
 
 function d3d_GetFormatID;
