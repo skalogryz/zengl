@@ -3,8 +3,10 @@
 Версия используемого Direct3D настраивается посредством объявлений в zgl_config.cfg
 
 Отличия от оригинального ZenGL:
+- Direct3D9Ex: tex_GetData очень медленная
 - Direct3D8: PR2D_SMOOTH не работает
-- Direct3D8: render target'ы не используют альфа-канал ввиду баг на стороне самого Direct3D8
+- Direct3D8: render target'ы не используют альфа-канал ввиду проблем на стороне самого Direct3D8
+- render target'ы могут потерять данные внутри после события Device Lost, из-за ограничений Direct3D
 - нет поддержки сжатых текстур
 - нет поддержки 64 битной Windows
 - scr_SetOptions не возвращает FALSE даже в случаи провала
@@ -15,8 +17,10 @@ This is modified version of ZenGL, that use Direct3D 8/9 as graphics API
 Version of Direct3D can be set by defines in zgl_config.cfg
 
 Difference with the original ZenGL:
+- Direct3D9Ex: tex_GetData is too slow
 - Direct3D8: PR2D_SMOOTH doesn't work
 - Direct3D8: render targets don't use alpha-chnnel because of bugs in Direct3D8
+- render targets can lose data inside after Device Lost, because of Direct3D restrictions
 - no support of compressed textures
 - no support of Windows 64 bit
 - scr_SetOptions won't return FALSE even if it fails
