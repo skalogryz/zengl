@@ -68,7 +68,7 @@ var
   d3dFormat   : TD3DFormat = D3DFMT_UNKNOWN;
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
-  d3d         : IDirect3D9Ex;
+  d3d         : {$IFDEF USE_DIRECT3D9Ex} IDirect3D9Ex {$ELSE} IDirect3D9 {$ENDIF};
   d3dDevice   : IDirect3DDevice9;
   d3dSurface  : IDirect3DSurface9;
   d3dStencil  : IDirect3DSurface9;
@@ -176,7 +176,11 @@ begin
       d3dDefaultUsage   := 0;
       d3dDefaultPool    := D3DPOOL_MANAGED;
       Direct3DCreate9Ex := nil;
+      {$IFDEF USE_DIRECT3D9Ex}
       d3d := IDirect3D9Ex( Direct3DCreate9( D3D_SDK_VERSION ) );
+      {$ELSE}
+      d3d := Direct3DCreate9( D3D_SDK_VERSION );
+      {$ENDIF}
       if not Assigned( d3d ) Then
         begin
           u_Error( 'Direct3DCreate9 Error' );

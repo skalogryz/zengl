@@ -1524,7 +1524,7 @@ begin
     begin
       d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY );
       d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
-      d3dTexArray[ RenderTexID ].Texture.UnlockRect( 0 );
+      d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
         begin
@@ -1540,7 +1540,7 @@ begin
 
           dst.LockRect( r, nil, D3DLOCK_READONLY );
           d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
-          dst.UnlockRect;
+          dst.UnlockRect();
 
           dst := nil;
           src := nil;
