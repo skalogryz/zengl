@@ -179,6 +179,8 @@ function joy_Init : Byte;
     axis : Integer;
     caps : PLongWord;
 begin
+  joyCount := 0;
+
   j := joyGetNumDevs();
   for i := 0 to j - 1 do
     if joyGetDevCapsW( i, @joyArray[ i ].caps, SizeOf( TJOYCAPSW ) ) = 0 Then

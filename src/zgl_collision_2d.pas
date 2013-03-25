@@ -75,7 +75,9 @@ begin
           Result := ( o2 * o3 ) >= 0
         else
           if o2 = 0 Then
-            Result := ( o1 * o3 ) >= 0;
+            Result := ( o1 * o3 ) >= 0
+          else
+            Result := FALSE;
     end else
       Result := FALSE;
 end;
