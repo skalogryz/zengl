@@ -221,6 +221,8 @@ function joy_Init : Byte;
     caps : PLongWord;
   {$ENDIF}
 begin
+  joyCount := 0;
+
 {$IFDEF LINUX}
   for i := 0 to 15 do
     begin
