@@ -697,6 +697,13 @@ begin
         end else
           managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
 
+  case fmt of
+    SND_FORMAT_MONO8: Result.Duration := Result.Size / Result.Frequency * 1000;
+    SND_FORMAT_MONO16: Result.Duration := Result.Size / 2 / Result.Frequency * 1000;
+    SND_FORMAT_STEREO8: Result.Duration := Result.Size / 2 / Result.Frequency * 1000;
+    SND_FORMAT_STEREO16: Result.Duration := Result.Size / 4 / Result.Frequency * 1000;
+  end;
+
   if not Assigned( Result.Data ) Then
     begin
       log_Add( 'Unable to load sound: "' + FileName + '"' );
@@ -735,6 +742,13 @@ begin
           exit;
         end else
           managerSound.Formats[ i ].MemLoader( Memory, Result.Data, Result.Size, fmt, Result.Frequency );
+
+  case fmt of
+    SND_FORMAT_MONO8: Result.Duration := Result.Size / Result.Frequency * 1000;
+    SND_FORMAT_MONO16: Result.Duration := Result.Size / 2 / Result.Frequency * 1000;
+    SND_FORMAT_STEREO8: Result.Duration := Result.Size / 2 / Result.Frequency * 1000;
+    SND_FORMAT_STEREO16: Result.Duration := Result.Size / 4 / Result.Frequency * 1000;
+  end;
 
   if not Assigned( Result.Data ) Then
     begin
