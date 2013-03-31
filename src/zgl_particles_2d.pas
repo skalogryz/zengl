@@ -363,9 +363,9 @@ begin
     emitter2d_Draw( pengine2d.List[ i ] );
 
   if oldBlendMode <> b2dCurBlendMode Then
-    fx_SetBlendMode( oldBlendMode );
+    fx_SetBlendMode( Byte( oldBlendMode ) );
   if oldColorMode <> b2dCurColorMode Then
-    fx_SetColorMode( oldColorMode );
+    fx_SetColorMode( Byte( oldColorMode ) );
 end;
 
 procedure pengine2d_Proc( dt : Double );
