@@ -14,7 +14,7 @@
 /* mail:  dr.andru@gmail.com      */
 /* JID:   dr.andru@googlemail.com */
 /* ICQ:   496929849               */
-/* Skype: kemka.andrey            */
+/* Skype: andru-kun               */
 /*                                */
 /*--------------------------------*/
 
