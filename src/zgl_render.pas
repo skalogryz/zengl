@@ -148,7 +148,7 @@ begin
       Height := Round( Height * scrResCY );
     end;
   glEnable( GL_SCISSOR_TEST );
-  glScissor( X, wndHeight - Y - Height, Width, Height );
+  glScissor( X, oglTargetH - Y - Height, Width, Height );
 
   INC( tSCount );
   SetLength( tScissor, tSCount );
@@ -180,7 +180,7 @@ begin
   if tSCount > 0 Then
     begin
       glEnable( GL_SCISSOR_TEST );
-      glScissor( render2dClipX, wndHeight - render2dClipY - render2dClipH, render2dClipW, render2dClipH );
+      glScissor( render2dClipX, oglTargetH - render2dClipY - render2dClipH, render2dClipW, render2dClipH );
     end else
       glDisable( GL_SCISSOR_TEST );
 end;
