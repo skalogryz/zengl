@@ -470,11 +470,13 @@ begin
 
           len := Length( Emitter.ParParams.Color );
           SetLength( Color, len );
-          Move( Emitter.ParParams.Color[ 0 ], Color[ 0 ], len * SizeOf( Color[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.Color[ 0 ], Color[ 0 ], len * SizeOf( Color[ 0 ] ) );
 
           len := Length( Emitter.ParParams.Alpha );
           SetLength( Alpha, len );
-          Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
 
           SizeXYBind := Emitter.ParParams.SizeXYBind;
           SizeXS := Emitter.ParParams.SizeXS;
@@ -484,11 +486,13 @@ begin
 
           len := Length( Emitter.ParParams.SizeXD );
           SetLength( SizeXD, len );
-          Move( Emitter.ParParams.SizeXD[ 0 ], SizeXD[ 0 ], len * SizeOf( SizeXD[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.SizeXD[ 0 ], SizeXD[ 0 ], len * SizeOf( SizeXD[ 0 ] ) );
 
           len := Length( Emitter.ParParams.SizeYD );
           SetLength( SizeYD, len );
-          Move( Emitter.ParParams.SizeYD[ 0 ], SizeYD[ 0 ], len * SizeOf( SizeYD[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.SizeYD[ 0 ], SizeYD[ 0 ], len * SizeOf( SizeYD[ 0 ] ) );
 
           AngleS    := Emitter.ParParams.AngleS;
           AngleV    := Emitter.ParParams.AngleV;
@@ -497,21 +501,24 @@ begin
 
           len := Length( Emitter.ParParams.VelocityD );
           SetLength( VelocityD, len );
-          Move( Emitter.ParParams.VelocityD[ 0 ], VelocityD[ 0 ], len * SizeOf( VelocityD[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.VelocityD[ 0 ], VelocityD[ 0 ], len * SizeOf( VelocityD[ 0 ] ) );
 
           aVelocityS := Emitter.ParParams.aVelocityS;
           aVelocityV := Emitter.ParParams.aVelocityV;
 
           len := Length( Emitter.ParParams.aVelocityD );
           SetLength( aVelocityD, len );
-          Move( Emitter.ParParams.aVelocityD[ 0 ], aVelocityD[ 0 ], len * SizeOf( aVelocityD[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.aVelocityD[ 0 ], aVelocityD[ 0 ], len * SizeOf( aVelocityD[ 0 ] ) );
 
           SpinS := Emitter.ParParams.SpinS;
           SpinV := Emitter.ParParams.SpinV;
 
           len := Length( Emitter.ParParams.SpinD );
           SetLength( SpinD, len );
-          Move( Emitter.ParParams.SpinD[ 0 ], SpinD[ 0 ], len * SizeOf( SpinD[ 0 ] ) );
+          if len > 0 Then
+            Move( Emitter.ParParams.SpinD[ 0 ], SpinD[ 0 ], len * SizeOf( SpinD[ 0 ] ) );
         end;
 
       Params.Position.X := Params.Position.X + X;
@@ -752,11 +759,13 @@ begin
             begin
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.Color, c );
-              mem_Read( emitter2dMem, ParParams.Color[ 0 ], SizeOf( TDiagramLW ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.Color[ 0 ], SizeOf( TDiagramLW ) * c );
 
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.Alpha, c );
-              mem_Read( emitter2dMem, ParParams.Alpha[ 0 ], SizeOf( TDiagramByte ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.Alpha[ 0 ], SizeOf( TDiagramByte ) * c );
             end;
           ZEF_CHUNK_SIZEXY:
             begin
@@ -768,11 +777,13 @@ begin
 
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.SizeXD, c );
-              mem_Read( emitter2dMem, ParParams.SizeXD[ 0 ], SizeOf( TDiagramSingle ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.SizeXD[ 0 ], SizeOf( TDiagramSingle ) * c );
 
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.SizeYD, c );
-              mem_Read( emitter2dMem, ParParams.SizeYD[ 0 ], SizeOf( TDiagramSingle ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.SizeYD[ 0 ], SizeOf( TDiagramSingle ) * c );
             end;
           ZEF_CHUNK_ANGLE:
             begin
@@ -786,7 +797,8 @@ begin
 
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.VelocityD, c );
-              mem_Read( emitter2dMem, ParParams.VelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.VelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
             end;
           ZEF_CHUNK_AVELOCITY:
             begin
@@ -795,7 +807,8 @@ begin
 
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.aVelocityD, c );
-              mem_Read( emitter2dMem, ParParams.aVelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.aVelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
             end;
           ZEF_CHUNK_SPIN:
             begin
@@ -804,7 +817,8 @@ begin
 
               mem_Read( emitter2dMem, c, 4 );
               SetLength( ParParams.SpinD, c );
-              mem_Read( emitter2dMem, ParParams.SpinD[ 0 ], SizeOf( TDiagramSingle ) * c );
+              if c > 0 Then
+                mem_Read( emitter2dMem, ParParams.SpinD[ 0 ], SizeOf( TDiagramSingle ) * c );
             end;
         else
           emitter2dMem.Position := emitter2dMem.Position + size;

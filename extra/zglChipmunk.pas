@@ -11,18 +11,17 @@
 {                                              }
 {------------------- header -------------------}
 {                                              }
-{ version:  1.0                                }
-{ date:     2012.10.12                         }
-{ homepage:                                    }
-{ https://github.com/Andru-kun/chipmunk-pascal }
+{ version:  1.0.1                              }
+{ date:     2013.03.31                         }
 {                                              }
 {------------- header written by: -------------}
 {                                              }
 {           Kemka Andrey aka Andru             }
 {                                              }
-{ mail: dr.andru@gmail.com                     }
-{ JID:  dr.andru@googlemail.com                }
-{ ICQ:  496929849                              }
+{ e-mail: dr.andru@gmail.com                   }
+{ jabber: dr.andru@googlemail.com              }
+{ icq:    496929849                            }
+{ skype:  andru-kun                            }
 {                                              }
 {----------------------------------------------}
 unit zglChipmunk;
@@ -168,7 +167,8 @@ type
     y : cpFloat;
   end;
 
-  cpVectArray = array of cpVect;
+  cpVectArrayHack = array[ 0..High(LongWord) div 32 - 1 ] of cpVect;
+  cpVectArray     = ^cpVectArrayHack;
 
 // BB
   cpBB = record
@@ -204,13 +204,16 @@ type
     hash : cpHashValue;
   end;
 
+  cpContactArrayHack = array[ 0..High(LongWord) div ( SizeOf( cpContact ) * 2 ) - 1 ] of cpContact;
+  cpContactArray     = ^cpContactArrayHack;
+
   cpArbiterState = ( cpArbiterStateNormal, cpArbiterStateFirstColl, cpArbiterStateIgnore, cpArbiterStateSleep, cpArbiterStateCached );
 
   // Data structure for tracking collisions between shapes.
   cpArbiter = record
     // Information on the contact points between the objects.
     numContacts : Integer;
-    contacts : array of cpContact;
+    contacts : cpContactArray;
 
     // The two shapes and bodies involved in the collision.
     // These variables are NOT in the order defined by the collision handler.
@@ -340,7 +343,8 @@ type
     d : cpFloat;
   end;
 
-  cpPolyShapeAxisArray = array of cpPolyShapeAxis;
+  cpPolyShapeAxisArrayHack = array[ 0..High(LongWord) div 48 - 1 ] of cpPolyShapeAxis;
+  cpPolyShapeAxisArray     = ^cpPolyShapeAxisArrayHack;
 
   // Convex polygon shape structure.
   cpPolyShape = record

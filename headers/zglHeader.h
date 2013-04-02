@@ -1,22 +1,22 @@
-/*--------------------------------*/
-/*-----------= ZenGL =------------*/
-/*--------------------------------*/
-/*                                */
-/* version:  0.3.9                */
-/* date:     2013.03.31           */
-/* license:  zlib                 */
-/* homepage: http://zengl.org     */
-/*                                */
-/*-------- developed by: ---------*/
-/*                                */
-/*     Andrey Kemka aka Andru     */
-/*                                */
-/* mail:  dr.andru@gmail.com      */
-/* JID:   dr.andru@googlemail.com */
-/* ICQ:   496929849               */
-/* Skype: andru-kun               */
-/*                                */
-/*--------------------------------*/
+/*---------------------------------*/
+/*------------= ZenGL =------------*/
+/*---------------------------------*/
+/*                                 */
+/* version:  0.3.10                */
+/* date:     2013.04.02            */
+/* license:  zlib                  */
+/* homepage: http://zengl.org      */
+/*                                 */
+/*--------- developed by: ---------*/
+/*                                 */
+/*     Andrey Kemka aka Andru      */
+/*                                 */
+/* e-mail: dr.andru@gmail.com      */
+/* jabber: dr.andru@googlemail.com */
+/* icq:    496929849               */
+/* skype:  andru-kun               */
+/*                                 */
+/*---------------------------------*/
 
 /*
  *  Copyright (c) 2012 Andrey Kemka
