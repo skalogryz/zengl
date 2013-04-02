@@ -373,7 +373,9 @@ var
   bPVertices  : array of TXYZCVertex;  // Primitives
   bPVCount    : Integer;
   // Scissor
+  {$IFDEF USE_DIRECT3D8}
   ScissorEnabled : Boolean;
+  {$ENDIF}
   ScissorX : Integer;
   ScissorY : Integer;
   ScissorW : Integer;
@@ -532,7 +534,15 @@ begin
     GL_BLEND: d3dDevice.SetRenderState( D3DRS_ALPHABLENDENABLE, iTRUE );
     GL_ALPHA_TEST: d3dDevice.SetRenderState( D3DRS_ALPHATESTENABLE, iTRUE );
     GL_DEPTH_TEST: d3dDevice.SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
-    GL_SCISSOR_TEST: ScissorEnabled := TRUE;
+    GL_SCISSOR_TEST:
+      begin
+        {$IFDEF USE_DIRECT3D8}
+        ScissorEnabled := TRUE;
+        {$ENDIF}
+        {$IFDEF USE_DIRECT3D9}
+        d3dDevice.SetRenderState( D3DRS_SCISSORTESTENABLE, iTRUE );
+        {$ENDIF}
+      end;
     {$IFDEF USE_DIRECT3D8}
     // MS sucks again! :)
     GL_LINE_SMOOTH, GL_POLYGON_SMOOTH:;// d3d_Device.SetRenderState( D3DRS_EDGEANTIALIAS, iTRUE );
@@ -557,8 +567,13 @@ begin
     GL_DEPTH_TEST: d3dDevice.SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE );
     GL_SCISSOR_TEST:
       begin
+        {$IFDEF USE_DIRECT3D8}
         ScissorEnabled := FALSE;
-        SetCurrentMode;
+        SetCurrentMode();
+        {$ENDIF}
+        {$IFDEF USE_DIRECT3D9}
+        d3dDevice.SetRenderState( D3DRS_SCISSORTESTENABLE, iFALSe );
+        {$ENDIF}
       end;
     {$IFDEF USE_DIRECT3D8}
     GL_LINE_SMOOTH, GL_POLYGON_SMOOTH:;// d3d_Device.SetRenderState( D3DRS_EDGEANTIALIAS, iFALSE );
@@ -571,8 +586,10 @@ end;
 
 procedure glViewport(x, y: GLint; width, height: GLsizei);
 begin
+  {$IFDEF USE_DIRECT3D8}
   if not ScissorEnabled Then
     begin
+  {$ENDIF}
       d3dViewport.X      := X;
       d3dViewport.Y      := Y;
       d3dViewport.Width  := Width;
@@ -587,6 +604,7 @@ begin
             d3dViewport.MaxZ := oglzFar;
           end;
       d3dDevice.SetViewport( d3dViewport );
+  {$IFDEF USE_DIRECT3D8}
     end else
       begin
         if cam2d.Apply Then glPopMatrix();
@@ -617,6 +635,7 @@ begin
 
         ScissorEnabled := TRUE;
       end;
+  {$ENDIF}
 end;
 
 procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
@@ -659,7 +678,12 @@ begin
 end;
 
 procedure glScissor(x, y: GLint; width, height: GLsizei);
+  {$IFDEF USE_DIRECT3D9}
+  var
+    r : Rect;
+  {$ENDIF}
 begin
+  {$IFDEF USE_DIRECT3D8}
   if oglTarget = TARGET_SCREEN Then
     begin
       ScissorX := x;
@@ -691,6 +715,14 @@ begin
       end;
 
   glViewPort( 0, 0, 0, 0 );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  r.Left   := x;
+  r.Right  := x + width;
+  r.Top    := y;
+  r.Bottom := y + height;
+  d3dDevice.SetScissorRect( @r );
+  {$ENDIF}
 end;
 
 procedure glDepthFunc(func: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}

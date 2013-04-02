@@ -6,6 +6,7 @@
 - Direct3D9Ex: tex_GetData очень медленная("спасибо" криворуким разработчикам из AMD и Intel)
 - Direct3D8: PR2D_SMOOTH не работает
 - Direct3D8: render target'ы не используют альфа-канал ввиду проблем на стороне самого Direct3D8
+- Direct3D8: scissor_* функции не работают при рендеринге в текстуру
 - render target'ы могут потерять данные внутри после события Device Lost, из-за ограничений Direct3D
 - нет поддержки сжатых текстур
 - нет поддержки 64 битной Windows
@@ -20,6 +21,7 @@ Difference with the original ZenGL:
 - Direct3D9Ex: tex_GetData is too slow("thanks" to developers from AMD and Intel)
 - Direct3D8: PR2D_SMOOTH doesn't work
 - Direct3D8: render targets don't use alpha-chnnel because of bugs in Direct3D8
+- Direct3D8: scissor_* functions don't work when rendering into texture
 - render targets can lose data inside after Device Lost, because of Direct3D restrictions
 - no support of compressed textures
 - no support of Windows 64 bit
