@@ -783,7 +783,6 @@ begin
   {$ENDIF}
 
   thread_EventDestroy( resQueueState[ id ] );
-  EndThread( 0 );
 end;
 
 procedure res_BeginQueue( QueueID : Byte );

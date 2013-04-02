@@ -371,14 +371,6 @@ begin
     System.Move( Str[ 1 ], Result^, len );
 end;
 
-{$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}
-function memcpy( destination, source : Pointer; num : csize_t ) : Pointer;
-begin
-  Move( source^, destination^, num );
-  Result := destination;
-end;
-{$IFEND}
-
 {$IFDEF WINDOWS}
 function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
   var
@@ -568,5 +560,14 @@ begin
   Sleep( Milliseconds );
 {$ENDIF}
 end;
+
+{$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}
+{$S-} // Don't know WTF is going on when stack check is enabled...
+function memcpy( destination, source : Pointer; num : csize_t ) : Pointer;
+begin
+  Move( source^, destination^, num );
+  Result := destination;
+end;
+{$IFEND}
 
 end.

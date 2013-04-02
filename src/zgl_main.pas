@@ -48,11 +48,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.3.9';
-  cs_Date     = '2013.03.31';
+  cs_ZenGL    = 'ZenGL 0.3.10';
+  cs_Date     = '2013.04.02';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 9;
+  cv_revision = 10;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
