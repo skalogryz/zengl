@@ -717,6 +717,16 @@ begin
   glViewPort( 0, 0, 0, 0 );
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
+  y := ( y - oglTargetH + Height ) * -1;
+  if x < 0 Then
+    x := 0;
+  if y < 0 Then
+    y := 0;
+  if x + width > oglTargetW Then
+    width := oglTargetW - x;
+  if y + height > oglTargetH Then
+    height := oglTargetH - y;
+
   r.Left   := x;
   r.Right  := x + width;
   r.Top    := y;
