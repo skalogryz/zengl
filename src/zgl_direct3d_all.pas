@@ -680,7 +680,7 @@ end;
 procedure glScissor(x, y: GLint; width, height: GLsizei);
   {$IFDEF USE_DIRECT3D9}
   var
-    r : Rect;
+    r : TRect;
   {$ENDIF}
 begin
   {$IFDEF USE_DIRECT3D8}
