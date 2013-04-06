@@ -251,6 +251,30 @@ begin
   {$ENDIF}
 end;
 
+function GetPosition( const Source : {$IFDEF USE_OPENAL} LongWord {$ELSE} IDirectSoundBuffer {$ENDIF} ) : Integer;
+  var
+    position : {$IFDEF USE_OPENAL} LongInt {$ELSE} LongWord {$ENDIF};
+begin
+  {$IFDEF USE_OPENAL}
+  if GetStatusPlaying( Source ) = 0 Then
+    begin
+      Result := 0;
+      exit;
+    end;
+
+  alGetSourcei( Source, AL_BYTE_OFFSET, position );
+  Result := position;
+  {$ELSE}
+  if not Assigned( Source ) Then
+    begin
+      Result := 0;
+      exit;
+    end;
+  Source.GetCurrentPosition( @position, nil );
+  Result := position;
+  {$ENDIF}
+end;
+
 procedure snd_MainLoop;
   var
     i : Integer;
@@ -706,7 +730,7 @@ function snd_Play( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y 
     dsStatus : LongWord;
     dsVolume : Single;
     {$ELSE}
-    j        : Integer;
+    state    : LongInt;
     {$ENDIF}
 begin
   Result := -1;
@@ -724,8 +748,8 @@ begin
       if Sound.Channel[ i ].Source = 0 Then
         Sound.Channel[ i ].Source := oal_Getsource( @Sound.Channel[ i ].Source );
 
-      alGetSourcei( Sound.Channel[ i ].Source, AL_SOURCE_STATE, j );
-      if j <> AL_PLAYING Then
+      alGetSourcei( Sound.Channel[ i ].Source, AL_SOURCE_STATE, state );
+      if state <> AL_PLAYING Then
          begin
            Result := i;
            break;
@@ -1161,6 +1185,8 @@ begin
       case What of
         SND_STATE_PLAYING: Result := GetStatusPlaying( Sound.Channel[ ID ].Source );
         SND_STATE_LOOPED: Result := GetStatusLooped( Sound.Channel[ ID ].Source );
+        SND_STATE_TIME: Result := Round( GetPosition( Sound.Channel[ ID ].Source ) / Sound.Size * Sound.Duration );
+        SND_STATE_PERCENT: Result := Round( GetPosition( Sound.Channel[ ID ].Source ) / Sound.Size * 100 );
         SND_INFO_DURATION: Result := Round( Sound.Duration );
       end;
 end;

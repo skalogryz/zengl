@@ -51,6 +51,8 @@ const
   AL_PAUSED                                 =$1013;
   AL_STOPPED                                =$1014;
 
+  AL_BYTE_OFFSET                            =$1026;
+
   AL_BUFFER                                 =$1009;
   AL_BUFFERS_PROCESSED                      =$1016;
 
@@ -72,12 +74,12 @@ function oal_GetSource( Source : Pointer ) : LongWord;
 type
   PALCdevice = ^ALCdevice;
   ALCdevice  = record
-end;
+  end;
 
 type
   PALCcontext = ^ALCcontext;
   ALCcontext  = record
-end;
+  end;
 
 var
   oalLibrary : LongWord;

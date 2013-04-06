@@ -1223,7 +1223,7 @@ procedure glGenTextures(n: GLsizei; textures: PGLuint);
     i : Integer;
 begin
   RenderTexID := -1;
-  for i := 0 to d3dTexCount - 1 do
+  for i := 1 to d3dTexCount - 1 do
     if d3dTexArray[ i ].Texture = nil Then
       begin
         RenderTexID := i;

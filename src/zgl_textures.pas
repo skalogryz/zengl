@@ -148,6 +148,12 @@ function tex_GetVRAM( Texture : zglPTexture ) : LongWord;
   var
     size : LongWord;
 begin
+  if ( not Assigned( Texture ) ) or ( Texture.ID = 0 ) Then
+    begin
+      Result := 0;
+      exit;
+    end;
+
   size := Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V );
   case Texture.Format of
     TEX_FORMAT_RGBA: Result := size * 4;
@@ -212,16 +218,16 @@ begin
     if not oglCanS3TC Then
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
-  width  := Round( Texture.Width / Texture.U );
-  height := Round( Texture.Height / Texture.V );
-  size   := tex_GetVRAM( @Texture );
-  Result := FALSE;
-
   glEnable( GL_TEXTURE_2D );
   glGenTextures( 1, @Texture.ID );
 
   tex_Filter( @Texture, Texture.Flags );
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
+
+  width  := Round( Texture.Width / Texture.U );
+  height := Round( Texture.Height / Texture.V );
+  size   := tex_GetVRAM( @Texture );
+  Result := FALSE;
 
   if ( ( not oglCanS3TC ) and ( ( Texture.Format = TEX_FORMAT_RGBA_PVR2 ) or ( Texture.Format = TEX_FORMAT_RGBA_PVR4 ) ) ) or
     ( ( width > oglMaxTexSize ) or ( height > oglMaxTexSize ) ) Then
