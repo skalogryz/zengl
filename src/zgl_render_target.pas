@@ -482,7 +482,11 @@ begin
           begin
             log_Add( 'FBO: Gen FrameBuffer - Error' );
             FreeFBO( Result, 1 );
+            {$IFNDEF USE_GLES}
             Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
+            {$ELSE}
+            Result := nil;
+            {$ENDIF}
             exit;
           end;
 
@@ -492,7 +496,11 @@ begin
           begin
             log_Add( 'FBO: Gen RenderBuffer - Error' );
             FreeFBO( Result, 2 );
+            {$IFNDEF USE_GLES}
             Result := rtarget_Add( Surface, Flags or RT_FORCE_PBUFFER );
+            {$ELSE}
+            Result := nil;
+            {$ENDIF}
             exit;
           end;
 
