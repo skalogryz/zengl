@@ -49,7 +49,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3.10';
-  cs_Date     = '2013.04.02';
+  cs_Date     = '2013.04.07';
   cv_major    = 0;
   cv_minor    = 3;
   cv_revision = 10;

@@ -59,6 +59,8 @@ const
   AL_PAUSED                                 =$1013;
   AL_STOPPED                                =$1014;
 
+  AL_BYTE_OFFSET                            =$1026;
+
   AL_BUFFER                                 =$1009;
   AL_BUFFERS_PROCESSED                      =$1016;
 
