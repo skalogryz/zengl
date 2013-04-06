@@ -140,7 +140,7 @@ begin
             Height := Trunc( Height * cam2d.Global.Zoom.Y );
           end;
     end;
-  if appFlags and CORRECT_RESOLUTION > 0 Then
+  if ( oglTarget = TARGET_SCREEN ) and ( appFlags and CORRECT_RESOLUTION > 0 ) Then
     begin
       X      := Round( X * scrResCX + scrAddCX );
       Y      := Round( Y * scrResCY + scrAddCY );
