@@ -336,6 +336,17 @@ var
   d3dMatrixMode : {$IFDEF USE_DIRECT3D8} LongWord {$ENDIF}
                   {$IFDEF USE_DIRECT3D9} TD3DTransformStateType {$ENDIF};
 
+  {$IFDEF USE_DIRECT3D8}
+  // Scissor
+  ScissorEnabled : Boolean;
+  ScissorX       : Integer;
+  ScissorY       : Integer;
+  ScissorW       : Integer;
+  ScissorH       : Integer;
+  ScissorScaleX  : Single;
+  ScissorScaleY  : Single;
+  {$ENDIF}
+
 implementation
 uses
   zgl_direct3d,
@@ -372,14 +383,6 @@ var
   bTVCount    : Integer;
   bPVertices  : array of TXYZCVertex;  // Primitives
   bPVCount    : Integer;
-  // Scissor
-  {$IFDEF USE_DIRECT3D8}
-  ScissorEnabled : Boolean;
-  {$ENDIF}
-  ScissorX : Integer;
-  ScissorY : Integer;
-  ScissorW : Integer;
-  ScissorH : Integer;
 
 procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer);
   var
@@ -687,7 +690,7 @@ begin
   if oglTarget = TARGET_SCREEN Then
     begin
       ScissorX := x;
-      ScissorY := -( y + height - wndHeight );
+      ScissorY := -y - height + oglTargetH;
       if ScissorX < scrAddCX Then
         begin
           ScissorW := ScissorX + width - scrAddCX;
@@ -699,19 +702,19 @@ begin
           ScissorY := scrAddCY;
         end else ScissorH := height;
 
-      if ScissorX + ScissorW > wndWidth - scrAddCX Then
-        ScissorW := wndWidth - ScissorX - scrAddCX;
-      if ScissorY + ScissorH > wndHeight - scrAddCY Then
-        ScissorH := wndHeight - ScissorY - scrAddCY;
+      if ScissorX + ScissorW > oglTargetW - scrAddCX Then
+        ScissorW := oglTargetW - ScissorX - scrAddCX;
+      if ScissorY + ScissorH > oglTargetH - scrAddCY Then
+        ScissorH := oglTargetH - ScissorY - scrAddCY;
 
       if ScissorX >= ScissorX + ScissorW Then exit;
       if ScissorY >= ScissorY + ScissorH Then exit;
     end else
       begin
-        ScissorX := x;
-        ScissorY := -( y + height - wndHeight );
-        ScissorW := width;
-        ScissorH := height;
+        ScissorX := Round( x * ScissorScaleX );
+        ScissorY := Round( ( -y - height + oglTargetH ) * ScissorScaleY );
+        ScissorW := Round( width * ScissorScaleX );
+        ScissorH := Round( height * ScissorScaleY );
       end;
 
   glViewPort( 0, 0, 0, 0 );

@@ -302,6 +302,18 @@ begin
         d3dDevice.SetDepthStencilSurface( nil );
       {$ENDIF}
 
+      {$IFDEF USE_DIRECT3D8}
+      if Target.Flags and RT_FULL_SCREEN > 0 Then
+        begin
+          ScissorScaleX := oglTargetW / Target.Surface.Width;
+          ScissorScaleY := oglTargetH / Target.Surface.Height;
+        end else
+          begin
+            ScissorScaleX := 1;
+            ScissorScaleY := 1;
+          end;
+      {$ENDIF}
+
       oglTarget  := TARGET_TEXTURE;
       oglTargetW := Target.Surface.Width;
       oglTargetH := Target.Surface.Height;
