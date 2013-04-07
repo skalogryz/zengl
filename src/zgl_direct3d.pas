@@ -177,7 +177,11 @@ begin
       d3dDefaultPool    := D3DPOOL_MANAGED;
       Direct3DCreate9Ex := nil;
       {$IFDEF USE_DIRECT3D9Ex}
+      {$IFDEF FPC}
+      d3d := Pointer( Direct3DCreate9( D3D_SDK_VERSION ) );
+      {$ELSE}
       d3d := IDirect3D9Ex( Direct3DCreate9( D3D_SDK_VERSION ) );
+      {$ENDIF}
       {$ELSE}
       d3d := Direct3DCreate9( D3D_SDK_VERSION );
       {$ENDIF}

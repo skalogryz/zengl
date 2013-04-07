@@ -417,23 +417,25 @@ begin
   a.Top    := y;
   a.Right  := x + width - 1;
   a.Bottom := y + height - 1;
-  dst.LockRect( r, @a, D3DLOCK_READONLY );
-  pSrc := Ptr( r.pBits );
-  pDst := Ptr( Ptr( pixels ) + width * ( height - 1 ) * 4 );
-  for j := 0 to height - 1 do
+  if dst.LockRect( r, @a, D3DLOCK_READONLY ) = D3D_OK Then
     begin
-      for i := 0 to width - 1 do
+      pSrc := Ptr( r.pBits );
+      pDst := Ptr( Ptr( pixels ) + width * ( height - 1 ) * 4 );
+      for j := 0 to height - 1 do
         begin
-          PByte( pDst + 2 )^ := PByte( pSrc + 0 )^;
-          PByte( pDst + 1 )^ := PByte( pSrc + 1 )^;
-          PByte( pDst + 0 )^ := PByte( pSrc + 2 )^;
-          PByte( pDst + 3 )^ := 255; // PByte( pSrc + 3 )^ всегда равно нулю O_o
-          INC( pSrc, 4 );
-          INC( pDst, 4 );
+          for i := 0 to width - 1 do
+            begin
+              PByte( pDst + 2 )^ := PByte( pSrc + 0 )^;
+              PByte( pDst + 1 )^ := PByte( pSrc + 1 )^;
+              PByte( pDst + 0 )^ := PByte( pSrc + 2 )^;
+              PByte( pDst + 3 )^ := 255; // PByte( pSrc + 3 )^ всегда равно нулю O_o
+              INC( pSrc, 4 );
+              INC( pDst, 4 );
+            end;
+          DEC( pDst, width * 4 * 2 );
         end;
-      DEC( pDst, width * 4 * 2 );
+      dst.UnlockRect();
     end;
-  dst.UnlockRect;
 
   dst := nil;
   src := nil;
@@ -1454,9 +1456,11 @@ begin
           log_Add( 'Can''t CreateTexture' );
           exit;
         end;
-      d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, 0 );
-      d3d_FillTexture( pixels, r.pBits, width, height );
-      d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
+      if d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, 0 ) = D3D_OK Then
+        begin
+          d3d_FillTexture( pixels, r.pBits, width, height );
+          d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
+        end;
     end;
 end;
 
@@ -1487,9 +1491,11 @@ begin
       a.Top    := yoffset;
       a.Right  := xoffset + width;
       a.Bottom := yoffset + height;
-      d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, @a, 0 );
-      d3d_FillTexture( pixels, r.pBits, width, height, d.Width * 4 );
-      d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
+      if d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, @a, 0 ) = D3D_OK Then
+        begin
+          d3d_FillTexture( pixels, r.pBits, width, height, d.Width * 4 );
+          d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
+        end;
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
         begin
@@ -1508,9 +1514,11 @@ begin
           d3dResArray[ RenderTexID ].GetSurfaceLevel( level, dst );
           d3dDevice.CopyRects( src, nil, 0, dst, nil );
 
-          d3dResArray[ RenderTexID ].LockRect( level, r, nil, 0 );
-          d3d_FillTexture( pixels, r.pBits, d.Width, d.Height );
-          d3dResArray[ RenderTexID ].UnlockRect( level );
+          if d3dResArray[ RenderTexID ].LockRect( level, r, nil, 0 ) = D3D_OK Then
+            begin
+              d3d_FillTexture( pixels, r.pBits, d.Width, d.Height );
+              d3dResArray[ RenderTexID ].UnlockRect( level );
+            end;
 
           d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, dst );
           d3dResArray[ RenderTexID ].GetSurfaceLevel( level, src );
@@ -1530,9 +1538,11 @@ begin
           d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, src );
           d3dDevice.GetRenderTargetData( src, d3dResArray[ RenderTexID ] );
 
-          d3dResArray[ RenderTexID ].LockRect( r, nil, 0 );
-          d3d_FillTexture( pixels, r.pBits, d.Width, d.Height );
-          d3dResArray[ RenderTexID ].UnlockRect();
+          if d3dResArray[ RenderTexID ].LockRect( r, nil, 0 ) = D3D_OK Then
+            begin
+              d3d_FillTexture( pixels, r.pBits, d.Width, d.Height );
+              d3dResArray[ RenderTexID ].UnlockRect();
+            end;
 
           d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, dst );
           d3dDevice.UpdateSurface( d3dResArray[ RenderTexID ], nil, dst, nil );
@@ -1545,8 +1555,9 @@ end;
 
 procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
   var
-    r : TD3DLockedRect;
-    d : TD3DSurface_Desc;
+    r    : TD3DLockedRect;
+    s, d : TD3DSurface_Desc;
+    hr : HRESULT;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
@@ -1560,25 +1571,49 @@ begin
   d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
   if ( d.Pool = D3DPOOL_MANAGED ) or ( d.Usage = D3DUSAGE_DYNAMIC ) Then
     begin
-      d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY );
-      d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
-      d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
+      if d3dTexArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY ) = D3D_OK Then
+        begin
+          d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
+          d3dTexArray[ RenderTexID ].Texture.UnlockRect( level );
+        end;
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
         begin
-          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( level, src );
           {$IFDEF USE_DIRECT3D8}
-          d3dDevice.CreateImageSurface( d.Width, d.Height, d.Format, dst );
+          d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
+          if Assigned( d3dResArray[ RenderTexID ] ) Then
+            begin
+              d3dResArray[ RenderTexID ].GetLevelDesc( 0, s );
+              if ( s.Width < d.Width ) or ( s.Height < d.Height ) or ( s.Format <> d.Format ) Then
+                d3dResArray[ RenderTexID ] := nil;
+            end;
+          if not Assigned( d3dResArray[ RenderTexID ] ) Then
+            d3dDevice.CreateTexture( d.Width, d.Height, 1, 0, d.Format, D3DPOOL_MANAGED, d3dResArray[ RenderTexID ] );
+
+          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( 0, src );
+          d3dResArray[ RenderTexID ].GetSurfaceLevel( 0, dst );
           d3dDevice.CopyRects( src, nil, 0, dst, nil );
           {$ENDIF}
           {$IFDEF USE_DIRECT3D9}
-          d3dDevice.CreateOffscreenPlainSurface( d.Width, d.Height, d.Format, D3DPOOL_SYSTEMMEM, dst, nil );
-          d3dDevice.GetRenderTargetData( src, dst );
+          d3dTexArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
+          if Assigned( d3dResArray[ RenderTexID ] ) Then
+            begin
+              d3dResArray[ RenderTexID ].GetDesc( s );
+              if ( s.Width < d.Width ) or ( s.Height < d.Height ) or ( s.Format <> d.Format ) Then
+                d3dResArray[ RenderTexID ] := nil;
+            end;
+          if not Assigned( d3dResArray[ RenderTexID ] ) Then
+            d3dDevice.CreateOffscreenPlainSurface( d.Width, d.Height, d.Format, D3DPOOL_SYSTEMMEM, d3dResArray[ RenderTexID ], nil );
+
+          d3dTexArray[ RenderTexID ].Texture.GetSurfaceLevel( 0, src );
+          d3dDevice.GetRenderTargetData( src, d3dResArray[ RenderTexID ] );
           {$ENDIF}
 
-          dst.LockRect( r, nil, D3DLOCK_READONLY );
-          d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
-          dst.UnlockRect();
+          if d3dResArray[ RenderTexID ].LockRect( {$IFDEF USE_DIRECT3D8} 0, {$ENDIF} r, nil, D3DLOCK_READONLY ) = D3D_OK Then
+            begin
+              d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
+              d3dResArray[ RenderTexID ].UnlockRect( {$IFDEF USE_DIRECT3D8} 0 {$ENDIF} );
+            end;
 
           dst := nil;
           src := nil;

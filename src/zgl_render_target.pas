@@ -97,7 +97,8 @@ uses
   zgl_screen,
   zgl_render,
   zgl_render_2d,
-  zgl_camera_2d;
+  zgl_camera_2d,
+  zgl_types;
 
 var
   lCanDraw : Boolean;
@@ -186,6 +187,8 @@ begin
 end;
 
 function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
+  var
+    data : PByteArray;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -194,7 +197,7 @@ begin
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
   zgl_GetMem( Pointer( Result.Next.Handle ), SizeOf( zglTD3DTarget ) );
 
-  rtarget_Save( Surface );
+  tex_GetData( Surface, data );
   d3dTexArray[ Surface.ID ].Texture := nil;
   {$IFDEF USE_DIRECT3D8}
   d3dDevice.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
@@ -211,7 +214,13 @@ begin
                                          D3DMULTISAMPLE_NONE, 0, TRUE, Result.Next.Handle.Depth, nil );
   {$ENDIF}
   d3dTexArray[ Surface.ID ].Pool := D3DPOOL_DEFAULT;
-  rtarget_Restore( Surface );
+
+  Surface.Width  := Round( Surface.Width / Surface.U );
+  Surface.Height := Round( Surface.Height / Surface.V );
+  tex_SetData( Surface, data, 0, 0, Surface.Width, Surface.Height );
+  Surface.Width  := Round( Surface.Width * Surface.U );
+  Surface.Height := Round( Surface.Height * Surface.V );
+  zgl_FreeMem( Pointer( data ) );
 
   Result.next.Type_      := 0;
   Result.next.Handle.Old := Surface;
