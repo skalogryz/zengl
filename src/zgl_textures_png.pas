@@ -380,7 +380,9 @@ end;
 
 procedure png_ReadtRNS( var pngMem : zglTMemory; Size : Integer );
 begin
-  mem_Read( pngMem, pngPaletteAlpha, Size );
+  mem_Read( pngMem, pngPaletteAlpha, 1 );
+  if Size > 1 Then // WTF? O_o
+    mem_Seek( pngMem, Size - 1, FSM_CUR );
   pngHastRNS := TRUE;
 end;
 
