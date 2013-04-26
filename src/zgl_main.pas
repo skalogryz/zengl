@@ -192,9 +192,9 @@ uses
   {$IFEND}
   zgl_timers,
   zgl_log,
-  {$IFDEF iOS}
+  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
   zgl_touch,
-  {$ENDIF}
+  {$IFEND}
   zgl_mouse,
   zgl_keyboard,
   zgl_render,
@@ -519,7 +519,7 @@ begin
       begin
         key_PInputChar := UserData;
       end;
-    {$IFDEF iOS}
+    {$IF DEFINED(iOS) or DEFINED(ANDROID)}
     INPUT_TOUCH_MOVE:
       begin
         touch_PMove := UserData;
@@ -532,7 +532,7 @@ begin
       begin
         touch_PRelease := UserData;
       end;
-    {$ENDIF}
+    {$IFEND}
     // Textures
     TEX_FORMAT_EXTENSION:
       begin
