@@ -1,7 +1,7 @@
 ﻿RU:
 ВНИМАНИЕ! Примеры не будут работать в эмуляторе с версией Android ниже 4.0, т.к. он не поддерживает архитектуру ARMv6
 
-Примеры рассчитаны на Android NDK r8 и FreePascal собранный по этой инструкции:
+Примеры рассчитаны на Android NDK r8e и FreePascal собранный по этой инструкции:
 http://zengl.org/wiki/doku.php?id=compilation:android
 
 Для других версий Android NDK понадобится менять путь для файлов проекта в Lazarus(Project->Project Options->Other).
@@ -14,7 +14,7 @@ http://zengl.org/wiki/doku.php?id=compilation:android
 EN:
 WARNING! Demos won't work in emulator with version of Android lower than 4.0 because it doesn't support ARMv6 architecture
 
-Demos are written for Android NDK r7c and FreePascal built using this instruction:
+Demos are written for Android NDK r8e and FreePascal built using this instruction:
 http://zengl.org/wiki/doku.php?id=compilation:android
 
 For other versions of Android NDK new path should be set for Lazarus project files(Project->Project Options->Other).
