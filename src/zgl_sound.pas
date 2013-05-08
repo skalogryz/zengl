@@ -534,6 +534,7 @@ begin
     if Assigned( sfStream[ i ]._decoder ) Then
       begin
         sfStream[ i ]._decoder.Close( sfStream[ i ] );
+        sfStream[ i ]._decoder := nil;
         if Assigned( sfStream[ i ].Buffer ) Then
           FreeMem( sfStream[ i ].Buffer );
         if Assigned( sfStream[ i ]._data ) Then
