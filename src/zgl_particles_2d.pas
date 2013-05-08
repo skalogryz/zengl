@@ -435,6 +435,8 @@ procedure pengine2d_AddEmitter( Emitter : zglPEmitter2D; Result : zglPPEmitter2D
     new : zglPEmitter2D;
     len : Integer;
 begin
+  if not Assigned( Emitter ) Then exit;
+
   if pengine2d.Count.Emitters + 1 > Length( pengine2d.List ) Then
     begin
       SetLength( pengine2d.List, Length( pengine2d.List ) + 1024 );
