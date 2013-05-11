@@ -531,8 +531,10 @@ begin
 {$IFDEF iOS}
   eglContext.renderbufferStorage_fromDrawable( GL_RENDERBUFFER, eglSurface );
 {$ENDIF}
-  oglWidth  := Width;
-  oglHeight := Height;
+  oglWidth   := Width;
+  oglHeight  := Height;
+  oglTargetW := Width;
+  oglTargetH := Height;
   if appFlags and CORRECT_RESOLUTION > 0 Then
     scr_CorrectResolution( scrResW, scrResH )
   else
