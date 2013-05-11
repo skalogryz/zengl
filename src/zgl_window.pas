@@ -226,8 +226,10 @@ begin
 
   d3d_Restore();
 
-  oglWidth  := Width;
-  oglHeight := Height;
+  oglWidth   := Width;
+  oglHeight  := Height;
+  oglTargetW := Width;
+  oglTargetH := Height;
   if appFlags and CORRECT_RESOLUTION > 0 Then
     scr_CorrectResolution( scrResW, scrResH )
   else
