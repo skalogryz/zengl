@@ -20,7 +20,7 @@
       <CharSet Value="04B0"/>
       <StringTable CompanyName="Andrey Kemka aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Andrey Kemka aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.3.11"/>
     </VersionInfo>
-    <BuildModes Count="4">
+    <BuildModes Count="2">
       <Item1 Name="Release" Default="True"/>
       <Item2 Name="Debug">
         <CompilerOptions>
@@ -62,97 +62,6 @@
           </Other>
         </CompilerOptions>
       </Item2>
-      <Item3 Name="C/C++ Support, Release">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="./ZenGL"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
-            <UnitOutputDirectory Value="../tmp"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <SyntaxMode Value="Delphi"/>
-              <CStyleOperator Value="False"/>
-              <CPPInline Value="False"/>
-              <UseAnsiStrings Value="False"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <Optimizations>
-              <OptimizationLevel Value="3"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-              <ExecutableType Value="Library"/>
-            </Options>
-          </Linking>
-          <Other>
-            <Verbosity>
-              <ShowNotes Value="False"/>
-              <ShowHints Value="False"/>
-              <ShowGenInfo Value="False"/>
-            </Verbosity>
-            <CustomOptions Value="-dUSE_EXPORT_C -Cccdecl"/>
-            <CompilerPath Value="$(CompPath)"/>
-          </Other>
-        </CompilerOptions>
-      </Item3>
-      <Item4 Name="C/C++ Support, Debug">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="./ZenGL"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
-            <UnitOutputDirectory Value="../tmp"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <SyntaxMode Value="Delphi"/>
-              <CStyleOperator Value="False"/>
-              <CPPInline Value="False"/>
-              <UseAnsiStrings Value="False"/>
-            </SyntaxOptions>
-          </Parsing>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-            </Debugging>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-              <ExecutableType Value="Library"/>
-            </Options>
-          </Linking>
-          <Other>
-            <Verbosity>
-              <ShowNotes Value="False"/>
-              <ShowHints Value="False"/>
-              <ShowGenInfo Value="False"/>
-            </Verbosity>
-            <CustomOptions Value="-dUSE_EXPORT_C -Cccdecl"/>
-            <CompilerPath Value="$(CompPath)"/>
-          </Other>
-        </CompilerOptions>
-      </Item4>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>

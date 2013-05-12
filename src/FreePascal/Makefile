@@ -14,8 +14,7 @@ endif
 
 # Variables
 FPC              = fpc
-DEFINES          = #-dUSE_EXPORT_C -Cccdecl
-FLAGS          	 = -O3 -XsX -CX -Sd $(DEFINES)
+FLAGS          	 = -O3 -XsX -CX -Sd
 LIBS             = -Fu../../lib/jpeg/$(ARCH)-$(OS) -Fu../../lib/ogg/$(ARCH)-$(OS) -Fu../../lib/theora/$(ARCH)-$(OS) -Fu../../lib/zlib/$(ARCH)-$(OS) -Fu../../lib/zip/$(ARCH)-$(OS)
 LIBSPPC          = -Fu../../lib/jpeg/powerpc-$(OS) -Fu../../lib/ogg/powerpc-$(OS) -Fu../../lib/theora/powerpc-$(OS) -Fu../../lib/zlib/powerpc-$(OS) -Fu../../lib/zip/powerpc-$(OS)
 # Linux 32-bit
