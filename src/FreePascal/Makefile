@@ -1,6 +1,5 @@
 FPC     = fpc
-DEFINES = #-dUSE_EXPORT_C -Cccdecl
-FLAGS   = -O3 -XsX -CX -Sd $(DEFINES)
+FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../Direct3D
 OUTPUT  = ./
 TMP     = -FU../tmp
