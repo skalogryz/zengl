@@ -807,7 +807,7 @@ begin
       end;
     WM_MOUSEWHEEL:
       begin
-        if ShortInt( wParam shr 16 ) > 0 Then
+        if SmallInt( wParam shr 16 ) > 0 Then
           begin
             mouseWheel[ M_WUP   ] := TRUE;
             mouseWheel[ M_WDOWN ] := FALSE;
