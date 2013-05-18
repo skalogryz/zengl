@@ -109,7 +109,7 @@ begin
       cbWndExtra    := 0;
       hInstance     := wndINST;
       hIcon         := LoadIconW  ( wndINST, 'MAINICON' );
-      hIconSm       := LoadIconW  ( wndINST, 'MAINICON' );
+      hIconSm       := 0;
       hCursor       := LoadCursorW( wndINST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
