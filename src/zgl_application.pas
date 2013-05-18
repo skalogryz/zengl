@@ -1387,7 +1387,6 @@ begin
       touchDown[ ID ]   := FALSE;
       touchUp[ ID ]     := TRUE;
       touchTap[ ID ]    := FALSE;
-      touchDblTap[ ID ] := FALSE;
       touchCanTap[ ID ] := TRUE;
 
       if Assigned( touch_PRelease ) Then
@@ -1401,8 +1400,7 @@ begin
 
             if Assigned( touch_PPress ) Then
               touch_PPress( ID );
-          end else
-            touchDblTap[ M_BLEFT ] := touchDown[ ID ] and ( not touchCanTap[ ID ] );
+          end;
 
         touchDown[ ID ] := TRUE;
         touchUp[ ID ]   := FALSE;

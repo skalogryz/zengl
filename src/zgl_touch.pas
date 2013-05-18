@@ -35,7 +35,6 @@ function touch_Y( Finger : Byte ) : Integer;
 function touch_Down( Finger : Byte ) : Boolean;
 function touch_Up( Finger : Byte ) : Boolean;
 function touch_Tap( Finger : Byte ) : Boolean;
-function touch_DblTap( Finger : Byte ) : Boolean;
 procedure touch_ClearState;
 
 var
@@ -45,7 +44,6 @@ var
   touchUp     : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchTap    : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchCanTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
-  touchDblTap : array[ 0..MAX_TOUCH - 1 ] of Boolean;
   touchActive : array[ 0..MAX_TOUCH - 1 ] of Boolean;
 
   // callback
@@ -93,14 +91,6 @@ begin
     Result := FALSE
   else
     Result := touchTap[ Finger ];
-end;
-
-function touch_DblTap( Finger : Byte ) : Boolean;
-begin
-  if Finger > MAX_TOUCH - 1 Then
-    Result := FALSE
-  else
-    Result := touchDblTap[ Finger ];
 end;
 
 procedure touch_ClearState;
