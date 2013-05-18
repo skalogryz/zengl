@@ -228,7 +228,7 @@ begin
       hInstance     := wndINST;
       hIcon         := LoadIconW  ( wndINST, 'MAINICON' );
       {$IFDEF WINDESKTOP}
-      hIconSm       := LoadIconW  ( wndINST, 'MAINICON' );
+      hIconSm       := 0;
       {$ENDIF}
       hCursor       := LoadCursorW( wndINST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
