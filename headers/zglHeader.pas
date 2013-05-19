@@ -2,8 +2,8 @@
 {------------= ZenGL =------------}
 {---------------------------------}
 {                                 }
-{ version:  0.3.11                }
-{ date:     2013.05.12            }
+{ version:  0.3.12                }
+{ date:     2013.05.19            }
 { license:  zlib                  }
 { homepage: http://zengl.org      }
 {                                 }
@@ -50,13 +50,6 @@ unit zglHeader;
 {$IFDEF MSWINDOWS}
   {$DEFINE WINDOWS}
 {$ENDIF}
-{$IFDEF WINDOWS}
-  {$IF DEFINED(WIN32) or DEFINED(WIN64)}
-    {$DEFINE WINDESKTOP}
-  {$ELSE}
-    {$DEFINE WINMOBILE}
-  {$IFEND}
-{$ENDIF}
 {$IFDEF DARWIN}
   {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
     {$DEFINE iOS}
@@ -72,10 +65,6 @@ interface
 {$IFDEF MACOSX}
 uses
   MacOSAll;
-{$ENDIF}
-{$IFDEF WINMOBILE}
-uses
-  Windows;
 {$ENDIF}
 
 type
@@ -1395,19 +1384,11 @@ function dlsym  ( Lib : Pointer; Name : PAnsiChar) : Pointer; cdecl; external 'd
 {$ENDIF}
 
 {$IFDEF WINDOWS}
-{$IFNDEF WINCE}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 
 function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PAnsiChar; uType : LongWord) : Integer; stdcall; external 'user32.dll';
-{$ELSE}
-function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
-function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
-function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
-
-function MessageBoxA( hWnd : LongWord; lpText, lpCaption : PWideChar; uType : LongWord) : Integer; stdcall; external 'coredll.dll' name 'MessageBoxW';
-{$ENDIF}
 {$ENDIF}
 
 implementation
@@ -1597,23 +1578,7 @@ begin
   Str := Result;
 end;
 
-{$IFDEF WINCE}
-function utf8_GetPWideChar( const Str : UTF8String ) : PWideChar;
-  var
-    len : Integer;
-begin
-  len := MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), nil, 0 );
-  GetMem( Result, len * 2 + 2 );
-  Result[ len ] := #0;
-  MultiByteToWideChar( CP_UTF8, 0, @Str[ 1 ], length( Str ), Result, len );
-end;
-{$ENDIF}
-
 function zglLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
-  {$IFDEF WINCE}
-  var
-    lib : PWideChar;
-  {$ENDIF}
 begin
   Result := FALSE;
   {$IFDEF LINUX}
@@ -1628,13 +1593,7 @@ begin
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
   {$ENDIF}
-  {$IFDEF WINCE}
-  lib := u_GetPWideChar( LibraryName );
-  zglLib := dlopen( lib );
-  FreeMem( lib );
-  {$ELSE}
   zglLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF UNIX}, $001 {$ENDIF} );
-  {$ENDIF}
 
   if zglLib <> {$IFDEF UNIX} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
     begin

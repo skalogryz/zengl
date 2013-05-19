@@ -16,9 +16,9 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="3"/>
-      <RevisionNr Value="11"/>
+      <RevisionNr Value="12"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Andrey Kemka aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Andrey Kemka aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.3.11"/>
+      <StringTable CompanyName="Andrey Kemka aka Andru" FileDescription="Cross-platform game development library" InternalName="ZenGL" LegalCopyright="Andrey Kemka aka Andru" OriginalFilename="ZenGL" ProductName="ZenGL" ProductVersion="0.3.12"/>
     </VersionInfo>
     <BuildModes Count="2">
       <Item1 Name="Release" Default="True"/>
