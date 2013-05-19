@@ -87,15 +87,15 @@ function _file_GetName( const FileName : UTF8String ) : PAnsiChar;
 function _file_GetExtension( const FileName : UTF8String ) : PAnsiChar;
 function _file_GetDirectory( const FileName : UTF8String ) : PAnsiChar;
 
-{$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+{$IFDEF DARWIN}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
-{$IFEND}
+{$ENDIF}
 
 implementation
 uses
-  {$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+  {$IFDEF DARWIN}
   zgl_application,
-  {$IFEND}
+  {$ENDIF}
   zgl_main,
   zgl_resources,
   zgl_log,
@@ -164,11 +164,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   wideStr := utf8_GetPWideChar( filePath + FileName );
-  {$ELSE}
-  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + FileName ) );
-  {$ENDIF}
   case Mode of
     FOM_CREATE: FileHandle := CreateFileW( wideStr, GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
     FOM_OPENR:  FileHandle := CreateFileW( wideStr, GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
@@ -200,11 +196,7 @@ begin
   Result := FpMkdir( filePath + Directory, MODE_MKDIR ) = FILE_ERROR;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   wideStr := utf8_GetPWideChar( filePath + Directory );
-  {$ELSE}
-  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Directory ) );
-  {$ENDIF}
   Result := CreateDirectoryW( wideStr, nil );
   FreeMem( wideStr );
 {$ENDIF}
@@ -245,11 +237,7 @@ begin
   dir := fpS_ISDIR( status.st_mode );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   wideStr := utf8_GetPWideChar( filePath + Name );
-  {$ELSE}
-  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
-  {$ENDIF}
   dir := GetFileAttributesW( wideStr ) and FILE_ATTRIBUTE_DIRECTORY > 0;
   FreeMem( wideStr );
 {$ENDIF}
@@ -277,12 +265,8 @@ begin
       Result := FpRmdir( filePath + Name ) = 0;
       {$ENDIF}
       {$IFDEF WINDOWS}
-      {$IFDEF WINDESKTOP}
       wideStr := utf8_GetPWideChar( filePath + Name );
-      {$ELSE}
-      wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
-      {$ENDIF}
-      Result := RemoveDirectoryW( wideStr );
+      Result  := RemoveDirectoryW( wideStr );
       FreeMem( wideStr );
       {$ENDIF}
       {$IFDEF MACOSX}
@@ -297,12 +281,8 @@ begin
       {$ENDIF}
       {$IFDEF WINDOWS}
       begin
-        {$IFDEF WINDESKTOP}
         wideStr := utf8_GetPWideChar( filePath + Name );
-        {$ELSE}
-        wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
-        {$ENDIF}
-        Result := DeleteFileW( wideStr );
+        Result  := DeleteFileW( wideStr );
         FreeMem( wideStr );
       end;
       {$ENDIF}
@@ -336,11 +316,7 @@ begin
   Result := FpStat( filePath + Name, status ) = 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   wideStr := utf8_GetPWideChar( filePath + Name );
-  {$ELSE}
-  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Name ) );
-  {$ENDIF}
   Result  := GetFileAttributesW( wideStr ) <> $FFFFFFFF;
   FreeMem( wideStr );
 {$ENDIF}
@@ -605,11 +581,7 @@ begin
   FpCloseDir( dir^ );
 {$IFEND}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   wideStr := utf8_GetPWideChar( filePath + Directory + '*' );
-  {$ELSE}
-  wideStr := utf8_GetPWideChar( platform_GetRes( filePath + Directory ) + '*' );
-  {$ENDIF}
   First   := FindFirstFileW( wideStr, FList );
   FreeMem( wideStr );
   repeat
@@ -717,15 +689,6 @@ begin
     Result := FileName;
 end;
 {$ENDIF}
-{$IFDEF WINCE}
-function platform_GetRes( const FileName : UTF8String ) : UTF8String;
-begin
-  if ( Length( FileName ) > 0 ) and ( FileName[ 1 ] <> '/' ) and ( FileName[ 1 ] <> '\' ) Then
-    Result := appWorkDir + FileName
-  else
-    Result := FileName;
-end;
-{$ENDIF}
 {$IFDEF iOS}
 function platform_GetRes( const FileName : UTF8String ) : UTF8String;
 begin
@@ -751,7 +714,7 @@ begin
       exit;
     end;
 
-  {$IF DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(WINCE)}
+  {$IF DEFINED(MACOSX) or DEFINED(iOS)}
   zipCurrent := zip_open( PAnsiChar( platform_GetRes( filePath + FileName ) ), 0, error );
   {$ELSE}
   zipCurrent := zip_open( PAnsiChar( filePath + FileName ), 0, error );

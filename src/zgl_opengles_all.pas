@@ -724,10 +724,6 @@ begin
 end;
 
 function gl_GetProc( const Proc : UTF8String ) : Pointer;
-  {$IFDEF WINCE}
-  var
-    wideStr : PWideChar;
-  {$ENDIF}
 begin
 {$IFNDEF NO_EGL}
   Result := eglGetProcAddress( PAnsiChar( Proc ) );
@@ -737,25 +733,10 @@ begin
   Result := nil;
 {$ENDIF}
 
-  {$IFNDEF WINCE}
   if Result = nil Then
     Result := dlsym( glesLibrary, PAnsiChar( Proc ) );
   if Result = nil Then
     Result := dlsym( glesLibrary, PAnsiChar( Proc + 'OES' ) );
-  {$ELSE}
-  if Result = nil Then
-    begin
-      wideStr := utf8_GetPWideChar( Proc );
-      Result  := dlsym( glesLibrary, wideStr );
-      FreeMem( wideStr );
-    end;
-  if Result = nil Then
-    begin
-      wideStr := utf8_GetPWideChar( Proc + 'OES' );
-      Result  := dlsym( glesLibrary, wideStr );
-      FreeMem( wideStr );
-    end;
-  {$ENDIF}
 end;
 
 function gl_IsSupported( const Extension, SearchIn: UTF8String ) : Boolean;

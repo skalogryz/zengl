@@ -52,7 +52,7 @@ const
   JSIOCGAXES    = -2147390959;
   JSIOCGBUTTONS = -2147390958;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   type
     PJOYCAPSW = ^TJOYCAPSW;
     TJOYCAPSW = packed record
@@ -161,7 +161,7 @@ type
     device  : LongInt;
     axesMap : array[ 0..ABS_MAX - 1 ] of Byte;
     {$ENDIF}
-    {$IFDEF WINDESKTOP}
+    {$IFDEF WINDOWS}
     caps    : TJOYCAPSW;
     axesMap : array[ 0..5 ] of Byte;
     {$ENDIF}
@@ -188,7 +188,7 @@ const
 {$IFDEF LINUX}
   JS_AXIS : array[ 0..17 ] of Byte = ( JOY_AXIS_X, JOY_AXIS_Y, JOY_AXIS_Z, JOY_AXIS_U, JOY_AXIS_V, JOY_AXIS_R, JOY_AXIS_Z, JOY_AXIS_R, 0, 0, 0, 0, 0, 0, 0, 0, JOY_POVX, JOY_POVY );
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   JS_AXIS : array[ 0..5 ] of LongWord = ( 17 {X}, 19 {Y}, 21 {Z}, 26 {R}, 28 {U}, 30 {V} );
 {$ENDIF}
 
@@ -216,7 +216,7 @@ var
 function joy_Init : Byte;
   var
     i, j : Integer;
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
     axis : Integer;
     caps : PLongWord;
   {$ENDIF}
@@ -268,7 +268,7 @@ begin
           break;
     end;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   j := joyGetNumDevs();
   for i := 0 to j - 1 do
     if joyGetDevCapsW( i, @joyArray[ i ].caps, SizeOf( TJOYCAPSW ) ) = 0 Then
@@ -343,7 +343,7 @@ procedure joy_Proc;
   {$IFDEF LINUX}
     event : js_event;
   {$ENDIF}
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
     j, a  : Integer;
     btn   : Integer;
     state : TJOYINFOEX;
@@ -387,7 +387,7 @@ begin
         end;
     end;
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
   state.dwSize := SizeOf( TJOYINFOEX );
   for i := 0 to joyCount - 1 do
     begin

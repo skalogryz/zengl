@@ -28,10 +28,6 @@ unit zgl_window;
   {$modeswitch objectivec1}
 {$ENDIF}
 
-{$IFDEF WINCE}
-  {$R zgl_wince.rc}
-{$ENDIF}
-
 interface
 {$IFDEF USE_X11}
   uses X, XLib, XUtil;
@@ -78,7 +74,7 @@ var
   wndHandle    : HWND;
   wndDC        : HDC;
   wndINST      : HINST;
-  wndClass     : {$IFNDEF WINCE}TWndClassExW{$ELSE}TWndClassW{$ENDIF};
+  wndClass     : TWndClassExW;
   wndClassName : PWideChar = 'ZenGL';
   wndStyle     : LongWord;
   wndCpnSize   : Integer;
@@ -212,35 +208,25 @@ begin
 {$IFDEF WINDOWS}
   wndCpnSize  := GetSystemMetrics( SM_CYCAPTION  );
   wndBrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
-  {$IFDEF WINDESKTOP}
   wndBrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
-  {$ENDIF}
 
   with wndClass do
     begin
-      {$IFDEF WINDESKTOP}
       cbSize        := SizeOf( TWndClassExW );
-      {$ENDIF}
-      style         := CS_DBLCLKS {$IFDEF WINDESKTOP}or CS_OWNDC{$ENDIF};
+      style         := CS_DBLCLKS or CS_OWNDC;
       lpfnWndProc   := @app_ProcessMessages;
       cbClsExtra    := 0;
       cbWndExtra    := 0;
       hInstance     := wndINST;
       hIcon         := LoadIconW  ( wndINST, 'MAINICON' );
-      {$IFDEF WINDESKTOP}
       hIconSm       := 0;
-      {$ENDIF}
       hCursor       := LoadCursorW( wndINST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
       lpszClassName := wndClassName;
     end;
 
-  {$IFDEF WINDESKTOP}
   if RegisterClassExW( wndClass ) = 0 Then
-  {$ELSE}
-  if RegisterClass( wndClass ) = 0 Then
-  {$ENDIF}
     begin
       u_Error( 'Cannot register window class' );
       exit;
@@ -255,7 +241,7 @@ begin
     wndHandle := CreateWindowExW( WS_EX_TOOLWINDOW, wndClassName, wndCaptionW, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, nil )
   else
   {$ENDIF}
-    wndHandle := CreateWindowExW( {$IFDEF WINDESKTOP}WS_EX_APPWINDOW or{$ENDIF} WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
+    wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
                                   wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
                                   wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );
 
@@ -421,7 +407,7 @@ begin
     wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
   SetWindowLongW( wndHandle, GWL_STYLE, LongInt(wndStyle) );
-  SetWindowLongW( wndHandle, GWL_EXSTYLE, {$IFDEF WINDESKTOP}WS_EX_APPWINDOW or{$ENDIF} WS_EX_TOPMOST * Byte( FullScreen ) );
+  SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 {$ENDIF}
 {$IFDEF MACOSX}
   if wndFullScreen Then

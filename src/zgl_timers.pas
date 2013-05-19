@@ -197,14 +197,10 @@ begin
   {$Q+}
 {$ENDIF}
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   m := SetThreadAffinityMask( GetCurrentThread(), 1 );
-  {$ENDIF}
   QueryPerformanceCounter( t );
   Result := 1000 * t * timerFreq - timerStart;
-  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), m );
-  {$ENDIF}
 {$ENDIF}
 {$IFDEF DARWIN}
   Result := mach_absolute_time() * timerTimebaseInfo.numer / timerTimebaseInfo.denom / 1000000 - timerStart;
@@ -226,9 +222,7 @@ end;
 
 initialization
 {$IFDEF WINDOWS}
-  {$IFDEF WINDESKTOP}
   SetThreadAffinityMask( GetCurrentThread(), 1 );
-  {$ENDIF}
   QueryPerformanceFrequency( timerFrequency );
   timerFreq := 1 / timerFrequency;
 {$ENDIF}

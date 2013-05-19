@@ -282,7 +282,7 @@ begin
           timer_MainLoop();
 
       t := timer_GetTicks();
-      {$IFDEF WINDESKTOP}
+      {$IFDEF WINDOWS}
       // Workaround for a bug with unstable time between frames(happens when videocard trying to reclock GPU frequency/etc.)...
       if Assigned( app_PUpdate ) and ( scrVSync ) and ( appFPS > 0 ) and ( appFPS = scrRefresh ) and ( appFlags and APP_USE_DT_CORRECTION > 0 ) Then
         app_PUpdate( 1000 / appFPS )
@@ -1856,6 +1856,6 @@ initialization
   app_PLoop       := @app_MainLoop;
   app_PCloseQuery := @app_CloseQuery;
 
-  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE or APP_USE_AUTOPAUSE {$IFDEF WINDESKTOP} or APP_USE_DT_CORRECTION {$ENDIF};
+  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE or APP_USE_AUTOPAUSE {$IFDEF WINDOWS} or APP_USE_DT_CORRECTION {$ENDIF};
 
 end.

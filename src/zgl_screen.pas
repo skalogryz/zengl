@@ -173,15 +173,8 @@ procedure XDestroyIC(ic : PXIC);cdecl;external;
 {$IFDEF WINDOWS}
 const
   MONITOR_DEFAULTTOPRIMARY = $00000001;
-{$ENDIF}
-{$IFDEF WINDESKTOP}
 function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
 function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
-{$ENDIF}
-{$IFDEF WINCE}
-function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'coredll.dll';
-function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'coredll.dll' name 'GetMonitorInfo';
-function ChangeDisplaySettingsExW( lpszDeviceName : PWideChar; lpDevMode : DEVMODEW; handle : HWND; dwflags : DWORD; lParam : Pointer ) : LongInt; stdcall; external 'coredll.dll' name 'ChangeDisplaySettingsEx';
 {$ENDIF}
 
 procedure scr_GetResList;
@@ -400,7 +393,7 @@ begin
   XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrDesktop, scrRotation, CurrentTime );
 {$ENDIF}
 {$IFDEF WINDOWS}
-  ChangeDisplaySettingsExW( scrMonInfo.szDevice, {$IFDEF WINDESKTOP}DEVMODEW( nil^ ){$ELSE}scrDesktop{$ENDIF}, 0, CDS_FULLSCREEN, nil );
+  ChangeDisplaySettingsExW( scrMonInfo.szDevice, DEVMODEW( nil^ ), 0, CDS_FULLSCREEN, nil );
 {$ENDIF}
 {$IFDEF MACOSX}
   CGDisplaySwitchToMode( scrDisplay, scrDesktop );

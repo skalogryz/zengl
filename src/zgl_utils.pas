@@ -103,23 +103,14 @@ function memcpy( destination, source : Pointer; num : csize_t ) : Pointer; cdecl
 {$IFDEF ANDROID}
 function __android_log_write( prio : LongInt; tag, text : PAnsiChar ) : LongInt; cdecl; external 'liblog.so' name '__android_log_write';
 {$ENDIF}
-{$IFDEF WINDESKTOP}
+{$IFDEF WINDOWS}
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
 function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall; external 'kernel32.dll' name 'GetProcAddress';
 {$ENDIF}
-{$IFDEF WINCE}
-function dlopen ( lpLibFileName : PWideChar) : HMODULE; stdcall; external 'coredll.dll' name 'LoadLibraryW';
-function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'coredll.dll' name 'FreeLibrary';
-function dlsym  ( hModule : HMODULE; lpProcName : PWideChar) : Pointer; stdcall; external 'coredll.dll' name 'GetProcAddressW';
-{$ENDIF}
 
 implementation
 uses
-  {$IFDEF WINCE}
-  zgl_application,
-  zgl_main,
-  {$ENDIF}
   zgl_log;
 
 function u_IntToStr( Value : Integer ) : UTF8String;

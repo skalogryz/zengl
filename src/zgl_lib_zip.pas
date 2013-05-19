@@ -52,7 +52,7 @@ unit zgl_lib_zip;
 
 interface
 uses
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
   {$ENDIF}
   zgl_memory,

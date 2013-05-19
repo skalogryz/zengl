@@ -61,17 +61,13 @@ begin
   if not Assigned( logFile ) Then
     logFile := utf8_GetPAnsiChar( 'log.txt' )
   {$ENDIF}
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
   if not Assigned( logFile ) Then
     logFile := utf8_GetPAnsiChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF MACOSX}
   if not Assigned( logFile ) Then
     logFile := utf8_GetPAnsiChar( appWorkDir + '../log.txt' )
-  {$ENDIF}
-  {$IFDEF WINCE}
-  if not Assigned( logFile ) Then
-    logFile := utf8_GetPAnsiChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF iOS}
   if not Assigned( logFile ) Then

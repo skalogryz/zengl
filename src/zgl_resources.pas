@@ -718,7 +718,7 @@ begin
               RES_ZIP_OPEN:
                 with item^, zglPZIPResource( Resource )^ do
                   begin
-                    {$IF DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(WINCE)}
+                    {$IF DEFINED(MACOSX) or DEFINED(iOS)}
                     zipCurrent := zip_open( PAnsiChar( platform_GetRes( FileName ) ), 0, i );
                     {$ELSE}
                     zipCurrent := zip_open( PAnsiChar( FileName ), 0, i );

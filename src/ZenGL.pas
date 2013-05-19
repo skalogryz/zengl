@@ -438,5 +438,7 @@ exports
   u_Sleep                  name prefix + 'u_Sleep'
   ;
 
+{$R *.res}
+
 begin
 end.
