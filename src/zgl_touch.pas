@@ -97,7 +97,6 @@ procedure touch_ClearState;
 begin
   FillChar( touchUp[ 0 ], MAX_TOUCH, 0 );
   FillChar( touchTap[ 0 ], MAX_TOUCH, 0 );
-  FillChar( touchDblTap[ 0 ], MAX_TOUCH, 0 );
   FillChar( touchCanTap[ 0 ], MAX_TOUCH, 1 );
 end;
 
