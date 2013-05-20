@@ -460,6 +460,11 @@ begin
       glFramebufferRenderbuffer := gl_GetProc( 'glFramebufferRenderbuffer' );
 
       glGetIntegerv( GL_MAX_RENDERBUFFER_SIZE, @oglMaxFBOSize );
+      if oglMaxFBOSize = 0 Then
+        begin
+          log_Add( 'Tegra-based device or other shit? It returns 0 for GL_MAX_RENDERBUFFER_SIZE' );
+          oglMaxFBOSize := oglMaxTexSize;
+        end;
       log_Add( 'GL_MAX_RENDERBUFFER_SIZE: ' + u_IntToStr( oglMaxFBOSize ) );
     end else
       oglCanFBO := FALSE;
