@@ -1436,6 +1436,7 @@ begin
   sfStream[ ID ]._waiting  := FALSE;
   sfStream[ ID ]._complete := 0;
   sfStream[ ID ]._lastTime := timer_GetTicks;
+  sfVolumes[ ID ]          := Volume;
 
   thread_EventCreate( sfEvent[ ID ] );
   thread_Create( sfThread[ ID ], @snd_ProcStream, @sfStream[ ID ].ID );
