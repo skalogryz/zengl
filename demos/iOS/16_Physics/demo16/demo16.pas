@@ -176,9 +176,6 @@ end;
 
 procedure Timer;
 begin
-  if touch_DblTap( 0 ) Then
-    balls := not balls;
-
   if touch_Tap( 0 ) Then
     begin
       if not balls Then
