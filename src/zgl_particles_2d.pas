@@ -562,8 +562,13 @@ procedure pengine2d_ClearAll;
     i : Integer;
 begin
   for i := 0 to pengine2d.Count.Emitters - 1 do
-    emitter2d_Free( pengine2d.List[ i ] );
+    begin
+      if Assigned( pengine2d.ListU[ i ] ) Then
+        pengine2d.ListU[ i ]^ := nil;
+      emitter2d_Free( pengine2d.List[ i ] );
+    end;
   SetLength( pengine2d.List, 0 );
+  SetLength( pengine2d.ListU, 0 );
   pengine2d.Count.Emitters := 0;
 end;
 
