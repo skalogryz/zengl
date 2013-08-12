@@ -30,13 +30,28 @@ unit zgl_lib_zip;
 {$ENDIF}
 
 {$L zlib_helper}
-{$L infback}
-{$L inffast}
-{$L inflate}
-{$L inftrees}
-{$L zutil}
-{$L adler32}
-{$L crc32}
+{$IFDEF USE_ZLIB_STATIC}
+  {$IFDEF USE_ZLIB_FULL}
+    {$L deflate}
+    {$L infback}
+    {$L inffast}
+    {$L inflate}
+    {$L inftrees}
+    {$L zutil}
+    {$L trees}
+    {$L compress}
+    {$L adler32}
+    {$L crc32}
+  {$ELSE}
+    {$L infback}
+    {$L inffast}
+    {$L inflate}
+    {$L inftrees}
+    {$L zutil}
+    {$L adler32}
+    {$L crc32}
+  {$ENDIF}
+{$ENDIF}
 
 interface
 uses
@@ -86,7 +101,7 @@ type
     ch_comment_len   : cint;       // length of changed zip archive * comment, -1 if unchanged
     nentry           : cuint64;    // number of entries
     nentry_alloc     : cuint64;    // number of entries allocated
-    entry            : Pointer;    //zip_entry // entries
+    entry            : Pointer;    // zip_entry // entries
     nfile            : cint;       // number of opened files within archive
     nfile_alloc      : cint;       // number of files allocated
     file_            : array of Pzip_file; // opened files within archive
@@ -118,6 +133,7 @@ function zip_fclose( file_ : Pzip_file ) : cint; cdecl; external;
 function zip_get_num_entries( archive : Pzip; flags : cint ) : cuint64; cdecl; external;
 function zip_get_name( archive : Pzip; index : cuint64; flags : cint ) : PAnsiChar; cdecl; external;
 
+{$IFNDEF USE_ZLIB_FULL}
 // hack for compression functions which will be never used, but which are needed on linking stage
 {$IFDEF FPC}
 function deflate_fake : Integer; cdecl; public name '_deflate'; public name 'deflate';
@@ -127,6 +143,7 @@ function deflateInit2_fake : Integer; cdecl; public name '_deflateInit2_'; publi
 function deflate : Integer; cdecl;
 function deflateEnd : Integer; cdecl;
 function deflateInit2_ : Integer; cdecl;
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
@@ -167,6 +184,7 @@ threadvar
 implementation
 
 {$IFDEF USE_ZIP}
+{$IFNDEF USE_ZLIB_FULL}
 {$IFDEF FPC}
 function deflate_fake : Integer;
 begin
@@ -197,6 +215,7 @@ function deflateInit2_ : Integer;
 begin
   Result := 0;
 end;
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
