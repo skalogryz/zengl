@@ -321,8 +321,7 @@ begin
 {$ENDIF}
 
 {$IFDEF USE_UIIMAGE}
-  jpg.Data    := NSData.alloc().init();
-  jpg.Data.initWithBytesNoCopy_length_freeWhenDone( Memory.Memory, Memory.Size, FALSE );
+  jpg.Data    := NSData.alloc().initWithBytesNoCopy_length_freeWhenDone( Memory.Memory, Memory.Size, FALSE );
   jpg.Image   := UIImage.imageWithData( jpg.Data );
   jpg.Width   := Round( jpg.Image.size.width );
   jpg.Height  := Round( jpg.Image.size.height );
