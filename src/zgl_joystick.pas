@@ -227,10 +227,10 @@ begin
   for i := 0 to 15 do
     begin
       joyArray[ joyCount ].device := FpOpen( '/dev/input/js' + u_IntToStr( i ), O_RDONLY or O_NONBLOCK );
-      if joyArray[ joyCount ].device = FILE_ERROR Then
+      if joyArray[ joyCount ].device <= FILE_ERROR Then
         joyArray[ joyCount ].device := FpOpen( '/dev/js' + u_IntToStr( i ), O_RDONLY or O_NONBLOCK );
 
-      if joyArray[ joyCount ].device <> FILE_ERROR Then
+      if joyArray[ joyCount ].device > FILE_ERROR Then
         begin
           SetLength( joyArray[ joyCount ].Info.Name, 256 );
           FpIOCtl( joyArray[ joyCount ].device, JSIOCGNAME,    @joyArray[ joyCount ].Info.Name[ 1 ] );
@@ -256,14 +256,19 @@ begin
               end;
 
           // Checking if joystick is a real one, because laptops with accelerometer can be detected as a joystick :)
-          if ( joyArray[ joyCount ].Info.Count.Axes >= 2 ) and ( joyArray[ joyCount ].Info.Count.Buttons > 0 ) Then
+          // Also ignore devices with more than 8 axes and 32 buttons
+          if ( joyArray[ joyCount ].Info.Count.Axes >= 2 ) and ( joyArray[ joyCount ].Info.Count.Buttons > 0 ) and
+             ( joyArray[ joyCount ].Info.Count.Axes <= 8 ) and ( joyArray[ joyCount ].Info.Count.Buttons <= 32 ) Then
             begin
-              log_Add( 'Joy: Find "' + joyArray[ joyCount ].Info.Name + '" (ID: ' + u_IntToStr( joyCount ) +
+              log_Add( 'Joy: Found "' + joyArray[ joyCount ].Info.Name + '" (ID: ' + u_IntToStr( joyCount ) +
                        '; Axes: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Axes ) +
                        '; Buttons: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Buttons ) + ')' );
 
               INC( joyCount );
-            end;
+            end else
+              log_Add( 'Joy: Ignore "' + joyArray[ joyCount ].Info.Name + '" (ID: ' + u_IntToStr( joyCount ) +
+                       '; Axes: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Axes ) +
+                       '; Buttons: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Buttons ) + ')' );
         end else
           break;
     end;
