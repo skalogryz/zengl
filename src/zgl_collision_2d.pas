@@ -261,7 +261,7 @@ begin
       closestX := Rect.X + Rect.W;
 
   closestY := Circle.cY;
-  if Circle.cY <= Rect.X Then
+  if Circle.cY <= Rect.Y Then
     closestY := Rect.Y
   else
     if Circle.cY > Rect.Y + Rect.H Then
