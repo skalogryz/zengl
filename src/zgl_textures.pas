@@ -575,14 +575,7 @@ begin
         tex_GetData( Texture, tData );
         tex_GetData( Mask, mData );
 
-        for j := 0 to Texture.Height - 1 do
-          begin
-            for i := 0 to rW - 1 do
-              tData[ i * 4 + 3 ] := mData[ i * 4 ];
-            INC( PByte( tData ), rW * 4 );
-            INC( PByte( mData ), rW * 4 );
-          end;
-        for j := Texture.Height to rH - 1 do
+        for j := 0 to rH - 1 do
           begin
             for i := 0 to rW - 1 do
               tData[ i * 4 + 3 ] := mData[ i * 4 ];
