@@ -551,6 +551,15 @@ begin
   VSync      := TRUE;
 {$IFEND}
 
+
+  // On Windows Width = 0 and Height = 0 can cause a BSOD xD
+  if ( FullScreen ) and ( ( Width = 0 ) or ( Height = 0 ) ) Then
+    begin
+      FullScreen := FALSE;
+      Width := 1;
+      Height := 1;
+    end;
+
   Result        := TRUE;
   wndWidth      := Width;
   wndHeight     := Height;
@@ -595,10 +604,14 @@ begin
 
       if ( scrCurrent = -1 ) or ( XRRSetScreenConfig( scrDisplay, scrSettings, wndRoot, scrCurrent, scrRotation, CurrentTime ) <> 0 ) Then
         begin
-          u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
           scrCurrent    := scrDesktop;
           wndFullScreen := FALSE;
           Result        := FALSE;
+          if appWork Then
+            begin
+              wnd_Update();
+              u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
+            end;
           exit;
         end;
     end else
@@ -640,9 +653,13 @@ begin
 
       if ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_TEST, nil ) <> DISP_CHANGE_SUCCESSFUL Then
         begin
-          u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
           wndFullScreen := FALSE;
           Result        := FALSE;
+          if appWork Then
+            begin
+              wnd_Update();
+              u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
+            end;
           exit;
         end else
           ChangeDisplaySettingsExW( scrMonInfo.szDevice, scrSettings, 0, CDS_FULLSCREEN, nil );
@@ -664,9 +681,13 @@ begin
 
       if ( b <> 1 ) or ( CGDisplaySwitchToMode( scrDisplay, scrSettings ) <> kCGErrorSuccess ) Then
         begin
-          u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
           wndFullScreen := FALSE;
           Result        := FALSE;
+          if appWork Then
+            begin
+              wnd_Update();
+              u_Warning( 'Cannot set fullscreen mode: ' + u_IntToStr( Width ) + 'x' + u_IntToStr( Height ) );
+            end;
           exit;
         end;
 
