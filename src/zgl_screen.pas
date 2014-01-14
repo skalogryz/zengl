@@ -211,6 +211,13 @@ end;
 
 function scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean ) : Boolean;
 begin
+  if ( FullScreen ) and ( ( Width = 0 ) or ( Height = 0 ) ) Then
+    begin
+      FullScreen := FALSE;
+      Width := 1;
+      Height := 1;
+    end;
+
   Result        := TRUE;
   wndWidth      := Width;
   wndHeight     := Height;
