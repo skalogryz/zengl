@@ -69,7 +69,7 @@ begin
   // RU: Перед стартом необходимо настроить viewport.
   // EN: Before the start need to configure a viewport.
   wnd_SetPos( Form1.Panel1.Left, Form1.Panel1.Top );
-  wnd_SetSize( Form1.Panel1.Width, Form1.Panel1.ClientHeight );
+  wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight );
 
   Form1.BringToFront();
 end;
