@@ -268,7 +268,7 @@ public class ZenGL extends GLSurfaceView
 		@Override
 		public boolean commitText( CharSequence text, int newCursorPosition )
 		{
-			zglNativeInputText( (String)text );
+			zglNativeInputText( text.toString() );
 
 			return true;
 		}
