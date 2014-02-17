@@ -177,21 +177,6 @@ public class ZenGL extends GLSurfaceView
 		System.exit( 0 );
 	}
 
-	public void SwapBuffers()
-	{
-	    try {
-	    	EGL10 currEGL = (EGL10)EGLContext.getEGL();
-
-	    	EGLDisplay currDisplay = currEGL.eglGetCurrentDisplay();
-	    	if ( currDisplay == EGL10.EGL_NO_DISPLAY ) return;    
-
-	    	EGLSurface currSurface = currEGL.eglGetCurrentSurface( EGL10.EGL_DRAW );
-	    	if ( currSurface == EGL10.EGL_NO_SURFACE ) return;
-
-	    	currEGL.eglSwapBuffers( currDisplay, currSurface);
-	    } catch ( Exception e ) { }
-	}
-
 	public void ShowKeyboard()
 	{
 		InputManager.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_NOT_ALWAYS );
