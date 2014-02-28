@@ -175,6 +175,15 @@ const
   MONITOR_DEFAULTTOPRIMARY = $00000001;
 function MonitorFromWindow( hwnd : HWND; dwFlags : LongWord ) : THandle; stdcall; external 'user32.dll';
 function GetMonitorInfoW( monitor : HMONITOR; var moninfo : MONITORINFOEX ) : BOOL; stdcall; external 'user32.dll';
+
+function GetDisplayRefresh : Integer;
+  var
+    tHDC: hdc;
+begin
+  tHDC := GetDC( 0 );
+  Result := GetDeviceCaps( tHDC, VREFRESH );
+  ReleaseDC( 0, tHDC );
+end;
 {$ENDIF}
 
 procedure scr_GetResList;
@@ -312,6 +321,10 @@ begin
   scrDesktop.dmSize := SizeOf( DEVMODEW );
   // Delphi: standard ENUM_REGISTRY_SETTINGS doesn't exist in Windows unit, no comments...
   EnumDisplaySettingsW( scrMonInfo.szDevice, LongWord(-2), scrDesktop );
+  // Special hack for fucking Microsoft Windows to fix problem with returning screen settings when application looses focus
+  // Explanation: line above returns real display frequency(e.g. 59Hz), but later this shit can't find available mode for this.
+  //              GetDisplayRefresh() returns 60Hz(but 59Hz when screen resolution changes(sic!)) and everything works...
+  scrDesktop.dmDisplayFrequency := GetDisplayRefresh();
 {$ENDIF}
 {$IFDEF MACOSX}
   scrDisplay  := CGMainDisplayID();
