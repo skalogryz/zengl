@@ -255,10 +255,7 @@ begin
   else
     log_Add( 'Screen options changed to: ' + u_IntToStr( wndWidth ) + ' x ' + u_IntToStr( wndHeight ) + ' windowed' );
   if appWork Then
-    begin
-      wnd_Update();
-      scrRefresh := scrDesktop.dmDisplayFrequency;
-    end;
+    wnd_Update();
 end;
 
 procedure scr_CorrectResolution( Width, Height : Word );
