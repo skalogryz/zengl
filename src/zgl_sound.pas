@@ -821,8 +821,8 @@ procedure snd_Stop( Sound : zglPSound; ID : Integer );
         alSourceRewind( Sound.Channel[ ID ].Source );
         alSourcei( Sound.Channel[ ID ].Source, AL_BUFFER, AL_NONE );
         {$ELSE}
-        Sound.Channel[ ID ].Source.SetCurrentPosition( 0 );
         Sound.Channel[ ID ].Source.Stop();
+        Sound.Channel[ ID ].Source.SetCurrentPosition( 0 );
         {$ENDIF}
       end;
   end;
