@@ -422,6 +422,8 @@ procedure pr2d_TriList( Texture : zglPTexture; TriList, TexCoords : zglPPoints2D
     w, h : Single;
     mode : LongWord;
 begin
+  {$RANGECHECKS OFF}
+
   if FX and PR2D_FILL > 0 Then
     mode := GL_TRIANGLES
   else
@@ -508,6 +510,7 @@ begin
       glDisable( GL_BLEND );
       glDisable( GL_ALPHA_TEST );
     end;
+  {$RANGECHECKS  ON}
 end;
 
 end.
