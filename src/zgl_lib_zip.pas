@@ -25,11 +25,23 @@ unit zgl_lib_zip;
 
 {$I zgl_config.cfg}
 
+interface
+uses
+  {$IFDEF WINDOWS}
+  zgl_lib_msvcrt,
+  {$ENDIF}
+  zgl_memory,
+  zgl_types;
+
 {$IFDEF USE_ZIP}
   {$L libzip}
 {$ENDIF}
 
+{.$DEFINE CZLIBHELPER}
+{$IFDEF CZLIBHELPER}
 {$L zlib_helper}
+{$ENDIF}
+
 {$IFDEF USE_ZLIB_STATIC}
   {$IFDEF USE_ZLIB_FULL}
     {$L deflate}
@@ -54,22 +66,24 @@ unit zgl_lib_zip;
 {$ELSE}
   {$IF DEFINED(LINUX) and ( not DEFINED(ANDROID) )}
     {$LINKLIB libz.so.1}
+{$DEFINE DYNAMICZLIB}
+const
+  libz = 'libz.so.1';
   {$IFEND}
   {$IFDEF ANDROID}
     {$LINKLIB libz.so}
+    {$DEFINE DYNAMICZLIB}
+    const
+      libz = 'libz.so';
   {$ENDIF}
   {$IFDEF DARWIN}
     {$LINKLIB libz.dylib}
+    {$DEFINE DYNAMICZLIB}
+    const
+      libz = 'libz.dylib';
   {$ENDIF}
 {$ENDIF}
 
-interface
-uses
-  {$IFDEF WINDOWS}
-  zgl_lib_msvcrt,
-  {$ENDIF}
-  zgl_memory,
-  zgl_types;
 
 {$IFDEF USE_ZIP}
 const
@@ -184,9 +198,23 @@ type
     reserved  : culong;    // reserved for future use
   end;
 
-procedure zlib_Init( out strm : z_stream_s ); cdecl; external;
-procedure zlib_Free( var strm : z_stream_s ); cdecl; external;
-function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; out pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl; external;
+procedure zlib_Init( out strm : z_stream_s ); cdecl; {$IFDEF CZLIBHELPER}external;{$ENDIF}
+procedure zlib_Free( var strm : z_stream_s ); cdecl; {$IFDEF CZLIBHELPER}external;{$ENDIF}
+function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; var pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl;
+  {$IFDEF CZLIBHELPER}external;{$ENDIF}
+
+{$IFNDEF CZLIBHELPER}
+const
+  ZLIB_VERSION = '1.2.5';
+
+function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
+  {$ifdef DYNAMICZLIB}libz name 'inflateInit_'{$endif};
+function inflateEnd(var strm: z_stream_s): cint; cdecl; external
+  {$ifdef DYNAMICZLIB}libz name 'inflateEnd'{$endif};
+function inflate(var strm: z_stream_s; flush: cint): cint; cdecl; external
+  {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif};
+
+{$ENDIF}
 
 {$IFDEF USE_ZIP}
 threadvar
@@ -230,5 +258,89 @@ end;
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}
+
+{$IfNDEF CZLIBHELPER}
+procedure zlib_Init( out strm : z_stream_s ); cdecl;
+begin
+  FillChar(strm, sizeof(strm), 0);
+  inflateInit_( strm, ZLIB_VERSION, sizeof(strm));
+end;
+
+procedure zlib_Free( var strm : z_stream_s ); cdecl;
+begin
+  inflateEnd(strm);
+end;
+
+function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; var pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl;
+var
+  b : PByte;
+  IDATHeader : PChar;
+begin
+  pngZStream.next_out  := Buffer;
+  pngZStream.avail_out := Bytes;
+
+  while ( pngZStream.avail_out > 0 ) do begin
+
+    if ( ( pngMem.Position = pngIDATEnd ) and ( pngZStream.avail_out > 0 ) and( pngZStream.avail_in = 0 ) )
+    then begin
+      inc(pngMem.Position, 4);
+
+      b := PByte( Ptr(pngMem.Memory) + pngMem.Position );
+      pngIDATEnd := b[ 3 ] + ( b[ 2 ] shl  8 ) + ( b[ 1 ] shl 16 ) + ( b[ 0 ] shl 24 );
+      inc(pngMem.Position, 4);
+
+      IDATHeader := PChar( Ptr(pngMem.Memory) + pngMem.Position );
+      if ( ( IDATHeader[ 0 ] <> 'I' ) and ( IDATHeader[ 1 ] <> 'D' ) and ( IDATHeader[ 2 ] <> 'A' ) and ( IDATHeader[ 3 ] <> 'T' ) ) then
+      begin
+        Result := -1;
+        Exit;
+      end;
+      inc(pngMem.Position, 4);
+
+      inc(pngIDATEnd, pngMem.Position);
+    end;
+
+    if ( pngZStream.avail_in = 0 ) then
+    begin
+      if ( pngMem.Size - pngMem.Position > 0 ) then
+      begin
+        if ( pngMem.Position + 65535 > pngIDATEnd ) then
+        begin
+          if ( pngMem.Position + ( pngIDATEnd - pngMem.Position ) > pngMem.Size ) then
+            pngZStream.avail_in := pngMem.Size - pngMem.Position
+          else
+            pngZStream.avail_in := pngIDATEnd - pngMem.Position;
+        end
+        else
+        begin
+          if ( pngMem.Position + 65535 > pngMem.Size ) then
+            pngZStream.avail_in := pngMem.Size - pngMem.Position
+          else
+            pngZStream.avail_in := 65535;
+        end;
+        inc(pngMem.Position, pngZStream.avail_in);
+      end
+      else
+        pngZStream.avail_in := 0;
+
+      if ( pngZStream.avail_in = 0 ) then begin
+        Result:=Bytes - pngZStream.avail_out;
+        Exit;
+      end;
+
+      pngZStream.next_in := PByte( Ptr(Ptr(pngMem.Memory) + pngMem.Position - pngZStream.avail_in) );
+    end;
+
+    Result := inflate( pngZStream, 0 );
+
+    if ( result < 0 ) then
+      Result := -1
+    else
+      Result := pngZStream.avail_in;
+  end;
+
+end;
+{$ENDIF}
+
 
 end.
