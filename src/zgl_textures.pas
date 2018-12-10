@@ -81,7 +81,9 @@ type
     Flags         : LongWord;
 
     prev, next    : zglPTexture;
-end;
+
+    delayData     : Pointer;
+  end;
 
 type
   zglPTextureFormat = ^zglTTextureFormat;
@@ -100,6 +102,7 @@ type
               end;
     First   : zglTTexture;
     Formats : array of zglTTextureFormat;
+    Delayed : Integer;
 end;
 
 function  tex_Add : zglPTexture;
@@ -136,6 +139,8 @@ var
   managerZeroTexture   : zglPTexture;
   tex_CalcCustomEffect : procedure( pData : PByteArray; Width, Height : Word );
 
+procedure tex_LoadDelayed;
+
 implementation
 uses
   zgl_main,
@@ -151,6 +156,25 @@ uses
   zgl_file,
   zgl_log,
   zgl_utils;
+
+procedure tex_LoadDelayed;
+var
+  t :  zglPTexture;
+  res : Boolean;
+begin
+  if managerTexture.Delayed=0 then Exit;
+
+  t:=@managerTexture.First;
+  while Assigned(t) do begin
+    if Assigned(t.delayData) then begin
+      res := tex_CreateGL(t^, PByteArray(t^.delayData));
+      Freemem(t^.delayData);
+      t^.delayData:=nil;
+    end;
+    t:=t.next;
+  end;
+  managerTexture.Delayed:=0;
+end;
 
 function tex_GetVRAM( Texture : zglPTexture ) : LongWord;
   var
@@ -265,8 +289,12 @@ begin
         if Texture.Flags and TEX_COMPRESS = 0 Then
           begin
             case Texture.Format of
-              TEX_FORMAT_RGBA: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
-              TEX_FORMAT_RGBA_4444: glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, pData );
+              TEX_FORMAT_RGBA: begin
+                glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+              end;
+              TEX_FORMAT_RGBA_4444: begin
+                glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, pData );
+              end;
               {$IFDEF USE_GLES}
               TEX_FORMAT_RGBA_PVR2: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, width, height, 0, size, pData );
               TEX_FORMAT_RGBA_PVR4: glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, width, height, 0, size, pData );
@@ -290,6 +318,8 @@ begin
 end;
 
 function tex_Create( var Data : PByteArray; Width, Height : Word; Format : Word = TEX_FORMAT_RGBA; Flags : LongWord = TEX_DEFAULT_2D ) : zglPTexture;
+var
+  w,h : Integer;
 begin
   Result        := tex_Add();
   Result.Width  := Width;
@@ -298,11 +328,21 @@ begin
   Result.Flags  := Flags;
   tex_CalcFlags( Result^, Data );
   tex_CalcTexCoords( Result^ );
-  if not tex_CreateGL( Result^, Data ) Then
-    begin
-      tex_Del( Result );
-      Result := managerZeroTexture;
-    end;
+
+  if GetCurrentThreadId=oglThreadId then begin
+    if not tex_CreateGL( Result^, Data ) Then
+      begin
+        tex_Del( Result );
+        Result := managerZeroTexture;
+      end
+  end else begin
+    // maximum data needed
+    w := u_GetPOT( Width );
+    h := u_GetPOT( Height );
+    Getmem(Result.delayData, w * h * 4 );
+    Move(Data^, Result.delayData^, w * h * 4);
+    inc(managerTexture.Delayed);
+  end;
 end;
 
 function tex_CreateZero( Width, Height : Word; Color, Flags : LongWord ) : zglPTexture;
