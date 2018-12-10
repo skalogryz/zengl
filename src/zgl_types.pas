@@ -33,8 +33,9 @@ type
 {$ENDIF}
 
 type
-  Ptr = {$IFDEF CPU64} QWORD {$ELSE} LongWord {$ENDIF};
-
+  Ptr = {$IFDEF FPC} PtrUInt {$ELSE}
+        {$IFDEF CPU64} QWORD {$ELSE} LongWord {$ENDIF}
+        {$ENDIF};
   PByteArray     = ^TByteArray;
   TByteArray     = array[ 0..High(LongWord) shr 1 - 1 ] of Byte;
   PWordArray     = ^TWordArray;
@@ -71,7 +72,7 @@ type
   cuint64 = qword;    pcuint64 = ^cuint64;
   cint64  = int64;    pcint64  = ^cint64;
   cbool   = longbool; pcbool   = ^cbool;
-{$IFDEF CPUx86_64}
+{$IFDEF CPU64}
   clong   = int64;    pclong   = ^clong;
   cslong  = int64;    pcslong  = ^cslong;
   culong  = qword;    pculong  = ^culong;
