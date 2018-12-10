@@ -191,9 +191,21 @@ end;
 procedure ogg_DecoderClose( var Stream : zglTSoundStream );
 begin
   if not vorbisInit Then exit;
-  if not Assigned( zglTOggStream( Stream._data^ ).vi ) Then exit;
+  if not Assigned(Stream._data) or not Assigned( zglTOggStream( Stream._data^ ).vi ) Then begin
+    exit;
+  end;
   zglTOggStream( Stream._data^ ).vi := nil;
+  if Assigned( Stream.Buffer ) then begin
+    FreeMem( Stream.Buffer );
+    Stream.Buffer:=nil;
+  end;
+
   ov_clear( zglTOggStream( Stream._data^ ).vf );
+
+  if Assigned( Stream._data ) then begin
+    FreeMem( Stream._Data );
+    Stream.Buffer:=nil;
+  end;
 end;
 
 function decoderRead( var VorbisFile : OggVorbis_File; Buffer : PByteArray; Bytes : LongWord; out _End : Boolean ) : LongWord;

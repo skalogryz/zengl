@@ -182,13 +182,16 @@ const
   kAudioSessionCategory_AmbientSound                  = 'ibma';
   kAudioSessionProperty_AudioCategory                 = 'taca';
   kAudioSessionProperty_OverrideCategoryMixWithOthers = 'ximc';
+  kAudioSessionProperty_OtherAudioIsPlaying           = 'rhto'; // read-only
 
 var
   sndAllowBackgroundMusic : LongWord;
 
 function AudioSessionInitialize( inRunLoop : CFRunLoopRef; inRunLoopMode : CFStringRef; inInterruptionListener : Pointer; inClientData : Pointer ) : Pointer; cdecl; external;
 function AudioSessionSetProperty( inID : LongWord; inDataSize : LongWord; inData : Pointer ) : Pointer; cdecl; external;
-function AudioSessionSetActive( active : Boolean ) : Pointer; cdecl; external;
+function AudioSessionSetActive( active : Boolean ) : Integer; cdecl; external;
+function AudioSessionGetProperty(inId: LongWord;
+  var ioDataSize: UInt32; var outData) : Integer; cdecl; external;
 {$ENDIF}
 
 var
@@ -382,6 +385,8 @@ function snd_Init : Boolean;
     i : Integer;
   {$IFDEF iOS}
     sessionCategory : LongWord;
+    sz: LongWord;
+    res: LongWord;
   {$ENDIF}
   {$IFDEF ANDROID}
     attr : array[ 0..2 ] of Integer;
@@ -414,13 +419,24 @@ begin
   {$ENDIF}
   {$IFDEF iOS}
   log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
-  oalDevice := alcOpenDevice( nil );
+  oalDevice:=nil;
+
   if AudioSessionInitialize( nil, nil, nil, nil ) = nil Then
     begin
-      sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
-      AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
-      AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
-      AudioSessionSetActive( TRUE );
+      res:=0;
+      sz:=sizeof(res);
+      if (AudioSessionGetProperty( LongWord( kAudioSessionProperty_OtherAudioIsPlaying), sz, res)=0) and (res>0) then
+        begin
+          log_Add( 'The audio is in use, by some other application' );
+        end
+      else
+        begin
+          oalDevice := alcOpenDevice( nil );
+          sessionCategory := LongWord( kAudioSessionCategory_AmbientSound );
+          AudioSessionSetProperty( LongWord( kAudioSessionProperty_AudioCategory ), SizeOf( sessionCategory ), @sessionCategory );
+          AudioSessionSetProperty( LongWord( kAudioSessionProperty_OverrideCategoryMixWithOthers ), SizeOf( sndAllowBackgroundMusic ), @sndAllowBackgroundMusic );
+          AudioSessionSetActive( TRUE );
+        end;
     end else
       log_Add( 'Unable to initialize Audio Session' );
   {$ELSE}
@@ -535,10 +551,6 @@ begin
       begin
         sfStream[ i ]._decoder.Close( sfStream[ i ] );
         sfStream[ i ]._decoder := nil;
-        if Assigned( sfStream[ i ].Buffer ) Then
-          FreeMem( sfStream[ i ].Buffer );
-        if Assigned( sfStream[ i ]._data ) Then
-          FreeMem( sfStream[ i ]._data );
       end;
 
 {$IFDEF USE_OPENAL}
@@ -866,7 +878,7 @@ begin
   Sound.Channel[ Result ].Source.SetPan( dsu_CalcPos( X, Y, Z, dsVolume ) );
   Sound.Channel[ Result ].Source.SetVolume( dsu_CalcVolume( dsVolume * Volume ) );
   Sound.Channel[ Result ].Source.SetFrequency( Sound.Frequency );
-  Sound.Channel[ Result ].Source.Play( 0, 0, DSBPLAY_LOOPING * Byte( Loop = TRUE ) );
+  dsError := Sound.Channel[ Result ].Source.Play( 0, 0, DSBPLAY_LOOPING * Byte( Loop = TRUE ) );
 {$ENDIF}
 end;
 
@@ -883,8 +895,8 @@ procedure snd_Stop( Sound : zglPSound; ID : Integer );
         alSourceRewind( Sound.Channel[ ID ].Source );
         alSourcei( Sound.Channel[ ID ].Source, AL_BUFFER, AL_NONE );
         {$ELSE}
-        Sound.Channel[ ID ].Source.Stop();
         Sound.Channel[ ID ].Source.SetCurrentPosition( 0 );
+        Sound.Channel[ ID ].Source.Stop();
         {$ENDIF}
       end;
   end;
@@ -1285,10 +1297,13 @@ function snd_ProcStream( data : Pointer ) : LongInt; {$IFDEF USE_EXPORT_C} regis
 
   procedure LoopStream( _buffer : PByteArray; _bufferSize : LongWord );
   begin
-    if _end and sfStream[ id ].Loop and ( bytesRead < _bufferSize ) Then
-      begin
+    if  ( bytesRead < _bufferSize ) and _end Then
+      if sfStream[ id ].Loop then begin
         sfStream[ id ]._decoder.Loop( sfStream[ id ] );
-        INC( bytesRead, sfStream[ id ]._decoder.Read( sfStream[ id ], _buffer, _bufferSize - bytesRead, _end ) );
+        inc( bytesRead, sfStream[ id ]._decoder.Read( sfStream[ id ], _buffer, _bufferSize - bytesRead, _end ) );
+      end else begin
+        // muting the rest of buffer
+        FillChar(_buffer^, _bufferSize - bytesRead, 0);
       end;
   end;
 begin
@@ -1423,6 +1438,8 @@ begin
     end;
 
   sfStream[ id ]._decoder.Close( sfStream[ id ] );
+  sfStream[ id ]._decoder:=nil;
+
   thread_EventDestroy( sfEvent[ id ] );
   EndThread( 0 );
 end;
@@ -1518,27 +1535,36 @@ begin
   if Assigned( sfStream[ Result ]._decoder ) Then
     begin
       sfStream[ Result ]._decoder.Close( sfStream[ Result ] );
-      if Assigned( sfStream[ Result ].Buffer ) Then
+      sfStream[ Result ]._decoder:=nil;
+      {writeln('snd_PlayFile: freeing buffer');
+      if Assigned( sfStream[ Result ].Buffer ) Then begin
         FreeMem( sfStream[ Result ].Buffer );
-      if Assigned( sfStream[ Result ]._data ) Then
+        sfStream[ Result ].Buffer := nil;
+      end;
+      if Assigned( sfStream[ Result ]._data ) Then begin
         FreeMem( sfStream[ Result ]._data );
+        sfStream[ Result ]._data := nil;
+      end;}
     end;
 
   if not file_Exists( FileName ) Then
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
+      Result:=-1;
       exit;
     end;
 
   ext := u_StrUp( file_GetExtension( FileName ) );
   for i := managerSound.Count.Formats - 1 downto 0 do
-    if ext = managerSound.Formats[ i ].Extension Then
+    if ext = managerSound.Formats[ i ].Extension Then begin
       sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
+    end;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
     begin
       sfStream[ Result ]._decoder := nil;
-      log_Add( 'Cannot play: "' + FileName + '"' );
+      log_Add('Cannot play: "' + FileName + '"' );
+      Result:=-1;
       exit;
     end;
 
@@ -1559,10 +1585,11 @@ begin
   if Assigned( sfStream[ Result ]._decoder ) Then
     begin
       sfStream[ Result ]._decoder.Close( sfStream[ Result ] );
-      if Assigned( sfStream[ Result ].Buffer ) Then
+      sfStream[ Result ]._decoder:=nil;
+      {if Assigned( sfStream[ Result ].Buffer ) Then
         FreeMem( sfStream[ Result ].Buffer );
       if Assigned( sfStream[ Result ]._data ) Then
-        FreeMem( sfStream[ Result ]._data );
+        FreeMem( sfStream[ Result ]._data );}
     end;
 
   ext := u_StrUp( Extension );
@@ -1597,7 +1624,10 @@ end;
 
 procedure snd_StopStream( ID : Integer );
 begin
-  if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or ( not sfStream[ ID ]._playing ) Then exit;
+  if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or ( not sfStream[ ID ]._playing ) Then
+  begin
+    exit;
+  end;
 
   sfStream[ ID ]._playing := FALSE;
 {$IFDEF USE_OPENAL}
