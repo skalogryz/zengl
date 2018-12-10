@@ -133,6 +133,11 @@ begin
 end;
 
 function file_Open( out FileHandle : zglTFile; const FileName : UTF8String; Mode : Byte ) : Boolean;
+{$ifdef darwin}
+var
+  p : UTF8String;
+  fh : cint;
+{$endif}
 begin
   {$IFDEF USE_ZIP}
   if Assigned( zipCurrent ) Then
@@ -174,10 +179,17 @@ begin
 {$ENDIF}
 {$IFDEF DARWIN}
   case Mode of
-    FOM_CREATE: FileHandle := FpOpen( platform_GetRes( filePath + FileName ), O_Creat or O_Trunc or O_RdWr );
-    FOM_OPENR:  FileHandle := FpOpen( platform_GetRes( filePath + FileName ), O_RdOnly );
-    FOM_OPENRW: FileHandle := FpOpen( platform_GetRes( filePath + FileName ), O_RdWr );
+    FOM_CREATE: fh := FpOpen( PAnsiChar(p), O_Creat or O_Trunc or O_RdWr );
+    FOM_OPENR:  fh := FpOpen( platform_GetRes( filePath + FileName ), O_RdOnly );
+    FOM_OPENRW: fh := FpOpen( platform_GetRes( filePath + FileName ), O_RdWr );
   end;
+  // this type casting is necessary for 64-bit
+  // otherwise Range-Check error could be returned!
+  // man 2 open - shows that -1 is returned, if the file cannot be openned
+  // int32 -1, cannot be converted uint64, w/o range check error!
+  if fh<0
+    then FileHandle:=FILE_ERROR
+    else FileHandle:=zglTFile(fh);
 {$ENDIF}
   Result := FileHandle <> FILE_ERROR;
 end;
@@ -211,7 +223,7 @@ function file_Remove( const Name : UTF8String ) : Boolean;
     status : Stat;
   {$IFEND}
   {$IFDEF iOS}
-    error : NSErrorPointer;
+    error : NSErrorPtr;
   {$ENDIF}
     i    : Integer;
     dir  : Boolean;
@@ -509,7 +521,7 @@ procedure file_Find( const Directory : UTF8String; out List : zglTFileList; Find
     dirContent  : NSArray;
     path        : NSString;
     fileName    : array[ 0..255 ] of AnsiChar;
-    error       : NSErrorPointer;
+    error       : NSErrorPtr;
     isDirectory : Boolean;
   {$ENDIF}
   {$IFDEF USE_ZIP}
