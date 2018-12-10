@@ -103,7 +103,7 @@ uses
 
 {$IFDEF USE_TRIANGULATION}
 var
-  tess        : Integer;
+  tess        : PGLUtesselator;
   tessMode    : Integer;
   tessHoles   : Boolean;
   tessFinish  : Boolean;
@@ -134,8 +134,8 @@ asm
 {$IFDEF CPUi386}
   FLD Angle
   FSINCOS
-  FSTP [EDX]
-  FSTP [EAX]
+  FSTP SINGLE [EDX]
+  FSTP SINGLE [EAX]
 {$ENDIF}
 end;
 {$ELSE}
