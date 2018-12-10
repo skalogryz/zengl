@@ -65,7 +65,10 @@ unit zgl_lib_ogg;
   {$LINKLIB libtremor.a}
 {$IFEND}
 {$IF DEFINED(iOS) and (not DEFINED(iPHONESIM))}
-  {$LINKLIB libgcc_s.1.dylib}
+  {$define USE_OGG_STATIC}
+  {$linkframework Ogg}
+  {$linkframework Vorbis}
+  {.$LINKLIB libgcc_s.1.dylib}
 {$IFEND}
 
 interface
@@ -94,6 +97,12 @@ const
   libvorbisfile = 'libvorbisfile-3.dll';
 {$ENDIF}
 {$IFDEF MACOSX}
+  libogg        = 'libogg.0.dylib';
+  libvorbis     = 'libvorbis.0.dylib';
+  libvorbisfile = 'libvorbisfile.3.dylib';
+{$ENDIF}
+{$IFDEF iOS}
+  //todo: link frameworks
   libogg        = 'libogg.0.dylib';
   libvorbis     = 'libvorbis.0.dylib';
   libvorbisfile = 'libvorbisfile.3.dylib';
