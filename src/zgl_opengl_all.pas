@@ -235,6 +235,7 @@ const
   // Vertex Array
   GL_VERTEX_ARRAY                   = $8074;
   GL_NORMAL_ARRAY                   = $8075;
+  GL_COLOR_ARRAY                    = $8076;
   GL_INDEX_ARRAY                    = $8077;
   GL_TEXTURE_COORD_ARRAY            = $8078;
 
@@ -259,6 +260,7 @@ const
 
   // Test
   GL_DEPTH_TEST                     = $0B71;
+  GL_DEPTH_WRITEMASK                = $0B72;
   GL_STENCIL_TEST                   = $0B90;
   GL_ALPHA_TEST                     = $0BC0;
   GL_SCISSOR_TEST                   = $0C11;
@@ -337,6 +339,10 @@ type
   // Depth
   procedure glDepthFunc(func: GLenum); stdcall; external libGL;
   procedure glDepthMask(flag: GLboolean); stdcall; external libGL;
+  // Stencil
+  procedure glStencilFunc(func: GLEnum; ref: GLInt; mask: GLuint); stdcall; external libGL;
+  procedure glStencilOp(sfail, dpfail, dppass: GLenum); stdcall; external libGL;
+  procedure glStencilMask(mask: GLuint); stdcall; external libGL;
   // Color
   procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGL;
   procedure glColor4ubv(v: PGLubyte); stdcall; external libGL;
@@ -362,7 +368,12 @@ var
   procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
   procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;
   procedure glVertex3f(x, y, z: GLfloat); stdcall; external libGL;
+
+  procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
+  procedure glTexCoordPointer(size: GLInt; atype: GLEnum; stide: GLsizei; const pointer: Pointer); stdcall; external libGL;
   procedure glVertexPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
+  procedure glDrawArrays(mode: GLenum; first: GLint; count: GLsizei); stdcall; external libGL;
+
   // Texture
   procedure glBindTexture(target: GLenum; texture: GLuint); stdcall; external libGL;
   procedure glGenTextures(n: GLsizei; textures: PGLuint); stdcall; external libGL;
@@ -379,6 +390,8 @@ var
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
+
+  function glGetError: GLenum; stdcall; external libGL;
 var
   //
   glCompressedTexImage2D : procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
@@ -398,16 +411,28 @@ var
 
   // Triangulation
   {$IFDEF USE_TRIANGULATION}
-  procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
-  function  gluErrorString(error: Integer): PAnsiChar; stdcall external libGLU;
-  function  gluNewTess: Integer; stdcall external libGLU;
-  procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
-  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
-  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external libGLU;
-  procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
-  procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
-  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
+  type
+  TGLUtesselator = record end;
+  PGLUtesselator = ^TGLUtesselator;
+
+  procedure gluDeleteTess(tess: PGLUtesselator); stdcall external libGLU;
+  function  gluErrorString(error: PGLUtesselator): PAnsiChar; stdcall external libGLU;
+  function  gluNewTess: PGLUtesselator; stdcall external libGLU;
+  procedure gluTessBeginContour(tess: PGLUtesselator); stdcall external libGLU;
+  procedure gluTessBeginPolygon(tess: PGLUtesselator; data: Pointer); stdcall external libGLU;
+  procedure gluTessCallback(tess: PGLUtesselator; which: Integer; fn: Pointer); stdcall external libGLU;
+  procedure gluTessEndContour(tess: PGLUtesselator); stdcall external libGLU;
+  procedure gluTessEndPolygon(tess: PGLUtesselator); stdcall external libGLU;
+  procedure gluTessVertex(tess: PGLUtesselator; vertex: PDouble; data: Pointer); stdcall external libGLU;
   {$ENDIF}
+
+  // multi-texture
+const
+  GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = $8B4D;
+
+var
+  glClientActiveTexture : procedure (texture: GLEnum); stdcall;
+  glActiveTexture : procedure(texture: GLEnum); stdcall;
 
 {$IFDEF LINUX}
 type

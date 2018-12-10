@@ -80,6 +80,11 @@ var
   oglMaxAnisotropy : Integer;
   oglMaxTexUnits   : Integer;
   oglSeparate      : Boolean;
+  //oglMaxCombTex    : Integer;
+  oglCanMultiTex   : Boolean;
+
+  oglInitialized   : Boolean = false;
+  oglThreadId      : TThreadID;
 
   {$IFDEF LINUX}
   oglXExtensions : UTF8String;
@@ -569,6 +574,20 @@ begin
     end else
       oglCanFBO := FALSE;
    log_Add( 'GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr( oglCanFBO ) );
+
+   // Multi-texture
+   glActiveTexture := gl_GetProc('glActiveTexture');
+   if not Assigned(@glActiveTexture) then  glActiveTexture := gl_GetProc('glActiveTextureARB');
+   oglCanMultiTex:=Assigned(glActiveTexture);
+
+   if oglCanMultiTex then begin
+     glClientActiveTexture := gl_GetProc('glClientActiveTexture');
+     if not Assigned(@glClientActiveTexture) then glClientActiveTexture := gl_GetProc('glClientActiveTextureARB');
+
+     //glGetIntegerv( GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, @oglMaxCombTex );
+     //log_Add( 'GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: '+u_intToStr(oglMaxCombTex));
+   end;
+   log_Add( 'MULTITEXTURES: ' + u_BoolToStr( oglCanMultiTex ) );
 
   // PBUFFER
 {$IFDEF LINUX}
