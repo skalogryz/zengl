@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <PathDelim Value="\"/>
+    <Name Value="zenglruntime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="src"/>
+        <OtherUnitFiles Value="src;extra"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files Count="61">
+      <Item1>
+        <Filename Value="src\jni.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="jni"/>
+      </Item1>
+      <Item2>
+        <Filename Value="src\ZenGL.pas"/>
+        <Type Value="Include"/>
+      </Item2>
+      <Item3>
+        <Filename Value="src\ZenGL.res"/>
+        <Type Value="Binary"/>
+      </Item3>
+      <Item4>
+        <Filename Value="src\zgl_application.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_application"/>
+      </Item4>
+      <Item5>
+        <Filename Value="src\zgl_camera_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_camera_2d"/>
+      </Item5>
+      <Item6>
+        <Filename Value="src\zgl_collision_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_collision_2d"/>
+      </Item6>
+      <Item7>
+        <Filename Value="src\zgl_config.cfg"/>
+        <Type Value="Text"/>
+      </Item7>
+      <Item8>
+        <Filename Value="src\zgl_file.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_file"/>
+      </Item8>
+      <Item9>
+        <Filename Value="src\zgl_font.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_font"/>
+      </Item9>
+      <Item10>
+        <Filename Value="src\zgl_fpc.cfg"/>
+        <Type Value="Text"/>
+      </Item10>
+      <Item11>
+        <Filename Value="src\zgl_fx.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_fx"/>
+      </Item11>
+      <Item12>
+        <Filename Value="src\zgl_grid_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_grid_2d"/>
+      </Item12>
+      <Item13>
+        <Filename Value="src\zgl_ini.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_ini"/>
+      </Item13>
+      <Item14>
+        <Filename Value="src\zgl_joystick.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_joystick"/>
+      </Item14>
+      <Item15>
+        <Filename Value="src\zgl_keyboard.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_keyboard"/>
+      </Item15>
+      <Item16>
+        <Filename Value="src\zgl_lib_msvcrt.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_lib_msvcrt"/>
+      </Item16>
+      <Item17>
+        <Filename Value="src\zgl_lib_ogg.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_lib_ogg"/>
+      </Item17>
+      <Item18>
+        <Filename Value="src\zgl_lib_theora.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_lib_theora"/>
+      </Item18>
+      <Item19>
+        <Filename Value="src\zgl_lib_zip.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_lib_zip"/>
+      </Item19>
+      <Item20>
+        <Filename Value="src\zgl_log.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_log"/>
+      </Item20>
+      <Item21>
+        <Filename Value="src\zgl_main.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_main"/>
+      </Item21>
+      <Item22>
+        <Filename Value="src\zgl_math_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_math_2d"/>
+      </Item22>
+      <Item23>
+        <Filename Value="src\zgl_memory.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_memory"/>
+      </Item23>
+      <Item24>
+        <Filename Value="src\zgl_mouse.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_mouse"/>
+      </Item24>
+      <Item25>
+        <Filename Value="src\zgl_mouse_to_touch.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_mouse_to_touch"/>
+      </Item25>
+      <Item26>
+        <Filename Value="src\zgl_opengl.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_opengl"/>
+      </Item26>
+      <Item27>
+        <Filename Value="src\zgl_opengl_all.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_opengl_all"/>
+      </Item27>
+      <Item28>
+        <Filename Value="src\zgl_opengles.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_opengles"/>
+      </Item28>
+      <Item29>
+        <Filename Value="src\zgl_opengles_all.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_opengles_all"/>
+      </Item29>
+      <Item30>
+        <Filename Value="src\zgl_particles_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_particles_2d"/>
+      </Item30>
+      <Item31>
+        <Filename Value="src\zgl_primitives_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_primitives_2d"/>
+      </Item31>
+      <Item32>
+        <Filename Value="src\zgl_render.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_render"/>
+      </Item32>
+      <Item33>
+        <Filename Value="src\zgl_render_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_render_2d"/>
+      </Item33>
+      <Item34>
+        <Filename Value="src\zgl_render_target.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_render_target"/>
+      </Item34>
+      <Item35>
+        <Filename Value="src\zgl_resources.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_resources"/>
+      </Item35>
+      <Item36>
+        <Filename Value="src\zgl_screen.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_screen"/>
+      </Item36>
+      <Item37>
+        <Filename Value="src\zgl_sengine_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sengine_2d"/>
+      </Item37>
+      <Item38>
+        <Filename Value="src\zgl_sound.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sound"/>
+      </Item38>
+      <Item39>
+        <Filename Value="src\zgl_sound_dsound.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sound_dsound"/>
+      </Item39>
+      <Item40>
+        <Filename Value="src\zgl_sound_ogg.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sound_ogg"/>
+      </Item40>
+      <Item41>
+        <Filename Value="src\zgl_sound_openal.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sound_openal"/>
+      </Item41>
+      <Item42>
+        <Filename Value="src\zgl_sound_wav.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sound_wav"/>
+      </Item42>
+      <Item43>
+        <Filename Value="src\zgl_sprite_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_sprite_2d"/>
+      </Item43>
+      <Item44>
+        <Filename Value="src\zgl_text.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_text"/>
+      </Item44>
+      <Item45>
+        <Filename Value="src\zgl_textures.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_textures"/>
+      </Item45>
+      <Item46>
+        <Filename Value="src\zgl_textures_jpg.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_textures_jpg"/>
+      </Item46>
+      <Item47>
+        <Filename Value="src\zgl_textures_png.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_textures_png"/>
+      </Item47>
+      <Item48>
+        <Filename Value="src\zgl_textures_pvr.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_textures_pvr"/>
+      </Item48>
+      <Item49>
+        <Filename Value="src\zgl_textures_tga.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_textures_tga"/>
+      </Item49>
+      <Item50>
+        <Filename Value="src\zgl_threads.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_threads"/>
+      </Item50>
+      <Item51>
+        <Filename Value="src\zgl_tiles_2d.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_tiles_2d"/>
+      </Item51>
+      <Item52>
+        <Filename Value="src\zgl_timers.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_timers"/>
+      </Item52>
+      <Item53>
+        <Filename Value="src\zgl_touch.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_touch"/>
+      </Item53>
+      <Item54>
+        <Filename Value="src\zgl_types.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_types"/>
+      </Item54>
+      <Item55>
+        <Filename Value="src\zgl_utils.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_utils"/>
+      </Item55>
+      <Item56>
+        <Filename Value="src\zgl_video.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_video"/>
+      </Item56>
+      <Item57>
+        <Filename Value="src\zgl_video_theora.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_video_theora"/>
+      </Item57>
+      <Item58>
+        <Filename Value="src\zgl_window.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zgl_window"/>
+      </Item58>
+      <Item59>
+        <Filename Value="extra\zglChipmunk.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zglChipmunk"/>
+      </Item59>
+      <Item60>
+        <Filename Value="extra\zglModPlug.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zglModPlug"/>
+      </Item60>
+      <Item61>
+        <Filename Value="extra\zglSpriteEngine.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="zglSpriteEngine"/>
+      </Item61>
+    </Files>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir);lib\jpeg\$(TargetCPU)-$(TargetOS);lib\msvcrt\$(TargetCPU);lib\ogg\$(TargetCPU)-$(TargetOS);lib\theora\$(TargetCPU)-$(TargetOS);lib\zlib\$(TargetCPU)-$(TargetOS);lib\zip\$(TargetCPU)-$(TargetOS)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
