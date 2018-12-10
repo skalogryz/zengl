@@ -78,11 +78,11 @@ const
   INPUT_KEY_PRESS        = $000030;
   INPUT_KEY_RELEASE      = $000031;
   INPUT_KEY_CHAR         = $000032;
-  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
+  {.$IF DEFINED(iOS) or DEFINED(ANDROID)}
   INPUT_TOUCH_MOVE       = $000040;
   INPUT_TOUCH_PRESS      = $000041;
   INPUT_TOUCH_RELEASE    = $000042;
-  {$IFEND}
+  {.$IFEND}
 
   TEX_FORMAT_EXTENSION   = $000100;
   TEX_FORMAT_FILE_LOADER = $000101;
@@ -161,8 +161,15 @@ const
   {$IFDEF iOS}
   SND_ALLOW_BACKGROUND_MUSIC = $100000;
   {$ENDIF}
+  STENCIL_BUFFER        = $200000;
 
-procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
+// Android will call it from GL-thread
+function zgl_InitScreen( {FSAA : Byte = 0; StencilBits : Byte = 0 }): Boolean;
+// Android will call it from it from the main thread, waiting for the graphics to be initialized
+procedure zgl_CheckInit;
+
+procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 ; AInitVideo: Boolean = true );
+
 procedure zgl_InitToHandle( Handle : Ptr; FSAA : Byte = 0; StencilBits : Byte = 0 );
 procedure zgl_Destroy;
 procedure zgl_Exit;
@@ -174,6 +181,9 @@ procedure zgl_FreeMem( var Mem : Pointer );
 procedure zgl_FreeStrList( var List : zglTStringList );
 procedure zgl_Enable( What : LongWord );
 procedure zgl_Disable( What : LongWord );
+
+var
+  mainInitFinished : Boolean;
 
 implementation
 uses
@@ -192,9 +202,9 @@ uses
   {$IFEND}
   zgl_timers,
   zgl_log,
-  {$IF DEFINED(iOS) or DEFINED(ANDROID)}
+  {.$IF DEFINED(iOS) or DEFINED(ANDROID)}
   zgl_touch,
-  {$IFEND}
+  {.$IFEND}
   zgl_mouse,
   zgl_keyboard,
   zgl_render,
@@ -243,35 +253,28 @@ begin
   {$ENDIF}
 end;
 
-procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
+function zgl_InitScreen({ FSAA : Byte = 0; StencilBits : Byte = 0 }): Boolean;
 begin
-  oglFSAA    := FSAA;
-  oglStencil := StencilBits;
+  Result := false;
 
-  {$IFDEF iOS}
-  if not appPoolInitialized Then
-    begin
-      appPoolInitialized := TRUE;
-      app_InitPool();
-      ExitCode := UIApplicationMain( argc, argv, nil, utf8_GetNSString( 'zglCAppDelegate' ) );
-      app_FreePool();
-      exit;
-    end;
-  {$ENDIF}
+  //oglFSAA    := FSAA;
+  //oglStencil := StencilBits;
+  oglThreadId := GetCurrentThreadId;
 
-  zgl_GetSysDir();
-  log_Init();
-
-  appInitialized := TRUE;
   if not scr_Create() Then exit;
   if not gl_Create() Then exit;
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not gl_Initialize() Then exit;
 
-  InitSoundVideo();
-
   wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
+
+  Result := true;
+end;
+
+procedure zgl_CompleteInit;
+begin
+  mainInitFinished := TRUE;
   appWork := TRUE;
 
   {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
@@ -301,6 +304,53 @@ begin
 
   app_PLoop();
   zgl_Destroy();
+end;
+
+procedure zgl_CheckInit;
+begin
+  if appWork or mainInitFinished then
+    // appWorks, nothing to check any more
+    Exit;
+
+  if not appInitialized then
+    // call zgl_Init first, to initiate the check
+    Exit;
+
+  if oglInitialized then
+    zgl_CompleteInit;
+end;
+
+procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 ; AInitVideo: Boolean = true);
+begin
+  //todo: remove?
+  oglFSAA    := FSAA;
+  oglStencil := StencilBits;
+
+  {$IFDEF iOS}
+  if not appPoolInitialized Then
+    begin
+      appPoolInitialized := TRUE;
+      app_InitPool();
+      ExitCode := UIApplicationMain( argc, argv, nil, utf8_GetNSString( 'zglCAppDelegate' ) );
+      app_FreePool();
+      exit;
+    end;
+  {$ENDIF}
+
+  zgl_GetSysDir();
+  log_Init();
+
+  appInitialized := TRUE;
+
+  if AInitVideo then begin
+    if not zgl_InitScreen() then Exit;
+  end;
+
+  InitSoundVideo();
+
+  if not AInitVideo then Exit;
+
+  zgl_CompleteInit;
 end;
 
 procedure zgl_InitToHandle( Handle : Ptr; FSAA : Byte = 0; StencilBits : Byte = 0 );
@@ -519,7 +569,7 @@ begin
       begin
         key_PInputChar := UserData;
       end;
-    {$IF DEFINED(iOS) or DEFINED(ANDROID)}
+    {.$IF DEFINED(iOS) or DEFINED(ANDROID)}
     INPUT_TOUCH_MOVE:
       begin
         touch_PMove := UserData;
@@ -532,7 +582,7 @@ begin
       begin
         touch_PRelease := UserData;
       end;
-    {$IFEND}
+    {.$IFEND}
     // Textures
     TEX_FORMAT_EXTENSION:
       begin
@@ -767,6 +817,9 @@ procedure zgl_Enable( What : LongWord );
 begin
   appFlags := appFlags or What;
 
+  if What and STENCIL_BUFFER > 0 then
+    glEnable( GL_STENCIL_TEST );
+
   if What and DEPTH_BUFFER > 0 Then
     glEnable( GL_DEPTH_TEST );
 
@@ -807,6 +860,9 @@ procedure zgl_Disable( What : LongWord );
 begin
   if appFlags and What > 0 Then
     appFlags := appFlags xor What;
+
+  if What and STENCIL_BUFFER > 0 then
+    glDisable( GL_STENCIL_TEST );
 
   if What and DEPTH_BUFFER > 0 Then
     glDisable( GL_DEPTH_TEST );

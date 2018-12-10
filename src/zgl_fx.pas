@@ -47,6 +47,11 @@ const
 
   FX_BLEND        = $100000;
   FX_COLOR        = $200000;
+  FX_BLENDALPHA   = $400000; // ALPHATEST with FX_BLEND
+
+  FX_STENCILTEST_NONE      = $00;
+  FX_STENCILTEST_FILLED    = $01;
+  FX_STENCILTEST_NOTFILLED = $02;
 
 procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
 procedure fx_SetColorMode( Mode : Byte );
@@ -57,6 +62,8 @@ procedure fx2d_SetVCA( c1, c2, c3, c4 : LongWord; a1, a2, a3, a4 : Byte );
 procedure fx2d_SetVertexes( x1, y1, x2, y2, x3, y3, x4, y4 : Single );
 procedure fx2d_SetScale( scaleX, scaleY : Single );
 procedure fx2d_SetRotatingPivot( X, Y : Single );
+
+procedure fx_SetStencilMode( AChange: Boolean; TestMode : Byte );
 
 var
   // FX2D_COLORMIX
@@ -230,6 +237,20 @@ begin
   fx2dRPX := X;
   fx2dRPY := Y;
 end;
+
+procedure fx_SetStencilMode( AChange: Boolean; TestMode : Byte );
+const
+  ChangeMask = $FF;
+  ChangeFlag : array [boolean] of GLEnum = (GL_KEEP, GL_REPLACE);
+begin
+  glStencilOp(GL_KEEP, GL_KEEP, ChangeFlag[AChange]);
+  case TestMode of
+    FX_STENCILTEST_NONE:      glStencilFunc(GL_ALWAYS, 1, ChangeMask);
+    FX_STENCILTEST_FILLED:    glStencilFunc(GL_EQUAL, 1, ChangeMask);
+    FX_STENCILTEST_NOTFILLED: glStencilFunc(GL_NOTEQUAL, 1, ChangeMask);
+  end;
+end;
+
 
 initialization
   fx2dAlpha    := @fx2dColor[ 3 ];
