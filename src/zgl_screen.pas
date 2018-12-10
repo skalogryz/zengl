@@ -87,6 +87,7 @@ var
   scrVSync       : Boolean;
   scrResList     : zglTResolutionList;
   scrInitialized : Boolean;
+  scrAutoFullScreen : Boolean = True;
 
   // Viewport
   scrViewportX : Integer;
@@ -495,10 +496,28 @@ begin
 end;
 
 procedure scr_Clear;
+var
+  depthClr: Byte;
+  m  : GLboolean;
+  dp : GLInt;
+  dch : Boolean;
 begin
   batch2d_Flush();
-  glClear( GL_COLOR_BUFFER_BIT * Byte( appFlags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( appFlags and DEPTH_BUFFER_CLEAR > 0 ) or
-           GL_STENCIL_BUFFER_BIT * Byte( appFlags and STENCIL_BUFFER_CLEAR > 0 ) );
+
+  depthClr:=Byte( appFlags and DEPTH_BUFFER_CLEAR > 0 );
+  dch:=depthClr>0;
+  if dch then begin
+    glGetIntegerv(GL_DEPTH_WRITEMASK, @dp);
+    dch:=dp<>GL_TRUE;
+    if dch then glDepthMask(GL_TRUE);
+  end else
+    dch:=false;
+
+  glClear( GL_COLOR_BUFFER_BIT * Byte( appFlags and COLOR_BUFFER_CLEAR > 0 )
+           or GL_DEPTH_BUFFER_BIT * depthClr
+           or GL_STENCIL_BUFFER_BIT * Byte( appFlags and STENCIL_BUFFER_CLEAR > 0 ) );
+
+  if dch then glDepthMask(dp);
 end;
 
 procedure scr_Flush;
@@ -564,7 +583,7 @@ begin
   wndFullScreen := FullScreen;
   scrVsync      := VSync;
 
-  if Height >= zgl_Get( DESKTOP_HEIGHT ) Then
+  if (Height >= zgl_Get( DESKTOP_HEIGHT )) and scrAutoFullScreen Then
     wndFullScreen := TRUE;
   if wndFullScreen Then
     begin

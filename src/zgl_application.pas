@@ -23,6 +23,8 @@
 }
 unit zgl_application;
 
+{.$define debugandroid}
+
 {$I zgl_config.cfg}
 {$IFDEF iOS}
   {$modeswitch objectivec1}
@@ -40,11 +42,13 @@ uses
   MacOSAll
   {$ENDIF}
   {$IFDEF iOS}
+  SysUtils,
   iPhoneAll, CFRunLoop, CGGeometry, CFBase, CFString
   {$ENDIF}
   {$IFDEF ANDROID}
   jni,
   zgl_threads
+  ,zgl_opengles_all
   {$ENDIF}
   ;
 
@@ -66,6 +70,9 @@ procedure app_InitPool;
 procedure app_FreePool;
 
 type
+
+  { zglCAppDelegate }
+
   zglCAppDelegate = objcclass(NSObject)
     procedure EnterMainLoop; message 'EnterMainLoop';
     procedure MainLoop; message 'MainLoop';
@@ -83,15 +90,21 @@ type
     function textFieldShouldReturn( textField : UITextField ) : Boolean; message 'textFieldShouldReturn:';
     function textFieldDidEndEditing( textField : UITextField ) : Boolean; message 'textFieldDidEndEditing:';
     procedure textFieldEditingChanged; message 'textFieldEditingChanged';
+
+    function window: UIWindow; message 'window';
   end;
 
 type
+
+  { zglCiOSViewController }
+
   zglCiOSViewController = objcclass(UIViewController)
   public
     function shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean; override;
     procedure didRotateFromInterfaceOrientation( fromInterfaceOrientation : UIInterfaceOrientation ); override;
-    function supportedInterfaceOrientations : LongWord; message 'supportedInterfaceOrientations';
-    function shouldAutorotate : Boolean; message 'shouldAutorotate';
+    function supportedInterfaceOrientations : NSUInteger; message 'supportedInterfaceOrientations'; override;
+    function shouldAutorotate : Boolean; message 'shouldAutorotate'; override;
+    function prefersStatusBarHidden : Boolean; message 'prefersStatusBarHidden';
   end;
 
 type
@@ -121,14 +134,16 @@ function  Java_zengl_android_ZenGL_zglNativeCloseQuery( env : PJNIEnv; thiz : jo
 procedure Java_zengl_android_ZenGL_zglNativeTouch( env : PJNIEnv; thiz : jobject; ID : jint; X, Y, Pressure : jfloat ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeInputText( env : PJNIEnv; thiz : jobject; text : jstring ); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeBackspace( env : PJNIEnv; thiz : jobject ); cdecl;
+function  Java_zengl_android_ZenGL_zglNativeBack( env : PJNIEnv; thiz : jobject ) : Boolean; cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeTick( env : PJNIEnv; thiz : jobject ); cdecl;
 {$ENDIF}
 
 var
-  appInitialized    : Boolean;
+  appInitialized    : Boolean;        // TRUE, if app started initialization, (FALSE otherwise)
   appGotSysDirs     : Boolean;
-  appWork           : Boolean;
+  appWork           : Boolean;        // TRUE, if app has finished Initialization and not yet closing
   appWorkTime       : LongWord;
-  appPause          : Boolean;
+  appPause          : Boolean;        // TRUE, if app is paused
   appAutoPause      : Boolean = TRUE;
   appFocus          : Boolean = TRUE;
   appLog            : Boolean;
@@ -177,7 +192,16 @@ var
   appFinish       : JMethodID;
   appShowKeyboard : JMethodID;
   appHideKeyboard : JMethodID;
+
   appLock         : zglTCriticalSection;
+  readyToDraw     : Boolean = false;
+  waitingForDraw  : Boolean = false;
+
+  appStartDraw    : zglTEvent; // start drawing
+  appDrawReady    : zglTEvent; // picture read
+  appDrawReceived : zglTEvent;
+
+
   //appIsLibrary    : Byte public name 'TC_SYSTEM_ISLIBRARY'; // workaround for the latest revisions of FreePascal 2.6.x
   {$ENDIF}
   appShowCursor : Boolean;
@@ -214,9 +238,11 @@ uses
   zgl_textures,
   zgl_font,
   {$IFDEF USE_SOUND}
-  zgl_sound,
+  zgl_sound,  {$ifdef ios} zgl_sound_openal,{$endif}
+
   {$ENDIF}
-  zgl_utils;
+  zgl_utils
+  ,zgl_log;
 
 procedure app_Draw;
 begin
@@ -1230,7 +1256,10 @@ end;
 procedure zglCAppDelegate.applicationWillResignActive( application : UIApplication );
 begin
   {$IFDEF USE_SOUND}
-  if sndInitialized Then AudioSessionSetActive( FALSE );
+  if sndInitialized Then begin
+    AudioSessionSetActive( FALSE );
+    alcMakeContextCurrent( nil );
+  end;
   {$ENDIF}
 
   if appAutoPause Then appPause := TRUE;
@@ -1246,7 +1275,6 @@ end;
 
 procedure zglCAppDelegate.applicationDidEnterBackground( application: UIApplication );
 begin
-//  appWork := FALSE;
 end;
 
 procedure zglCAppDelegate.applicationWillTerminate( application: UIApplication );
@@ -1259,9 +1287,14 @@ begin
 end;
 
 procedure zglCAppDelegate.applicationDidBecomeActive( application: UIApplication );
+var
+  p : Pointer;
 begin
   {$IFDEF USE_SOUND}
-  if sndInitialized Then AudioSessionSetActive( TRUE );
+  if sndInitialized Then begin
+    alcMakeContextCurrent( oalContext );
+    AudioSessionSetActive( TRUE );
+  end;
   {$ENDIF}
 
   appPause := FALSE;
@@ -1269,7 +1302,8 @@ begin
     app_PActivate( TRUE );
 end;
 
-procedure zglCAppDelegate.applicationDidReceiveMemoryWarning;
+procedure zglCAppDelegate.applicationDidReceiveMemoryWarning(
+  application: UIApplication);
 begin
   if Assigned( app_PMemoryWarn ) Then
     app_PMemoryWarn();
@@ -1325,19 +1359,29 @@ begin
       keysTextChanged := FALSE;
 end;
 
+function zglCAppDelegate.window: UIWindow;
+begin
+  Result:=wndHandle;
+end;
+
 function zglCiOSViewController.shouldAutorotateToInterfaceOrientation( interfaceOrientation : UIInterfaceOrientation ) : Boolean;
 begin
   Result := ( scrCanPortrait and ( ( interfaceOrientation = UIInterfaceOrientationPortrait ) or ( interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown ) ) ) or
             ( scrCanLandscape and ( ( interfaceOrientation = UIInterfaceOrientationLandscapeLeft ) or ( interfaceOrientation = UIInterfaceOrientationLandscapeRight ) ) );
 end;
 
-function zglCiOSViewController.supportedInterfaceOrientations : LongWord;
+function zglCiOSViewController.supportedInterfaceOrientations : NSUInteger;
 begin
   Result := ( 1 shl UIInterfaceOrientationPortrait + 1 shl UIInterfaceOrientationPortraitUpsideDown ) * Byte( scrCanPortrait ) +
             ( 1 shl UIInterfaceOrientationLandscapeLeft + 1 shl UIInterfaceOrientationLandscapeRight ) * Byte( scrCanLandscape );
 end;
 
 function zglCiOSViewController.shouldAutorotate : Boolean;
+begin
+  Result := TRUE;
+end;
+
+function zglCiOSViewController.prefersStatusBarHidden: Boolean;
 begin
   Result := TRUE;
 end;
@@ -1368,6 +1412,8 @@ begin
 
   scr_SetOptions( scrDesktopW, scrDesktopH, REFRESH_MAXIMUM, TRUE, TRUE );
 
+  gl_iOSCreateRenderBuffer( scrDesktopW, scrDesktopH );
+
   if appWork and Assigned( app_POrientation ) Then
     app_POrientation( scrOrientation );
 end;
@@ -1378,7 +1424,17 @@ begin
 end;
 
 procedure zglCiOSEAGLView.UpdateTouch( ID : Integer );
+var
+  mask : LongWord;
+  i    : integer;
 begin
+  mask:=0;
+  for i:=0 to length(touchActive)-1 do
+    if touchActive[i] then mask:=mask or (1 shl i);
+  mask:=0;
+  for i:=0 to length(touchUp)-1 do
+    if touchUp[i] then mask:=mask or (1 shl i);
+
   if not touchActive[ ID ] Then
     begin
       touchDown[ ID ]   := FALSE;
@@ -1407,10 +1463,11 @@ begin
       end;
 
   // mouse emulation
-  if ID = 0 Then
+  if false and (ID = 0) Then
     begin
-      mouseX := touchX[ 0 ];
-      mouseY := touchY[ 0 ];
+      //writeln('emulating mouze');
+      mouseX := touchX[ ID ];
+      mouseY := touchY[ ID ];
 
       if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
         begin
@@ -1421,7 +1478,7 @@ begin
             mouse_PMove( mouseX, mouseY );
         end;
 
-      if ( touchDown[ 0 ] ) and ( not mouseDown[ M_BLEFT ] ) Then
+      if ( touchDown[ ID ] ) and ( not mouseDown[ M_BLEFT ] ) Then
         begin
           mouseDown[ M_BLEFT ] := TRUE;
           if mouseCanClick[ M_BLEFT ] Then
@@ -1433,7 +1490,7 @@ begin
                 mouse_PPress( M_BLEFT );
             end;
         end else
-          if ( not touchDown[ 0 ] ) and ( mouseDown[ M_BLEFT ] ) Then
+          if ( not touchDown[ ID ] ) and ( mouseDown[ M_BLEFT ] ) Then
             begin
               mouseDown[ M_BLEFT ]     := FALSE;
               mouseUp  [ M_BLEFT ]     := TRUE;
@@ -1442,7 +1499,7 @@ begin
               if Assigned( mouse_PRelease ) Then
                 mouse_PRelease( M_BLEFT );
             end else
-              if touchDown[ 0 ] Then
+              if touchDown[ ID ] Then
                 begin
                   if timer_GetTicks - mouseDblCTime[ M_BLEFT ] < mouseDblCInt Then
                    mouseDblClick[ M_BLEFT ] := TRUE;
@@ -1462,8 +1519,10 @@ begin
   for i := 0 to touches.allObjects().count - 1 do
     begin
       touch := UITouch( touches.allObjects().objectAtIndex( i ) );
+
       for j := 0 to MAX_TOUCH - 1 do
-        if ( ( not touchActive[ j ] ) and ( not touchUp[ j ] ) ) or ( touch.tapCount = 2 ) Then
+        // why does it check for touchUp ?
+        if not touchActive[ j ] Then
           begin
             if appFlags and CORRECT_RESOLUTION > 0 Then
               begin
@@ -1474,11 +1533,13 @@ begin
                   touchX[ j ] := Round( touch.locationInView( Self ).x * scale );
                   touchY[ j ] := Round( touch.locationInView( Self ).y * scale );
                 end;
+            //write('  ,',touchX[j], ':',touchY[j],' ');
             touchActive[ j ] := TRUE;
             UpdateTouch( j );
             break;
           end;
     end;
+  //writeln;
 end;
 
 procedure zglCiOSEAGLView.touchesMoved_withEvent( touches : NSSet; event : UIevent );
@@ -1490,6 +1551,7 @@ procedure zglCiOSEAGLView.touchesMoved_withEvent( touches : NSSet; event : UIeve
     scale : Single;
 begin
   scale := eglView.contentScaleFactor;
+  //writeln('--- touch');
 
   for i := 0 to touches.allObjects().count - 1 do
     begin
@@ -1602,6 +1664,9 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeInit( env : PJNIEnv; thiz : jobject; AppDirectory, HomeDirectory : jstring );
 begin
+  {$ifdef debugandroid}
+  log_Add('zglNativeInit! 0');
+  {$endif}
   appEnv        := env;
   appObject     := thiz;
   appWorkDir    := appEnv^.GetStringUTFChars( appEnv, AppDirectory, nil );
@@ -1609,6 +1674,29 @@ begin
   appGotSysDirs := TRUE;
 
   thread_CSInit( appLock );
+  {$ifdef debugandroid}
+  log_Add('zglNativeInit!');
+  {$endif}
+
+  {$ifdef debugandroid}
+  log_Add('zglNativeInit!2');
+  {$endif}
+  thread_EventCreate( appStartDraw );
+  {$ifdef debugandroid}
+  log_Add('zglNativeInit!3');
+  {$endif}
+  thread_EventCreate( appDrawReady );
+  thread_EventCreate( appDrawReceived );
+
+  {$ifdef debugandroid}
+  log_Add('zglNativeInit!4');
+  {$endif}
+  thread_EventReset( appStartDraw );
+  thread_EventReset( appDrawReady );
+  // yay! the applcation should now work
+
+  // do not initialize video, it will come from the main thread!
+  zgl_Init(0,0,false);
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDestroy( env : PJNIEnv; thiz : jobject );
@@ -1618,23 +1706,42 @@ begin
   appWork   := FALSE;
   zgl_Destroy();
 
+  thread_EventDestroy( appStartDraw );
+  thread_EventDestroy( appDrawReady );
+  thread_EventDestroy( appDrawReceived );
+
   thread_CSDone( appLock );
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceCreated( env : PJNIEnv; thiz : jobject );
 begin
+  {$ifdef debugandroid}
+  log_Add('zglNativeSurfaceCreated 0');
+  {$endif}
   thread_CSEnter( appLock );
 
   appEnv    := env;
   appObject := thiz;
 
-  if appInitialized Then
+  {$ifdef debugandroid}
+  log_Add('zglNativeSurfaceCreated 1');
+  {$endif}
+  if appInitialized and mainInitFinished Then
     begin
+      {$ifdef debugandroid}
+      log_Add('zglNativeSurfaceCreated 2');
+      {$endif}
       oglVRAMUsed := 0;
       gl_ResetState();
+
+      //todo: should this occur in the main thread?
       if Assigned( app_PRestore ) Then
         app_PRestore();
+
       timer_Reset();
+      {$ifdef debugandroid}
+      log_Add('zglNativeSurfaceCreated 3');
+      {$endif}
     end;
 
   thread_CSLeave( appLock );
@@ -1642,69 +1749,90 @@ end;
 
 procedure Java_zengl_android_ZenGL_zglNativeSurfaceChanged( env : PJNIEnv; thiz : jobject; Width, Height : jint );
 begin
+  {$ifdef debugandroid}
+  log_Add('zglNativeSurfaceChanged0');
+  {$endif}
   thread_CSEnter( appLock );
 
   appEnv    := env;
   appObject := thiz;
 
-  if not appInitialized Then
+  {$ifdef debugandroid}
+  log_Add('zglNativeSurfaceChanged3');
+  {$endif}
+  if not mainInitFinished Then
     begin
       scrDesktopW := Width;
       scrDesktopH := Height;
       wndWidth    := Width;
       wndHeight   := Height;
 
-      zgl_Init();
+      {$ifdef debugandroid}
+      log_Add('zglNativeSurfaceChanged3-5');
+      {$endif}
+      zgl_InitScreen();
+      //zgl_Init();
     end else
       wnd_SetSize( Width, Height );
 
+  {$ifdef debugandroid}
+  log_Add('zglNativeSurfaceChanged4');
+  {$endif}
   thread_CSLeave( appLock );
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame( env : PJNIEnv; thiz : jobject );
-  var
-    t : Double;
 begin
-  thread_CSEnter( appLock );
+  if not mainInitFinished then Exit; // not yet initialized
 
-  appEnv    := env;
-  appObject := thiz;
-  if not appWork Then
-    begin
-      appEnv^.CallVoidMethod( appEnv, appObject, appFinish );
-      thread_CSLeave( appLock );
-      exit;
-    end;
+  {$ifdef debugandroid}
+  log_Add('zglNativeDRAW! 0');
+  {$endif}
 
-  res_Proc();
-  {$IFDEF USE_JOYSTICK}
-  joy_Proc();
-  {$ENDIF}
-  {$IFDEF USE_SOUND}
-  snd_MainLoop();
-  {$ENDIF}
+  thread_EventReset( appStartDraw );
+  thread_EventReset( appDrawReady );
+  waitingForDraw:=false;
+  readyToDraw:=true;
 
-  if appPause Then
-    begin
-      timer_Reset();
-      appdt := timer_GetTicks();
-      exit;
-    end else
-      timer_MainLoop();
+  {$ifdef debugandroid}
+  log_Add('zglNativeDRAW! 1.5 waiting for permission ');
+  {$endif}
+  thread_EventWait( appStartDraw, 300 );
+  if not waitingForDraw then begin
+    readyToDraw:=false;
+    {$ifdef debugandroid}
+    log_Add('zglNativeDRAW! 1.5 failed! nobody is awaiting for drawing ');
+    {$endif}
+    Exit;
+  end;
 
-  t := timer_GetTicks();
-  if Assigned( app_PUpdate ) Then
-    app_PUpdate( timer_GetTicks() - appdt );
-  appdt := t;
+  try
+    {$ifdef debugandroid}
+    log_Add('zglNativeDRAW! 1.6 granted! ');
+    {$endif}
 
-  app_Draw();
+    tex_LoadDelayed();
+    app_Draw();
 
-  thread_CSLeave( appLock );
+    //eglMakeCurrent( oglDisplay, oglSurface, oglSurface, oglContext );
+    readyToDraw:=false;
+  finally
+    thread_EventReset( appDrawReceived );
+
+    thread_EventSet( appDrawReady );
+    thread_EventWait( appDrawReceived );
+  end;
+  {$ifdef debugandroid}
+  log_Add('zglNativeDRAW! 3');
+  {$endif}
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeActivate( env : PJNIEnv; thiz : jobject; Activate : jboolean );
 begin
   thread_CSEnter( appLock );
+  {$ifdef debugandroid}
+  log_Add('Native Activeate: '+u_IntToStr(Activate));
+  {$endif}
 
   appEnv    := env;
   appObject := thiz;
@@ -1733,10 +1861,16 @@ begin
       end;
 
   thread_CSLeave( appLock );
+  {$ifdef debugandroid}
+  log_Add('Native Activeate: '+u_IntToStr(Activate)+ ' handling done!');
+  {$endif}
 end;
 
 function Java_zengl_android_ZenGL_zglNativeCloseQuery( env : PJNIEnv; thiz : jobject ) : Boolean;
 begin
+  {$ifdef debugandroid}
+  log_Add('zglNativeCloseQuery');
+  {$endif}
   thread_CSEnter( appLock );
 
   Result := FALSE;
@@ -1768,23 +1902,25 @@ begin
 
       if Assigned( touch_PPress ) Then
         touch_PPress( ID );
-    end else
-      if ( touchDown[ ID ] ) and ( Pressure <= 0 ) Then
-        begin
-          touchDown[ ID ]   := FALSE;
-          touchUp[ ID ]     := TRUE;
-          touchTap[ ID ]    := FALSE;
-          touchCanTap[ ID ] := TRUE;
+    end 
+  else if ( touchDown[ ID ] ) and ( Pressure <= 0 ) Then
+     begin
+       if Assigned( touch_PMove )  and ( Pressure > 0 ) Then
+         touch_PMove( ID, touchX[ ID ], touchY[ ID ] );
 
-          if Assigned( touch_PRelease ) Then
-            touch_PRelease( ID );
-        end;
+       touchDown[ ID ]   := FALSE;
+       touchUp[ ID ]     := TRUE;
+       touchTap[ ID ]    := FALSE;
+       touchCanTap[ ID ] := TRUE;
 
-  if Assigned( touch_PMove ) Then
+       if Assigned( touch_PRelease ) Then
+         touch_PRelease( ID );
+    end
+  else if Assigned( touch_PMove )  and ( Pressure > 0 ) Then
     touch_PMove( ID, touchX[ ID ], touchY[ ID ] );
 
   // mouse emulation
-  if ID = 0 Then
+  {if ID = 0 Then
     begin
       mouseX := touchX[ 0 ];
       mouseY := touchY[ 0 ];
@@ -1822,7 +1958,7 @@ begin
               if Assigned( mouse_PRelease ) Then
                 mouse_PRelease( M_BLEFT );
             end;
-    end;
+    end;}
 
   thread_CSLeave( appLock );
 end;
@@ -1843,6 +1979,103 @@ procedure Java_zengl_android_ZenGL_zglNativeBackspace( env : PJNIEnv; thiz : job
 begin
   thread_CSEnter( appLock );
   utf8_Backspace( keysText );
+  thread_CSLeave( appLock );
+end;
+
+function Java_zengl_android_ZenGL_zglNativeBack( env : PJNIEnv; thiz : jobject ) : Boolean;
+begin
+  Result:=false;
+end;
+
+procedure Java_zengl_android_ZenGL_zglNativeTick( env : PJNIEnv; thiz : jobject ); cdecl;
+var
+  t : Double;
+begin
+  if not mainInitFinished then begin
+    {$ifdef debugandroid}
+    log_Add('waiting for GL Thread to init...');
+    {$endif}
+    zgl_CheckInit;
+    Exit;
+  end;
+
+  {$ifdef debugandroid}
+  log_Add('native tick1');
+  {$endif}
+  thread_CSEnter( appLock );
+  {$ifdef debugandroid}
+  log_Add('native tick2');
+  {$endif}
+
+  appEnv    := env;
+  appObject := thiz;
+  {$ifdef debugandroid}
+  log_Add('native tick3');
+  {$endif}
+  if not appWork Then
+    begin
+      {$ifdef debugandroid}
+      log_Add('native tick3-3? failingN?!');
+      {$endif}
+      appEnv^.CallVoidMethod( appEnv, appObject, appFinish );
+      thread_CSLeave( appLock );
+      exit;
+    end;
+
+  {$ifdef debugandroid}
+  log_Add('native tick4');
+  {$endif}
+
+  res_Proc();
+  {$IFDEF USE_JOYSTICK}
+  joy_Proc();
+  {$ENDIF}
+  {$IFDEF USE_SOUND}
+  snd_MainLoop();
+  {$ENDIF}
+
+  {$ifdef debugandroid}
+  log_Add('native tick5');
+  {$endif}
+
+  if appPause Then
+    begin
+      timer_Reset();
+      appdt := timer_GetTicks();
+      thread_CSLeave( appLock );
+      exit;
+    end else
+      timer_MainLoop();
+
+  t := timer_GetTicks();
+  if Assigned( app_PUpdate ) Then
+    app_PUpdate( timer_GetTicks() - appdt );
+  appdt := t;
+
+  //thread_EventWait( appStartDraw, 1);
+  {$ifdef debugandroid}
+  log_Add('native tick6');
+  {$endif}
+  if readyToDraw then begin
+    // i'm locked now and waiting for you drawing thread
+    waitingForDraw:=true;
+    thread_EventSet( appStartDraw );
+    {$ifdef debugandroid}
+    log_Add('native tick7 waiting for render');
+    {$endif}
+    thread_EventWait( appDrawReady );
+
+    thread_EventSet( appDrawReceived );
+  //thread_EventReset( appStartDraw );
+    //log_Add('native tick7');
+
+    //eglMakeCurrent( oglDisplay, oglSurface, oglSurface, oglContext );
+    //app_Draw();
+  end;
+
+  {$ifdef debugandroid}
+  log_Add('native tick8');
+  {$endif}
   thread_CSLeave( appLock );
 end;
 {$ENDIF}
