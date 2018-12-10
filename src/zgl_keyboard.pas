@@ -40,7 +40,7 @@ uses
   MacOSAll;
   {$ENDIF}
   {$IFDEF iOS}
-  iPhoneAll, CGGeometry;
+  iPhoneAll {, CGGeometry};
   {$ENDIF}
   {$IFDEF ANDROID}
   jni;
