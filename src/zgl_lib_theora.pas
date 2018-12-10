@@ -56,6 +56,9 @@ const
 {$IFDEF MACOSX}
   libtheoradec  = 'libtheoradec.1.dylib';
 {$ENDIF}
+{$IFDEF IOS}
+  libtheoradec  = 'libtheoradec.1.dylib';
+{$ENDIF}
 {$ENDIF}
 
 type
