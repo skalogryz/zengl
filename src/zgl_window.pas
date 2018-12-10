@@ -180,6 +180,8 @@ begin
     begin
       wndX := ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2;
       wndY := ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2;
+      //if wndX<0 then wndX:=0;
+      if wndY<0 then wndY:=0;
     end;
 {$IFDEF USE_X11}
   FillChar( wndAttr, SizeOf( wndAttr ), 0 );
