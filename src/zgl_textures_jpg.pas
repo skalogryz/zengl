@@ -49,11 +49,11 @@ uses
   {$ENDIF}
   {$IFDEF USE_UIIMAGE}
   iPhoneAll,
-  CGContext,
+{  CGContext,
   CGGeometry,
   CGImage,
   CGBitmapContext,
-  CGColorSpace,
+  CGColorSpace,}
   {$ENDIF}
   zgl_types,
   zgl_memory;
