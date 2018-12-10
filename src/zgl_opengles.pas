@@ -95,6 +95,9 @@ var
   oglReadPixelsFBO : LongWord;
   oglReadPixelsRB  : LongWord;
 
+  oglInitialized   : Boolean = false;
+  oglThreadId      : TThreadID;
+
   {$IFNDEF NO_EGL}
   oglDisplay : EGLDisplay;
   oglConfig  : EGLConfig;
@@ -111,9 +114,16 @@ var
   eglContext      : EAGLContext;
   eglSurface      : CAEAGLLayer;
   eglView         : UIView;
-  eglFramebuffer  : GLuint;
-  eglRenderbuffer : GLuint;
+  eglFramebuffer  : GLuint = 0;
+  eglRenderbuffer : GLuint = 0;
+  eglDepthbuffer  : GLuint = 0;
+  eglStencilbuffer: GLuint = 0;
   {$ENDIF}
+
+{$ifdef iOS}
+procedure gl_iOSReleaseRenderBuffer;
+procedure gl_iOSCreateRenderBuffer(w,h: Integer);
+{$endif}
 
 implementation
 uses
@@ -277,6 +287,7 @@ begin
 
   glDeleteFramebuffers( 1, @eglFramebuffer );
   glDeleteRenderbuffers( 1, @eglRenderbuffer );
+  glDeleteRenderbuffers( 1, @eglDepthbuffer );
 
   EAGLContext.setCurrentContext( nil );
   eglContext.release();
@@ -284,6 +295,52 @@ begin
 
   FreeGLES();
 end;
+
+{$ifdef iOS}
+procedure gl_iOSReleaseRenderBuffer;
+begin
+  //eglView.dealloc();
+  glDeleteFramebuffers( 1, @eglFramebuffer );
+  glDeleteRenderbuffers( 1, @eglRenderbuffer );
+  glDeleteRenderbuffers( 1, @eglDepthbuffer );
+  //EAGLContext.setCurrentContext( nil );
+end;
+
+
+procedure gl_iOSCreateRenderBuffer(w,h: Integer);
+begin
+
+  if eglFramebuffer <> 0 then gl_iOSReleaseRenderBuffer;
+
+  glGenFramebuffers( 1, @eglFramebuffer );
+  glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
+
+  glGenRenderbuffers( 1, @eglRenderbuffer );
+  glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
+
+  eglContext.renderbufferStorage_fromDrawable( GL_RENDERBUFFER, eglSurface );
+
+  glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
+
+  if oglCanFBODepth24 Then
+     oglzDepth := 24
+  else
+     oglzDepth := 16;
+
+  if oglzDepth > 0 Then
+    begin
+      glGenRenderbuffers(1, @eglDepthbuffer);
+      glBindRenderbuffer(GL_RENDERBUFFER, eglDepthbuffer);
+      //GL_DEPTH_COM
+      case oglzDepth of
+        16: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h );
+        24: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,  w, h );
+      end;
+      glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, eglDepthbuffer );
+      glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
+    end;
+end;
+{$endif}
 
 function gl_Initialize : Boolean;
   var
@@ -349,31 +406,11 @@ begin
 
   gl_LoadEx();
 {$IFDEF iOS}
-  glGenFramebuffers( 1, @eglFramebuffer );
-  glBindFramebuffer( GL_FRAMEBUFFER, eglFramebuffer );
-
-  glGenRenderbuffers( 1, @eglRenderbuffer );
-  glBindRenderbuffer( GL_RENDERBUFFER, eglRenderbuffer );
-
-  eglContext.renderbufferStorage_fromDrawable( GL_RENDERBUFFER, eglSurface );
-
-  glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer );
-
-  {if oglCanFBODepth24 Then
-     oglzDepth := 24
-  else
-     oglzDepth := 16;
-
-  if oglzDepth > 0 Then
-     begin
-       case oglzDepth of
-         16: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, oglWidth, oglHeight );
-         24: glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, oglWidth, oglHeight );
-       end;
-       glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, eglRenderbuffer );
-     end;}
+  gl_iOSCreateRenderBuffer(oglWidth, oglHeight);
 {$ENDIF}
   gl_ResetState();
+
+  oglInitialized := true;
 
   Result := TRUE;
 end;

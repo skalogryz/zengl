@@ -270,9 +270,13 @@ const
   GL_DEPTH_COMPONENT16                = $81A5; // GL_DEPTH_COMPONENT16_OES
   GL_DEPTH_COMPONENT24                = $81A6; // GL_DEPTH_COMPONENT24_OES
   GL_DEPTH_COMPONENT32                = $81A7; // GL_DEPTH_COMPONENT32_OES
+  GL_DEPTH_STENCIL_ATTACHMENT         = $821A; // GL_DEPTH_STENCIL_ATTACHMENT
+  GL_DEPTH24_STENCIL8                 = $88F0; // GL_DEPTH24_STENCIL8
   GL_COLOR_ATTACHMENT0                = $8CE0; // GL_COLOR_ATTACHMENT0_OES
   GL_DEPTH_ATTACHMENT                 = $8D00; // GL_DEPTH_ATTACHMENT_OES
+  GL_STENCIL_INDEX8                   = $8D48; // GL_STENCIL_INDEX8
   GL_MAX_RENDERBUFFER_SIZE            = $84E8; // GL_MAX_RENDERBUFFER_SIZE_OES
+  GL_FRAMEBUFFER_COMPLETE             = $8CD5;
 
   // Matrices
   GL_MODELVIEW_MATRIX                 = $0BA6;
@@ -317,6 +321,9 @@ const
   GLU_TESS_EDGE_FLAG_DATA           = $1870E;
   GLU_TESS_COMBINE_DATA             = $1870F;
 
+
+  GL_DEPTH_WRITEMASK                = $0B72;
+
 type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
   GLboolean  = Byte;          PGLboolean  = ^GLboolean;
@@ -340,6 +347,7 @@ var
   glHint       : procedure(target, mode: GLenum); stdcall;
   glShadeModel : procedure(mode: GLenum); stdcall;
   glReadPixels : procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall;
+  glGetError   : function: GLenum; stdcall;
   // Clear
   glClear      : procedure(mask: GLbitfield); stdcall;
   glClearColor : procedure(red, green, blue, alpha: GLclampf); stdcall;
@@ -367,6 +375,10 @@ var
   // Depth
   glDepthFunc : procedure(func: GLenum); stdcall;
   glDepthMask : procedure(flag: GLboolean); stdcall;
+  // Stencil
+  glStencilFunc: procedure (func: GLEnum; ref: GLInt; mask: GLuint); stdcall;
+  glStencilOp : procedure (sfail, dpfail, dppass: GLenum); stdcall;
+  glStencilMask : procedure (mask: GLuint); stdcall;
   // Color
   glColorMask    : procedure(red, green, blue, alpha: GLboolean); stdcall;
   glColorPointer : procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
@@ -415,6 +427,9 @@ var
   glCheckFramebufferStatus  : function(target: GLenum): GLenum; stdcall;
   glFramebufferTexture2D    : procedure(target: GLenum; attachment: GLenum; textarget: GLenum; texture: GLuint; level: GLint); stdcall;
   glFramebufferRenderbuffer : procedure(target: GLenum; attachment: GLenum; renderbuffertarget: GLenum; renderbuffer: GLuint); stdcall;
+  // Multitexture
+  glClientActiveTexture     : procedure (texture: GLEnum); stdcall;
+  glActiveTexture           : procedure(texture: GLEnum); stdcall;
 
   // State
   procedure glBegin(mode: GLenum);
@@ -437,15 +452,19 @@ var
 
 // Triangulation
   {$IFDEF USE_TRIANGULATION}
-  procedure gluDeleteTess(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  function  gluErrorString(error: Integer): PChar; stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  function  gluNewTess: Integer; stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessBeginContour(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessEndContour(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessEndPolygon(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  type
+  TGLUtesselator = record end;
+  PGLUtesselator = ^TGLUtesselator;
+
+  procedure gluDeleteTess(tess: PGLUtesselator); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  function  gluErrorString(error: PtrUInt): PChar; stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  function  gluNewTess: PGLUtesselator; stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  procedure gluTessBeginContour(tess: PGLUtesselator); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  procedure gluTessBeginPolygon(tess: PGLUtesselator; data: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  procedure gluTessCallback(tess: PGLUtesselator; which: Integer; fn: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  procedure gluTessEndContour(tess: PGLUtesselator); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  procedure gluTessEndPolygon(tess: PGLUtesselator); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
+  procedure gluTessVertex(tess: PGLUtesselator; vertex: PDouble; data: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
   {$ENDIF}
 
 // EGL
@@ -649,6 +668,7 @@ begin
   glHint               := dlsym( glesLibrary, 'glHint' );
   glShadeModel         := dlsym( glesLibrary, 'glShadeModel' );
   glReadPixels         := dlsym( glesLibrary, 'glReadPixels' );
+  glGetError           := dlsym( glesLibrary, 'glGetError' );
   glClear              := dlsym( glesLibrary, 'glClear' );
   glClearColor         := dlsym( glesLibrary, 'glClearColor' );
   {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
@@ -671,6 +691,9 @@ begin
   glScissor            := dlsym( glesLibrary, 'glScissor' );
   glDepthFunc          := dlsym( glesLibrary, 'glDepthFunc' );
   glDepthMask          := dlsym( glesLibrary, 'glDepthMask' );
+  glStencilFunc        := dlsym( glesLibrary, 'glStencilFunc' );
+  glStencilOp          := dlsym( glesLibrary, 'glStencilOp' );
+  glStencilMask        := dlsym( glesLibrary, 'glStencilMask' );
   glColorMask          := dlsym( glesLibrary, 'glColorMask' );
   glColorPointer       := dlsym( glesLibrary, 'glColorPointer' );
   glAlphaFunc          := dlsym( glesLibrary, 'glAlphaFunc' );
@@ -696,6 +719,10 @@ begin
   glTexEnvi            := dlsym( glesLibrary, 'glTexEnvi' );
   glTexCoordPointer    := dlsym( glesLibrary, 'glTexCoordPointer' );
   glDrawArrays         := dlsym( glesLibrary, 'glDrawArrays' );
+
+  glClientActiveTexture := dlsym( glesLibrary, 'glClientActiveTexture' );
+  glActiveTexture       := dlsym( glesLibrary, 'glActiveTexture' );
+
 
   // OpenGL ES 1.0
   if not Assigned( glTexParameteri ) Then
