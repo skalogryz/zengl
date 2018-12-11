@@ -2,6 +2,8 @@ unit zgl_mouse_to_touch;
 
 interface
 
+{$ifdef fpc}{$mode delphi}{$endif}
+
 uses
   zgl_mouse, zgl_touch, zgl_keyboard;
 
