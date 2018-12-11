@@ -131,7 +131,6 @@
       </Item24>
       <Item25>
         <Filename Value="src\zgl_mouse_to_touch.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="zgl_mouse_to_touch"/>
       </Item25>
       <Item26>
@@ -206,7 +205,6 @@
       </Item39>
       <Item40>
         <Filename Value="src\zgl_sound_ogg.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="zgl_sound_ogg"/>
       </Item40>
       <Item41>
@@ -226,7 +224,6 @@
       </Item43>
       <Item44>
         <Filename Value="src\zgl_text.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="zgl_text"/>
       </Item44>
       <Item45>
@@ -236,12 +233,10 @@
       </Item45>
       <Item46>
         <Filename Value="src\zgl_textures_jpg.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="zgl_textures_jpg"/>
       </Item46>
       <Item47>
         <Filename Value="src\zgl_textures_png.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="zgl_textures_png"/>
       </Item47>
       <Item48>
@@ -251,7 +246,6 @@
       </Item48>
       <Item49>
         <Filename Value="src\zgl_textures_tga.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="zgl_textures_tga"/>
       </Item49>
       <Item50>
