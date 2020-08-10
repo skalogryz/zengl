@@ -31,8 +31,10 @@ unit zgl_lib_theora;
 
 interface
 uses
+  {$IFDEF USE_THEORA_STATIC}
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
+  {$ENDIF}
   {$ENDIF}
   zgl_lib_ogg,
   zgl_types
