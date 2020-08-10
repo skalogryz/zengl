@@ -34,7 +34,9 @@ unit zgl_textures_jpg;
 
 {$IFNDEF USE_LIBJPEG}
   {$IFDEF WINDOWS}
+    {$IFDEF CPUI386}
     {$DEFINE USE_OLEPICTURE}
+    {$ENDIF}
   {$ENDIF}
   {$IFDEF iOS}
     {$DEFINE USE_UIIMAGE}
@@ -45,7 +47,9 @@ interface
 uses
   {$IFDEF WINDOWS}
   Windows,
+  {$IFDEF USE_LIBJPEG}
   zgl_lib_msvcrt,
+  {$ENDIF}
   {$ENDIF}
   {$IFDEF USE_UIIMAGE}
   iPhoneAll,
@@ -290,8 +294,10 @@ begin
 end;
 
 procedure jpg_LoadFromMemory( const Memory : zglTMemory; out Data : PByteArray; out W, H, Format : Word );
+{$IFDEF USE_LIBJPEG}
   var
     jpg : zglTJPGData;
+    {$ENDIF}
   {$IFDEF USE_OLEPICTURE}
     m : Pointer;
     g : HGLOBAL;
@@ -334,9 +340,11 @@ begin
   CGContextRelease( jpg.Context );
 {$ENDIF}
 
+{$IFDEF USE_LIBJPEG}
   W      := jpg.Width;
   H      := jpg.Height;
   Format := TEX_FORMAT_RGBA;
+{$ENDIF}
 end;
 
 {$IFDEF USE_JPG}

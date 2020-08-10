@@ -73,8 +73,10 @@ unit zgl_lib_ogg;
 
 interface
 uses
+  {$IFDEF USE_OGG_STATIC}
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
+  {$ENDIF}
   {$ENDIF}
   zgl_types
   ;

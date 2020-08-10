@@ -193,7 +193,7 @@ type
     zfree     : TFree;     // used to free the internal state
     opaque    : Pointer;   // private data object passed to zalloc and zfree
 
-    data_type : Integer;   // best guess about the data type: ascii or binary
+    data_type : cint;      // best guess about the data type: ascii or binary
     adler     : culong;    // adler32 value of the uncompressed data
     reserved  : culong;    // reserved for future use
   end;
