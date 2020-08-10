@@ -73,9 +73,19 @@ type
   cint64  = int64;    pcint64  = ^cint64;
   cbool   = longbool; pcbool   = ^cbool;
 {$IFDEF CPU64}
-  clong   = int64;    pclong   = ^clong;
-  cslong  = int64;    pcslong  = ^cslong;
-  culong  = qword;    pculong  = ^culong;
+  {$ifdef mswindows}
+  clong   = int32;
+  cslong  = int32;
+  culong  = uint32;
+  {$else}
+  clong   = int64;
+  cslong  = int64;
+  culong  = qword;
+  {$endif}
+  pclong   = ^clong;
+  pcslong  = ^cslong;
+  pculong  = ^culong;
+
 {$ELSE}
   clong   = longint;  pclong   = ^clong;
   cslong  = longint;  pcslong  = ^cslong;
