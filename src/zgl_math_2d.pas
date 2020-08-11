@@ -63,6 +63,9 @@ type
   zglTRect = record
     X, Y, W, H : Double;
 end;
+  zglTRectSingle = record
+    X, Y, W, H : Single;
+end;
 
 type
   zglPCircle = ^zglTCircle;
@@ -94,8 +97,12 @@ var
   cosTable : array[ 0..360 ] of Double;
   sinTable : array[ 0..360 ] of Double;
 
+// convert single point to double point
+procedure pt_F2D(const s: zglTPoint2DSingle; out d: zglTPoint2D); inline;
+
 implementation
 uses
+  {$ifdef FPC} Math,{$endif}
   zgl_main,
   {$IFNDEF USE_GLES}
   zgl_opengl_all
@@ -131,10 +138,14 @@ begin
   if a > b Then Result := a else Result := b;
 end;
 
-procedure m_SinCos( Angle : Double; out s, c : Double ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+procedure m_SinCos( Angle : Double; out s, c : Double ); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
+  {$ifdef fpc}
+  Math.SinCos(Angle, s, c);
+  {$else}
   s := Sin( Angle );
   c := Cos( Angle );
+  {$endif}
 end;
 
 procedure InitCosSinTables;
@@ -350,6 +361,12 @@ begin
       Result := 0;
 end;
 {$ENDIF}
+
+procedure pt_F2D(const s: zglTPoint2DSingle; out d: zglTPoint2D); inline;
+begin
+  d.X := s.X;
+  d.Y := s.Y;
+end;
 
 initialization
   InitCosSinTables();
