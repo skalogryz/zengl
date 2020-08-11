@@ -110,9 +110,9 @@ type
     Color      : LongWord;
     Alpha      : Byte;
 
-    Position   : zglTPoint2D;
-    Size       : zglTPoint2D;
-    SizeS      : zglTPoint2D;
+    Position   : zglTPoint2DSingle;
+    Size       : zglTPoint2DSingle;
+    SizeS      : zglTPoint2DSingle;
     Angle      : Single;
     Direction  : Single;
 
@@ -138,7 +138,7 @@ type
   zglTEmitterRect = record
     Direction : Single;
     Spread    : Single;
-    Rect      : zglTRect;
+    Rect      : zglTRectSingle;
   end;
 
   zglTEmitterCircle = record
@@ -203,7 +203,7 @@ type
       LifeTime : Integer;
       Loop     : Boolean;
       Emission : Integer;
-      Position : zglTPoint2D;
+      Position : zglTPoint2DSingle;
                  end;
     ParParams  : zglTParticleParams;
 
@@ -715,11 +715,26 @@ begin
       end;
 end;
 
+type
+  TexCoordSingle = array[ 0..3 ] of zglTPoint2DSingle;
+
+procedure texCoordSingleToZ(const src: TexCoordSingle; out dst: zglTTextureCoord); inline;
+begin
+  pt_F2D(src[0], dst[0]);
+  pt_F2D(src[1], dst[1]);
+  pt_F2D(src[2], dst[2]);
+  pt_F2D(src[3], dst[3]);
+end;
+
 function emitter2d_Load( const FileName : UTF8String ) : zglPEmitter2D;
   var
     c     : LongWord;
     chunk : Word;
     size  : LongWord;
+
+var
+  tx : array of TexCoordSingle;
+  i  : integer;
 begin
   Result := emitter2d_Add();
   with Result^, Result._private do
@@ -749,8 +764,12 @@ begin
               mem_Read( emitter2dMem, size, 4 );
               if Assigned( ParParams.Texture ) Then
                 begin
-                  SetLength( ParParams.Texture.FramesCoord, size div SizeOf( zglTTextureCoord ) );
-                  mem_Read( emitter2dMem, ParParams.Texture.FramesCoord[ 0 ], size );
+                  SetLength( tx, size div sizeof (TexCoordSingle));
+                  mem_Read( emitter2dMem, tx[0], size );
+
+                  SetLength( ParParams.Texture.FramesCoord, length(tx) );
+                  for i:=0 to length(tx)-1 do
+                    texCoordSingleToZ(tx[i], ParParams.Texture.FramesCoord[i]);
                 end else
                   INC( emitter2dMem.Position, size );
             end;
@@ -1201,17 +1220,17 @@ begin
               fx2dAlpha^ := p.Alpha;
               glColor4ubv( @fx2dColor[ 0 ] );
 
-              glTexCoord2fv( @tc[ 0 ] );
-              glVertex2fv( @quad[ 0 ] );
+              glTexCoord2dv( @tc[ 0 ] );
+              glVertex2dv( @quad[ 0 ] );
 
-              glTexCoord2fv( @tc[ 1 ] );
-              glVertex2fv( @quad[ 1 ] );
+              glTexCoord2dv( @tc[ 1 ] );
+              glVertex2dv( @quad[ 1 ] );
 
-              glTexCoord2fv( @tc[ 2 ] );
-              glVertex2fv( @quad[ 2 ] );
+              glTexCoord2dv( @tc[ 2 ] );
+              glVertex2dv( @quad[ 2 ] );
 
-              glTexCoord2fv( @tc[ 3 ] );
-              glVertex2fv( @quad[ 3 ] );
+              glTexCoord2dv( @tc[ 3 ] );
+              glVertex2dv( @quad[ 3 ] );
             end;
         end else
           for i := 0 to Particles - 1 do
@@ -1265,17 +1284,17 @@ begin
               fx2dAlpha^ := p.Alpha;
               glColor4ubv( @fx2dColor[ 0 ] );
 
-              glTexCoord2fv( @tc[ 0 ] );
-              glVertex2fv( @quad[ 0 ] );
+              glTexCoord2dv( @tc[ 0 ] );
+              glVertex2dv( @quad[ 0 ] );
 
-              glTexCoord2fv( @tc[ 1 ] );
-              glVertex2fv( @quad[ 1 ] );
+              glTexCoord2dv( @tc[ 1 ] );
+              glVertex2dv( @quad[ 1 ] );
 
-              glTexCoord2fv( @tc[ 2 ] );
-              glVertex2fv( @quad[ 2 ] );
+              glTexCoord2dv( @tc[ 2 ] );
+              glVertex2dv( @quad[ 2 ] );
 
-              glTexCoord2fv( @tc[ 3 ] );
-              glVertex2fv( @quad[ 3 ] );
+              glTexCoord2dv( @tc[ 3 ] );
+              glVertex2dv( @quad[ 3 ] );
             end;
 
       if not b2dStarted Then
