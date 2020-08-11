@@ -44,7 +44,7 @@ type
     ShiftX    : Integer;
     ShiftY    : Integer;
     ShiftP    : Integer;
-    TexCoords : array[ 0..3 ] of zglTPoint2DSingle;
+    TexCoords : array[ 0..3 ] of zglTPoint2D;
 end;
 
 type
@@ -244,6 +244,8 @@ procedure font_Load( var fnt : zglPFont; var fntMem : zglTMemory );
     i     : Integer;
     c     : LongWord;
     fntID : array[ 0..13 ] of AnsiChar;
+    pts   : array [0..3] of zglTPoint2DSingle;
+    j     : Integer;
 begin
   fntID[ 13 ] := #0;
   mem_Read( fntMem, fntID, 13 );
@@ -291,7 +293,11 @@ begin
       mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].X, 4 );
       mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
       {$ELSE}
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2DSingle ) * 4 );
+      mem_Read( fntMem, pts[0], sizeof( zglTPoint2DSingle ) * 4);
+      for j := 0 to length(pts) - 1 do begin
+        fnt.CharDesc[ c ].TexCoords[ j ].X := pts [j].X;
+        fnt.CharDesc[ c ].TexCoords[ j ].Y := pts [j].Y;
+      end;
       {$ENDIF}
     end;
 end;
