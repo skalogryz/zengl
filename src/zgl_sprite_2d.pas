@@ -270,7 +270,6 @@ procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; Alp
     mW, mH : Double;
 begin
   if not Assigned( Texture ) Then exit;
-  writeln('ss sprite');
 
   if FX and FX2D_SCALE > 0 Then
     begin
