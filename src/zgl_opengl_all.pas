@@ -368,6 +368,9 @@ var
   procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
   procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;
   procedure glVertex3f(x, y, z: GLfloat); stdcall; external libGL;
+  procedure glVertex2d(x, y: GLdouble); stdcall; external libGL;
+  procedure glVertex2dv(v: PGLdouble); stdcall; external libGL;
+  procedure glVertex3d(x, y, z: GLdouble); stdcall; external libGL;
 
   procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
   procedure glTexCoordPointer(size: GLInt; atype: GLEnum; stide: GLsizei; const pointer: Pointer); stdcall; external libGL;
@@ -390,6 +393,8 @@ var
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
   procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
+  procedure glTexCoord2d(s, t: GLdouble); stdcall; external libGL;
+  procedure glTexCoord2dv(v: PGLdouble); stdcall; external libGL;
 
   function glGetError: GLenum; stdcall; external libGL;
 var

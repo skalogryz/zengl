@@ -1126,7 +1126,7 @@ procedure emitter2d_Draw( Emitter : zglPEmitter2D );
     x1, x2 : Single;
     y1, y2 : Single;
     cX, cY : Single;
-    c, s   : Single;
+    c, s   : Double;
 begin
   if not Assigned( Emitter ) Then exit;
 

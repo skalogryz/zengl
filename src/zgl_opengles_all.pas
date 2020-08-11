@@ -444,11 +444,16 @@ var
   procedure glVertex2f(x, y: GLfloat);
   procedure glVertex2fv(v: PGLfloat);
   procedure glVertex3f(x, y, z: GLfloat);
+  procedure glVertex2d(x, y: GLdouble);
+  procedure glVertex2dv(v: PGLdouble);
+  procedure glVertex3d(x, y, z: GLdouble);
   // Texture
   procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
   // TexCoords
   procedure glTexCoord2f(s, t: GLfloat);
   procedure glTexCoord2fv(v: PGLfloat);
+  procedure glTexCoord2d(s, t: GLdouble);
+  procedure glTexCoord2dv(v: PGLdouble);
 
 // Triangulation
   {$IFDEF USE_TRIANGULATION}
@@ -986,6 +991,25 @@ begin
     end;
 end;
 
+procedure glVertex2d(x, y: GLdouble);
+begin
+  glVertex2f(x,y);
+end;
+
+procedure glVertex2dv(v: PGLdouble);
+var
+  f: array[0..1] of GLsingle;
+begin
+  f[0]:=v[0];
+  f[1]:=v[1];
+  glVertex2fv(@f);
+end;
+
+procedure glVertex3d(x, y, z: GLdouble);
+begin
+  glVertex3f(x,y,z);
+end;
+
 procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
 begin
 end;
@@ -1001,6 +1025,26 @@ begin
 end;
 
 procedure glTexCoord2fv(v: PGLfloat);
+begin
+  RenderTextured := TRUE;
+
+  if bSize = Length( bVertices ) Then
+    SetLength( bVertices, bSize + 1024 );
+  bVertices[ bSize ].U := zglPPoint2D( v ).X;
+  bVertices[ bSize ].V := zglPPoint2D( v ).Y;
+end;
+
+procedure glTexCoord2d(s, t: GLdouble);
+begin
+  RenderTextured := TRUE;
+
+  if bSize = Length( bVertices ) Then
+    SetLength( bVertices, bSize + 1024 );
+  bVertices[ bSize ].U := s;
+  bVertices[ bSize ].V := t;
+end;
+
+procedure glTexCoord2dv(v: PGLdouble);
 begin
   RenderTextured := TRUE;
 

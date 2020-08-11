@@ -41,6 +41,9 @@ const
 type
   zglPPoint2D = ^zglTPoint2D;
   zglTPoint2D = record
+    X, Y : Double;
+end;
+  zglTPoint2DSingle = record
     X, Y : Single;
 end;
 
@@ -51,35 +54,35 @@ type
 type
   zglPLine = ^zglTLine;
   zglTLine = record
-    x0, y0 : Single;
-    x1, y1 : Single;
+    x0, y0 : Double;
+    x1, y1 : Double;
 end;
 
 type
   zglPRect = ^zglTRect;
   zglTRect = record
-    X, Y, W, H : Single;
+    X, Y, W, H : Double;
 end;
 
 type
   zglPCircle = ^zglTCircle;
   zglTCircle = record
-    cX, cY : Single;
-    Radius : Single;
+    cX, cY : Double;
+    Radius : Double;
 end;
 
-function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
-function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+function min( a, b : Double ) : Double; {$IFDEF USE_INLINE} inline; {$ENDIF}
+function max( a, b : Double ) : Double; {$IFDEF USE_INLINE} inline; {$ENDIF}
 
-procedure m_SinCos( Angle : Single; out s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
+procedure m_SinCos( Angle : Double; out s, c : Double ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 
 procedure InitCosSinTables;
-function  m_Cos( Angle : Integer ) : Single;
-function  m_Sin( Angle : Integer ) : Single;
-function  m_Distance( x1, y1, x2, y2 : Single ) : Single;
-function  m_FDistance( x1, y1, x2, y2 : Single ) : Single;
-function  m_Angle( x1, y1, x2, y2 : Single ) : Single;
-function  m_Orientation( x, y, x1, y1, x2, y2 : Single ) : Integer;
+function  m_Cos( Angle : Integer ) : Double;
+function  m_Sin( Angle : Integer ) : Double;
+function  m_Distance( x1, y1, x2, y2 : Double ) : Double;
+function  m_FDistance( x1, y1, x2, y2 : Double ) : Double;
+function  m_Angle( x1, y1, x2, y2 : Double ) : Double;
+function  m_Orientation( x, y, x1, y1, x2, y2 : Double ) : Integer;
 
 {$IFDEF USE_TRIANGULATION}
 procedure tess_Triangulate( Contour : zglPPoints2D; iLo, iHi : Integer; AddHoles : Boolean = FALSE );
@@ -88,8 +91,8 @@ function  tess_GetData( out TriPoints : zglPPoints2D ) : Integer;
 {$ENDIF}
 
 var
-  cosTable : array[ 0..360 ] of Single;
-  sinTable : array[ 0..360 ] of Single;
+  cosTable : array[ 0..360 ] of Double;
+  sinTable : array[ 0..360 ] of Double;
 
 implementation
 uses
@@ -113,42 +116,31 @@ var
   tessVerts   : array of zglTPoint2D;
 {$ENDIF}
 
-function ArcTan2( dx, dy : Single ) : Single;
+function ArcTan2( dx, dy : Double ) : Double;
 begin
   Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
 end;
 
-function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+function min( a, b : Double ) : Double; {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   if a > b Then Result := b else Result := a;
 end;
 
-function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+function max( a, b : Double ) : Double; {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   if a > b Then Result := a else Result := b;
 end;
 
-procedure m_SinCos( Angle : Single; out s, c : Single ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
-{$IFDEF USE_ASM}
-asm
-{$IFDEF CPUi386}
-  FLD Angle
-  FSINCOS
-  FSTP SINGLE [EDX]
-  FSTP SINGLE [EAX]
-{$ENDIF}
-end;
-{$ELSE}
+procedure m_SinCos( Angle : Double; out s, c : Double ); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 begin
   s := Sin( Angle );
   c := Cos( Angle );
 end;
-{$ENDIF}
 
 procedure InitCosSinTables;
   var
     i         : Integer;
-    rad_angle : Single;
+    rad_angle : Double;
 begin
   for i := 0 to 360 do
     begin
@@ -158,7 +150,7 @@ begin
     end;
 end;
 
-function m_Cos( Angle : Integer ) : Single;
+function m_Cos( Angle : Integer ) : Double;
 begin
   if Angle > 360 Then
     DEC( Angle, ( Angle div 360 ) * 360 )
@@ -168,7 +160,7 @@ begin
   Result := cosTable[ Angle ];
 end;
 
-function m_Sin( Angle : Integer ) : Single;
+function m_Sin( Angle : Integer ) : Double;
 begin
   if Angle > 360 Then
     DEC( Angle, ( Angle div 360 ) * 360 )
@@ -178,19 +170,19 @@ begin
   Result := sinTable[ Angle ];
 end;
 
-function m_Distance( x1, y1, x2, y2 : Single ) : Single;
+function m_Distance( x1, y1, x2, y2 : Double ) : Double;
 begin
   Result := sqrt( sqr( x1 - x2 ) + sqr( y1 - y2 ) );
 end;
 
-function m_FDistance( x1, y1, x2, y2 : Single ) : Single;
+function m_FDistance( x1, y1, x2, y2 : Double ) : Double;
 begin
   Result := sqr( x1 - x2 ) + sqr( y1 - y2 );
 end;
 
-function m_Angle( x1, y1, x2, y2 : Single ) : Single;
+function m_Angle( x1, y1, x2, y2 : Double ) : Double;
   var
-    dx, dy : Single;
+    dx, dy : Double;
 begin
   dx := ( X1 - X2 );
   dy := ( Y1 - Y2 );
@@ -225,9 +217,9 @@ begin
         Result := ArcTan2( dx, dy )
 end;
 
-function m_Orientation( x, y, x1, y1, x2, y2 : Single ) : Integer;
+function m_Orientation( x, y, x1, y1, x2, y2 : Double ) : Integer;
   var
-    orientation : Single;
+    orientation : Double;
 begin
   orientation := ( x2 - x1 ) * ( y - y1 ) - ( x - x1 ) * ( y2 - y1 );
 

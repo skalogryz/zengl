@@ -44,7 +44,7 @@ type
     ShiftX    : Integer;
     ShiftY    : Integer;
     ShiftP    : Integer;
-    TexCoords : array[ 0..3 ] of zglTPoint2D;
+    TexCoords : array[ 0..3 ] of zglTPoint2DSingle;
 end;
 
 type
@@ -291,7 +291,7 @@ begin
       mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].X, 4 );
       mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 3 ].Y, 4 );
       {$ELSE}
-      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
+      mem_Read( fntMem, fnt.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2DSingle ) * 4 );
       {$ENDIF}
     end;
 end;

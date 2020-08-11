@@ -33,11 +33,11 @@ uses
   zgl_textures,
   zgl_math_2d;
 
-procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
-procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
-procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
-procedure csprite2d_Draw( const Texture : array of zglPTexture; const CutRect : array of zglTRect; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
+procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Double; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
+procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
+procedure csprite2d_Draw( const Texture : array of zglPTexture; const CutRect : array of zglTRect; X, Y, W, H, Angle : Double; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
 
 implementation
 uses
@@ -56,19 +56,19 @@ uses
 const
   FLIP_TEXCOORD : array[ 0..3 ] of zglTTexCoordIndex = ( ( 0, 1, 2, 3 ), ( 1, 0, 3, 2 ), ( 3, 2, 1, 0 ), ( 2, 3, 0, 1 ) );
 
-procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Double; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     tci  : zglPTexCoordIndex;
     p    : zglPPoint2D;
     mode : Integer;
 
-    x1, x2 : Single;
-    y1, y2 : Single;
-    cX, cY : Single;
-    c, s   : Single;
-    mX, mY : Single;
-    mW, mH : Single;
+    x1, x2 : Double;
+    y1, y2 : Double;
+    cX, cY : Double;
+    c, s   : Double;
+    mX, mY : Double;
+    mW, mH : Double;
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -207,41 +207,41 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
+      glTexCoord2dv( @TexCoord[ tci[ 0 ] ] );
+      glVertex2dv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 1 ] ] );
-      glVertex2fv( @quad[ 1 ] );
+      glTexCoord2dv( @TexCoord[ tci[ 1 ] ] );
+      glVertex2dv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
+      glTexCoord2dv( @TexCoord[ tci[ 2 ] ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
+      glTexCoord2dv( @TexCoord[ tci[ 2 ] ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
-      glVertex2fv( @quad[ 3 ] );
+      glTexCoord2dv( @TexCoord[ tci[ 3 ] ] );
+      glVertex2dv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
+      glTexCoord2dv( @TexCoord[ tci[ 0 ] ] );
+      glVertex2dv( @quad[ 0 ] );
     end else
       begin
-        glTexCoord2fv( @TexCoord[ tci[ 0 ] ] );
-        glVertex2fv( @quad[ 0 ] );
+        glTexCoord2dv( @TexCoord[ tci[ 0 ] ] );
+        glVertex2dv( @quad[ 0 ] );
 
-        glTexCoord2fv( @TexCoord[ tci[ 1 ] ] );
-        glVertex2fv( @quad[ 1 ] );
+        glTexCoord2dv( @TexCoord[ tci[ 1 ] ] );
+        glVertex2dv( @quad[ 1 ] );
 
-        glTexCoord2fv( @TexCoord[ tci[ 2 ] ] );
-        glVertex2fv( @quad[ 2 ] );
+        glTexCoord2dv( @TexCoord[ tci[ 2 ] ] );
+        glVertex2dv( @quad[ 2 ] );
 
-        glTexCoord2fv( @TexCoord[ tci[ 3 ] ] );
-        glVertex2fv( @quad[ 3 ] );
+        glTexCoord2dv( @TexCoord[ tci[ 3 ] ] );
+        glVertex2dv( @quad[ 3 ] );
       end;
 
   if not b2dStarted Then
@@ -254,7 +254,7 @@ begin
     end;
 end;
 
-procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
@@ -262,14 +262,15 @@ procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alp
     tci  : zglPTexCoordIndex;
     mode : Integer;
 
-    x1, x2 : Single;
-    y1, y2 : Single;
-    cX, cY : Single;
-    c, s   : Single;
-    mX, mY : Single;
-    mW, mH : Single;
+    x1, x2 : Double;
+    y1, y2 : Double;
+    cX, cY : Double;
+    c, s   : Double;
+    mX, mY : Double;
+    mW, mH : Double;
 begin
   if not Assigned( Texture ) Then exit;
+  writeln('ss sprite');
 
   if FX and FX2D_SCALE > 0 Then
     begin
@@ -407,41 +408,41 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
+      glTexCoord2dv( @tc[ tci[ 0 ] ] );
+      glVertex2dv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 1 ] ] );
-      glVertex2fv( @quad[ 1 ] );
+      glTexCoord2dv( @tc[ tci[ 1 ] ] );
+      glVertex2dv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
+      glTexCoord2dv( @tc[ tci[ 2 ] ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
+      glTexCoord2dv( @tc[ tci[ 2 ] ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 3 ] ] );
-      glVertex2fv( @quad[ 3 ] );
+      glTexCoord2dv( @tc[ tci[ 3 ] ] );
+      glVertex2dv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
+      glTexCoord2dv( @tc[ tci[ 0 ] ] );
+      glVertex2dv( @quad[ 0 ] );
     end else
       begin
-        glTexCoord2fv( @tc[ tci[ 0 ] ] );
-        glVertex2fv( @quad[ 0 ] );
+        glTexCoord2dv( @tc[ tci[ 0 ] ] );
+        glVertex2dv( @quad[ 0 ] );
 
-        glTexCoord2fv( @tc[ tci[ 1 ] ] );
-        glVertex2fv( @quad[ 1 ] );
+        glTexCoord2dv( @tc[ tci[ 1 ] ] );
+        glVertex2dv( @quad[ 1 ] );
 
-        glTexCoord2fv( @tc[ tci[ 2 ] ] );
-        glVertex2fv( @quad[ 2 ] );
+        glTexCoord2dv( @tc[ tci[ 2 ] ] );
+        glVertex2dv( @quad[ 2 ] );
 
-        glTexCoord2fv( @tc[ tci[ 3 ] ] );
-        glVertex2fv( @quad[ 3 ] );
+        glTexCoord2dv( @tc[ tci[ 3 ] ] );
+        glVertex2dv( @quad[ 3 ] );
       end;
 
   if not b2dStarted Then
@@ -454,7 +455,7 @@ begin
     end;
 end;
 
-procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
@@ -463,12 +464,12 @@ procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Fra
     fc   : Integer;
     mode : Integer;
 
-    x1, x2 : Single;
-    y1, y2 : Single;
-    cX, cY : Single;
-    c, s   : Single;
-    mX, mY : Single;
-    mW, mH : Single;
+    x1, x2 : Double;
+    y1, y2 : Double;
+    cX, cY : Double;
+    c, s   : Double;
+    mX, mY : Double;
+    mW, mH : Double;
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -614,41 +615,41 @@ begin
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
+      glTexCoord2dv( @tc[ tci[ 0 ] ] );
+      glVertex2dv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 1 ] ] );
-      glVertex2fv( @quad[ 1 ] );
+      glTexCoord2dv( @tc[ tci[ 1 ] ] );
+      glVertex2dv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
+      glTexCoord2dv( @tc[ tci[ 2 ] ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 2 ] ] );
-      glVertex2fv( @quad[ 2 ] );
+      glTexCoord2dv( @tc[ tci[ 2 ] ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 3 ] ] );
-      glVertex2fv( @quad[ 3 ] );
+      glTexCoord2dv( @tc[ tci[ 3 ] ] );
+      glVertex2dv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
-      glTexCoord2fv( @tc[ tci[ 0 ] ] );
-      glVertex2fv( @quad[ 0 ] );
+      glTexCoord2dv( @tc[ tci[ 0 ] ] );
+      glVertex2dv( @quad[ 0 ] );
     end else
       begin
-        glTexCoord2fv( @tc[ tci[ 0 ] ] );
-        glVertex2fv( @quad[ 0 ] );
+        glTexCoord2dv( @tc[ tci[ 0 ] ] );
+        glVertex2dv( @quad[ 0 ] );
 
-        glTexCoord2fv( @tc[ tci[ 1 ] ] );
-        glVertex2fv( @quad[ 1 ] );
+        glTexCoord2dv( @tc[ tci[ 1 ] ] );
+        glVertex2dv( @quad[ 1 ] );
 
-        glTexCoord2fv( @tc[ tci[ 2 ] ] );
-        glVertex2fv( @quad[ 2 ] );
+        glTexCoord2dv( @tc[ tci[ 2 ] ] );
+        glVertex2dv( @quad[ 2 ] );
 
-        glTexCoord2fv( @tc[ tci[ 3 ] ] );
-        glVertex2fv( @quad[ 3 ] );
+        glTexCoord2dv( @tc[ tci[ 3 ] ] );
+        glVertex2dv( @quad[ 3 ] );
       end;
 
   if not b2dStarted Then
@@ -661,20 +662,20 @@ begin
     end;
 end;
 
-procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Double; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
     mode : Integer;
 
-    tU, tV, tX, tY, tW, tH : Single;
+    tU, tV, tX, tY, tW, tH : Double;
 
-    x1, x2 : Single;
-    y1, y2 : Single;
-    cX, cY : Single;
-    c, s   : Single;
-    mX, mY : Single;
-    mW, mH : Single;
+    x1, x2 : Double;
+    y1, y2 : Double;
+    cX, cY : Double;
+    c, s   : Double;
+    mX, mY : Double;
+    mW, mH : Double;
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -719,7 +720,7 @@ begin
 (*
 
 glTexCoord2f( tX + tU, tY + tV );
-glVertex2fv( @quad[ 0 ] );
+glVertex2dv( @quad[ 0 ] );
 
 glColor4ubv( @fx2dVCA2[ 0 ] );
 glTexCoord2f( tW - tU, tY + tV );
@@ -840,40 +841,40 @@ glTexCoord2f( tW - tU, tY + tV );
     begin
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
-      glVertex2fv( @quad[ 0 ] );
+      glVertex2dv( @quad[ 0 ] );
 
       glColor4ubv( @fx2dVCA2[ 0 ] );
       glTexCoord2f( tW - tU, tY + tV );
-      glVertex2fv( @quad[ 1 ] );
+      glVertex2dv( @quad[ 1 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
-      glVertex2fv( @quad[ 2 ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
-      glVertex2fv( @quad[ 2 ] );
+      glVertex2dv( @quad[ 2 ] );
 
       glColor4ubv( @fx2dVCA4[ 0 ] );
       glTexCoord2f( tX + tU, tH - tV );
-      glVertex2fv( @quad[ 3 ] );
+      glVertex2dv( @quad[ 3 ] );
 
       glColor4ubv( @fx2dVCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
-      glVertex2fv( @quad[ 0 ] );
+      glVertex2dv( @quad[ 0 ] );
     end else
       begin
         glTexCoord2f( tX + tU, tY + tV );
-        glVertex2fv( @quad[ 0 ] );
+        glVertex2dv( @quad[ 0 ] );
 
         glTexCoord2f( tW - tU, tY + tV );
-        glVertex2fv( @quad[ 1 ] );
+        glVertex2dv( @quad[ 1 ] );
 
         glTexCoord2f( tW - tU, tH - tV );
-        glVertex2fv( @quad[ 2 ] );
+        glVertex2dv( @quad[ 2 ] );
 
         glTexCoord2f( tX + tU, tH - tV );
-        glVertex2fv( @quad[ 3 ] );
+        glVertex2dv( @quad[ 3 ] );
       end;
 
   if not b2dStarted Then
@@ -888,7 +889,7 @@ end;
 
 procedure csprite2d_Draw( const Texture : array of zglPTexture;
   const CutRect : array of zglTRect;
-  X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
+  X, Y, W, H, Angle : Double; Alpha : Byte = 255; FX : LongWord = FX_BLEND ); overload;
 
 var
     quad : array[ 0..3 ] of zglTPoint2D;
@@ -903,18 +904,18 @@ var
     mode : Integer;
 
     tc     : array [ 0..4] of record
-      tU, tV, tX, tY, tW, tH : Single;
+      tU, tV, tX, tY, tW, tH : Double;
     end;
 
     i : integer;
-    tU, tV, tX, tY, tW, tH : Single;
+    tU, tV, tX, tY, tW, tH : Double;
 
-    x1, x2 : Single;
-    y1, y2 : Single;
-    cX, cY : Single;
-    c, s   : Single;
-    mX, mY : Single;
-    mW, mH : Single;
+    x1, x2 : Double;
+    y1, y2 : Double;
+    cX, cY : Double;
+    c, s   : Double;
+    mX, mY : Double;
+    mW, mH : Double;
     clrdw  : longword;
 begin
   if length(Texture)=0 then Exit;
@@ -973,7 +974,7 @@ begin
 (*
 
 glTexCoord2f( tX + tU, tY + tV );
-glVertex2fv( @quad[ 0 ] );
+glVertex2dv( @quad[ 0 ] );
 
 glColor4ubv( @fx2dVCA2[ 0 ] );
 glTexCoord2f( tW - tU, tY + tV );
